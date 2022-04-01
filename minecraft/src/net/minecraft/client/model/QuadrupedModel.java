@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
+public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> implements HeadedModel {
 	protected final ModelPart head;
 	protected final ModelPart body;
 	protected final ModelPart rightHindLeg;
@@ -68,5 +68,10 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
 		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
 		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+	}
+
+	@Override
+	public ModelPart getHead() {
+		return this.head;
 	}
 }

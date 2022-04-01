@@ -62,18 +62,4 @@ public class PartNames {
 	public static final String TOP_GILLS = "top_gills";
 	public static final String LEFT_GILLS = "left_gills";
 	public static final String RIGHT_GILLS = "right_gills";
-	public static final String ROOT = "root";
-	public static final String CROAKING_BODY = "croaking_body";
-	public static final String TONGUE = "tongue";
-	public static final String TONGUE_R1 = "tongue_r1";
-	public static final String LEFT_HAND = "left_hand";
-	public static final String RIGHT_HAND = "right_hand";
-	public static final String LEFT_FOOT = "left_foot";
-	public static final String RIGHT_FOOT = "right_foot";
-	public static final String EYES = "eyes";
-	public static final String RIGHT_TENDRIL = "right_tendril";
-	public static final String LEFT_TENDRIL = "left_tendril";
-	public static final String RIGHT_RIBCAGE = "right_ribcage";
-	public static final String LEFT_RIBCAGE = "left_ribcage";
-	public static final String BONE = "bone";
 }

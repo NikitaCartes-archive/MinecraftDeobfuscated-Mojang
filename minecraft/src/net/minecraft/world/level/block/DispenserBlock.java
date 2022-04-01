@@ -6,38 +6,26 @@ import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
-import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-import net.minecraft.world.level.block.entity.DropperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
-public class DispenserBlock extends BaseEntityBlock {
+public class DispenserBlock extends Block {
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
 	private static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = Util.make(
@@ -45,54 +33,24 @@ public class DispenserBlock extends BaseEntityBlock {
 	);
 	private static final int TRIGGER_DURATION = 4;
 
-	public static void registerBehavior(ItemLike itemLike, DispenseItemBehavior dispenseItemBehavior) {
-		DISPENSER_REGISTRY.put(itemLike.asItem(), dispenseItemBehavior);
-	}
-
 	protected DispenserBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TRIGGERED, Boolean.valueOf(false)));
 	}
 
-	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
-	) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof DispenserBlockEntity) {
-				player.openMenu((DispenserBlockEntity)blockEntity);
-				if (blockEntity instanceof DropperBlockEntity) {
-					player.awardStat(Stats.INSPECT_DROPPER);
-				} else {
-					player.awardStat(Stats.INSPECT_DISPENSER);
-				}
-			}
-
-			return InteractionResult.CONSUME;
-		}
+	public static void registerBehavior(ItemLike itemLike, DispenseItemBehavior dispenseItemBehavior) {
 	}
 
-	protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
-		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
-		DispenserBlockEntity dispenserBlockEntity = blockSourceImpl.getEntity();
-		int i = dispenserBlockEntity.getRandomSlot();
-		if (i < 0) {
-			serverLevel.levelEvent(1001, blockPos, 0);
-			serverLevel.gameEvent(null, GameEvent.DISPENSE_FAIL, blockPos);
-		} else {
-			ItemStack itemStack = dispenserBlockEntity.getItem(i);
-			DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);
-			if (dispenseItemBehavior != DispenseItemBehavior.NOOP) {
-				dispenserBlockEntity.setItem(i, dispenseItemBehavior.dispense(blockSourceImpl, itemStack));
-			}
-		}
+	protected Vec3 getSpitMotion(BlockState blockState) {
+		return Vec3.atLowerCornerOf(((Direction)blockState.getValue(FACING)).getNormal());
 	}
 
-	protected DispenseItemBehavior getDispenseMethod(ItemStack itemStack) {
-		return (DispenseItemBehavior)DISPENSER_REGISTRY.get(itemStack.getItem());
+	protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
+		BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING));
+		BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+		if (!blockState2.isAir() && (!blockState2.is(Blocks.WATER) && !blockState2.is(Blocks.LAVA) || blockState2.getFluidState().isSource())) {
+			FallingBlockEntity var6 = FallingBlockEntity.fall(serverLevel, blockPos2, blockState2, this.getSpitMotion(blockState).add(0.0, 0.1, 0.0));
+		}
 	}
 
 	@Override
@@ -109,40 +67,12 @@ public class DispenserBlock extends BaseEntityBlock {
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		this.dispenseFrom(serverLevel, blockPos);
-	}
-
-	@Override
-	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new DispenserBlockEntity(blockPos, blockState);
+		this.dispenseFrom(serverLevel, blockPos, blockState);
 	}
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		return this.defaultBlockState().setValue(FACING, blockPlaceContext.getNearestLookingDirection().getOpposite());
-	}
-
-	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof DispenserBlockEntity) {
-				((DispenserBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
-	}
-
-	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (!blockState.is(blockState2.getBlock())) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof DispenserBlockEntity) {
-				Containers.dropContents(level, blockPos, (DispenserBlockEntity)blockEntity);
-				level.updateNeighbourForOutputSignal(blockPos, this);
-			}
-
-			super.onRemove(blockState, level, blockPos, blockState2, bl);
-		}
 	}
 
 	public static Position getDispensePosition(BlockSource blockSource) {
@@ -151,16 +81,6 @@ public class DispenserBlock extends BaseEntityBlock {
 		double e = blockSource.y() + 0.7 * (double)direction.getStepY();
 		double f = blockSource.z() + 0.7 * (double)direction.getStepZ();
 		return new PositionImpl(d, e, f);
-	}
-
-	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
-		return true;
-	}
-
-	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
 	}
 
 	@Override

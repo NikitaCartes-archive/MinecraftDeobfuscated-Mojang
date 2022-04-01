@@ -3,9 +3,11 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import javax.annotation.Nullable;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.item.Items;
 
 public class RangedAttackGoal extends Goal {
 	private final Mob mob;
@@ -43,8 +45,14 @@ public class RangedAttackGoal extends Goal {
 	public boolean canUse() {
 		LivingEntity livingEntity = this.mob.getTarget();
 		if (livingEntity != null && livingEntity.isAlive()) {
-			this.target = livingEntity;
-			return true;
+			if (this.mob.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL)) {
+				return false;
+			} else if (this.mob.getTarget().getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL) && this.mob.getTarget().isCrouching()) {
+				return false;
+			} else {
+				this.target = livingEntity;
+				return true;
+			}
 		} else {
 			return false;
 		}
@@ -52,7 +60,13 @@ public class RangedAttackGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return this.canUse() || !this.mob.getNavigation().isDone();
+		if (this.mob.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL)) {
+			return false;
+		} else {
+			return this.mob.getTarget() != null && this.mob.getTarget().getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL) && this.mob.getTarget().isCrouching()
+				? false
+				: this.canUse() || !this.mob.getNavigation().isDone();
+		}
 	}
 
 	@Override
@@ -91,7 +105,12 @@ public class RangedAttackGoal extends Goal {
 
 			float f = (float)Math.sqrt(d) / this.attackRadius;
 			float g = Mth.clamp(f, 0.1F, 1.0F);
-			this.rangedAttackMob.performRangedAttack(this.target, g);
+			if (this.mob.isPassenger() && this.mob.getRootVehicle() == this.mob.getTarget()) {
+				this.rangedAttackMob.performVehicleAttack(g);
+			} else {
+				this.rangedAttackMob.performRangedAttack(this.target, g);
+			}
+
 			this.attackTime = Mth.floor(f * (float)(this.attackIntervalMax - this.attackIntervalMin) + (float)this.attackIntervalMin);
 		} else if (this.attackTime < 0) {
 			this.attackTime = Mth.floor(Mth.lerp(Math.sqrt(d) / (double)this.attackRadius, (double)this.attackIntervalMin, (double)this.attackIntervalMax));

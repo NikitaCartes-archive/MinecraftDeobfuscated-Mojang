@@ -191,7 +191,6 @@ public class RecipeProvider implements DataProvider {
 		planksFromLogs(consumer, Blocks.OAK_PLANKS, ItemTags.OAK_LOGS);
 		planksFromLogs(consumer, Blocks.SPRUCE_PLANKS, ItemTags.SPRUCE_LOGS);
 		planksFromLogs(consumer, Blocks.WARPED_PLANKS, ItemTags.WARPED_STEMS);
-		planksFromLogs(consumer, Blocks.MANGROVE_PLANKS, ItemTags.MANGROVE_LOGS);
 		woodFromLogs(consumer, Blocks.ACACIA_WOOD, Blocks.ACACIA_LOG);
 		woodFromLogs(consumer, Blocks.BIRCH_WOOD, Blocks.BIRCH_LOG);
 		woodFromLogs(consumer, Blocks.DARK_OAK_WOOD, Blocks.DARK_OAK_LOG);
@@ -200,7 +199,6 @@ public class RecipeProvider implements DataProvider {
 		woodFromLogs(consumer, Blocks.SPRUCE_WOOD, Blocks.SPRUCE_LOG);
 		woodFromLogs(consumer, Blocks.CRIMSON_HYPHAE, Blocks.CRIMSON_STEM);
 		woodFromLogs(consumer, Blocks.WARPED_HYPHAE, Blocks.WARPED_STEM);
-		woodFromLogs(consumer, Blocks.MANGROVE_WOOD, Blocks.MANGROVE_LOG);
 		woodFromLogs(consumer, Blocks.STRIPPED_ACACIA_WOOD, Blocks.STRIPPED_ACACIA_LOG);
 		woodFromLogs(consumer, Blocks.STRIPPED_BIRCH_WOOD, Blocks.STRIPPED_BIRCH_LOG);
 		woodFromLogs(consumer, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_LOG);
@@ -209,14 +207,12 @@ public class RecipeProvider implements DataProvider {
 		woodFromLogs(consumer, Blocks.STRIPPED_SPRUCE_WOOD, Blocks.STRIPPED_SPRUCE_LOG);
 		woodFromLogs(consumer, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_STEM);
 		woodFromLogs(consumer, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.STRIPPED_WARPED_STEM);
-		woodFromLogs(consumer, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.STRIPPED_MANGROVE_LOG);
 		woodenBoat(consumer, Items.ACACIA_BOAT, Blocks.ACACIA_PLANKS);
 		woodenBoat(consumer, Items.BIRCH_BOAT, Blocks.BIRCH_PLANKS);
 		woodenBoat(consumer, Items.DARK_OAK_BOAT, Blocks.DARK_OAK_PLANKS);
 		woodenBoat(consumer, Items.JUNGLE_BOAT, Blocks.JUNGLE_PLANKS);
 		woodenBoat(consumer, Items.OAK_BOAT, Blocks.OAK_PLANKS);
 		woodenBoat(consumer, Items.SPRUCE_BOAT, Blocks.SPRUCE_PLANKS);
-		woodenBoat(consumer, Items.MANGROVE_BOAT, Blocks.MANGROVE_PLANKS);
 		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLACK_WOOL, Items.BLACK_DYE);
 		carpet(consumer, Blocks.BLACK_CARPET, Blocks.BLACK_WOOL);
 		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLACK_CARPET, Items.BLACK_DYE);
@@ -415,18 +411,6 @@ public class RecipeProvider implements DataProvider {
 		candle(consumer, Blocks.RED_CANDLE, Items.RED_DYE);
 		candle(consumer, Blocks.WHITE_CANDLE, Items.WHITE_DYE);
 		candle(consumer, Blocks.YELLOW_CANDLE, Items.YELLOW_DYE);
-		ShapelessRecipeBuilder.shapeless(Blocks.PACKED_MUD, 1).requires(Blocks.MUD).requires(Items.WHEAT).unlockedBy("has_mud", has(Blocks.MUD)).save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.MUD_BRICKS, 4)
-			.define('#', Blocks.PACKED_MUD)
-			.pattern("##")
-			.pattern("##")
-			.unlockedBy("has_packed_mud", has(Blocks.PACKED_MUD))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.MUDDY_MANGROVE_ROOTS, 1)
-			.requires(Blocks.MUD)
-			.requires(Items.MANGROVE_ROOTS)
-			.unlockedBy("has_mangrove_roots", has(Blocks.MANGROVE_ROOTS))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.ACTIVATOR_RAIL, 6)
 			.define('#', Blocks.REDSTONE_TORCH)
 			.define('S', Items.STICK)
@@ -621,18 +605,13 @@ public class RecipeProvider implements DataProvider {
 				)
 			)
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.CHEST_MINECART)
-			.requires(Blocks.CHEST)
-			.requires(Items.MINECART)
+		ShapedRecipeBuilder.shaped(Items.CHEST_MINECART)
+			.define('A', Blocks.CHEST)
+			.define('B', Items.MINECART)
+			.pattern("A")
+			.pattern("B")
 			.unlockedBy("has_minecart", has(Items.MINECART))
 			.save(consumer);
-		chestBoat(consumer, Items.ACACIA_CHEST_BOAT, Items.ACACIA_BOAT);
-		chestBoat(consumer, Items.BIRCH_CHEST_BOAT, Items.BIRCH_BOAT);
-		chestBoat(consumer, Items.DARK_OAK_CHEST_BOAT, Items.DARK_OAK_BOAT);
-		chestBoat(consumer, Items.JUNGLE_CHEST_BOAT, Items.JUNGLE_BOAT);
-		chestBoat(consumer, Items.OAK_CHEST_BOAT, Items.OAK_BOAT);
-		chestBoat(consumer, Items.SPRUCE_CHEST_BOAT, Items.SPRUCE_BOAT);
-		chestBoat(consumer, Items.MANGROVE_CHEST_BOAT, Items.MANGROVE_BOAT);
 		chiseledBuilder(Blocks.CHISELED_QUARTZ_BLOCK, Ingredient.of(Blocks.QUARTZ_SLAB))
 			.unlockedBy("has_chiseled_quartz_block", has(Blocks.CHISELED_QUARTZ_BLOCK))
 			.unlockedBy("has_quartz_block", has(Blocks.QUARTZ_BLOCK))
@@ -951,9 +930,11 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.unlockedBy("has_cobblestone", has(ItemTags.STONE_CRAFTING_MATERIALS))
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.FURNACE_MINECART)
-			.requires(Blocks.FURNACE)
-			.requires(Items.MINECART)
+		ShapedRecipeBuilder.shaped(Items.FURNACE_MINECART)
+			.define('A', Blocks.FURNACE)
+			.define('B', Items.MINECART)
+			.pattern("A")
+			.pattern("B")
 			.unlockedBy("has_minecart", has(Items.MINECART))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.GLASS_BOTTLE, 3)
@@ -1113,9 +1094,11 @@ public class RecipeProvider implements DataProvider {
 			.pattern(" I ")
 			.unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.HOPPER_MINECART)
-			.requires(Blocks.HOPPER)
-			.requires(Items.MINECART)
+		ShapedRecipeBuilder.shaped(Items.HOPPER_MINECART)
+			.define('A', Blocks.HOPPER)
+			.define('B', Items.MINECART)
+			.pattern("A")
+			.pattern("B")
 			.unlockedBy("has_minecart", has(Items.MINECART))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.IRON_AXE)
@@ -1830,9 +1813,11 @@ public class RecipeProvider implements DataProvider {
 			.pattern("X#X")
 			.unlockedBy("has_gunpowder", has(Items.GUNPOWDER))
 			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.TNT_MINECART)
-			.requires(Blocks.TNT)
-			.requires(Items.MINECART)
+		ShapedRecipeBuilder.shaped(Items.TNT_MINECART)
+			.define('A', Blocks.TNT)
+			.define('B', Items.MINECART)
+			.pattern("A")
+			.pattern("B")
 			.unlockedBy("has_minecart", has(Items.MINECART))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.TORCH, 4)
@@ -2377,6 +2362,9 @@ public class RecipeProvider implements DataProvider {
 		stonecutterResultFromBase(consumer, Blocks.STONE_BRICKS, Blocks.STONE);
 		stonecutterResultFromBase(consumer, Blocks.STONE_BRICK_SLAB, Blocks.STONE, 2);
 		stonecutterResultFromBase(consumer, Blocks.STONE_BRICK_STAIRS, Blocks.STONE);
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.STONE), Blocks.GRAVEL);
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.GRAVEL), Blocks.SAND);
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.SANDSTONE), Blocks.SAND);
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.STONE), Blocks.CHISELED_STONE_BRICKS)
 			.unlockedBy("has_stone", has(Blocks.STONE))
 			.save(consumer, "chiseled_stone_bricks_stone_from_stonecutting");
@@ -2416,9 +2404,6 @@ public class RecipeProvider implements DataProvider {
 		stonecutterResultFromBase(consumer, Blocks.BRICK_SLAB, Blocks.BRICKS, 2);
 		stonecutterResultFromBase(consumer, Blocks.BRICK_STAIRS, Blocks.BRICKS);
 		stonecutterResultFromBase(consumer, Blocks.BRICK_WALL, Blocks.BRICKS);
-		stonecutterResultFromBase(consumer, Blocks.MUD_BRICK_SLAB, Blocks.MUD_BRICKS, 2);
-		stonecutterResultFromBase(consumer, Blocks.MUD_BRICK_STAIRS, Blocks.MUD_BRICKS);
-		stonecutterResultFromBase(consumer, Blocks.MUD_BRICK_WALL, Blocks.MUD_BRICKS);
 		stonecutterResultFromBase(consumer, Blocks.NETHER_BRICK_SLAB, Blocks.NETHER_BRICKS, 2);
 		stonecutterResultFromBase(consumer, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_BRICKS);
 		stonecutterResultFromBase(consumer, Blocks.NETHER_BRICK_WALL, Blocks.NETHER_BRICKS);
@@ -2671,15 +2656,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.group("boat")
 			.unlockedBy("in_water", insideOf(Blocks.WATER))
-			.save(consumer);
-	}
-
-	private static void chestBoat(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(itemLike)
-			.requires(Blocks.CHEST)
-			.requires(itemLike2)
-			.group("chest_boat")
-			.unlockedBy("has_boat", has(ItemTags.BOATS))
 			.save(consumer);
 	}
 

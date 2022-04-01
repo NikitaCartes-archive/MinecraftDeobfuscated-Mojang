@@ -60,8 +60,7 @@ public class BlockColors {
 			Blocks.JUNGLE_LEAVES,
 			Blocks.ACACIA_LEAVES,
 			Blocks.DARK_OAK_LEAVES,
-			Blocks.VINE,
-			Blocks.MANGROVE_LEAVES
+			Blocks.VINE
 		);
 		blockColors.register(
 			(blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null

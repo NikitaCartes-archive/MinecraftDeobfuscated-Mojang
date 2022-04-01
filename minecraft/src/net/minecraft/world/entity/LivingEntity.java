@@ -82,7 +82,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
@@ -93,6 +92,8 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
+import net.minecraft.world.item.trading.CarryableTrade;
+import net.minecraft.world.level.CarriedBlocks;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -231,6 +232,8 @@ public abstract class LivingEntity extends Entity {
 	private float swimAmountO;
 	protected Brain<?> brain;
 	private boolean skipDropExperience;
+	@Nullable
+	private Player thrownBy;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
 		super(entityType, level);
@@ -649,16 +652,11 @@ public abstract class LivingEntity extends Entity {
 		this.discardFriction = bl;
 	}
 
-	protected void equipEventAndSound(ItemStack itemStack, boolean bl) {
-		if (!itemStack.isEmpty() && !this.isSpectator()) {
-			if (bl) {
-				this.gameEvent(GameEvent.EQUIP);
-			}
-
-			SoundEvent soundEvent = itemStack.getEquipSound();
-			if (soundEvent != null) {
-				this.playSound(soundEvent, 1.0F, 1.0F);
-			}
+	protected void equipEventAndSound(ItemStack itemStack) {
+		SoundEvent soundEvent = itemStack.getEquipSound();
+		if (!itemStack.isEmpty() && soundEvent != null && !this.isSpectator()) {
+			this.gameEvent(GameEvent.EQUIP);
+			this.playSound(soundEvent, 1.0F, 1.0F);
 		}
 	}
 
@@ -1161,6 +1159,11 @@ public abstract class LivingEntity extends Entity {
 				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
 			}
 
+			if (!this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				this.spawnAtLocation(this.getItemBySlot(EquipmentSlot.HEAD));
+				this.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+			}
+
 			return bl3;
 		}
 	}
@@ -1269,7 +1272,7 @@ public abstract class LivingEntity extends Entity {
 				this.stopSleeping();
 			}
 
-			this.gameEvent(GameEvent.ENTITY_DIE);
+			this.gameEvent(GameEvent.ENTITY_DYING);
 			if (!this.level.isClientSide && this.hasCustomName()) {
 				LOGGER.info("Named entity {} died: {}", this, this.getCombatTracker().getDeathMessage().getString());
 			}
@@ -1435,7 +1438,7 @@ public abstract class LivingEntity extends Entity {
 		} else {
 			BlockPos blockPos = this.blockPosition();
 			BlockState blockState = this.getFeetBlockState();
-			if (blockState.is(BlockTags.CLIMBABLE)) {
+			if (this.canClimbOn(blockPos, blockState)) {
 				this.lastClimbablePos = Optional.of(blockPos);
 				return true;
 			} else if (blockState.getBlock() instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(blockPos, blockState)) {
@@ -1574,7 +1577,7 @@ public abstract class LivingEntity extends Entity {
 				this.setHealth(i - var8);
 				this.getCombatTracker().recordDamage(damageSource, i, var8);
 				this.setAbsorptionAmount(this.getAbsorptionAmount() - var8);
-				this.gameEvent(GameEvent.ENTITY_DAMAGE);
+				this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
 			}
 		}
 	}
@@ -1858,6 +1861,11 @@ public abstract class LivingEntity extends Entity {
 		return predicate.test(this.getMainHandItem()) || predicate.test(this.getOffhandItem());
 	}
 
+	public ItemStack getCarriedAsItem() {
+		BlockState blockState = this.getCarriedBlock();
+		return blockState == null ? ItemStack.EMPTY : CarriedBlocks.getItemStackFromBlock(blockState);
+	}
+
 	public ItemStack getItemInHand(InteractionHand interactionHand) {
 		if (interactionHand == InteractionHand.MAIN_HAND) {
 			return this.getItemBySlot(EquipmentSlot.MAINHAND);
@@ -2006,9 +2014,13 @@ public abstract class LivingEntity extends Entity {
 		if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
 			double d = 0.08;
 			boolean bl = this.getDeltaMovement().y <= 0.0;
-			if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
+			if (bl && (this.hasEffect(MobEffects.SLOW_FALLING) || this instanceof Player && this.hasPassenger(entity -> entity.getType() == EntityType.CHICKEN))) {
 				d = 0.01;
 				this.resetFallDistance();
+			}
+
+			if (this instanceof Player && this.hasPassenger(entity -> entity.getType() == EntityType.BEE)) {
+				d = -5.0E-4;
 			}
 
 			FluidState fluidState = this.level.getFluidState(this.blockPosition());
@@ -2221,6 +2233,10 @@ public abstract class LivingEntity extends Entity {
 		super.tick();
 		this.updatingUsingItem();
 		this.updateSwimAmount();
+		if (this.thrownBy != null && this.getDeltaMovement().length() < 0.15) {
+			this.removeThrownBy();
+		}
+
 		if (!this.level.isClientSide) {
 			int i = this.getArrowCount();
 			if (i > 0) {
@@ -2596,7 +2612,7 @@ public abstract class LivingEntity extends Entity {
 						itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
 					}
 
-					this.gameEvent(GameEvent.ELYTRA_GLIDE);
+					this.gameEvent(GameEvent.ELYTRA_FREE_FALL);
 				}
 			} else {
 				bl = false;
@@ -2940,6 +2956,7 @@ public abstract class LivingEntity extends Entity {
 		if (!this.level.isClientSide || this.isUsingItem()) {
 			InteractionHand interactionHand = this.getUsedItemHand();
 			if (!this.useItem.equals(this.getItemInHand(interactionHand))) {
+				this.clearCarried();
 				this.releaseUsingItem();
 			} else {
 				if (!this.useItem.isEmpty() && this.isUsingItem()) {
@@ -3189,6 +3206,7 @@ public abstract class LivingEntity extends Entity {
 
 	public ItemStack eat(Level level, ItemStack itemStack) {
 		if (itemStack.isEdible()) {
+			level.gameEvent(this, GameEvent.EAT, this.eyeBlockPosition());
 			level.playSound(
 				null,
 				this.getX(),
@@ -3204,7 +3222,7 @@ public abstract class LivingEntity extends Entity {
 				itemStack.shrink(1);
 			}
 
-			level.gameEvent(this, GameEvent.EAT, this.getEyePosition());
+			this.gameEvent(GameEvent.EAT);
 		}
 
 		return itemStack;
@@ -3341,8 +3359,65 @@ public abstract class LivingEntity extends Entity {
 		);
 	}
 
-	public boolean canDisableShield() {
-		return this.getMainHandItem().getItem() instanceof AxeItem;
+	@Nullable
+	public BlockState getCarriedBlock() {
+		return null;
+	}
+
+	@Override
+	public boolean canSpawnFootprintParticle() {
+		return this.getCarriedBlock() != null && !this.isInWater() && !this.isSpectator() && !this.isInLava() && this.isAlive();
+	}
+
+	public void clearCarried() {
+	}
+
+	@Nullable
+	public CarryableTrade getTradeProposition() {
+		if (this.getCarriedBlock() != null) {
+			return CarryableTrade.block(this.getCarriedBlock().getBlock());
+		} else {
+			Entity entity = this.getFirstPassenger();
+			return entity != null ? CarryableTrade.entity(entity.getType()) : null;
+		}
+	}
+
+	public LivingEntity.Carried getCarried() {
+		if (this.getCarriedBlock() != null) {
+			return LivingEntity.Carried.BLOCK;
+		} else {
+			return this.hasPassenger(entity -> true) ? LivingEntity.Carried.MOB : LivingEntity.Carried.NONE;
+		}
+	}
+
+	@Override
+	public void throwEntity(ServerPlayer serverPlayer, Vec3 vec3) {
+		super.throwEntity(serverPlayer, vec3);
+		this.setThrownBy(serverPlayer);
+		this.getSelfAndPassengers().forEach(entity -> {
+			if (entity instanceof LivingEntity livingEntity) {
+				livingEntity.setThrownBy(serverPlayer);
+			}
+		});
+	}
+
+	void setThrownBy(@Nullable ServerPlayer serverPlayer) {
+		this.thrownBy = serverPlayer;
+	}
+
+	void removeThrownBy() {
+		this.thrownBy = null;
+	}
+
+	@Nullable
+	public Player getThrownBy() {
+		return this.thrownBy;
+	}
+
+	public static enum Carried {
+		BLOCK,
+		MOB,
+		NONE;
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

@@ -22,7 +22,6 @@ import net.minecraft.client.gui.screens.inventory.HopperScreen;
 import net.minecraft.client.gui.screens.inventory.LecternScreen;
 import net.minecraft.client.gui.screens.inventory.LoomScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 import net.minecraft.client.gui.screens.inventory.SmokerScreen;
@@ -98,7 +97,6 @@ public class MenuScreens {
 		register(MenuType.HOPPER, HopperScreen::new);
 		register(MenuType.LECTERN, LecternScreen::new);
 		register(MenuType.LOOM, LoomScreen::new);
-		register(MenuType.MERCHANT, MerchantScreen::new);
 		register(MenuType.SHULKER_BOX, ShulkerBoxScreen::new);
 		register(MenuType.SMITHING, SmithingScreen::new);
 		register(MenuType.SMOKER, SmokerScreen::new);

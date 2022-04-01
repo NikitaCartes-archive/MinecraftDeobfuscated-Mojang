@@ -96,8 +96,7 @@ public class SoundEngine {
 	private synchronized void loadLibrary() {
 		if (!this.loaded) {
 			try {
-				String string = this.options.soundDevice().get();
-				this.library.init("".equals(string) ? null : string, this.options.directionalAudio().get());
+				this.library.init("".equals(this.options.soundDevice) ? null : this.options.soundDevice);
 				this.listener.reset();
 				this.listener.setGain(this.options.getSoundSourceVolume(SoundSource.MASTER));
 				this.soundBuffers.preload(this.preloadQueue).thenRun(this.preloadQueue::clear);
@@ -182,7 +181,7 @@ public class SoundEngine {
 			if (bl) {
 				this.lastDeviceCheckTime = l;
 				if (this.devicePoolState.compareAndSet(SoundEngine.DeviceCheckState.NO_CHANGE, SoundEngine.DeviceCheckState.ONGOING)) {
-					String string = this.options.soundDevice().get();
+					String string = this.options.soundDevice;
 					Util.ioPool().execute(() -> {
 						if ("".equals(string)) {
 							if (this.library.hasDefaultDeviceChanged()) {

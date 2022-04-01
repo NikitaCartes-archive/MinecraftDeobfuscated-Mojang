@@ -22,13 +22,13 @@ public class ClientboundBlockUpdatePacket implements Packet<ClientGamePacketList
 
 	public ClientboundBlockUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
-		this.blockState = friendlyByteBuf.readById(Block.BLOCK_STATE_REGISTRY);
+		this.blockState = Block.BLOCK_STATE_REGISTRY.byId(friendlyByteBuf.readVarInt());
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
-		friendlyByteBuf.writeId(Block.BLOCK_STATE_REGISTRY, this.blockState);
+		friendlyByteBuf.writeVarInt(Block.getId(this.blockState));
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

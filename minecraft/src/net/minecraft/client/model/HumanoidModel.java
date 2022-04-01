@@ -15,8 +15,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
@@ -99,12 +104,26 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 
 	public void prepareMobModel(T livingEntity, float f, float g, float h) {
 		this.swimAmount = livingEntity.getSwimAmount(h);
+		if (livingEntity.getCarried() != LivingEntity.Carried.NONE) {
+			this.leftArmPose = this.rightArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
+		}
+
 		super.prepareMobModel(livingEntity, f, g, h);
 	}
 
 	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
 		boolean bl = livingEntity.getFallFlyingTicks() > 4;
 		boolean bl2 = livingEntity.isVisuallySwimming();
+		if (!(livingEntity instanceof EnderMan) && !(livingEntity instanceof ArmorStand)) {
+			boolean bl3 = livingEntity.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL);
+			this.leftArm.visible = !bl3;
+			this.rightArm.visible = !bl3;
+			this.head.visible = !bl3;
+			if (livingEntity instanceof Player player && player.isCrouching()) {
+				this.body.visible = this.leftLeg.visible = this.rightLeg.visible = !bl3;
+			}
+		}
+
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		if (bl) {
 			this.head.xRot = (float) (-Math.PI / 4);
@@ -157,17 +176,17 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 
 		this.rightArm.yRot = 0.0F;
 		this.leftArm.yRot = 0.0F;
-		boolean bl3 = livingEntity.getMainArm() == HumanoidArm.RIGHT;
+		boolean bl4 = livingEntity.getMainArm() == HumanoidArm.RIGHT;
 		if (livingEntity.isUsingItem()) {
-			boolean bl4 = livingEntity.getUsedItemHand() == InteractionHand.MAIN_HAND;
-			if (bl4 == bl3) {
+			boolean bl5 = livingEntity.getUsedItemHand() == InteractionHand.MAIN_HAND;
+			if (bl5 == bl4) {
 				this.poseRightArm(livingEntity);
 			} else {
 				this.poseLeftArm(livingEntity);
 			}
 		} else {
-			boolean bl4 = bl3 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
-			if (bl3 != bl4) {
+			boolean bl5 = bl4 ? this.leftArmPose.isTwoHanded() : this.rightArmPose.isTwoHanded();
+			if (bl4 != bl5) {
 				this.poseLeftArm(livingEntity);
 				this.poseRightArm(livingEntity);
 			} else {
@@ -248,9 +267,20 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		}
 
 		this.hat.copyFrom(this.head);
+		if (livingEntity.getCarried() == LivingEntity.Carried.MOB) {
+			this.leftArm.xRot--;
+			this.rightArm.xRot--;
+			this.leftArm.y -= 2.0F;
+			this.rightArm.y -= 2.0F;
+		}
 	}
 
 	private void poseRightArm(T livingEntity) {
+		if (livingEntity instanceof Player && ((Player)livingEntity).getCarried() != LivingEntity.Carried.NONE) {
+			this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) (Math.PI * 2.0 / 5.0);
+			this.rightArm.yRot = (float) (-Math.PI / 6);
+		}
+
 		switch (this.rightArmPose) {
 			case EMPTY:
 				this.rightArm.yRot = 0.0F;
@@ -286,6 +316,11 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 	}
 
 	private void poseLeftArm(T livingEntity) {
+		if (livingEntity instanceof Player && ((Player)livingEntity).getCarried() != LivingEntity.Carried.NONE) {
+			this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) (Math.PI * 2.0 / 5.0);
+			this.leftArm.yRot = (float) (Math.PI / 6);
+		}
+
 		switch (this.leftArmPose) {
 			case EMPTY:
 				this.leftArm.yRot = 0.0F;

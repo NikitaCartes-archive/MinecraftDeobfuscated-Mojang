@@ -54,7 +54,6 @@ public class PillagerOutpostPools {
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("pillager_outpost/feature_cage1"), 1),
 					Pair.of(StructurePoolElement.legacy("pillager_outpost/feature_cage2"), 1),
-					Pair.of(StructurePoolElement.legacy("pillager_outpost/feature_cage_with_allays"), 1),
 					Pair.of(StructurePoolElement.legacy("pillager_outpost/feature_logs"), 1),
 					Pair.of(StructurePoolElement.legacy("pillager_outpost/feature_tent1"), 1),
 					Pair.of(StructurePoolElement.legacy("pillager_outpost/feature_tent2"), 1),

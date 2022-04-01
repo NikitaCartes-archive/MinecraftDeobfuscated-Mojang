@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SheepModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.SheepFurLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Sheep;
@@ -14,6 +15,7 @@ public class SheepRenderer extends MobRenderer<Sheep, SheepModel<Sheep>> {
 
 	public SheepRenderer(EntityRendererProvider.Context context) {
 		super(context, new SheepModel<>(context.bakeLayer(ModelLayers.SHEEP)), 0.7F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 		this.addLayer(new SheepFurLayer(this, context.getModelSet()));
 	}
 

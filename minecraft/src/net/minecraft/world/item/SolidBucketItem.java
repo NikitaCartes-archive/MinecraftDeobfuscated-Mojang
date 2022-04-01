@@ -11,7 +11,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class SolidBucketItem extends BlockItem implements DispensibleContainerItem {
@@ -51,7 +50,6 @@ public class SolidBucketItem extends BlockItem implements DispensibleContainerIt
 				level.setBlock(blockPos, this.getBlock().defaultBlockState(), 3);
 			}
 
-			level.gameEvent(player, GameEvent.FLUID_PLACE, blockPos);
 			level.playSound(player, blockPos, this.placeSound, SoundSource.BLOCKS, 1.0F, 1.0F);
 			return true;
 		} else {

@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -66,12 +65,12 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			SectionPos.blockToSectionCoord(blockPos.getX()),
 			SectionPos.blockToSectionCoord(blockPos.getZ()),
 			ThreadedLevelLightEngine.TaskType.POST_UPDATE,
-			Util.name((Runnable)(() -> super.checkBlock(blockPos2)), () -> "checkBlock " + blockPos2)
+			Util.name(() -> super.checkBlock(blockPos2), () -> "checkBlock " + blockPos2)
 		);
 	}
 
 	protected void updateChunkStatus(ChunkPos chunkPos) {
-		this.addTask(chunkPos.x, chunkPos.z, () -> 0, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, Util.name((Runnable)(() -> {
+		this.addTask(chunkPos.x, chunkPos.z, () -> 0, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, Util.name(() -> {
 			super.retainData(chunkPos, false);
 			super.enableLightSources(chunkPos, false);
 
@@ -83,7 +82,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
 				super.updateSectionStatus(SectionPos.of(chunkPos, i), true);
 			}
-		}), () -> "updateChunkStatus " + chunkPos + " true"));
+		}, () -> "updateChunkStatus " + chunkPos + " true"));
 	}
 
 	@Override
@@ -93,7 +92,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			sectionPos.z(),
 			() -> 0,
 			ThreadedLevelLightEngine.TaskType.PRE_UPDATE,
-			Util.name((Runnable)(() -> super.updateSectionStatus(sectionPos, bl)), () -> "updateSectionStatus " + sectionPos + " " + bl)
+			Util.name(() -> super.updateSectionStatus(sectionPos, bl), () -> "updateSectionStatus " + sectionPos + " " + bl)
 		);
 	}
 
@@ -103,7 +102,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			chunkPos.x,
 			chunkPos.z,
 			ThreadedLevelLightEngine.TaskType.PRE_UPDATE,
-			Util.name((Runnable)(() -> super.enableLightSources(chunkPos, bl)), () -> "enableLight " + chunkPos + " " + bl)
+			Util.name(() -> super.enableLightSources(chunkPos, bl), () -> "enableLight " + chunkPos + " " + bl)
 		);
 	}
 
@@ -114,7 +113,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			sectionPos.z(),
 			() -> 0,
 			ThreadedLevelLightEngine.TaskType.PRE_UPDATE,
-			Util.name((Runnable)(() -> super.queueSectionData(lightLayer, sectionPos, dataLayer, bl)), () -> "queueData " + sectionPos)
+			Util.name(() -> super.queueSectionData(lightLayer, sectionPos, dataLayer, bl), () -> "queueData " + sectionPos)
 		);
 	}
 
@@ -138,22 +137,14 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			chunkPos.z,
 			() -> 0,
 			ThreadedLevelLightEngine.TaskType.PRE_UPDATE,
-			Util.name((Runnable)(() -> super.retainData(chunkPos, bl)), () -> "retainData " + chunkPos)
+			Util.name(() -> super.retainData(chunkPos, bl), () -> "retainData " + chunkPos)
 		);
-	}
-
-	public CompletableFuture<ChunkAccess> retainData(ChunkAccess chunkAccess) {
-		ChunkPos chunkPos = chunkAccess.getPos();
-		return CompletableFuture.supplyAsync(Util.name((Supplier)(() -> {
-			super.retainData(chunkPos, true);
-			return chunkAccess;
-		}), () -> "retainData: " + chunkPos), runnable -> this.addTask(chunkPos.x, chunkPos.z, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, runnable));
 	}
 
 	public CompletableFuture<ChunkAccess> lightChunk(ChunkAccess chunkAccess, boolean bl) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		chunkAccess.setLightCorrect(false);
-		this.addTask(chunkPos.x, chunkPos.z, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, Util.name((Runnable)(() -> {
+		this.addTask(chunkPos.x, chunkPos.z, ThreadedLevelLightEngine.TaskType.PRE_UPDATE, Util.name(() -> {
 			LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
 
 			for (int i = 0; i < chunkAccess.getSectionsCount(); i++) {
@@ -168,7 +159,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 			if (!bl) {
 				chunkAccess.getLights().forEach(blockPos -> super.onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
 			}
-		}), () -> "lightChunk " + chunkPos + " " + bl));
+		}, () -> "lightChunk " + chunkPos + " " + bl));
 		return CompletableFuture.supplyAsync(() -> {
 			chunkAccess.setLightCorrect(true);
 			super.retainData(chunkPos, false);

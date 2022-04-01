@@ -91,7 +91,8 @@ public enum GameType {
 		return byName(string, SURVIVAL);
 	}
 
-	public static GameType byName(String string, GameType gameType) {
+	@Nullable
+	public static GameType byName(String string, @Nullable GameType gameType) {
 		for (GameType gameType2 : values()) {
 			if (gameType2.name.equals(string)) {
 				return gameType2;

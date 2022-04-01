@@ -248,6 +248,39 @@ public class Witch extends Raider implements RangedAttackMob {
 	}
 
 	@Override
+	public void performVehicleAttack(float f) {
+		if (!this.isDrinkingPotion()) {
+			if (this.isPassenger()) {
+				Vec3 vec3 = this.getRootVehicle().getForward();
+				double d = vec3.x;
+				double e = vec3.y;
+				double g = vec3.z;
+				double h = Math.sqrt(d * d + g * g);
+				Potion potion = Potions.HARMING;
+				int i = this.level.random.nextInt(5);
+
+				potion = switch (i) {
+					case 0 -> Potions.HEALING;
+					case 1 -> Potions.REGENERATION;
+					case 2 -> Potions.SLOWNESS;
+					case 3 -> Potions.WEAKNESS;
+					default -> Potions.POISON;
+				};
+				ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
+				thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
+				thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
+				thrownPotion.shoot(d, e + h * 0.2, g, 0.75F, 8.0F);
+				if (!this.isSilent()) {
+					this.level
+						.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+				}
+
+				this.level.addFreshEntity(thrownPotion);
+			}
+		}
+	}
+
+	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return 1.62F;
 	}

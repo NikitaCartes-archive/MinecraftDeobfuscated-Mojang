@@ -180,12 +180,7 @@ public class Brain<E extends LivingEntity> {
 	}
 
 	public <U> Optional<U> getMemory(MemoryModuleType<U> memoryModuleType) {
-		Optional<? extends ExpirableValue<?>> optional = (Optional<? extends ExpirableValue<?>>)this.memories.get(memoryModuleType);
-		if (optional == null) {
-			throw new IllegalStateException("Unregistered memory fetched: " + memoryModuleType);
-		} else {
-			return optional.map(ExpirableValue::getValue);
-		}
+		return ((Optional)this.memories.get(memoryModuleType)).map(ExpirableValue::getValue);
 	}
 
 	public <U> long getTimeUntilExpiry(MemoryModuleType<U> memoryModuleType) {
@@ -394,11 +389,10 @@ public class Brain<E extends LivingEntity> {
 		for (Entry<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> entry : this.memories.entrySet()) {
 			if (((Optional)entry.getValue()).isPresent()) {
 				ExpirableValue<?> expirableValue = (ExpirableValue<?>)((Optional)entry.getValue()).get();
+				expirableValue.tick();
 				if (expirableValue.hasExpired()) {
 					this.eraseMemory((MemoryModuleType)entry.getKey());
 				}
-
-				expirableValue.tick();
 			}
 		}
 	}

@@ -184,7 +184,9 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		public void onPress() {
-			BeaconScreen.this.minecraft.getConnection().send(new ServerboundSetBeaconPacket(BeaconScreen.this.primary, BeaconScreen.this.secondary));
+			BeaconScreen.this.minecraft
+				.getConnection()
+				.send(new ServerboundSetBeaconPacket(MobEffect.getId(BeaconScreen.this.primary), MobEffect.getId(BeaconScreen.this.secondary)));
 			BeaconScreen.this.minecraft.player.closeContainer();
 		}
 

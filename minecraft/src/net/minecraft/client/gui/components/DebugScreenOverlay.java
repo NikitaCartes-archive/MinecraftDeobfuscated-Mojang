@@ -65,7 +65,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -324,19 +323,14 @@ public class DebugScreenOverlay extends GuiComponent {
 						)
 					);
 				}
-
-				if (levelChunk2 != null) {
-					list.add(String.format("Blending: %s", levelChunk2.isOldNoiseGeneration() ? "Old" : "New"));
-				}
 			}
 
 			ServerLevel serverLevel = this.getServerLevel();
 			if (serverLevel != null) {
 				ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 				ChunkGenerator chunkGenerator = serverChunkCache.getGenerator();
-				RandomState randomState = serverChunkCache.randomState();
-				chunkGenerator.addDebugScreenInfo(list, randomState, blockPos);
-				Climate.Sampler sampler = randomState.sampler();
+				chunkGenerator.addDebugScreenInfo(list, blockPos);
+				Climate.Sampler sampler = chunkGenerator.climateSampler();
 				BiomeSource biomeSource = chunkGenerator.getBiomeSource();
 				biomeSource.addDebugInfo(list, blockPos, sampler);
 				NaturalSpawner.SpawnState spawnState = serverChunkCache.getLastSpawnState();
@@ -361,7 +355,10 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add("Shader: " + postChain.getName());
 			}
 
-			list.add(this.minecraft.getSoundManager().getDebugString() + String.format(" (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F)));
+			list.add(
+				this.minecraft.getSoundManager().getDebugString()
+					+ String.format(" (Number of ghosts in world: %d)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F))
+			);
 			return list;
 		}
 	}
@@ -551,9 +548,8 @@ public class DebugScreenOverlay extends GuiComponent {
 		this.hLine(poseStack, i, i + p - 1, t - 1, -1);
 		this.vLine(poseStack, i, t - 60, t, -1);
 		this.vLine(poseStack, i + p - 1, t - 60, t, -1);
-		int v = this.minecraft.options.framerateLimit().get();
-		if (bl && v > 0 && v <= 250) {
-			this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)v), -16711681);
+		if (bl && this.minecraft.options.framerateLimit > 0 && this.minecraft.options.framerateLimit <= 250) {
+			this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
 		}
 
 		String string = r + " ms min";

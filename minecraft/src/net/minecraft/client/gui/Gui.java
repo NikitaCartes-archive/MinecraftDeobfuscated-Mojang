@@ -41,7 +41,6 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -64,12 +63,13 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -90,6 +90,7 @@ public class Gui extends GuiComponent {
 	private static final ResourceLocation PUMPKIN_BLUR_LOCATION = new ResourceLocation("textures/misc/pumpkinblur.png");
 	private static final ResourceLocation SPYGLASS_SCOPE_LOCATION = new ResourceLocation("textures/misc/spyglass_scope.png");
 	private static final ResourceLocation POWDER_SNOW_OUTLINE_LOCATION = new ResourceLocation("textures/misc/powder_snow_outline.png");
+	private static final ResourceLocation BARREL_OVERLAY_LOCATION = new ResourceLocation("textures/misc/barrel_eye_holes.png");
 	private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
 	private static final Component SAVING_TEXT = new TranslatableComponent("menu.savingLevel");
 	private static final int COLOR_WHITE = 16777215;
@@ -182,7 +183,9 @@ public class Gui extends GuiComponent {
 		float g = this.minecraft.getDeltaFrameTime();
 		this.scopeScale = Mth.lerp(0.5F * g, this.scopeScale, 1.125F);
 		if (this.minecraft.options.getCameraType().isFirstPerson()) {
-			if (this.minecraft.player.isScoping()) {
+			if (this.minecraft.player.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL)) {
+				this.renderBarrelOverlay();
+			} else if (this.minecraft.player.isScoping()) {
 				this.renderSpyglassOverlay(this.scopeScale);
 			} else {
 				this.scopeScale = 0.5F;
@@ -205,7 +208,6 @@ public class Gui extends GuiComponent {
 		if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
 			this.spectatorGui.renderHotbar(poseStack);
 		} else if (!this.minecraft.options.hideGui) {
-			this.renderHotbar(f, poseStack);
 		}
 
 		if (!this.minecraft.options.hideGui) {
@@ -231,12 +233,9 @@ public class Gui extends GuiComponent {
 			if (this.minecraft.player.isRidingJumpable()) {
 				this.renderJumpMeter(poseStack, i);
 			} else if (this.minecraft.gameMode.hasExperience()) {
-				this.renderExperienceBar(poseStack, i);
 			}
 
-			if (this.minecraft.options.heldItemTooltips && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
-				this.renderSelectedItemName(poseStack);
-			} else if (this.minecraft.player.isSpectator()) {
+			if ((!this.minecraft.options.heldItemTooltips || this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) && this.minecraft.player.isSpectator()) {
 				this.spectatorGui.renderTooltip(poseStack);
 			}
 		}
@@ -389,7 +388,7 @@ public class Gui extends GuiComponent {
 		Options options = this.minecraft.options;
 		if (options.getCameraType().isFirstPerson()) {
 			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
-				if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo().get()) {
+				if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo) {
 					Camera camera = this.minecraft.gameRenderer.getMainCamera();
 					PoseStack poseStack2 = RenderSystem.getModelViewStack();
 					poseStack2.pushPose();
@@ -410,7 +409,7 @@ public class Gui extends GuiComponent {
 					);
 					int i = 15;
 					this.blit(poseStack, (this.screenWidth - 15) / 2, (this.screenHeight - 15) / 2, 0, 0, 15, 15);
-					if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {
+					if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.CROSSHAIR) {
 						float f = this.minecraft.player.getAttackStrengthScale(0.0F);
 						boolean bl = false;
 						if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && f >= 1.0F) {
@@ -552,7 +551,7 @@ public class Gui extends GuiComponent {
 				}
 			}
 
-			if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR) {
+			if (this.minecraft.options.attackIndicator == AttackIndicatorStatus.HOTBAR) {
 				float g = this.minecraft.player.getAttackStrengthScale(0.0F);
 				if (g < 1.0F) {
 					int o = this.screenHeight - 20;
@@ -775,90 +774,38 @@ public class Gui extends GuiComponent {
 			this.lastHealth = i;
 			int j = this.displayHealth;
 			this.random.setSeed((long)(this.tickCount * 312871));
-			FoodData foodData = player.getFoodData();
-			int k = foodData.getFoodLevel();
-			int m = this.screenWidth / 2 - 91;
-			int n = this.screenWidth / 2 + 91;
-			int o = this.screenHeight - 39;
+			int k = this.screenHeight - 9 - 2;
 			float f = Math.max((float)player.getAttributeValue(Attributes.MAX_HEALTH), (float)Math.max(j, i));
-			int p = Mth.ceil(player.getAbsorptionAmount());
-			int q = Mth.ceil((f + (float)p) / 2.0F / 10.0F);
-			int r = Math.max(10 - (q - 2), 3);
-			int s = o - (q - 1) * r - 10;
-			int t = o - 10;
-			int u = player.getArmorValue();
-			int v = -1;
+			int m = Mth.ceil(player.getAbsorptionAmount());
+			int n = Mth.ceil((f + (float)m) / 2.0F / 10.0F);
+			int o = Math.max(10 - (n - 2), 3);
+			int p = k - 10;
+			int q = -1;
 			if (player.hasEffect(MobEffects.REGENERATION)) {
-				v = this.tickCount % Mth.ceil(f + 5.0F);
-			}
-
-			this.minecraft.getProfiler().push("armor");
-
-			for (int w = 0; w < 10; w++) {
-				if (u > 0) {
-					int x = m + w * 8;
-					if (w * 2 + 1 < u) {
-						this.blit(poseStack, x, s, 34, 9, 9, 9);
-					}
-
-					if (w * 2 + 1 == u) {
-						this.blit(poseStack, x, s, 25, 9, 9, 9);
-					}
-
-					if (w * 2 + 1 > u) {
-						this.blit(poseStack, x, s, 16, 9, 9, 9);
-					}
-				}
+				q = this.tickCount % Mth.ceil(f + 5.0F);
 			}
 
 			this.minecraft.getProfiler().popPush("health");
-			this.renderHearts(poseStack, player, m, o, r, v, f, i, j, p, bl);
+			this.renderHearts(poseStack, player, this.screenWidth / 2, k, o, q, f, i, j, m, bl);
 			LivingEntity livingEntity = this.getPlayerVehicleWithHealth();
-			int xx = this.getVehicleMaxHearts(livingEntity);
-			if (xx == 0) {
-				this.minecraft.getProfiler().popPush("food");
-
-				for (int y = 0; y < 10; y++) {
-					int z = o;
-					int aa = 16;
-					int ab = 0;
-					if (player.hasEffect(MobEffects.HUNGER)) {
-						aa += 36;
-						ab = 13;
-					}
-
-					if (player.getFoodData().getSaturationLevel() <= 0.0F && this.tickCount % (k * 3 + 1) == 0) {
-						z = o + (this.random.nextInt(3) - 1);
-					}
-
-					int ac = n - y * 8 - 9;
-					this.blit(poseStack, ac, z, 16 + ab * 9, 27, 9, 9);
-					if (y * 2 + 1 < k) {
-						this.blit(poseStack, ac, z, aa + 36, 27, 9, 9);
-					}
-
-					if (y * 2 + 1 == k) {
-						this.blit(poseStack, ac, z, aa + 45, 27, 9, 9);
-					}
-				}
-
-				t -= 10;
-			}
-
+			int r = this.getVehicleMaxHearts(livingEntity);
 			this.minecraft.getProfiler().popPush("air");
-			int y = player.getMaxAirSupply();
-			int zx = Math.min(player.getAirSupply(), y);
-			if (player.isEyeInFluid(FluidTags.WATER) || zx < y) {
-				int aax = this.getVisibleVehicleHeartRows(xx) - 1;
-				t -= aax * 10;
-				int abx = Mth.ceil((double)(zx - 2) * 10.0 / (double)y);
-				int acx = Mth.ceil((double)zx * 10.0 / (double)y) - abx;
+			int s = player.getMaxAirSupply();
+			int t = Math.min(player.getAirSupply(), s);
+			if (player.isEyeInFluid(FluidTags.WATER) || t < s) {
+				int u = this.getVisibleVehicleHeartRows(r);
+				int v = u - 1;
+				p -= v * 10;
+				int w = u * 8;
+				int x = this.screenWidth + w / 2;
+				int y = Mth.ceil((double)(t - 2) * 10.0 / (double)s);
+				int z = Mth.ceil((double)t * 10.0 / (double)s) - y;
 
-				for (int ad = 0; ad < abx + acx; ad++) {
-					if (ad < abx) {
-						this.blit(poseStack, n - ad * 8 - 9, t, 16, 18, 9, 9);
+				for (int aa = 0; aa < y + z; aa++) {
+					if (aa < y) {
+						this.blit(poseStack, x - aa * 8 - 9, p, 16, 18, 9, 9);
 					} else {
-						this.blit(poseStack, n - ad * 8 - 9, t, 25, 18, 9, 9);
+						this.blit(poseStack, x - aa * 8 - 9, p, 25, 18, 9, 9);
 					}
 				}
 			}
@@ -873,39 +820,41 @@ public class Gui extends GuiComponent {
 		int q = Mth.ceil((double)f / 2.0);
 		int r = Mth.ceil((double)o / 2.0);
 		int s = q * 2;
+		int t = 80;
+		int u = i - 40;
 
-		for (int t = q + r - 1; t >= 0; t--) {
-			int u = t / 10;
-			int v = t % 10;
-			int w = i + v * 8;
-			int x = j - u * k;
+		for (int v = q + r - 1; v >= 0; v--) {
+			int w = v / 10;
+			int x = v % 10;
+			int y = u + x * 8;
+			int z = j - w * k;
 			if (m + o <= 4) {
-				x += this.random.nextInt(2);
+				z += this.random.nextInt(2);
 			}
 
-			if (t < q && t == l) {
-				x -= 2;
+			if (v < q && v == l) {
+				z -= 2;
 			}
 
-			this.renderHeart(poseStack, Gui.HeartType.CONTAINER, w, x, p, bl, false);
-			int y = t * 2;
-			boolean bl2 = t >= q;
+			this.renderHeart(poseStack, Gui.HeartType.CONTAINER, y, z, p, bl, false);
+			int aa = v * 2;
+			boolean bl2 = v >= q;
 			if (bl2) {
-				int z = y - s;
-				if (z < o) {
-					boolean bl3 = z + 1 == o;
-					this.renderHeart(poseStack, heartType == Gui.HeartType.WITHERED ? heartType : Gui.HeartType.ABSORBING, w, x, p, false, bl3);
+				int ab = aa - s;
+				if (ab < o) {
+					boolean bl3 = ab + 1 == o;
+					this.renderHeart(poseStack, heartType == Gui.HeartType.WITHERED ? heartType : Gui.HeartType.ABSORBING, y, z, p, false, bl3);
 				}
 			}
 
-			if (bl && y < n) {
-				boolean bl4 = y + 1 == n;
-				this.renderHeart(poseStack, heartType, w, x, p, true, bl4);
+			if (bl && aa < n) {
+				boolean bl4 = aa + 1 == n;
+				this.renderHeart(poseStack, heartType, y, z, p, true, bl4);
 			}
 
-			if (y < m) {
-				boolean bl4 = y + 1 == m;
-				this.renderHeart(poseStack, heartType, w, x, p, false, bl4);
+			if (aa < m) {
+				boolean bl4 = aa + 1 == m;
+				this.renderHeart(poseStack, heartType, y, z, p, false, bl4);
 			}
 		}
 	}
@@ -921,30 +870,31 @@ public class Gui extends GuiComponent {
 			if (i != 0) {
 				int j = (int)Math.ceil((double)livingEntity.getHealth());
 				this.minecraft.getProfiler().popPush("mountHealth");
-				int k = this.screenHeight - 39;
-				int l = this.screenWidth / 2 + 91;
-				int m = k;
-				int n = 0;
+				int k = 80;
+				int l = this.screenHeight - 22;
+				int m = (this.screenWidth - 80) / 2;
+				int n = l;
+				int o = 0;
 
-				for (boolean bl = false; i > 0; n += 20) {
-					int o = Math.min(i, 10);
-					i -= o;
+				for (boolean bl = false; i > 0; o += 20) {
+					int p = Math.min(i, 10);
+					i -= p;
 
-					for (int p = 0; p < o; p++) {
-						int q = 52;
-						int r = 0;
-						int s = l - p * 8 - 9;
-						this.blit(poseStack, s, m, 52 + r * 9, 9, 9, 9);
-						if (p * 2 + 1 + n < j) {
-							this.blit(poseStack, s, m, 88, 9, 9, 9);
+					for (int q = 0; q < p; q++) {
+						int r = 52;
+						int s = 0;
+						int t = m + q * 8;
+						this.blit(poseStack, t, n, 52 + s * 9, 9, 9, 9);
+						if (q * 2 + 1 + o < j) {
+							this.blit(poseStack, t, n, 88, 9, 9, 9);
 						}
 
-						if (p * 2 + 1 + n == j) {
-							this.blit(poseStack, s, m, 97, 9, 9, 9);
+						if (q * 2 + 1 + o == j) {
+							this.blit(poseStack, t, n, 97, 9, 9, 9);
 						}
 					}
 
-					m -= 10;
+					n -= 10;
 				}
 			}
 		}
@@ -965,6 +915,54 @@ public class Gui extends GuiComponent {
 		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv(1.0F, 0.0F).endVertex();
 		bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0F, 0.0F).endVertex();
 		tesselator.end();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableDepthTest();
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	private void renderBarrelOverlay() {
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, BARREL_OVERLAY_LOCATION);
+		Tesselator tesselator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		float f = (float)Math.min(this.screenWidth, this.screenHeight);
+		float h = Math.min((float)this.screenWidth / f, (float)this.screenHeight / f);
+		float i = f * h;
+		float j = f * h;
+		float k = ((float)this.screenWidth - i) / 2.0F;
+		float l = ((float)this.screenHeight - j) / 2.0F - this.minecraft.player.xRotO * 4.0F;
+		float m = k + i;
+		float n = l + j;
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.vertex((double)k, (double)n, -90.0).uv(0.0F, 1.0F).endVertex();
+		bufferBuilder.vertex((double)m, (double)n, -90.0).uv(1.0F, 1.0F).endVertex();
+		bufferBuilder.vertex((double)m, (double)l, -90.0).uv(1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex((double)k, (double)l, -90.0).uv(0.0F, 0.0F).endVertex();
+		tesselator.end();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.disableTexture();
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)n, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex(0.0, (double)n, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex(0.0, (double)l, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)l, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex(0.0, 0.0, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex(0.0, (double)n, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)k, (double)n, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)k, (double)l, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex(0.0, (double)l, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)m, (double)n, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)n, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)l, -90.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)m, (double)l, -90.0).color(0, 0, 0, 255).endVertex();
+		tesselator.end();
+		RenderSystem.enableTexture();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -1020,10 +1018,8 @@ public class Gui extends GuiComponent {
 
 	private void updateVignetteBrightness(Entity entity) {
 		if (entity != null) {
-			BlockPos blockPos = new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ());
-			float f = LightTexture.getBrightness(entity.level.dimensionType(), entity.level.getMaxLocalRawBrightness(blockPos));
-			float g = Mth.clamp(1.0F - f, 0.0F, 1.0F);
-			this.vignetteBrightness = this.vignetteBrightness + (g - this.vignetteBrightness) * 0.01F;
+			float f = Mth.clamp(1.0F - entity.getBrightness(), 0.0F, 1.0F);
+			this.vignetteBrightness = this.vignetteBrightness + (f - this.vignetteBrightness) * 0.01F;
 		}
 	}
 
@@ -1223,7 +1219,7 @@ public class Gui extends GuiComponent {
 
 	public void handleChat(ChatType chatType, Component component, UUID uUID) {
 		if (!this.minecraft.isBlocked(uUID)) {
-			if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
+			if (!this.minecraft.options.hideMatchedNames || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
 				for (ChatListener chatListener : (List)this.chatListeners.get(chatType)) {
 					chatListener.handle(chatType, component, uUID);
 				}
@@ -1268,7 +1264,7 @@ public class Gui extends GuiComponent {
 	}
 
 	private void renderSavingIndicator(PoseStack poseStack) {
-		if (this.minecraft.options.showAutosaveIndicator().get() && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
+		if (this.minecraft.options.showAutosaveIndicator && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
 			int i = Mth.floor(255.0F * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0F, 1.0F));
 			if (i > 8) {
 				Font font = this.getFont();

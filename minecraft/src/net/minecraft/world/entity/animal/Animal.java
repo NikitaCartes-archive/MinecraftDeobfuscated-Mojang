@@ -27,10 +27,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public abstract class Animal extends AgeableMob {
-	protected static final int PARENT_AGE_AFTER_BREEDING = 6000;
+	static final int PARENT_AGE_AFTER_BREEDING = 6000;
 	private int inLove;
 	@Nullable
 	private UUID loveCause;
@@ -80,7 +81,7 @@ public abstract class Animal extends AgeableMob {
 
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-		return levelReader.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK) ? 10.0F : levelReader.getPathfindingCostFromLightLevels(blockPos);
+		return levelReader.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK) ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
 	}
 
 	@Override
@@ -141,12 +142,14 @@ public abstract class Animal extends AgeableMob {
 			if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.setInLove(player);
+				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
 				return InteractionResult.SUCCESS;
 			}
 
 			if (this.isBaby()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
-				this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+				this.ageUp((int)((float)(-i / 20) * 0.1F), true);
+				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 

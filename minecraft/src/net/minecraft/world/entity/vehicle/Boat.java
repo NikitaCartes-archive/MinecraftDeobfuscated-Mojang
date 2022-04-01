@@ -159,11 +159,11 @@ public class Boat extends Entity {
 			this.setHurtTime(10);
 			this.setDamage(this.getDamage() + f * 10.0F);
 			this.markHurt();
-			this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+			this.gameEvent(GameEvent.ENTITY_DAMAGED, damageSource.getEntity());
 			boolean bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
 			if (bl || this.getDamage() > 40.0F) {
 				if (!bl && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-					this.destroy(damageSource);
+					this.spawnAtLocation(this.getDropItem());
 				}
 
 				this.discard();
@@ -173,10 +173,6 @@ public class Boat extends Entity {
 		} else {
 			return true;
 		}
-	}
-
-	protected void destroy(DamageSource damageSource) {
-		this.spawnAtLocation(this.getDropItem());
 	}
 
 	@Override
@@ -227,8 +223,6 @@ public class Boat extends Entity {
 				return Items.ACACIA_BOAT;
 			case DARK_OAK:
 				return Items.DARK_OAK_BOAT;
-			case MANGROVE:
-				return Items.MANGROVE_BOAT;
 		}
 	}
 
@@ -312,7 +306,7 @@ public class Boat extends Entity {
 						double d = i == 1 ? -vec3.z : vec3.z;
 						double e = i == 1 ? vec3.x : -vec3.x;
 						this.level.playSound(null, this.getX() + d, this.getY(), this.getZ() + e, soundEvent, this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat());
-						this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new Vec3(this.getX() + d, this.getY(), this.getZ() + e));
+						this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new BlockPos(this.getX() + d, this.getY(), this.getZ() + e));
 					}
 				}
 
@@ -331,7 +325,7 @@ public class Boat extends Entity {
 				Entity entity = (Entity)list.get(j);
 				if (!entity.hasPassenger(this)) {
 					if (bl
-						&& this.getPassengers().size() < this.getMaxPassengers()
+						&& this.getPassengers().size() < 2
 						&& !entity.isPassenger()
 						&& entity.getBbWidth() < this.getBbWidth()
 						&& entity instanceof LivingEntity
@@ -649,14 +643,10 @@ public class Boat extends Entity {
 		}
 	}
 
-	protected float getSinglePassengerXOffset() {
-		return 0.0F;
-	}
-
 	@Override
 	public void positionRider(Entity entity) {
 		if (this.hasPassenger(entity)) {
-			float f = this.getSinglePassengerXOffset();
+			float f = 0.0F;
 			float g = (float)((this.isRemoved() ? 0.01F : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
 			if (this.getPassengers().size() > 1) {
 				int i = this.getPassengers().indexOf(entity);
@@ -676,7 +666,7 @@ public class Boat extends Entity {
 			entity.setYRot(entity.getYRot() + this.deltaRotation);
 			entity.setYHeadRot(entity.getYHeadRot() + this.deltaRotation);
 			this.clampRotation(entity);
-			if (entity instanceof Animal && this.getPassengers().size() == this.getMaxPassengers()) {
+			if (entity instanceof Animal && this.getPassengers().size() > 1) {
 				int j = entity.getId() % 2 == 0 ? 90 : 270;
 				entity.setYBodyRot(((Animal)entity).yBodyRot + (float)j);
 				entity.setYHeadRot(entity.getYHeadRot() + (float)j);
@@ -840,11 +830,7 @@ public class Boat extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity entity) {
-		return this.getPassengers().size() < this.getMaxPassengers() && !this.isEyeInFluid(FluidTags.WATER);
-	}
-
-	protected int getMaxPassengers() {
-		return 2;
+		return this.getPassengers().size() < 2 && !this.isEyeInFluid(FluidTags.WATER);
 	}
 
 	@Nullable
@@ -889,8 +875,7 @@ public class Boat extends Entity {
 		BIRCH(Blocks.BIRCH_PLANKS, "birch"),
 		JUNGLE(Blocks.JUNGLE_PLANKS, "jungle"),
 		ACACIA(Blocks.ACACIA_PLANKS, "acacia"),
-		DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak"),
-		MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove");
+		DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak");
 
 		private final String name;
 		private final Block planks;

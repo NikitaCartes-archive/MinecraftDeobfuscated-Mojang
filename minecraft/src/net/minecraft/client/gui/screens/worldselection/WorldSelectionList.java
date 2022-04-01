@@ -110,7 +110,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		}
 
 		if (this.cachedList.isEmpty()) {
-			CreateWorldScreen.openFresh(this.minecraft, null);
+			this.minecraft.setScreen(CreateWorldScreen.createFresh(null));
 		} else {
 			String string = ((String)supplier.get()).toLowerCase(Locale.ROOT);
 
@@ -229,7 +229,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 			RenderSystem.enableBlend();
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			RenderSystem.disableBlend();
-			if (this.minecraft.options.touchscreen().get() || bl) {
+			if (this.minecraft.options.touchscreen || bl) {
 				RenderSystem.setShaderTexture(0, WorldSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -386,7 +386,6 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		}
 
 		public void editWorld() {
-			this.queueLoadScreen();
 			String string = this.summary.getLevelId();
 
 			try {
@@ -416,7 +415,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 
 			try (
 				LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
-				WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false);
+				WorldStem worldStem = this.minecraft.makeWorldStem(levelStorageAccess, false);
 			) {
 				WorldGenSettings worldGenSettings = worldStem.worldData().worldGenSettings();
 				Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
@@ -451,7 +450,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
 				this.queueLoadScreen();
-				this.minecraft.createWorldOpenFlows().loadLevel(this.screen, this.summary.getLevelId());
+				this.minecraft.loadLevel(this.summary.getLevelId());
 			}
 		}
 

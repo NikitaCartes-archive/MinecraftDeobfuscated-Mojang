@@ -56,7 +56,7 @@ public class MushroomCow extends Cow implements Shearable {
 
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-		return levelReader.getBlockState(blockPos.below()).is(Blocks.MYCELIUM) ? 10.0F : levelReader.getPathfindingCostFromLightLevels(blockPos);
+		return levelReader.getBlockState(blockPos.below()).is(Blocks.MYCELIUM) ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
 	}
 
 	public static boolean checkMushroomSpawnRules(
@@ -204,7 +204,7 @@ public class MushroomCow extends Cow implements Shearable {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putString("Type", this.getMushroomType().type);
 		if (this.effect != null) {
-			compoundTag.putInt("EffectId", MobEffect.getId(this.effect));
+			compoundTag.putByte("EffectId", (byte)MobEffect.getId(this.effect));
 			compoundTag.putInt("EffectDuration", this.effectDuration);
 		}
 	}
@@ -214,7 +214,7 @@ public class MushroomCow extends Cow implements Shearable {
 		super.readAdditionalSaveData(compoundTag);
 		this.setMushroomType(MushroomCow.MushroomType.byType(compoundTag.getString("Type")));
 		if (compoundTag.contains("EffectId", 1)) {
-			this.effect = MobEffect.byId(compoundTag.getInt("EffectId"));
+			this.effect = MobEffect.byId(compoundTag.getByte("EffectId"));
 		}
 
 		if (compoundTag.contains("EffectDuration", 3)) {

@@ -2,7 +2,6 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
@@ -10,18 +9,16 @@ import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public record NoiseGeneratorSettings(
 	NoiseSettings noiseSettings,
 	BlockState defaultBlock,
 	BlockState defaultFluid,
-	NoiseRouter noiseRouter,
+	NoiseRouterWithOnlyNoises noiseRouter,
 	SurfaceRules.RuleSource surfaceRule,
-	List<Climate.ParameterPoint> spawnTarget,
 	int seaLevel,
 	@Deprecated boolean disableMobGeneration,
 	boolean aquifersEnabled,
@@ -33,9 +30,8 @@ public record NoiseGeneratorSettings(
 					NoiseSettings.CODEC.fieldOf("noise").forGetter(NoiseGeneratorSettings::noiseSettings),
 					BlockState.CODEC.fieldOf("default_block").forGetter(NoiseGeneratorSettings::defaultBlock),
 					BlockState.CODEC.fieldOf("default_fluid").forGetter(NoiseGeneratorSettings::defaultFluid),
-					NoiseRouter.CODEC.fieldOf("noise_router").forGetter(NoiseGeneratorSettings::noiseRouter),
+					NoiseRouterWithOnlyNoises.CODEC.fieldOf("noise_router").forGetter(NoiseGeneratorSettings::noiseRouter),
 					SurfaceRules.RuleSource.CODEC.fieldOf("surface_rule").forGetter(NoiseGeneratorSettings::surfaceRule),
-					Climate.ParameterPoint.CODEC.listOf().fieldOf("spawn_target").forGetter(NoiseGeneratorSettings::spawnTarget),
 					Codec.INT.fieldOf("sea_level").forGetter(NoiseGeneratorSettings::seaLevel),
 					Codec.BOOL.fieldOf("disable_mob_generation").forGetter(NoiseGeneratorSettings::disableMobGeneration),
 					Codec.BOOL.fieldOf("aquifers_enabled").forGetter(NoiseGeneratorSettings::isAquifersEnabled),
@@ -69,6 +65,10 @@ public record NoiseGeneratorSettings(
 		return this.useLegacyRandomSource ? WorldgenRandom.Algorithm.LEGACY : WorldgenRandom.Algorithm.XOROSHIRO;
 	}
 
+	public NoiseRouter createNoiseRouter(Registry<NormalNoise.NoiseParameters> registry, long l) {
+		return NoiseRouterData.createNoiseRouter(this.noiseSettings, l, registry, this.getRandomSource(), this.noiseRouter);
+	}
+
 	private static void register(ResourceKey<NoiseGeneratorSettings> resourceKey, NoiseGeneratorSettings noiseGeneratorSettings) {
 		BuiltinRegistries.register(BuiltinRegistries.NOISE_GENERATOR_SETTINGS, resourceKey.location(), noiseGeneratorSettings);
 	}
@@ -82,9 +82,8 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.END_NOISE_SETTINGS,
 			Blocks.END_STONE.defaultBlockState(),
 			Blocks.AIR.defaultBlockState(),
-			NoiseRouterData.end(),
+			NoiseRouterData.end(NoiseSettings.END_NOISE_SETTINGS),
 			SurfaceRuleData.end(),
-			List.of(),
 			0,
 			true,
 			false,
@@ -98,9 +97,8 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.NETHER_NOISE_SETTINGS,
 			Blocks.NETHERRACK.defaultBlockState(),
 			Blocks.LAVA.defaultBlockState(),
-			NoiseRouterData.nether(),
+			NoiseRouterData.nether(NoiseSettings.NETHER_NOISE_SETTINGS),
 			SurfaceRuleData.nether(),
-			List.of(),
 			32,
 			false,
 			false,
@@ -110,13 +108,13 @@ public record NoiseGeneratorSettings(
 	}
 
 	private static NoiseGeneratorSettings overworld(boolean bl, boolean bl2) {
+		NoiseSettings noiseSettings = NoiseSettings.overworldNoiseSettings(bl);
 		return new NoiseGeneratorSettings(
-			NoiseSettings.OVERWORLD_NOISE_SETTINGS,
+			noiseSettings,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.overworld(bl2, bl),
+			NoiseRouterData.overworld(noiseSettings, bl2),
 			SurfaceRuleData.overworld(),
-			new OverworldBiomeBuilder().spawnTarget(),
 			63,
 			false,
 			true,
@@ -130,9 +128,8 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.CAVES_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.caves(),
+			NoiseRouterData.overworldWithoutCaves(NoiseSettings.CAVES_NOISE_SETTINGS),
 			SurfaceRuleData.overworldLike(false, true, true),
-			List.of(),
 			32,
 			false,
 			false,
@@ -146,9 +143,8 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.FLOATING_ISLANDS_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.floatingIslands(),
+			NoiseRouterData.overworldWithoutCaves(NoiseSettings.FLOATING_ISLANDS_NOISE_SETTINGS),
 			SurfaceRuleData.overworldLike(false, false, false),
-			List.of(),
 			-64,
 			false,
 			false,

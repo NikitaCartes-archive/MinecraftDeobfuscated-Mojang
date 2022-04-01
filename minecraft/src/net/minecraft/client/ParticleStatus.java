@@ -5,10 +5,9 @@ import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
-import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
-public enum ParticleStatus implements OptionEnum {
+public enum ParticleStatus {
 	ALL(0, "options.particles.all"),
 	DECREASED(1, "options.particles.decreased"),
 	MINIMAL(2, "options.particles.minimal");
@@ -24,12 +23,10 @@ public enum ParticleStatus implements OptionEnum {
 		this.key = string2;
 	}
 
-	@Override
 	public String getKey() {
 		return this.key;
 	}
 
-	@Override
 	public int getId() {
 		return this.id;
 	}

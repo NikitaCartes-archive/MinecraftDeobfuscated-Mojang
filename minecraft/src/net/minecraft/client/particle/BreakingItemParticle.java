@@ -14,7 +14,7 @@ public class BreakingItemParticle extends TextureSheetParticle {
 	private final float uo;
 	private final float vo;
 
-	BreakingItemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ItemStack itemStack) {
+	public BreakingItemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ItemStack itemStack) {
 		this(clientLevel, d, e, f, itemStack);
 		this.xd *= 0.1F;
 		this.yd *= 0.1F;

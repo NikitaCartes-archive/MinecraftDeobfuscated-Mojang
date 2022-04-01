@@ -8,6 +8,7 @@ import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.CarriedBlockLayer;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.EnderEyesLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -21,8 +22,9 @@ public class EndermanRenderer extends MobRenderer<EnderMan, EndermanModel<EnderM
 
 	public EndermanRenderer(EntityRendererProvider.Context context) {
 		super(context, new EndermanModel<>(context.bakeLayer(ModelLayers.ENDERMAN)), 0.5F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 		this.addLayer(new EnderEyesLayer<>(this));
-		this.addLayer(new CarriedBlockLayer(this));
+		this.addLayer(new CarriedBlockLayer<>(this, 0.25F, 0.1875F, 0.25F));
 	}
 
 	public void render(EnderMan enderMan, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

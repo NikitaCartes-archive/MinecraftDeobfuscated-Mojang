@@ -13,7 +13,6 @@ import java.io.File;
 import java.net.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import joptsimple.OptionParser;
@@ -49,7 +48,6 @@ import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -144,17 +142,19 @@ public class Main {
 
 			WorldStem worldStem;
 			try {
-				DataPackConfig dataPackConfig = (DataPackConfig)Objects.requireNonNullElse(levelStorageAccess.getDataPacks(), DataPackConfig.DEFAULT);
-				WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, dataPackConfig, bl);
-				WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(
-					packConfig, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel
+				WorldStem.InitConfig initConfig = new WorldStem.InitConfig(
+					packRepository, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel, bl
 				);
 				worldStem = (WorldStem)WorldStem.load(
 						initConfig,
-						(resourceManager, dataPackConfigx) -> {
+						() -> {
+							DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
+							return dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig;
+						},
+						(resourceManager, dataPackConfig) -> {
 							RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
 							DynamicOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
-							WorldData worldDatax = levelStorageAccess.getDataTag(dynamicOps, dataPackConfigx, writable.allElementsLifecycle());
+							WorldData worldDatax = levelStorageAccess.getDataTag(dynamicOps, dataPackConfig, writable.allElementsLifecycle());
 							if (worldDatax != null) {
 								return Pair.of(worldDatax, writable.freeze());
 							} else {
@@ -162,7 +162,7 @@ public class Main {
 								WorldGenSettings worldGenSettings;
 								if (optionSet.has(optionSpec3)) {
 									levelSettings = MinecraftServer.DEMO_SETTINGS;
-									worldGenSettings = WorldPresets.demoSettings(writable);
+									worldGenSettings = WorldGenSettings.demoSettings(writable);
 								} else {
 									DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
 									levelSettings = new LevelSettings(
@@ -172,7 +172,7 @@ public class Main {
 										dedicatedServerProperties.difficulty,
 										false,
 										new GameRules(),
-										dataPackConfigx
+										dataPackConfig
 									);
 									worldGenSettings = optionSet.has(optionSpec4)
 										? dedicatedServerProperties.getWorldGenSettings(writable).withBonusChest()
@@ -191,9 +191,11 @@ public class Main {
 				LOGGER.warn(
 					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var38
 				);
+				packRepository.close();
 				return;
 			}
 
+			worldStem.updateGlobals();
 			RegistryAccess.Frozen frozen = worldStem.registryAccess();
 			dedicatedServerSettings.getProperties().getWorldGenSettings(frozen);
 			WorldData worldData = worldStem.worldData();

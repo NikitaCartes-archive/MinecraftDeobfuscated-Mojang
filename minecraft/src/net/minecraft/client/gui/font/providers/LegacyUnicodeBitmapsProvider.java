@@ -3,9 +3,8 @@ package net.minecraft.client.gui.font.providers;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
-import com.mojang.blaze3d.font.SheetGlyphInfo;
+import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -14,12 +13,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.IllegalFormatException;
 import java.util.Map;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -30,9 +27,8 @@ import org.slf4j.Logger;
 public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int UNICODE_SHEETS = 256;
-	private static final int CODEPOINTS_PER_SHEET = 256;
+	private static final int CHARS_PER_SHEET = 256;
 	private static final int TEXTURE_SIZE = 256;
-	private static final byte NO_GLYPH = 0;
 	private final ResourceManager resourceManager;
 	private final byte[] sizes;
 	private final String texturePattern;
@@ -110,8 +106,8 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 
 	@Nullable
 	@Override
-	public GlyphInfo getGlyph(int i) {
-		if (i >= 0 && i < this.sizes.length) {
+	public RawGlyph getGlyph(int i) {
+		if (i >= 0 && i <= 65535) {
 			byte b = this.sizes[i];
 			if (b != 0) {
 				NativeImage nativeImage = (NativeImage)this.textures.computeIfAbsent(this.getSheetLocation(i), this::loadTexture);
@@ -131,7 +127,7 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 	public IntSet getSupportedGlyphs() {
 		IntSet intSet = new IntOpenHashSet();
 
-		for (int i = 0; i < this.sizes.length; i++) {
+		for (int i = 0; i < 65535; i++) {
 			if (this.sizes[i] != 0) {
 				intSet.add(i);
 			}
@@ -212,7 +208,8 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 
 				LegacyUnicodeBitmapsProvider var4;
 				try {
-					byte[] bs = resource.getInputStream().readNBytes(65536);
+					byte[] bs = new byte[65536];
+					resource.getInputStream().read(bs);
 					var4 = new LegacyUnicodeBitmapsProvider(resourceManager, bs, this.texturePattern);
 				} catch (Throwable var6) {
 					if (resource != null) {
@@ -239,11 +236,49 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static record Glyph(int sourceX, int sourceY, int width, int height, NativeImage source) implements GlyphInfo {
+	static class Glyph implements RawGlyph {
+		private final int width;
+		private final int height;
+		private final int sourceX;
+		private final int sourceY;
+		private final NativeImage source;
+
+		Glyph(int i, int j, int k, int l, NativeImage nativeImage) {
+			this.width = k;
+			this.height = l;
+			this.sourceX = i;
+			this.sourceY = j;
+			this.source = nativeImage;
+		}
+
+		@Override
+		public float getOversample() {
+			return 2.0F;
+		}
+
+		@Override
+		public int getPixelWidth() {
+			return this.width;
+		}
+
+		@Override
+		public int getPixelHeight() {
+			return this.height;
+		}
 
 		@Override
 		public float getAdvance() {
 			return (float)(this.width / 2 + 1);
+		}
+
+		@Override
+		public void upload(int i, int j) {
+			this.source.upload(0, i, j, this.sourceX, this.sourceY, this.width, this.height, false, false);
+		}
+
+		@Override
+		public boolean isColored() {
+			return this.source.format().components() > 1;
 		}
 
 		@Override
@@ -254,36 +289,6 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 		@Override
 		public float getBoldOffset() {
 			return 0.5F;
-		}
-
-		@Override
-		public BakedGlyph bake(Function<SheetGlyphInfo, BakedGlyph> function) {
-			return (BakedGlyph)function.apply(new SheetGlyphInfo() {
-				@Override
-				public float getOversample() {
-					return 2.0F;
-				}
-
-				@Override
-				public int getPixelWidth() {
-					return Glyph.this.width;
-				}
-
-				@Override
-				public int getPixelHeight() {
-					return Glyph.this.height;
-				}
-
-				@Override
-				public void upload(int i, int j) {
-					Glyph.this.source.upload(0, i, j, Glyph.this.sourceX, Glyph.this.sourceY, Glyph.this.width, Glyph.this.height, false, false);
-				}
-
-				@Override
-				public boolean isColored() {
-					return Glyph.this.source.format().components() > 1;
-				}
-			});
 		}
 	}
 }

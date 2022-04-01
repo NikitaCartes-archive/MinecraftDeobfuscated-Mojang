@@ -128,7 +128,9 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 
 	@Override
 	public AbstractIllager.IllagerArmPose getArmPose() {
-		if (this.isChargingCrossbow()) {
+		if (this.getCarried() != LivingEntity.Carried.NONE) {
+			return AbstractIllager.IllagerArmPose.CROSSBOW_HOLD;
+		} else if (this.isChargingCrossbow()) {
 			return AbstractIllager.IllagerArmPose.CROSSBOW_CHARGE;
 		} else if (this.isHolding(Items.CROSSBOW)) {
 			return AbstractIllager.IllagerArmPose.CROSSBOW_HOLD;

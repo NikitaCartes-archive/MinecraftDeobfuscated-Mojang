@@ -16,23 +16,18 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
+public class LeavesBlock extends Block {
 	public static final int DECAY_DISTANCE = 7;
 	public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
 	public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
-	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final int TICK_DELAY = 1;
 
 	public LeavesBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-		this.registerDefaultState(
-			this.stateDefinition.any().setValue(DISTANCE, Integer.valueOf(7)).setValue(PERSISTENT, Boolean.valueOf(false)).setValue(WATERLOGGED, Boolean.valueOf(false))
-		);
+		this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, Integer.valueOf(7)).setValue(PERSISTENT, Boolean.valueOf(false)));
 	}
 
 	@Override
@@ -47,14 +42,10 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 
 	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if (this.decaying(blockState)) {
+		if (!(Boolean)blockState.getValue(PERSISTENT) && (Integer)blockState.getValue(DISTANCE) == 7) {
 			dropResources(blockState, serverLevel, blockPos);
 			serverLevel.removeBlock(blockPos, false);
 		}
-	}
-
-	protected boolean decaying(BlockState blockState) {
-		return !(Boolean)blockState.getValue(PERSISTENT) && (Integer)blockState.getValue(DISTANCE) == 7;
 	}
 
 	@Override
@@ -71,10 +62,6 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
-		}
-
 		int i = getDistanceAt(blockState2) + 1;
 		if (i != 1 || (Integer)blockState.getValue(DISTANCE) != i) {
 			levelAccessor.scheduleTick(blockPos, this, 1);
@@ -107,11 +94,6 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
-		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
-	}
-
-	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if (level.isRainingAt(blockPos.above())) {
 			if (random.nextInt(15) == 1) {
@@ -129,15 +111,11 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(DISTANCE, PERSISTENT, WATERLOGGED);
+		builder.add(DISTANCE, PERSISTENT);
 	}
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-		BlockState blockState = this.defaultBlockState()
-			.setValue(PERSISTENT, Boolean.valueOf(true))
-			.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER));
-		return updateDistance(blockState, blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
+		return updateDistance(this.defaultBlockState().setValue(PERSISTENT, Boolean.valueOf(true)), blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
 	}
 }

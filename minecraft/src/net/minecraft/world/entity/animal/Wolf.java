@@ -215,7 +215,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			} else if ((this.isWet || this.isShaking) && this.isShaking) {
 				if (this.shakeAnim == 0.0F) {
 					this.playSound(SoundEvents.WOLF_SHAKE, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-					this.gameEvent(GameEvent.ENTITY_SHAKE);
+					this.gameEvent(GameEvent.WOLF_SHAKING);
 				}
 
 				this.shakeAnimO = this.shakeAnim;
@@ -346,6 +346,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 					}
 
 					this.heal((float)item.getFoodProperties().getNutrition());
+					this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
 					return InteractionResult.SUCCESS;
 				}
 

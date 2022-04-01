@@ -26,7 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -48,7 +48,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.WorldGenTickAccess;
 import org.slf4j.Logger;
@@ -68,7 +67,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	private final BiomeManager biomeManager;
 	private final ChunkPos firstPos;
 	private final ChunkPos lastPos;
-	private final StructureManager structureManager;
+	private final StructureFeatureManager structureFeatureManager;
 	private final ChunkStatus generatingStatus;
 	private final int writeRadiusCutoff;
 	@Nullable
@@ -93,12 +92,8 @@ public class WorldGenRegion implements WorldGenLevel {
 			this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed));
 			this.firstPos = ((ChunkAccess)list.get(0)).getPos();
 			this.lastPos = ((ChunkAccess)list.get(list.size() - 1)).getPos();
-			this.structureManager = serverLevel.structureManager().forWorldGenRegion(this);
+			this.structureFeatureManager = serverLevel.structureFeatureManager().forWorldGenRegion(this);
 		}
-	}
-
-	public boolean isOldChunkAround(ChunkPos chunkPos, int i) {
-		return this.level.getChunkSource().chunkMap.isOldChunkAround(chunkPos, i);
 	}
 
 	public ChunkPos getCenter() {
@@ -418,7 +413,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
 	}
 
 	@Override

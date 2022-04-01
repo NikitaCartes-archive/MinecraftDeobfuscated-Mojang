@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.BarrelLayer;
 import net.minecraft.client.renderer.entity.layers.WitchItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Witch;
@@ -17,6 +18,7 @@ public class WitchRenderer extends MobRenderer<Witch, WitchModel<Witch>> {
 	public WitchRenderer(EntityRendererProvider.Context context) {
 		super(context, new WitchModel<>(context.bakeLayer(ModelLayers.WITCH)), 0.5F);
 		this.addLayer(new WitchItemLayer<>(this));
+		this.addLayer(new BarrelLayer<>(this));
 	}
 
 	public void render(Witch witch, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

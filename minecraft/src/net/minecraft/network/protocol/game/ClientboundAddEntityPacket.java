@@ -78,7 +78,7 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 	public ClientboundAddEntityPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.uuid = friendlyByteBuf.readUUID();
-		this.type = friendlyByteBuf.readById(Registry.ENTITY_TYPE);
+		this.type = Registry.ENTITY_TYPE.byId(friendlyByteBuf.readVarInt());
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
 		this.z = friendlyByteBuf.readDouble();
@@ -94,7 +94,7 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeUUID(this.uuid);
-		friendlyByteBuf.writeId(Registry.ENTITY_TYPE, this.type);
+		friendlyByteBuf.writeVarInt(Registry.ENTITY_TYPE.getId(this.type));
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
 		friendlyByteBuf.writeDouble(this.z);

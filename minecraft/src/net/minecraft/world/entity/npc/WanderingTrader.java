@@ -114,8 +114,6 @@ public class WanderingTrader extends AbstractVillager {
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			} else {
 				if (!this.level.isClientSide) {
-					this.setTradingPlayer(player);
-					this.openTradingScreen(player, this.getDisplayName(), 1);
 				}
 
 				return InteractionResult.sidedSuccess(this.level.isClientSide);

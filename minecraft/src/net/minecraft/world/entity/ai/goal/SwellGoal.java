@@ -2,8 +2,10 @@ package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
 import javax.annotation.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.item.Items;
 
 public class SwellGoal extends Goal {
 	private final Creeper creeper;
@@ -18,7 +20,9 @@ public class SwellGoal extends Goal {
 	@Override
 	public boolean canUse() {
 		LivingEntity livingEntity = this.creeper.getTarget();
-		return this.creeper.getSwellDir() > 0 || livingEntity != null && this.creeper.distanceToSqr(livingEntity) < 9.0;
+		return livingEntity != null && livingEntity.isCrouching() && livingEntity.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL)
+			? false
+			: this.creeper.getSwellDir() > 0 || livingEntity != null && this.creeper.distanceToSqr(livingEntity) < 9.0;
 	}
 
 	@Override
@@ -39,14 +43,28 @@ public class SwellGoal extends Goal {
 
 	@Override
 	public void tick() {
-		if (this.target == null) {
-			this.creeper.setSwellDir(-1);
-		} else if (this.creeper.distanceToSqr(this.target) > 49.0) {
-			this.creeper.setSwellDir(-1);
-		} else if (!this.creeper.getSensing().hasLineOfSight(this.target)) {
-			this.creeper.setSwellDir(-1);
-		} else {
-			this.creeper.setSwellDir(1);
+		if (!this.creeper.wasPickedUpByPlayer) {
+			if (this.target == null) {
+				this.creeper.setSwellDir(-1);
+				return;
+			}
+
+			if (this.target.isCrouching() && this.target.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL)) {
+				this.creeper.setSwellDir(-1);
+				return;
+			}
+
+			if (this.creeper.distanceToSqr(this.target) > 49.0) {
+				this.creeper.setSwellDir(-1);
+				return;
+			}
+
+			if (!this.creeper.getSensing().hasLineOfSight(this.target)) {
+				this.creeper.setSwellDir(-1);
+				return;
+			}
 		}
+
+		this.creeper.setSwellDir(1);
 	}
 }

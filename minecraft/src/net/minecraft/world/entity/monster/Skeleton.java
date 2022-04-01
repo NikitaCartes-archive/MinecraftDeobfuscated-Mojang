@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 
 public class Skeleton extends AbstractSkeleton {
 	private static final EntityDataAccessor<Boolean> DATA_STRAY_CONVERSION_ID = SynchedEntityData.defineId(Skeleton.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> DATA_SPYGLASSES_IN_SOCKETS = SynchedEntityData.defineId(Skeleton.class, EntityDataSerializers.INT);
 	public static final String CONVERSION_TAG = "StrayConversionTime";
 	private int inPowderSnowTime;
 	private int conversionTime;
@@ -25,6 +26,7 @@ public class Skeleton extends AbstractSkeleton {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.getEntityData().define(DATA_STRAY_CONVERSION_ID, false);
+		this.getEntityData().define(DATA_SPYGLASSES_IN_SOCKETS, this.level.random.nextDouble() < 0.0625 ? 2 : 0);
 	}
 
 	public boolean isFreezeConverting() {
@@ -33,6 +35,14 @@ public class Skeleton extends AbstractSkeleton {
 
 	public void setFreezeConverting(boolean bl) {
 		this.entityData.set(DATA_STRAY_CONVERSION_ID, bl);
+	}
+
+	public int getSpyglassesInSockets() {
+		return this.getEntityData().get(DATA_SPYGLASSES_IN_SOCKETS);
+	}
+
+	public void addSpyglassIntoEyeSocket() {
+		this.getEntityData().set(DATA_SPYGLASSES_IN_SOCKETS, this.getSpyglassesInSockets() + 1);
 	}
 
 	@Override
@@ -119,5 +129,11 @@ public class Skeleton extends AbstractSkeleton {
 			creeper.increaseDroppedSkulls();
 			this.spawnAtLocation(Items.SKELETON_SKULL);
 		}
+
+		for (int j = 0; j < this.getSpyglassesInSockets(); j++) {
+			this.spawnAtLocation(Items.SPYGLASS);
+		}
+
+		this.getEntityData().set(DATA_SPYGLASSES_IN_SOCKETS, 0);
 	}
 }

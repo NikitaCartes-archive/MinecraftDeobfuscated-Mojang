@@ -26,78 +26,27 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 
 public class SculkSpreader {
+	public static final int XP_PER_GROWTH_SPAWN = 10;
+	public static final int NO_GROWTH_RADIUS = 4;
 	public static final int MAX_GROWTH_RATE_RADIUS = 24;
 	public static final int MAX_CHARGE = 1000;
+	public static final int CHARGE_DECAY_RATE_HIGH = 10;
+	public static final int ADDITIONAL_SLOW_DECAY_RATE = 5;
 	public static final float MAX_DECAY_FACTOR = 0.5F;
 	private static final int MAX_CURSORS = 32;
-	public static final int SHRIEKER_PLACEMENT_RATE = 11;
-	final boolean isWorldGeneration;
-	private final TagKey<Block> replaceableBlocks;
-	private final int growthSpawnCost;
-	private final int noGrowthRadius;
-	private final int chargeDecayRate;
-	private final int additionalDecayRate;
 	private List<SculkSpreader.ChargeCursor> cursors = new ArrayList();
 	private static final Logger LOGGER = LogUtils.getLogger();
-
-	public SculkSpreader(boolean bl, TagKey<Block> tagKey, int i, int j, int k, int l) {
-		this.isWorldGeneration = bl;
-		this.replaceableBlocks = tagKey;
-		this.growthSpawnCost = i;
-		this.noGrowthRadius = j;
-		this.chargeDecayRate = k;
-		this.additionalDecayRate = l;
-	}
-
-	public static SculkSpreader createLevelSpreader() {
-		return new SculkSpreader(false, BlockTags.SCULK_REPLACEABLE, 10, 4, 10, 5);
-	}
-
-	public static SculkSpreader createWorldGenSpreader() {
-		return new SculkSpreader(true, BlockTags.SCULK_REPLACEABLE_WORLD_GEN, 50, 1, 5, 10);
-	}
-
-	public TagKey<Block> replaceableBlocks() {
-		return this.replaceableBlocks;
-	}
-
-	public int growthSpawnCost() {
-		return this.growthSpawnCost;
-	}
-
-	public int noGrowthRadius() {
-		return this.noGrowthRadius;
-	}
-
-	public int chargeDecayRate() {
-		return this.chargeDecayRate;
-	}
-
-	public int additionalDecayRate() {
-		return this.additionalDecayRate;
-	}
-
-	public boolean isWorldGeneration() {
-		return this.isWorldGeneration;
-	}
 
 	@VisibleForTesting
 	public List<SculkSpreader.ChargeCursor> getCursors() {
 		return this.cursors;
-	}
-
-	public void clear() {
-		this.cursors.clear();
 	}
 
 	public void load(CompoundTag compoundTag) {
@@ -138,16 +87,16 @@ public class SculkSpreader {
 		}
 	}
 
-	public void updateCursors(LevelAccessor levelAccessor, BlockPos blockPos, Random random, boolean bl) {
+	public void updateCursors(Level level, BlockPos blockPos, Random random) {
 		if (!this.cursors.isEmpty()) {
 			List<SculkSpreader.ChargeCursor> list = new ArrayList();
 			Map<BlockPos, SculkSpreader.ChargeCursor> map = new HashMap();
 			Object2IntMap<BlockPos> object2IntMap = new Object2IntOpenHashMap<>();
 
 			for (SculkSpreader.ChargeCursor chargeCursor : this.cursors) {
-				chargeCursor.update(levelAccessor, blockPos, random, this, bl);
+				chargeCursor.update(level, blockPos, random);
 				if (chargeCursor.charge <= 0) {
-					levelAccessor.levelEvent(3006, chargeCursor.getPos(), 0);
+					level.levelEvent(3006, chargeCursor.getPos(), 0);
 				} else {
 					BlockPos blockPos2 = chargeCursor.getPos();
 					object2IntMap.computeInt(blockPos2, (blockPosx, integer) -> (integer == null ? 0 : integer) + chargeCursor.charge);
@@ -155,7 +104,7 @@ public class SculkSpreader {
 					if (chargeCursor2 == null) {
 						map.put(blockPos2, chargeCursor);
 						list.add(chargeCursor);
-					} else if (!this.isWorldGeneration() && chargeCursor.charge + chargeCursor2.charge <= 1000) {
+					} else if (chargeCursor.charge + chargeCursor2.charge <= 1000) {
 						chargeCursor2.mergeWith(chargeCursor);
 					} else {
 						list.add(chargeCursor);
@@ -174,7 +123,7 @@ public class SculkSpreader {
 				if (i > 0 && collection != null) {
 					int j = (int)(Math.log1p((double)i) / 2.3F) + 1;
 					int k = (j << 6) + MultifaceBlock.pack(collection);
-					levelAccessor.levelEvent(3006, blockPos2, k);
+					level.levelEvent(3006, blockPos2, k);
 				}
 			}
 
@@ -238,46 +187,31 @@ public class SculkSpreader {
 			return this.facings;
 		}
 
-		private boolean shouldUpdate(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
-			if (this.charge <= 0) {
-				return false;
-			} else if (bl) {
-				return true;
-			} else {
-				return levelAccessor instanceof ServerLevel serverLevel ? serverLevel.shouldTickBlocksAt(blockPos) : false;
-			}
-		}
-
-		public void update(LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl) {
-			if (this.shouldUpdate(levelAccessor, blockPos, sculkSpreader.isWorldGeneration)) {
+		public void update(Level level, BlockPos blockPos, Random random) {
+			if (level.shouldTickBlocksAt(this.pos) && this.charge > 0) {
 				if (this.updateDelay > 0) {
 					this.updateDelay--;
 				} else {
-					BlockState blockState = levelAccessor.getBlockState(this.pos);
+					BlockState blockState = level.getBlockState(this.pos);
 					SculkBehaviour sculkBehaviour = getBlockBehaviour(blockState);
-					if (bl && sculkBehaviour.attemptSpreadVein(levelAccessor, this.pos, blockState, this.facings, sculkSpreader.isWorldGeneration())) {
+					if (sculkBehaviour.attemptSpreadVein(level, this.pos, blockState, this.facings)) {
 						if (sculkBehaviour.canChangeBlockStateOnSpread()) {
-							blockState = levelAccessor.getBlockState(this.pos);
+							blockState = level.getBlockState(this.pos);
 							sculkBehaviour = getBlockBehaviour(blockState);
 						}
 
-						levelAccessor.playSound(null, this.pos, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 1.0F);
+						level.playSound(null, this.pos, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 1.0F);
 					}
 
-					this.charge = sculkBehaviour.attemptUseCharge(this, levelAccessor, blockPos, random, sculkSpreader, bl);
+					this.charge = sculkBehaviour.attemptUseCharge(this, level, blockPos, random);
 					if (this.charge <= 0) {
-						sculkBehaviour.onDischarged(levelAccessor, blockState, this.pos, random);
+						sculkBehaviour.onDischarged(level, blockState, this.pos, random);
 					} else {
-						BlockPos blockPos2 = getValidMovementPos(levelAccessor, this.pos, random);
+						BlockPos blockPos2 = getValidMovementPos(level, this.pos, random);
 						if (blockPos2 != null) {
-							sculkBehaviour.onDischarged(levelAccessor, blockState, this.pos, random);
+							sculkBehaviour.onDischarged(level, blockState, this.pos, random);
 							this.pos = blockPos2.immutable();
-							if (sculkSpreader.isWorldGeneration() && !this.pos.closerThan(new Vec3i(blockPos.getX(), this.pos.getY(), blockPos.getZ()), 15.0)) {
-								this.charge = 0;
-								return;
-							}
-
-							blockState = levelAccessor.getBlockState(blockPos2);
+							blockState = level.getBlockState(blockPos2);
 						}
 
 						if (blockState.getBlock() instanceof SculkBehaviour) {
@@ -308,16 +242,16 @@ public class SculkSpreader {
 		}
 
 		@Nullable
-		private static BlockPos getValidMovementPos(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
+		private static BlockPos getValidMovementPos(Level level, BlockPos blockPos, Random random) {
 			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 			BlockPos.MutableBlockPos mutableBlockPos2 = blockPos.mutable();
 
 			for (Vec3i vec3i : getRandomizedNonCornerNeighbourOffsets(random)) {
 				mutableBlockPos2.setWithOffset(blockPos, vec3i);
-				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos2);
-				if (blockState.getBlock() instanceof SculkBehaviour && isMovementUnobstructed(levelAccessor, blockPos, mutableBlockPos2)) {
+				BlockState blockState = level.getBlockState(mutableBlockPos2);
+				if (blockState.getBlock() instanceof SculkBehaviour && isMovementUnobstructed(level, blockPos, mutableBlockPos2)) {
 					mutableBlockPos.set(mutableBlockPos2);
-					if (SculkVeinBlock.hasSubstrateAccess(levelAccessor, blockState, mutableBlockPos2)) {
+					if (SculkVeinBlock.hasSubstrateAccess(level, blockState, mutableBlockPos2)) {
 						break;
 					}
 				}
@@ -326,7 +260,7 @@ public class SculkSpreader {
 			return mutableBlockPos.equals(blockPos) ? null : mutableBlockPos;
 		}
 
-		private static boolean isMovementUnobstructed(LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
+		private static boolean isMovementUnobstructed(Level level, BlockPos blockPos, BlockPos blockPos2) {
 			if (blockPos.distManhattan(blockPos2) == 1) {
 				return true;
 			} else {
@@ -341,18 +275,18 @@ public class SculkSpreader {
 					Direction.Axis.Z, blockPos3.getZ() < 0 ? Direction.AxisDirection.NEGATIVE : Direction.AxisDirection.POSITIVE
 				);
 				if (blockPos3.getX() == 0) {
-					return isUnobstructed(levelAccessor, blockPos, direction2) || isUnobstructed(levelAccessor, blockPos, direction3);
+					return isUnobstructed(level, blockPos, direction2) || isUnobstructed(level, blockPos, direction3);
 				} else {
 					return blockPos3.getY() == 0
-						? isUnobstructed(levelAccessor, blockPos, direction) || isUnobstructed(levelAccessor, blockPos, direction3)
-						: isUnobstructed(levelAccessor, blockPos, direction) || isUnobstructed(levelAccessor, blockPos, direction2);
+						? isUnobstructed(level, blockPos, direction) || isUnobstructed(level, blockPos, direction3)
+						: isUnobstructed(level, blockPos, direction) || isUnobstructed(level, blockPos, direction2);
 				}
 			}
 		}
 
-		private static boolean isUnobstructed(LevelAccessor levelAccessor, BlockPos blockPos, Direction direction) {
+		private static boolean isUnobstructed(Level level, BlockPos blockPos, Direction direction) {
 			BlockPos blockPos2 = blockPos.relative(direction);
-			return !levelAccessor.getBlockState(blockPos2).isFaceSturdy(levelAccessor, blockPos2, direction.getOpposite());
+			return !level.getBlockState(blockPos2).isFaceSturdy(level, blockPos2, direction.getOpposite());
 		}
 	}
 }

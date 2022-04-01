@@ -16,4 +16,9 @@ public class FluidTagsProvider extends TagsProvider<Fluid> {
 		this.tag(FluidTags.WATER).add(Fluids.WATER, Fluids.FLOWING_WATER);
 		this.tag(FluidTags.LAVA).add(Fluids.LAVA, Fluids.FLOWING_LAVA);
 	}
+
+	@Override
+	public String getName() {
+		return "Fluid Tags";
+	}
 }

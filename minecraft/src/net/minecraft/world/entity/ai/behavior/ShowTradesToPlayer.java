@@ -1,45 +1,54 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.trading.CarryableTrade;
 import net.minecraft.world.item.trading.MerchantOffer;
 
 public class ShowTradesToPlayer extends Behavior<Villager> {
 	private static final int MAX_LOOK_TIME = 900;
 	private static final int STARTING_LOOK_TIME = 40;
+	public static final int CYCLE_INTERVAL_TICKS = 100;
 	@Nullable
-	private ItemStack playerItemStack;
-	private final List<ItemStack> displayItems = Lists.<ItemStack>newArrayList();
+	private CarryableTrade playerTradeProposition;
+	private final List<MerchantOffer> availableOffers = Lists.<MerchantOffer>newArrayList();
 	private int cycleCounter;
 	private int displayIndex;
 	private int lookTime;
 
 	public ShowTradesToPlayer(int i, int j) {
-		super(ImmutableMap.of(MemoryModuleType.INTERACTION_TARGET, MemoryStatus.VALUE_PRESENT), i, j);
+		super(ImmutableMap.of(MemoryModuleType.NEAREST_PLAYERS, MemoryStatus.VALUE_PRESENT), i, j);
 	}
 
 	public boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
 		Brain<?> brain = villager.getBrain();
-		if (!brain.getMemory(MemoryModuleType.INTERACTION_TARGET).isPresent()) {
+		if (!brain.getMemory(MemoryModuleType.NEAREST_PLAYERS).isPresent()) {
+			return false;
+		} else if (villager.isAlive() && !villager.isBaby()) {
+			for (Player player : (List)brain.getMemory(MemoryModuleType.NEAREST_PLAYERS).get()) {
+				if (player.isAlive() && player.position().closerThan(villager.position(), 6.0)) {
+					CarryableTrade carryableTrade = player.getTradeProposition();
+					if (carryableTrade != null && this.hasMatchingOffers(villager, carryableTrade)) {
+						villager.getBrain().setMemory(MemoryModuleType.INTERACTION_TARGET, player);
+						return true;
+					}
+				}
+			}
+
 			return false;
 		} else {
-			LivingEntity livingEntity = (LivingEntity)brain.getMemory(MemoryModuleType.INTERACTION_TARGET).get();
-			return livingEntity.getType() == EntityType.PLAYER
-				&& villager.isAlive()
-				&& livingEntity.isAlive()
-				&& !villager.isBaby()
-				&& villager.distanceToSqr(livingEntity) <= 17.0;
+			return false;
 		}
 	}
 
@@ -60,10 +69,10 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	public void tick(ServerLevel serverLevel, Villager villager, long l) {
 		LivingEntity livingEntity = this.lookAtTarget(villager);
 		this.findItemsToDisplay(livingEntity, villager);
-		if (!this.displayItems.isEmpty()) {
+		if (!this.availableOffers.isEmpty()) {
 			this.displayCyclingItems(villager);
 		} else {
-			clearHeldItem(villager);
+			villager.setCurrentOffer(null);
 			this.lookTime = Math.min(this.lookTime, 40);
 		}
 
@@ -73,22 +82,22 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	public void stop(ServerLevel serverLevel, Villager villager, long l) {
 		super.stop(serverLevel, villager, l);
 		villager.getBrain().eraseMemory(MemoryModuleType.INTERACTION_TARGET);
-		clearHeldItem(villager);
-		this.playerItemStack = null;
+		villager.setCurrentOffer(null);
+		this.playerTradeProposition = null;
 	}
 
 	private void findItemsToDisplay(LivingEntity livingEntity, Villager villager) {
 		boolean bl = false;
-		ItemStack itemStack = livingEntity.getMainHandItem();
-		if (this.playerItemStack == null || !ItemStack.isSame(this.playerItemStack, itemStack)) {
-			this.playerItemStack = itemStack;
+		CarryableTrade carryableTrade = livingEntity.getTradeProposition();
+		if (this.playerTradeProposition == null || carryableTrade == null || !carryableTrade.matches(this.playerTradeProposition)) {
+			this.playerTradeProposition = carryableTrade;
 			bl = true;
-			this.displayItems.clear();
+			this.availableOffers.clear();
 		}
 
-		if (bl && !this.playerItemStack.isEmpty()) {
-			this.updateDisplayItems(villager);
-			if (!this.displayItems.isEmpty()) {
+		if (bl && this.playerTradeProposition != null) {
+			this.updateDisplayItems(villager, this.playerTradeProposition);
+			if (!this.availableOffers.isEmpty()) {
 				this.lookTime = 900;
 				this.displayFirstItem(villager);
 			}
@@ -96,29 +105,21 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	}
 
 	private void displayFirstItem(Villager villager) {
-		displayAsHeldItem(villager, (ItemStack)this.displayItems.get(0));
+		MerchantOffer merchantOffer = (MerchantOffer)this.availableOffers.get(0);
+		villager.setCurrentOffer(merchantOffer);
 	}
 
-	private void updateDisplayItems(Villager villager) {
-		for (MerchantOffer merchantOffer : villager.getOffers()) {
-			if (!merchantOffer.isOutOfStock() && this.playerItemStackMatchesCostOfOffer(merchantOffer)) {
-				this.displayItems.add(merchantOffer.getResult());
-			}
-		}
+	private void updateDisplayItems(Villager villager, CarryableTrade carryableTrade) {
+		getMatchingOffers(villager, carryableTrade).forEach(this.availableOffers::add);
+		Collections.shuffle(this.availableOffers);
 	}
 
-	private boolean playerItemStackMatchesCostOfOffer(MerchantOffer merchantOffer) {
-		return ItemStack.isSame(this.playerItemStack, merchantOffer.getCostA()) || ItemStack.isSame(this.playerItemStack, merchantOffer.getCostB());
+	private boolean hasMatchingOffers(Villager villager, CarryableTrade carryableTrade) {
+		return !Iterables.isEmpty(getMatchingOffers(villager, carryableTrade));
 	}
 
-	private static void clearHeldItem(Villager villager) {
-		villager.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-		villager.setDropChance(EquipmentSlot.MAINHAND, 0.085F);
-	}
-
-	private static void displayAsHeldItem(Villager villager, ItemStack itemStack) {
-		villager.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
-		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+	private static Iterable<MerchantOffer> getMatchingOffers(Villager villager, CarryableTrade carryableTrade) {
+		return Iterables.filter(villager.getOffers(), merchantOffer -> !merchantOffer.isOutOfStock() && merchantOffer.accepts(carryableTrade));
 	}
 
 	private LivingEntity lookAtTarget(Villager villager) {
@@ -129,14 +130,14 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	}
 
 	private void displayCyclingItems(Villager villager) {
-		if (this.displayItems.size() >= 2 && ++this.cycleCounter >= 40) {
+		if (this.availableOffers.size() >= 2 && ++this.cycleCounter >= 100) {
 			this.displayIndex++;
 			this.cycleCounter = 0;
-			if (this.displayIndex > this.displayItems.size() - 1) {
+			if (this.displayIndex > this.availableOffers.size() - 1) {
 				this.displayIndex = 0;
 			}
 
-			displayAsHeldItem(villager, (ItemStack)this.displayItems.get(this.displayIndex));
+			villager.setCurrentOffer((MerchantOffer)this.availableOffers.get(this.displayIndex));
 		}
 	}
 }

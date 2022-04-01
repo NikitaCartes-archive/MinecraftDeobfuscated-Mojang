@@ -21,9 +21,10 @@ import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
-import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
@@ -160,6 +161,7 @@ import net.minecraft.network.protocol.game.ServerboundSetStructureBlockPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
+import net.minecraft.network.protocol.game.ServerboundThrowPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
@@ -193,9 +195,10 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundAddMobPacket.class, ClientboundAddMobPacket::new)
 					.addPacket(ClientboundAddPaintingPacket.class, ClientboundAddPaintingPacket::new)
 					.addPacket(ClientboundAddPlayerPacket.class, ClientboundAddPlayerPacket::new)
+					.addPacket(ClientboundAddVibrationSignalPacket.class, ClientboundAddVibrationSignalPacket::new)
 					.addPacket(ClientboundAnimatePacket.class, ClientboundAnimatePacket::new)
 					.addPacket(ClientboundAwardStatsPacket.class, ClientboundAwardStatsPacket::new)
-					.addPacket(ClientboundBlockChangedAckPacket.class, ClientboundBlockChangedAckPacket::new)
+					.addPacket(ClientboundBlockBreakAckPacket.class, ClientboundBlockBreakAckPacket::new)
 					.addPacket(ClientboundBlockDestructionPacket.class, ClientboundBlockDestructionPacket::new)
 					.addPacket(ClientboundBlockEntityDataPacket.class, ClientboundBlockEntityDataPacket::new)
 					.addPacket(ClientboundBlockEventPacket.class, ClientboundBlockEventPacket::new)
@@ -340,6 +343,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundSetStructureBlockPacket.class, ServerboundSetStructureBlockPacket::new)
 					.addPacket(ServerboundSignUpdatePacket.class, ServerboundSignUpdatePacket::new)
 					.addPacket(ServerboundSwingPacket.class, ServerboundSwingPacket::new)
+					.addPacket(ServerboundThrowPacket.class, ServerboundThrowPacket::new)
 					.addPacket(ServerboundTeleportToEntityPacket.class, ServerboundTeleportToEntityPacket::new)
 					.addPacket(ServerboundUseItemOnPacket.class, ServerboundUseItemOnPacket::new)
 					.addPacket(ServerboundUseItemPacket.class, ServerboundUseItemPacket::new)

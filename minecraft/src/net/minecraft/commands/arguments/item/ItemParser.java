@@ -6,143 +6,98 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.datafixers.util.Either;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public class ItemParser {
-	private static final SimpleCommandExceptionType ERROR_NO_TAGS_ALLOWED = new SimpleCommandExceptionType(
+	public static final SimpleCommandExceptionType ERROR_NO_TAGS_ALLOWED = new SimpleCommandExceptionType(
 		new TranslatableComponent("argument.item.tag.disallowed")
 	);
-	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM = new DynamicCommandExceptionType(
+	public static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("argument.item.id.invalid", object)
-	);
-	private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("arguments.item.tag.unknown", object)
 	);
 	private static final char SYNTAX_START_NBT = '{';
 	private static final char SYNTAX_TAG = '#';
-	private static final Function<SuggestionsBuilder, CompletableFuture<Suggestions>> SUGGEST_NOTHING = SuggestionsBuilder::buildFuture;
-	private final HolderLookup<Item> items;
+	private static final BiFunction<SuggestionsBuilder, Registry<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, registry) -> suggestionsBuilder.buildFuture();
 	private final StringReader reader;
-	private final boolean allowTags;
-	private Either<Holder<Item>, HolderSet<Item>> result;
+	private final boolean forTesting;
+	private Item item;
 	@Nullable
 	private CompoundTag nbt;
-	private Function<SuggestionsBuilder, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
+	@Nullable
+	private TagKey<Item> tag;
+	private int tagCursor;
+	private BiFunction<SuggestionsBuilder, Registry<Item>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
 
-	private ItemParser(HolderLookup<Item> holderLookup, StringReader stringReader, boolean bl) {
-		this.items = holderLookup;
+	public ItemParser(StringReader stringReader, boolean bl) {
 		this.reader = stringReader;
-		this.allowTags = bl;
+		this.forTesting = bl;
 	}
 
-	public static ItemParser.ItemResult parseForItem(HolderLookup<Item> holderLookup, StringReader stringReader) throws CommandSyntaxException {
-		int i = stringReader.getCursor();
-
-		try {
-			ItemParser itemParser = new ItemParser(holderLookup, stringReader, false);
-			itemParser.parse();
-			Holder<Item> holder = (Holder<Item>)itemParser.result.left().orElseThrow(() -> new IllegalStateException("Parser returned unexpected tag name"));
-			return new ItemParser.ItemResult(holder, itemParser.nbt);
-		} catch (CommandSyntaxException var5) {
-			stringReader.setCursor(i);
-			throw var5;
-		}
+	public Item getItem() {
+		return this.item;
 	}
 
-	public static Either<ItemParser.ItemResult, ItemParser.TagResult> parseForTesting(HolderLookup<Item> holderLookup, StringReader stringReader) throws CommandSyntaxException {
-		int i = stringReader.getCursor();
-
-		try {
-			ItemParser itemParser = new ItemParser(holderLookup, stringReader, true);
-			itemParser.parse();
-			return itemParser.result
-				.mapBoth(holder -> new ItemParser.ItemResult(holder, itemParser.nbt), holderSet -> new ItemParser.TagResult(holderSet, itemParser.nbt));
-		} catch (CommandSyntaxException var4) {
-			stringReader.setCursor(i);
-			throw var4;
-		}
+	@Nullable
+	public CompoundTag getNbt() {
+		return this.nbt;
 	}
 
-	public static CompletableFuture<Suggestions> fillSuggestions(HolderLookup<Item> holderLookup, SuggestionsBuilder suggestionsBuilder, boolean bl) {
-		StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
-		stringReader.setCursor(suggestionsBuilder.getStart());
-		ItemParser itemParser = new ItemParser(holderLookup, stringReader, bl);
-
-		try {
-			itemParser.parse();
-		} catch (CommandSyntaxException var6) {
-		}
-
-		return (CompletableFuture<Suggestions>)itemParser.suggestions.apply(suggestionsBuilder.createOffset(stringReader.getCursor()));
+	public TagKey<Item> getTag() {
+		return this.tag;
 	}
 
-	private void readItem() throws CommandSyntaxException {
+	public void readItem() throws CommandSyntaxException {
 		int i = this.reader.getCursor();
 		ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-		Optional<Holder<Item>> optional = this.items.get(ResourceKey.create(Registry.ITEM_REGISTRY, resourceLocation));
-		this.result = Either.left((Holder<Item>)optional.orElseThrow(() -> {
+		this.item = (Item)Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> {
 			this.reader.setCursor(i);
-			return ERROR_UNKNOWN_ITEM.createWithContext(this.reader, resourceLocation);
-		}));
+			return ERROR_UNKNOWN_ITEM.createWithContext(this.reader, resourceLocation.toString());
+		});
 	}
 
-	private void readTag() throws CommandSyntaxException {
-		if (!this.allowTags) {
-			throw ERROR_NO_TAGS_ALLOWED.createWithContext(this.reader);
+	public void readTag() throws CommandSyntaxException {
+		if (!this.forTesting) {
+			throw ERROR_NO_TAGS_ALLOWED.create();
 		} else {
-			int i = this.reader.getCursor();
-			this.reader.expect('#');
 			this.suggestions = this::suggestTag;
-			ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-			Optional<? extends HolderSet<Item>> optional = this.items.get(TagKey.create(Registry.ITEM_REGISTRY, resourceLocation));
-			this.result = Either.right((HolderSet<Item>)optional.orElseThrow(() -> {
-				this.reader.setCursor(i);
-				return ERROR_UNKNOWN_TAG.createWithContext(this.reader, resourceLocation);
-			}));
+			this.reader.expect('#');
+			this.tagCursor = this.reader.getCursor();
+			this.tag = TagKey.create(Registry.ITEM_REGISTRY, ResourceLocation.read(this.reader));
 		}
 	}
 
-	private void readNbt() throws CommandSyntaxException {
+	public void readNbt() throws CommandSyntaxException {
 		this.nbt = new TagParser(this.reader).readStruct();
 	}
 
-	private void parse() throws CommandSyntaxException {
-		if (this.allowTags) {
-			this.suggestions = this::suggestItemIdOrTag;
-		} else {
-			this.suggestions = this::suggestItem;
-		}
-
+	public ItemParser parse() throws CommandSyntaxException {
+		this.suggestions = this::suggestItemIdOrTag;
 		if (this.reader.canRead() && this.reader.peek() == '#') {
 			this.readTag();
 		} else {
 			this.readItem();
+			this.suggestions = this::suggestOpenNbt;
 		}
 
-		this.suggestions = this::suggestOpenNbt;
 		if (this.reader.canRead() && this.reader.peek() == '{') {
 			this.suggestions = SUGGEST_NOTHING;
 			this.readNbt();
 		}
+
+		return this;
 	}
 
-	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder) {
+	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf('{'));
 		}
@@ -150,22 +105,19 @@ public class ItemParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.items.listTags().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
+	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
+		return SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder.createOffset(this.tagCursor));
 	}
 
-	private CompletableFuture<Suggestions> suggestItem(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.items.listElements().map(ResourceKey::location), suggestionsBuilder);
+	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
+		if (this.forTesting) {
+			SharedSuggestionProvider.suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
+		}
+
+		return SharedSuggestionProvider.suggestResource(Registry.ITEM.keySet(), suggestionsBuilder);
 	}
 
-	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder) {
-		this.suggestTag(suggestionsBuilder);
-		return this.suggestItem(suggestionsBuilder);
-	}
-
-	public static record ItemResult(Holder<Item> item, @Nullable CompoundTag nbt) {
-	}
-
-	public static record TagResult(HolderSet<Item> tag, @Nullable CompoundTag nbt) {
+	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder, Registry<Item> registry) {
+		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()), registry);
 	}
 }

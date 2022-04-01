@@ -1,11 +1,14 @@
 package net.minecraft.world.level.levelgen;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -42,28 +45,40 @@ public class SurfaceSystem {
 	private final NormalNoise icebergPillarNoise;
 	private final NormalNoise icebergPillarRoofNoise;
 	private final NormalNoise icebergSurfaceNoise;
-	private final PositionalRandomFactory noiseRandom;
+	private final Registry<NormalNoise.NoiseParameters> noises;
+	private final Map<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise> noiseIntances = new ConcurrentHashMap();
+	private final Map<ResourceLocation, PositionalRandomFactory> positionalRandoms = new ConcurrentHashMap();
+	private final PositionalRandomFactory randomFactory;
 	private final NormalNoise surfaceNoise;
 	private final NormalNoise surfaceSecondaryNoise;
 
-	public SurfaceSystem(RandomState randomState, BlockState blockState, int i, PositionalRandomFactory positionalRandomFactory) {
+	public SurfaceSystem(Registry<NormalNoise.NoiseParameters> registry, BlockState blockState, int i, long l, WorldgenRandom.Algorithm algorithm) {
+		this.noises = registry;
 		this.defaultBlock = blockState;
 		this.seaLevel = i;
-		this.noiseRandom = positionalRandomFactory;
-		this.clayBandsOffsetNoise = randomState.getOrCreateNoise(Noises.CLAY_BANDS_OFFSET);
-		this.clayBands = generateBands(positionalRandomFactory.fromHashOf(new ResourceLocation("clay_bands")));
-		this.surfaceNoise = randomState.getOrCreateNoise(Noises.SURFACE);
-		this.surfaceSecondaryNoise = randomState.getOrCreateNoise(Noises.SURFACE_SECONDARY);
-		this.badlandsPillarNoise = randomState.getOrCreateNoise(Noises.BADLANDS_PILLAR);
-		this.badlandsPillarRoofNoise = randomState.getOrCreateNoise(Noises.BADLANDS_PILLAR_ROOF);
-		this.badlandsSurfaceNoise = randomState.getOrCreateNoise(Noises.BADLANDS_SURFACE);
-		this.icebergPillarNoise = randomState.getOrCreateNoise(Noises.ICEBERG_PILLAR);
-		this.icebergPillarRoofNoise = randomState.getOrCreateNoise(Noises.ICEBERG_PILLAR_ROOF);
-		this.icebergSurfaceNoise = randomState.getOrCreateNoise(Noises.ICEBERG_SURFACE);
+		this.randomFactory = algorithm.newInstance(l).forkPositional();
+		this.clayBandsOffsetNoise = Noises.instantiate(registry, this.randomFactory, Noises.CLAY_BANDS_OFFSET);
+		this.clayBands = generateBands(this.randomFactory.fromHashOf(new ResourceLocation("clay_bands")));
+		this.surfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.SURFACE);
+		this.surfaceSecondaryNoise = Noises.instantiate(registry, this.randomFactory, Noises.SURFACE_SECONDARY);
+		this.badlandsPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_PILLAR);
+		this.badlandsPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_PILLAR_ROOF);
+		this.badlandsSurfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.BADLANDS_SURFACE);
+		this.icebergPillarNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_PILLAR);
+		this.icebergPillarRoofNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_PILLAR_ROOF);
+		this.icebergSurfaceNoise = Noises.instantiate(registry, this.randomFactory, Noises.ICEBERG_SURFACE);
+	}
+
+	protected NormalNoise getOrCreateNoise(ResourceKey<NormalNoise.NoiseParameters> resourceKey) {
+		return (NormalNoise)this.noiseIntances.computeIfAbsent(resourceKey, resourceKey2 -> Noises.instantiate(this.noises, this.randomFactory, resourceKey));
+	}
+
+	protected PositionalRandomFactory getOrCreateRandomFactory(ResourceLocation resourceLocation) {
+		return (PositionalRandomFactory)this.positionalRandoms
+			.computeIfAbsent(resourceLocation, resourceLocation2 -> this.randomFactory.fromHashOf(resourceLocation).forkPositional());
 	}
 
 	public void buildSurface(
-		RandomState randomState,
 		BiomeManager biomeManager,
 		Registry<Biome> registry,
 		boolean bl,
@@ -97,7 +112,7 @@ public class SurfaceSystem {
 				return "ChunkBlockColumn " + chunkPos;
 			}
 		};
-		SurfaceRules.Context context = new SurfaceRules.Context(this, randomState, chunkAccess, noiseChunk, biomeManager::getBiome, registry, worldGenerationContext);
+		SurfaceRules.Context context = new SurfaceRules.Context(this, chunkAccess, noiseChunk, biomeManager::getBiome, registry, worldGenerationContext);
 		SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
@@ -162,7 +177,7 @@ public class SurfaceSystem {
 
 	protected int getSurfaceDepth(int i, int j) {
 		double d = this.surfaceNoise.getValue((double)i, 0.0, (double)j);
-		return (int)(d * 2.75 + 3.0 + this.noiseRandom.at(i, 0, j).nextDouble() * 0.25);
+		return (int)(d * 2.75 + 3.0 + this.randomFactory.at(i, 0, j).nextDouble() * 0.25);
 	}
 
 	protected double getSurfaceSecondary(int i, int j) {
@@ -184,13 +199,7 @@ public class SurfaceSystem {
 		boolean bl
 	) {
 		SurfaceRules.Context context = new SurfaceRules.Context(
-			this,
-			carvingContext.randomState(),
-			chunkAccess,
-			noiseChunk,
-			function,
-			carvingContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
-			carvingContext
+			this, chunkAccess, noiseChunk, function, carvingContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), carvingContext
 		);
 		SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
 		int i = blockPos.getX();
@@ -258,7 +267,7 @@ public class SurfaceSystem {
 			}
 
 			double o = m;
-			RandomSource randomSource = this.noiseRandom.at(j, 0, k);
+			RandomSource randomSource = this.randomFactory.at(j, 0, k);
 			int p = 2 + randomSource.nextInt(4);
 			int q = this.seaLevel + 18 + randomSource.nextInt(10);
 			int r = 0;

@@ -15,15 +15,15 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public abstract class StructurePoolElement {
 	public static final Codec<StructurePoolElement> CODEC = Registry.STRUCTURE_POOL_ELEMENT
@@ -40,18 +40,18 @@ public abstract class StructurePoolElement {
 		this.projection = projection;
 	}
 
-	public abstract Vec3i getSize(StructureTemplateManager structureTemplateManager, Rotation rotation);
+	public abstract Vec3i getSize(StructureManager structureManager, Rotation rotation);
 
 	public abstract List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
-		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random
+		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random
 	);
 
-	public abstract BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation);
+	public abstract BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation);
 
 	public abstract boolean place(
-		StructureTemplateManager structureTemplateManager,
-		WorldGenLevel worldGenLevel,
 		StructureManager structureManager,
+		WorldGenLevel worldGenLevel,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
 		BlockPos blockPos,
 		BlockPos blockPos2,

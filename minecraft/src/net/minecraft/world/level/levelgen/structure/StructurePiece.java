@@ -17,7 +17,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.material.FluidState;
@@ -102,12 +103,16 @@ public abstract class StructurePiece {
 
 	protected abstract void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag);
 
+	public NoiseEffect getNoiseEffect() {
+		return NoiseEffect.BEARD;
+	}
+
 	public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
 	}
 
 	public abstract void postProcess(
 		WorldGenLevel worldGenLevel,
-		StructureManager structureManager,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
 		Random random,
 		BoundingBox boundingBox,
@@ -121,10 +126,6 @@ public abstract class StructurePiece {
 
 	public int getGenDepth() {
 		return this.genDepth;
-	}
-
-	public void setGenDepth(int i) {
-		this.genDepth = i;
 	}
 
 	public boolean isCloseToChunk(ChunkPos chunkPos, int i) {
@@ -549,7 +550,7 @@ public abstract class StructurePiece {
 		return this.type;
 	}
 
-	public abstract static class BlockSelector {
+	protected abstract static class BlockSelector {
 		protected BlockState next = Blocks.AIR.defaultBlockState();
 
 		public abstract void next(Random random, int i, int j, int k, boolean bl);

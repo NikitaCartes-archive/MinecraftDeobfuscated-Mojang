@@ -226,16 +226,22 @@ public class RedStoneWireBlock extends Block {
 			if (redstoneSide != RedstoneSide.NONE && !levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction)).is(this)) {
 				mutableBlockPos.move(Direction.DOWN);
 				BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
-				if (blockState2.is(this)) {
+				if (!blockState2.is(Blocks.OBSERVER)) {
 					BlockPos blockPos2 = mutableBlockPos.relative(direction.getOpposite());
-					levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState(blockPos2), mutableBlockPos, blockPos2, i, j);
+					BlockState blockState3 = blockState2.updateShape(
+						direction.getOpposite(), levelAccessor.getBlockState(blockPos2), levelAccessor, mutableBlockPos, blockPos2
+					);
+					updateOrDestroy(blockState2, blockState3, levelAccessor, mutableBlockPos, i, j);
 				}
 
 				mutableBlockPos.setWithOffset(blockPos, direction).move(Direction.UP);
-				BlockState blockState3 = levelAccessor.getBlockState(mutableBlockPos);
-				if (blockState3.is(this)) {
+				BlockState blockState4 = levelAccessor.getBlockState(mutableBlockPos);
+				if (!blockState4.is(Blocks.OBSERVER)) {
 					BlockPos blockPos3 = mutableBlockPos.relative(direction.getOpposite());
-					levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState(blockPos3), mutableBlockPos, blockPos3, i, j);
+					BlockState blockState5 = blockState4.updateShape(
+						direction.getOpposite(), levelAccessor.getBlockState(blockPos3), levelAccessor, mutableBlockPos, blockPos3
+					);
+					updateOrDestroy(blockState4, blockState5, levelAccessor, mutableBlockPos, i, j);
 				}
 			}
 		}

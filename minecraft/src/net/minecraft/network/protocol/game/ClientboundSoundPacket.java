@@ -29,7 +29,7 @@ public class ClientboundSoundPacket implements Packet<ClientGamePacketListener> 
 	}
 
 	public ClientboundSoundPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.sound = friendlyByteBuf.readById(Registry.SOUND_EVENT);
+		this.sound = Registry.SOUND_EVENT.byId(friendlyByteBuf.readVarInt());
 		this.source = friendlyByteBuf.readEnum(SoundSource.class);
 		this.x = friendlyByteBuf.readInt();
 		this.y = friendlyByteBuf.readInt();
@@ -40,7 +40,7 @@ public class ClientboundSoundPacket implements Packet<ClientGamePacketListener> 
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeId(Registry.SOUND_EVENT, this.sound);
+		friendlyByteBuf.writeVarInt(Registry.SOUND_EVENT.getId(this.sound));
 		friendlyByteBuf.writeEnum(this.source);
 		friendlyByteBuf.writeInt(this.x);
 		friendlyByteBuf.writeInt(this.y);

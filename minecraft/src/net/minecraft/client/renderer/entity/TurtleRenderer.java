@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.TurtleModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Turtle;
 
@@ -15,6 +16,7 @@ public class TurtleRenderer extends MobRenderer<Turtle, TurtleModel<Turtle>> {
 
 	public TurtleRenderer(EntityRendererProvider.Context context) {
 		super(context, new TurtleModel<>(context.bakeLayer(ModelLayers.TURTLE)), 0.7F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 	}
 
 	public void render(Turtle turtle, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

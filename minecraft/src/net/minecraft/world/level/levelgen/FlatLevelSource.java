@@ -11,9 +11,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
-import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,7 +37,8 @@ public class FlatLevelSource extends ChunkGenerator {
 			registry,
 			flatLevelGeneratorSettings.structureOverrides(),
 			new FixedBiomeSource(flatLevelGeneratorSettings.getBiomeFromSettings()),
-			new FixedBiomeSource(flatLevelGeneratorSettings.getBiome())
+			new FixedBiomeSource(flatLevelGeneratorSettings.getBiome()),
+			0L
 		);
 		this.settings = flatLevelGeneratorSettings;
 	}
@@ -46,12 +48,17 @@ public class FlatLevelSource extends ChunkGenerator {
 		return CODEC;
 	}
 
+	@Override
+	public ChunkGenerator withSeed(long l) {
+		return this;
+	}
+
 	public FlatLevelGeneratorSettings settings() {
 		return this.settings;
 	}
 
 	@Override
-	public void buildSurface(WorldGenRegion worldGenRegion, StructureManager structureManager, RandomState randomState, ChunkAccess chunkAccess) {
+	public void buildSurface(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 	}
 
 	@Override
@@ -66,7 +73,7 @@ public class FlatLevelSource extends ChunkGenerator {
 
 	@Override
 	public CompletableFuture<ChunkAccess> fillFromNoise(
-		Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess
+		Executor executor, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess
 	) {
 		List<BlockState> list = this.settings.getLayers();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -92,7 +99,7 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+	public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor) {
 		List<BlockState> list = this.settings.getLayers();
 
 		for (int k = Math.min(list.size(), levelHeightAccessor.getMaxBuildHeight()) - 1; k >= 0; k--) {
@@ -106,7 +113,7 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public NoiseColumn getBaseColumn(int i, int j, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+	public NoiseColumn getBaseColumn(int i, int j, LevelHeightAccessor levelHeightAccessor) {
 		return new NoiseColumn(
 			levelHeightAccessor.getMinBuildHeight(),
 			(BlockState[])this.settings
@@ -119,16 +126,20 @@ public class FlatLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public void addDebugScreenInfo(List<String> list, RandomState randomState, BlockPos blockPos) {
+	public void addDebugScreenInfo(List<String> list, BlockPos blockPos) {
+	}
+
+	@Override
+	public Climate.Sampler climateSampler() {
+		return Climate.empty();
 	}
 
 	@Override
 	public void applyCarvers(
 		WorldGenRegion worldGenRegion,
 		long l,
-		RandomState randomState,
 		BiomeManager biomeManager,
-		StructureManager structureManager,
+		StructureFeatureManager structureFeatureManager,
 		ChunkAccess chunkAccess,
 		GenerationStep.Carving carving
 	) {

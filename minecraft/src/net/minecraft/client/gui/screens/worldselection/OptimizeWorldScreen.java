@@ -46,7 +46,7 @@ public class OptimizeWorldScreen extends Screen {
 	) {
 		try {
 			OptimizeWorldScreen var7;
-			try (WorldStem worldStem = minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false)) {
+			try (WorldStem worldStem = minecraft.makeWorldStem(levelStorageAccess, false)) {
 				WorldData worldData = worldStem.worldData();
 				levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldData);
 				var7 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());

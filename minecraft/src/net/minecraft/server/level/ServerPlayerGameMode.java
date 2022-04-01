@@ -2,28 +2,39 @@ package net.minecraft.server.level;
 
 import com.mojang.logging.LogUtils;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 
 public class ServerPlayerGameMode {
@@ -119,67 +130,99 @@ public class ServerPlayerGameMode {
 		return f;
 	}
 
-	private void debugLogging(BlockPos blockPos, boolean bl, int i, String string) {
-	}
+	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i) {
+		double d = this.player.getX() - ((double)blockPos.getX() + 0.5);
+		double e = this.player.getY() - ((double)blockPos.getY() + 0.5) + 1.5;
+		double f = this.player.getZ() - ((double)blockPos.getZ() + 0.5);
+		double g = d * d + e * e + f * f;
+		if (g > 36.0) {
+			BlockState blockState;
+			if (this.player.level.getServer() != null
+				&& this.player.chunkPosition().getChessboardDistance(new ChunkPos(blockPos)) < this.player.level.getServer().getPlayerList().getViewDistance()) {
+				blockState = this.level.getBlockState(blockPos);
+			} else {
+				blockState = Blocks.AIR.defaultBlockState();
+			}
 
-	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
-		if (this.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(blockPos)) > ServerGamePacketListenerImpl.MAX_INTERACTION_DISTANCE) {
-			this.debugLogging(blockPos, false, j, "too far");
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, blockState, action, false, "too far"));
 		} else if (blockPos.getY() >= i) {
-			this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
-			this.debugLogging(blockPos, false, j, "too high");
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "too high"));
 		} else {
 			if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+				BlockState blockState = this.level.getBlockState(blockPos);
 				if (!this.level.mayInteract(this.player, blockPos)) {
-					this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
-					this.debugLogging(blockPos, false, j, "may not interact");
+					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, blockState, action, false, "may not interact"));
+					return;
+				}
+
+				if (blockState.getBlock() instanceof EntityBlock && this.level.getBlockEntity(blockPos) instanceof Container container && !container.isEmpty()) {
+					int[] is = IntStream.range(0, container.getContainerSize()).toArray();
+					ArrayUtils.shuffle(is);
+
+					for (int j : is) {
+						ItemStack itemStack = container.removeItem(j, 1);
+						if (!itemStack.isEmpty()) {
+							Entity.lunchAsBlock(this.level, itemStack, 1.0F, Vec3.atCenterOf(blockPos));
+						}
+					}
+
+					this.level.sendParticles(ParticleTypes.EXPLOSION, (double)blockPos.getX(), (double)blockPos.getY() + 0.5, (double)blockPos.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+					this.level.playSound(null, blockPos, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.0F, 1.0F);
+					this.destroyAndAck(blockPos, action, "boom");
 					return;
 				}
 
 				if (this.isCreative()) {
-					this.destroyAndAck(blockPos, j, "creative destroy");
+					this.destroyAndAck(blockPos, action, "creative destroy");
 					return;
 				}
 
 				if (this.player.blockActionRestricted(this.level, blockPos, this.gameModeForPlayer)) {
-					this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
-					this.debugLogging(blockPos, false, j, "block action restricted");
+					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, blockState, action, false, "block action restricted"));
 					return;
 				}
 
 				this.destroyProgressStart = this.gameTicks;
-				float f = 1.0F;
-				BlockState blockState = this.level.getBlockState(blockPos);
+				float h = 1.0F;
 				if (!blockState.isAir()) {
 					blockState.attack(this.level, blockPos, this.player);
-					f = blockState.getDestroyProgress(this.player, this.player.level, blockPos);
+					h = blockState.getDestroyProgress(this.player, this.player.level, blockPos);
 				}
 
-				if (!blockState.isAir() && f >= 1.0F) {
-					this.destroyAndAck(blockPos, j, "insta mine");
+				if (!blockState.isAir() && h >= 1.0F) {
+					this.destroyAndAck(blockPos, action, "insta mine");
 				} else {
 					if (this.isDestroyingBlock) {
-						this.player.connection.send(new ClientboundBlockUpdatePacket(this.destroyPos, this.level.getBlockState(this.destroyPos)));
-						this.debugLogging(blockPos, false, j, "abort destroying since another started (client insta mine, server disagreed)");
+						this.player
+							.connection
+							.send(
+								new ClientboundBlockBreakAckPacket(
+									this.destroyPos,
+									this.level.getBlockState(this.destroyPos),
+									ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+									false,
+									"abort destroying since another started (client insta mine, server disagreed)"
+								)
+							);
 					}
 
 					this.isDestroyingBlock = true;
 					this.destroyPos = blockPos.immutable();
-					int k = (int)(f * 10.0F);
+					int k = (int)(h * 10.0F);
 					this.level.destroyBlockProgress(this.player.getId(), blockPos, k);
-					this.debugLogging(blockPos, true, j, "actual start of destroying");
+					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, blockState, action, true, "actual start of destroying"));
 					this.lastSentState = k;
 				}
 			} else if (action == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
 				if (blockPos.equals(this.destroyPos)) {
 					int l = this.gameTicks - this.destroyProgressStart;
-					BlockState blockStatex = this.level.getBlockState(blockPos);
-					if (!blockStatex.isAir()) {
-						float g = blockStatex.getDestroyProgress(this.player, this.player.level, blockPos) * (float)(l + 1);
-						if (g >= 0.7F) {
+					BlockState blockState2 = this.level.getBlockState(blockPos);
+					if (!blockState2.isAir()) {
+						float m = blockState2.getDestroyProgress(this.player, this.player.level, blockPos) * (float)(l + 1);
+						if (m >= 0.7F) {
 							this.isDestroyingBlock = false;
 							this.level.destroyBlockProgress(this.player.getId(), blockPos, -1);
-							this.destroyAndAck(blockPos, j, "destroyed");
+							this.destroyAndAck(blockPos, action, "destroyed");
 							return;
 						}
 
@@ -192,60 +235,55 @@ public class ServerPlayerGameMode {
 					}
 				}
 
-				this.debugLogging(blockPos, true, j, "stopped destroying");
+				this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "stopped destroying"));
 			} else if (action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
 				this.isDestroyingBlock = false;
 				if (!Objects.equals(this.destroyPos, blockPos)) {
 					LOGGER.warn("Mismatch in destroy block pos: {} {}", this.destroyPos, blockPos);
 					this.level.destroyBlockProgress(this.player.getId(), this.destroyPos, -1);
-					this.debugLogging(blockPos, true, j, "aborted mismatched destroying");
+					this.player
+						.connection
+						.send(new ClientboundBlockBreakAckPacket(this.destroyPos, this.level.getBlockState(this.destroyPos), action, true, "aborted mismatched destroying"));
 				}
 
 				this.level.destroyBlockProgress(this.player.getId(), blockPos, -1);
-				this.debugLogging(blockPos, true, j, "aborted destroying");
+				this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "aborted destroying"));
 			}
 		}
 	}
 
-	public void destroyAndAck(BlockPos blockPos, int i, String string) {
+	public void destroyAndAck(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, String string) {
 		if (this.destroyBlock(blockPos)) {
-			this.debugLogging(blockPos, true, i, string);
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, string));
 		} else {
-			this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
-			this.debugLogging(blockPos, false, i, string);
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, string));
 		}
 	}
 
 	public boolean destroyBlock(BlockPos blockPos) {
-		BlockState blockState = this.level.getBlockState(blockPos);
-		if (!this.player.getMainHandItem().getItem().canAttackBlock(blockState, this.level, blockPos, this.player)) {
+		boolean bl = this.player.getCarriedAsItem().getItem() instanceof DiggerItem;
+		if (this.player.getCarried() != LivingEntity.Carried.NONE && !bl) {
 			return false;
 		} else {
-			BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
-			Block block = blockState.getBlock();
-			if (block instanceof GameMasterBlock && !this.player.canUseGameMasterBlocks()) {
-				this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
-				return false;
-			} else if (this.player.blockActionRestricted(this.level, blockPos, this.gameModeForPlayer)) {
+			BlockState blockState = this.level.getBlockState(blockPos);
+			if (!this.player.getMainHandItem().getItem().canAttackBlock(blockState, this.level, blockPos, this.player)) {
 				return false;
 			} else {
-				block.playerWillDestroy(this.level, blockPos, blockState, this.player);
-				boolean bl = this.level.removeBlock(blockPos, false);
-				if (bl) {
-					block.destroy(this.level, blockPos, blockState);
-				}
-
-				if (this.isCreative()) {
-					return true;
+				BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
+				Block block = blockState.getBlock();
+				if (block instanceof GameMasterBlock && !this.player.canUseGameMasterBlocks()) {
+					this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+					return false;
+				} else if (this.player.blockActionRestricted(this.level, blockPos, this.gameModeForPlayer)) {
+					return false;
 				} else {
-					ItemStack itemStack = this.player.getMainHandItem();
-					ItemStack itemStack2 = itemStack.copy();
-					boolean bl2 = this.player.hasCorrectToolForDrops(blockState);
-					itemStack.mineBlock(this.level, blockState, blockPos, this.player);
-					if (bl && bl2) {
-						block.playerDestroy(this.level, this.player, blockPos, blockState, blockEntity, itemStack2);
+					block.playerWillDestroy(this.level, blockPos, blockState, this.player);
+					if (bl) {
+						this.player.broadcastBreakEvent(InteractionHand.MAIN_HAND);
 					}
 
+					boolean bl2 = this.level.removeBlock(blockPos, false);
+					this.player.setCarriedBlock(blockState);
 					return true;
 				}
 			}
@@ -324,6 +362,10 @@ public class ServerPlayerGameMode {
 
 				if (interactionResult2.consumesAction()) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
+				}
+
+				if (interactionResult2.consumesAction()) {
+					serverPlayer.setCarriedBlock(null);
 				}
 
 				return interactionResult2;

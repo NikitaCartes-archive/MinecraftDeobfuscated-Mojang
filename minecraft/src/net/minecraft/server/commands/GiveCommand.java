@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -14,20 +13,22 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.CarriedBlocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class GiveCommand {
 	public static final int MAX_ALLOWED_ITEMSTACKS = 100;
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("give")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
 					Commands.argument("targets", EntityArgument.players())
 						.then(
-							Commands.argument("item", ItemArgument.item(commandBuildContext))
+							Commands.argument("item", ItemArgument.item())
 								.executes(
 									commandContext -> giveItem(
 											commandContext.getSource(), ItemArgument.getItem(commandContext, "item"), EntityArgument.getPlayers(commandContext, "targets"), 1
@@ -63,14 +64,10 @@ public class GiveCommand {
 					int m = Math.min(j, l);
 					l -= m;
 					ItemStack itemStack = itemInput.createItemStack(m, false);
-					boolean bl = serverPlayer.getInventory().add(itemStack);
-					if (bl && itemStack.isEmpty()) {
-						itemStack.setCount(1);
-						ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
-						if (itemEntity != null) {
-							itemEntity.makeFakeItem();
-						}
-
+					if (serverPlayer.getCarried() == LivingEntity.Carried.NONE && itemStack.getCount() == 1) {
+						serverPlayer.setCarriedBlock((BlockState)CarriedBlocks.getBlockFromItemStack(itemStack).orElse(null));
+					} else if (!itemStack.isEmpty()) {
+						serverPlayer.drop(itemStack, false);
 						serverPlayer.level
 							.playSound(
 								null,
@@ -82,13 +79,6 @@ public class GiveCommand {
 								0.2F,
 								((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
 							);
-						serverPlayer.containerMenu.broadcastChanges();
-					} else {
-						ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
-						if (itemEntity != null) {
-							itemEntity.setNoPickUpDelay();
-							itemEntity.setOwner(serverPlayer.getUUID());
-						}
 					}
 				}
 			}

@@ -30,10 +30,7 @@ import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import net.minecraft.world.entity.animal.frog.Frog;
-import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -71,7 +68,6 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
@@ -79,7 +75,6 @@ import org.slf4j.Logger;
 public class DefaultAttributes {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<EntityType<? extends LivingEntity>, AttributeSupplier> SUPPLIERS = ImmutableMap.<EntityType<? extends LivingEntity>, AttributeSupplier>builder()
-		.put(EntityType.ALLAY, Allay.createAttributes().build())
 		.put(EntityType.ARMOR_STAND, LivingEntity.createLivingAttributes().build())
 		.put(EntityType.AXOLOTL, Axolotl.createAttributes().build())
 		.put(EntityType.BAT, Bat.createAttributes().build())
@@ -100,7 +95,6 @@ public class DefaultAttributes {
 		.put(EntityType.ENDER_DRAGON, EnderDragon.createAttributes().build())
 		.put(EntityType.EVOKER, Evoker.createAttributes().build())
 		.put(EntityType.FOX, Fox.createAttributes().build())
-		.put(EntityType.FROG, Frog.createAttributes().build())
 		.put(EntityType.GHAST, Ghast.createAttributes().build())
 		.put(EntityType.GIANT, Giant.createAttributes().build())
 		.put(EntityType.GLOW_SQUID, GlowSquid.createAttributes().build())
@@ -140,14 +134,12 @@ public class DefaultAttributes {
 		.put(EntityType.SQUID, Squid.createAttributes().build())
 		.put(EntityType.STRAY, AbstractSkeleton.createAttributes().build())
 		.put(EntityType.STRIDER, Strider.createAttributes().build())
-		.put(EntityType.TADPOLE, Tadpole.createAttributes().build())
 		.put(EntityType.TRADER_LLAMA, Llama.createAttributes().build())
 		.put(EntityType.TROPICAL_FISH, AbstractFish.createAttributes().build())
 		.put(EntityType.TURTLE, Turtle.createAttributes().build())
 		.put(EntityType.VEX, Vex.createAttributes().build())
 		.put(EntityType.VILLAGER, Villager.createAttributes().build())
 		.put(EntityType.VINDICATOR, Vindicator.createAttributes().build())
-		.put(EntityType.WARDEN, Warden.createAttributes().build())
 		.put(EntityType.WANDERING_TRADER, Mob.createMobAttributes().build())
 		.put(EntityType.WITCH, Witch.createAttributes().build())
 		.put(EntityType.WITHER, WitherBoss.createAttributes().build())

@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GiantZombieModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.layers.CarriedBlockLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,7 @@ public class GiantMobRenderer extends MobRenderer<Giant, HumanoidModel<Giant>> {
 				this, new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT_INNER_ARMOR)), new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT_OUTER_ARMOR))
 			)
 		);
+		this.addLayer(new CarriedBlockLayer<>(this, 0.125F, 0.25F, 0.5F));
 	}
 
 	protected void scale(Giant giant, PoseStack poseStack, float f) {

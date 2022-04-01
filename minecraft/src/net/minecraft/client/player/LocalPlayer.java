@@ -45,6 +45,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundThrowPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -58,6 +59,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MoverType;
@@ -70,7 +72,6 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
@@ -91,7 +92,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private static final float WATER_VISION_QUICK_PERCENT = 0.6F;
 	private static final double SUFFOCATING_COLLISION_CHECK_SCALE = 0.35;
 	private static final double MINOR_COLLISION_ANGLE_THRESHOLD_RADIAN = 0.13962634F;
-	private static final float DEFAULT_SNEAKING_MOVEMENT_FACTOR = 0.3F;
 	public final ClientPacketListener connection;
 	private final StatsCounter stats;
 	private final ClientRecipeBook recipeBook;
@@ -278,7 +278,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			this.lastOnGround = this.onGround;
-			this.autoJumpEnabled = this.minecraft.options.autoJump().get();
+			this.autoJumpEnabled = this.minecraft.options.autoJump;
 		}
 	}
 
@@ -297,6 +297,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 	public void swing(InteractionHand interactionHand) {
 		super.swing(interactionHand);
 		this.connection.send(new ServerboundSwingPacket(interactionHand));
+	}
+
+	public void throwCarried() {
+		this.connection.send(new ServerboundThrowPacket(this.getViewVector(0.5F)));
 	}
 
 	@Override
@@ -664,8 +668,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			&& !this.isSwimming()
 			&& this.canEnterPose(Pose.CROUCHING)
 			&& (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
-		float f = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(this), 0.0F, 1.0F);
-		this.input.tick(this.isMovingSlowly(), f);
+		this.input.tick(this.isMovingSlowly());
 		this.minecraft.getTutorial().onInput(this.input);
 		if (this.isUsingItem() && !this.isPassenger()) {
 			this.input.leftImpulse *= 0.2F;
@@ -747,6 +750,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 					this.jumpTriggerTime = 0;
 				}
 			}
+		} else if (!bl && this.input.jumping && !bl4 && this.hasPassenger(entity -> entity.getType() == EntityType.CHICKEN)) {
+			if (this.jumpTriggerTime == 0) {
+				this.jumpTriggerTime = 7;
+			} else {
+				this.setDeltaMovement(this.getDeltaMovement().add(new Vec3(0.0, 0.5, 0.0)));
+				this.jumpTriggerTime = 0;
+			}
 		}
 
 		if (this.input.jumping && !bl6 && !bl && !this.getAbilities().flying && !this.isPassenger() && !this.onClimbable()) {
@@ -816,6 +826,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (this.onGround && this.getAbilities().flying && !this.minecraft.gameMode.isAlwaysFlying()) {
 			this.getAbilities().flying = false;
 			this.onUpdateAbilities();
+		}
+
+		if (this.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL) && this.isCrouching()) {
+			this.setPos((double)Mth.floor(this.getX()) + 0.5, this.getY(), (double)Mth.floor(this.getZ()) + 0.5);
 		}
 	}
 

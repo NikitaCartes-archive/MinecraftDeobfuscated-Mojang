@@ -6,10 +6,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
+import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Map.Entry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -26,15 +26,12 @@ public class RegistryLoader {
 	public <E> DataResult<? extends Registry<E>> overrideRegistryFromResources(
 		WritableRegistry<E> writableRegistry, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, DynamicOps<JsonElement> dynamicOps
 	) {
-		Map<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>> map = this.resources.listResources(resourceKey);
+		Collection<ResourceKey<E>> collection = this.resources.listResources(resourceKey);
 		DataResult<WritableRegistry<E>> dataResult = DataResult.success(writableRegistry, Lifecycle.stable());
 
-		for (Entry<ResourceKey<E>, RegistryResourceAccess.EntryThunk<E>> entry : map.entrySet()) {
+		for (ResourceKey<E> resourceKey2 : collection) {
 			dataResult = dataResult.flatMap(
-				writableRegistryx -> this.overrideElementFromResources(
-							writableRegistryx, resourceKey, codec, (ResourceKey<E>)entry.getKey(), Optional.of((RegistryResourceAccess.EntryThunk)entry.getValue()), dynamicOps
-						)
-						.map(holder -> writableRegistryx)
+				writableRegistryx -> this.overrideElementFromResources(writableRegistryx, resourceKey, codec, resourceKey2, dynamicOps).map(holder -> writableRegistryx)
 			);
 		}
 
@@ -48,18 +45,6 @@ public class RegistryLoader {
 		ResourceKey<E> resourceKey2,
 		DynamicOps<JsonElement> dynamicOps
 	) {
-		Optional<RegistryResourceAccess.EntryThunk<E>> optional = this.resources.getResource(resourceKey2);
-		return this.overrideElementFromResources(writableRegistry, resourceKey, codec, resourceKey2, optional, dynamicOps);
-	}
-
-	private <E> DataResult<Holder<E>> overrideElementFromResources(
-		WritableRegistry<E> writableRegistry,
-		ResourceKey<? extends Registry<E>> resourceKey,
-		Codec<E> codec,
-		ResourceKey<E> resourceKey2,
-		Optional<RegistryResourceAccess.EntryThunk<E>> optional,
-		DynamicOps<JsonElement> dynamicOps
-	) {
 		RegistryLoader.ReadCache<E> readCache = this.readCache(resourceKey);
 		DataResult<Holder<E>> dataResult = (DataResult<Holder<E>>)readCache.values.get(resourceKey2);
 		if (dataResult != null) {
@@ -67,6 +52,7 @@ public class RegistryLoader {
 		} else {
 			Holder<E> holder = writableRegistry.getOrCreateHolder(resourceKey2);
 			readCache.values.put(resourceKey2, DataResult.success(holder));
+			Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> optional = this.resources.parseElement(dynamicOps, resourceKey, resourceKey2, codec);
 			DataResult<Holder<E>> dataResult2;
 			if (optional.isEmpty()) {
 				if (writableRegistry.containsKey(resourceKey2)) {
@@ -75,7 +61,7 @@ public class RegistryLoader {
 					dataResult2 = DataResult.error("Missing referenced custom/removed registry entry for registry " + resourceKey + " named " + resourceKey2.location());
 				}
 			} else {
-				DataResult<RegistryResourceAccess.ParsedEntry<E>> dataResult3 = ((RegistryResourceAccess.EntryThunk)optional.get()).parseElement(dynamicOps, codec);
+				DataResult<RegistryResourceAccess.ParsedEntry<E>> dataResult3 = (DataResult<RegistryResourceAccess.ParsedEntry<E>>)optional.get();
 				Optional<RegistryResourceAccess.ParsedEntry<E>> optional2 = dataResult3.result();
 				if (optional2.isPresent()) {
 					RegistryResourceAccess.ParsedEntry<E> parsedEntry = (RegistryResourceAccess.ParsedEntry<E>)optional2.get();

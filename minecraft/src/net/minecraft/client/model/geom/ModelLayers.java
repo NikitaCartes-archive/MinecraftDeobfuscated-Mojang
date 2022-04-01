@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 public class ModelLayers {
 	private static final String DEFAULT_LAYER = "main";
 	private static final Set<ModelLayerLocation> ALL_MODELS = Sets.<ModelLayerLocation>newHashSet();
-	public static final ModelLayerLocation ALLAY = register("allay");
 	public static final ModelLayerLocation ARMOR_STAND = register("armor_stand");
 	public static final ModelLayerLocation ARMOR_STAND_INNER_ARMOR = registerInnerArmor("armor_stand");
 	public static final ModelLayerLocation ARMOR_STAND_OUTER_ARMOR = registerOuterArmor("armor_stand");
@@ -60,7 +59,6 @@ public class ModelLayers {
 	public static final ModelLayerLocation EVOKER = register("evoker");
 	public static final ModelLayerLocation EVOKER_FANGS = register("evoker_fangs");
 	public static final ModelLayerLocation FOX = register("fox");
-	public static final ModelLayerLocation FROG = register("frog");
 	public static final ModelLayerLocation FURNACE_MINECART = register("furnace_minecart");
 	public static final ModelLayerLocation GHAST = register("ghast");
 	public static final ModelLayerLocation GIANT = register("giant");
@@ -137,7 +135,6 @@ public class ModelLayers {
 	public static final ModelLayerLocation STRAY_OUTER_LAYER = register("stray", "outer");
 	public static final ModelLayerLocation STRIDER = register("strider");
 	public static final ModelLayerLocation STRIDER_SADDLE = register("strider", "saddle");
-	public static final ModelLayerLocation TADPOLE = register("tadpole");
 	public static final ModelLayerLocation TNT_MINECART = register("tnt_minecart");
 	public static final ModelLayerLocation TRADER_LLAMA = register("trader_llama");
 	public static final ModelLayerLocation TRIDENT = register("trident");
@@ -149,7 +146,6 @@ public class ModelLayers {
 	public static final ModelLayerLocation VEX = register("vex");
 	public static final ModelLayerLocation VILLAGER = register("villager");
 	public static final ModelLayerLocation VINDICATOR = register("vindicator");
-	public static final ModelLayerLocation WARDEN = register("warden");
 	public static final ModelLayerLocation WANDERING_TRADER = register("wandering_trader");
 	public static final ModelLayerLocation WITCH = register("witch");
 	public static final ModelLayerLocation WITHER = register("wither");
@@ -200,10 +196,6 @@ public class ModelLayers {
 
 	public static ModelLayerLocation createBoatModelName(Boat.Type type) {
 		return createLocation("boat/" + type.getName(), "main");
-	}
-
-	public static ModelLayerLocation createChestBoatModelName(Boat.Type type) {
-		return createLocation("chest_boat/" + type.getName(), "main");
 	}
 
 	public static ModelLayerLocation createSignModelName(WoodType woodType) {

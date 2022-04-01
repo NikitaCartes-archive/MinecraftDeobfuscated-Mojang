@@ -11,7 +11,6 @@ import java.util.stream.LongStream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -338,17 +337,6 @@ public class GameTestHelper {
 		throw new GameTestAssertPosException("Expected " + item.getDescription().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
 	}
 
-	public void assertItemEntityNotPresent(Item item, BlockPos blockPos, double d) {
-		BlockPos blockPos2 = this.absolutePos(blockPos);
-
-		for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockPos2).inflate(d), Entity::isAlive)) {
-			ItemEntity itemEntity = (ItemEntity)entity;
-			if (itemEntity.getItem().getItem().equals(item)) {
-				throw new GameTestAssertPosException("Did not expect " + item.getDescription().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
-			}
-		}
-	}
-
 	public void assertEntityNotPresent(EntityType<?> entityType) {
 		List<? extends Entity> list = this.getLevel().getEntities(entityType, this.getBounds(), Entity::isAlive);
 		if (!list.isEmpty()) {
@@ -418,9 +406,7 @@ public class GameTestHelper {
 	public void assertContainerContains(BlockPos blockPos, Item item) {
 		BlockPos blockPos2 = this.absolutePos(blockPos);
 		BlockEntity blockEntity = this.getLevel().getBlockEntity(blockPos2);
-		if (!(blockEntity instanceof BaseContainerBlockEntity)) {
-			throw new GameTestAssertException("Expected a container at " + blockPos + ", found " + Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()));
-		} else if (((BaseContainerBlockEntity)blockEntity).countItem(item) != 1) {
+		if (blockEntity instanceof BaseContainerBlockEntity && ((BaseContainerBlockEntity)blockEntity).countItem(item) != 1) {
 			throw new GameTestAssertException("Container should contain: " + item);
 		}
 	}

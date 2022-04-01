@@ -1,14 +1,14 @@
 package net.minecraft.world.level.gameevent;
 
 import javax.annotation.Nullable;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 public interface GameEventListener {
 	PositionSource getListenerSource();
 
 	int getListenerRadius();
 
-	boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3);
+	boolean handleGameEvent(Level level, GameEvent gameEvent, @Nullable Entity entity, BlockPos blockPos);
 }

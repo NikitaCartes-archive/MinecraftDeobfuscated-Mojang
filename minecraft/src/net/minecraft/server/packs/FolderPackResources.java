@@ -90,27 +90,26 @@ public class FolderPackResources extends AbstractPackResources {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
 		File file = new File(this.file, packType.getDirectory());
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
-		this.listResources(new File(new File(file, string), string2), string, list, string2 + "/", predicate);
+		this.listResources(new File(new File(file, string), string2), i, string, list, string2 + "/", predicate);
 		return list;
 	}
 
-	private void listResources(File file, String string, List<ResourceLocation> list, String string2, Predicate<ResourceLocation> predicate) {
+	private void listResources(File file, int i, String string, List<ResourceLocation> list, String string2, Predicate<String> predicate) {
 		File[] files = file.listFiles();
 		if (files != null) {
 			for (File file2 : files) {
 				if (file2.isDirectory()) {
-					this.listResources(file2, string, list, string2 + file2.getName() + "/", predicate);
-				} else if (!file2.getName().endsWith(".mcmeta")) {
+					if (i > 0) {
+						this.listResources(file2, i - 1, string, list, string2 + file2.getName() + "/", predicate);
+					}
+				} else if (!file2.getName().endsWith(".mcmeta") && predicate.test(file2.getName())) {
 					try {
-						ResourceLocation resourceLocation = new ResourceLocation(string, string2 + file2.getName());
-						if (predicate.test(resourceLocation)) {
-							list.add(resourceLocation);
-						}
-					} catch (ResourceLocationException var12) {
-						LOGGER.error(var12.getMessage());
+						list.add(new ResourceLocation(string, string2 + file2.getName()));
+					} catch (ResourceLocationException var13) {
+						LOGGER.error(var13.getMessage());
 					}
 				}
 			}

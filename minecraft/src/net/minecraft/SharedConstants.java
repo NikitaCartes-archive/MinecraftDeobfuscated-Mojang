@@ -12,24 +12,24 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3085;
+	public static final int WORLD_VERSION = 3076;
 	@Deprecated
-	public static final String SERIES = "main";
+	public static final String SERIES = "april2022";
 	@Deprecated
-	public static final String VERSION_STRING = "22w13a";
+	public static final String VERSION_STRING = "22w13oneBlockAtATime";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.19";
 	@Deprecated
-	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 759;
+	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 758;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 76;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 77;
 	public static final int SNBT_NAG_VERSION = 3075;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 9;
+	public static final int RESOURCE_PACK_FORMAT = 8;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 10;
+	public static final int DATA_PACK_FORMAT = 9;
 	public static final String DATA_VERSION_TAG = "DataVersion";
 	public static final boolean CNC_PART_2_ITEMS_AND_BLOCKS = false;
 	public static final boolean USE_NEW_RENDERSYSTEM = false;
@@ -110,7 +110,6 @@ public class SharedConstants {
 	public static final int WORLD_RESOLUTION = 16;
 	public static final int MAX_CHAT_LENGTH = 256;
 	public static final int MAX_COMMAND_LENGTH = 32500;
-	public static final int MAX_CHAINED_NEIGHBOR_UPDATES = 1000000;
 	public static final char[] ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
 	public static final int TICKS_PER_SECOND = 20;
 	public static final int TICKS_PER_MINUTE = 1200;
@@ -160,7 +159,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741900;
+		return 1073741901;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

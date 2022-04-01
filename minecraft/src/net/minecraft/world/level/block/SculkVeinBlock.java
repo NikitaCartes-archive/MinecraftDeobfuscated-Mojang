@@ -7,11 +7,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,13 +43,13 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 		return this.sameSpaceSpreader;
 	}
 
-	public static boolean regrow(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Collection<Direction> collection) {
+	public static boolean regrow(Level level, BlockPos blockPos, BlockState blockState, Collection<Direction> collection) {
 		boolean bl = false;
 		BlockState blockState2 = Blocks.SCULK_VEIN.defaultBlockState();
 
 		for (Direction direction : collection) {
 			BlockPos blockPos2 = blockPos.relative(direction);
-			if (canAttachTo(levelAccessor, direction, blockPos2, levelAccessor.getBlockState(blockPos2))) {
+			if (canAttachTo(level, direction, blockPos2, level.getBlockState(blockPos2))) {
 				blockState2 = blockState2.setValue(getFaceProperty(direction), Boolean.valueOf(true));
 				bl = true;
 			}
@@ -62,62 +62,59 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 				blockState2 = blockState2.setValue(WATERLOGGED, Boolean.valueOf(true));
 			}
 
-			levelAccessor.setBlock(blockPos, blockState2, 3);
+			level.setBlock(blockPos, blockState2, 3);
 			return true;
 		}
 	}
 
 	@Override
-	public void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, Random random) {
+	public void onDischarged(Level level, BlockState blockState, BlockPos blockPos, Random random) {
 		if (blockState.is(this)) {
 			for (Direction direction : DIRECTIONS) {
 				BooleanProperty booleanProperty = getFaceProperty(direction);
-				if ((Boolean)blockState.getValue(booleanProperty) && levelAccessor.getBlockState(blockPos.relative(direction)).is(Blocks.SCULK)) {
+				if ((Boolean)blockState.getValue(booleanProperty) && level.getBlockState(blockPos.relative(direction)).is(Blocks.SCULK)) {
 					blockState = blockState.setValue(booleanProperty, Boolean.valueOf(false));
 				}
 			}
 
 			if (!hasAnyFace(blockState)) {
-				FluidState fluidState = levelAccessor.getFluidState(blockPos);
+				FluidState fluidState = level.getFluidState(blockPos);
 				blockState = (fluidState.isEmpty() ? Blocks.AIR : Blocks.WATER).defaultBlockState();
 			}
 
-			levelAccessor.setBlock(blockPos, blockState, 3);
-			SculkBehaviour.super.onDischarged(levelAccessor, blockState, blockPos, random);
+			level.setBlock(blockPos, blockState, 3);
+			SculkBehaviour.super.onDischarged(level, blockState, blockPos, random);
 		}
 	}
 
 	@Override
-	public int attemptUseCharge(
-		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl
-	) {
-		if (bl && this.attemptPlaceSculk(sculkSpreader, levelAccessor, chargeCursor.getPos(), random)) {
+	public int attemptUseCharge(SculkSpreader.ChargeCursor chargeCursor, Level level, BlockPos blockPos, Random random) {
+		if (this.attemptPlaceSculk(level, chargeCursor.getPos(), random)) {
 			return chargeCursor.getCharge() - 1;
 		} else {
-			return random.nextInt(sculkSpreader.chargeDecayRate()) == 0 ? Mth.floor((float)chargeCursor.getCharge() * 0.5F) : chargeCursor.getCharge();
+			return random.nextInt(10) == 0 ? Mth.floor((float)chargeCursor.getCharge() * 0.5F) : chargeCursor.getCharge();
 		}
 	}
 
-	private boolean attemptPlaceSculk(SculkSpreader sculkSpreader, LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
-		BlockState blockState = levelAccessor.getBlockState(blockPos);
-		TagKey<Block> tagKey = sculkSpreader.replaceableBlocks();
+	private boolean attemptPlaceSculk(Level level, BlockPos blockPos, Random random) {
+		BlockState blockState = level.getBlockState(blockPos);
 
 		for (Direction direction : Direction.allShuffled(random)) {
 			if (hasFace(blockState, direction)) {
 				BlockPos blockPos2 = blockPos.relative(direction);
-				if (levelAccessor.getBlockState(blockPos2).is(tagKey)) {
+				if (level.getBlockState(blockPos2).is(BlockTags.SCULK_REPLACEABLE)) {
 					BlockState blockState2 = Blocks.SCULK.defaultBlockState();
-					levelAccessor.setBlock(blockPos2, blockState2, 3);
-					levelAccessor.playSound(null, blockPos2, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 1.0F);
-					this.veinSpreader.spreadAll(blockState2, levelAccessor, blockPos2, sculkSpreader.isWorldGeneration());
+					level.setBlock(blockPos2, blockState2, 3);
+					level.playSound(null, blockPos2, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 1.0F);
+					this.veinSpreader.spreadAll(blockState2, level, blockPos2);
 					Direction direction2 = direction.getOpposite();
 
 					for (Direction direction3 : DIRECTIONS) {
 						if (direction3 != direction2) {
 							BlockPos blockPos3 = blockPos2.relative(direction3);
-							BlockState blockState3 = levelAccessor.getBlockState(blockPos3);
+							BlockState blockState3 = level.getBlockState(blockPos3);
 							if (blockState3.is(this)) {
-								this.onDischarged(levelAccessor, blockState3, blockPos3, random);
+								this.onDischarged(level, blockState3, blockPos3, random);
 							}
 						}
 					}
@@ -130,12 +127,12 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 		return false;
 	}
 
-	public static boolean hasSubstrateAccess(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos) {
+	public static boolean hasSubstrateAccess(Level level, BlockState blockState, BlockPos blockPos) {
 		if (!blockState.is(Blocks.SCULK_VEIN)) {
 			return false;
 		} else {
 			for (Direction direction : DIRECTIONS) {
-				if (hasFace(blockState, direction) && levelAccessor.getBlockState(blockPos.relative(direction)).is(BlockTags.SCULK_REPLACEABLE)) {
+				if (hasFace(blockState, direction) && level.getBlockState(blockPos.relative(direction)).is(BlockTags.SCULK_REPLACEABLE)) {
 					return true;
 				}
 			}

@@ -58,8 +58,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.redstone.CollectingNeighborUpdater;
-import net.minecraft.world.level.redstone.NeighborUpdater;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -67,7 +65,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
 
 public abstract class Level implements LevelAccessor, AutoCloseable {
-	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceKey.codec(Registry.DIMENSION_REGISTRY);
+	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceLocation.CODEC
+		.xmap(ResourceKey.elementKey(Registry.DIMENSION_REGISTRY), ResourceKey::location);
 	public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("overworld"));
 	public static final ResourceKey<Level> NETHER = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_nether"));
 	public static final ResourceKey<Level> END = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_end"));
@@ -80,7 +79,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public static final int MAX_ENTITY_SPAWN_Y = 20000000;
 	public static final int MIN_ENTITY_SPAWN_Y = -20000000;
 	protected final List<TickingBlockEntity> blockEntityTickers = Lists.<TickingBlockEntity>newArrayList();
-	protected final NeighborUpdater neighborUpdater;
 	private final List<TickingBlockEntity> pendingBlockEntityTickers = Lists.<TickingBlockEntity>newArrayList();
 	private boolean tickingBlockEntities;
 	private final Thread thread;
@@ -110,8 +108,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		Supplier<ProfilerFiller> supplier,
 		boolean bl,
 		boolean bl2,
-		long l,
-		int i
+		long l
 	) {
 		this.profiler = supplier;
 		this.levelData = writableLevelData;
@@ -138,7 +135,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.thread = Thread.currentThread();
 		this.biomeManager = new BiomeManager(this, l);
 		this.isDebug = bl2;
-		this.neighborUpdater = new CollectingNeighborUpdater(this, i);
 	}
 
 	@Override
@@ -299,20 +295,60 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public void updateNeighborsAt(BlockPos blockPos, Block block) {
+		this.neighborChanged(blockPos.west(), block, blockPos);
+		this.neighborChanged(blockPos.east(), block, blockPos);
+		this.neighborChanged(blockPos.below(), block, blockPos);
+		this.neighborChanged(blockPos.above(), block, blockPos);
+		this.neighborChanged(blockPos.north(), block, blockPos);
+		this.neighborChanged(blockPos.south(), block, blockPos);
 	}
 
 	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction) {
+		if (direction != Direction.WEST) {
+			this.neighborChanged(blockPos.west(), block, blockPos);
+		}
+
+		if (direction != Direction.EAST) {
+			this.neighborChanged(blockPos.east(), block, blockPos);
+		}
+
+		if (direction != Direction.DOWN) {
+			this.neighborChanged(blockPos.below(), block, blockPos);
+		}
+
+		if (direction != Direction.UP) {
+			this.neighborChanged(blockPos.above(), block, blockPos);
+		}
+
+		if (direction != Direction.NORTH) {
+			this.neighborChanged(blockPos.north(), block, blockPos);
+		}
+
+		if (direction != Direction.SOUTH) {
+			this.neighborChanged(blockPos.south(), block, blockPos);
+		}
 	}
 
 	public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
-	}
+		if (!this.isClientSide) {
+			BlockState blockState = this.getBlockState(blockPos);
 
-	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-	}
-
-	@Override
-	public void neighborShapeChanged(Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
-		this.neighborUpdater.shapeUpdate(direction, blockState, blockPos, blockPos2, i, j);
+			try {
+				blockState.neighborChanged(this, blockPos, block, blockPos2, false);
+			} catch (Throwable var8) {
+				CrashReport crashReport = CrashReport.forThrowable(var8, "Exception while updating neighbours");
+				CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");
+				crashReportCategory.setDetail("Source block type", (CrashReportDetail<String>)(() -> {
+					try {
+						return String.format("ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
+					} catch (Throwable var2) {
+						return "ID #" + Registry.BLOCK.getKey(block);
+					}
+				}));
+				CrashReportCategory.populateBlockDetails(crashReportCategory, this, blockPos, blockState);
+				throw new ReportedException(crashReport);
+			}
+		}
 	}
 
 	@Override
@@ -790,12 +826,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			if (this.hasChunkAt(blockPos2)) {
 				BlockState blockState = this.getBlockState(blockPos2);
 				if (blockState.is(Blocks.COMPARATOR)) {
-					this.neighborChanged(blockState, blockPos2, block, blockPos, false);
+					blockState.neighborChanged(this, blockPos2, block, blockPos, false);
 				} else if (blockState.isRedstoneConductor(this, blockPos2)) {
 					blockPos2 = blockPos2.relative(direction);
 					blockState = this.getBlockState(blockPos2);
 					if (blockState.is(Blocks.COMPARATOR)) {
-						this.neighborChanged(blockState, blockPos2, block, blockPos, false);
+						blockState.neighborChanged(this, blockPos2, block, blockPos, false);
 					}
 				}
 			}
@@ -889,6 +925,26 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	protected abstract LevelEntityGetter<Entity> getEntities();
+
+	protected void postGameEventInRadius(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos, int i) {
+		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
+		int k = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
+		int l = SectionPos.blockToSectionCoord(blockPos.getX() + i);
+		int m = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
+		int n = SectionPos.blockToSectionCoord(blockPos.getY() - i);
+		int o = SectionPos.blockToSectionCoord(blockPos.getY() + i);
+
+		for (int p = j; p <= l; p++) {
+			for (int q = k; q <= m; q++) {
+				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
+				if (chunkAccess != null) {
+					for (int r = n; r <= o; r++) {
+						chunkAccess.getEventDispatcher(r).post(gameEvent, entity, blockPos);
+					}
+				}
+			}
+		}
+	}
 
 	@Override
 	public long nextSubTickCount() {

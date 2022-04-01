@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GoatModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.goat.Goat;
 
@@ -13,6 +14,7 @@ public class GoatRenderer extends MobRenderer<Goat, GoatModel<Goat>> {
 
 	public GoatRenderer(EntityRendererProvider.Context context) {
 		super(context, new GoatModel<>(context.bakeLayer(ModelLayers.GOAT)), 0.7F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(Goat goat) {

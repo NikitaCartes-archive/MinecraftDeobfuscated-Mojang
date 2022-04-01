@@ -1,9 +1,11 @@
 package net.minecraft.server.packs.resources;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -15,11 +17,9 @@ public interface ResourceManager extends ResourceProvider {
 
 	boolean hasResource(ResourceLocation resourceLocation);
 
-	List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException;
+	List<Resource> getResources(ResourceLocation resourceLocation) throws IOException;
 
-	Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate);
-
-	Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate);
+	Collection<ResourceLocation> listResources(String string, Predicate<String> predicate);
 
 	Stream<PackResources> listPacks();
 
@@ -28,7 +28,7 @@ public interface ResourceManager extends ResourceProvider {
 
 		@Override
 		public Set<String> getNamespaces() {
-			return Set.of();
+			return ImmutableSet.of();
 		}
 
 		@Override
@@ -42,18 +42,13 @@ public interface ResourceManager extends ResourceProvider {
 		}
 
 		@Override
-		public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
-			throw new FileNotFoundException(resourceLocation.toString());
+		public List<Resource> getResources(ResourceLocation resourceLocation) {
+			return ImmutableList.of();
 		}
 
 		@Override
-		public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
-			return Map.of();
-		}
-
-		@Override
-		public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
-			return Map.of();
+		public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
+			return ImmutableSet.<ResourceLocation>of();
 		}
 
 		@Override

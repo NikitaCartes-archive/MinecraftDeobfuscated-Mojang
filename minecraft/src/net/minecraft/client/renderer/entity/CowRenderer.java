@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CowModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Cow;
 
@@ -13,6 +14,7 @@ public class CowRenderer extends MobRenderer<Cow, CowModel<Cow>> {
 
 	public CowRenderer(EntityRendererProvider.Context context) {
 		super(context, new CowModel<>(context.bakeLayer(ModelLayers.COW)), 0.7F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(Cow cow) {

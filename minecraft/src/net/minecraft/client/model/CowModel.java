@@ -44,6 +44,7 @@ public class CowModel<T extends Entity> extends QuadrupedModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
+	@Override
 	public ModelPart getHead() {
 		return this.head;
 	}

@@ -355,57 +355,37 @@ public class ModelBakery {
 				List<Pair<String, BlockModelDefinition>> list2;
 				try {
 					list2 = (List<Pair<String, BlockModelDefinition>>)this.resourceManager
-						.getResourceStack(resourceLocation3)
+						.getResources(resourceLocation3)
 						.stream()
 						.map(
-							resourceThunk -> {
+							resource -> {
 								try {
-									Resource resource = resourceThunk.open();
+									InputStream inputStream = resource.getInputStream();
 
-									Pair var5x;
+									Pair var3x;
 									try {
-										InputStream inputStream = resource.getInputStream();
-
-										try {
-											var5x = Pair.of(
-												resourceThunk.sourcePackId(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-											);
-										} catch (Throwable var9x) {
-											if (inputStream != null) {
-												try {
-													inputStream.close();
-												} catch (Throwable var8x) {
-													var9x.addSuppressed(var8x);
-												}
-											}
-
-											throw var9x;
-										}
-
+										var3x = Pair.of(resource.getSourceName(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
+									} catch (Throwable var6x) {
 										if (inputStream != null) {
-											inputStream.close();
-										}
-									} catch (Throwable var10x) {
-										if (resource != null) {
 											try {
-												resource.close();
-											} catch (Throwable var7x) {
-												var10x.addSuppressed(var7x);
+												inputStream.close();
+											} catch (Throwable var5x) {
+												var6x.addSuppressed(var5x);
 											}
 										}
 
-										throw var10x;
+										throw var6x;
 									}
 
-									if (resource != null) {
-										resource.close();
+									if (inputStream != null) {
+										inputStream.close();
 									}
 
-									return var5x;
-								} catch (Exception var11x) {
+									return var3x;
+								} catch (Exception var7x) {
 									throw new ModelBakery.BlockStateDefinitionException(
 										String.format(
-											"Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resourceLocation3, resourceThunk.sourcePackId(), var11x.getMessage()
+											"Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resource.getLocation(), resource.getSourceName(), var7x.getMessage()
 										)
 									);
 								}

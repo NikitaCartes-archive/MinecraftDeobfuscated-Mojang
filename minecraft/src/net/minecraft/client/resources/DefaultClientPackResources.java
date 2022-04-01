@@ -19,7 +19,7 @@ public class DefaultClientPackResources extends VanillaPackResources {
 	private final AssetIndex assetIndex;
 
 	public DefaultClientPackResources(PackMetadataSection packMetadataSection, AssetIndex assetIndex) {
-		super(packMetadataSection, "minecraft", "realms");
+		super(packMetadataSection, "minecraft", "realms", "nothingtoseeheremovealong");
 		this.assetIndex = assetIndex;
 	}
 
@@ -66,9 +66,9 @@ public class DefaultClientPackResources extends VanillaPackResources {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
-		Collection<ResourceLocation> collection = super.getResources(packType, string, string2, predicate);
-		collection.addAll(this.assetIndex.getFiles(string2, string, predicate));
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+		Collection<ResourceLocation> collection = super.getResources(packType, string, string2, i, predicate);
+		collection.addAll(this.assetIndex.getFiles(string2, string, i, predicate));
 		return collection;
 	}
 }

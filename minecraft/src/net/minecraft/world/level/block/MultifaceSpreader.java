@@ -43,10 +43,10 @@ public class MultifaceSpreader {
 			.orElse(Optional.empty());
 	}
 
-	public long spreadAll(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
+	public long spreadAll(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		return (Long)Direction.stream()
 			.filter(direction -> this.config.canSpreadFrom(blockState, direction))
-			.map(direction -> this.spreadFromFaceTowardAllDirections(blockState, levelAccessor, blockPos, direction, bl))
+			.map(direction -> this.spreadFromFaceTowardAllDirections(blockState, levelAccessor, blockPos, direction, false))
 			.reduce(0L, Long::sum);
 	}
 

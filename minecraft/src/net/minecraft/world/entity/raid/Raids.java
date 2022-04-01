@@ -21,7 +21,6 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
@@ -174,7 +173,7 @@ public class Raids extends SavedData {
 	}
 
 	public static String getFileId(Holder<DimensionType> holder) {
-		return holder.is(BuiltinDimensionTypes.END) ? "raids_end" : "raids";
+		return holder.is(DimensionType.END_LOCATION) ? "raids_end" : "raids";
 	}
 
 	private int getUniqueId() {

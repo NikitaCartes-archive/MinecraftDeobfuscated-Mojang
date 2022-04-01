@@ -49,7 +49,7 @@ public class ArmorStandItem extends Item {
 					this.randomizePose(armorStand, level.random);
 					serverLevel.addFreshEntityWithPassengers(armorStand);
 					level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75F, 0.8F);
-					armorStand.gameEvent(GameEvent.ENTITY_PLACE, useOnContext.getPlayer());
+					level.gameEvent(useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, armorStand);
 				}
 
 				itemStack.shrink(1);

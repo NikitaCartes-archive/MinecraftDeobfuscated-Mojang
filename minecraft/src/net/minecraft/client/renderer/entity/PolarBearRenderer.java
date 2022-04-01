@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PolarBearModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.PolarBear;
 
@@ -14,6 +15,7 @@ public class PolarBearRenderer extends MobRenderer<PolarBear, PolarBearModel<Pol
 
 	public PolarBearRenderer(EntityRendererProvider.Context context) {
 		super(context, new PolarBearModel<>(context.bakeLayer(ModelLayers.POLAR_BEAR)), 0.9F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(PolarBear polarBear) {

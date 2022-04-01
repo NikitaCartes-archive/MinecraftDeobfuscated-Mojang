@@ -32,7 +32,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
@@ -65,76 +64,58 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 			profilerFiller.push(string);
 
 			try {
-				for (ResourceThunk resourceThunk : resourceManager.getResourceStack(new ResourceLocation(string, "sounds.json"))) {
-					profilerFiller.push(resourceThunk.sourcePackId());
+				for (Resource resource : resourceManager.getResources(new ResourceLocation(string, "sounds.json"))) {
+					profilerFiller.push(resource.getSourceName());
 
 					try {
-						Resource resource = resourceThunk.open();
+						InputStream inputStream = resource.getInputStream();
 
 						try {
-							InputStream inputStream = resource.getInputStream();
+							Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
 							try {
-								Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+								profilerFiller.push("parse");
+								Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, reader, SOUND_EVENT_REGISTRATION_TYPE);
+								profilerFiller.popPush("register");
 
-								try {
-									profilerFiller.push("parse");
-									Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, reader, SOUND_EVENT_REGISTRATION_TYPE);
-									profilerFiller.popPush("register");
-
-									for (Entry<String, SoundEventRegistration> entry : map.entrySet()) {
-										preparations.handleRegistration(new ResourceLocation(string, (String)entry.getKey()), (SoundEventRegistration)entry.getValue(), resourceManager);
-									}
-
-									profilerFiller.pop();
-								} catch (Throwable var18) {
-									try {
-										reader.close();
-									} catch (Throwable var17) {
-										var18.addSuppressed(var17);
-									}
-
-									throw var18;
+								for (Entry<String, SoundEventRegistration> entry : map.entrySet()) {
+									preparations.handleRegistration(new ResourceLocation(string, (String)entry.getKey()), (SoundEventRegistration)entry.getValue(), resourceManager);
 								}
 
-								reader.close();
-							} catch (Throwable var19) {
-								if (inputStream != null) {
-									try {
-										inputStream.close();
-									} catch (Throwable var16) {
-										var19.addSuppressed(var16);
-									}
-								}
-
-								throw var19;
-							}
-
-							if (inputStream != null) {
-								inputStream.close();
-							}
-						} catch (Throwable var20) {
-							if (resource != null) {
+								profilerFiller.pop();
+							} catch (Throwable var16) {
 								try {
-									resource.close();
+									reader.close();
 								} catch (Throwable var15) {
-									var20.addSuppressed(var15);
+									var16.addSuppressed(var15);
+								}
+
+								throw var16;
+							}
+
+							reader.close();
+						} catch (Throwable var17) {
+							if (inputStream != null) {
+								try {
+									inputStream.close();
+								} catch (Throwable var14) {
+									var17.addSuppressed(var14);
 								}
 							}
 
-							throw var20;
+							throw var17;
 						}
 
-						if (resource != null) {
-							resource.close();
+						if (inputStream != null) {
+							inputStream.close();
 						}
-					} catch (RuntimeException var21) {
-						LOGGER.warn("Invalid {} in resourcepack: '{}'", "sounds.json", resourceThunk.sourcePackId(), var21);
+					} catch (RuntimeException var18) {
+						LOGGER.warn("Invalid {} in resourcepack: '{}'", "sounds.json", resource.getSourceName(), var18);
 					}
 
 					profilerFiller.pop();
 				}
-			} catch (IOException var22) {
+			} catch (IOException var19) {
 			}
 
 			profilerFiller.pop();

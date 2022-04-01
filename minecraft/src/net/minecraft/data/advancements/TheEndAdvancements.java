@@ -14,6 +14,7 @@ import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -52,6 +53,25 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("killed_dragon", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityType.ENDER_DRAGON)))
 			.save(consumer, "end/kill_dragon");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Blocks.DRAGON_HEAD,
+				new TranslatableComponent("advancements.end.ride_dragon.title"),
+				new TranslatableComponent("advancements.end.ride_dragon.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"ride_dragon",
+				StartRidingTrigger.TriggerInstance.playerStartsRiding(
+					EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.ENDER_DRAGON).build())
+				)
+			)
+			.save(consumer, "end/ride_dragon");
 		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement2)
 			.display(
@@ -92,7 +112,7 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.END_CITY)))
+			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(BuiltinStructures.END_CITY)))
 			.save(consumer, "end/find_end_city");
 		Advancement.Builder.advancement()
 			.parent(advancement2)

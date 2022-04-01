@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -297,11 +296,6 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	public boolean isOcclusionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return Block.isShapeFullBlock(blockState.getOcclusionShape(blockGetter, blockPos));
-	}
-
-	@Deprecated
 	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.getCollisionShape(blockState, blockGetter, blockPos, collisionContext);
 	}
@@ -416,10 +410,6 @@ public abstract class BlockBehaviour {
 
 		public Block getBlock() {
 			return this.owner;
-		}
-
-		public Holder<Block> getBlockHolder() {
-			return this.owner.builtInRegistryHolder();
 		}
 
 		public Material getMaterial() {
@@ -596,7 +586,6 @@ public abstract class BlockBehaviour {
 			return this.getBlock().triggerEvent(this.asState(), level, blockPos, i, j);
 		}
 
-		@Deprecated
 		public void neighborChanged(Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 			this.getBlock().neighborChanged(this.asState(), level, blockPos, block, blockPos2, bl);
 		}
@@ -611,7 +600,9 @@ public abstract class BlockBehaviour {
 
 			for (Direction direction : BlockBehaviour.UPDATE_SHAPE_ORDER) {
 				mutableBlockPos.setWithOffset(blockPos, direction);
-				levelAccessor.neighborShapeChanged(direction.getOpposite(), this.asState(), mutableBlockPos, blockPos, i, j);
+				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
+				BlockState blockState2 = blockState.updateShape(direction.getOpposite(), this.asState(), levelAccessor, mutableBlockPos, blockPos);
+				Block.updateOrDestroy(blockState, blockState2, levelAccessor, mutableBlockPos, i, j);
 			}
 		}
 
@@ -962,7 +953,7 @@ public abstract class BlockBehaviour {
 			return this;
 		}
 
-		public BlockBehaviour.Properties noLootTable() {
+		public BlockBehaviour.Properties noDrops() {
 			this.drops = BuiltInLootTables.EMPTY;
 			return this;
 		}

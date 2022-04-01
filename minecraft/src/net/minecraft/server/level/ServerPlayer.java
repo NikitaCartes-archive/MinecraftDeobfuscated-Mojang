@@ -48,7 +48,6 @@ import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
@@ -59,8 +58,10 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
@@ -72,6 +73,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.stats.ServerStatsCounter;
@@ -93,7 +95,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
@@ -106,6 +110,7 @@ import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ComplexItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -119,6 +124,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.GenericItemBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -448,6 +454,46 @@ public class ServerPlayer extends Player {
 		this.trackStartFallingPosition();
 		this.trackEnteredOrExitedLavaOnVehicle();
 		this.advancements.flushDirty(this);
+		if (this.blockPosition().getY() < -32 && !this.level.dimensionType().bedWorks() && this.getVehicle() instanceof EnderDragon enderDragon) {
+			MinecraftServer minecraftServer = this.level.getServer();
+			if (minecraftServer != null) {
+				Level level = minecraftServer.overworld();
+				if (level instanceof ServerLevel serverLevel) {
+					Entity entity2 = this.teleportToDimenstion(enderDragon, serverLevel);
+					Entity entity3 = this.teleportPlayerToDimension(serverLevel, this);
+					if (entity2 != null && entity3 != null) {
+						entity3.startRiding(entity2);
+					}
+				}
+			}
+		}
+	}
+
+	private Entity teleportPlayerToDimension(ServerLevel serverLevel, Entity entity) {
+		ChunkPos chunkPos = new ChunkPos(entity.blockPosition());
+		serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, entity.getId());
+		entity.stopRiding();
+		if (((ServerPlayer)entity).isSleeping()) {
+			((ServerPlayer)entity).stopSleepInBed(true, true);
+		}
+
+		((ServerPlayer)entity).teleportTo(serverLevel, entity.getX(), 360.0, entity.getZ(), 0.0F, 0.0F);
+		return entity;
+	}
+
+	@Nullable
+	private Entity teleportToDimenstion(Entity entity, ServerLevel serverLevel) {
+		entity.unRide();
+		entity = entity.getType().create(serverLevel);
+		if (entity != null) {
+			entity.restoreFrom(entity);
+			entity.moveTo(entity.getX(), 360.0, entity.getZ(), 0.0F, 0.0F);
+			entity.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+			serverLevel.addDuringTeleport(entity);
+			return entity;
+		} else {
+			return null;
+		}
 	}
 
 	public void doTick() {
@@ -557,7 +603,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void die(DamageSource damageSource) {
-		this.gameEvent(GameEvent.ENTITY_DIE);
+		this.gameEvent(GameEvent.ENTITY_DYING);
 		boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES);
 		if (bl) {
 			Component component = this.getCombatTracker().getDeathMessage();
@@ -665,6 +711,31 @@ public class ServerPlayer extends Player {
 			} else {
 				if (damageSource instanceof EntityDamageSource) {
 					Entity entity = damageSource.getEntity();
+					if (entity instanceof Mob mob) {
+						if (mob instanceof EnderMan enderMan) {
+							BlockState blockState = mob.getCarriedBlock();
+							if (blockState != null && this.getCarried() == LivingEntity.Carried.NONE) {
+								mob.setCarriedBlock(null);
+								this.setCarriedBlock(blockState);
+								enderMan.stopBeingAngry();
+								Vec3 vec3 = enderMan.position();
+								enderMan.randomTeleport(
+									vec3.x + (enderMan.getRandom().nextDouble() - 0.5) * 16.0, vec3.y, vec3.z + (enderMan.getRandom().nextDouble() - 0.5) * 16.0, true
+								);
+								this.level.playSound(null, this, SoundEvents.OOOF, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
+								return false;
+							}
+						} else if (mob.canStealItem()
+							&& !damageSource.isProjectile()
+							&& this.getCarried() == LivingEntity.Carried.BLOCK
+							&& mob.getCarried() == LivingEntity.Carried.NONE) {
+							mob.setCarriedBlock(this.getCarriedBlock());
+							this.setCarriedBlock(null);
+							this.level.playSound(null, this, SoundEvents.OOOF, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
+							return false;
+						}
+					}
+
 					if (entity instanceof Player && !this.canHarmPlayer((Player)entity)) {
 						return false;
 					}
@@ -977,28 +1048,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public OptionalInt openMenu(@Nullable MenuProvider menuProvider) {
-		if (menuProvider == null) {
-			return OptionalInt.empty();
-		} else {
-			if (this.containerMenu != this.inventoryMenu) {
-				this.closeContainer();
-			}
-
-			this.nextContainerCounter();
-			AbstractContainerMenu abstractContainerMenu = menuProvider.createMenu(this.containerCounter, this.getInventory(), this);
-			if (abstractContainerMenu == null) {
-				if (this.isSpectator()) {
-					this.displayClientMessage(new TranslatableComponent("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
-				}
-
-				return OptionalInt.empty();
-			} else {
-				this.connection.send(new ClientboundOpenScreenPacket(abstractContainerMenu.containerId, abstractContainerMenu.getType(), menuProvider.getDisplayName()));
-				this.initMenu(abstractContainerMenu);
-				this.containerMenu = abstractContainerMenu;
-				return OptionalInt.of(this.containerCounter);
-			}
-		}
+		return OptionalInt.empty();
 	}
 
 	@Override
@@ -1146,6 +1196,7 @@ public class ServerPlayer extends Player {
 		this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
 		if (bl) {
 			this.getInventory().replaceWith(serverPlayer.getInventory());
+			this.setCarriedBlock(serverPlayer.getCarriedBlock());
 			this.setHealth(serverPlayer.getHealth());
 			this.foodData = serverPlayer.foodData;
 			this.experienceLevel = serverPlayer.experienceLevel;
@@ -1514,22 +1565,20 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public ItemEntity drop(ItemStack itemStack, boolean bl, boolean bl2) {
-		ItemEntity itemEntity = super.drop(itemStack, bl, bl2);
-		if (itemEntity == null) {
-			return null;
+	public List<FallingBlockEntity> drop(ItemStack itemStack, boolean bl, boolean bl2) {
+		List<FallingBlockEntity> list = super.drop(itemStack, bl, bl2);
+		if (list.isEmpty()) {
+			return list;
 		} else {
-			this.level.addFreshEntity(itemEntity);
-			ItemStack itemStack2 = itemEntity.getItem();
-			if (bl2) {
-				if (!itemStack2.isEmpty()) {
-					this.awardStat(Stats.ITEM_DROPPED.get(itemStack2.getItem()), itemStack.getCount());
-				}
+			for (FallingBlockEntity fallingBlockEntity : list) {
+				this.level.addFreshEntity(fallingBlockEntity);
+			}
 
+			if (bl2) {
 				this.awardStat(Stats.DROP);
 			}
 
-			return itemEntity;
+			return list;
 		}
 	}
 
@@ -1594,10 +1643,57 @@ public class ServerPlayer extends Player {
 		Inventory inventory = this.getInventory();
 		ItemStack itemStack = inventory.removeFromSelected(bl);
 		this.containerMenu.findSlot(inventory, inventory.selected).ifPresent(i -> this.containerMenu.setRemoteSlot(i, inventory.getSelected()));
-		return this.drop(itemStack, false, true) != null;
+		return !this.drop(itemStack, false, true).isEmpty();
 	}
 
 	public boolean allowsListing() {
 		return this.allowsListing;
+	}
+
+	@Override
+	protected void addPassenger(Entity entity) {
+		super.addPassenger(entity);
+		this.connection.send(new ClientboundSetPassengersPacket(this));
+	}
+
+	@Override
+	protected void removePassenger(Entity entity) {
+		super.removePassenger(entity);
+		this.connection.send(new ClientboundSetPassengersPacket(this));
+	}
+
+	public void tryThrowBlock(Vec3 vec3) {
+		BlockState blockState = this.getCarriedBlock();
+		if (blockState != null) {
+			if (blockState.is(Blocks.GENERIC_ITEM_BLOCK)) {
+				Item item = GenericItemBlock.itemFromGenericBlock(blockState);
+				if (item == Items.LAVA_BUCKET) {
+					blockState = Blocks.LAVA.defaultBlockState();
+				}
+
+				if (item == Items.WATER_BUCKET) {
+					blockState = Blocks.WATER.defaultBlockState();
+				}
+			}
+
+			this.setCarriedBlock(null);
+			if (blockState.is(Blocks.POINTED_DRIPSTONE)) {
+				this.level.playSound(null, this, SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 1.0F, 1.0F);
+			}
+
+			FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(this, blockState, Direction.getNearest(vec3.x, 0.0, vec3.z));
+			fallingBlockEntity.setDeltaMovement(vec3);
+			this.level.addFreshEntity(fallingBlockEntity);
+		}
+	}
+
+	public void tryThrowEntities(Vec3 vec3) {
+		this.getPassengers().forEach(entity -> entity.throwEntity(this, vec3));
+	}
+
+	@Override
+	public void throwEntity(ServerPlayer serverPlayer, Vec3 vec3) {
+		super.throwEntity(serverPlayer, vec3);
+		this.connection.send(new ClientboundSetEntityMotionPacket(this));
 	}
 }

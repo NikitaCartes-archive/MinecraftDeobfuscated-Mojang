@@ -56,6 +56,10 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.CarriedBlocks;
+import net.minecraft.world.level.block.GenericItemBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -171,6 +175,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
 		this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
 		this.register(ParticleTypes.SMALL_FLAME, FlameParticle.SmallFlameProvider::new);
+		this.register(ParticleTypes.FOOTSTEP, FootprintParticle.Provider::new);
 		this.register(ParticleTypes.DRIPPING_DRIPSTONE_WATER, DripParticle.DripstoneWaterHangProvider::new);
 		this.register(ParticleTypes.FALLING_DRIPSTONE_WATER, DripParticle.DripstoneWaterFallProvider::new);
 		this.register(ParticleTypes.DRIPPING_DRIPSTONE_LAVA, DripParticle.DripstoneLavaHangProvider::new);
@@ -182,8 +187,6 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.WAX_OFF, GlowParticle.WaxOffProvider::new);
 		this.register(ParticleTypes.ELECTRIC_SPARK, GlowParticle.ElectricSparkProvider::new);
 		this.register(ParticleTypes.SCRAPE, GlowParticle.ScrapeProvider::new);
-		this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
-		this.register(ParticleTypes.ALLAY_DUST, GlowParticle.AllayDustProvider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {
@@ -458,35 +461,55 @@ public class ParticleEngine implements PreparableReloadListener {
 		if (!blockState.isAir()) {
 			VoxelShape voxelShape = blockState.getShape(this.level, blockPos);
 			double d = 0.25;
-			voxelShape.forAllBoxes(
-				(dx, e, f, g, h, i) -> {
-					double j = Math.min(1.0, g - dx);
-					double k = Math.min(1.0, h - e);
-					double l = Math.min(1.0, i - f);
-					int m = Math.max(2, Mth.ceil(j / 0.25));
-					int n = Math.max(2, Mth.ceil(k / 0.25));
-					int o = Math.max(2, Mth.ceil(l / 0.25));
+			Item item = GenericItemBlock.itemFromGenericBlock(blockState);
+			if (item != null) {
+				ItemStack itemStack = CarriedBlocks.getItemStackFromBlock(blockState);
+				if (!itemStack.isEmpty()) {
+					this.destroy(
+						blockPos,
+						voxelShape,
+						0.25,
+						(clientLevel, dx, e, f, g, h, i, blockPosx) -> new BreakingItemParticle(clientLevel, dx, e, f, g * 0.1, h * 0.1, i * 0.1, itemStack)
+					);
+					return;
+				}
+			}
 
-					for (int p = 0; p < m; p++) {
-						for (int q = 0; q < n; q++) {
-							for (int r = 0; r < o; r++) {
-								double s = ((double)p + 0.5) / (double)m;
-								double t = ((double)q + 0.5) / (double)n;
-								double u = ((double)r + 0.5) / (double)o;
-								double v = s * j + dx;
-								double w = t * k + e;
-								double x = u * l + f;
-								this.add(
-									new TerrainParticle(
-										this.level, (double)blockPos.getX() + v, (double)blockPos.getY() + w, (double)blockPos.getZ() + x, s - 0.5, t - 0.5, u - 0.5, blockState, blockPos
-									)
-								);
-							}
+			this.destroy(
+				blockPos, voxelShape, 0.25, (clientLevel, dx, e, f, g, h, i, blockPosx) -> new TerrainParticle(clientLevel, dx, e, f, g, h, i, blockState, blockPosx)
+			);
+		}
+	}
+
+	private void destroy(BlockPos blockPos, VoxelShape voxelShape, double d, ParticleEngine.DestroyParticleFactory destroyParticleFactory) {
+		voxelShape.forAllBoxes(
+			(e, f, g, h, i, j) -> {
+				double k = Math.min(1.0, h - e);
+				double l = Math.min(1.0, i - f);
+				double m = Math.min(1.0, j - g);
+				int n = Math.max(2, Mth.ceil(k / d));
+				int o = Math.max(2, Mth.ceil(l / d));
+				int p = Math.max(2, Mth.ceil(m / d));
+
+				for (int q = 0; q < n; q++) {
+					for (int r = 0; r < o; r++) {
+						for (int s = 0; s < p; s++) {
+							double t = ((double)q + 0.5) / (double)n;
+							double u = ((double)r + 0.5) / (double)o;
+							double v = ((double)s + 0.5) / (double)p;
+							double w = t * k + e;
+							double x = u * l + f;
+							double y = v * m + g;
+							this.add(
+								destroyParticleFactory.create(
+									this.level, (double)blockPos.getX() + w, (double)blockPos.getY() + x, (double)blockPos.getZ() + y, t - 0.5, u - 0.5, v - 0.5, blockPos
+								)
+							);
 						}
 					}
 				}
-			);
-		}
+			}
+		);
 	}
 
 	public void crack(BlockPos blockPos, Direction direction) {
@@ -524,6 +547,15 @@ public class ParticleEngine implements PreparableReloadListener {
 				d = (double)i + aABB.maxX + 0.1F;
 			}
 
+			Item item = GenericItemBlock.itemFromGenericBlock(blockState);
+			if (item != null) {
+				ItemStack itemStack = CarriedBlocks.getItemStackFromBlock(blockState);
+				if (!itemStack.isEmpty()) {
+					this.add(new BreakingItemParticle(this.level, d, e, g, 0.0, 0.0, 0.0, itemStack).setPower(0.2F).scale(0.6F));
+					return;
+				}
+			}
+
 			this.add(new TerrainParticle(this.level, d, e, g, 0.0, 0.0, 0.0, blockState, blockPos).setPower(0.2F).scale(0.6F));
 		}
 	}
@@ -534,6 +566,11 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	private boolean hasSpaceInParticleLimit(ParticleGroup particleGroup) {
 		return this.trackedParticleCounts.getInt(particleGroup) < particleGroup.getLimit();
+	}
+
+	@Environment(EnvType.CLIENT)
+	interface DestroyParticleFactory {
+		Particle create(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, BlockPos blockPos);
 	}
 
 	@Environment(EnvType.CLIENT)

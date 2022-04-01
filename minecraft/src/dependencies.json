@@ -88,9 +88,9 @@
 		"url": "https://libraries.minecraft.net/com/mojang/javabridge/1.2.24/javabridge-1.2.24.jar"
 	},
 	{
-		"sha1sum": "1227f9e0666314f9de41477e3ec277e542ed7f7b",
-		"name": "java-objc-bridge-1.1.jar",
-		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.1/java-objc-bridge-1.1.jar"
+		"sha1sum": "6ef160c3133a78de015830860197602ca1c855d3",
+		"name": "java-objc-bridge-1.0.0.jar",
+		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.0.0/java-objc-bridge-1.0.0.jar"
 	},
 	{
 		"sha1sum": "7cf4c87dd802db50721db66947aa237d7ad09418",
@@ -218,8 +218,8 @@
 		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar"
 	},
 	{
-		"sha1sum": "5f4e3a6ef86cb021f7ca87ca192cddb50c26eb59",
-		"name": "text2speech-1.13.9.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.13.9/text2speech-1.13.9.jar"
+		"sha1sum": "1f618f522dbdd93218c270bcfd8f8dd84be31717",
+		"name": "text2speech-1.12.4.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.12.4/text2speech-1.12.4.jar"
 	}
 ]

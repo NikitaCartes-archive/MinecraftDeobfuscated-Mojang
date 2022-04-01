@@ -309,13 +309,13 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 					m = -999;
 				}
 
-				if (this.minecraft.options.touchscreen().get() && bl2 && this.menu.getCarried().isEmpty()) {
-					this.onClose();
+				if (this.minecraft.options.touchscreen && bl2 && this.menu.getCarried().isEmpty()) {
+					this.minecraft.setScreen(null);
 					return true;
 				}
 
 				if (m != -1) {
-					if (this.minecraft.options.touchscreen().get()) {
+					if (this.minecraft.options.touchscreen) {
 						if (slot != null && slot.hasItem()) {
 							this.clickedSlot = slot;
 							this.draggingItem = ItemStack.EMPTY;
@@ -391,7 +391,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	public boolean mouseDragged(double d, double e, int i, double f, double g) {
 		Slot slot = this.findSlot(d, e);
 		ItemStack itemStack = this.menu.getCarried();
-		if (this.clickedSlot != null && this.minecraft.options.touchscreen().get()) {
+		if (this.clickedSlot != null && this.minecraft.options.touchscreen) {
 			if (i == 0 || i == 1) {
 				if (this.draggingItem.isEmpty()) {
 					if (slot != this.clickedSlot && !this.clickedSlot.getItem().isEmpty()) {
@@ -474,7 +474,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				return true;
 			}
 
-			if (this.clickedSlot != null && this.minecraft.options.touchscreen().get()) {
+			if (this.clickedSlot != null && this.minecraft.options.touchscreen) {
 				if (i == 0 || i == 1) {
 					if (this.draggingItem.isEmpty() && slot != this.clickedSlot) {
 						this.draggingItem = this.clickedSlot.getItem();

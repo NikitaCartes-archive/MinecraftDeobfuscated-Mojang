@@ -38,8 +38,6 @@ import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.IdMap;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -101,21 +99,6 @@ public class FriendlyByteBuf extends ByteBuf {
 			throw new EncoderException("Failed to encode: " + partialResult.message() + " " + object);
 		});
 		this.writeNbt((CompoundTag)dataResult.result().get());
-	}
-
-	public <T> void writeId(IdMap<T> idMap, T object) {
-		int i = idMap.getId(object);
-		if (i == -1) {
-			throw new IllegalArgumentException("Can't find id for '" + object + "' in map " + idMap);
-		} else {
-			this.writeVarInt(i);
-		}
-	}
-
-	@Nullable
-	public <T> T readById(IdMap<T> idMap) {
-		int i = this.readVarInt();
-		return idMap.byId(i);
 	}
 
 	public static <T> IntFunction<T> limitValue(IntFunction<T> intFunction, int i) {
@@ -458,7 +441,7 @@ public class FriendlyByteBuf extends ByteBuf {
 		} else {
 			this.writeBoolean(true);
 			Item item = itemStack.getItem();
-			this.writeId(Registry.ITEM, item);
+			this.writeVarInt(Item.getId(item));
 			this.writeByte(itemStack.getCount());
 			CompoundTag compoundTag = null;
 			if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
@@ -475,9 +458,9 @@ public class FriendlyByteBuf extends ByteBuf {
 		if (!this.readBoolean()) {
 			return ItemStack.EMPTY;
 		} else {
-			Item item = this.readById(Registry.ITEM);
-			int i = this.readByte();
-			ItemStack itemStack = new ItemStack(item, i);
+			int i = this.readVarInt();
+			int j = this.readByte();
+			ItemStack itemStack = new ItemStack(Item.byId(i), j);
 			itemStack.setTag(this.readNbt());
 			return itemStack;
 		}

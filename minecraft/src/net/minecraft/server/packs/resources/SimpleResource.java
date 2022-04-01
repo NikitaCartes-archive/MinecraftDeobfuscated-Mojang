@@ -16,9 +16,8 @@ public class SimpleResource implements Resource {
 	private final String sourceName;
 	private final ResourceLocation location;
 	private final InputStream resourceStream;
-	@Nullable
-	private InputStream metadataStream;
-	@Nullable
+	private final InputStream metadataStream;
+	private boolean triedMetadata;
 	private JsonObject metadata;
 
 	public SimpleResource(String string, ResourceLocation resourceLocation, InputStream inputStream, @Nullable InputStream inputStream2) {
@@ -40,36 +39,56 @@ public class SimpleResource implements Resource {
 
 	@Override
 	public boolean hasMetadata() {
-		return this.metadata != null || this.metadataStream != null;
+		return this.metadataStream != null;
 	}
 
 	@Nullable
 	@Override
 	public <T> T getMetadata(MetadataSectionSerializer<T> metadataSectionSerializer) {
-		if (this.metadata == null && this.metadataStream != null) {
-			BufferedReader bufferedReader = null;
-
-			try {
-				bufferedReader = new BufferedReader(new InputStreamReader(this.metadataStream, StandardCharsets.UTF_8));
-				this.metadata = GsonHelper.parse(bufferedReader);
-			} finally {
-				IOUtils.closeQuietly(bufferedReader);
-			}
-
-			this.metadataStream = null;
-		}
-
-		if (this.metadata == null) {
+		if (!this.hasMetadata()) {
 			return null;
 		} else {
-			String string = metadataSectionSerializer.getMetadataSectionName();
-			return this.metadata.has(string) ? metadataSectionSerializer.fromJson(GsonHelper.getAsJsonObject(this.metadata, string)) : null;
+			if (this.metadata == null && !this.triedMetadata) {
+				this.triedMetadata = true;
+				BufferedReader bufferedReader = null;
+
+				try {
+					bufferedReader = new BufferedReader(new InputStreamReader(this.metadataStream, StandardCharsets.UTF_8));
+					this.metadata = GsonHelper.parse(bufferedReader);
+				} finally {
+					IOUtils.closeQuietly(bufferedReader);
+				}
+			}
+
+			if (this.metadata == null) {
+				return null;
+			} else {
+				String string = metadataSectionSerializer.getMetadataSectionName();
+				return this.metadata.has(string) ? metadataSectionSerializer.fromJson(GsonHelper.getAsJsonObject(this.metadata, string)) : null;
+			}
 		}
 	}
 
 	@Override
 	public String getSourceName() {
 		return this.sourceName;
+	}
+
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		} else if (!(object instanceof SimpleResource simpleResource)) {
+			return false;
+		} else if (this.location != null ? this.location.equals(simpleResource.location) : simpleResource.location == null) {
+			return this.sourceName != null ? this.sourceName.equals(simpleResource.sourceName) : simpleResource.sourceName == null;
+		} else {
+			return false;
+		}
+	}
+
+	public int hashCode() {
+		int i = this.sourceName != null ? this.sourceName.hashCode() : 0;
+		return 31 * i + (this.location != null ? this.location.hashCode() : 0);
 	}
 
 	public void close() throws IOException {

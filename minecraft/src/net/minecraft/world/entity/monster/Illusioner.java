@@ -207,8 +207,26 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 	}
 
 	@Override
+	public void performVehicleAttack(float f) {
+		if (this.isPassenger()) {
+			ItemStack itemStack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
+			AbstractArrow abstractArrow = ProjectileUtil.getMobArrow(this, itemStack, f);
+			Vec3 vec3 = this.getRootVehicle().getForward();
+			double d = vec3.x;
+			double e = vec3.y;
+			double g = vec3.z;
+			double h = Math.sqrt(d * d + g * g);
+			abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
+			this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+			this.level.addFreshEntity(abstractArrow);
+		}
+	}
+
+	@Override
 	public AbstractIllager.IllagerArmPose getArmPose() {
-		if (this.isCastingSpell()) {
+		if (this.getCarried() != LivingEntity.Carried.NONE) {
+			return AbstractIllager.IllagerArmPose.CROSSBOW_HOLD;
+		} else if (this.isCastingSpell()) {
 			return AbstractIllager.IllagerArmPose.SPELLCASTING;
 		} else {
 			return this.isAggressive() ? AbstractIllager.IllagerArmPose.BOW_AND_ARROW : AbstractIllager.IllagerArmPose.CROSSED;

@@ -22,7 +22,6 @@ import net.minecraft.util.datafix.fixes.BedItemColorFix;
 import net.minecraft.util.datafix.fixes.BeehivePoiRenameFix;
 import net.minecraft.util.datafix.fixes.BiomeFix;
 import net.minecraft.util.datafix.fixes.BitStorageAlignFix;
-import net.minecraft.util.datafix.fixes.BlendingDataFix;
 import net.minecraft.util.datafix.fixes.BlockEntityBannerColorFix;
 import net.minecraft.util.datafix.fixes.BlockEntityBlockStateFix;
 import net.minecraft.util.datafix.fixes.BlockEntityCustomNameToComponentFix;
@@ -41,7 +40,6 @@ import net.minecraft.util.datafix.fixes.CauldronRenameFix;
 import net.minecraft.util.datafix.fixes.CavesAndCliffsRenames;
 import net.minecraft.util.datafix.fixes.ChunkBedBlockEntityInjecterFix;
 import net.minecraft.util.datafix.fixes.ChunkBiomeFix;
-import net.minecraft.util.datafix.fixes.ChunkDeleteIgnoredLightDataFix;
 import net.minecraft.util.datafix.fixes.ChunkHeightAndBiomeFix;
 import net.minecraft.util.datafix.fixes.ChunkLightRemoveFix;
 import net.minecraft.util.datafix.fixes.ChunkPalettedStorageFix;
@@ -141,7 +139,6 @@ import net.minecraft.util.datafix.fixes.ReorganizePoi;
 import net.minecraft.util.datafix.fixes.SavedDataFeaturePoolElementFix;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
-import net.minecraft.util.datafix.fixes.SimpleRenameFix;
 import net.minecraft.util.datafix.fixes.SpawnerDataFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
 import net.minecraft.util.datafix.fixes.StatsRenameFix;
@@ -214,10 +211,6 @@ import net.minecraft.util.datafix.schemas.V2831;
 import net.minecraft.util.datafix.schemas.V2832;
 import net.minecraft.util.datafix.schemas.V2842;
 import net.minecraft.util.datafix.schemas.V3076;
-import net.minecraft.util.datafix.schemas.V3078;
-import net.minecraft.util.datafix.schemas.V3081;
-import net.minecraft.util.datafix.schemas.V3082;
-import net.minecraft.util.datafix.schemas.V3083;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -850,46 +843,6 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new StructuresBecomeConfiguredFix(schema155));
 		Schema schema156 = dataFixerBuilder.addSchema(3076, V3076::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema156, "Added Sculk Catalyst", References.BLOCK_ENTITY));
-		Schema schema157 = dataFixerBuilder.addSchema(3077, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new ChunkDeleteIgnoredLightDataFix(schema157));
-		Schema schema158 = dataFixerBuilder.addSchema(3078, V3078::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema158, "Added Frog", References.ENTITY));
-		dataFixerBuilder.addFixer(new AddNewChoices(schema158, "Added Tadpole", References.ENTITY));
-		dataFixerBuilder.addFixer(new AddNewChoices(schema158, "Added Sculk Shrieker", References.BLOCK_ENTITY));
-		Schema schema159 = dataFixerBuilder.addSchema(3079, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new BlendingDataFix(schema159, "Blending Data Fix v3079"));
-		Schema schema160 = dataFixerBuilder.addSchema(3081, V3081::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema160, "Added Warden", References.ENTITY));
-		Schema schema161 = dataFixerBuilder.addSchema(3082, V3082::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema161, "Added Chest Boat", References.ENTITY));
-		Schema schema162 = dataFixerBuilder.addSchema(3083, V3083::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema162, "Added Allay", References.ENTITY));
-		Schema schema163 = dataFixerBuilder.addSchema(3084, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(
-			new SimpleRenameFix(
-				schema163,
-				References.GAME_EVENT_NAME,
-				ImmutableMap.<String, String>builder()
-					.put("minecraft:block_press", "minecraft:block_activate")
-					.put("minecraft:block_switch", "minecraft:block_activate")
-					.put("minecraft:block_unpress", "minecraft:block_deactivate")
-					.put("minecraft:block_unswitch", "minecraft:block_deactivate")
-					.put("minecraft:drinking_finish", "minecraft:drink")
-					.put("minecraft:elytra_free_fall", "minecraft:elytra_glide")
-					.put("minecraft:entity_damaged", "minecraft:entity_damage")
-					.put("minecraft:entity_dying", "minecraft:entity_die")
-					.put("minecraft:entity_killed", "minecraft:entity_die")
-					.put("minecraft:mob_interact", "minecraft:entity_interact")
-					.put("minecraft:ravager_roar", "minecraft:entity_roar")
-					.put("minecraft:ring_bell", "minecraft:block_change")
-					.put("minecraft:shulker_close", "minecraft:container_close")
-					.put("minecraft:shulker_open", "minecraft:container_open")
-					.put("minecraft:wolf_shaking", "minecraft:entity_shake")
-					.build()
-			)
-		);
-		Schema schema164 = dataFixerBuilder.addSchema(3085, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new BlendingDataFix(schema164, "Blending Data Fix v3085"));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

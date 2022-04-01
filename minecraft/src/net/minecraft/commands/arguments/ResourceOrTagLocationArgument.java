@@ -14,10 +14,9 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentSerializer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -26,7 +25,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 
 public class ResourceOrTagLocationArgument<T> implements ArgumentType<ResourceOrTagLocationArgument.Result<T>> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012", "#skeletons", "#minecraft:skeletons");
@@ -61,8 +60,10 @@ public class ResourceOrTagLocationArgument<T> implements ArgumentType<ResourceOr
 		return getRegistryType(commandContext, string, Registry.BIOME_REGISTRY, ERROR_INVALID_BIOME);
 	}
 
-	public static ResourceOrTagLocationArgument.Result<Structure> getStructure(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getRegistryType(commandContext, string, Registry.STRUCTURE_REGISTRY, ERROR_INVALID_STRUCTURE);
+	public static ResourceOrTagLocationArgument.Result<ConfiguredStructureFeature<?, ?>> getStructureFeature(
+		CommandContext<CommandSourceStack> commandContext, String string
+	) throws CommandSyntaxException {
+		return getRegistryType(commandContext, string, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ERROR_INVALID_STRUCTURE);
 	}
 
 	public ResourceOrTagLocationArgument.Result<T> parse(StringReader stringReader) throws CommandSyntaxException {
@@ -95,42 +96,6 @@ public class ResourceOrTagLocationArgument<T> implements ArgumentType<ResourceOr
 		return EXAMPLES;
 	}
 
-	public static class Info<T> implements ArgumentTypeInfo<ResourceOrTagLocationArgument<T>, ResourceOrTagLocationArgument.Info<T>.Template> {
-		public void serializeToNetwork(ResourceOrTagLocationArgument.Info<T>.Template template, FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeResourceLocation(template.registryKey.location());
-		}
-
-		public ResourceOrTagLocationArgument.Info<T>.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			return new ResourceOrTagLocationArgument.Info.Template(ResourceKey.createRegistryKey(resourceLocation));
-		}
-
-		public void serializeToJson(ResourceOrTagLocationArgument.Info<T>.Template template, JsonObject jsonObject) {
-			jsonObject.addProperty("registry", template.registryKey.location().toString());
-		}
-
-		public ResourceOrTagLocationArgument.Info<T>.Template unpack(ResourceOrTagLocationArgument<T> resourceOrTagLocationArgument) {
-			return new ResourceOrTagLocationArgument.Info.Template(resourceOrTagLocationArgument.registryKey);
-		}
-
-		public final class Template implements ArgumentTypeInfo.Template<ResourceOrTagLocationArgument<T>> {
-			final ResourceKey<? extends Registry<T>> registryKey;
-
-			Template(ResourceKey<? extends Registry<T>> resourceKey) {
-				this.registryKey = resourceKey;
-			}
-
-			public ResourceOrTagLocationArgument<T> instantiate(CommandBuildContext commandBuildContext) {
-				return new ResourceOrTagLocationArgument<>(this.registryKey);
-			}
-
-			@Override
-			public ArgumentTypeInfo<ResourceOrTagLocationArgument<T>, ?> type() {
-				return Info.this;
-			}
-		}
-	}
-
 	static record ResourceResult<T>(ResourceKey<T> key) implements ResourceOrTagLocationArgument.Result<T> {
 		@Override
 		public Either<ResourceKey<T>, TagKey<T>> unwrap() {
@@ -158,6 +123,21 @@ public class ResourceOrTagLocationArgument<T> implements ArgumentType<ResourceOr
 		<E> Optional<ResourceOrTagLocationArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> resourceKey);
 
 		String asPrintable();
+	}
+
+	public static class Serializer implements ArgumentSerializer<ResourceOrTagLocationArgument<?>> {
+		public void serializeToNetwork(ResourceOrTagLocationArgument<?> resourceOrTagLocationArgument, FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeResourceLocation(resourceOrTagLocationArgument.registryKey.location());
+		}
+
+		public ResourceOrTagLocationArgument<?> deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
+			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
+			return new ResourceOrTagLocationArgument(ResourceKey.createRegistryKey(resourceLocation));
+		}
+
+		public void serializeToJson(ResourceOrTagLocationArgument<?> resourceOrTagLocationArgument, JsonObject jsonObject) {
+			jsonObject.addProperty("registry", resourceOrTagLocationArgument.registryKey.location().toString());
+		}
 	}
 
 	static record TagResult<T>(TagKey<T> key) implements ResourceOrTagLocationArgument.Result<T> {

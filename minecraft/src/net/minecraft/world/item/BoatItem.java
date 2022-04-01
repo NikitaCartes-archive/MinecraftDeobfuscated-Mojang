@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -9,7 +10,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -20,11 +20,9 @@ import net.minecraft.world.phys.Vec3;
 public class BoatItem extends Item {
 	private static final Predicate<Entity> ENTITY_PREDICATE = EntitySelector.NO_SPECTATORS.and(Entity::isPickable);
 	private final Boat.Type type;
-	private final boolean hasChest;
 
-	public BoatItem(boolean bl, Boat.Type type, Item.Properties properties) {
+	public BoatItem(Boat.Type type, Item.Properties properties) {
 		super(properties);
-		this.hasChest = bl;
 		this.type = type;
 	}
 
@@ -50,7 +48,7 @@ public class BoatItem extends Item {
 			}
 
 			if (hitResult.getType() == HitResult.Type.BLOCK) {
-				Boat boat = this.getBoat(level, hitResult);
+				Boat boat = new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
 				boat.setType(this.type);
 				boat.setYRot(player.getYRot());
 				if (!level.noCollision(boat, boat.getBoundingBox())) {
@@ -58,7 +56,7 @@ public class BoatItem extends Item {
 				} else {
 					if (!level.isClientSide) {
 						level.addFreshEntity(boat);
-						level.gameEvent(player, GameEvent.ENTITY_PLACE, hitResult.getLocation());
+						level.gameEvent(player, GameEvent.ENTITY_PLACE, new BlockPos(hitResult.getLocation()));
 						if (!player.getAbilities().instabuild) {
 							itemStack.shrink(1);
 						}
@@ -71,11 +69,5 @@ public class BoatItem extends Item {
 				return InteractionResultHolder.pass(itemStack);
 			}
 		}
-	}
-
-	private Boat getBoat(Level level, HitResult hitResult) {
-		return (Boat)(this.hasChest
-			? new ChestBoat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z)
-			: new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z));
 	}
 }

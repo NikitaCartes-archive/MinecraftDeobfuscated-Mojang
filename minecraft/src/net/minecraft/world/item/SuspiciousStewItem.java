@@ -21,7 +21,7 @@ public class SuspiciousStewItem extends Item {
 		CompoundTag compoundTag = itemStack.getOrCreateTag();
 		ListTag listTag = compoundTag.getList("Effects", 9);
 		CompoundTag compoundTag2 = new CompoundTag();
-		compoundTag2.putInt("EffectId", MobEffect.getId(mobEffect));
+		compoundTag2.putByte("EffectId", (byte)MobEffect.getId(mobEffect));
 		compoundTag2.putInt("EffectDuration", i);
 		listTag.add(compoundTag2);
 		compoundTag.put("Effects", listTag);
@@ -41,7 +41,7 @@ public class SuspiciousStewItem extends Item {
 					j = compoundTag2.getInt("EffectDuration");
 				}
 
-				MobEffect mobEffect = MobEffect.byId(compoundTag2.getInt("EffectId"));
+				MobEffect mobEffect = MobEffect.byId(compoundTag2.getByte("EffectId"));
 				if (mobEffect != null) {
 					livingEntity.addEffect(new MobEffectInstance(mobEffect, j));
 				}

@@ -23,7 +23,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -137,15 +136,6 @@ public class WorldUpgrader {
 									compoundTag2.remove("Heightmaps");
 									bl3 = bl3 || compoundTag2.contains("isLightOn");
 									compoundTag2.remove("isLightOn");
-									ListTag listTag = compoundTag2.getList("sections", 10);
-
-									for (int j = 0; j < listTag.size(); j++) {
-										CompoundTag compoundTag3 = listTag.getCompound(j);
-										bl3 = bl3 || compoundTag3.contains("BlockLight");
-										compoundTag3.remove("BlockLight");
-										bl3 = bl3 || compoundTag3.contains("SkyLight");
-										compoundTag3.remove("SkyLight");
-									}
 								}
 
 								if (bl3) {
@@ -153,15 +143,15 @@ public class WorldUpgrader {
 									bl2 = true;
 								}
 							}
-						} catch (ReportedException var27) {
-							Throwable throwable = var27.getCause();
+						} catch (ReportedException var24) {
+							Throwable throwable = var24.getCause();
 							if (!(throwable instanceof IOException)) {
-								throw var27;
+								throw var24;
 							}
 
 							LOGGER.error("Error upgrading chunk {}", chunkPos, throwable);
-						} catch (IOException var28) {
-							LOGGER.error("Error upgrading chunk {}", chunkPos, var28);
+						} catch (IOException var25) {
+							LOGGER.error("Error upgrading chunk {}", chunkPos, var25);
 						}
 
 						if (bl2) {
@@ -189,8 +179,8 @@ public class WorldUpgrader {
 			for (ChunkStorage chunkStorage2 : immutableMap2.values()) {
 				try {
 					chunkStorage2.close();
-				} catch (IOException var26) {
-					LOGGER.error("Error upgrading chunk", (Throwable)var26);
+				} catch (IOException var23) {
+					LOGGER.error("Error upgrading chunk", (Throwable)var23);
 				}
 			}
 

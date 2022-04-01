@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
@@ -151,12 +152,12 @@ public class EntityDataSerializers {
 	};
 	public static final EntityDataSerializer<ParticleOptions> PARTICLE = new EntityDataSerializer<ParticleOptions>() {
 		public void write(FriendlyByteBuf friendlyByteBuf, ParticleOptions particleOptions) {
-			friendlyByteBuf.writeId(Registry.PARTICLE_TYPE, particleOptions.getType());
+			friendlyByteBuf.writeVarInt(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
 			particleOptions.writeToNetwork(friendlyByteBuf);
 		}
 
 		public ParticleOptions read(FriendlyByteBuf friendlyByteBuf) {
-			return this.readParticle(friendlyByteBuf, friendlyByteBuf.readById(Registry.PARTICLE_TYPE));
+			return this.readParticle(friendlyByteBuf, (ParticleType<ParticleOptions>)Registry.PARTICLE_TYPE.byId(friendlyByteBuf.readVarInt()));
 		}
 
 		private <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {
@@ -255,14 +256,14 @@ public class EntityDataSerializers {
 	};
 	public static final EntityDataSerializer<VillagerData> VILLAGER_DATA = new EntityDataSerializer<VillagerData>() {
 		public void write(FriendlyByteBuf friendlyByteBuf, VillagerData villagerData) {
-			friendlyByteBuf.writeId(Registry.VILLAGER_TYPE, villagerData.getType());
-			friendlyByteBuf.writeId(Registry.VILLAGER_PROFESSION, villagerData.getProfession());
+			friendlyByteBuf.writeVarInt(Registry.VILLAGER_TYPE.getId(villagerData.getType()));
+			friendlyByteBuf.writeVarInt(Registry.VILLAGER_PROFESSION.getId(villagerData.getProfession()));
 			friendlyByteBuf.writeVarInt(villagerData.getLevel());
 		}
 
 		public VillagerData read(FriendlyByteBuf friendlyByteBuf) {
 			return new VillagerData(
-				friendlyByteBuf.readById(Registry.VILLAGER_TYPE), friendlyByteBuf.readById(Registry.VILLAGER_PROFESSION), friendlyByteBuf.readVarInt()
+				Registry.VILLAGER_TYPE.byId(friendlyByteBuf.readVarInt()), Registry.VILLAGER_PROFESSION.byId(friendlyByteBuf.readVarInt()), friendlyByteBuf.readVarInt()
 			);
 		}
 
@@ -295,6 +296,19 @@ public class EntityDataSerializers {
 
 		public Pose copy(Pose pose) {
 			return pose;
+		}
+	};
+	public static final EntityDataSerializer<Optional<EntityType<?>>> OPTIONAL_ENTITY_TYPE = new EntityDataSerializer<Optional<EntityType<?>>>() {
+		public void write(FriendlyByteBuf friendlyByteBuf, Optional<EntityType<?>> optional) {
+			friendlyByteBuf.writeOptional(optional, (friendlyByteBufx, entityType) -> friendlyByteBufx.writeVarInt(Registry.ENTITY_TYPE.getId(entityType)));
+		}
+
+		public Optional<EntityType<?>> read(FriendlyByteBuf friendlyByteBuf) {
+			return friendlyByteBuf.readOptional(friendlyByteBufx -> Registry.ENTITY_TYPE.byId(friendlyByteBufx.readVarInt()));
+		}
+
+		public Optional<EntityType<?>> copy(Optional<EntityType<?>> optional) {
+			return optional;
 		}
 	};
 
@@ -334,5 +348,6 @@ public class EntityDataSerializers {
 		registerSerializer(VILLAGER_DATA);
 		registerSerializer(OPTIONAL_UNSIGNED_INT);
 		registerSerializer(POSE);
+		registerSerializer(OPTIONAL_ENTITY_TYPE);
 	}
 }

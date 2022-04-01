@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Deque;
 import java.util.List;
@@ -23,7 +22,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintCache;
-import net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler;
 import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BiomeColors;
@@ -86,11 +84,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
-import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientLevel extends Level {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final double FLUID_PARTICLE_SPAWN_OFFSET = 0.05;
 	private static final int NORMAL_LIGHT_UPDATES_PER_FRAME = 10;
 	private static final int LIGHT_UPDATE_QUEUE_SIZE_THRESHOLD = 1000;
@@ -123,48 +119,7 @@ public class ClientLevel extends Level {
 	private final ClientChunkCache chunkSource;
 	private final Deque<Runnable> lightUpdateQueue = Queues.<Runnable>newArrayDeque();
 	private int serverSimulationDistance;
-	private final BlockStatePredictionHandler blockStatePredictionHandler = new BlockStatePredictionHandler();
 	private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
-
-	public void handleBlockChangedAck(int i) {
-		this.blockStatePredictionHandler.endPredictionsUpTo(i, this);
-	}
-
-	public void setServerVerifiedBlockState(BlockPos blockPos, BlockState blockState, int i) {
-		if (!this.blockStatePredictionHandler.updateKnownServerState(blockPos, blockState)) {
-			super.setBlock(blockPos, blockState, i, 512);
-		}
-	}
-
-	public void syncBlockState(BlockPos blockPos, BlockState blockState, Vec3 vec3) {
-		BlockState blockState2 = this.getBlockState(blockPos);
-		if (blockState2 != blockState) {
-			this.setBlock(blockPos, blockState, 19);
-			Player player = this.minecraft.player;
-			if (this == player.level && player.isColliding(blockPos, blockState)) {
-				player.absMoveTo(vec3.x, vec3.y, vec3.z);
-			}
-		}
-	}
-
-	BlockStatePredictionHandler getBlockStatePredictionHandler() {
-		return this.blockStatePredictionHandler;
-	}
-
-	@Override
-	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
-		if (this.blockStatePredictionHandler.isPredicting()) {
-			BlockState blockState2 = this.getBlockState(blockPos);
-			boolean bl = super.setBlock(blockPos, blockState, i, j);
-			if (bl) {
-				this.blockStatePredictionHandler.retainKnownServerState(blockPos, blockState2, this.minecraft.player);
-			}
-
-			return bl;
-		} else {
-			return super.setBlock(blockPos, blockState, i, j);
-		}
-	}
 
 	public ClientLevel(
 		ClientPacketListener clientPacketListener,
@@ -178,7 +133,7 @@ public class ClientLevel extends Level {
 		boolean bl,
 		long l
 	) {
-		super(clientLevelData, resourceKey, holder, supplier, true, bl, l, 1000000);
+		super(clientLevelData, resourceKey, holder, supplier, true, bl, l);
 		this.connection = clientPacketListener;
 		this.chunkSource = new ClientChunkCache(this, i);
 		this.clientLevelData = clientLevelData;
@@ -342,6 +297,10 @@ public class ClientLevel extends Level {
 	@Override
 	public Entity getEntity(int i) {
 		return this.getEntities().get(i);
+	}
+
+	public void setKnownState(BlockPos blockPos, BlockState blockState) {
+		this.setBlock(blockPos, blockState, 19);
 	}
 
 	@Override
@@ -679,7 +638,7 @@ public class ClientLevel extends Level {
 			k = k * o + n * (1.0F - o);
 		}
 
-		if (!this.minecraft.options.hideLightningFlash().get() && this.skyFlashTime > 0) {
+		if (!this.minecraft.options.hideLightningFlashes && this.skyFlashTime > 0) {
 			float n = (float)this.skyFlashTime - f;
 			if (n > 1.0F) {
 				n = 1.0F;
@@ -771,7 +730,7 @@ public class ClientLevel extends Level {
 	}
 
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
-		int i = Minecraft.getInstance().options.biomeBlendRadius().get();
+		int i = Minecraft.getInstance().options.biomeBlendRadius;
 		if (i == 0) {
 			return colorResolver.getColor(this.getBiome(blockPos).value(), (double)blockPos.getX(), (double)blockPos.getZ());
 		} else {
@@ -820,7 +779,7 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
+	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
 	}
 
 	protected Map<String, MapItemSavedData> getAllMapData() {

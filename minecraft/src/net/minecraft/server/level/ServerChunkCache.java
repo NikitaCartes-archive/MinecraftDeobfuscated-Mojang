@@ -40,8 +40,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
-import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -70,7 +69,7 @@ public class ServerChunkCache extends ChunkSource {
 		ServerLevel serverLevel,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		DataFixer dataFixer,
-		StructureTemplateManager structureTemplateManager,
+		StructureManager structureManager,
 		Executor executor,
 		ChunkGenerator chunkGenerator,
 		int i,
@@ -90,7 +89,7 @@ public class ServerChunkCache extends ChunkSource {
 			serverLevel,
 			levelStorageAccess,
 			dataFixer,
-			structureTemplateManager,
+			structureManager,
 			executor,
 			this.mainThreadProcessor,
 			this,
@@ -425,10 +424,6 @@ public class ServerChunkCache extends ChunkSource {
 
 	public ChunkGenerator getGenerator() {
 		return this.chunkMap.generator();
-	}
-
-	public RandomState randomState() {
-		return this.chunkMap.randomState();
 	}
 
 	@Override

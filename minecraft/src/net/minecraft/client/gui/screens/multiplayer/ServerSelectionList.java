@@ -341,7 +341,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				this.screen.setToolTip(list2);
 			}
 
-			if (this.minecraft.options.touchscreen().get() || bl) {
+			if (this.minecraft.options.touchscreen || bl) {
 				RenderSystem.setShaderTexture(0, ServerSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);

@@ -239,11 +239,6 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public Set<ResourceKey<T>> registryKeySet() {
-		return Collections.unmodifiableSet(this.byKey.keySet());
-	}
-
-	@Override
 	public Set<Entry<ResourceKey<T>, T>> entrySet() {
 		return Collections.unmodifiableSet(Maps.transformValues(this.byKey, Holder::value).entrySet());
 	}

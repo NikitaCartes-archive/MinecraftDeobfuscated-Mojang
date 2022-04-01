@@ -1,76 +1,40 @@
 package net.minecraft.world.level.levelgen.structure;
 
-import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
-import net.minecraft.world.level.levelgen.structure.structures.OceanMonumentStructure;
-import org.slf4j.Logger;
 
 public final class StructureStart {
 	public static final String INVALID_START_ID = "INVALID";
 	public static final StructureStart INVALID_START = new StructureStart(null, new ChunkPos(0, 0), 0, new PiecesContainer(List.of()));
-	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Structure structure;
+	private final ConfiguredStructureFeature<?, ?> feature;
 	private final PiecesContainer pieceContainer;
 	private final ChunkPos chunkPos;
 	private int references;
 	@Nullable
 	private volatile BoundingBox cachedBoundingBox;
 
-	public StructureStart(Structure structure, ChunkPos chunkPos, int i, PiecesContainer piecesContainer) {
-		this.structure = structure;
+	public StructureStart(ConfiguredStructureFeature<?, ?> configuredStructureFeature, ChunkPos chunkPos, int i, PiecesContainer piecesContainer) {
+		this.feature = configuredStructureFeature;
 		this.chunkPos = chunkPos;
 		this.references = i;
 		this.pieceContainer = piecesContainer;
 	}
 
-	@Nullable
-	public static StructureStart loadStaticStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l) {
-		String string = compoundTag.getString("id");
-		if ("INVALID".equals(string)) {
-			return INVALID_START;
-		} else {
-			Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
-			Structure structure = registry.get(new ResourceLocation(string));
-			if (structure == null) {
-				LOGGER.error("Unknown stucture id: {}", string);
-				return null;
-			} else {
-				ChunkPos chunkPos = new ChunkPos(compoundTag.getInt("ChunkX"), compoundTag.getInt("ChunkZ"));
-				int i = compoundTag.getInt("references");
-				ListTag listTag = compoundTag.getList("Children", 10);
-
-				try {
-					PiecesContainer piecesContainer = PiecesContainer.load(listTag, structurePieceSerializationContext);
-					if (structure instanceof OceanMonumentStructure) {
-						piecesContainer = OceanMonumentStructure.regeneratePiecesAfterLoad(chunkPos, l, piecesContainer);
-					}
-
-					return new StructureStart(structure, chunkPos, i, piecesContainer);
-				} catch (Exception var11) {
-					LOGGER.error("Failed Start with id {}", string, var11);
-					return null;
-				}
-			}
-		}
-	}
-
 	public BoundingBox getBoundingBox() {
 		BoundingBox boundingBox = this.cachedBoundingBox;
 		if (boundingBox == null) {
-			boundingBox = this.structure.adjustBoundingBox(this.pieceContainer.calculateBoundingBox());
+			boundingBox = this.feature.adjustBoundingBox(this.pieceContainer.calculateBoundingBox());
 			this.cachedBoundingBox = boundingBox;
 		}
 
@@ -78,7 +42,12 @@ public final class StructureStart {
 	}
 
 	public void placeInChunk(
-		WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos
+		WorldGenLevel worldGenLevel,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator chunkGenerator,
+		Random random,
+		BoundingBox boundingBox,
+		ChunkPos chunkPos
 	) {
 		List<StructurePiece> list = this.pieceContainer.pieces();
 		if (!list.isEmpty()) {
@@ -88,11 +57,14 @@ public final class StructureStart {
 
 			for (StructurePiece structurePiece : list) {
 				if (structurePiece.getBoundingBox().intersects(boundingBox)) {
-					structurePiece.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
+					structurePiece.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
 				}
 			}
 
-			this.structure.afterPlace(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, this.pieceContainer);
+			this.feature
+				.feature
+				.getPostPlacementProcessor()
+				.afterPlace(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, this.pieceContainer);
 		}
 	}
 
@@ -100,7 +72,7 @@ public final class StructureStart {
 		CompoundTag compoundTag = new CompoundTag();
 		if (this.isValid()) {
 			compoundTag.putString(
-				"id", structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).getKey(this.structure).toString()
+				"id", structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).getKey(this.feature).toString()
 			);
 			compoundTag.putInt("ChunkX", chunkPos.x);
 			compoundTag.putInt("ChunkZ", chunkPos.z);
@@ -137,8 +109,8 @@ public final class StructureStart {
 		return 1;
 	}
 
-	public Structure getStructure() {
-		return this.structure;
+	public ConfiguredStructureFeature<?, ?> getFeature() {
+		return this.feature;
 	}
 
 	public List<StructurePiece> getPieces() {

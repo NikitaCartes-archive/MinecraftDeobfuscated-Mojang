@@ -1,15 +1,12 @@
 package net.minecraft.world.level.block;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -22,7 +19,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class NoteBlock extends Block {
@@ -57,18 +53,16 @@ public class NoteBlock extends Block {
 		boolean bl2 = level.hasNeighborSignal(blockPos);
 		if (bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2) {
-				this.playNote(null, level, blockPos);
+				this.playNote(level, blockPos);
 			}
 
 			level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)), 3);
 		}
 	}
 
-	private void playNote(@Nullable Entity entity, Level level, BlockPos blockPos) {
-		BlockState blockState = level.getBlockState(blockPos.above());
-		if (!blockState.is(BlockTags.WOOL) && !blockState.is(BlockTags.WOOL_CARPETS)) {
+	private void playNote(Level level, BlockPos blockPos) {
+		if (level.getBlockState(blockPos.above()).isAir()) {
 			level.blockEvent(blockPos, this, 0, 0);
-			level.gameEvent(entity, GameEvent.NOTE_BLOCK_PLAY, blockPos);
 		}
 	}
 
@@ -81,7 +75,7 @@ public class NoteBlock extends Block {
 		} else {
 			blockState = blockState.cycle(NOTE);
 			level.setBlock(blockPos, blockState, 3);
-			this.playNote(player, level, blockPos);
+			this.playNote(level, blockPos);
 			player.awardStat(Stats.TUNE_NOTEBLOCK);
 			return InteractionResult.CONSUME;
 		}
@@ -90,7 +84,7 @@ public class NoteBlock extends Block {
 	@Override
 	public void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
 		if (!level.isClientSide) {
-			this.playNote(player, level, blockPos);
+			this.playNote(level, blockPos);
 			player.awardStat(Stats.PLAY_NOTEBLOCK);
 		}
 	}

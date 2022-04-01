@@ -6,7 +6,7 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.OptionInstance;
+import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -23,6 +23,7 @@ import net.minecraft.world.Difficulty;
 
 @Environment(EnvType.CLIENT)
 public class OptionsScreen extends Screen {
+	private static final Option[] OPTION_SCREEN_OPTIONS = new Option[]{Option.FOV};
 	private final Screen lastScreen;
 	private final Options options;
 	private CycleButton<Difficulty> difficultyButton;
@@ -38,10 +39,10 @@ public class OptionsScreen extends Screen {
 	protected void init() {
 		int i = 0;
 
-		for (OptionInstance<?> optionInstance : new OptionInstance[]{this.options.fov()}) {
+		for (Option option : OPTION_SCREEN_OPTIONS) {
 			int j = this.width / 2 - 155 + i % 2 * 160;
 			int k = this.height / 6 - 12 + 24 * (i >> 1);
-			this.addRenderableWidget(optionInstance.createButton(this.minecraft.options, j, k, 150));
+			this.addRenderableWidget(option.createButton(this.minecraft.options, j, k, 150));
 			i++;
 		}
 

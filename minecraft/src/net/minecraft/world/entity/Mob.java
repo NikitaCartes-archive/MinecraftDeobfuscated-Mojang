@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
@@ -22,6 +21,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -66,23 +66,23 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class Mob extends LivingEntity {
 	private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
 	private static final int MOB_FLAG_NO_AI = 1;
 	private static final int MOB_FLAG_LEFTHANDED = 2;
 	private static final int MOB_FLAG_AGGRESSIVE = 4;
-	protected static final int PICKUP_REACH = 1;
-	private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 0, 1);
 	public static final float MAX_WEARING_ARMOR_CHANCE = 0.15F;
 	public static final float MAX_PICKUP_LOOT_CHANCE = 0.55F;
 	public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5F;
 	public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25F;
 	public static final String LEASH_TAG = "Leash";
+	private static final int PICKUP_REACH = 1;
 	public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
 	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
 	public int ambientSoundTime;
@@ -107,6 +107,7 @@ public abstract class Mob extends LivingEntity {
 	@Nullable
 	private ResourceLocation lootTable;
 	private long lootTableSeed;
+	private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BLOCK_STATE);
 	@Nullable
 	private Entity leashHolder;
 	private int delayedLeashHolderId;
@@ -223,13 +224,23 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	public void ate() {
-		this.gameEvent(GameEvent.EAT);
 	}
 
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
+		this.entityData.define(DATA_CARRY_STATE, Optional.empty());
 		this.entityData.define(DATA_MOB_FLAGS_ID, (byte)0);
+	}
+
+	public void setCarriedBlock(@Nullable BlockState blockState) {
+		this.entityData.set(DATA_CARRY_STATE, Optional.ofNullable(blockState));
+	}
+
+	@Nullable
+	@Override
+	public BlockState getCarriedBlock() {
+		return (BlockState)this.entityData.get(DATA_CARRY_STATE).orElse(null);
 	}
 
 	public int getAmbientSoundInterval() {
@@ -346,6 +357,11 @@ public abstract class Mob extends LivingEntity {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putBoolean("CanPickUpLoot", this.canPickUpLoot());
 		compoundTag.putBoolean("PersistenceRequired", this.persistenceRequired);
+		BlockState blockState = this.getCarriedBlock();
+		if (blockState != null) {
+			compoundTag.put("carriedBlockState", NbtUtils.writeBlockState(blockState));
+		}
+
 		ListTag listTag = new ListTag();
 
 		for (ItemStack itemStack : this.armorItems) {
@@ -417,6 +433,15 @@ public abstract class Mob extends LivingEntity {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
+		BlockState blockState = null;
+		if (compoundTag.contains("carriedBlockState", 10)) {
+			blockState = NbtUtils.readBlockState(compoundTag.getCompound("carriedBlockState"));
+			if (blockState.isAir()) {
+				blockState = null;
+			}
+		}
+
+		this.setCarriedBlock(blockState);
 		if (compoundTag.contains("CanPickUpLoot", 1)) {
 			this.setCanPickUpLoot(compoundTag.getBoolean("CanPickUpLoot"));
 		}
@@ -510,10 +535,7 @@ public abstract class Mob extends LivingEntity {
 		super.aiStep();
 		this.level.getProfiler().push("looting");
 		if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-			Vec3i vec3i = this.getPickupReach();
-
-			for (ItemEntity itemEntity : this.level
-				.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ()))) {
+			for (ItemEntity itemEntity : this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0))) {
 				if (!itemEntity.isRemoved() && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
 					this.pickUpItem(itemEntity);
 				}
@@ -521,10 +543,6 @@ public abstract class Mob extends LivingEntity {
 		}
 
 		this.level.getProfiler().pop();
-	}
-
-	protected Vec3i getPickupReach() {
-		return ITEM_PICKUP_REACH;
 	}
 
 	protected void pickUpItem(ItemEntity itemEntity) {
@@ -547,6 +565,7 @@ public abstract class Mob extends LivingEntity {
 			}
 
 			this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
+			this.equipEventAndSound(itemStack);
 			return true;
 		} else {
 			return false;
@@ -832,7 +851,6 @@ public abstract class Mob extends LivingEntity {
 	@Override
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
 		this.verifyEquippedItem(itemStack);
-		this.equipEventAndSound(itemStack, true);
 		switch (equipmentSlot.getType()) {
 			case HAND:
 				this.handItems.set(equipmentSlot.getIndex(), itemStack);
@@ -1009,6 +1027,10 @@ public abstract class Mob extends LivingEntity {
 		return spawnGroupData;
 	}
 
+	public boolean canBeControlledByRider() {
+		return false;
+	}
+
 	public void setPersistenceRequired() {
 		this.persistenceRequired = true;
 	}
@@ -1054,12 +1076,7 @@ public abstract class Mob extends LivingEntity {
 				return interactionResult;
 			} else {
 				interactionResult = this.mobInteract(player, interactionHand);
-				if (interactionResult.consumesAction()) {
-					this.gameEvent(GameEvent.ENTITY_INTERACT);
-					return interactionResult;
-				} else {
-					return super.interact(player, interactionHand);
-				}
+				return interactionResult.consumesAction() ? interactionResult : super.interact(player, interactionHand);
 			}
 		}
 	}
@@ -1269,7 +1286,7 @@ public abstract class Mob extends LivingEntity {
 
 	@Override
 	public boolean isControlledByLocalInstance() {
-		return this.hasControllingPassenger() && super.isControlledByLocalInstance();
+		return this.canBeControlledByRider() && super.isControlledByLocalInstance();
 	}
 
 	@Override
@@ -1314,11 +1331,6 @@ public abstract class Mob extends LivingEntity {
 
 	public double getMeleeAttackRangeSqr(LivingEntity livingEntity) {
 		return (double)(this.getBbWidth() * 2.0F * this.getBbWidth() * 2.0F + livingEntity.getBbWidth());
-	}
-
-	public boolean isWithinMeleeAttackRange(LivingEntity livingEntity) {
-		double d = this.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-		return d <= this.getMeleeAttackRangeSqr(livingEntity);
 	}
 
 	@Override
@@ -1366,7 +1378,7 @@ public abstract class Mob extends LivingEntity {
 
 	protected boolean isSunBurnTick() {
 		if (this.level.isDay() && !this.level.isClientSide) {
-			float f = this.getLightLevelDependentMagicValue();
+			float f = this.getBrightness();
 			BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
 			boolean bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
 			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !bl && this.level.canSeeSky(blockPos)) {
@@ -1403,5 +1415,15 @@ public abstract class Mob extends LivingEntity {
 	public ItemStack getPickResult() {
 		SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
 		return spawnEggItem == null ? null : new ItemStack(spawnEggItem);
+	}
+
+	public boolean canStealItem() {
+		return false;
+	}
+
+	@Override
+	public void throwEntity(ServerPlayer serverPlayer, Vec3 vec3) {
+		super.throwEntity(serverPlayer, vec3);
+		this.playAmbientSound();
 	}
 }

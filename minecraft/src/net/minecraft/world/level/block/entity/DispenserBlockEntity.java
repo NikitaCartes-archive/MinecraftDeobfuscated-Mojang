@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
 	private static final Random RANDOM = new Random();
-	public static final int CONTAINER_SIZE = 9;
-	private NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
+	public static final int CONTAINER_SIZE = 1;
+	private NonNullList<ItemStack> items = NonNullList.withSize(1, ItemStack.EMPTY);
 
 	protected DispenserBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
 		super(blockEntityType, blockPos, blockState);
@@ -28,7 +28,12 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
 
 	@Override
 	public int getContainerSize() {
-		return 9;
+		return 1;
+	}
+
+	@Override
+	public int getMaxStackSize() {
+		return 1;
 	}
 
 	public int getRandomSlot() {

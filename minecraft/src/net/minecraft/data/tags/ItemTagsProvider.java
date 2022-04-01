@@ -26,7 +26,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.STONE_BRICKS, ItemTags.STONE_BRICKS);
 		this.copy(BlockTags.WOODEN_BUTTONS, ItemTags.WOODEN_BUTTONS);
 		this.copy(BlockTags.BUTTONS, ItemTags.BUTTONS);
-		this.copy(BlockTags.WOOL_CARPETS, ItemTags.WOOL_CARPETS);
+		this.copy(BlockTags.CARPETS, ItemTags.CARPETS);
 		this.copy(BlockTags.WOODEN_DOORS, ItemTags.WOODEN_DOORS);
 		this.copy(BlockTags.WOODEN_STAIRS, ItemTags.WOODEN_STAIRS);
 		this.copy(BlockTags.WOODEN_SLABS, ItemTags.WOODEN_SLABS);
@@ -39,7 +39,6 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.BIRCH_LOGS, ItemTags.BIRCH_LOGS);
 		this.copy(BlockTags.ACACIA_LOGS, ItemTags.ACACIA_LOGS);
 		this.copy(BlockTags.SPRUCE_LOGS, ItemTags.SPRUCE_LOGS);
-		this.copy(BlockTags.MANGROVE_LOGS, ItemTags.MANGROVE_LOGS);
 		this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
 		this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
 		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
@@ -91,19 +90,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.RED_BANNER,
 				Items.BLACK_BANNER
 			);
-		this.tag(ItemTags.BOATS)
-			.add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT, Items.MANGROVE_BOAT)
-			.addTag(ItemTags.CHEST_BOATS);
-		this.tag(ItemTags.CHEST_BOATS)
-			.add(
-				Items.OAK_CHEST_BOAT,
-				Items.SPRUCE_CHEST_BOAT,
-				Items.BIRCH_CHEST_BOAT,
-				Items.JUNGLE_CHEST_BOAT,
-				Items.ACACIA_CHEST_BOAT,
-				Items.DARK_OAK_CHEST_BOAT,
-				Items.MANGROVE_CHEST_BOAT
-			);
+		this.tag(ItemTags.BOATS).add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT);
 		this.tag(ItemTags.FISHES).add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH);
 		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
 		this.tag(ItemTags.CREEPER_DROP_MUSIC_DISCS)
@@ -200,5 +187,10 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		Tag.Builder builder = this.getOrCreateRawBuilder(tagKey2);
 		Tag.Builder builder2 = (Tag.Builder)this.blockTags.apply(tagKey);
 		builder2.getEntries().forEach(builder::add);
+	}
+
+	@Override
+	public String getName() {
+		return "Item Tags";
 	}
 }

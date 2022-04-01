@@ -55,7 +55,6 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 	}
 
 	public void accept(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
-		this.add(EntityType.ALLAY, LootTable.lootTable());
 		this.add(EntityType.ARMOR_STAND, LootTable.lootTable());
 		this.add(EntityType.AXOLOTL, LootTable.lootTable());
 		this.add(EntityType.BAT, LootTable.lootTable());
@@ -306,7 +305,6 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(EntityType.FOX, LootTable.lootTable());
-		this.add(EntityType.FROG, LootTable.lootTable());
 		this.add(
 			EntityType.GHAST,
 			LootTable.lootTable()
@@ -820,7 +818,6 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 						)
 				)
 		);
-		this.add(EntityType.TADPOLE, LootTable.lootTable());
 		this.add(
 			EntityType.TRADER_LLAMA,
 			LootTable.lootTable()
@@ -871,7 +868,6 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 		);
 		this.add(EntityType.VEX, LootTable.lootTable());
 		this.add(EntityType.VILLAGER, LootTable.lootTable());
-		this.add(EntityType.WARDEN, LootTable.lootTable());
 		this.add(EntityType.WANDERING_TRADER, LootTable.lootTable());
 		this.add(
 			EntityType.VINDICATOR,

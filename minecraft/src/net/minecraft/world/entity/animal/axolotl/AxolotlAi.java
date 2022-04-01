@@ -14,7 +14,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.BabyFollowAdult;
-import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.EraseMemoryIf;
@@ -63,7 +62,7 @@ public class AxolotlAi {
 	private static void initPlayDeadActivity(Brain<Axolotl> brain) {
 		brain.addActivityAndRemoveMemoriesWhenStopped(
 			Activity.PLAY_DEAD,
-			ImmutableList.of(Pair.of(0, new PlayDead()), Pair.of(1, new EraseMemoryIf<>(BehaviorUtils::isBreeding, MemoryModuleType.PLAY_DEAD_TICKS))),
+			ImmutableList.of(Pair.of(0, new PlayDead()), Pair.of(1, new EraseMemoryIf<>(AxolotlAi::isBreeding, MemoryModuleType.PLAY_DEAD_TICKS))),
 			ImmutableSet.of(Pair.of(MemoryModuleType.PLAY_DEAD_TICKS, MemoryStatus.VALUE_PRESENT)),
 			ImmutableSet.of(MemoryModuleType.PLAY_DEAD_TICKS)
 		);
@@ -77,7 +76,7 @@ public class AxolotlAi {
 				new StopAttackingIfTargetInvalid<>(Axolotl::onStopAttacking),
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(AxolotlAi::getSpeedModifierChasing),
 				new MeleeAttack(20),
-				new EraseMemoryIf(BehaviorUtils::isBreeding, MemoryModuleType.ATTACK_TARGET)
+				new EraseMemoryIf(AxolotlAi::isBreeding, MemoryModuleType.ATTACK_TARGET)
 			),
 			MemoryModuleType.ATTACK_TARGET
 		);
@@ -165,7 +164,11 @@ public class AxolotlAi {
 	}
 
 	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(Axolotl axolotl) {
-		return BehaviorUtils.isBreeding(axolotl) ? Optional.empty() : axolotl.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE);
+		return isBreeding(axolotl) ? Optional.empty() : axolotl.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE);
+	}
+
+	private static boolean isBreeding(Axolotl axolotl) {
+		return axolotl.getBrain().hasMemoryValue(MemoryModuleType.BREED_TARGET);
 	}
 
 	public static Ingredient getTemptations() {

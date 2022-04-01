@@ -40,46 +40,33 @@ public class TextFilterClient implements AutoCloseable {
 		thread.setName("Chat-Filter-Worker-" + WORKER_COUNT.getAndIncrement());
 		return thread;
 	};
-	private static final String DEFAULT_ENDPOINT = "v1/chat";
 	private final URL chatEndpoint;
-	private final TextFilterClient.MessageEncoder chatEncoder;
 	final URL joinEndpoint;
-	final TextFilterClient.JoinOrLeaveEncoder joinEncoder;
 	final URL leaveEndpoint;
-	final TextFilterClient.JoinOrLeaveEncoder leaveEncoder;
 	private final String authKey;
+	private final int ruleId;
+	private final String serverId;
+	private final String roomId;
 	final TextFilterClient.IgnoreStrategy chatIgnoreStrategy;
 	final ExecutorService workerPool;
 
 	private TextFilterClient(
-		URL uRL,
-		TextFilterClient.MessageEncoder messageEncoder,
-		URL uRL2,
-		TextFilterClient.JoinOrLeaveEncoder joinOrLeaveEncoder,
-		URL uRL3,
-		TextFilterClient.JoinOrLeaveEncoder joinOrLeaveEncoder2,
-		String string,
-		TextFilterClient.IgnoreStrategy ignoreStrategy,
-		int i
+		URL uRL, URL uRL2, URL uRL3, String string, int i, String string2, String string3, TextFilterClient.IgnoreStrategy ignoreStrategy, int j
 	) {
 		this.authKey = string;
+		this.ruleId = i;
+		this.serverId = string2;
+		this.roomId = string3;
 		this.chatIgnoreStrategy = ignoreStrategy;
 		this.chatEndpoint = uRL;
-		this.chatEncoder = messageEncoder;
 		this.joinEndpoint = uRL2;
-		this.joinEncoder = joinOrLeaveEncoder;
 		this.leaveEndpoint = uRL3;
-		this.leaveEncoder = joinOrLeaveEncoder2;
-		this.workerPool = Executors.newFixedThreadPool(i, THREAD_FACTORY);
+		this.workerPool = Executors.newFixedThreadPool(j, THREAD_FACTORY);
 	}
 
 	private static URL getEndpoint(URI uRI, @Nullable JsonObject jsonObject, String string, String string2) throws MalformedURLException {
-		String string3 = getEndpointFromConfig(jsonObject, string, string2);
+		String string3 = jsonObject != null ? GsonHelper.getAsString(jsonObject, string, string2) : string2;
 		return uRI.resolve("/" + string3).toURL();
-	}
-
-	private static String getEndpointFromConfig(@Nullable JsonObject jsonObject, String string, String string2) {
-		return jsonObject != null ? GsonHelper.getAsString(jsonObject, string, string2) : string2;
 	}
 
 	@Nullable
@@ -100,64 +87,32 @@ public class TextFilterClient implements AutoCloseable {
 					int j = GsonHelper.getAsInt(jsonObject, "hashesToDrop", -1);
 					int k = GsonHelper.getAsInt(jsonObject, "maxConcurrentRequests", 7);
 					JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "endpoints", null);
-					String string5 = getEndpointFromConfig(jsonObject2, "chat", "v1/chat");
-					boolean bl = string5.equals("v1/chat");
-					URL uRL = uRI.resolve("/" + string5).toURL();
+					URL uRL = getEndpoint(uRI, jsonObject2, "chat", "v1/chat");
 					URL uRL2 = getEndpoint(uRI, jsonObject2, "join", "v1/join");
 					URL uRL3 = getEndpoint(uRI, jsonObject2, "leave", "v1/leave");
-					TextFilterClient.JoinOrLeaveEncoder joinOrLeaveEncoder = gameProfile -> {
-						JsonObject jsonObjectx = new JsonObject();
-						jsonObjectx.addProperty("server", string3);
-						jsonObjectx.addProperty("room", string4);
-						jsonObjectx.addProperty("user_id", gameProfile.getId().toString());
-						jsonObjectx.addProperty("user_display_name", gameProfile.getName());
-						return jsonObjectx;
-					};
-					TextFilterClient.MessageEncoder messageEncoder;
-					if (bl) {
-						messageEncoder = (gameProfile, string3x) -> {
-							JsonObject jsonObjectx = new JsonObject();
-							jsonObjectx.addProperty("rule", i);
-							jsonObjectx.addProperty("server", string3);
-							jsonObjectx.addProperty("room", string4);
-							jsonObjectx.addProperty("player", gameProfile.getId().toString());
-							jsonObjectx.addProperty("player_display_name", gameProfile.getName());
-							jsonObjectx.addProperty("text", string3x);
-							return jsonObjectx;
-						};
-					} else {
-						String string6 = String.valueOf(i);
-						messageEncoder = (gameProfile, string4x) -> {
-							JsonObject jsonObjectx = new JsonObject();
-							jsonObjectx.addProperty("rule_id", string6);
-							jsonObjectx.addProperty("category", string3);
-							jsonObjectx.addProperty("subcategory", string4);
-							jsonObjectx.addProperty("user_id", gameProfile.getId().toString());
-							jsonObjectx.addProperty("user_display_name", gameProfile.getName());
-							jsonObjectx.addProperty("text", string4x);
-							return jsonObjectx;
-						};
-					}
-
 					TextFilterClient.IgnoreStrategy ignoreStrategy = TextFilterClient.IgnoreStrategy.select(j);
-					String string7 = Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII));
-					return new TextFilterClient(uRL, messageEncoder, uRL2, joinOrLeaveEncoder, uRL3, joinOrLeaveEncoder, string7, ignoreStrategy, k);
+					return new TextFilterClient(
+						uRL, uRL2, uRL3, Base64.getEncoder().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, string4, ignoreStrategy, k
+					);
 				}
-			} catch (Exception var19) {
-				LOGGER.warn("Failed to parse chat filter config {}", string, var19);
+			} catch (Exception var14) {
+				LOGGER.warn("Failed to parse chat filter config {}", string, var14);
 				return null;
 			}
 		}
 	}
 
-	void processJoinOrLeave(GameProfile gameProfile, URL uRL, TextFilterClient.JoinOrLeaveEncoder joinOrLeaveEncoder, Executor executor) {
+	void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("server", this.serverId);
+		jsonObject.addProperty("room", this.roomId);
+		jsonObject.addProperty("user_id", gameProfile.getId().toString());
+		jsonObject.addProperty("user_display_name", gameProfile.getName());
 		executor.execute(() -> {
-			JsonObject jsonObject = joinOrLeaveEncoder.encode(gameProfile);
-
 			try {
 				this.processRequest(jsonObject, uRL);
-			} catch (Exception var6) {
-				LOGGER.warn("Failed to send join/leave packet to {} for player {}", uRL, gameProfile, var6);
+			} catch (Exception var5) {
+				LOGGER.warn("Failed to send join/leave packet to {} for player {}", uRL, gameProfile, var5);
 			}
 		});
 	}
@@ -165,28 +120,37 @@ public class TextFilterClient implements AutoCloseable {
 	CompletableFuture<TextFilter.FilteredText> requestMessageProcessing(
 		GameProfile gameProfile, String string, TextFilterClient.IgnoreStrategy ignoreStrategy, Executor executor
 	) {
-		return string.isEmpty() ? CompletableFuture.completedFuture(TextFilter.FilteredText.EMPTY) : CompletableFuture.supplyAsync(() -> {
-			JsonObject jsonObject = this.chatEncoder.encode(gameProfile, string);
-
-			try {
-				JsonObject jsonObject2 = this.processRequestResponse(jsonObject, this.chatEndpoint);
-				boolean bl = GsonHelper.getAsBoolean(jsonObject2, "response", false);
-				if (bl) {
-					return TextFilter.FilteredText.passThrough(string);
-				} else {
-					String string2 = GsonHelper.getAsString(jsonObject2, "hashed", null);
-					if (string2 == null) {
-						return TextFilter.FilteredText.fullyFiltered(string);
+		if (string.isEmpty()) {
+			return CompletableFuture.completedFuture(TextFilter.FilteredText.EMPTY);
+		} else {
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("rule", this.ruleId);
+			jsonObject.addProperty("server", this.serverId);
+			jsonObject.addProperty("room", this.roomId);
+			jsonObject.addProperty("player", gameProfile.getId().toString());
+			jsonObject.addProperty("player_display_name", gameProfile.getName());
+			jsonObject.addProperty("text", string);
+			return CompletableFuture.supplyAsync(() -> {
+				try {
+					JsonObject jsonObject2 = this.processRequestResponse(jsonObject, this.chatEndpoint);
+					boolean bl = GsonHelper.getAsBoolean(jsonObject2, "response", false);
+					if (bl) {
+						return TextFilter.FilteredText.passThrough(string);
 					} else {
-						int i = GsonHelper.getAsJsonArray(jsonObject2, "hashes").size();
-						return ignoreStrategy.shouldIgnore(string2, i) ? TextFilter.FilteredText.fullyFiltered(string) : new TextFilter.FilteredText(string, string2);
+						String string2 = GsonHelper.getAsString(jsonObject2, "hashed", null);
+						if (string2 == null) {
+							return TextFilter.FilteredText.fullyFiltered(string);
+						} else {
+							int i = GsonHelper.getAsJsonArray(jsonObject2, "hashes").size();
+							return ignoreStrategy.shouldIgnore(string2, i) ? TextFilter.FilteredText.fullyFiltered(string) : new TextFilter.FilteredText(string, string2);
+						}
 					}
+				} catch (Exception var8) {
+					LOGGER.warn("Failed to validate message '{}'", string, var8);
+					return TextFilter.FilteredText.fullyFiltered(string);
 				}
-			} catch (Exception var9) {
-				LOGGER.warn("Failed to validate message '{}'", string, var9);
-				return TextFilter.FilteredText.fullyFiltered(string);
-			}
-		}, executor);
+			}, executor);
+		}
 	}
 
 	public void close() {
@@ -213,7 +177,7 @@ public class TextFilterClient implements AutoCloseable {
 				}
 
 				try {
-					var13 = Streams.parse(new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))).getAsJsonObject();
+					var13 = Streams.parse(new JsonReader(new InputStreamReader(inputStream))).getAsJsonObject();
 				} finally {
 					this.drainStream(inputStream);
 				}
@@ -329,24 +293,17 @@ public class TextFilterClient implements AutoCloseable {
 		}
 
 		static TextFilterClient.IgnoreStrategy select(int i) {
-			return switch (i) {
-				case -1 -> NEVER_IGNORE;
-				case 0 -> IGNORE_FULLY_FILTERED;
-				default -> ignoreOverThreshold(i);
-			};
+			switch (i) {
+				case -1:
+					return NEVER_IGNORE;
+				case 0:
+					return IGNORE_FULLY_FILTERED;
+				default:
+					return ignoreOverThreshold(i);
+			}
 		}
 
 		boolean shouldIgnore(String string, int i);
-	}
-
-	@FunctionalInterface
-	interface JoinOrLeaveEncoder {
-		JsonObject encode(GameProfile gameProfile);
-	}
-
-	@FunctionalInterface
-	interface MessageEncoder {
-		JsonObject encode(GameProfile gameProfile, String string);
 	}
 
 	class PlayerContext implements TextFilter {
@@ -361,12 +318,12 @@ public class TextFilterClient implements AutoCloseable {
 
 		@Override
 		public void join() {
-			TextFilterClient.this.processJoinOrLeave(this.profile, TextFilterClient.this.joinEndpoint, TextFilterClient.this.joinEncoder, this.streamExecutor);
+			TextFilterClient.this.processJoinOrLeave(this.profile, TextFilterClient.this.joinEndpoint, this.streamExecutor);
 		}
 
 		@Override
 		public void leave() {
-			TextFilterClient.this.processJoinOrLeave(this.profile, TextFilterClient.this.leaveEndpoint, TextFilterClient.this.leaveEncoder, this.streamExecutor);
+			TextFilterClient.this.processJoinOrLeave(this.profile, TextFilterClient.this.leaveEndpoint, this.streamExecutor);
 		}
 
 		@Override

@@ -8,25 +8,24 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.util.GsonHelper;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class TagLoader<T> {
@@ -45,20 +44,14 @@ public class TagLoader<T> {
 	public Map<ResourceLocation, Tag.Builder> load(ResourceManager resourceManager) {
 		Map<ResourceLocation, Tag.Builder> map = Maps.<ResourceLocation, Tag.Builder>newHashMap();
 
-		for (Entry<ResourceLocation, List<ResourceThunk>> entry : resourceManager.listResourceStacks(
-				this.directory, resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
-			)
-			.entrySet()) {
-			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
+		for (ResourceLocation resourceLocation : resourceManager.listResources(this.directory, stringx -> stringx.endsWith(".json"))) {
 			String string = resourceLocation.getPath();
 			ResourceLocation resourceLocation2 = new ResourceLocation(
 				resourceLocation.getNamespace(), string.substring(this.directory.length() + 1, string.length() - PATH_SUFFIX_LENGTH)
 			);
 
-			for (ResourceThunk resourceThunk : (List)entry.getValue()) {
-				try {
-					Resource resource = resourceThunk.open();
-
+			try {
+				for (Resource resource : resourceManager.getResources(resourceLocation)) {
 					try {
 						InputStream inputStream = resource.getInputStream();
 
@@ -68,54 +61,44 @@ public class TagLoader<T> {
 							try {
 								JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
 								if (jsonObject == null) {
-									throw new NullPointerException("Invalid JSON contents");
+									LOGGER.error("Couldn't load tag list {} from {} in data pack {} as it is empty or null", resourceLocation2, resourceLocation, resource.getSourceName());
+								} else {
+									((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject, resource.getSourceName());
 								}
-
-								((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject, resourceThunk.sourcePackId());
-							} catch (Throwable var18) {
+							} catch (Throwable var23) {
 								try {
 									reader.close();
-								} catch (Throwable var17) {
-									var18.addSuppressed(var17);
+								} catch (Throwable var22) {
+									var23.addSuppressed(var22);
 								}
 
-								throw var18;
+								throw var23;
 							}
 
 							reader.close();
-						} catch (Throwable var19) {
+						} catch (Throwable var24) {
 							if (inputStream != null) {
 								try {
 									inputStream.close();
-								} catch (Throwable var16) {
-									var19.addSuppressed(var16);
+								} catch (Throwable var21) {
+									var24.addSuppressed(var21);
 								}
 							}
 
-							throw var19;
+							throw var24;
 						}
 
 						if (inputStream != null) {
 							inputStream.close();
 						}
-					} catch (Throwable var20) {
-						if (resource != null) {
-							try {
-								resource.close();
-							} catch (Throwable var15) {
-								var20.addSuppressed(var15);
-							}
-						}
-
-						throw var20;
+					} catch (RuntimeException | IOException var25) {
+						LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation2, resourceLocation, resource.getSourceName(), var25);
+					} finally {
+						IOUtils.closeQuietly(resource);
 					}
-
-					if (resource != null) {
-						resource.close();
-					}
-				} catch (Exception var21) {
-					LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation2, resourceLocation, resourceThunk.sourcePackId(), var21);
 				}
+			} catch (IOException var27) {
+				LOGGER.error("Couldn't read tag list {} from {}", resourceLocation2, resourceLocation, var27);
 			}
 		}
 

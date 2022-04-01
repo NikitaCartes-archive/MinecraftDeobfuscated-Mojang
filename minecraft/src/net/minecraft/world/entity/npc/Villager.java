@@ -23,7 +23,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -35,8 +34,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Mth;
-import net.minecraft.util.SpawnUtil;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -48,7 +45,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -59,8 +55,6 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
-import net.minecraft.world.entity.ai.gossip.GossipContainer;
-import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
@@ -71,6 +65,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.player.Player;
@@ -84,6 +79,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 
@@ -111,9 +107,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	private Player lastTradedPlayer;
 	private boolean chasing;
 	private int foodLevel;
-	private final GossipContainer gossips = new GossipContainer();
-	private long lastGossipTime;
-	private long lastGossipDecayTime;
 	private int villagerXp;
 	private long lastRestockGameTime;
 	private int numberOfRestocksToday;
@@ -303,8 +296,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		if (this.getUnhappyCounter() > 0) {
 			this.setUnhappyCounter(this.getUnhappyCounter() - 1);
 		}
-
-		this.maybeDecayGossip();
 	}
 
 	@Override
@@ -328,8 +319,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			if (bl) {
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			} else {
-				if (!this.level.isClientSide && !this.offers.isEmpty()) {
-					this.startTrading(player);
+				if (!this.level.isClientSide && !this.tryTradeWithPlayer(player)) {
+					this.setUnhappy();
 				}
 
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
@@ -344,12 +335,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	private void startTrading(Player player) {
-		this.updateSpecialPrices(player);
-		this.setTradingPlayer(player);
-		this.openTradingScreen(player, this.getDisplayName(), this.getVillagerData().getLevel());
-	}
-
 	@Override
 	public void setTradingPlayer(@Nullable Player player) {
 		boolean bl = this.getTradingPlayer() != null && player == null;
@@ -362,13 +347,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	protected void stopTrading() {
 		super.stopTrading();
-		this.resetSpecialPrices();
-	}
-
-	private void resetSpecialPrices() {
-		for (MerchantOffer merchantOffer : this.getOffers()) {
-			merchantOffer.resetSpecialPriceDiff();
-		}
 	}
 
 	@Override
@@ -445,26 +423,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	private void updateSpecialPrices(Player player) {
-		int i = this.getPlayerReputation(player);
-		if (i != 0) {
-			for (MerchantOffer merchantOffer : this.getOffers()) {
-				merchantOffer.addToSpecialPriceDiff(-Mth.floor((float)i * merchantOffer.getPriceMultiplier()));
-			}
-		}
-
-		if (player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE)) {
-			MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.HERO_OF_THE_VILLAGE);
-			int j = mobEffectInstance.getAmplifier();
-
-			for (MerchantOffer merchantOffer2 : this.getOffers()) {
-				double d = 0.3 + 0.0625 * (double)j;
-				int k = (int)Math.floor(d * (double)merchantOffer2.getBaseCostA().getCount());
-				merchantOffer2.addToSpecialPriceDiff(-Math.max(k, 1));
-			}
-		}
-	}
-
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
@@ -476,10 +434,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		super.addAdditionalSaveData(compoundTag);
 		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		compoundTag.putByte("FoodLevel", (byte)this.foodLevel);
-		compoundTag.put("Gossips", this.gossips.store(NbtOps.INSTANCE).getValue());
 		compoundTag.putInt("Xp", this.villagerXp);
 		compoundTag.putLong("LastRestock", this.lastRestockGameTime);
-		compoundTag.putLong("LastGossipDecay", this.lastGossipDecayTime);
 		compoundTag.putInt("RestocksToday", this.numberOfRestocksToday);
 		if (this.assignProfessionWhenSpawned) {
 			compoundTag.putBoolean("AssignProfessionWhenSpawned", true);
@@ -503,13 +459,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		ListTag listTag = compoundTag.getList("Gossips", 10);
-		this.gossips.update(new Dynamic<>(NbtOps.INSTANCE, listTag));
 		if (compoundTag.contains("Xp", 3)) {
 			this.villagerXp = compoundTag.getInt("Xp");
 		}
 
 		this.lastRestockGameTime = compoundTag.getLong("LastRestock");
-		this.lastGossipDecayTime = compoundTag.getLong("LastGossipDecay");
 		this.setCanPickUpLoot(true);
 		if (this.level instanceof ServerLevel) {
 			this.refreshBrain((ServerLevel)this.level);
@@ -570,17 +524,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	@Override
 	protected void rewardTradeXp(MerchantOffer merchantOffer) {
-		int i = 3 + this.random.nextInt(4);
 		this.villagerXp = this.villagerXp + merchantOffer.getXp();
 		this.lastTradedPlayer = this.getTradingPlayer();
 		if (this.shouldIncreaseLevel()) {
 			this.updateMerchantTimer = 40;
 			this.increaseProfessionLevelOnUpdate = true;
-			i += 5;
-		}
-
-		if (merchantOffer.shouldRewardExp()) {
-			this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY() + 0.5, this.getZ(), i));
 		}
 	}
 
@@ -681,10 +629,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 				}
 			}
 		}
-	}
-
-	public int getPlayerReputation(Player player) {
-		return this.gossips.getReputation(player.getUUID(), gossipType -> true);
 	}
 
 	private void digestFood(int i) {
@@ -851,27 +795,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			VillagerTrades.ItemListing[] itemListings = int2ObjectMap.get(villagerData.getLevel());
 			if (itemListings != null) {
 				MerchantOffers merchantOffers = this.getOffers();
-				this.addOffersFromItemListings(merchantOffers, itemListings, 2);
+				this.addOffersFromItemListings(merchantOffers, itemListings, Integer.MAX_VALUE);
 			}
-		}
-	}
-
-	public void gossip(ServerLevel serverLevel, Villager villager, long l) {
-		if ((l < this.lastGossipTime || l >= this.lastGossipTime + 1200L) && (l < villager.lastGossipTime || l >= villager.lastGossipTime + 1200L)) {
-			this.gossips.transferFrom(villager.gossips, this.random, 10);
-			this.lastGossipTime = l;
-			villager.lastGossipTime = l;
-			this.spawnGolemIfNeeded(serverLevel, l, 5);
-		}
-	}
-
-	private void maybeDecayGossip() {
-		long l = this.level.getGameTime();
-		if (this.lastGossipDecayTime == 0L) {
-			this.lastGossipDecayTime = l;
-		} else if (l >= this.lastGossipDecayTime + 24000L) {
-			this.gossips.decay();
-			this.lastGossipDecayTime = l;
 		}
 	}
 
@@ -881,7 +806,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			List<Villager> list = serverLevel.getEntitiesOfClass(Villager.class, aABB);
 			List<Villager> list2 = (List<Villager>)list.stream().filter(villager -> villager.wantsToSpawnGolem(l)).limit(5L).collect(Collectors.toList());
 			if (list2.size() >= i) {
-				if (SpawnUtil.trySpawnMob(EntityType.IRON_GOLEM, serverLevel, this.blockPosition(), 10, 8, 6).isPresent()) {
+				IronGolem ironGolem = this.trySpawnGolem(serverLevel);
+				if (ironGolem != null) {
 					list.forEach(GolemSensor::golemDetected);
 				}
 			}
@@ -892,18 +818,51 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		return !this.golemSpawnConditionsMet(this.level.getGameTime()) ? false : !this.brain.hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY);
 	}
 
+	@Nullable
+	private IronGolem trySpawnGolem(ServerLevel serverLevel) {
+		BlockPos blockPos = this.blockPosition();
+
+		for (int i = 0; i < 10; i++) {
+			double d = (double)(serverLevel.random.nextInt(16) - 8);
+			double e = (double)(serverLevel.random.nextInt(16) - 8);
+			BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e);
+			if (blockPos2 != null) {
+				IronGolem ironGolem = EntityType.IRON_GOLEM.create(serverLevel, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false);
+				if (ironGolem != null) {
+					if (ironGolem.checkSpawnRules(serverLevel, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(serverLevel)) {
+						serverLevel.addFreshEntityWithPassengers(ironGolem);
+						return ironGolem;
+					}
+
+					ironGolem.discard();
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Nullable
+	private BlockPos findSpawnPositionForGolemInColumn(BlockPos blockPos, double d, double e) {
+		int i = 6;
+		BlockPos blockPos2 = blockPos.offset(d, 6.0, e);
+		BlockState blockState = this.level.getBlockState(blockPos2);
+
+		for (int j = 6; j >= -6; j--) {
+			BlockPos blockPos3 = blockPos2;
+			BlockState blockState2 = blockState;
+			blockPos2 = blockPos2.below();
+			blockState = this.level.getBlockState(blockPos2);
+			if ((blockState2.isAir() || blockState2.getMaterial().isLiquid()) && blockState.getMaterial().isSolidBlocking()) {
+				return blockPos3;
+			}
+		}
+
+		return null;
+	}
+
 	@Override
 	public void onReputationEventFrom(ReputationEventType reputationEventType, Entity entity) {
-		if (reputationEventType == ReputationEventType.ZOMBIE_VILLAGER_CURED) {
-			this.gossips.add(entity.getUUID(), GossipType.MAJOR_POSITIVE, 20);
-			this.gossips.add(entity.getUUID(), GossipType.MINOR_POSITIVE, 25);
-		} else if (reputationEventType == ReputationEventType.TRADE) {
-			this.gossips.add(entity.getUUID(), GossipType.TRADING, 2);
-		} else if (reputationEventType == ReputationEventType.VILLAGER_HURT) {
-			this.gossips.add(entity.getUUID(), GossipType.MINOR_NEGATIVE, 25);
-		} else if (reputationEventType == ReputationEventType.VILLAGER_KILLED) {
-			this.gossips.add(entity.getUUID(), GossipType.MAJOR_NEGATIVE, 25);
-		}
 	}
 
 	@Override
@@ -918,14 +877,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	private void resetNumberOfRestocks() {
 		this.catchUpDemand();
 		this.numberOfRestocksToday = 0;
-	}
-
-	public GossipContainer getGossips() {
-		return this.gossips;
-	}
-
-	public void setGossips(Tag tag) {
-		this.gossips.update(new Dynamic<>(NbtOps.INSTANCE, tag));
 	}
 
 	@Override

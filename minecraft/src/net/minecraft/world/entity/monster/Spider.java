@@ -201,7 +201,7 @@ public class Spider extends Monster {
 
 		@Override
 		public boolean canContinueToUse() {
-			float f = this.mob.getLightLevelDependentMagicValue();
+			float f = this.mob.getBrightness();
 			if (f >= 0.5F && this.mob.getRandom().nextInt(100) == 0) {
 				this.mob.setTarget(null);
 				return false;
@@ -241,7 +241,7 @@ public class Spider extends Monster {
 
 		@Override
 		public boolean canUse() {
-			float f = this.mob.getLightLevelDependentMagicValue();
+			float f = this.mob.getBrightness();
 			return f >= 0.5F ? false : super.canUse();
 		}
 	}

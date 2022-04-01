@@ -19,12 +19,13 @@ import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.RegistryLoader;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 
 public class RegistryCodecs {
 	private static <T> MapCodec<RegistryCodecs.RegistryEntry<T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
 		return RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ResourceKey.codec(resourceKey).fieldOf("name").forGetter(RegistryCodecs.RegistryEntry::key),
+						ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name").forGetter(RegistryCodecs.RegistryEntry::key),
 						Codec.INT.fieldOf("id").forGetter(RegistryCodecs.RegistryEntry::id),
 						mapCodec.forGetter(RegistryCodecs.RegistryEntry::value)
 					)
@@ -89,7 +90,7 @@ public class RegistryCodecs {
 	}
 
 	private static <T> Codec<Map<ResourceKey<T>, T>> directCodec(ResourceKey<? extends Registry<T>> resourceKey, Codec<T> codec) {
-		return Codec.unboundedMap(ResourceKey.codec(resourceKey), codec);
+		return Codec.unboundedMap(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location), codec);
 	}
 
 	public static <E> Codec<HolderSet<E>> homogeneousList(ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {

@@ -1,38 +1,21 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 
 public class BlockRotProcessor extends StructureProcessor {
-	public static final Codec<BlockRotProcessor> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(
-					TagKey.codec(Registry.BLOCK_REGISTRY).optionalFieldOf("rottable_blocks").forGetter(blockRotProcessor -> blockRotProcessor.rottableBlocks),
-					Codec.floatRange(0.0F, 1.0F).fieldOf("integrity").forGetter(blockRotProcessor -> blockRotProcessor.integrity)
-				)
-				.apply(instance, BlockRotProcessor::new)
-	);
-	private Optional<TagKey<Block>> rottableBlocks;
+	public static final Codec<BlockRotProcessor> CODEC = Codec.FLOAT
+		.fieldOf("integrity")
+		.orElse(1.0F)
+		.<BlockRotProcessor>xmap(BlockRotProcessor::new, blockRotProcessor -> blockRotProcessor.integrity)
+		.codec();
 	private final float integrity;
 
-	public BlockRotProcessor(TagKey<Block> tagKey, float f) {
-		this(Optional.of(tagKey), f);
-	}
-
 	public BlockRotProcessor(float f) {
-		this(Optional.empty(), f);
-	}
-
-	private BlockRotProcessor(Optional<TagKey<Block>> optional, float f) {
 		this.integrity = f;
-		this.rottableBlocks = optional;
 	}
 
 	@Nullable
@@ -46,9 +29,7 @@ public class BlockRotProcessor extends StructureProcessor {
 		StructurePlaceSettings structurePlaceSettings
 	) {
 		Random random = structurePlaceSettings.getRandom(structureBlockInfo2.pos);
-		return (!this.rottableBlocks.isPresent() || structureBlockInfo.state.is((TagKey<Block>)this.rottableBlocks.get())) && !(random.nextFloat() <= this.integrity)
-			? null
-			: structureBlockInfo2;
+		return !(this.integrity >= 1.0F) && !(random.nextFloat() <= this.integrity) ? null : structureBlockInfo2;
 	}
 
 	@Override

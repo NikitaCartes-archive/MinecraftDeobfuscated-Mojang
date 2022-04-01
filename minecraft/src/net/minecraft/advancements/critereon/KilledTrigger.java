@@ -88,12 +88,6 @@ public class KilledTrigger extends SimpleCriterionTrigger<KilledTrigger.TriggerI
 			);
 		}
 
-		public static KilledTrigger.TriggerInstance playerKilledEntityNearSculkCatalyst() {
-			return new KilledTrigger.TriggerInstance(
-				CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.id, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, DamageSourcePredicate.ANY
-			);
-		}
-
 		public static KilledTrigger.TriggerInstance entityKilledPlayer(EntityPredicate entityPredicate) {
 			return new KilledTrigger.TriggerInstance(
 				CriteriaTriggers.ENTITY_KILLED_PLAYER.id, EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(entityPredicate), DamageSourcePredicate.ANY

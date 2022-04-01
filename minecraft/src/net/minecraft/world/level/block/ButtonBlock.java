@@ -105,7 +105,7 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 		} else {
 			this.press(blockState, level, blockPos);
 			this.playSound(player, level, blockPos, true);
-			level.gameEvent(player, GameEvent.BLOCK_ACTIVATE, blockPos);
+			level.gameEvent(player, GameEvent.BLOCK_PRESS, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
@@ -157,7 +157,7 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 				serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 3);
 				this.updateNeighbours(blockState, serverLevel, blockPos);
 				this.playSound(null, serverLevel, blockPos, false);
-				serverLevel.gameEvent(null, GameEvent.BLOCK_DEACTIVATE, blockPos);
+				serverLevel.gameEvent(GameEvent.BLOCK_UNPRESS, blockPos);
 			}
 		}
 	}
@@ -177,7 +177,7 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 			level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl)), 3);
 			this.updateNeighbours(blockState, level, blockPos);
 			this.playSound(null, level, blockPos, bl);
-			level.gameEvent((Entity)list.stream().findFirst().orElse(null), bl ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
+			level.gameEvent((Entity)list.stream().findFirst().orElse(null), bl ? GameEvent.BLOCK_PRESS : GameEvent.BLOCK_UNPRESS, blockPos);
 		}
 
 		if (bl) {

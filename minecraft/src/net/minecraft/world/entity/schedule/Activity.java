@@ -21,14 +21,6 @@ public class Activity {
 	public static final Activity PLAY_DEAD = register("play_dead");
 	public static final Activity LONG_JUMP = register("long_jump");
 	public static final Activity RAM = register("ram");
-	public static final Activity TONGUE = register("tongue");
-	public static final Activity SWIM = register("swim");
-	public static final Activity LAY_SPAWN = register("lay_spawn");
-	public static final Activity SNIFF = register("sniff");
-	public static final Activity INVESTIGATE = register("investigate");
-	public static final Activity ROAR = register("roar");
-	public static final Activity EMERGE = register("emerge");
-	public static final Activity DIG = register("dig");
 	private final String name;
 	private final int hashCode;
 

@@ -55,14 +55,14 @@ public class MouseHandler {
 
 			int m = i;
 			if (bl) {
-				if (this.minecraft.options.touchscreen().get() && this.clickDepth++ > 0) {
+				if (this.minecraft.options.touchscreen && this.clickDepth++ > 0) {
 					return;
 				}
 
 				this.activeButton = m;
 				this.mousePressedTime = Blaze3D.getTime();
 			} else if (this.activeButton != -1) {
-				if (this.minecraft.options.touchscreen().get() && --this.clickDepth > 0) {
+				if (this.minecraft.options.touchscreen && --this.clickDepth > 0) {
 					return;
 				}
 
@@ -111,7 +111,7 @@ public class MouseHandler {
 
 	private void onScroll(long l, double d, double e) {
 		if (l == Minecraft.getInstance().getWindow().getWindow()) {
-			double f = (this.minecraft.options.discreteMouseScroll().get() ? Math.signum(e) : e) * this.minecraft.options.mouseWheelSensitivity().get();
+			double f = (this.minecraft.options.discreteMouseScroll ? Math.signum(e) : e) * this.minecraft.options.mouseWheelSensitivity;
 			if (this.minecraft.getOverlay() == null) {
 				if (this.minecraft.screen != null) {
 					double g = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
@@ -209,7 +209,7 @@ public class MouseHandler {
 		double e = d - this.lastMouseEventTime;
 		this.lastMouseEventTime = d;
 		if (this.isMouseGrabbed() && this.minecraft.isWindowActive()) {
-			double f = this.minecraft.options.sensitivity().get() * 0.6F + 0.2F;
+			double f = this.minecraft.options.sensitivity * 0.6F + 0.2F;
 			double g = f * f * f;
 			double h = g * 8.0;
 			double k;
@@ -234,7 +234,7 @@ public class MouseHandler {
 			this.accumulatedDX = 0.0;
 			this.accumulatedDY = 0.0;
 			int m = 1;
-			if (this.minecraft.options.invertYMouse().get()) {
+			if (this.minecraft.options.invertYMouse) {
 				m = -1;
 			}
 

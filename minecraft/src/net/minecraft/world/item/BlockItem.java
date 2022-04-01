@@ -1,7 +1,9 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -20,13 +22,16 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
@@ -35,6 +40,51 @@ public class BlockItem extends Item {
 	public static final String BLOCK_STATE_TAG = "BlockStateTag";
 	@Deprecated
 	private final Block block;
+	private static final Set<Property<?>> PROPERTIES_TO_COPY_FROM_TAG = ImmutableSet.of(
+		BlockStateProperties.LIT,
+		BlockStateProperties.LIT,
+		BlockStateProperties.VINE_END,
+		BlockStateProperties.HAS_RECORD,
+		BlockStateProperties.HAS_BOOK,
+		BlockStateProperties.PICKLES,
+		BlockStateProperties.RESPAWN_ANCHOR_CHARGES,
+		BlockStateProperties.EGGS,
+		BlockStateProperties.LAYERS,
+		BlockStateProperties.HATCH,
+		BlockStateProperties.INVERTED,
+		BlockStateProperties.DRIPSTONE_THICKNESS,
+		BlockStateProperties.DELAY,
+		BlockStateProperties.CONDITIONAL,
+		BlockStateProperties.CANDLES,
+		BlockStateProperties.BLOOM,
+		BlockStateProperties.BITES,
+		BlockStateProperties.BAMBOO_LEAVES,
+		BlockStateProperties.BERRIES,
+		BlockStateProperties.LEVEL,
+		BlockStateProperties.LEVEL_HONEY,
+		BlockStateProperties.LEVEL_FLOWING,
+		BlockStateProperties.LEVEL_CAULDRON,
+		BlockStateProperties.LEVEL_COMPOSTER,
+		BlockStateProperties.OPEN,
+		BlockStateProperties.EYE,
+		BlockStateProperties.STAGE,
+		BlockStateProperties.NOTE,
+		BlockStateProperties.STRUCTUREBLOCK_MODE,
+		BlockStateProperties.PISTON_TYPE,
+		BlockStateProperties.AGE_1,
+		BlockStateProperties.AGE_2,
+		BlockStateProperties.AGE_3,
+		BlockStateProperties.AGE_5,
+		BlockStateProperties.AGE_7,
+		BlockStateProperties.AGE_15,
+		BlockStateProperties.AGE_25,
+		BlockStateProperties.HAS_BOTTLE_0,
+		BlockStateProperties.HAS_BOTTLE_1,
+		BlockStateProperties.HAS_BOTTLE_2,
+		BlockStateProperties.SLAB_TYPE,
+		BlockStateProperties.MOISTURE,
+		BlockStateProperties.MODE_COMPARATOR
+	);
 
 	public BlockItem(Block block, Item.Properties properties) {
 		super(properties);
@@ -72,7 +122,10 @@ public class BlockItem extends Item {
 					ItemStack itemStack = blockPlaceContext2.getItemInHand();
 					BlockState blockState2 = level.getBlockState(blockPos);
 					if (blockState2.is(blockState.getBlock())) {
-						blockState2 = this.updateBlockStateFromTag(blockPos, level, itemStack, blockState2);
+						if (!blockState2.is(Blocks.END_PORTAL_FRAME)) {
+							blockState2 = this.updateBlockStateFromTag(blockPos, level, itemStack, blockState2, blockPlaceContext2);
+						}
+
 						this.updateCustomBlockEntityTag(blockPos, level, player, itemStack, blockState2);
 						blockState2.getBlock().setPlacedBy(level, blockPos, blockState2, player, itemStack);
 						if (player instanceof ServerPlayer) {
@@ -90,6 +143,37 @@ public class BlockItem extends Item {
 					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 			}
+		}
+	}
+
+	public static InteractionResult placeSpecificStateBecauseCodeQualityIsNotImportant(BlockPlaceContext blockPlaceContext, BlockState blockState) {
+		if (!blockPlaceContext.canPlace()) {
+			return InteractionResult.FAIL;
+		} else if (!blockPlaceContext.getLevel().setBlock(blockPlaceContext.getClickedPos(), blockState, 11)) {
+			return InteractionResult.FAIL;
+		} else {
+			BlockPos blockPos = blockPlaceContext.getClickedPos();
+			Level level = blockPlaceContext.getLevel();
+			Player player = blockPlaceContext.getPlayer();
+			ItemStack itemStack = blockPlaceContext.getItemInHand();
+			BlockState blockState2 = level.getBlockState(blockPos);
+			if (blockState2.is(blockState.getBlock())) {
+				blockState2.getBlock().setPlacedBy(level, blockPos, blockState2, player, itemStack);
+				if (player instanceof ServerPlayer) {
+					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
+				}
+			}
+
+			SoundType soundType = blockState2.getSoundType();
+			level.playSound(
+				player, blockPos, blockState2.getSoundType().getPlaceSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F
+			);
+			level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
+			if (player == null || !player.getAbilities().instabuild) {
+				itemStack.shrink(1);
+			}
+
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 
@@ -112,7 +196,7 @@ public class BlockItem extends Item {
 		return blockState != null && this.canPlace(blockPlaceContext, blockState) ? blockState : null;
 	}
 
-	private BlockState updateBlockStateFromTag(BlockPos blockPos, Level level, ItemStack itemStack, BlockState blockState) {
+	private BlockState updateBlockStateFromTag(BlockPos blockPos, Level level, ItemStack itemStack, BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		BlockState blockState2 = blockState;
 		CompoundTag compoundTag = itemStack.getTag();
 		if (compoundTag != null) {
@@ -121,9 +205,11 @@ public class BlockItem extends Item {
 
 			for (String string : compoundTag2.getAllKeys()) {
 				Property<?> property = stateDefinition.getProperty(string);
-				if (property != null) {
+				if (property != null && PROPERTIES_TO_COPY_FROM_TAG.contains(property)) {
 					String string2 = compoundTag2.get(string).getAsString();
-					blockState2 = updateState(blockState2, property, string2);
+					if (property != BlockStateProperties.SLAB_TYPE || string2.equals(SlabType.DOUBLE.getSerializedName())) {
+						blockState2 = updateState(blockState2, property, string2);
+					}
 				}
 			}
 		}

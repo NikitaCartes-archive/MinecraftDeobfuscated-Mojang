@@ -183,19 +183,6 @@ public abstract class RenderType extends RenderStateShard {
 			return create("entity_translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
 		})
 	);
-	private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_TRANSLUCENT_EMISSIVE = Util.memoize(
-		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
-			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
-				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
-				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-				.setCullState(NO_CULL)
-				.setWriteMaskState(COLOR_WRITE)
-				.setOverlayState(OVERLAY)
-				.createCompositeState(boolean_);
-			return create("entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
-		})
-	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_SMOOTH_CUTOUT = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
@@ -716,14 +703,6 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
 		return entityTranslucent(resourceLocation, true);
-	}
-
-	public static RenderType entityTranslucentEmissive(ResourceLocation resourceLocation, boolean bl) {
-		return (RenderType)ENTITY_TRANSLUCENT_EMISSIVE.apply(resourceLocation, bl);
-	}
-
-	public static RenderType entityTranslucentEmissive(ResourceLocation resourceLocation) {
-		return entityTranslucentEmissive(resourceLocation, true);
 	}
 
 	public static RenderType entitySmoothCutout(ResourceLocation resourceLocation) {

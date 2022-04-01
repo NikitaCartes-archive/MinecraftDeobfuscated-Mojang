@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,6 +44,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractSkeleton extends Monster implements RangedAttackMob {
 	private final RangedBowAttackGoal<AbstractSkeleton> bowGoal = new RangedBowAttackGoal<>(this, 1.0, 20, 15.0F);
@@ -63,6 +65,11 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	protected AbstractSkeleton(EntityType<? extends AbstractSkeleton> entityType, Level level) {
 		super(entityType, level);
 		this.reassessWeaponGoal();
+	}
+
+	@Override
+	public boolean canStealItem() {
+		return true;
 	}
 
 	@Override
@@ -189,9 +196,48 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
 		double g = livingEntity.getZ() - this.getZ();
 		double h = Math.sqrt(d * d + g * g);
-		abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
+		float i;
+		if (this instanceof Skeleton skeleton) {
+			if (skeleton.getSpyglassesInSockets() >= 2) {
+				i = 0.0F;
+			} else {
+				i = (float)(14 - this.level.getDifficulty().getId() * 4) / 2.0F;
+			}
+		} else {
+			i = (float)(14 - this.level.getDifficulty().getId() * 4);
+		}
+
+		abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, i);
 		this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
 		this.level.addFreshEntity(abstractArrow);
+	}
+
+	@Override
+	public void performVehicleAttack(float f) {
+		if (this.isPassenger()) {
+			ItemStack itemStack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
+			AbstractArrow abstractArrow = this.getArrow(itemStack, f);
+			Entity entity = this.getRootVehicle();
+			Vec3 vec3 = entity.position().add(entity.getForward().multiply(10.0, 10.0, 10.0));
+			double d = vec3.x() - this.getX();
+			double e = vec3.y() - abstractArrow.getY();
+			double g = vec3.z() - this.getZ();
+			double h = Math.sqrt(d * d + g * g);
+			float i;
+			if (this instanceof Skeleton skeleton) {
+				if (skeleton.getSpyglassesInSockets() >= 2) {
+					i = 0.0F;
+				} else {
+					i = (float)(14 - this.level.getDifficulty().getId() * 4) / 2.0F;
+				}
+			} else {
+				i = (float)(14 - this.level.getDifficulty().getId() * 4);
+			}
+
+			abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, i);
+			this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+			this.level.addFreshEntity(abstractArrow);
+		}
 	}
 
 	protected AbstractArrow getArrow(ItemStack itemStack, float f) {

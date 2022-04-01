@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
@@ -380,7 +379,7 @@ public class Rabbit extends Animal {
 		int i = this.random.nextInt(100);
 		if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
 			return i < 80 ? 1 : 3;
-		} else if (holder.is(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS)) {
+		} else if (Biome.getBiomeCategory(holder) == Biome.BiomeCategory.DESERT) {
 			return 4;
 		} else {
 			return i < 50 ? 0 : (i < 90 ? 5 : 2);

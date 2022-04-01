@@ -7,18 +7,19 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
-import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.ToFloatFunction;
-import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.level.biome.TerrainShaper;
+import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.synth.BlendedNoise;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -26,9 +27,7 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import org.slf4j.Logger;
 
 public final class DensityFunctions {
-	private static final Codec<DensityFunction> CODEC = Registry.DENSITY_FUNCTION_TYPES
-		.byNameCodec()
-		.dispatch(densityFunction -> densityFunction.codec().codec(), Function.identity());
+	private static final Codec<DensityFunction> CODEC = Registry.DENSITY_FUNCTION_TYPES.byNameCodec().dispatch(DensityFunction::codec, Function.identity());
 	protected static final double MAX_REASONABLE_NOISE_VALUE = 1000000.0;
 	static final Codec<Double> NOISE_VALUE_CODEC = Codec.doubleRange(-1000000.0, 1000000.0);
 	public static final Codec<DensityFunction> DIRECT_CODEC = Codec.either(NOISE_VALUE_CODEC, CODEC)
@@ -62,45 +61,46 @@ public final class DensityFunctions {
 			register(registry, type2.getSerializedName(), type2.codec);
 		}
 
+		register(registry, "slide", DensityFunctions.Slide.CODEC);
+
 		for (DensityFunctions.TwoArgumentSimpleFunction.Type type3 : DensityFunctions.TwoArgumentSimpleFunction.Type.values()) {
 			register(registry, type3.getSerializedName(), type3.codec);
 		}
 
 		register(registry, "spline", DensityFunctions.Spline.CODEC);
+		register(registry, "terrain_shaper_spline", DensityFunctions.TerrainShaperSpline.CODEC);
 		register(registry, "constant", DensityFunctions.Constant.CODEC);
 		return register(registry, "y_clamped_gradient", DensityFunctions.YClampedGradient.CODEC);
 	}
 
 	private static Codec<? extends DensityFunction> register(
-		Registry<Codec<? extends DensityFunction>> registry, String string, KeyDispatchDataCodec<? extends DensityFunction> keyDispatchDataCodec
+		Registry<Codec<? extends DensityFunction>> registry, String string, Codec<? extends DensityFunction> codec
 	) {
-		return Registry.register(registry, string, keyDispatchDataCodec.codec());
+		return Registry.register(registry, string, codec);
 	}
 
-	static <A, O> KeyDispatchDataCodec<O> singleArgumentCodec(Codec<A> codec, Function<A, O> function, Function<O, A> function2) {
-		return KeyDispatchDataCodec.of(codec.fieldOf("argument").xmap(function, function2));
+	static <A, O> Codec<O> singleArgumentCodec(Codec<A> codec, Function<A, O> function, Function<O, A> function2) {
+		return codec.fieldOf("argument").xmap(function, function2).codec();
 	}
 
-	static <O> KeyDispatchDataCodec<O> singleFunctionArgumentCodec(Function<DensityFunction, O> function, Function<O, DensityFunction> function2) {
+	static <O> Codec<O> singleFunctionArgumentCodec(Function<DensityFunction, O> function, Function<O, DensityFunction> function2) {
 		return singleArgumentCodec(DensityFunction.HOLDER_HELPER_CODEC, function, function2);
 	}
 
-	static <O> KeyDispatchDataCodec<O> doubleFunctionArgumentCodec(
+	static <O> Codec<O> doubleFunctionArgumentCodec(
 		BiFunction<DensityFunction, DensityFunction, O> biFunction, Function<O, DensityFunction> function, Function<O, DensityFunction> function2
 	) {
-		return KeyDispatchDataCodec.of(
-			RecordCodecBuilder.mapCodec(
-				instance -> instance.group(
-							DensityFunction.HOLDER_HELPER_CODEC.fieldOf("argument1").forGetter(function),
-							DensityFunction.HOLDER_HELPER_CODEC.fieldOf("argument2").forGetter(function2)
-						)
-						.apply(instance, biFunction)
-			)
+		return RecordCodecBuilder.create(
+			instance -> instance.group(
+						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("argument1").forGetter(function),
+						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("argument2").forGetter(function2)
+					)
+					.apply(instance, biFunction)
 		);
 	}
 
-	static <O> KeyDispatchDataCodec<O> makeCodec(MapCodec<O> mapCodec) {
-		return KeyDispatchDataCodec.of(mapCodec);
+	static <O> Codec<O> makeCodec(MapCodec<O> mapCodec) {
+		return mapCodec.codec();
 	}
 
 	private DensityFunctions() {
@@ -127,7 +127,7 @@ public final class DensityFunctions {
 	}
 
 	public static DensityFunction mappedNoise(Holder<NormalNoise.NoiseParameters> holder, @Deprecated double d, double e, double f, double g) {
-		return mapFromUnitTo(new DensityFunctions.Noise(new DensityFunction.NoiseHolder(holder), d, e), f, g);
+		return mapFromUnitTo(new DensityFunctions.Noise(holder, null, d, e), f, g);
 	}
 
 	public static DensityFunction mappedNoise(Holder<NormalNoise.NoiseParameters> holder, double d, double e, double f) {
@@ -141,7 +141,7 @@ public final class DensityFunctions {
 	public static DensityFunction shiftedNoise2d(
 		DensityFunction densityFunction, DensityFunction densityFunction2, double d, Holder<NormalNoise.NoiseParameters> holder
 	) {
-		return new DensityFunctions.ShiftedNoise(densityFunction, zero(), densityFunction2, d, 0.0, new DensityFunction.NoiseHolder(holder));
+		return new DensityFunctions.ShiftedNoise(densityFunction, zero(), densityFunction2, d, 0.0, holder, null);
 	}
 
 	public static DensityFunction noise(Holder<NormalNoise.NoiseParameters> holder) {
@@ -149,7 +149,7 @@ public final class DensityFunctions {
 	}
 
 	public static DensityFunction noise(Holder<NormalNoise.NoiseParameters> holder, double d, double e) {
-		return new DensityFunctions.Noise(new DensityFunction.NoiseHolder(holder), d, e);
+		return new DensityFunctions.Noise(holder, null, d, e);
 	}
 
 	public static DensityFunction noise(Holder<NormalNoise.NoiseParameters> holder, double d) {
@@ -163,15 +163,15 @@ public final class DensityFunctions {
 	}
 
 	public static DensityFunction shiftA(Holder<NormalNoise.NoiseParameters> holder) {
-		return new DensityFunctions.ShiftA(new DensityFunction.NoiseHolder(holder));
+		return new DensityFunctions.ShiftA(holder, null);
 	}
 
 	public static DensityFunction shiftB(Holder<NormalNoise.NoiseParameters> holder) {
-		return new DensityFunctions.ShiftB(new DensityFunction.NoiseHolder(holder));
+		return new DensityFunctions.ShiftB(holder, null);
 	}
 
 	public static DensityFunction shift(Holder<NormalNoise.NoiseParameters> holder) {
-		return new DensityFunctions.Shift(new DensityFunction.NoiseHolder(holder));
+		return new DensityFunctions.Shift(holder, null);
 	}
 
 	public static DensityFunction blendDensity(DensityFunction densityFunction) {
@@ -185,7 +185,11 @@ public final class DensityFunctions {
 	public static DensityFunction weirdScaledSampler(
 		DensityFunction densityFunction, Holder<NormalNoise.NoiseParameters> holder, DensityFunctions.WeirdScaledSampler.RarityValueMapper rarityValueMapper
 	) {
-		return new DensityFunctions.WeirdScaledSampler(densityFunction, new DensityFunction.NoiseHolder(holder), rarityValueMapper);
+		return new DensityFunctions.WeirdScaledSampler(densityFunction, holder, null, rarityValueMapper);
+	}
+
+	public static DensityFunction slide(NoiseSettings noiseSettings, DensityFunction densityFunction) {
+		return new DensityFunctions.Slide(noiseSettings, densityFunction);
 	}
 
 	public static DensityFunction add(DensityFunction densityFunction, DensityFunction densityFunction2) {
@@ -204,8 +208,15 @@ public final class DensityFunctions {
 		return DensityFunctions.TwoArgumentSimpleFunction.create(DensityFunctions.TwoArgumentSimpleFunction.Type.MAX, densityFunction, densityFunction2);
 	}
 
-	public static DensityFunction spline(CubicSpline<DensityFunctions.Spline.Point, DensityFunctions.Spline.Coordinate> cubicSpline) {
-		return new DensityFunctions.Spline(cubicSpline);
+	public static DensityFunction terrainShaperSpline(
+		DensityFunction densityFunction,
+		DensityFunction densityFunction2,
+		DensityFunction densityFunction3,
+		DensityFunctions.TerrainShaperSpline.SplineType splineType,
+		double d,
+		double e
+	) {
+		return new DensityFunctions.TerrainShaperSpline(densityFunction, densityFunction2, densityFunction3, null, splineType, d, e);
 	}
 
 	public static DensityFunction zero() {
@@ -239,17 +250,9 @@ public final class DensityFunctions {
 	}
 
 	public static DensityFunction lerp(DensityFunction densityFunction, DensityFunction densityFunction2, DensityFunction densityFunction3) {
-		if (densityFunction2 instanceof DensityFunctions.Constant constant) {
-			return lerp(densityFunction, constant.value, densityFunction3);
-		} else {
-			DensityFunction densityFunction4 = cacheOnce(densityFunction);
-			DensityFunction densityFunction5 = add(mul(densityFunction4, constant(-1.0)), constant(1.0));
-			return add(mul(densityFunction2, densityFunction5), mul(densityFunction3, densityFunction4));
-		}
-	}
-
-	public static DensityFunction lerp(DensityFunction densityFunction, double d, DensityFunction densityFunction2) {
-		return add(mul(densityFunction, add(densityFunction2, constant(-d))), constant(d));
+		DensityFunction densityFunction4 = cacheOnce(densityFunction);
+		DensityFunction densityFunction5 = add(mul(densityFunction4, constant(-1.0)), constant(1.0));
+		return add(mul(densityFunction2, densityFunction5), mul(densityFunction3, densityFunction4));
 	}
 
 	static record Ap2(DensityFunctions.TwoArgumentSimpleFunction.Type type, DensityFunction argument1, DensityFunction argument2, double minValue, double maxValue)
@@ -304,7 +307,9 @@ public final class DensityFunctions {
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(DensityFunctions.TwoArgumentSimpleFunction.create(this.type, this.argument1.mapAll(visitor), this.argument2.mapAll(visitor)));
+			return (DensityFunction)visitor.apply(
+				DensityFunctions.TwoArgumentSimpleFunction.create(this.type, this.argument1.mapAll(visitor), this.argument2.mapAll(visitor))
+			);
 		}
 	}
 
@@ -333,10 +338,10 @@ public final class DensityFunctions {
 	}
 
 	public interface BeardifierOrMarker extends DensityFunction.SimpleFunction {
-		KeyDispatchDataCodec<DensityFunction> CODEC = KeyDispatchDataCodec.of(MapCodec.unit(DensityFunctions.BeardifierMarker.INSTANCE));
+		Codec<DensityFunction> CODEC = Codec.unit(DensityFunctions.BeardifierMarker.INSTANCE);
 
 		@Override
-		default KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		default Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
@@ -344,7 +349,7 @@ public final class DensityFunctions {
 	protected static enum BlendAlpha implements DensityFunction.SimpleFunction {
 		INSTANCE;
 
-		public static final KeyDispatchDataCodec<DensityFunction> CODEC = KeyDispatchDataCodec.of(MapCodec.unit(INSTANCE));
+		public static final Codec<DensityFunction> CODEC = Codec.unit(INSTANCE);
 
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
@@ -367,13 +372,13 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
 	static record BlendDensity(DensityFunction input) implements DensityFunctions.TransformerWithContext {
-		static final KeyDispatchDataCodec<DensityFunctions.BlendDensity> CODEC = DensityFunctions.singleFunctionArgumentCodec(
+		static final Codec<DensityFunctions.BlendDensity> CODEC = DensityFunctions.singleFunctionArgumentCodec(
 			DensityFunctions.BlendDensity::new, DensityFunctions.BlendDensity::input
 		);
 
@@ -384,7 +389,7 @@ public final class DensityFunctions {
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.BlendDensity(this.input.mapAll(visitor)));
+			return (DensityFunction)visitor.apply(new DensityFunctions.BlendDensity(this.input.mapAll(visitor)));
 		}
 
 		@Override
@@ -398,7 +403,7 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
@@ -406,7 +411,7 @@ public final class DensityFunctions {
 	protected static enum BlendOffset implements DensityFunction.SimpleFunction {
 		INSTANCE;
 
-		public static final KeyDispatchDataCodec<DensityFunction> CODEC = KeyDispatchDataCodec.of(MapCodec.unit(INSTANCE));
+		public static final Codec<DensityFunction> CODEC = Codec.unit(INSTANCE);
 
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
@@ -429,7 +434,7 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
@@ -443,7 +448,7 @@ public final class DensityFunctions {
 					)
 					.apply(instance, DensityFunctions.Clamp::new)
 		);
-		public static final KeyDispatchDataCodec<DensityFunctions.Clamp> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+		public static final Codec<DensityFunctions.Clamp> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
 
 		@Override
 		public double transform(double d) {
@@ -456,13 +461,13 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
 	static record Constant(double value) implements DensityFunction.SimpleFunction {
-		static final KeyDispatchDataCodec<DensityFunctions.Constant> CODEC = DensityFunctions.singleArgumentCodec(
+		static final Codec<DensityFunctions.Constant> CODEC = DensityFunctions.singleArgumentCodec(
 			DensityFunctions.NOISE_VALUE_CODEC, DensityFunctions.Constant::new, DensityFunctions.Constant::value
 		);
 		static final DensityFunctions.Constant ZERO = new DensityFunctions.Constant(0.0);
@@ -488,17 +493,14 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
 	protected static final class EndIslandDensityFunction implements DensityFunction.SimpleFunction {
-		public static final KeyDispatchDataCodec<DensityFunctions.EndIslandDensityFunction> CODEC = KeyDispatchDataCodec.of(
-			MapCodec.unit(new DensityFunctions.EndIslandDensityFunction(0L))
-		);
-		private static final float ISLAND_THRESHOLD = -0.9F;
-		private final SimplexNoise islandNoise;
+		public static final Codec<DensityFunctions.EndIslandDensityFunction> CODEC = Codec.unit(new DensityFunctions.EndIslandDensityFunction(0L));
+		final SimplexNoise islandNoise;
 
 		public EndIslandDensityFunction(long l) {
 			RandomSource randomSource = new LegacyRandomSource(l);
@@ -506,35 +508,9 @@ public final class DensityFunctions {
 			this.islandNoise = new SimplexNoise(randomSource);
 		}
 
-		private static float getHeightValue(SimplexNoise simplexNoise, int i, int j) {
-			int k = i / 2;
-			int l = j / 2;
-			int m = i % 2;
-			int n = j % 2;
-			float f = 100.0F - Mth.sqrt((float)(i * i + j * j)) * 8.0F;
-			f = Mth.clamp(f, -100.0F, 80.0F);
-
-			for (int o = -12; o <= 12; o++) {
-				for (int p = -12; p <= 12; p++) {
-					long q = (long)(k + o);
-					long r = (long)(l + p);
-					if (q * q + r * r > 4096L && simplexNoise.getValue((double)q, (double)r) < -0.9F) {
-						float g = (Mth.abs((float)q) * 3439.0F + Mth.abs((float)r) * 147.0F) % 13.0F + 9.0F;
-						float h = (float)(m - o * 2);
-						float s = (float)(n - p * 2);
-						float t = 100.0F - Mth.sqrt(h * h + s * s) * g;
-						t = Mth.clamp(t, -100.0F, 80.0F);
-						f = Math.max(f, t);
-					}
-				}
-			}
-
-			return f;
-		}
-
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
-			return ((double)getHeightValue(this.islandNoise, functionContext.blockX() / 8, functionContext.blockZ() / 8) - 8.0) / 128.0;
+			return ((double)TheEndBiomeSource.getHeightValue(this.islandNoise, functionContext.blockX() / 8, functionContext.blockZ() / 8) - 8.0) / 128.0;
 		}
 
 		@Override
@@ -548,13 +524,12 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
-	@VisibleForDebug
-	public static record HolderHolder(Holder<DensityFunction> function) implements DensityFunction {
+	protected static record HolderHolder(Holder<DensityFunction> function) implements DensityFunction {
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
 			return this.function.value().compute(functionContext);
@@ -567,7 +542,7 @@ public final class DensityFunctions {
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.HolderHolder(new Holder.Direct<>(this.function.value().mapAll(visitor))));
+			return (DensityFunction)visitor.apply(new DensityFunctions.HolderHolder(new Holder.Direct<>(this.function.value().mapAll(visitor))));
 		}
 
 		@Override
@@ -581,7 +556,7 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			throw new UnsupportedOperationException("Calling .codec() on HolderHolder");
 		}
 	}
@@ -621,7 +596,7 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return this.type.codec;
 		}
 
@@ -634,7 +609,7 @@ public final class DensityFunctions {
 			SQUEEZE("squeeze");
 
 			private final String name;
-			final KeyDispatchDataCodec<DensityFunctions.Mapped> codec = DensityFunctions.singleFunctionArgumentCodec(
+			final Codec<DensityFunctions.Mapped> codec = DensityFunctions.singleFunctionArgumentCodec(
 				densityFunction -> DensityFunctions.Mapped.create(this, densityFunction), DensityFunctions.Mapped::input
 			);
 
@@ -661,6 +636,11 @@ public final class DensityFunctions {
 		}
 
 		@Override
+		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
+			return (DensityFunction)visitor.apply(new DensityFunctions.Marker(this.type, this.wrapped.mapAll(visitor)));
+		}
+
+		@Override
 		public double minValue() {
 			return this.wrapped.minValue();
 		}
@@ -678,7 +658,7 @@ public final class DensityFunctions {
 			CacheAllInCell("cache_all_in_cell");
 
 			private final String name;
-			final KeyDispatchDataCodec<DensityFunctions.MarkerOrMarked> codec = DensityFunctions.singleFunctionArgumentCodec(
+			final Codec<DensityFunctions.MarkerOrMarked> codec = DensityFunctions.singleFunctionArgumentCodec(
 				densityFunction -> new DensityFunctions.Marker(this, densityFunction), DensityFunctions.MarkerOrMarked::wrapped
 			);
 
@@ -699,19 +679,14 @@ public final class DensityFunctions {
 		DensityFunction wrapped();
 
 		@Override
-		default KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		default Codec<? extends DensityFunction> codec() {
 			return this.type().codec;
-		}
-
-		@Override
-		default DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.Marker(this.type(), this.wrapped().mapAll(visitor)));
 		}
 	}
 
 	static record MulOrAdd(DensityFunctions.MulOrAdd.Type specificType, DensityFunction input, double minValue, double maxValue, double argument)
-		implements DensityFunctions.PureTransformer,
-		DensityFunctions.TwoArgumentSimpleFunction {
+		implements DensityFunctions.TwoArgumentSimpleFunction,
+		DensityFunctions.PureTransformer {
 		@Override
 		public DensityFunctions.TwoArgumentSimpleFunction.Type type() {
 			return this.specificType == DensityFunctions.MulOrAdd.Type.MUL
@@ -764,31 +739,28 @@ public final class DensityFunctions {
 		}
 	}
 
-	protected static record Noise(DensityFunction.NoiseHolder noise, @Deprecated double xzScale, double yScale) implements DensityFunction {
+	protected static record Noise(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise noise, @Deprecated double xzScale, double yScale)
+		implements DensityFunction.SimpleFunction {
 		public static final MapCodec<DensityFunctions.Noise> DATA_CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						DensityFunction.NoiseHolder.CODEC.fieldOf("noise").forGetter(DensityFunctions.Noise::noise),
+						NormalNoise.NoiseParameters.CODEC.fieldOf("noise").forGetter(DensityFunctions.Noise::noiseData),
 						Codec.DOUBLE.fieldOf("xz_scale").forGetter(DensityFunctions.Noise::xzScale),
 						Codec.DOUBLE.fieldOf("y_scale").forGetter(DensityFunctions.Noise::yScale)
 					)
-					.apply(instance, DensityFunctions.Noise::new)
+					.apply(instance, DensityFunctions.Noise::createUnseeded)
 		);
-		public static final KeyDispatchDataCodec<DensityFunctions.Noise> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+		public static final Codec<DensityFunctions.Noise> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+		public static DensityFunctions.Noise createUnseeded(Holder<NormalNoise.NoiseParameters> holder, @Deprecated double d, double e) {
+			return new DensityFunctions.Noise(holder, null, d, e);
+		}
 
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
-			return this.noise
-				.getValue((double)functionContext.blockX() * this.xzScale, (double)functionContext.blockY() * this.yScale, (double)functionContext.blockZ() * this.xzScale);
-		}
-
-		@Override
-		public void fillArray(double[] ds, DensityFunction.ContextProvider contextProvider) {
-			contextProvider.fillAllDirectly(ds, this);
-		}
-
-		@Override
-		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.Noise(visitor.visitNoise(this.noise), this.xzScale, this.yScale));
+			return this.noise == null
+				? 0.0
+				: this.noise
+					.getValue((double)functionContext.blockX() * this.xzScale, (double)functionContext.blockY() * this.yScale, (double)functionContext.blockZ() * this.xzScale);
 		}
 
 		@Override
@@ -798,11 +770,11 @@ public final class DensityFunctions {
 
 		@Override
 		public double maxValue() {
-			return this.noise.maxValue();
+			return this.noise == null ? 2.0 : this.noise.maxValue();
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
@@ -839,7 +811,7 @@ public final class DensityFunctions {
 					)
 					.apply(instance, DensityFunctions.RangeChoice::new)
 		);
-		public static final KeyDispatchDataCodec<DensityFunctions.RangeChoice> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+		public static final Codec<DensityFunctions.RangeChoice> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
 
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
@@ -863,7 +835,7 @@ public final class DensityFunctions {
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(
+			return (DensityFunction)visitor.apply(
 				new DensityFunctions.RangeChoice(
 					this.input.mapAll(visitor), this.minInclusive, this.maxExclusive, this.whenInRange.mapAll(visitor), this.whenOutOfRange.mapAll(visitor)
 				)
@@ -881,14 +853,14 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
-	protected static record Shift(DensityFunction.NoiseHolder offsetNoise) implements DensityFunctions.ShiftNoise {
-		static final KeyDispatchDataCodec<DensityFunctions.Shift> CODEC = DensityFunctions.singleArgumentCodec(
-			DensityFunction.NoiseHolder.CODEC, DensityFunctions.Shift::new, DensityFunctions.Shift::offsetNoise
+	static record Shift(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) implements DensityFunctions.ShiftNoise {
+		static final Codec<DensityFunctions.Shift> CODEC = DensityFunctions.singleArgumentCodec(
+			NormalNoise.NoiseParameters.CODEC, holder -> new DensityFunctions.Shift(holder, null), DensityFunctions.Shift::noiseData
 		);
 
 		@Override
@@ -897,19 +869,19 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.Shift(visitor.visitNoise(this.offsetNoise)));
+		public DensityFunctions.ShiftNoise withNewNoise(NormalNoise normalNoise) {
+			return new DensityFunctions.Shift(this.noiseData, normalNoise);
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
-	protected static record ShiftA(DensityFunction.NoiseHolder offsetNoise) implements DensityFunctions.ShiftNoise {
-		static final KeyDispatchDataCodec<DensityFunctions.ShiftA> CODEC = DensityFunctions.singleArgumentCodec(
-			DensityFunction.NoiseHolder.CODEC, DensityFunctions.ShiftA::new, DensityFunctions.ShiftA::offsetNoise
+	protected static record ShiftA(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) implements DensityFunctions.ShiftNoise {
+		static final Codec<DensityFunctions.ShiftA> CODEC = DensityFunctions.singleArgumentCodec(
+			NormalNoise.NoiseParameters.CODEC, holder -> new DensityFunctions.ShiftA(holder, null), DensityFunctions.ShiftA::noiseData
 		);
 
 		@Override
@@ -918,19 +890,19 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.ShiftA(visitor.visitNoise(this.offsetNoise)));
+		public DensityFunctions.ShiftNoise withNewNoise(NormalNoise normalNoise) {
+			return new DensityFunctions.ShiftA(this.noiseData, normalNoise);
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
-	protected static record ShiftB(DensityFunction.NoiseHolder offsetNoise) implements DensityFunctions.ShiftNoise {
-		static final KeyDispatchDataCodec<DensityFunctions.ShiftB> CODEC = DensityFunctions.singleArgumentCodec(
-			DensityFunction.NoiseHolder.CODEC, DensityFunctions.ShiftB::new, DensityFunctions.ShiftB::offsetNoise
+	protected static record ShiftB(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) implements DensityFunctions.ShiftNoise {
+		static final Codec<DensityFunctions.ShiftB> CODEC = DensityFunctions.singleArgumentCodec(
+			NormalNoise.NoiseParameters.CODEC, holder -> new DensityFunctions.ShiftB(holder, null), DensityFunctions.ShiftB::noiseData
 		);
 
 		@Override
@@ -939,18 +911,21 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.ShiftB(visitor.visitNoise(this.offsetNoise)));
+		public DensityFunctions.ShiftNoise withNewNoise(NormalNoise normalNoise) {
+			return new DensityFunctions.ShiftB(this.noiseData, normalNoise);
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
-	interface ShiftNoise extends DensityFunction {
-		DensityFunction.NoiseHolder offsetNoise();
+	interface ShiftNoise extends DensityFunction.SimpleFunction {
+		Holder<NormalNoise.NoiseParameters> noiseData();
+
+		@Nullable
+		NormalNoise offsetNoise();
 
 		@Override
 		default double minValue() {
@@ -959,21 +934,26 @@ public final class DensityFunctions {
 
 		@Override
 		default double maxValue() {
-			return this.offsetNoise().maxValue() * 4.0;
+			NormalNoise normalNoise = this.offsetNoise();
+			return (normalNoise == null ? 2.0 : normalNoise.maxValue()) * 4.0;
 		}
 
 		default double compute(double d, double e, double f) {
-			return this.offsetNoise().getValue(d * 0.25, e * 0.25, f * 0.25) * 4.0;
+			NormalNoise normalNoise = this.offsetNoise();
+			return normalNoise == null ? 0.0 : normalNoise.getValue(d * 0.25, e * 0.25, f * 0.25) * 4.0;
 		}
 
-		@Override
-		default void fillArray(double[] ds, DensityFunction.ContextProvider contextProvider) {
-			contextProvider.fillAllDirectly(ds, this);
-		}
+		DensityFunctions.ShiftNoise withNewNoise(NormalNoise normalNoise);
 	}
 
 	protected static record ShiftedNoise(
-		DensityFunction shiftX, DensityFunction shiftY, DensityFunction shiftZ, double xzScale, double yScale, DensityFunction.NoiseHolder noise
+		DensityFunction shiftX,
+		DensityFunction shiftY,
+		DensityFunction shiftZ,
+		double xzScale,
+		double yScale,
+		Holder<NormalNoise.NoiseParameters> noiseData,
+		@Nullable NormalNoise noise
 	) implements DensityFunction {
 		private static final MapCodec<DensityFunctions.ShiftedNoise> DATA_CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
@@ -982,18 +962,33 @@ public final class DensityFunctions {
 						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("shift_z").forGetter(DensityFunctions.ShiftedNoise::shiftZ),
 						Codec.DOUBLE.fieldOf("xz_scale").forGetter(DensityFunctions.ShiftedNoise::xzScale),
 						Codec.DOUBLE.fieldOf("y_scale").forGetter(DensityFunctions.ShiftedNoise::yScale),
-						DensityFunction.NoiseHolder.CODEC.fieldOf("noise").forGetter(DensityFunctions.ShiftedNoise::noise)
+						NormalNoise.NoiseParameters.CODEC.fieldOf("noise").forGetter(DensityFunctions.ShiftedNoise::noiseData)
 					)
-					.apply(instance, DensityFunctions.ShiftedNoise::new)
+					.apply(instance, DensityFunctions.ShiftedNoise::createUnseeded)
 		);
-		public static final KeyDispatchDataCodec<DensityFunctions.ShiftedNoise> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+		public static final Codec<DensityFunctions.ShiftedNoise> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+		public static DensityFunctions.ShiftedNoise createUnseeded(
+			DensityFunction densityFunction,
+			DensityFunction densityFunction2,
+			DensityFunction densityFunction3,
+			double d,
+			double e,
+			Holder<NormalNoise.NoiseParameters> holder
+		) {
+			return new DensityFunctions.ShiftedNoise(densityFunction, densityFunction2, densityFunction3, d, e, holder, null);
+		}
 
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
-			double d = (double)functionContext.blockX() * this.xzScale + this.shiftX.compute(functionContext);
-			double e = (double)functionContext.blockY() * this.yScale + this.shiftY.compute(functionContext);
-			double f = (double)functionContext.blockZ() * this.xzScale + this.shiftZ.compute(functionContext);
-			return this.noise.getValue(d, e, f);
+			if (this.noise == null) {
+				return 0.0;
+			} else {
+				double d = (double)functionContext.blockX() * this.xzScale + this.shiftX.compute(functionContext);
+				double e = (double)functionContext.blockY() * this.yScale + this.shiftY.compute(functionContext);
+				double f = (double)functionContext.blockZ() * this.xzScale + this.shiftZ.compute(functionContext);
+				return this.noise.getValue(d, e, f);
+			}
 		}
 
 		@Override
@@ -1003,9 +998,9 @@ public final class DensityFunctions {
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(
+			return (DensityFunction)visitor.apply(
 				new DensityFunctions.ShiftedNoise(
-					this.shiftX.mapAll(visitor), this.shiftY.mapAll(visitor), this.shiftZ.mapAll(visitor), this.xzScale, this.yScale, visitor.visitNoise(this.noise)
+					this.shiftX.mapAll(visitor), this.shiftY.mapAll(visitor), this.shiftZ.mapAll(visitor), this.xzScale, this.yScale, this.noiseData, this.noise
 				)
 			);
 		}
@@ -1017,36 +1012,64 @@ public final class DensityFunctions {
 
 		@Override
 		public double maxValue() {
-			return this.noise.maxValue();
+			return this.noise == null ? 2.0 : this.noise.maxValue();
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}
 
-	public static record Spline(CubicSpline<DensityFunctions.Spline.Point, DensityFunctions.Spline.Coordinate> spline) implements DensityFunction {
-		private static final Codec<CubicSpline<DensityFunctions.Spline.Point, DensityFunctions.Spline.Coordinate>> SPLINE_CODEC = CubicSpline.codec(
-			DensityFunctions.Spline.Coordinate.CODEC
+	protected static record Slide(@Nullable NoiseSettings settings, DensityFunction input) implements DensityFunctions.TransformerWithContext {
+		public static final Codec<DensityFunctions.Slide> CODEC = DensityFunctions.singleFunctionArgumentCodec(
+			densityFunction -> new DensityFunctions.Slide(null, densityFunction), DensityFunctions.Slide::input
 		);
-		private static final MapCodec<DensityFunctions.Spline> DATA_CODEC = SPLINE_CODEC.fieldOf("spline")
-			.xmap(DensityFunctions.Spline::new, DensityFunctions.Spline::spline);
-		public static final KeyDispatchDataCodec<DensityFunctions.Spline> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
 
 		@Override
-		public double compute(DensityFunction.FunctionContext functionContext) {
-			return (double)this.spline.apply(new DensityFunctions.Spline.Point(functionContext));
+		public double transform(DensityFunction.FunctionContext functionContext, double d) {
+			return this.settings == null ? d : NoiseRouterData.applySlide(this.settings, d, (double)functionContext.blockY());
+		}
+
+		@Override
+		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
+			return (DensityFunction)visitor.apply(new DensityFunctions.Slide(this.settings, this.input.mapAll(visitor)));
 		}
 
 		@Override
 		public double minValue() {
-			return (double)this.spline.minValue();
+			return this.settings == null
+				? this.input.minValue()
+				: Math.min(this.input.minValue(), Math.min(this.settings.bottomSlideSettings().target(), this.settings.topSlideSettings().target()));
 		}
 
 		@Override
 		public double maxValue() {
-			return (double)this.spline.maxValue();
+			return this.settings == null
+				? this.input.maxValue()
+				: Math.max(this.input.maxValue(), Math.max(this.settings.bottomSlideSettings().target(), this.settings.topSlideSettings().target()));
+		}
+
+		@Override
+		public Codec<? extends DensityFunction> codec() {
+			return CODEC;
+		}
+	}
+
+	public static record Spline(CubicSpline<TerrainShaper.PointCustom> spline, double minValue, double maxValue) implements DensityFunction {
+		private static final MapCodec<DensityFunctions.Spline> DATA_CODEC = RecordCodecBuilder.mapCodec(
+			instance -> instance.group(
+						TerrainShaper.SPLINE_CUSTOM_CODEC.fieldOf("spline").forGetter(DensityFunctions.Spline::spline),
+						DensityFunctions.NOISE_VALUE_CODEC.fieldOf("min_value").forGetter(DensityFunctions.Spline::minValue),
+						DensityFunctions.NOISE_VALUE_CODEC.fieldOf("max_value").forGetter(DensityFunctions.Spline::maxValue)
+					)
+					.apply(instance, DensityFunctions.Spline::new)
+		);
+		public static final Codec<DensityFunctions.Spline> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+		@Override
+		public double compute(DensityFunction.FunctionContext functionContext) {
+			return Mth.clamp((double)this.spline.apply(TerrainShaper.makePoint(functionContext)), this.minValue, this.maxValue);
 		}
 
 		@Override
@@ -1056,62 +1079,127 @@ public final class DensityFunctions {
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.Spline(this.spline.mapAll(coordinate -> coordinate.mapAll(visitor))));
+			return (DensityFunction)visitor.apply(
+				new DensityFunctions.Spline(
+					this.spline
+						.mapAll(
+							toFloatFunction -> (ToFloatFunction<TerrainShaper.PointCustom>)(toFloatFunction instanceof TerrainShaper.CoordinateCustom coordinateCustom
+									? coordinateCustom.mapAll(visitor)
+									: toFloatFunction)
+						),
+					this.minValue,
+					this.maxValue
+				)
+			);
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
+			return CODEC;
+		}
+	}
+
+	@Deprecated
+	public static record TerrainShaperSpline(
+		DensityFunction continentalness,
+		DensityFunction erosion,
+		DensityFunction weirdness,
+		@Nullable TerrainShaper shaper,
+		DensityFunctions.TerrainShaperSpline.SplineType spline,
+		double minValue,
+		double maxValue
+	) implements DensityFunction {
+		private static final MapCodec<DensityFunctions.TerrainShaperSpline> DATA_CODEC = RecordCodecBuilder.mapCodec(
+			instance -> instance.group(
+						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("continentalness").forGetter(DensityFunctions.TerrainShaperSpline::continentalness),
+						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("erosion").forGetter(DensityFunctions.TerrainShaperSpline::erosion),
+						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("weirdness").forGetter(DensityFunctions.TerrainShaperSpline::weirdness),
+						DensityFunctions.TerrainShaperSpline.SplineType.CODEC.fieldOf("spline").forGetter(DensityFunctions.TerrainShaperSpline::spline),
+						DensityFunctions.NOISE_VALUE_CODEC.fieldOf("min_value").forGetter(DensityFunctions.TerrainShaperSpline::minValue),
+						DensityFunctions.NOISE_VALUE_CODEC.fieldOf("max_value").forGetter(DensityFunctions.TerrainShaperSpline::maxValue)
+					)
+					.apply(instance, DensityFunctions.TerrainShaperSpline::createUnseeded)
+		);
+		public static final Codec<DensityFunctions.TerrainShaperSpline> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+		public static DensityFunctions.TerrainShaperSpline createUnseeded(
+			DensityFunction densityFunction,
+			DensityFunction densityFunction2,
+			DensityFunction densityFunction3,
+			DensityFunctions.TerrainShaperSpline.SplineType splineType,
+			double d,
+			double e
+		) {
+			return new DensityFunctions.TerrainShaperSpline(densityFunction, densityFunction2, densityFunction3, null, splineType, d, e);
+		}
+
+		@Override
+		public double compute(DensityFunction.FunctionContext functionContext) {
+			return this.shaper == null
+				? 0.0
+				: Mth.clamp(
+					(double)this.spline
+						.spline
+						.apply(
+							this.shaper,
+							TerrainShaper.makePoint(
+								(float)this.continentalness.compute(functionContext), (float)this.erosion.compute(functionContext), (float)this.weirdness.compute(functionContext)
+							)
+						),
+					this.minValue,
+					this.maxValue
+				);
+		}
+
+		@Override
+		public void fillArray(double[] ds, DensityFunction.ContextProvider contextProvider) {
+			for (int i = 0; i < ds.length; i++) {
+				ds[i] = this.compute(contextProvider.forIndex(i));
+			}
+		}
+
+		@Override
+		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
+			return (DensityFunction)visitor.apply(
+				new DensityFunctions.TerrainShaperSpline(
+					this.continentalness.mapAll(visitor), this.erosion.mapAll(visitor), this.weirdness.mapAll(visitor), this.shaper, this.spline, this.minValue, this.maxValue
+				)
+			);
+		}
+
+		@Override
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 
-		public static record Coordinate(Holder<DensityFunction> function) implements ToFloatFunction<DensityFunctions.Spline.Point> {
-			public static final Codec<DensityFunctions.Spline.Coordinate> CODEC = DensityFunction.CODEC
-				.xmap(DensityFunctions.Spline.Coordinate::new, DensityFunctions.Spline.Coordinate::function);
-
-			public String toString() {
-				Optional<ResourceKey<DensityFunction>> optional = this.function.unwrapKey();
-				if (optional.isPresent()) {
-					ResourceKey<DensityFunction> resourceKey = (ResourceKey<DensityFunction>)optional.get();
-					if (resourceKey == NoiseRouterData.CONTINENTS) {
-						return "continents";
-					}
-
-					if (resourceKey == NoiseRouterData.EROSION) {
-						return "erosion";
-					}
-
-					if (resourceKey == NoiseRouterData.RIDGES) {
-						return "weirdness";
-					}
-
-					if (resourceKey == NoiseRouterData.RIDGES_FOLDED) {
-						return "ridges";
-					}
-				}
-
-				return "Coordinate[" + this.function + "]";
-			}
-
-			public float apply(DensityFunctions.Spline.Point point) {
-				return (float)this.function.value().compute(point.context());
-			}
-
-			@Override
-			public float minValue() {
-				return (float)this.function.value().minValue();
-			}
-
-			@Override
-			public float maxValue() {
-				return (float)this.function.value().maxValue();
-			}
-
-			public DensityFunctions.Spline.Coordinate mapAll(DensityFunction.Visitor visitor) {
-				return new DensityFunctions.Spline.Coordinate(new Holder.Direct<>(this.function.value().mapAll(visitor)));
-			}
+		interface Spline {
+			float apply(TerrainShaper terrainShaper, TerrainShaper.Point point);
 		}
 
-		public static record Point(DensityFunction.FunctionContext context) {
+		public static enum SplineType implements StringRepresentable {
+			OFFSET("offset", TerrainShaper::offset),
+			FACTOR("factor", TerrainShaper::factor),
+			JAGGEDNESS("jaggedness", TerrainShaper::jaggedness);
+
+			private static final Map<String, DensityFunctions.TerrainShaperSpline.SplineType> BY_NAME = (Map<String, DensityFunctions.TerrainShaperSpline.SplineType>)Arrays.stream(
+					values()
+				)
+				.collect(Collectors.toMap(DensityFunctions.TerrainShaperSpline.SplineType::getSerializedName, splineType -> splineType));
+			public static final Codec<DensityFunctions.TerrainShaperSpline.SplineType> CODEC = StringRepresentable.fromEnum(
+				DensityFunctions.TerrainShaperSpline.SplineType::values, BY_NAME::get
+			);
+			private final String name;
+			final DensityFunctions.TerrainShaperSpline.Spline spline;
+
+			private SplineType(String string2, DensityFunctions.TerrainShaperSpline.Spline spline) {
+				this.name = string2;
+				this.spline = spline;
+			}
+
+			@Override
+			public String getSerializedName() {
+				return this.name;
+			}
 		}
 	}
 
@@ -1197,7 +1285,7 @@ public final class DensityFunctions {
 		DensityFunction argument2();
 
 		@Override
-		default KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		default Codec<? extends DensityFunction> codec() {
 			return this.type().codec;
 		}
 
@@ -1207,7 +1295,7 @@ public final class DensityFunctions {
 			MIN("min"),
 			MAX("max");
 
-			final KeyDispatchDataCodec<DensityFunctions.TwoArgumentSimpleFunction> codec = DensityFunctions.doubleFunctionArgumentCodec(
+			final Codec<DensityFunctions.TwoArgumentSimpleFunction> codec = DensityFunctions.doubleFunctionArgumentCodec(
 				(densityFunction, densityFunction2) -> DensityFunctions.TwoArgumentSimpleFunction.create(this, densityFunction, densityFunction2),
 				DensityFunctions.TwoArgumentSimpleFunction::argument1,
 				DensityFunctions.TwoArgumentSimpleFunction::argument2
@@ -1226,29 +1314,45 @@ public final class DensityFunctions {
 	}
 
 	protected static record WeirdScaledSampler(
-		DensityFunction input, DensityFunction.NoiseHolder noise, DensityFunctions.WeirdScaledSampler.RarityValueMapper rarityValueMapper
+		DensityFunction input,
+		Holder<NormalNoise.NoiseParameters> noiseData,
+		@Nullable NormalNoise noise,
+		DensityFunctions.WeirdScaledSampler.RarityValueMapper rarityValueMapper
 	) implements DensityFunctions.TransformerWithContext {
 		private static final MapCodec<DensityFunctions.WeirdScaledSampler> DATA_CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						DensityFunction.HOLDER_HELPER_CODEC.fieldOf("input").forGetter(DensityFunctions.WeirdScaledSampler::input),
-						DensityFunction.NoiseHolder.CODEC.fieldOf("noise").forGetter(DensityFunctions.WeirdScaledSampler::noise),
+						NormalNoise.NoiseParameters.CODEC.fieldOf("noise").forGetter(DensityFunctions.WeirdScaledSampler::noiseData),
 						DensityFunctions.WeirdScaledSampler.RarityValueMapper.CODEC
 							.fieldOf("rarity_value_mapper")
 							.forGetter(DensityFunctions.WeirdScaledSampler::rarityValueMapper)
 					)
-					.apply(instance, DensityFunctions.WeirdScaledSampler::new)
+					.apply(instance, DensityFunctions.WeirdScaledSampler::createUnseeded)
 		);
-		public static final KeyDispatchDataCodec<DensityFunctions.WeirdScaledSampler> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+		public static final Codec<DensityFunctions.WeirdScaledSampler> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+
+		public static DensityFunctions.WeirdScaledSampler createUnseeded(
+			DensityFunction densityFunction, Holder<NormalNoise.NoiseParameters> holder, DensityFunctions.WeirdScaledSampler.RarityValueMapper rarityValueMapper
+		) {
+			return new DensityFunctions.WeirdScaledSampler(densityFunction, holder, null, rarityValueMapper);
+		}
 
 		@Override
 		public double transform(DensityFunction.FunctionContext functionContext, double d) {
-			double e = this.rarityValueMapper.mapper.get(d);
-			return e * Math.abs(this.noise.getValue((double)functionContext.blockX() / e, (double)functionContext.blockY() / e, (double)functionContext.blockZ() / e));
+			if (this.noise == null) {
+				return 0.0;
+			} else {
+				double e = this.rarityValueMapper.mapper.get(d);
+				return e * Math.abs(this.noise.getValue((double)functionContext.blockX() / e, (double)functionContext.blockY() / e, (double)functionContext.blockZ() / e));
+			}
 		}
 
 		@Override
 		public DensityFunction mapAll(DensityFunction.Visitor visitor) {
-			return visitor.apply(new DensityFunctions.WeirdScaledSampler(this.input.mapAll(visitor), visitor.visitNoise(this.noise), this.rarityValueMapper));
+			this.input.mapAll(visitor);
+			return (DensityFunction)visitor.apply(
+				new DensityFunctions.WeirdScaledSampler(this.input.mapAll(visitor), this.noiseData, this.noise, this.rarityValueMapper)
+			);
 		}
 
 		@Override
@@ -1258,11 +1362,11 @@ public final class DensityFunctions {
 
 		@Override
 		public double maxValue() {
-			return this.rarityValueMapper.maxRarity * this.noise.maxValue();
+			return this.rarityValueMapper.maxRarity * (this.noise == null ? 2.0 : this.noise.maxValue());
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 
@@ -1270,8 +1374,12 @@ public final class DensityFunctions {
 			TYPE1("type_1", NoiseRouterData.QuantizedSpaghettiRarity::getSpaghettiRarity3D, 2.0),
 			TYPE2("type_2", NoiseRouterData.QuantizedSpaghettiRarity::getSphaghettiRarity2D, 3.0);
 
+			private static final Map<String, DensityFunctions.WeirdScaledSampler.RarityValueMapper> BY_NAME = (Map<String, DensityFunctions.WeirdScaledSampler.RarityValueMapper>)Arrays.stream(
+					values()
+				)
+				.collect(Collectors.toMap(DensityFunctions.WeirdScaledSampler.RarityValueMapper::getSerializedName, rarityValueMapper -> rarityValueMapper));
 			public static final Codec<DensityFunctions.WeirdScaledSampler.RarityValueMapper> CODEC = StringRepresentable.fromEnum(
-				DensityFunctions.WeirdScaledSampler.RarityValueMapper::values
+				DensityFunctions.WeirdScaledSampler.RarityValueMapper::values, BY_NAME::get
 			);
 			private final String name;
 			final Double2DoubleFunction mapper;
@@ -1300,7 +1408,7 @@ public final class DensityFunctions {
 					)
 					.apply(instance, DensityFunctions.YClampedGradient::new)
 		);
-		public static final KeyDispatchDataCodec<DensityFunctions.YClampedGradient> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
+		public static final Codec<DensityFunctions.YClampedGradient> CODEC = DensityFunctions.makeCodec(DATA_CODEC);
 
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
@@ -1318,7 +1426,7 @@ public final class DensityFunctions {
 		}
 
 		@Override
-		public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+		public Codec<? extends DensityFunction> codec() {
 			return CODEC;
 		}
 	}

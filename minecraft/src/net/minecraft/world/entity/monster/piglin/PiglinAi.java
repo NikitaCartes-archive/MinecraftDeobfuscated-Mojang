@@ -29,7 +29,7 @@ import net.minecraft.world.entity.ai.behavior.CrossbowAttack;
 import net.minecraft.world.entity.ai.behavior.DismountOrSkipMounting;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.EraseMemoryIf;
-import net.minecraft.world.entity.ai.behavior.GoToTargetLocation;
+import net.minecraft.world.entity.ai.behavior.GoToCelebrateLocation;
 import net.minecraft.world.entity.ai.behavior.GoToWantedItem;
 import net.minecraft.world.entity.ai.behavior.InteractWith;
 import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
@@ -187,8 +187,8 @@ public class PiglinAi {
 				avoidRepellent(),
 				new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0F),
 				new StartAttacking(AbstractPiglin::isAdult, PiglinAi::findNearestValidAttackTarget),
-				new RunIf((Predicate)(piglin -> !piglin.isDancing()), new GoToTargetLocation(MemoryModuleType.CELEBRATE_LOCATION, 2, 1.0F)),
-				new RunIf(Piglin::isDancing, new GoToTargetLocation(MemoryModuleType.CELEBRATE_LOCATION, 4, 0.6F)),
+				new RunIf((Predicate)(piglin -> !piglin.isDancing()), new GoToCelebrateLocation(2, 1.0F)),
+				new RunIf(Piglin::isDancing, new GoToCelebrateLocation(4, 0.6F)),
 				new RunOne(
 					ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0F), 1), Pair.of(new RandomStroll(0.6F, 2, 1), 1), Pair.of(new DoNothing(10, 20), 1))
 				)

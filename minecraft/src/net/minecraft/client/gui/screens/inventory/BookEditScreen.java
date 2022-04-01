@@ -285,23 +285,22 @@ public class BookEditScreen extends Screen {
 			this.pageEdit.cut();
 			return true;
 		} else {
-			TextFieldHelper.CursorStep cursorStep = Screen.hasControlDown() ? TextFieldHelper.CursorStep.WORD : TextFieldHelper.CursorStep.CHARACTER;
 			switch (i) {
 				case 257:
 				case 335:
 					this.pageEdit.insertText("\n");
 					return true;
 				case 259:
-					this.pageEdit.removeFromCursor(-1, cursorStep);
+					this.pageEdit.removeCharsFromCursor(-1);
 					return true;
 				case 261:
-					this.pageEdit.removeFromCursor(1, cursorStep);
+					this.pageEdit.removeCharsFromCursor(1);
 					return true;
 				case 262:
-					this.pageEdit.moveBy(1, Screen.hasShiftDown(), cursorStep);
+					this.pageEdit.moveByChars(1, Screen.hasShiftDown());
 					return true;
 				case 263:
-					this.pageEdit.moveBy(-1, Screen.hasShiftDown(), cursorStep);
+					this.pageEdit.moveByChars(-1, Screen.hasShiftDown());
 					return true;
 				case 264:
 					this.keyDown();
@@ -342,24 +341,16 @@ public class BookEditScreen extends Screen {
 	}
 
 	private void keyHome() {
-		if (Screen.hasControlDown()) {
-			this.pageEdit.setCursorToStart(Screen.hasShiftDown());
-		} else {
-			int i = this.pageEdit.getCursorPos();
-			int j = this.getDisplayCache().findLineStart(i);
-			this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
-		}
+		int i = this.pageEdit.getCursorPos();
+		int j = this.getDisplayCache().findLineStart(i);
+		this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
 	}
 
 	private void keyEnd() {
-		if (Screen.hasControlDown()) {
-			this.pageEdit.setCursorToEnd(Screen.hasShiftDown());
-		} else {
-			BookEditScreen.DisplayCache displayCache = this.getDisplayCache();
-			int i = this.pageEdit.getCursorPos();
-			int j = displayCache.findLineEnd(i);
-			this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
-		}
+		BookEditScreen.DisplayCache displayCache = this.getDisplayCache();
+		int i = this.pageEdit.getCursorPos();
+		int j = displayCache.findLineEnd(i);
+		this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
 	}
 
 	private boolean titleKeyPressed(int i, int j, int k) {

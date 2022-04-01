@@ -177,7 +177,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 			level.setBlock(blockPos, blockState.setValue(EXTENDED, Boolean.valueOf(true)), 67);
 			level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.25F + 0.6F);
-			level.gameEvent(null, GameEvent.PISTON_EXTEND, blockPos);
+			level.gameEvent(GameEvent.PISTON_EXTEND, blockPos);
 		} else if (i == 1 || i == 2) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos.relative(direction));
 			if (blockEntity instanceof PistonMovingBlockEntity) {
@@ -223,7 +223,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 			}
 
 			level.playSound(null, blockPos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.15F + 0.6F);
-			level.gameEvent(null, GameEvent.PISTON_CONTRACT, blockPos);
+			level.gameEvent(GameEvent.PISTON_CONTRACT, blockPos);
 		}
 
 		return true;
@@ -234,10 +234,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 			return false;
 		} else if (blockState.isAir()) {
 			return true;
-		} else if (blockState.is(Blocks.OBSIDIAN)
-			|| blockState.is(Blocks.CRYING_OBSIDIAN)
-			|| blockState.is(Blocks.RESPAWN_ANCHOR)
-			|| blockState.is(Blocks.REINFORCED_DEEPSLATE)) {
+		} else if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
 			return false;
 		} else if (direction == Direction.DOWN && blockPos.getY() == level.getMinBuildHeight()) {
 			return false;

@@ -62,9 +62,4 @@ public class SoulSandBlock extends Block {
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
-
-	@Override
-	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return 0.2F;
-	}
 }

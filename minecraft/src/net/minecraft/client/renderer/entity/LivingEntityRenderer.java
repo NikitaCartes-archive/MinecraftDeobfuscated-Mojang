@@ -20,10 +20,13 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.scores.Team;
 import org.slf4j.Logger;
 
@@ -174,34 +177,38 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 	}
 
 	protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {
-		if (this.isShaking(livingEntity)) {
-			g += (float)(Math.cos((double)livingEntity.tickCount * 3.25) * Math.PI * 0.4F);
-		}
-
-		if (!livingEntity.hasPose(Pose.SLEEPING)) {
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
-		}
-
-		if (livingEntity.deathTime > 0) {
-			float i = ((float)livingEntity.deathTime + h - 1.0F) / 20.0F * 1.6F;
-			i = Mth.sqrt(i);
-			if (i > 1.0F) {
-				i = 1.0F;
+		if (livingEntity.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL) && livingEntity.isCrouching()) {
+			g = 0.0F;
+		} else {
+			if (this.isShaking(livingEntity)) {
+				g += (float)(Math.cos((double)livingEntity.tickCount * 3.25) * Math.PI * 0.4F);
 			}
 
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(i * this.getFlipDegrees(livingEntity)));
-		} else if (livingEntity.isAutoSpinAttack()) {
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F - livingEntity.getXRot()));
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)livingEntity.tickCount + h) * -75.0F));
-		} else if (livingEntity.hasPose(Pose.SLEEPING)) {
-			Direction direction = livingEntity.getBedOrientation();
-			float j = direction != null ? sleepDirectionToRotation(direction) : g;
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F));
-		} else if (isEntityUpsideDown(livingEntity)) {
-			poseStack.translate(0.0, (double)(livingEntity.getBbHeight() + 0.1F), 0.0);
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+			if (!livingEntity.hasPose(Pose.SLEEPING)) {
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
+			}
+
+			if (livingEntity.deathTime > 0) {
+				float i = ((float)livingEntity.deathTime + h - 1.0F) / 20.0F * 1.6F;
+				i = Mth.sqrt(i);
+				if (i > 1.0F) {
+					i = 1.0F;
+				}
+
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(i * this.getFlipDegrees(livingEntity)));
+			} else if (livingEntity.isAutoSpinAttack()) {
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F - livingEntity.getXRot()));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)livingEntity.tickCount + h) * -75.0F));
+			} else if (livingEntity.hasPose(Pose.SLEEPING)) {
+				Direction direction = livingEntity.getBedOrientation();
+				float j = direction != null ? sleepDirectionToRotation(direction) : g;
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F));
+			} else if (isEntityUpsideDown(livingEntity)) {
+				poseStack.translate(0.0, (double)(livingEntity.getBbHeight() + 0.1F), 0.0);
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+			}
 		}
 	}
 
@@ -265,6 +272,6 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			}
 		}
 
-		return false;
+		return livingEntity instanceof Pig && livingEntity.getVehicle() instanceof Player;
 	}
 }

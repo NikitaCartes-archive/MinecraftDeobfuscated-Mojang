@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.CaveVinesBlock;
-import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.SmallDripleafBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,13 +32,12 @@ import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SculkPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration;
@@ -131,12 +129,10 @@ public class CaveFeatures {
 	public static final Holder<ConfiguredFeature<UnderwaterMagmaConfiguration, ?>> UNDERWATER_MAGMA = FeatureUtils.register(
 		"underwater_magma", Feature.UNDERWATER_MAGMA, new UnderwaterMagmaConfiguration(5, 1, 0.5F)
 	);
-	private static final MultifaceBlock GLOW_LICHEN_BLOCK = (MultifaceBlock)Blocks.GLOW_LICHEN;
-	public static final Holder<ConfiguredFeature<MultifaceGrowthConfiguration, ?>> GLOW_LICHEN = FeatureUtils.register(
+	public static final Holder<ConfiguredFeature<GlowLichenConfiguration, ?>> GLOW_LICHEN = FeatureUtils.register(
 		"glow_lichen",
-		Feature.MULTIFACE_GROWTH,
-		new MultifaceGrowthConfiguration(
-			GLOW_LICHEN_BLOCK,
+		Feature.GLOW_LICHEN,
+		new GlowLichenConfiguration(
 			20,
 			false,
 			true,
@@ -371,36 +367,6 @@ public class CaveFeatures {
 			16,
 			0.05,
 			1
-		)
-	);
-	public static final Holder<ConfiguredFeature<SculkPatchConfiguration, ?>> SCULK_PATCH_DEEP_DARK = FeatureUtils.register(
-		"sculk_patch_deep_dark", Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F)
-	);
-	public static final Holder<ConfiguredFeature<SculkPatchConfiguration, ?>> SCULK_PATCH_ANCIENT_CITY = FeatureUtils.register(
-		"sculk_patch_ancient_city", Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F)
-	);
-	private static final MultifaceBlock SCULK_VEIN_BLOCK = (MultifaceBlock)Blocks.SCULK_VEIN;
-	public static final Holder<ConfiguredFeature<MultifaceGrowthConfiguration, ?>> SCULK_VEIN = FeatureUtils.register(
-		"sculk_vein",
-		Feature.MULTIFACE_GROWTH,
-		new MultifaceGrowthConfiguration(
-			SCULK_VEIN_BLOCK,
-			20,
-			true,
-			true,
-			true,
-			1.0F,
-			HolderSet.direct(
-				Block::builtInRegistryHolder,
-				Blocks.STONE,
-				Blocks.ANDESITE,
-				Blocks.DIORITE,
-				Blocks.GRANITE,
-				Blocks.DRIPSTONE_BLOCK,
-				Blocks.CALCITE,
-				Blocks.TUFF,
-				Blocks.DEEPSLATE
-			)
 		)
 	);
 

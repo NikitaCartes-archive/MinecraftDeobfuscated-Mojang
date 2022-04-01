@@ -244,7 +244,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	private static void setTilt(BlockState blockState, Level level, BlockPos blockPos, Tilt tilt) {
 		level.setBlock(blockPos, blockState.setValue(TILT, tilt), 2);
 		if (tilt.causesVibration()) {
-			level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
+			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos);
 		}
 	}
 

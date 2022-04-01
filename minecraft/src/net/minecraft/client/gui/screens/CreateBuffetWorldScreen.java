@@ -12,9 +12,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -22,7 +22,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 
 @Environment(EnvType.CLIENT)
 public class CreateBuffetWorldScreen extends Screen {
@@ -34,13 +33,12 @@ public class CreateBuffetWorldScreen extends Screen {
 	Holder<Biome> biome;
 	private Button doneButton;
 
-	public CreateBuffetWorldScreen(Screen screen, WorldCreationContext worldCreationContext, Consumer<Holder<Biome>> consumer) {
+	public CreateBuffetWorldScreen(Screen screen, RegistryAccess registryAccess, Consumer<Holder<Biome>> consumer, Holder<Biome> holder) {
 		super(new TranslatableComponent("createWorld.customize.buffet.title"));
 		this.parent = screen;
 		this.applySettings = consumer;
-		this.biomes = worldCreationContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-		Holder<Biome> holder = (Holder<Biome>)this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
-		this.biome = (Holder<Biome>)worldCreationContext.worldGenSettings().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
+		this.biome = holder;
+		this.biomes = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
 	}
 
 	@Override
@@ -120,7 +118,7 @@ public class CreateBuffetWorldScreen extends Screen {
 			public Entry(Holder.Reference<Biome> reference) {
 				this.biome = reference;
 				ResourceLocation resourceLocation = reference.key().location();
-				String string = resourceLocation.toLanguageKey("biome");
+				String string = "biome." + resourceLocation.getNamespace() + "." + resourceLocation.getPath();
 				if (Language.getInstance().has(string)) {
 					this.name = new TranslatableComponent(string);
 				} else {

@@ -33,7 +33,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
@@ -109,39 +108,35 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		WorldGenSettings worldGenSettings,
 		Lifecycle lifecycle
 	) {
-		if (!worldGenSettings.dimensions().containsKey(LevelStem.OVERWORLD)) {
-			throw new IllegalStateException("Missing Overworld dimension data");
-		} else {
-			this.fixerUpper = dataFixer;
-			this.wasModded = bl;
-			this.xSpawn = j;
-			this.ySpawn = k;
-			this.zSpawn = l;
-			this.spawnAngle = f;
-			this.gameTime = m;
-			this.dayTime = n;
-			this.version = o;
-			this.clearWeatherTime = p;
-			this.rainTime = q;
-			this.raining = bl2;
-			this.thunderTime = r;
-			this.thundering = bl3;
-			this.initialized = bl4;
-			this.difficultyLocked = bl5;
-			this.worldBorder = settings;
-			this.wanderingTraderSpawnDelay = s;
-			this.wanderingTraderSpawnChance = t;
-			this.wanderingTraderId = uUID;
-			this.knownServerBrands = set;
-			this.loadedPlayerTag = compoundTag;
-			this.playerDataVersion = i;
-			this.scheduledEvents = timerQueue;
-			this.customBossEvents = compoundTag2;
-			this.endDragonFightData = compoundTag3;
-			this.settings = levelSettings;
-			this.worldGenSettings = worldGenSettings;
-			this.worldGenSettingsLifecycle = lifecycle;
-		}
+		this.fixerUpper = dataFixer;
+		this.wasModded = bl;
+		this.xSpawn = j;
+		this.ySpawn = k;
+		this.zSpawn = l;
+		this.spawnAngle = f;
+		this.gameTime = m;
+		this.dayTime = n;
+		this.version = o;
+		this.clearWeatherTime = p;
+		this.rainTime = q;
+		this.raining = bl2;
+		this.thunderTime = r;
+		this.thundering = bl3;
+		this.initialized = bl4;
+		this.difficultyLocked = bl5;
+		this.worldBorder = settings;
+		this.wanderingTraderSpawnDelay = s;
+		this.wanderingTraderSpawnChance = t;
+		this.wanderingTraderId = uUID;
+		this.knownServerBrands = set;
+		this.loadedPlayerTag = compoundTag;
+		this.playerDataVersion = i;
+		this.scheduledEvents = timerQueue;
+		this.customBossEvents = compoundTag2;
+		this.endDragonFightData = compoundTag3;
+		this.settings = levelSettings;
+		this.worldGenSettings = worldGenSettings;
+		this.worldGenSettingsLifecycle = lifecycle;
 	}
 
 	public PrimaryLevelData(LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {

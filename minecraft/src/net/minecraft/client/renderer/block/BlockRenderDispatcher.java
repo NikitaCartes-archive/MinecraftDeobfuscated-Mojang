@@ -2,12 +2,14 @@ package net.minecraft.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -18,8 +20,10 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.GenericItemBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -67,23 +71,40 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 	) {
 		try {
 			RenderShape renderShape = blockState.getRenderShape();
-			return renderShape != RenderShape.MODEL
-				? false
-				: this.modelRenderer
-					.tesselateBlock(
-						blockAndTintGetter,
-						this.getBlockModel(blockState),
-						blockState,
-						blockPos,
-						poseStack,
-						vertexConsumer,
-						bl,
-						random,
-						blockState.getSeed(blockPos),
-						OverlayTexture.NO_OVERLAY
-					);
-		} catch (Throwable var11) {
-			CrashReport crashReport = CrashReport.forThrowable(var11, "Tesselating block in world");
+			if (renderShape != RenderShape.MODEL) {
+				return false;
+			} else {
+				Item item = GenericItemBlock.itemFromGenericBlock(blockState);
+				if (item != null) {
+					ItemStack itemStack = new ItemStack(item);
+					BakedModel bakedModel = Minecraft.getInstance().getItemRenderer().getModel(itemStack, null, null, 4);
+					poseStack.pushPose();
+					poseStack.translate(0.0, 0.5, 0.0);
+					poseStack.mulPose(Vector3f.XP.rotation(1.55F));
+					boolean bl2 = this.modelRenderer
+						.tesselateBlock(
+							blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, blockState.getSeed(blockPos), OverlayTexture.NO_OVERLAY
+						);
+					poseStack.popPose();
+					return bl2;
+				} else {
+					return this.modelRenderer
+						.tesselateBlock(
+							blockAndTintGetter,
+							this.getBlockModel(blockState),
+							blockState,
+							blockPos,
+							poseStack,
+							vertexConsumer,
+							bl,
+							random,
+							blockState.getSeed(blockPos),
+							OverlayTexture.NO_OVERLAY
+						);
+				}
+			}
+		} catch (Throwable var13) {
+			CrashReport crashReport = CrashReport.forThrowable(var13, "Tesselating block in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
 			CrashReportCategory.populateBlockDetails(crashReportCategory, blockAndTintGetter, blockPos, blockState);
 			throw new ReportedException(crashReport);

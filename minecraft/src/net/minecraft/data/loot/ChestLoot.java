@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.ConfiguredStructureTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -351,81 +351,6 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 				)
 		);
 		biConsumer.accept(
-			BuiltInLootTables.ANCIENT_CITY,
-			LootTable.lootTable()
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(UniformGenerator.between(4.0F, 9.0F))
-						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-						.add(LootItem.lootTableItem(Items.MUSIC_DISC_OTHERSIDE).setWeight(1))
-						.add(LootItem.lootTableItem(Items.COMPASS).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
-						.add(LootItem.lootTableItem(Items.SCULK_CATALYST).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-						.add(LootItem.lootTableItem(Items.NAME_TAG).setWeight(2))
-						.add(
-							LootItem.lootTableItem(Items.DIAMOND_HOE)
-								.setWeight(2)
-								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(30.0F, 50.0F)).allowTreasure())
-						)
-						.add(LootItem.lootTableItem(Items.LEAD).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
-						.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
-						.add(LootItem.lootTableItem(Items.SADDLE).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
-						.add(LootItem.lootTableItem(Items.MUSIC_DISC_13).setWeight(2))
-						.add(LootItem.lootTableItem(Items.MUSIC_DISC_CAT).setWeight(2))
-						.add(
-							LootItem.lootTableItem(Items.DIAMOND_LEGGINGS)
-								.setWeight(2)
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(30.0F, 50.0F)).allowTreasure())
-						)
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(3).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SWIFT_SNEAK)))
-						.add(LootItem.lootTableItem(Items.SCULK).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 10.0F))))
-						.add(LootItem.lootTableItem(Items.SCULK_SENSOR).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Items.CANDLE).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
-						.add(LootItem.lootTableItem(Items.AMETHYST_SHARD).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
-						.add(LootItem.lootTableItem(Items.EXPERIENCE_BOTTLE).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Items.GLOW_BERRIES).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
-						.add(
-							LootItem.lootTableItem(Items.IRON_LEGGINGS)
-								.setWeight(3)
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
-						)
-						.add(
-							LootItem.lootTableItem(Items.POTION)
-								.setWeight(4)
-								.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F)))
-								.apply(SetPotionFunction.setPotion(Potions.STRONG_REGENERATION))
-						)
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(4).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 10.0F))))
-						.add(LootItem.lootTableItem(Items.BONE).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
-						.add(LootItem.lootTableItem(Items.SOUL_TORCH).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
-						.add(LootItem.lootTableItem(Items.COAL).setWeight(6).apply(SetItemCountFunction.setCount(UniformGenerator.between(6.0F, 15.0F))))
-				)
-		);
-		biConsumer.accept(
-			BuiltInLootTables.ANCIENT_CITY_ICE_BOX,
-			LootTable.lootTable()
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(UniformGenerator.between(4.0F, 10.0F))
-						.add(
-							LootItem.lootTableItem(Items.SUSPICIOUS_STEW)
-								.setWeight(1)
-								.apply(
-									SetStewEffectFunction.stewEffect()
-										.withEffect(MobEffects.NIGHT_VISION, UniformGenerator.between(7.0F, 10.0F))
-										.withEffect(MobEffects.BLINDNESS, UniformGenerator.between(5.0F, 7.0F))
-								)
-								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F)))
-						)
-						.add(LootItem.lootTableItem(Items.GOLDEN_CARROT).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 10.0F))))
-						.add(LootItem.lootTableItem(Items.BAKED_POTATO).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 10.0F))))
-						.add(LootItem.lootTableItem(Items.PACKED_ICE).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F))))
-						.add(LootItem.lootTableItem(Items.SNOWBALL).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F))))
-				)
-		);
-		biConsumer.accept(
 			BuiltInLootTables.DESERT_PYRAMID,
 			LootTable.lootTable()
 				.withPool(
@@ -608,6 +533,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 						.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR).setWeight(3))
 						.add(LootItem.lootTableItem(Blocks.OBSIDIAN).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
 				)
+				.withPool(LootPool.lootPool().add(LootItem.lootTableItem(Blocks.END_PORTAL_FRAME)))
 		);
 		biConsumer.accept(
 			BuiltInLootTables.PILLAGER_OUTPOST,
@@ -646,7 +572,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 							LootItem.lootTableItem(Items.MAP)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(StructureTags.ON_TREASURE_MAPS)
+										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
@@ -879,7 +805,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(10)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(StructureTags.ON_TREASURE_MAPS)
+										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
@@ -911,7 +837,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(5)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination(StructureTags.ON_TREASURE_MAPS)
+										.setDestination(ConfiguredStructureTags.ON_TREASURE_MAPS)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)

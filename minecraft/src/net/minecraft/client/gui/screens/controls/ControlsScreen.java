@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.controls;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.MouseSettingsScreen;
@@ -34,10 +35,10 @@ public class ControlsScreen extends OptionsSubScreen {
 			new Button(j, k, 150, 20, new TranslatableComponent("controls.keybinds"), button -> this.minecraft.setScreen(new KeyBindsScreen(this, this.options)))
 		);
 		k += 24;
-		this.addRenderableWidget(this.options.toggleCrouch().createButton(this.options, i, k, 150));
-		this.addRenderableWidget(this.options.toggleSprint().createButton(this.options, j, k, 150));
+		this.addRenderableWidget(Option.TOGGLE_CROUCH.createButton(this.options, i, k, 150));
+		this.addRenderableWidget(Option.TOGGLE_SPRINT.createButton(this.options, j, k, 150));
 		k += 24;
-		this.addRenderableWidget(this.options.autoJump().createButton(this.options, i, k, 150));
+		this.addRenderableWidget(Option.AUTO_JUMP.createButton(this.options, i, k, 150));
 		k += 24;
 		this.addRenderableWidget(new Button(this.width / 2 - 100, k, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
 	}

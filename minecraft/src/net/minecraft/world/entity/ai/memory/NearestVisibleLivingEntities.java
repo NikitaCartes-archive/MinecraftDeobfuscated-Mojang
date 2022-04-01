@@ -23,7 +23,7 @@ public class NearestVisibleLivingEntities {
 		this.nearbyEntities = list;
 		Object2BooleanOpenHashMap<LivingEntity> object2BooleanOpenHashMap = new Object2BooleanOpenHashMap<>(list.size());
 		Predicate<LivingEntity> predicate = livingEntity2 -> Sensor.isEntityTargetable(livingEntity, livingEntity2);
-		this.lineOfSightTest = livingEntityx -> object2BooleanOpenHashMap.computeIfAbsent(livingEntityx, predicate);
+		this.lineOfSightTest = livingEntityx -> object2BooleanOpenHashMap.computeBooleanIfAbsent(livingEntityx, predicate);
 	}
 
 	public static NearestVisibleLivingEntities empty() {
@@ -38,11 +38,6 @@ public class NearestVisibleLivingEntities {
 		}
 
 		return Optional.empty();
-	}
-
-	@SafeVarargs
-	public final Optional<LivingEntity> findClosest(Predicate<LivingEntity>... predicates) {
-		return (Optional<LivingEntity>)Stream.of(predicates).map(this::findClosest).filter(Optional::isPresent).findAny().orElse(Optional.empty());
 	}
 
 	public Iterable<LivingEntity> findAll(Predicate<LivingEntity> predicate) {

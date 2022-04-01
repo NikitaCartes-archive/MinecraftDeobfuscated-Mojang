@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.QuadrupedModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,12 +21,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
 
@@ -35,13 +38,23 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 	private final float scaleY;
 	private final float scaleZ;
 	private final Map<SkullBlock.Type, SkullModelBase> skullModels;
+	private final boolean barrels;
 
 	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
-		this(renderLayerParent, entityModelSet, 1.0F, 1.0F, 1.0F);
+		this(renderLayerParent, entityModelSet, false);
 	}
 
 	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, float f, float g, float h) {
+		this(renderLayerParent, entityModelSet, f, g, h, false);
+	}
+
+	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, boolean bl) {
+		this(renderLayerParent, entityModelSet, 1.0F, 1.0F, 1.0F, bl);
+	}
+
+	public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, float f, float g, float h, boolean bl) {
 		super(renderLayerParent);
+		this.barrels = bl;
 		this.scaleX = f;
 		this.scaleY = g;
 		this.scaleZ = h;
@@ -50,7 +63,7 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.HEAD);
-		if (!itemStack.isEmpty()) {
+		if (!itemStack.isEmpty() && (!this.barrels || !itemStack.is(Items.BARREL))) {
 			Item item = itemStack.getItem();
 			poseStack.pushPose();
 			poseStack.scale(this.scaleX, this.scaleY, this.scaleZ);
@@ -64,6 +77,13 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 			}
 
 			this.getParentModel().getHead().translateAndRotate(poseStack);
+			if (this.getParentModel() instanceof QuadrupedModel) {
+				poseStack.translate(0.0, 0.25, -0.25125);
+				if (livingEntity instanceof Panda) {
+					poseStack.scale(1.333F, 1.333F, 1.333F);
+				}
+			}
+
 			if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
 				float m = 1.1875F;
 				poseStack.scale(1.1875F, -1.1875F, -1.1875F);

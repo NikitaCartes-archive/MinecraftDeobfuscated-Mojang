@@ -18,7 +18,7 @@ public interface PackResources extends AutoCloseable {
 
 	InputStream getResource(PackType packType, ResourceLocation resourceLocation) throws IOException;
 
-	Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate);
+	Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate);
 
 	boolean hasResource(PackType packType, ResourceLocation resourceLocation);
 

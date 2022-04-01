@@ -61,5 +61,4 @@ public class EntityEvent {
 	public static final byte START_RAM = 58;
 	public static final byte END_RAM = 59;
 	public static final byte POOF = 60;
-	public static final byte TENDRILS_SHIVER = 61;
 }

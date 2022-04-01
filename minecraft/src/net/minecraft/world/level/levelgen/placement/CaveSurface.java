@@ -8,10 +8,11 @@ public enum CaveSurface implements StringRepresentable {
 	CEILING(Direction.UP, 1, "ceiling"),
 	FLOOR(Direction.DOWN, -1, "floor");
 
-	public static final Codec<CaveSurface> CODEC = StringRepresentable.fromEnum(CaveSurface::values);
+	public static final Codec<CaveSurface> CODEC = StringRepresentable.fromEnum(CaveSurface::values, CaveSurface::byName);
 	private final Direction direction;
 	private final int y;
 	private final String id;
+	private static final CaveSurface[] VALUES = values();
 
 	private CaveSurface(Direction direction, int j, String string2) {
 		this.direction = direction;
@@ -25,6 +26,16 @@ public enum CaveSurface implements StringRepresentable {
 
 	public int getY() {
 		return this.y;
+	}
+
+	public static CaveSurface byName(String string) {
+		for (CaveSurface caveSurface : VALUES) {
+			if (caveSurface.getSerializedName().equals(string)) {
+				return caveSurface;
+			}
+		}
+
+		throw new IllegalArgumentException("Unknown Surface type: " + string);
 	}
 
 	@Override

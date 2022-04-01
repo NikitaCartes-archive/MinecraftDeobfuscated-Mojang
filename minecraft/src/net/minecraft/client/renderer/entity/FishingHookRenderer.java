@@ -66,7 +66,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			float r;
 			if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson())
 				&& player == Minecraft.getInstance().player) {
-				double s = 960.0 / (double)this.entityRenderDispatcher.options.fov().get().intValue();
+				double s = 960.0 / this.entityRenderDispatcher.options.fov;
 				Vec3 vec3 = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)j * 0.525F, -0.1F);
 				vec3 = vec3.scale(s);
 				vec3 = vec3.yRot(k * 0.5F);

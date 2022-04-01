@@ -5,10 +5,9 @@ import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
-import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
-public enum PrioritizeChunkUpdates implements OptionEnum {
+public enum PrioritizeChunkUpdates {
 	NONE(0, "options.prioritizeChunkUpdates.none"),
 	PLAYER_AFFECTED(1, "options.prioritizeChunkUpdates.byPlayer"),
 	NEARBY(2, "options.prioritizeChunkUpdates.nearby");
@@ -24,12 +23,10 @@ public enum PrioritizeChunkUpdates implements OptionEnum {
 		this.key = string2;
 	}
 
-	@Override
 	public int getId() {
 		return this.id;
 	}
 
-	@Override
 	public String getKey() {
 		return this.key;
 	}

@@ -37,10 +37,7 @@ public class RedStoneOreBlock extends Block {
 
 	@Override
 	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
-		if (!entity.isSteppingCarefully()) {
-			interact(blockState, level, blockPos);
-		}
-
+		interact(blockState, level, blockPos);
 		super.stepOn(level, blockPos, blockState, entity);
 	}
 

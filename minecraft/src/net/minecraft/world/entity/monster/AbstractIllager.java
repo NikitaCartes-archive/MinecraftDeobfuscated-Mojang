@@ -23,8 +23,13 @@ public abstract class AbstractIllager extends Raider {
 		return MobType.ILLAGER;
 	}
 
+	@Override
+	public boolean canStealItem() {
+		return true;
+	}
+
 	public AbstractIllager.IllagerArmPose getArmPose() {
-		return AbstractIllager.IllagerArmPose.CROSSED;
+		return this.getCarried() != LivingEntity.Carried.NONE ? AbstractIllager.IllagerArmPose.CROSSBOW_HOLD : AbstractIllager.IllagerArmPose.CROSSED;
 	}
 
 	@Override

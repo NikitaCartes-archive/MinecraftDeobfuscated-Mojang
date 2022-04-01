@@ -149,7 +149,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (!this.isBaby()) {
 			if (this.isTamed() && player.isSecondaryUseActive()) {
-				this.openCustomInventoryScreen(player);
+				this.openInventory(player);
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 
@@ -180,7 +180,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 			}
 
 			if (!this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE)) {
-				this.openCustomInventoryScreen(player);
+				this.openInventory(player);
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 		}

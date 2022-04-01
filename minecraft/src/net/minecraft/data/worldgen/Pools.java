@@ -22,7 +22,6 @@ public class Pools {
 		BastionPieces.bootstrap();
 		PillagerOutpostPools.bootstrap();
 		VillagePools.bootstrap();
-		AncientCityStructurePieces.bootstrap();
 		return BUILTIN_EMPTY;
 	}
 

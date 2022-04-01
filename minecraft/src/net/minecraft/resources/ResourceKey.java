@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import net.minecraft.core.Registry;
 
 public class ResourceKey<T> {
@@ -52,5 +53,9 @@ public class ResourceKey<T> {
 
 	public ResourceLocation registry() {
 		return this.registryName;
+	}
+
+	public static <T> Function<ResourceLocation, ResourceKey<T>> elementKey(ResourceKey<? extends Registry<T>> resourceKey) {
+		return resourceLocation -> create(resourceKey, resourceLocation);
 	}
 }

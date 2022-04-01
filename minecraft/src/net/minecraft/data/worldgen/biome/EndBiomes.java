@@ -15,6 +15,7 @@ public class EndBiomes {
 		BiomeDefaultFeatures.endSpawns(builder2);
 		return new Biome.BiomeBuilder()
 			.precipitation(Biome.Precipitation.NONE)
+			.biomeCategory(Biome.BiomeCategory.THEEND)
 			.temperature(0.5F)
 			.downfall(0.5F)
 			.specialEffects(

@@ -14,14 +14,15 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
+import net.minecraft.client.renderer.entity.layers.BarrelLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
+import net.minecraft.client.renderer.entity.layers.CarriedBlockLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.Deadmau5EarsLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
-import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
@@ -30,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
@@ -51,15 +53,16 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 				new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))
 			)
 		);
-		this.addLayer(new PlayerItemInHandLayer<>(this));
 		this.addLayer(new ArrowLayer<>(context, this));
 		this.addLayer(new Deadmau5EarsLayer(this));
 		this.addLayer(new CapeLayer(this));
-		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), true));
 		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
 		this.addLayer(new ParrotOnShoulderLayer<>(this, context.getModelSet()));
 		this.addLayer(new SpinAttackEffectLayer<>(this, context.getModelSet()));
 		this.addLayer(new BeeStingerLayer<>(this));
+		this.addLayer(new CarriedBlockLayer<>(this, 0.125F, 0.25F, 0.5F));
+		this.addLayer(new BarrelLayer<>(this));
 	}
 
 	public void render(AbstractClientPlayer abstractClientPlayer, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -186,8 +189,17 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		playerModel.swimAmount = 0.0F;
 		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		modelPart.xRot = 0.0F;
-		modelPart.render(poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY);
 		modelPart2.xRot = 0.0F;
+		if (abstractClientPlayer.getCarried() == LivingEntity.Carried.MOB) {
+			modelPart.y = 6.0F;
+			modelPart2.y = 6.0F;
+			modelPart.xRot -= (float) (Math.PI / 6);
+			modelPart.zRot = modelPart.zRot + (modelPart == playerModel.rightArm ? 30.0F : -30.0F) * (float) (Math.PI / 180.0);
+			modelPart2.xRot -= (float) (Math.PI / 6);
+			modelPart2.zRot = modelPart2.zRot + (modelPart2 == playerModel.rightSleeve ? 30.0F : -30.0F) * (float) (Math.PI / 180.0);
+		}
+
+		modelPart.render(poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY);
 		modelPart2.render(
 			poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY
 		);

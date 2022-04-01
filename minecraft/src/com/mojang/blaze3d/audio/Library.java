@@ -21,7 +21,6 @@ import org.lwjgl.openal.ALC11;
 import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.openal.ALCapabilities;
 import org.lwjgl.openal.ALUtil;
-import org.lwjgl.openal.SOFTHRTF;
 import org.lwjgl.system.MemoryStack;
 import org.slf4j.Logger;
 
@@ -69,7 +68,7 @@ public class Library {
 		this.defaultDeviceName = getDefaultDeviceName();
 	}
 
-	public void init(@Nullable String string, boolean bl) {
+	public void init(@Nullable String string) {
 		this.currentDevice = openDeviceOrFallback(string);
 		this.supportsDisconnections = ALC10.alcIsExtensionPresent(this.currentDevice, "ALC_EXT_disconnect");
 		ALCCapabilities aLCCapabilities = ALC.createCapabilities(this.currentDevice);
@@ -78,10 +77,6 @@ public class Library {
 		} else if (!aLCCapabilities.OpenALC11) {
 			throw new IllegalStateException("OpenAL 1.1 not supported");
 		} else {
-			if (aLCCapabilities.ALC_SOFT_HRTF && bl) {
-				this.enableHrtf();
-			}
-
 			this.context = ALC10.alcCreateContext(this.currentDevice, (IntBuffer)null);
 			ALC10.alcMakeContextCurrent(this.context);
 			int i = this.getChannelCount();
@@ -100,18 +95,6 @@ public class Library {
 				} else {
 					OpenAlUtil.checkALError("Enable per-source distance models");
 					LOGGER.info("OpenAL initialized on device {}", this.getCurrentDeviceName());
-				}
-			}
-		}
-	}
-
-	private void enableHrtf() {
-		int i = ALC10.alcGetInteger(this.currentDevice, 6548);
-		if (i > 0) {
-			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-				IntBuffer intBuffer = memoryStack.callocInt(10).put(6546).put(1).put(6550).put(0).put(0).flip();
-				if (!SOFTHRTF.alcResetDeviceSOFT(this.currentDevice, intBuffer)) {
-					LOGGER.warn("Failed to reset device: {}", ALC10.alcGetString(this.currentDevice, ALC10.alcGetError(this.currentDevice)));
 				}
 			}
 		}

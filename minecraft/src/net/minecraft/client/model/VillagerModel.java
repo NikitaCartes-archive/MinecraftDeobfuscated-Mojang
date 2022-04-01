@@ -10,7 +10,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.VillagerDataHolder;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
 public class VillagerModel<T extends Entity> extends HierarchicalModel<T> implements HeadedModel, VillagerHeadModel {
@@ -82,8 +87,35 @@ public class VillagerModel<T extends Entity> extends HierarchicalModel<T> implem
 	@Override
 	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		boolean bl = false;
-		if (entity instanceof AbstractVillager) {
-			bl = ((AbstractVillager)entity).getUnhappyCounter() > 0;
+		if (entity instanceof Witch) {
+			this.hat.y = -10.03125F;
+		} else {
+			this.hat.y = this.head.y;
+		}
+
+		boolean bl2;
+		if (entity instanceof AbstractVillager abstractVillager) {
+			bl = abstractVillager.getUnhappyCounter() > 0;
+			bl2 = abstractVillager.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL);
+			this.root.getChild("arms").visible = !bl2;
+			this.head.visible = !bl2;
+			if (bl2) {
+				this.hat.y = 1.5F;
+				if (entity instanceof VillagerDataHolder villagerDataHolder && villagerDataHolder.getVillagerData().getProfession() == VillagerProfession.LIBRARIAN) {
+					this.hat.y++;
+				}
+			}
+		} else if (entity instanceof Witch witch) {
+			bl2 = witch.getItemBySlot(EquipmentSlot.HEAD).is(Items.BARREL);
+			this.root.getChild("arms").visible = !bl2;
+			if (bl2) {
+				this.hat.y = -13.03125F;
+				this.head.y = 6.96875F;
+			} else {
+				this.head.y = 0.0F;
+			}
+		} else {
+			bl2 = false;
 		}
 
 		this.head.yRot = i * (float) (Math.PI / 180.0);
@@ -99,6 +131,10 @@ public class VillagerModel<T extends Entity> extends HierarchicalModel<T> implem
 		this.leftLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g * 0.5F;
 		this.rightLeg.yRot = 0.0F;
 		this.leftLeg.yRot = 0.0F;
+		if (bl2) {
+			this.head.xRot = 0.0F;
+			this.head.yRot = 0.0F;
+		}
 	}
 
 	@Override

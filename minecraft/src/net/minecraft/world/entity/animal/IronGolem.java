@@ -36,7 +36,6 @@ import net.minecraft.world.entity.ai.goal.MoveBackToVillageGoal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsTargetGoal;
 import net.minecraft.world.entity.ai.goal.OfferFlowerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.target.DefendVillageTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
@@ -49,6 +48,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 
@@ -76,7 +76,6 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		this.goalSelector.addGoal(5, new OfferFlowerGoal(this));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-		this.targetSelector.addGoal(1, new DefendVillageTargetGoal(this));
 		this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
 		this.targetSelector
@@ -210,9 +209,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		float g = (int)f > 0 ? f / 2.0F + (float)this.random.nextInt((int)f) : f;
 		boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
 		if (bl) {
-			double d = entity instanceof LivingEntity livingEntity ? livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 0.0;
-			double e = Math.max(0.0, 1.0 - d);
-			entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4F * e, 0.0));
+			entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4F, 0.0));
 			this.doEnchantDamageEffects(this, entity);
 		}
 
@@ -286,6 +283,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 			} else {
 				float g = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
 				this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, g);
+				this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
@@ -348,6 +346,10 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.875F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
+	}
+
+	public boolean isJolly() {
+		return this.getCustomName() != null && this.getCustomName().getString().equalsIgnoreCase("billyballong");
 	}
 
 	public static enum Crackiness {

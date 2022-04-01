@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public record TagKey<T>(ResourceKey<? extends Registry<T>> registry, ResourceLocation location) {
-	private static final Interner<TagKey<?>> VALUES = Interners.newWeakInterner();
+	private static final Interner<TagKey<?>> VALUES = Interners.newStrongInterner();
 
 	@Deprecated
 	public TagKey(ResourceKey<? extends Registry<T>> registry, ResourceLocation location) {

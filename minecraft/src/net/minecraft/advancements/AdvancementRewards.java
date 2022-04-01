@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -69,11 +68,7 @@ public class AdvancementRewards {
 						);
 					bl = true;
 				} else {
-					ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
-					if (itemEntity != null) {
-						itemEntity.setNoPickUpDelay();
-						itemEntity.setOwner(serverPlayer.getUUID());
-					}
+					serverPlayer.drop(itemStack, false);
 				}
 			}
 		}

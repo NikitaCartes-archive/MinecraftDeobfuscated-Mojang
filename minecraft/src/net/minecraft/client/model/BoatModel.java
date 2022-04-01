@@ -1,7 +1,6 @@
 package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -23,20 +22,16 @@ public class BoatModel extends ListModel<Boat> {
 	private static final String FRONT = "front";
 	private static final String RIGHT = "right";
 	private static final String LEFT = "left";
-	private static final String CHEST_BOTTOM = "chest_bottom";
-	private static final String CHEST_LID = "chest_lid";
-	private static final String CHEST_LOCK = "chest_lock";
 	private final ModelPart leftPaddle;
 	private final ModelPart rightPaddle;
 	private final ModelPart waterPatch;
 	private final ImmutableList<ModelPart> parts;
 
-	public BoatModel(ModelPart modelPart, boolean bl) {
+	public BoatModel(ModelPart modelPart) {
 		this.leftPaddle = modelPart.getChild("left_paddle");
 		this.rightPaddle = modelPart.getChild("right_paddle");
 		this.waterPatch = modelPart.getChild("water_patch");
-		Builder<ModelPart> builder = new Builder<>();
-		builder.add(
+		this.parts = ImmutableList.of(
 			modelPart.getChild("bottom"),
 			modelPart.getChild("back"),
 			modelPart.getChild("front"),
@@ -45,16 +40,9 @@ public class BoatModel extends ListModel<Boat> {
 			this.leftPaddle,
 			this.rightPaddle
 		);
-		if (bl) {
-			builder.add(modelPart.getChild("chest_bottom"));
-			builder.add(modelPart.getChild("chest_lid"));
-			builder.add(modelPart.getChild("chest_lock"));
-		}
-
-		this.parts = builder.build();
 	}
 
-	public static LayerDefinition createBodyModel(boolean bl) {
+	public static LayerDefinition createBodyModel() {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		int i = 32;
@@ -85,24 +73,6 @@ public class BoatModel extends ListModel<Boat> {
 		partDefinition.addOrReplaceChild(
 			"left", CubeListBuilder.create().texOffs(0, 43).addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F), PartPose.offset(0.0F, 4.0F, 9.0F)
 		);
-		if (bl) {
-			partDefinition.addOrReplaceChild(
-				"chest_bottom",
-				CubeListBuilder.create().texOffs(0, 76).addBox(0.0F, 0.0F, 0.0F, 12.0F, 8.0F, 12.0F),
-				PartPose.offsetAndRotation(-2.0F, -5.0F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
-			);
-			partDefinition.addOrReplaceChild(
-				"chest_lid",
-				CubeListBuilder.create().texOffs(0, 59).addBox(0.0F, 0.0F, 0.0F, 12.0F, 4.0F, 12.0F),
-				PartPose.offsetAndRotation(-2.0F, -9.0F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
-			);
-			partDefinition.addOrReplaceChild(
-				"chest_lock",
-				CubeListBuilder.create().texOffs(0, 59).addBox(0.0F, 0.0F, 0.0F, 2.0F, 4.0F, 1.0F),
-				PartPose.offsetAndRotation(-1.0F, -6.0F, -1.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
-			);
-		}
-
 		int n = 20;
 		int o = 7;
 		int p = 6;
@@ -122,7 +92,7 @@ public class BoatModel extends ListModel<Boat> {
 			CubeListBuilder.create().texOffs(0, 0).addBox(-14.0F, -9.0F, -3.0F, 28.0F, 16.0F, 3.0F),
 			PartPose.offsetAndRotation(0.0F, -3.0F, 1.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
 		);
-		return LayerDefinition.create(meshDefinition, 128, bl ? 128 : 64);
+		return LayerDefinition.create(meshDefinition, 128, 64);
 	}
 
 	public void setupAnim(Boat boat, float f, float g, float h, float i, float j) {

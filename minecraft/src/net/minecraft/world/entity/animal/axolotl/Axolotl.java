@@ -415,17 +415,21 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		return !this.isPlayingDead() && super.canBeSeenAsEnemy();
 	}
 
-	public static void onStopAttacking(Axolotl axolotl, LivingEntity livingEntity) {
-		Level level = axolotl.level;
-		if (livingEntity.isDeadOrDying()) {
-			DamageSource damageSource = livingEntity.getLastDamageSource();
-			if (damageSource != null) {
-				Entity entity = damageSource.getEntity();
-				if (entity != null && entity.getType() == EntityType.PLAYER) {
-					Player player = (Player)entity;
-					List<Player> list = level.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));
-					if (list.contains(player)) {
-						axolotl.applySupportingEffects(player);
+	public static void onStopAttacking(Axolotl axolotl) {
+		Optional<LivingEntity> optional = axolotl.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
+		if (optional.isPresent()) {
+			Level level = axolotl.level;
+			LivingEntity livingEntity = (LivingEntity)optional.get();
+			if (livingEntity.isDeadOrDying()) {
+				DamageSource damageSource = livingEntity.getLastDamageSource();
+				if (damageSource != null) {
+					Entity entity = damageSource.getEntity();
+					if (entity != null && entity.getType() == EntityType.PLAYER) {
+						Player player = (Player)entity;
+						List<Player> list = level.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));
+						if (list.contains(player)) {
+							axolotl.applySupportingEffects(player);
+						}
 					}
 				}
 			}

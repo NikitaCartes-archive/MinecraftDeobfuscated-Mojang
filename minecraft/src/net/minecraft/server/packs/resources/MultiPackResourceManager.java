@@ -1,70 +1,36 @@
 package net.minecraft.server.packs.resources;
 
-import com.mojang.logging.LogUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import org.slf4j.Logger;
 
 public class MultiPackResourceManager implements CloseableResourceManager {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Map<String, FallbackResourceManager> namespacedManagers;
 	private final List<PackResources> packs;
 
 	public MultiPackResourceManager(PackType packType, List<PackResources> list) {
 		this.packs = List.copyOf(list);
 		Map<String, FallbackResourceManager> map = new HashMap();
-		List<String> list2 = list.stream().flatMap(packResourcesx -> packResourcesx.getNamespaces(packType).stream()).toList();
 
 		for (PackResources packResources : list) {
-			ResourceFilterSection resourceFilterSection = this.getPackFilterSection(packResources);
-			Set<String> set = packResources.getNamespaces(packType);
-			Predicate<ResourceLocation> predicate = resourceFilterSection != null
-				? resourceLocation -> resourceFilterSection.isPathFiltered(resourceLocation.getPath())
-				: null;
-
-			for (String string : list2) {
-				boolean bl = set.contains(string);
-				boolean bl2 = resourceFilterSection != null && resourceFilterSection.isNamespaceFiltered(string);
-				if (bl || bl2) {
-					FallbackResourceManager fallbackResourceManager = (FallbackResourceManager)map.get(string);
-					if (fallbackResourceManager == null) {
-						fallbackResourceManager = new FallbackResourceManager(packType, string);
-						map.put(string, fallbackResourceManager);
-					}
-
-					if (bl && bl2) {
-						fallbackResourceManager.push(packResources, predicate);
-					} else if (bl) {
-						fallbackResourceManager.push(packResources);
-					} else {
-						fallbackResourceManager.pushFilterOnly(packResources.getName(), predicate);
-					}
-				}
+			for (String string : packResources.getNamespaces(packType)) {
+				((FallbackResourceManager)map.computeIfAbsent(string, stringx -> new FallbackResourceManager(packType, stringx))).add(packResources);
 			}
 		}
 
 		this.namespacedManagers = map;
-	}
-
-	@Nullable
-	private ResourceFilterSection getPackFilterSection(PackResources packResources) {
-		try {
-			return packResources.getMetadataSection(ResourceFilterSection.SERIALIZER);
-		} catch (IOException var3) {
-			LOGGER.error("Failed to get filter section from pack {}", packResources.getName());
-			return null;
-		}
 	}
 
 	@Override
@@ -89,35 +55,26 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 	}
 
 	@Override
-	public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
+	public List<Resource> getResources(ResourceLocation resourceLocation) throws IOException {
 		ResourceManager resourceManager = (ResourceManager)this.namespacedManagers.get(resourceLocation.getNamespace());
 		if (resourceManager != null) {
-			return resourceManager.getResourceStack(resourceLocation);
+			return resourceManager.getResources(resourceLocation);
 		} else {
 			throw new FileNotFoundException(resourceLocation.toString());
 		}
 	}
 
 	@Override
-	public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
-		Map<ResourceLocation, ResourceThunk> map = new TreeMap();
+	public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
+		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 
 		for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
-			map.putAll(fallbackResourceManager.listResources(string, predicate));
+			set.addAll(fallbackResourceManager.listResources(string, predicate));
 		}
 
-		return map;
-	}
-
-	@Override
-	public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
-		Map<ResourceLocation, List<ResourceThunk>> map = new TreeMap();
-
-		for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
-			map.putAll(fallbackResourceManager.listResourceStacks(string, predicate));
-		}
-
-		return map;
+		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList(set);
+		Collections.sort(list);
+		return list;
 	}
 
 	@Override

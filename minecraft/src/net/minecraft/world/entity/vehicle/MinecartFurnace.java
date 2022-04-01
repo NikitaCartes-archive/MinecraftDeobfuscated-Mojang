@@ -9,12 +9,13 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FurnaceBlock;
@@ -74,8 +75,11 @@ public class MinecartFurnace extends AbstractMinecart {
 	}
 
 	@Override
-	protected Item getDropItem() {
-		return Items.FURNACE_MINECART;
+	public void destroy(DamageSource damageSource) {
+		super.destroy(damageSource);
+		if (!damageSource.isExplosion() && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			this.spawnAtLocation(Blocks.FURNACE);
+		}
 	}
 
 	@Override

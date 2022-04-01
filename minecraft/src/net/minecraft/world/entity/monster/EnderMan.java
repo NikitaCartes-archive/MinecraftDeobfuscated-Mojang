@@ -2,16 +2,16 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -23,6 +23,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -30,8 +31,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -46,6 +49,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
@@ -55,9 +59,11 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
@@ -71,7 +77,6 @@ public class EnderMan extends Monster implements NeutralMob {
 	);
 	private static final int DELAY_BETWEEN_CREEPY_STARE_SOUND = 400;
 	private static final int MIN_DEAGGRESSION_TIME = 600;
-	private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BLOCK_STATE);
 	private static final EntityDataAccessor<Boolean> DATA_CREEPY = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_STARED_AT = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
 	private int lastStareSound = Integer.MIN_VALUE;
@@ -80,6 +85,7 @@ public class EnderMan extends Monster implements NeutralMob {
 	private int remainingPersistentAngerTime;
 	@Nullable
 	private UUID persistentAngerTarget;
+	private boolean dontCareAboutItem;
 
 	public EnderMan(EntityType<? extends EnderMan> entityType, Level level) {
 		super(entityType, level);
@@ -132,7 +138,6 @@ public class EnderMan extends Monster implements NeutralMob {
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
-		this.entityData.define(DATA_CARRY_STATE, Optional.empty());
 		this.entityData.define(DATA_CREEPY, false);
 		this.entityData.define(DATA_STARED_AT, false);
 	}
@@ -184,27 +189,15 @@ public class EnderMan extends Monster implements NeutralMob {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		BlockState blockState = this.getCarriedBlock();
-		if (blockState != null) {
-			compoundTag.put("carriedBlockState", NbtUtils.writeBlockState(blockState));
-		}
-
 		this.addPersistentAngerSaveData(compoundTag);
+		compoundTag.putBoolean("i_dont_care", this.dontCareAboutItem);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		BlockState blockState = null;
-		if (compoundTag.contains("carriedBlockState", 10)) {
-			blockState = NbtUtils.readBlockState(compoundTag.getCompound("carriedBlockState"));
-			if (blockState.isAir()) {
-				blockState = null;
-			}
-		}
-
-		this.setCarriedBlock(blockState);
 		this.readPersistentAngerSaveData(this.level, compoundTag);
+		this.dontCareAboutItem = compoundTag.getBoolean("i_dont_care");
 	}
 
 	boolean isLookingAtMe(Player player) {
@@ -259,7 +252,7 @@ public class EnderMan extends Monster implements NeutralMob {
 	@Override
 	protected void customServerAiStep() {
 		if (this.level.isDay() && this.tickCount >= this.targetChangeTime + 600) {
-			float f = this.getLightLevelDependentMagicValue();
+			float f = this.getBrightness();
 			if (f > 0.5F && this.level.canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
 				this.setTarget(null);
 				this.teleport();
@@ -301,7 +294,13 @@ public class EnderMan extends Monster implements NeutralMob {
 		boolean bl = blockState.getMaterial().blocksMotion();
 		boolean bl2 = blockState.getFluidState().is(FluidTags.WATER);
 		if (bl && !bl2) {
-			boolean bl3 = this.randomTeleport(d, e, f, true);
+			boolean bl3;
+			if (this.getRootVehicle() instanceof Player player) {
+				bl3 = player.randomTeleport(d, e, f, true);
+			} else {
+				bl3 = this.randomTeleport(d, e, f, true);
+			}
+
 			if (bl3 && !this.isSilent()) {
 				this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
 				this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
@@ -337,35 +336,30 @@ public class EnderMan extends Monster implements NeutralMob {
 		}
 	}
 
-	public void setCarriedBlock(@Nullable BlockState blockState) {
-		this.entityData.set(DATA_CARRY_STATE, Optional.ofNullable(blockState));
-	}
-
-	@Nullable
-	public BlockState getCarriedBlock() {
-		return (BlockState)this.entityData.get(DATA_CARRY_STATE).orElse(null);
-	}
-
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (damageSource instanceof IndirectEntityDamageSource) {
 			Entity entity = damageSource.getDirectEntity();
-			boolean bl;
-			if (entity instanceof ThrownPotion) {
-				bl = this.hurtWithCleanWater(damageSource, (ThrownPotion)entity, f);
+			if (entity instanceof FallingBlockEntity) {
+				return super.hurt(damageSource, f);
 			} else {
-				bl = false;
-			}
-
-			for (int i = 0; i < 64; i++) {
-				if (this.teleport()) {
-					return true;
+				boolean bl;
+				if (entity instanceof ThrownPotion) {
+					bl = this.hurtWithCleanWater(damageSource, (ThrownPotion)entity, f);
+				} else {
+					bl = false;
 				}
-			}
 
-			return bl;
+				for (int i = 0; i < 64; i++) {
+					if (this.teleport()) {
+						return true;
+					}
+				}
+
+				return bl;
+			}
 		} else {
 			boolean bl2 = super.hurt(damageSource, f);
 			if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
@@ -398,7 +392,39 @@ public class EnderMan extends Monster implements NeutralMob {
 
 	@Override
 	public boolean requiresCustomPersistence() {
-		return super.requiresCustomPersistence() || this.getCarriedBlock() != null;
+		return super.requiresCustomPersistence() || !this.dontCareAboutItem && this.getCarried() != LivingEntity.Carried.NONE;
+	}
+
+	@Nullable
+	@Override
+	public SpawnGroupData finalizeSpawn(
+		ServerLevelAccessor serverLevelAccessor,
+		DifficultyInstance difficultyInstance,
+		MobSpawnType mobSpawnType,
+		@Nullable SpawnGroupData spawnGroupData,
+		@Nullable CompoundTag compoundTag
+	) {
+		ServerLevel serverLevel = serverLevelAccessor.getLevel().getServer().getLevel(Level.END);
+		boolean bl = false;
+		if (serverLevel == serverLevelAccessor) {
+			bl = true;
+		} else if (serverLevel != null) {
+			EndDragonFight endDragonFight = serverLevel.dragonFight();
+			if (endDragonFight != null && endDragonFight.hasPreviouslyKilledDragon()) {
+				bl = true;
+			}
+		}
+
+		if (bl) {
+			Random random = serverLevelAccessor.getRandom();
+			Registry.BLOCK
+				.getRandom(random)
+				.flatMap(holder -> Util.getRandomSafe(((Block)holder.value()).getStateDefinition().getPossibleStates(), random))
+				.ifPresent(this::setCarriedBlock);
+			this.dontCareAboutItem = true;
+		}
+
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	static class EndermanFreezeWhenLookedAt extends Goal {

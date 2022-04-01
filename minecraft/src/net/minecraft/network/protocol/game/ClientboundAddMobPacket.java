@@ -5,14 +5,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundAddMobPacket implements Packet<ClientGamePacketListener> {
 	private final int id;
 	private final UUID uuid;
-	private final EntityType<?> type;
+	private final int type;
 	private final double x;
 	private final double y;
 	private final double z;
@@ -26,7 +25,7 @@ public class ClientboundAddMobPacket implements Packet<ClientGamePacketListener>
 	public ClientboundAddMobPacket(LivingEntity livingEntity) {
 		this.id = livingEntity.getId();
 		this.uuid = livingEntity.getUUID();
-		this.type = livingEntity.getType();
+		this.type = Registry.ENTITY_TYPE.getId(livingEntity.getType());
 		this.x = livingEntity.getX();
 		this.y = livingEntity.getY();
 		this.z = livingEntity.getZ();
@@ -46,7 +45,7 @@ public class ClientboundAddMobPacket implements Packet<ClientGamePacketListener>
 	public ClientboundAddMobPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.uuid = friendlyByteBuf.readUUID();
-		this.type = friendlyByteBuf.readById(Registry.ENTITY_TYPE);
+		this.type = friendlyByteBuf.readVarInt();
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
 		this.z = friendlyByteBuf.readDouble();
@@ -62,7 +61,7 @@ public class ClientboundAddMobPacket implements Packet<ClientGamePacketListener>
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeUUID(this.uuid);
-		friendlyByteBuf.writeId(Registry.ENTITY_TYPE, this.type);
+		friendlyByteBuf.writeVarInt(this.type);
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
 		friendlyByteBuf.writeDouble(this.z);
@@ -86,7 +85,7 @@ public class ClientboundAddMobPacket implements Packet<ClientGamePacketListener>
 		return this.uuid;
 	}
 
-	public EntityType<?> getType() {
+	public int getType() {
 		return this.type;
 	}
 

@@ -29,10 +29,10 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 	}
 
 	public void render(PoseStack poseStack) {
-		if (!this.isListening && this.minecraft.options.showSubtitles().get()) {
+		if (!this.isListening && this.minecraft.options.showSubtitles) {
 			this.minecraft.getSoundManager().addListener(this);
 			this.isListening = true;
-		} else if (this.isListening && !this.minecraft.options.showSubtitles().get()) {
+		} else if (this.isListening && !this.minecraft.options.showSubtitles) {
 			this.minecraft.getSoundManager().removeListener(this);
 			this.isListening = false;
 		}

@@ -69,11 +69,11 @@ public class DemoMode extends ServerPlayerGameMode {
 	}
 
 	@Override
-	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
+	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i) {
 		if (this.demoHasEnded) {
 			this.outputDemoReminder();
 		} else {
-			super.handleBlockBreakAction(blockPos, action, direction, i, j);
+			super.handleBlockBreakAction(blockPos, action, direction, i);
 		}
 	}
 

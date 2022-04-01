@@ -3,7 +3,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
@@ -35,12 +33,10 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.animal.Bee;
-import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -54,7 +50,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public class DebugPackets {
@@ -116,7 +111,7 @@ public class DebugPackets {
 	public static void sendBeeInfo(Bee bee) {
 	}
 
-	public static void sendGameEventInfo(Level level, GameEvent gameEvent, Vec3 vec3) {
+	public static void sendGameEventInfo(Level level, GameEvent gameEvent, BlockPos blockPos) {
 	}
 
 	public static void sendGameEventListenerInfo(Level level, GameEventListener gameEventListener) {
@@ -150,13 +145,6 @@ public class DebugPackets {
 			friendlyByteBuf.writeBoolean(false);
 		}
 
-		if (livingEntity.getType() == EntityType.WARDEN) {
-			Warden warden = (Warden)livingEntity;
-			friendlyByteBuf.writeInt(warden.getClientAngerLevel());
-		} else {
-			friendlyByteBuf.writeInt(-1);
-		}
-
 		friendlyByteBuf.writeCollection(brain.getActiveActivities(), (friendlyByteBufx, activity) -> friendlyByteBufx.writeUtf(activity.getName()));
 		Set<String> set = (Set<String>)brain.getRunningBehaviors().stream().map(Behavior::toString).collect(Collectors.toSet());
 		friendlyByteBuf.writeCollection(set, FriendlyByteBuf::writeUtf);
@@ -187,12 +175,7 @@ public class DebugPackets {
 		}
 
 		if (livingEntity instanceof Villager) {
-			Map<UUID, Object2IntMap<GossipType>> map = ((Villager)livingEntity).getGossips().getGossipEntries();
 			List<String> list = Lists.<String>newArrayList();
-			map.forEach((uUID, object2IntMap) -> {
-				String string = DebugEntityNameGenerator.getEntityName(uUID);
-				object2IntMap.forEach((gossipType, integer) -> list.add(string + ": " + gossipType + ": " + integer));
-			});
 			friendlyByteBuf.writeCollection(list, FriendlyByteBuf::writeUtf);
 		} else {
 			friendlyByteBuf.writeVarInt(0);

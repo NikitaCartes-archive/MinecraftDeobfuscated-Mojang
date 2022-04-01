@@ -912,7 +912,7 @@ public class LegacyPackResourcesAdapter implements PackResources {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
 		return Collections.emptyList();
 	}
 

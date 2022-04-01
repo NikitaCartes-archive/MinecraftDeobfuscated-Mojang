@@ -61,11 +61,15 @@ public class BakedGlyph {
 	}
 
 	public RenderType renderType(Font.DisplayMode displayMode) {
-		return switch (displayMode) {
-			case NORMAL -> this.normalType;
-			case SEE_THROUGH -> this.seeThroughType;
-			case POLYGON_OFFSET -> this.polygonOffsetType;
-		};
+		switch (displayMode) {
+			case NORMAL:
+			default:
+				return this.normalType;
+			case SEE_THROUGH:
+				return this.seeThroughType;
+			case POLYGON_OFFSET:
+				return this.polygonOffsetType;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -4,9 +4,12 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -37,6 +40,21 @@ public class CactusBlock extends Block {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
+			Direction[] directions = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
+			boolean bl = false;
+
+			for (Direction direction : directions) {
+				BlockPos blockPos2 = blockPos.relative(direction);
+				BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+				if (blockState2.is(Blocks.PUMPKIN)) {
+					serverLevel.setBlock(blockPos2, Blocks.CARVED_PUMPKIN.defaultBlockState(), 4);
+					bl = true;
+				}
+			}
+
+			if (bl) {
+				serverLevel.playSound(null, blockPos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);
+			}
 		}
 	}
 
@@ -56,7 +74,7 @@ public class CactusBlock extends Block {
 					serverLevel.setBlockAndUpdate(blockPos2, this.defaultBlockState());
 					BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(0));
 					serverLevel.setBlock(blockPos, blockState2, 4);
-					serverLevel.neighborChanged(blockState2, blockPos2, this, blockPos, false);
+					blockState2.neighborChanged(serverLevel, blockPos2, this, blockPos, false);
 				} else {
 					serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j + 1)), 4);
 				}
@@ -103,6 +121,9 @@ public class CactusBlock extends Block {
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		entity.hurt(DamageSource.CACTUS, 1.0F);
+		if (entity instanceof Shearable shearable && shearable.readyForShearing()) {
+			shearable.shear(SoundSource.BLOCKS);
+		}
 	}
 
 	@Override

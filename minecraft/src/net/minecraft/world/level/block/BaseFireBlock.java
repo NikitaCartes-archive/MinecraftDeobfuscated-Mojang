@@ -36,11 +36,7 @@ public abstract class BaseFireBlock extends Block {
 	}
 
 	public static BlockState getState(BlockGetter blockGetter, BlockPos blockPos) {
-		BlockPos blockPos2 = blockPos.below();
-		BlockState blockState = blockGetter.getBlockState(blockPos2);
-		return SoulFireBlock.canSurviveOnBlock(blockState)
-			? Blocks.SOUL_FIRE.defaultBlockState()
-			: ((FireBlock)Blocks.FIRE).getStateForPlacement(blockGetter, blockPos);
+		return ((FireBlock)Blocks.FIRE).getStateForPlacement(blockGetter, blockPos);
 	}
 
 	@Override

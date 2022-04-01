@@ -329,8 +329,8 @@ public class PackResourcesAdapterV4 implements PackResources {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
-		return this.pack.getResources(packType, string, string2, predicate);
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+		return this.pack.getResources(packType, string, string2, i, predicate);
 	}
 
 	@Override
