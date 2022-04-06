@@ -14,12 +14,12 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
@@ -56,7 +56,7 @@ public class LootPool {
     }
 
     private void addRandomItem(Consumer<ItemStack> consumer, LootContext lootContext) {
-        Random random = lootContext.getRandom();
+        RandomSource randomSource = lootContext.getRandom();
         ArrayList<LootPoolEntry> list = Lists.newArrayList();
         MutableInt mutableInt = new MutableInt();
         for (LootPoolEntryContainer lootPoolEntryContainer : this.entries) {
@@ -76,7 +76,7 @@ public class LootPool {
             ((LootPoolEntry)list.get(0)).createItemStack(consumer, lootContext);
             return;
         }
-        int j = random.nextInt(mutableInt.intValue());
+        int j = randomSource.nextInt(mutableInt.intValue());
         for (LootPoolEntry lootPoolEntry2 : list) {
             if ((j -= lootPoolEntry2.getWeight(lootContext.getLuck())) >= 0) continue;
             lootPoolEntry2.createItemStack(consumer, lootContext);

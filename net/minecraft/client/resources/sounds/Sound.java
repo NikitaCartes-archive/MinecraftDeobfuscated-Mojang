@@ -8,24 +8,26 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.Weighted;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.SampledFloat;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Sound
 implements Weighted<Sound> {
     private final ResourceLocation location;
-    private final float volume;
-    private final float pitch;
+    private final SampledFloat volume;
+    private final SampledFloat pitch;
     private final int weight;
     private final Type type;
     private final boolean stream;
     private final boolean preload;
     private final int attenuationDistance;
 
-    public Sound(String string, float f, float g, int i, Type type, boolean bl, boolean bl2, int j) {
+    public Sound(String string, SampledFloat sampledFloat, SampledFloat sampledFloat2, int i, Type type, boolean bl, boolean bl2, int j) {
         this.location = new ResourceLocation(string);
-        this.volume = f;
-        this.pitch = g;
+        this.volume = sampledFloat;
+        this.pitch = sampledFloat2;
         this.weight = i;
         this.type = type;
         this.stream = bl;
@@ -41,11 +43,11 @@ implements Weighted<Sound> {
         return new ResourceLocation(this.location.getNamespace(), "sounds/" + this.location.getPath() + ".ogg");
     }
 
-    public float getVolume() {
+    public SampledFloat getVolume() {
         return this.volume;
     }
 
-    public float getPitch() {
+    public SampledFloat getPitch() {
         return this.pitch;
     }
 
@@ -55,7 +57,7 @@ implements Weighted<Sound> {
     }
 
     @Override
-    public Sound getSound() {
+    public Sound getSound(RandomSource randomSource) {
         return this;
     }
 
@@ -87,8 +89,8 @@ implements Weighted<Sound> {
     }
 
     @Override
-    public /* synthetic */ Object getSound() {
-        return this.getSound();
+    public /* synthetic */ Object getSound(RandomSource randomSource) {
+        return this.getSound(randomSource);
     }
 
     @Environment(value=EnvType.CLIENT)

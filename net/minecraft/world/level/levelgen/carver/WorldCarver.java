@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.carver;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -170,9 +170,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         return blockState;
     }
 
-    public abstract boolean carve(CarvingContext var1, C var2, ChunkAccess var3, Function<BlockPos, Holder<Biome>> var4, Random var5, Aquifer var6, ChunkPos var7, CarvingMask var8);
+    public abstract boolean carve(CarvingContext var1, C var2, ChunkAccess var3, Function<BlockPos, Holder<Biome>> var4, RandomSource var5, Aquifer var6, ChunkPos var7, CarvingMask var8);
 
-    public abstract boolean isStartChunk(C var1, Random var2);
+    public abstract boolean isStartChunk(C var1, RandomSource var2);
 
     protected boolean canReplaceBlock(BlockState blockState) {
         return this.replaceableBlocks.contains(blockState.getBlock());

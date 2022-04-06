@@ -17,13 +17,13 @@ import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,7 +55,7 @@ extends LootItemConditionalFunction {
     @Override
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         Enchantment enchantment2;
-        Random random = lootContext.getRandom();
+        RandomSource randomSource = lootContext.getRandom();
         if (this.enchantments.isEmpty()) {
             boolean bl = itemStack.is(Items.BOOK);
             List list = Registry.ENCHANTMENT.stream().filter(Enchantment::isDiscoverable).filter(enchantment -> bl || enchantment.canEnchant(itemStack)).collect(Collectors.toList());
@@ -63,15 +63,15 @@ extends LootItemConditionalFunction {
                 LOGGER.warn("Couldn't find a compatible enchantment for {}", (Object)itemStack);
                 return itemStack;
             }
-            enchantment2 = (Enchantment)list.get(random.nextInt(list.size()));
+            enchantment2 = (Enchantment)list.get(randomSource.nextInt(list.size()));
         } else {
-            enchantment2 = this.enchantments.get(random.nextInt(this.enchantments.size()));
+            enchantment2 = this.enchantments.get(randomSource.nextInt(this.enchantments.size()));
         }
-        return EnchantRandomlyFunction.enchantItem(itemStack, enchantment2, random);
+        return EnchantRandomlyFunction.enchantItem(itemStack, enchantment2, randomSource);
     }
 
-    private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, Random random) {
-        int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+    private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, RandomSource randomSource) {
+        int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
         if (itemStack.is(Items.BOOK)) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
             EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));

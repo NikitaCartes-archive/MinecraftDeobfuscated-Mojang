@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -39,20 +39,20 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (random.nextInt(25) == 0) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+        if (randomSource.nextInt(25) == 0) {
             int i = 5;
             int j = 4;
             for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-4, -1, -4), blockPos.offset(4, 1, 4))) {
                 if (!serverLevel.getBlockState(blockPos2).is(this) || --i > 0) continue;
                 return;
             }
-            BlockPos blockPos3 = blockPos.offset(random.nextInt(3) - 1, random.nextInt(2) - random.nextInt(2), random.nextInt(3) - 1);
+            BlockPos blockPos3 = blockPos.offset(randomSource.nextInt(3) - 1, randomSource.nextInt(2) - randomSource.nextInt(2), randomSource.nextInt(3) - 1);
             for (int k = 0; k < 4; ++k) {
                 if (serverLevel.isEmptyBlock(blockPos3) && blockState.canSurvive(serverLevel, blockPos3)) {
                     blockPos = blockPos3;
                 }
-                blockPos3 = blockPos.offset(random.nextInt(3) - 1, random.nextInt(2) - random.nextInt(2), random.nextInt(3) - 1);
+                blockPos3 = blockPos.offset(randomSource.nextInt(3) - 1, randomSource.nextInt(2) - randomSource.nextInt(2), randomSource.nextInt(3) - 1);
             }
             if (serverLevel.isEmptyBlock(blockPos3) && blockState.canSurvive(serverLevel, blockPos3)) {
                 serverLevel.setBlock(blockPos3, blockState, 2);
@@ -75,9 +75,9 @@ implements BonemealableBlock {
         return levelReader.getRawBrightness(blockPos, 0) < 13 && this.mayPlaceOn(blockState2, levelReader, blockPos2);
     }
 
-    public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
+    public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
         serverLevel.removeBlock(blockPos, false);
-        if (this.featureSupplier.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
+        if (this.featureSupplier.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos)) {
             return true;
         }
         serverLevel.setBlock(blockPos, blockState, 3);
@@ -90,13 +90,13 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        return (double)random.nextFloat() < 0.4;
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
+        return (double)randomSource.nextFloat() < 0.4;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        this.growMushroom(serverLevel, blockPos, blockState, random);
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
+        this.growMushroom(serverLevel, blockPos, blockState, randomSource);
     }
 }
 

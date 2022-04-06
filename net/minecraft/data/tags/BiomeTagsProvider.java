@@ -39,8 +39,7 @@ extends TagsProvider<Biome> {
         this.tag(BiomeTags.HAS_DESERT_PYRAMID).add(Biomes.DESERT);
         this.tag(BiomeTags.HAS_IGLOO).add(Biomes.SNOWY_TAIGA).add(Biomes.SNOWY_PLAINS).add(Biomes.SNOWY_SLOPES);
         this.tag(BiomeTags.HAS_JUNGLE_TEMPLE).add(Biomes.BAMBOO_JUNGLE).add(Biomes.JUNGLE);
-        this.tag(BiomeTags.HAS_MINESHAFT).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER).addTag(BiomeTags.IS_BEACH).addTag(BiomeTags.IS_MOUNTAIN).addTag(BiomeTags.IS_HILL).addTag(BiomeTags.IS_TAIGA).addTag(BiomeTags.IS_JUNGLE).addTag(BiomeTags.IS_FOREST).add(Biomes.STONY_SHORE);
-        this.tag(BiomeTags.HAS_MINESHAFT).add(Biomes.MUSHROOM_FIELDS).add(Biomes.ICE_SPIKES).add(Biomes.WINDSWEPT_SAVANNA).add(Biomes.DESERT).add(Biomes.SAVANNA).add(Biomes.SNOWY_PLAINS).add(Biomes.PLAINS).add(Biomes.SUNFLOWER_PLAINS).add(Biomes.SWAMP).add(Biomes.SAVANNA_PLATEAU).add(Biomes.DRIPSTONE_CAVES).add(Biomes.LUSH_CAVES);
+        this.tag(BiomeTags.HAS_MINESHAFT).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER).addTag(BiomeTags.IS_BEACH).addTag(BiomeTags.IS_MOUNTAIN).addTag(BiomeTags.IS_HILL).addTag(BiomeTags.IS_TAIGA).addTag(BiomeTags.IS_JUNGLE).addTag(BiomeTags.IS_FOREST).add(Biomes.STONY_SHORE).add(Biomes.MUSHROOM_FIELDS).add(Biomes.ICE_SPIKES).add(Biomes.WINDSWEPT_SAVANNA).add(Biomes.DESERT).add(Biomes.SAVANNA).add(Biomes.SNOWY_PLAINS).add(Biomes.PLAINS).add(Biomes.SUNFLOWER_PLAINS).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP).add(Biomes.SAVANNA_PLATEAU).add(Biomes.DRIPSTONE_CAVES).add(Biomes.LUSH_CAVES);
         this.tag(BiomeTags.HAS_MINESHAFT_MESA).addTag(BiomeTags.IS_BADLANDS);
         this.tag(BiomeTags.HAS_OCEAN_MONUMENT).addTag(BiomeTags.IS_DEEP_OCEAN);
         this.tag(BiomeTags.REQUIRED_OCEAN_MONUMENT_SURROUNDING).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER);
@@ -50,7 +49,7 @@ extends TagsProvider<Biome> {
         this.tag(BiomeTags.HAS_RUINED_PORTAL_DESERT).add(Biomes.DESERT);
         this.tag(BiomeTags.HAS_RUINED_PORTAL_JUNGLE).addTag(BiomeTags.IS_JUNGLE);
         this.tag(BiomeTags.HAS_RUINED_PORTAL_OCEAN).addTag(BiomeTags.IS_OCEAN);
-        this.tag(BiomeTags.HAS_RUINED_PORTAL_SWAMP).add(Biomes.SWAMP);
+        this.tag(BiomeTags.HAS_RUINED_PORTAL_SWAMP).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
         this.tag(BiomeTags.HAS_RUINED_PORTAL_MOUNTAIN).addTag(BiomeTags.IS_BADLANDS).addTag(BiomeTags.IS_HILL).add(Biomes.SAVANNA_PLATEAU).add(Biomes.WINDSWEPT_SAVANNA).add(Biomes.STONY_SHORE).addTag(BiomeTags.IS_MOUNTAIN);
         this.tag(BiomeTags.HAS_RUINED_PORTAL_STANDARD).addTag(BiomeTags.IS_BEACH).addTag(BiomeTags.IS_RIVER).addTag(BiomeTags.IS_TAIGA).addTag(BiomeTags.IS_FOREST).add(Biomes.MUSHROOM_FIELDS).add(Biomes.ICE_SPIKES).add(Biomes.DRIPSTONE_CAVES).add(Biomes.LUSH_CAVES).add(Biomes.SAVANNA).add(Biomes.SNOWY_PLAINS).add(Biomes.PLAINS).add(Biomes.SUNFLOWER_PLAINS);
         this.tag(BiomeTags.HAS_SHIPWRECK_BEACHED).addTag(BiomeTags.IS_BEACH);
@@ -72,19 +71,19 @@ extends TagsProvider<Biome> {
         this.tag(BiomeTags.HAS_END_CITY).add(Biomes.END_HIGHLANDS).add(Biomes.END_MIDLANDS);
         this.tag(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL).add(Biomes.WARM_OCEAN);
         this.tag(BiomeTags.PLAYS_UNDERWATER_MUSIC).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER);
-        this.tag(BiomeTags.HAS_CLOSER_WATER_FOG).add(Biomes.SWAMP);
-        this.tag(BiomeTags.WATER_ON_MAP_OUTLINES).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER).add(Biomes.SWAMP);
+        this.tag(BiomeTags.HAS_CLOSER_WATER_FOG).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
+        this.tag(BiomeTags.WATER_ON_MAP_OUTLINES).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
         this.tag(BiomeTags.WITHOUT_ZOMBIE_SIEGES).add(Biomes.MUSHROOM_FIELDS);
         this.tag(BiomeTags.WITHOUT_PATROL_SPAWNS).add(Biomes.MUSHROOM_FIELDS);
         this.tag(BiomeTags.WITHOUT_WANDERING_TRADER_SPAWNS).add(Biomes.THE_VOID);
         this.tag(BiomeTags.SPAWNS_COLD_VARIANT_FROGS).add(Biomes.SNOWY_PLAINS).add(Biomes.ICE_SPIKES).add(Biomes.FROZEN_PEAKS).add(Biomes.JAGGED_PEAKS).add(Biomes.SNOWY_SLOPES).add(Biomes.FROZEN_OCEAN).add(Biomes.DEEP_FROZEN_OCEAN).add(Biomes.GROVE).add(Biomes.DEEP_DARK).add(Biomes.FROZEN_RIVER).add(Biomes.SNOWY_TAIGA).add(Biomes.SNOWY_BEACH).addTag(BiomeTags.IS_END);
-        this.tag(BiomeTags.SPAWNS_WARM_VARIANT_FROGS).add(Biomes.DESERT).add(Biomes.WARM_OCEAN).addTag(BiomeTags.IS_JUNGLE).addTag(BiomeTags.IS_SAVANNA).addTag(BiomeTags.IS_NETHER).addTag(BiomeTags.IS_BADLANDS);
+        this.tag(BiomeTags.SPAWNS_WARM_VARIANT_FROGS).add(Biomes.DESERT).add(Biomes.WARM_OCEAN).addTag(BiomeTags.IS_JUNGLE).addTag(BiomeTags.IS_SAVANNA).addTag(BiomeTags.IS_NETHER).addTag(BiomeTags.IS_BADLANDS).add(Biomes.MANGROVE_SWAMP);
         this.tag(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS).add(Biomes.DESERT);
         this.tag(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS).addTag(BiomeTags.IS_RIVER);
         this.tag(BiomeTags.ALLOWS_TROPICAL_FISH_SPAWNS_AT_ANY_HEIGHT).add(Biomes.LUSH_CAVES);
         this.tag(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS).add(Biomes.FROZEN_OCEAN).add(Biomes.DEEP_FROZEN_OCEAN);
         this.tag(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS).addTag(BiomeTags.IS_RIVER);
-        this.tag(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS).add(Biomes.SWAMP);
+        this.tag(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
     }
 }
 

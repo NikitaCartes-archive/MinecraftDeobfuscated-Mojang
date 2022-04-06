@@ -3,9 +3,9 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -18,10 +18,10 @@ extends SpreadingSnowyDirtBlock {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        super.animateTick(blockState, level, blockPos, random);
-        if (random.nextInt(10) == 0) {
-            level.addParticle(ParticleTypes.MYCELIUM, (double)blockPos.getX() + random.nextDouble(), (double)blockPos.getY() + 1.1, (double)blockPos.getZ() + random.nextDouble(), 0.0, 0.0, 0.0);
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+        super.animateTick(blockState, level, blockPos, randomSource);
+        if (randomSource.nextInt(10) == 0) {
+            level.addParticle(ParticleTypes.MYCELIUM, (double)blockPos.getX() + randomSource.nextDouble(), (double)blockPos.getY() + 1.1, (double)blockPos.getZ() + randomSource.nextDouble(), 0.0, 0.0, 0.0);
         }
     }
 }

@@ -5,11 +5,11 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.BitSet;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
@@ -27,11 +27,11 @@ extends Feature<OreConfiguration> {
 
     @Override
     public boolean place(FeaturePlaceContext<OreConfiguration> featurePlaceContext) {
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         BlockPos blockPos = featurePlaceContext.origin();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         OreConfiguration oreConfiguration = featurePlaceContext.config();
-        float f = random.nextFloat() * (float)Math.PI;
+        float f = randomSource.nextFloat() * (float)Math.PI;
         float g = (float)oreConfiguration.size / 8.0f;
         int i = Mth.ceil(((float)oreConfiguration.size / 16.0f * 2.0f + 1.0f) / 2.0f);
         double d = (double)blockPos.getX() + Math.sin(f) * (double)g;
@@ -39,8 +39,8 @@ extends Feature<OreConfiguration> {
         double h = (double)blockPos.getZ() + Math.cos(f) * (double)g;
         double j = (double)blockPos.getZ() - Math.cos(f) * (double)g;
         int k = 2;
-        double l = blockPos.getY() + random.nextInt(3) - 2;
-        double m = blockPos.getY() + random.nextInt(3) - 2;
+        double l = blockPos.getY() + randomSource.nextInt(3) - 2;
+        double m = blockPos.getY() + randomSource.nextInt(3) - 2;
         int n = blockPos.getX() - Mth.ceil(g) - i;
         int o = blockPos.getY() - 2 - i;
         int p = blockPos.getZ() - Mth.ceil(g) - i;
@@ -49,13 +49,13 @@ extends Feature<OreConfiguration> {
         for (int s = n; s <= n + q; ++s) {
             for (int t = p; t <= p + q; ++t) {
                 if (o > worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, s, t)) continue;
-                return this.doPlace(worldGenLevel, random, oreConfiguration, d, e, h, j, l, m, n, o, p, q, r);
+                return this.doPlace(worldGenLevel, randomSource, oreConfiguration, d, e, h, j, l, m, n, o, p, q, r);
             }
         }
         return false;
     }
 
-    protected boolean doPlace(WorldGenLevel worldGenLevel, Random random, OreConfiguration oreConfiguration, double d, double e, double f, double g, double h, double i, int j, int k, int l, int m, int n) {
+    protected boolean doPlace(WorldGenLevel worldGenLevel, RandomSource randomSource, OreConfiguration oreConfiguration, double d, double e, double f, double g, double h, double i, int j, int k, int l, int m, int n) {
         double v;
         double u;
         double t;
@@ -71,7 +71,7 @@ extends Feature<OreConfiguration> {
             s = Mth.lerp((double)r, d, e);
             t = Mth.lerp((double)r, h, i);
             u = Mth.lerp((double)r, f, g);
-            v = random.nextDouble() * (double)p / 16.0;
+            v = randomSource.nextDouble() * (double)p / 16.0;
             double w = ((double)(Mth.sin((float)Math.PI * r) + 1.0f) * v + 1.0) / 2.0;
             ds[q * 4 + 0] = s;
             ds[q * 4 + 1] = t;
@@ -121,7 +121,7 @@ extends Feature<OreConfiguration> {
                             int an = SectionPos.sectionRelative(ai);
                             BlockState blockState = levelChunkSection.getBlockState(al, am, an);
                             for (OreConfiguration.TargetBlockState targetBlockState : oreConfiguration.targetStates) {
-                                if (!OreFeature.canPlaceOre(blockState, bulkSectionAccess::getBlockState, random, oreConfiguration, targetBlockState, mutableBlockPos)) continue;
+                                if (!OreFeature.canPlaceOre(blockState, bulkSectionAccess::getBlockState, randomSource, oreConfiguration, targetBlockState, mutableBlockPos)) continue;
                                 levelChunkSection.setBlockState(al, am, an, targetBlockState.state, false);
                                 ++o;
                                 continue block11;
@@ -134,24 +134,24 @@ extends Feature<OreConfiguration> {
         return o > 0;
     }
 
-    public static boolean canPlaceOre(BlockState blockState, Function<BlockPos, BlockState> function, Random random, OreConfiguration oreConfiguration, OreConfiguration.TargetBlockState targetBlockState, BlockPos.MutableBlockPos mutableBlockPos) {
-        if (!targetBlockState.target.test(blockState, random)) {
+    public static boolean canPlaceOre(BlockState blockState, Function<BlockPos, BlockState> function, RandomSource randomSource, OreConfiguration oreConfiguration, OreConfiguration.TargetBlockState targetBlockState, BlockPos.MutableBlockPos mutableBlockPos) {
+        if (!targetBlockState.target.test(blockState, randomSource)) {
             return false;
         }
-        if (OreFeature.shouldSkipAirCheck(random, oreConfiguration.discardChanceOnAirExposure)) {
+        if (OreFeature.shouldSkipAirCheck(randomSource, oreConfiguration.discardChanceOnAirExposure)) {
             return true;
         }
         return !OreFeature.isAdjacentToAir(function, mutableBlockPos);
     }
 
-    protected static boolean shouldSkipAirCheck(Random random, float f) {
+    protected static boolean shouldSkipAirCheck(RandomSource randomSource, float f) {
         if (f <= 0.0f) {
             return true;
         }
         if (f >= 1.0f) {
             return false;
         }
-        return random.nextFloat() >= f;
+        return randomSource.nextFloat() >= f;
     }
 }
 

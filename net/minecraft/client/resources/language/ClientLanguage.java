@@ -6,7 +6,6 @@ package net.minecraft.client.resources.language;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -21,7 +20,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.util.FormattedCharSequence;
 import org.slf4j.Logger;
 
@@ -48,7 +46,6 @@ extends Language {
                 try {
                     ResourceLocation resourceLocation = new ResourceLocation(string3, string2);
                     ClientLanguage.appendFrom(string, resourceManager.getResourceStack(resourceLocation), map);
-                } catch (FileNotFoundException resourceLocation) {
                 } catch (Exception exception) {
                     LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, exception.toString());
                 }
@@ -57,24 +54,18 @@ extends Language {
         return new ClientLanguage(ImmutableMap.copyOf(map), bl);
     }
 
-    private static void appendFrom(String string, List<ResourceThunk> list, Map<String, String> map) {
-        for (ResourceThunk resourceThunk : list) {
+    private static void appendFrom(String string, List<Resource> list, Map<String, String> map) {
+        for (Resource resource : list) {
             try {
-                Resource resource = resourceThunk.open();
+                InputStream inputStream = resource.open();
                 try {
-                    InputStream inputStream = resource.getInputStream();
-                    try {
-                        Language.loadFromJson(inputStream, map::put);
-                    } finally {
-                        if (inputStream == null) continue;
-                        inputStream.close();
-                    }
+                    Language.loadFromJson(inputStream, map::put);
                 } finally {
-                    if (resource == null) continue;
-                    resource.close();
+                    if (inputStream == null) continue;
+                    inputStream.close();
                 }
             } catch (IOException iOException) {
-                LOGGER.warn("Failed to load translations for {} from pack {}", string, resourceThunk.sourcePackId(), iOException);
+                LOGGER.warn("Failed to load translations for {} from pack {}", string, resource.sourcePackId(), iOException);
             }
         }
     }

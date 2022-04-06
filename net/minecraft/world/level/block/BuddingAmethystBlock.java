@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.AmethystBlock;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
@@ -31,11 +31,11 @@ extends AmethystBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (random.nextInt(5) != 0) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+        if (randomSource.nextInt(5) != 0) {
             return;
         }
-        Direction direction = DIRECTIONS[random.nextInt(DIRECTIONS.length)];
+        Direction direction = DIRECTIONS[randomSource.nextInt(DIRECTIONS.length)];
         BlockPos blockPos2 = blockPos.relative(direction);
         BlockState blockState2 = serverLevel.getBlockState(blockPos2);
         Block block = null;

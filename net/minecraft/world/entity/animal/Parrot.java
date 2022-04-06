@@ -9,7 +9,6 @@ import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.Util;
@@ -26,6 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -288,7 +288,7 @@ implements FlyingAnimal {
         return false;
     }
 
-    public static boolean checkParrotSpawnRules(EntityType<Parrot> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkParrotSpawnRules(EntityType<Parrot> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.PARROTS_SPAWNABLE_ON) && Parrot.isBrightEnoughToSpawn(levelAccessor, blockPos);
     }
 
@@ -323,10 +323,10 @@ implements FlyingAnimal {
         return Parrot.getAmbient(this.level, this.level.random);
     }
 
-    public static SoundEvent getAmbient(Level level, Random random) {
-        if (level.getDifficulty() != Difficulty.PEACEFUL && random.nextInt(1000) == 0) {
+    public static SoundEvent getAmbient(Level level, RandomSource randomSource) {
+        if (level.getDifficulty() != Difficulty.PEACEFUL && randomSource.nextInt(1000) == 0) {
             ArrayList<EntityType<?>> list = Lists.newArrayList(MOB_SOUND_MAP.keySet());
-            return Parrot.getImitatedSound((EntityType)list.get(random.nextInt(list.size())));
+            return Parrot.getImitatedSound((EntityType)list.get(randomSource.nextInt(list.size())));
         }
         return SoundEvents.PARROT_AMBIENT;
     }
@@ -366,8 +366,8 @@ implements FlyingAnimal {
         return Parrot.getPitch(this.random);
     }
 
-    public static float getPitch(Random random) {
-        return (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f;
+    public static float getPitch(RandomSource randomSource) {
+        return (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2f + 1.0f;
     }
 
     @Override

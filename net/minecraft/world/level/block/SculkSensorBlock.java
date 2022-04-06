@@ -6,7 +6,6 @@ package net.minecraft.world.level.block;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +13,7 @@ import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -129,7 +129,7 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (SculkSensorBlock.getPhase(blockState) != SculkSensorPhase.ACTIVE) {
             if (SculkSensorBlock.getPhase(blockState) == SculkSensorPhase.COOLDOWN) {
                 serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(PHASE, SculkSensorPhase.INACTIVE), 3);
@@ -244,11 +244,15 @@ implements SimpleWaterloggedBlock {
     }
 
     public static void activate(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
+        Entity entity2;
         level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(PHASE, SculkSensorPhase.ACTIVE)).setValue(POWER, i), 3);
         level.scheduleTick(blockPos, blockState.getBlock(), 40);
         SculkSensorBlock.updateNeighbours(level, blockPos);
         if (entity instanceof Player) {
             level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
+        } else if (entity != null && (entity2 = entity.getControllingPassenger()) instanceof Player) {
+            Player player = (Player)entity2;
+            level.gameEvent((Entity)player, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
         }
         if (!blockState.getValue(WATERLOGGED).booleanValue()) {
             level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.SCULK_CLICKING, SoundSource.BLOCKS, 1.0f, level.random.nextFloat() * 0.2f + 0.8f);
@@ -256,18 +260,18 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
         if (SculkSensorBlock.getPhase(blockState) != SculkSensorPhase.ACTIVE) {
             return;
         }
-        Direction direction = Direction.getRandom(random);
+        Direction direction = Direction.getRandom(randomSource);
         if (direction == Direction.UP || direction == Direction.DOWN) {
             return;
         }
-        double d = (double)blockPos.getX() + 0.5 + (direction.getStepX() == 0 ? 0.5 - random.nextDouble() : (double)direction.getStepX() * 0.6);
+        double d = (double)blockPos.getX() + 0.5 + (direction.getStepX() == 0 ? 0.5 - randomSource.nextDouble() : (double)direction.getStepX() * 0.6);
         double e = (double)blockPos.getY() + 0.25;
-        double f = (double)blockPos.getZ() + 0.5 + (direction.getStepZ() == 0 ? 0.5 - random.nextDouble() : (double)direction.getStepZ() * 0.6);
-        double g = (double)random.nextFloat() * 0.04;
+        double f = (double)blockPos.getZ() + 0.5 + (direction.getStepZ() == 0 ? 0.5 - randomSource.nextDouble() : (double)direction.getStepZ() * 0.6);
+        double g = (double)randomSource.nextFloat() * 0.04;
         level.addParticle(DustColorTransitionOptions.SCULK_TO_REDSTONE, d, e, f, 0.0, g, 0.0);
     }
 

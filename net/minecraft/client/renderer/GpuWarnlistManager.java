@@ -13,8 +13,6 @@ import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -22,7 +20,6 @@ import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -127,9 +124,8 @@ extends SimplePreparableReloadListener<Preparations> {
     private static JsonObject parseJson(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         profilerFiller.push("parse_json");
         JsonObject jsonObject = null;
-        try (Resource resource = resourceManager.getResource(GPU_WARNLIST_LOCATION);
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));){
-            jsonObject = new JsonParser().parse(bufferedReader).getAsJsonObject();
+        try (BufferedReader reader = resourceManager.openAsReader(GPU_WARNLIST_LOCATION);){
+            jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
         } catch (JsonSyntaxException | IOException exception) {
             LOGGER.warn("Failed to load GPU warnlist");
         }

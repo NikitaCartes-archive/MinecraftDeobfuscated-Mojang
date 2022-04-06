@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -130,12 +130,12 @@ SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         if (!SeaPickleBlock.isDead(blockState) && serverLevel.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
             int i = 5;
             int j = 1;
@@ -149,8 +149,8 @@ SimpleWaterloggedBlock {
                     for (int r = q - 2; r < q; ++r) {
                         BlockState blockState2;
                         BlockPos blockPos2 = new BlockPos(m + o, r, blockPos.getZ() - n + p);
-                        if (blockPos2 == blockPos || random.nextInt(6) != 0 || !serverLevel.getBlockState(blockPos2).is(Blocks.WATER) || !(blockState2 = serverLevel.getBlockState(blockPos2.below())).is(BlockTags.CORAL_BLOCKS)) continue;
-                        serverLevel.setBlock(blockPos2, (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, random.nextInt(4) + 1), 3);
+                        if (blockPos2 == blockPos || randomSource.nextInt(6) != 0 || !serverLevel.getBlockState(blockPos2).is(Blocks.WATER) || !(blockState2 = serverLevel.getBlockState(blockPos2.below())).is(BlockTags.CORAL_BLOCKS)) continue;
+                        serverLevel.setBlock(blockPos2, (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, randomSource.nextInt(4) + 1), 3);
                     }
                 }
                 if (l < 2) {

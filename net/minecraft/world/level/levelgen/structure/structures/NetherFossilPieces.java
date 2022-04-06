@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -27,9 +27,9 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 public class NetherFossilPieces {
     private static final ResourceLocation[] FOSSILS = new ResourceLocation[]{new ResourceLocation("nether_fossils/fossil_1"), new ResourceLocation("nether_fossils/fossil_2"), new ResourceLocation("nether_fossils/fossil_3"), new ResourceLocation("nether_fossils/fossil_4"), new ResourceLocation("nether_fossils/fossil_5"), new ResourceLocation("nether_fossils/fossil_6"), new ResourceLocation("nether_fossils/fossil_7"), new ResourceLocation("nether_fossils/fossil_8"), new ResourceLocation("nether_fossils/fossil_9"), new ResourceLocation("nether_fossils/fossil_10"), new ResourceLocation("nether_fossils/fossil_11"), new ResourceLocation("nether_fossils/fossil_12"), new ResourceLocation("nether_fossils/fossil_13"), new ResourceLocation("nether_fossils/fossil_14")};
 
-    public static void addPieces(StructureTemplateManager structureTemplateManager, StructurePieceAccessor structurePieceAccessor, Random random, BlockPos blockPos) {
-        Rotation rotation = Rotation.getRandom(random);
-        structurePieceAccessor.addPiece(new NetherFossilPiece(structureTemplateManager, Util.getRandom(FOSSILS, random), blockPos, rotation));
+    public static void addPieces(StructureTemplateManager structureTemplateManager, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, BlockPos blockPos) {
+        Rotation rotation = Rotation.getRandom(randomSource);
+        structurePieceAccessor.addPiece(new NetherFossilPiece(structureTemplateManager, Util.getRandom(FOSSILS, randomSource), blockPos, rotation));
     }
 
     public static class NetherFossilPiece
@@ -53,13 +53,13 @@ public class NetherFossilPieces {
         }
 
         @Override
-        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             boundingBox.encapsulate(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
-            super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
         }
     }
 }

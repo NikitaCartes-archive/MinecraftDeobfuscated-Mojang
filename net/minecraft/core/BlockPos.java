@@ -7,7 +7,6 @@ import com.google.common.collect.AbstractIterator;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -18,6 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
@@ -255,11 +255,11 @@ extends Vec3i {
         return new MutableBlockPos(this.getX(), this.getY(), this.getZ());
     }
 
-    public static Iterable<BlockPos> randomInCube(Random random, int i, BlockPos blockPos, int j) {
-        return BlockPos.randomBetweenClosed(random, i, blockPos.getX() - j, blockPos.getY() - j, blockPos.getZ() - j, blockPos.getX() + j, blockPos.getY() + j, blockPos.getZ() + j);
+    public static Iterable<BlockPos> randomInCube(RandomSource randomSource, int i, BlockPos blockPos, int j) {
+        return BlockPos.randomBetweenClosed(randomSource, i, blockPos.getX() - j, blockPos.getY() - j, blockPos.getZ() - j, blockPos.getX() + j, blockPos.getY() + j, blockPos.getZ() + j);
     }
 
-    public static Iterable<BlockPos> randomBetweenClosed(final Random random, final int i, final int j, final int k, final int l, int m, int n, int o) {
+    public static Iterable<BlockPos> randomBetweenClosed(final RandomSource randomSource, final int i, final int j, final int k, final int l, int m, int n, int o) {
         final int p = m - j + 1;
         final int q = n - k + 1;
         final int r = o - l + 1;
@@ -272,7 +272,7 @@ extends Vec3i {
                 if (this.counter <= 0) {
                     return (BlockPos)this.endOfData();
                 }
-                MutableBlockPos blockPos = this.nextPos.set(j + random.nextInt(p), k + random.nextInt(q), l + random.nextInt(r));
+                MutableBlockPos blockPos = this.nextPos.set(j + randomSource.nextInt(p), k + randomSource.nextInt(q), l + randomSource.nextInt(r));
                 --this.counter;
                 return blockPos;
             }

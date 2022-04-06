@@ -9,13 +9,13 @@ import com.google.common.collect.Sets;
 import com.mojang.math.Vector3f;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -379,13 +379,13 @@ extends Block {
         return Mth.color((float)vec3.x(), (float)vec3.y(), (float)vec3.z());
     }
 
-    private void spawnParticlesAlongLine(Level level, Random random, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g) {
+    private void spawnParticlesAlongLine(Level level, RandomSource randomSource, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g) {
         float h = g - f;
-        if (random.nextFloat() >= 0.2f * h) {
+        if (randomSource.nextFloat() >= 0.2f * h) {
             return;
         }
         float i = 0.4375f;
-        float j = f + h * random.nextFloat();
+        float j = f + h * randomSource.nextFloat();
         double d = 0.5 + (double)(0.4375f * (float)direction.getStepX()) + (double)(j * (float)direction2.getStepX());
         double e = 0.5 + (double)(0.4375f * (float)direction.getStepY()) + (double)(j * (float)direction2.getStepY());
         double k = 0.5 + (double)(0.4375f * (float)direction.getStepZ()) + (double)(j * (float)direction2.getStepZ());
@@ -393,7 +393,7 @@ extends Block {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
         int i = blockState.getValue(POWER);
         if (i == 0) {
             return;
@@ -402,14 +402,14 @@ extends Block {
             RedstoneSide redstoneSide = (RedstoneSide)blockState.getValue(PROPERTY_BY_DIRECTION.get(direction));
             switch (redstoneSide) {
                 case UP: {
-                    this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], direction, Direction.UP, -0.5f, 0.5f);
+                    this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], direction, Direction.UP, -0.5f, 0.5f);
                 }
                 case SIDE: {
-                    this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0f, 0.5f);
+                    this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0f, 0.5f);
                     continue block4;
                 }
             }
-            this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0f, 0.3f);
+            this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0f, 0.3f);
         }
     }
 

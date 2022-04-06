@@ -41,11 +41,6 @@ public class NearestVisibleLivingEntities {
         return Optional.empty();
     }
 
-    @SafeVarargs
-    public final Optional<LivingEntity> findClosest(Predicate<LivingEntity> ... predicates) {
-        return Stream.of(predicates).map(this::findClosest).filter(Optional::isPresent).findAny().orElse(Optional.empty());
-    }
-
     public Iterable<LivingEntity> findAll(Predicate<LivingEntity> predicate) {
         return Iterables.filter(this.nearbyEntities, livingEntity -> predicate.test((LivingEntity)livingEntity) && this.lineOfSightTest.test((LivingEntity)livingEntity));
     }

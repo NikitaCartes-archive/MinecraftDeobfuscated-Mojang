@@ -52,7 +52,7 @@ implements Comparable<MobEffectInstance> {
     }
 
     public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3) {
-        this(mobEffect, i, j, bl, bl2, bl3, null, Optional.ofNullable(mobEffect.createFactorData().get()));
+        this(mobEffect, i, j, bl, bl2, bl3, null, mobEffect.createFactorData());
     }
 
     public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3, @Nullable MobEffectInstance mobEffectInstance, Optional<FactorData> optional) {
@@ -68,7 +68,7 @@ implements Comparable<MobEffectInstance> {
 
     public MobEffectInstance(MobEffectInstance mobEffectInstance) {
         this.effect = mobEffectInstance.effect;
-        this.factorData = Optional.ofNullable(this.effect.createFactorData().get());
+        this.factorData = this.effect.createFactorData();
         this.setDetailsFrom(mobEffectInstance);
     }
 

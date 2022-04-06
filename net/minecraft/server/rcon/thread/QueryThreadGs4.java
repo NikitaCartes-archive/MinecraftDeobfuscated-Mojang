@@ -16,12 +16,12 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.NetworkDataOutputStream;
 import net.minecraft.server.rcon.PktUtils;
 import net.minecraft.server.rcon.thread.GenericThread;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -287,7 +287,7 @@ extends GenericThread {
             this.identBytes[2] = bs[5];
             this.identBytes[3] = bs[6];
             this.ident = new String(this.identBytes, StandardCharsets.UTF_8);
-            this.challenge = new Random().nextInt(0x1000000);
+            this.challenge = RandomSource.create().nextInt(0x1000000);
             this.challengeBytes = String.format("\t%s%d\u0000", this.ident, this.challenge).getBytes(StandardCharsets.UTF_8);
         }
 

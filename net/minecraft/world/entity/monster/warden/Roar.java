@@ -39,7 +39,7 @@ extends Behavior<Warden> {
         Optional<LivingEntity> optional = brain.getMemory(MemoryModuleType.ROAR_TARGET);
         if (optional.isPresent()) {
             LivingEntity livingEntity = optional.get();
-            if (Warden.canTargetEntity(livingEntity)) {
+            if (warden.canTargetEntity(livingEntity)) {
                 return true;
             }
             brain.eraseMemory(MemoryModuleType.ROAR_TARGET);

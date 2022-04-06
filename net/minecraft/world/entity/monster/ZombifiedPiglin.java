@@ -3,13 +3,13 @@
  */
 package net.minecraft.world.entity.monster;
 
-import java.util.Random;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.Difficulty;
@@ -158,7 +158,7 @@ implements NeutralMob {
         this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
-    public static boolean checkZombifiedPiglinSpawnRules(EntityType<ZombifiedPiglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkZombifiedPiglinSpawnRules(EntityType<ZombifiedPiglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
     }
 

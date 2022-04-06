@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.DoublePredicate;
@@ -26,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.SerializableUUID;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.gossip.GossipType;
 
@@ -57,7 +57,7 @@ public class GossipContainer {
         return this.gossips.entrySet().stream().flatMap(entry -> ((EntityGossips)entry.getValue()).unpack((UUID)entry.getKey()));
     }
 
-    private Collection<GossipEntry> selectGossipsForTransfer(Random random, int i) {
+    private Collection<GossipEntry> selectGossipsForTransfer(RandomSource randomSource, int i) {
         List list = this.unpack().collect(Collectors.toList());
         if (list.isEmpty()) {
             return Collections.emptyList();
@@ -70,7 +70,7 @@ public class GossipContainer {
         }
         Set<GossipEntry> set = Sets.newIdentityHashSet();
         for (int l = 0; l < i; ++l) {
-            int m = random.nextInt(j);
+            int m = randomSource.nextInt(j);
             int n = Arrays.binarySearch(is, m);
             set.add((GossipEntry)list.get(n < 0 ? -n - 1 : n));
         }
@@ -81,8 +81,8 @@ public class GossipContainer {
         return this.gossips.computeIfAbsent(uUID2, uUID -> new EntityGossips());
     }
 
-    public void transferFrom(GossipContainer gossipContainer, Random random, int i) {
-        Collection<GossipEntry> collection = gossipContainer.selectGossipsForTransfer(random, i);
+    public void transferFrom(GossipContainer gossipContainer, RandomSource randomSource, int i) {
+        Collection<GossipEntry> collection = gossipContainer.selectGossipsForTransfer(randomSource, i);
         collection.forEach(gossipEntry -> {
             int i = gossipEntry.value - gossipEntry.type.decayPerTransfer;
             if (i >= 2) {

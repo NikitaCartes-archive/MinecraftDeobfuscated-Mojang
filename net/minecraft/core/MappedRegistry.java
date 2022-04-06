@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +35,7 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -295,8 +295,8 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public Optional<Holder<T>> getRandom(Random random) {
-        return Util.getRandomSafe(this.holdersInOrder(), random).map(Holder::hackyErase);
+    public Optional<Holder<T>> getRandom(RandomSource randomSource) {
+        return Util.getRandomSafe(this.holdersInOrder(), randomSource).map(Holder::hackyErase);
     }
 
     @Override

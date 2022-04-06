@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,7 +23,7 @@ public class UnderwaterAmbientSoundInstances {
         private int fade;
 
         public UnderwaterAmbientSoundInstance(LocalPlayer localPlayer) {
-            super(SoundEvents.AMBIENT_UNDERWATER_LOOP, SoundSource.AMBIENT);
+            super(SoundEvents.AMBIENT_UNDERWATER_LOOP, SoundSource.AMBIENT, SoundInstance.createUnseededRandom());
             this.player = localPlayer;
             this.looping = true;
             this.delay = 0;
@@ -48,7 +49,7 @@ public class UnderwaterAmbientSoundInstances {
         private final LocalPlayer player;
 
         protected SubSound(LocalPlayer localPlayer, SoundEvent soundEvent) {
-            super(soundEvent, SoundSource.AMBIENT);
+            super(soundEvent, SoundSource.AMBIENT, SoundInstance.createUnseededRandom());
             this.player = localPlayer;
             this.looping = false;
             this.delay = 0;

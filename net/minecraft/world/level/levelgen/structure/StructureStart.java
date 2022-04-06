@@ -5,12 +5,12 @@ package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -77,7 +77,7 @@ public final class StructureStart {
         return boundingBox;
     }
 
-    public void placeInChunk(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+    public void placeInChunk(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos) {
         List<StructurePiece> list = this.pieceContainer.pieces();
         if (list.isEmpty()) {
             return;
@@ -87,9 +87,9 @@ public final class StructureStart {
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), boundingBox2.minY(), blockPos.getZ());
         for (StructurePiece structurePiece : list) {
             if (!structurePiece.getBoundingBox().intersects(boundingBox)) continue;
-            structurePiece.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
+            structurePiece.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos2);
         }
-        this.structure.afterPlace(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, this.pieceContainer);
+        this.structure.afterPlace(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, this.pieceContainer);
     }
 
     public CompoundTag createTag(StructurePieceSerializationContext structurePieceSerializationContext, ChunkPos chunkPos) {

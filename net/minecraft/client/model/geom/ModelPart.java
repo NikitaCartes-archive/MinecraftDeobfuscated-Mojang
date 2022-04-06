@@ -12,12 +12,12 @@ import com.mojang.math.Vector4f;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 
 @Environment(value=EnvType.CLIENT)
 public final class ModelPart {
@@ -169,8 +169,8 @@ public final class ModelPart {
         }
     }
 
-    public Cube getRandomCube(Random random) {
-        return this.cubes.get(random.nextInt(this.cubes.size()));
+    public Cube getRandomCube(RandomSource randomSource) {
+        return this.cubes.get(randomSource.nextInt(this.cubes.size()));
     }
 
     public boolean isEmpty() {

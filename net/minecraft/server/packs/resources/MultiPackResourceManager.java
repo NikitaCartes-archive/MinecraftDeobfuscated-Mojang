@@ -4,11 +4,11 @@
 package net.minecraft.server.packs.resources;
 
 import com.mojang.logging.LogUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -21,7 +21,6 @@ import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceFilterSection;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -79,35 +78,26 @@ implements CloseableResourceManager {
     }
 
     @Override
-    public Resource getResource(ResourceLocation resourceLocation) throws IOException {
+    public Optional<Resource> getResource(ResourceLocation resourceLocation) {
         ResourceManager resourceManager = this.namespacedManagers.get(resourceLocation.getNamespace());
         if (resourceManager != null) {
             return resourceManager.getResource(resourceLocation);
         }
-        throw new FileNotFoundException(resourceLocation.toString());
+        return Optional.empty();
     }
 
     @Override
-    public boolean hasResource(ResourceLocation resourceLocation) {
-        ResourceManager resourceManager = this.namespacedManagers.get(resourceLocation.getNamespace());
-        if (resourceManager != null) {
-            return resourceManager.hasResource(resourceLocation);
-        }
-        return false;
-    }
-
-    @Override
-    public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
+    public List<Resource> getResourceStack(ResourceLocation resourceLocation) {
         ResourceManager resourceManager = this.namespacedManagers.get(resourceLocation.getNamespace());
         if (resourceManager != null) {
             return resourceManager.getResourceStack(resourceLocation);
         }
-        throw new FileNotFoundException(resourceLocation.toString());
+        return List.of();
     }
 
     @Override
-    public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
-        TreeMap<ResourceLocation, ResourceThunk> map = new TreeMap<ResourceLocation, ResourceThunk>();
+    public Map<ResourceLocation, Resource> listResources(String string, Predicate<ResourceLocation> predicate) {
+        TreeMap<ResourceLocation, Resource> map = new TreeMap<ResourceLocation, Resource>();
         for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
             map.putAll(fallbackResourceManager.listResources(string, predicate));
         }
@@ -115,8 +105,8 @@ implements CloseableResourceManager {
     }
 
     @Override
-    public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
-        TreeMap<ResourceLocation, List<ResourceThunk>> map = new TreeMap<ResourceLocation, List<ResourceThunk>>();
+    public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+        TreeMap<ResourceLocation, List<Resource>> map = new TreeMap<ResourceLocation, List<Resource>>();
         for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
             map.putAll(fallbackResourceManager.listResourceStacks(string, predicate));
         }

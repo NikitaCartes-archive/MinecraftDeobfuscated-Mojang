@@ -5,7 +5,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
@@ -29,12 +29,12 @@ extends LootItemConditionalFunction {
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         Float float_ = lootContext.getParamOrNull(LootContextParams.EXPLOSION_RADIUS);
         if (float_ != null) {
-            Random random = lootContext.getRandom();
+            RandomSource randomSource = lootContext.getRandom();
             float f = 1.0f / float_.floatValue();
             int i = itemStack.getCount();
             int j = 0;
             for (int k = 0; k < i; ++k) {
-                if (!(random.nextFloat() <= f)) continue;
+                if (!(randomSource.nextFloat() <= f)) continue;
                 ++j;
             }
             itemStack.setCount(j);

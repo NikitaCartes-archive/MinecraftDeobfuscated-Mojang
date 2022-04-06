@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -13,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -102,17 +102,17 @@ implements RangedAttackMob {
         return spawnGroupData;
     }
 
-    public static boolean checkDrownedSpawnRules(EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkDrownedSpawnRules(EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         boolean bl;
         if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
             return false;
         }
         Holder<Biome> holder = serverLevelAccessor.getBiome(blockPos);
-        boolean bl2 = bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL && Drowned.isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random) && (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
+        boolean bl2 = bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL && Drowned.isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource) && (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
         if (holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)) {
-            return random.nextInt(15) == 0 && bl;
+            return randomSource.nextInt(15) == 0 && bl;
         }
-        return random.nextInt(40) == 0 && Drowned.isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl;
+        return randomSource.nextInt(40) == 0 && Drowned.isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl;
     }
 
     private static boolean isDeepEnoughToSpawn(LevelAccessor levelAccessor, BlockPos blockPos) {
@@ -356,10 +356,10 @@ implements RangedAttackMob {
 
         @Nullable
         private Vec3 getWaterPos() {
-            Random random = this.mob.getRandom();
+            RandomSource randomSource = this.mob.getRandom();
             BlockPos blockPos = this.mob.blockPosition();
             for (int i = 0; i < 10; ++i) {
-                BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, 2 - random.nextInt(8), random.nextInt(20) - 10);
+                BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(20) - 10, 2 - randomSource.nextInt(8), randomSource.nextInt(20) - 10);
                 if (!this.level.getBlockState(blockPos2).is(Blocks.WATER)) continue;
                 return Vec3.atBottomCenterOf(blockPos2);
             }

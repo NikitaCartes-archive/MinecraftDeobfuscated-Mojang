@@ -5,9 +5,9 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -35,20 +35,20 @@ extends Feature<ColumnFeatureConfiguration> {
         int i = featurePlaceContext.chunkGenerator().getSeaLevel();
         BlockPos blockPos = featurePlaceContext.origin();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         ColumnFeatureConfiguration columnFeatureConfiguration = featurePlaceContext.config();
         if (!BasaltColumnsFeature.canPlaceAt(worldGenLevel, i, blockPos.mutable())) {
             return false;
         }
-        int j = columnFeatureConfiguration.height().sample(random);
-        boolean bl = random.nextFloat() < 0.9f;
+        int j = columnFeatureConfiguration.height().sample(randomSource);
+        boolean bl = randomSource.nextFloat() < 0.9f;
         int k = Math.min(j, bl ? 5 : 8);
         int l = bl ? 50 : 15;
         boolean bl2 = false;
-        for (BlockPos blockPos2 : BlockPos.randomBetweenClosed(random, l, blockPos.getX() - k, blockPos.getY(), blockPos.getZ() - k, blockPos.getX() + k, blockPos.getY(), blockPos.getZ() + k)) {
+        for (BlockPos blockPos2 : BlockPos.randomBetweenClosed(randomSource, l, blockPos.getX() - k, blockPos.getY(), blockPos.getZ() - k, blockPos.getX() + k, blockPos.getY(), blockPos.getZ() + k)) {
             int m = j - blockPos2.distManhattan(blockPos);
             if (m < 0) continue;
-            bl2 |= this.placeColumn(worldGenLevel, i, blockPos2, m, columnFeatureConfiguration.reach().sample(random));
+            bl2 |= this.placeColumn(worldGenLevel, i, blockPos2, m, columnFeatureConfiguration.reach().sample(randomSource));
         }
         return bl2;
     }

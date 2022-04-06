@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.block.grower;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,16 +17,16 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractTreeGrower {
     @Nullable
-    protected abstract Holder<? extends ConfiguredFeature<?, ?>> getConfiguredFeature(Random var1, boolean var2);
+    protected abstract Holder<? extends ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource var1, boolean var2);
 
-    public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
-        Holder<ConfiguredFeature<?, ?>> holder = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
+    public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
+        Holder<ConfiguredFeature<?, ?>> holder = this.getConfiguredFeature(randomSource, this.hasFlowers(serverLevel, blockPos));
         if (holder == null) {
             return false;
         }
         ConfiguredFeature<?, ?> configuredFeature = holder.value();
         serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-        if (configuredFeature.place(serverLevel, chunkGenerator, random, blockPos)) {
+        if (configuredFeature.place(serverLevel, chunkGenerator, randomSource, blockPos)) {
             return true;
         }
         serverLevel.setBlock(blockPos, blockState, 4);

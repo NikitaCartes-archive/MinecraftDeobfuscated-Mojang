@@ -5,9 +5,9 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.Blocks;
@@ -36,17 +36,17 @@ extends PlacementModifier {
     }
 
     @Override
-    public Stream<BlockPos> getPositions(PlacementContext placementContext, Random random, BlockPos blockPos) {
+    public Stream<BlockPos> getPositions(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
         boolean bl;
         Stream.Builder<BlockPos> builder = Stream.builder();
         int i = 0;
         do {
             bl = false;
-            for (int j = 0; j < this.count.sample(random); ++j) {
+            for (int j = 0; j < this.count.sample(randomSource); ++j) {
                 int l;
                 int m;
-                int k = random.nextInt(16) + blockPos.getX();
-                int n = CountOnEveryLayerPlacement.findOnGroundYPosition(placementContext, k, m = placementContext.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l = random.nextInt(16) + blockPos.getZ()), l, i);
+                int k = randomSource.nextInt(16) + blockPos.getX();
+                int n = CountOnEveryLayerPlacement.findOnGroundYPosition(placementContext, k, m = placementContext.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l = randomSource.nextInt(16) + blockPos.getZ()), l, i);
                 if (n == Integer.MAX_VALUE) continue;
                 builder.add(new BlockPos(k, n, l));
                 bl = true;

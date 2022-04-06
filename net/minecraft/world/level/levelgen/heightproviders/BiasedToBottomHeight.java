@@ -8,7 +8,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
@@ -34,15 +34,15 @@ extends HeightProvider {
     }
 
     @Override
-    public int sample(Random random, WorldGenerationContext worldGenerationContext) {
+    public int sample(RandomSource randomSource, WorldGenerationContext worldGenerationContext) {
         int i = this.minInclusive.resolveY(worldGenerationContext);
         int j = this.maxInclusive.resolveY(worldGenerationContext);
         if (j - i - this.inner + 1 <= 0) {
             LOGGER.warn("Empty height range: {}", (Object)this);
             return i;
         }
-        int k = random.nextInt(j - i - this.inner + 1);
-        return random.nextInt(k + this.inner) + i;
+        int k = randomSource.nextInt(j - i - this.inner + 1);
+        return randomSource.nextInt(k + this.inner) + i;
     }
 
     @Override

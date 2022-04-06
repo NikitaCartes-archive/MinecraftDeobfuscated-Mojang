@@ -3,10 +3,9 @@
  */
 package net.minecraft.server.packs.resources;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -14,19 +13,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.minecraft.server.packs.resources.ResourceThunk;
 
 public interface ResourceManager
 extends ResourceProvider {
     public Set<String> getNamespaces();
 
-    public boolean hasResource(ResourceLocation var1);
+    public List<Resource> getResourceStack(ResourceLocation var1);
 
-    public List<ResourceThunk> getResourceStack(ResourceLocation var1) throws IOException;
+    public Map<ResourceLocation, Resource> listResources(String var1, Predicate<ResourceLocation> var2);
 
-    public Map<ResourceLocation, ResourceThunk> listResources(String var1, Predicate<ResourceLocation> var2);
-
-    public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String var1, Predicate<ResourceLocation> var2);
+    public Map<ResourceLocation, List<Resource>> listResourceStacks(String var1, Predicate<ResourceLocation> var2);
 
     public Stream<PackResources> listPacks();
 
@@ -41,27 +37,22 @@ extends ResourceProvider {
         }
 
         @Override
-        public Resource getResource(ResourceLocation resourceLocation) throws IOException {
-            throw new FileNotFoundException(resourceLocation.toString());
+        public Optional<Resource> getResource(ResourceLocation resourceLocation) {
+            return Optional.empty();
         }
 
         @Override
-        public boolean hasResource(ResourceLocation resourceLocation) {
-            return false;
+        public List<Resource> getResourceStack(ResourceLocation resourceLocation) {
+            return List.of();
         }
 
         @Override
-        public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
-            throw new FileNotFoundException(resourceLocation.toString());
-        }
-
-        @Override
-        public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
+        public Map<ResourceLocation, Resource> listResources(String string, Predicate<ResourceLocation> predicate) {
             return Map.of();
         }
 
         @Override
-        public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+        public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
             return Map.of();
         }
 

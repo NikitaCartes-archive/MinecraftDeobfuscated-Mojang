@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +19,7 @@ extends AbstractHugeMushroomFeature {
     }
 
     @Override
-    protected void makeCap(LevelAccessor levelAccessor, Random random, BlockPos blockPos, int i, BlockPos.MutableBlockPos mutableBlockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration) {
+    protected void makeCap(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, int i, BlockPos.MutableBlockPos mutableBlockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration) {
         for (int j = i - 3; j <= i; ++j) {
             int k = j < i ? hugeMushroomFeatureConfiguration.foliageRadius : hugeMushroomFeatureConfiguration.foliageRadius - 1;
             int l = hugeMushroomFeatureConfiguration.foliageRadius - 2;
@@ -35,7 +35,7 @@ extends AbstractHugeMushroomFeature {
                     if (j < i && bl5 == bl6) continue;
                     mutableBlockPos.setWithOffset(blockPos, m, j, n);
                     if (levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) continue;
-                    BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos);
+                    BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(randomSource, blockPos);
                     if (blockState.hasProperty(HugeMushroomBlock.WEST) && blockState.hasProperty(HugeMushroomBlock.EAST) && blockState.hasProperty(HugeMushroomBlock.NORTH) && blockState.hasProperty(HugeMushroomBlock.SOUTH) && blockState.hasProperty(HugeMushroomBlock.UP)) {
                         blockState = (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)blockState.setValue(HugeMushroomBlock.UP, j >= i - 1)).setValue(HugeMushroomBlock.WEST, m < -l)).setValue(HugeMushroomBlock.EAST, m > l)).setValue(HugeMushroomBlock.NORTH, n < -l)).setValue(HugeMushroomBlock.SOUTH, n > l);
                     }

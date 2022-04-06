@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.KelpBlock;
@@ -26,17 +26,17 @@ extends Feature<NoneFeatureConfiguration> {
         int i = 0;
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         int j = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX(), blockPos.getZ());
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ());
         if (worldGenLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
             BlockState blockState = Blocks.KELP.defaultBlockState();
             BlockState blockState2 = Blocks.KELP_PLANT.defaultBlockState();
-            int k = 1 + random.nextInt(10);
+            int k = 1 + randomSource.nextInt(10);
             for (int l = 0; l <= k; ++l) {
                 if (worldGenLevel.getBlockState(blockPos2).is(Blocks.WATER) && worldGenLevel.getBlockState(blockPos2.above()).is(Blocks.WATER) && blockState2.canSurvive(worldGenLevel, blockPos2)) {
                     if (l == k) {
-                        worldGenLevel.setBlock(blockPos2, (BlockState)blockState.setValue(KelpBlock.AGE, random.nextInt(4) + 20), 2);
+                        worldGenLevel.setBlock(blockPos2, (BlockState)blockState.setValue(KelpBlock.AGE, randomSource.nextInt(4) + 20), 2);
                         ++i;
                     } else {
                         worldGenLevel.setBlock(blockPos2, blockState2, 2);
@@ -44,7 +44,7 @@ extends Feature<NoneFeatureConfiguration> {
                 } else if (l > 0) {
                     BlockPos blockPos3 = blockPos2.below();
                     if (!blockState.canSurvive(worldGenLevel, blockPos3) || worldGenLevel.getBlockState(blockPos3.below()).is(Blocks.KELP)) break;
-                    worldGenLevel.setBlock(blockPos3, (BlockState)blockState.setValue(KelpBlock.AGE, random.nextInt(4) + 20), 2);
+                    worldGenLevel.setBlock(blockPos3, (BlockState)blockState.setValue(KelpBlock.AGE, randomSource.nextInt(4) + 20), 2);
                     ++i;
                     break;
                 }

@@ -5,10 +5,10 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -91,11 +91,11 @@ extends Monster {
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
-    public static boolean checkPatrollingMonsterSpawnRules(EntityType<? extends PatrollingMonster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkPatrollingMonsterSpawnRules(EntityType<? extends PatrollingMonster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         if (levelAccessor.getBrightness(LightLayer.BLOCK, blockPos) > 8) {
             return false;
         }
-        return PatrollingMonster.checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+        return PatrollingMonster.checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
     }
 
     @Override
@@ -206,8 +206,8 @@ extends Monster {
         }
 
         private boolean moveRandomly() {
-            Random random = ((LivingEntity)this.mob).getRandom();
-            BlockPos blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ((Entity)this.mob).blockPosition().offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
+            RandomSource randomSource = ((LivingEntity)this.mob).getRandom();
+            BlockPos blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ((Entity)this.mob).blockPosition().offset(-8 + randomSource.nextInt(16), 0, -8 + randomSource.nextInt(16)));
             return ((Mob)this.mob).getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), this.speedModifier);
         }
     }

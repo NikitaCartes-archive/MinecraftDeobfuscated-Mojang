@@ -19,11 +19,10 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import java.io.Closeable;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.InvalidClassException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntSupplier;
@@ -34,7 +33,6 @@ import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -66,12 +64,11 @@ AutoCloseable {
     public EffectInstance(ResourceManager resourceManager, String string) throws IOException {
         ResourceLocation resourceLocation = new ResourceLocation(EFFECT_SHADER_PATH + string + ".json");
         this.name = string;
-        Resource resource = null;
-        try {
+        Resource resource = resourceManager.getResourceOrThrow(resourceLocation);
+        try (BufferedReader reader = resource.openAsReader();){
             JsonArray jsonArray3;
             JsonArray jsonArray2;
-            resource = resourceManager.getResource(resourceLocation);
-            JsonObject jsonObject = GsonHelper.parse(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+            JsonObject jsonObject = GsonHelper.parse(reader);
             String string2 = GsonHelper.getAsString(jsonObject, "vertex");
             String string3 = GsonHelper.getAsString(jsonObject, "fragment");
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "samplers", null);
@@ -132,19 +129,13 @@ AutoCloseable {
                 }
             }
         } catch (Exception exception4) {
-            Object string3 = resource != null ? " (" + resource.getSourceName() + ")" : "";
             ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(exception4);
-            chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath() + (String)string3);
+            chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath() + " (" + resource.sourcePackId() + ")");
             throw chainedJsonException4;
-        } finally {
-            IOUtils.closeQuietly((Closeable)resource);
         }
         this.markDirty();
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public static EffectProgram getOrCreate(ResourceManager resourceManager, Program.Type type, String string) throws IOException {
         EffectProgram effectProgram;
         Program program = type.getPrograms().get(string);
@@ -153,11 +144,9 @@ AutoCloseable {
         }
         if (program == null) {
             ResourceLocation resourceLocation = new ResourceLocation(EFFECT_SHADER_PATH + string + type.getExtension());
-            Resource resource = resourceManager.getResource(resourceLocation);
-            try {
-                effectProgram = EffectProgram.compileShader(type, string, resource.getInputStream(), resource.getSourceName());
-            } finally {
-                IOUtils.closeQuietly((Closeable)resource);
+            Resource resource = resourceManager.getResourceOrThrow(resourceLocation);
+            try (InputStream inputStream = resource.open();){
+                effectProgram = EffectProgram.compileShader(type, string, inputStream, resource.sourcePackId());
             }
         } else {
             effectProgram = (EffectProgram)program;

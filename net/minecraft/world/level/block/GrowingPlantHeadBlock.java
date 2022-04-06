@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -45,14 +45,14 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         BlockPos blockPos2;
-        if (blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability && this.canGrowInto(serverLevel.getBlockState(blockPos2 = blockPos.relative(this.growthDirection)))) {
+        if (blockState.getValue(AGE) < 25 && randomSource.nextDouble() < this.growPerTickProbability && this.canGrowInto(serverLevel.getBlockState(blockPos2 = blockPos.relative(this.growthDirection)))) {
             serverLevel.setBlockAndUpdate(blockPos2, this.getGrowIntoState(blockState, serverLevel.random));
         }
     }
 
-    protected BlockState getGrowIntoState(BlockState blockState, Random random) {
+    protected BlockState getGrowIntoState(BlockState blockState, RandomSource randomSource) {
         return (BlockState)blockState.cycle(AGE);
     }
 
@@ -93,15 +93,15 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         BlockPos blockPos2 = blockPos.relative(this.growthDirection);
         int i = Math.min(blockState.getValue(AGE) + 1, 25);
-        int j = this.getBlocksToGrowWhenBonemealed(random);
+        int j = this.getBlocksToGrowWhenBonemealed(randomSource);
         for (int k = 0; k < j && this.canGrowInto(serverLevel.getBlockState(blockPos2)); ++k) {
             serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState.setValue(AGE, i));
             blockPos2 = blockPos2.relative(this.growthDirection);
@@ -109,7 +109,7 @@ implements BonemealableBlock {
         }
     }
 
-    protected abstract int getBlocksToGrowWhenBonemealed(Random var1);
+    protected abstract int getBlocksToGrowWhenBonemealed(RandomSource var1);
 
     protected abstract boolean canGrowInto(BlockState var1);
 

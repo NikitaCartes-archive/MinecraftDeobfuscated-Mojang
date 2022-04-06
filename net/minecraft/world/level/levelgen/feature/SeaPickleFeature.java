@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SeaPickleBlock;
@@ -24,16 +24,16 @@ extends Feature<CountConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<CountConfiguration> featurePlaceContext) {
         int i = 0;
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        int j = featurePlaceContext.config().count().sample(random);
+        int j = featurePlaceContext.config().count().sample(randomSource);
         for (int k = 0; k < j; ++k) {
-            int l = random.nextInt(8) - random.nextInt(8);
-            int m = random.nextInt(8) - random.nextInt(8);
+            int l = randomSource.nextInt(8) - randomSource.nextInt(8);
+            int m = randomSource.nextInt(8) - randomSource.nextInt(8);
             int n = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX() + l, blockPos.getZ() + m);
             BlockPos blockPos2 = new BlockPos(blockPos.getX() + l, n, blockPos.getZ() + m);
-            BlockState blockState = (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, random.nextInt(4) + 1);
+            BlockState blockState = (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, randomSource.nextInt(4) + 1);
             if (!worldGenLevel.getBlockState(blockPos2).is(Blocks.WATER) || !blockState.canSurvive(worldGenLevel, blockPos2)) continue;
             worldGenLevel.setBlock(blockPos2, blockState, 2);
             ++i;

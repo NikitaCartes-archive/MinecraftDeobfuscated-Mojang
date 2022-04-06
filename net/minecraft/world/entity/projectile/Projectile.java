@@ -134,7 +134,7 @@ extends Entity {
             this.onHitBlock((BlockHitResult)hitResult);
         }
         if (type != HitResult.Type.MISS) {
-            this.gameEvent(GameEvent.PROJECTILE_LAND, this);
+            this.level.gameEvent((Entity)this, GameEvent.PROJECTILE_LAND, hitResult.getLocation());
         }
     }
 

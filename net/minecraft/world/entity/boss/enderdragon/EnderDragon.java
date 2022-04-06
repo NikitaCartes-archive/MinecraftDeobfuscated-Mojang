@@ -10,7 +10,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -773,11 +773,11 @@ implements Enemy {
     }
 
     @Override
-    public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
-        super.recreateFromPacket(clientboundAddMobPacket);
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
         EnderDragonPart[] enderDragonParts = this.getSubEntities();
         for (int i = 0; i < enderDragonParts.length; ++i) {
-            enderDragonParts[i].setId(i + clientboundAddMobPacket.getId());
+            enderDragonParts[i].setId(i + clientboundAddEntityPacket.getId());
         }
     }
 

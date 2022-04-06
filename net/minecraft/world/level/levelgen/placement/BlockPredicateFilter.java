@@ -7,8 +7,8 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementFilter;
@@ -28,7 +28,7 @@ extends PlacementFilter {
     }
 
     @Override
-    protected boolean shouldPlace(PlacementContext placementContext, Random random, BlockPos blockPos) {
+    protected boolean shouldPlace(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
         return this.predicate.test(placementContext.getLevel(), blockPos);
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -47,6 +48,10 @@ public interface SoundInstance {
 
     default public boolean canPlaySound() {
         return true;
+    }
+
+    public static RandomSource createUnseededRandom() {
+        return RandomSource.create();
     }
 
     @Environment(value=EnvType.CLIENT)

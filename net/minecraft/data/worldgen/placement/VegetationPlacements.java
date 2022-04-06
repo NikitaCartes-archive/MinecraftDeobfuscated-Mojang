@@ -103,6 +103,7 @@ public class VegetationPlacements {
     public static final Holder<PlacedFeature> TREES_JUNGLE = PlacementUtils.register("trees_jungle", VegetationFeatures.TREES_JUNGLE, VegetationPlacements.treePlacement(PlacementUtils.countExtra(50, 0.1f, 1)));
     public static final Holder<PlacedFeature> BAMBOO_VEGETATION = PlacementUtils.register("bamboo_vegetation", VegetationFeatures.BAMBOO_VEGETATION, VegetationPlacements.treePlacement(PlacementUtils.countExtra(30, 0.1f, 1)));
     public static final Holder<PlacedFeature> MUSHROOM_ISLAND_VEGETATION = PlacementUtils.register("mushroom_island_vegetation", VegetationFeatures.MUSHROOM_ISLAND_VEGETATION, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
+    public static final Holder<PlacedFeature> TREES_MANGROVE = PlacementUtils.register("trees_mangrove", VegetationFeatures.MANGROVE_VEGETATION, PlacementUtils.countExtra(30, 0.1f, 1), InSquarePlacement.spread(), SurfaceWaterDepthFilter.forMaxDepth(5), PlacementUtils.HEIGHTMAP_OCEAN_FLOOR, BiomeFilter.biome(), BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(Blocks.MANGROVE_PROPAGULE.defaultBlockState(), BlockPos.ZERO)));
 
     public static List<PlacementModifier> worldSurfaceSquaredWithCount(int i) {
         return List.of(CountPlacement.of(i), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome());

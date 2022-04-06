@@ -470,11 +470,6 @@ implements EntityTypeTest<Entity, T> {
         return Util.ifElse(EntityType.by(compoundTag).map(entityType -> entityType.create(level)), entity -> entity.load(compoundTag), () -> LOGGER.warn("Skipping Entity with id {}", (Object)compoundTag.getString("id")));
     }
 
-    @Nullable
-    public static Entity create(Level level, @Nullable EntityType<?> entityType) {
-        return entityType == null ? null : (Entity)entityType.create(level);
-    }
-
     public AABB getAABB(double d, double e, double f) {
         float g = this.getWidth() / 2.0f;
         return new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)this.getHeight(), f + (double)g);

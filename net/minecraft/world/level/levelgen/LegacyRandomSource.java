@@ -6,11 +6,11 @@ package net.minecraft.world.level.levelgen;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.ThreadingDetector;
 import net.minecraft.world.level.levelgen.BitRandomSource;
 import net.minecraft.world.level.levelgen.MarsagliaPolarGaussian;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.RandomSource;
 
 public class LegacyRandomSource
 implements BitRandomSource {

@@ -3,15 +3,12 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -44,7 +41,6 @@ implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final BooleanProperty CAN_SUMMON = BlockStateProperties.CAN_SUMMON;
     protected static final VoxelShape COLLIDER = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
-    private static final int SHRIEKING_TICKS = 90;
     public static final double TOP_Y = COLLIDER.max(Direction.Axis.Y);
 
     public SculkShriekerBlock(BlockBehaviour.Properties properties) {
@@ -61,51 +57,32 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
-        if (entity instanceof Player && level instanceof ServerLevel) {
+        if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            SculkShriekerBlock.shriek(serverLevel, blockState, blockPos);
+            if (entity instanceof Player || entity.getControllingPassenger() instanceof Player) {
+                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.shriek(serverLevel));
+            }
         }
         super.stepOn(level, blockPos, blockState, entity);
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (blockState.getValue(SHRIEKING).booleanValue()) {
-            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SHRIEKING, false), 3);
-            if (blockState.getValue(CAN_SUMMON).booleanValue()) {
-                SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).ifPresent(wardenSpawnTracker -> wardenSpawnTracker.triggerWarningEvent(serverLevel, blockPos));
+    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        super.onRemove(blockState, level, blockPos, blockState2, bl);
+        if (level instanceof ServerLevel) {
+            ServerLevel serverLevel = (ServerLevel)level;
+            if (blockState.getValue(SHRIEKING).booleanValue() && !blockState.is(blockState2.getBlock())) {
+                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.replyOrSummon(serverLevel));
             }
         }
     }
 
     @Override
-    public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-        if (level instanceof ServerLevel) {
-            ServerLevel serverLevel = (ServerLevel)level;
-            if (level.hasNeighborSignal(blockPos)) {
-                SculkShriekerBlock.shriek(serverLevel, blockState, blockPos);
-            }
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+        if (blockState.getValue(SHRIEKING).booleanValue()) {
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SHRIEKING, false), 3);
+            serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.replyOrSummon(serverLevel));
         }
-    }
-
-    public static boolean canShriek(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
-        return blockState.getValue(SHRIEKING) == false && (blockState.getValue(CAN_SUMMON) == false || SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).map(wardenSpawnTracker -> wardenSpawnTracker.canPrepareWarningEvent(serverLevel, blockPos)).orElse(false) != false);
-    }
-
-    public static void shriek(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos) {
-        if (!SculkShriekerBlock.canShriek(serverLevel, blockPos, blockState)) {
-            return;
-        }
-        if (!blockState.getValue(CAN_SUMMON).booleanValue() || SculkShriekerBlock.getWardenSpawnTracker(serverLevel, blockPos).filter(wardenSpawnTracker -> wardenSpawnTracker.prepareWarningEvent(serverLevel, blockPos)).isPresent()) {
-            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SHRIEKING, true), 2);
-            serverLevel.scheduleTick(blockPos, blockState.getBlock(), 90);
-            serverLevel.levelEvent(3007, blockPos, 0);
-        }
-    }
-
-    private static Optional<WardenSpawnTracker> getWardenSpawnTracker(ServerLevel serverLevel, BlockPos blockPos) {
-        Player player = serverLevel.getNearestPlayer((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 16.0, EntitySelector.NO_SPECTATORS.and(Entity::isAlive));
-        return player == null ? Optional.empty() : Optional.of(player.getWardenSpawnTracker());
     }
 
     @Override

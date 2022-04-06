@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
@@ -41,7 +41,7 @@ extends SnowyDirtBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (!SpreadingSnowyDirtBlock.canBeGrass(blockState, serverLevel, blockPos)) {
             serverLevel.setBlockAndUpdate(blockPos, Blocks.DIRT.defaultBlockState());
             return;
@@ -49,7 +49,7 @@ extends SnowyDirtBlock {
         if (serverLevel.getMaxLocalRawBrightness(blockPos.above()) >= 9) {
             BlockState blockState2 = this.defaultBlockState();
             for (int i = 0; i < 4; ++i) {
-                BlockPos blockPos2 = blockPos.offset(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
+                BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(3) - 1, randomSource.nextInt(5) - 3, randomSource.nextInt(3) - 1);
                 if (!serverLevel.getBlockState(blockPos2).is(Blocks.DIRT) || !SpreadingSnowyDirtBlock.canPropagate(blockState2, serverLevel, blockPos2)) continue;
                 serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState2.setValue(SNOWY, serverLevel.getBlockState(blockPos2.above()).is(Blocks.SNOW)));
             }

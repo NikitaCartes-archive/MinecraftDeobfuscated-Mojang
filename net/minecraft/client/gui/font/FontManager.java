@@ -14,10 +14,7 @@ import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +31,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -60,17 +56,15 @@ implements AutoCloseable {
             profilerFiller.startTick();
             Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
             HashMap<ResourceLocation, List<GlyphProvider>> map = Maps.newHashMap();
-            for (Map.Entry<ResourceLocation, List<ResourceThunk>> entry : resourceManager.listResourceStacks("font", resourceLocation -> resourceLocation.getPath().endsWith(".json")).entrySet()) {
+            for (Map.Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks("font", resourceLocation -> resourceLocation.getPath().endsWith(".json")).entrySet()) {
                 ResourceLocation resourceLocation2 = entry.getKey();
                 String string = resourceLocation2.getPath();
                 ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring("font/".length(), string.length() - ".json".length()));
                 List list = map.computeIfAbsent(resourceLocation22, resourceLocation -> Lists.newArrayList(new AllMissingGlyphProvider()));
                 profilerFiller.push(resourceLocation22::toString);
-                for (ResourceThunk resourceThunk : entry.getValue()) {
-                    profilerFiller.push(resourceThunk.sourcePackId());
-                    try (Resource resource = resourceThunk.open();
-                         InputStream inputStream = resource.getInputStream();
-                         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
+                for (Resource resource : entry.getValue()) {
+                    profilerFiller.push(resource.sourcePackId());
+                    try (BufferedReader reader = resource.openAsReader();){
                         try {
                             profilerFiller.push("reading");
                             JsonArray jsonArray = GsonHelper.getAsJsonArray(GsonHelper.fromJson(gson, (Reader)reader, JsonObject.class), "providers");
@@ -93,7 +87,7 @@ implements AutoCloseable {
                             profilerFiller.pop();
                         }
                     } catch (Exception exception) {
-                        LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation22, FontManager.FONTS_PATH, resourceThunk.sourcePackId(), exception);
+                        LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation22, FontManager.FONTS_PATH, resource.sourcePackId(), exception);
                     }
                     profilerFiller.pop();
                 }

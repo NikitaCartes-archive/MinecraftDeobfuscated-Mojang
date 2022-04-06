@@ -17,7 +17,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -49,7 +48,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -93,14 +94,14 @@ implements ResourceManagerReloadListener {
     }
 
     private void renderModelLists(BakedModel bakedModel, ItemStack itemStack, int i, int j, PoseStack poseStack, VertexConsumer vertexConsumer) {
-        Random random = new Random();
+        RandomSource randomSource = RandomSource.create();
         long l = 42L;
         for (Direction direction : Direction.values()) {
-            random.setSeed(42L);
-            this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, direction, random), itemStack, i, j);
+            randomSource.setSeed(42L);
+            this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, direction, randomSource), itemStack, i, j);
         }
-        random.setSeed(42L);
-        this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, random), itemStack, i, j);
+        randomSource.setSeed(42L);
+        this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, randomSource), itemStack, i, j);
     }
 
     public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel) {
@@ -126,7 +127,7 @@ implements ResourceManagerReloadListener {
             Block block;
             boolean bl32 = transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem ? !((block = ((BlockItem)itemStack.getItem()).getBlock()) instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock) : true;
             RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl32);
-            if (itemStack.is(Items.COMPASS) && itemStack.hasFoil()) {
+            if (itemStack.is(ItemTags.COMPASSES) && itemStack.hasFoil()) {
                 poseStack.pushPose();
                 PoseStack.Pose pose = poseStack.last();
                 if (transformType == ItemTransforms.TransformType.GUI) {

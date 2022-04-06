@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.structure.pieces;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
@@ -35,21 +35,21 @@ implements StructurePieceAccessor {
     }
 
     @Deprecated
-    public void moveBelowSeaLevel(int i, int j, Random random, int k) {
+    public void moveBelowSeaLevel(int i, int j, RandomSource randomSource, int k) {
         int l = i - k;
         BoundingBox boundingBox = this.getBoundingBox();
         int m = boundingBox.getYSpan() + j + 1;
         if (m < l) {
-            m += random.nextInt(l - m);
+            m += randomSource.nextInt(l - m);
         }
         int n = m - boundingBox.maxY();
         this.offsetPiecesVertically(n);
     }
 
-    public void moveInsideHeights(Random random, int i, int j) {
+    public void moveInsideHeights(RandomSource randomSource, int i, int j) {
         BoundingBox boundingBox = this.getBoundingBox();
         int k = j - i + 1 - boundingBox.getYSpan();
-        int l = k > 1 ? i + random.nextInt(k) : i;
+        int l = k > 1 ? i + randomSource.nextInt(k) : i;
         int m = l - boundingBox.minY();
         this.offsetPiecesVertically(m);
     }

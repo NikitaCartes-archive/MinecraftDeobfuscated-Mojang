@@ -6,7 +6,6 @@ package net.minecraft.client.resources.model;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -15,6 +14,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,8 +34,8 @@ implements BakedModel {
     }
 
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, Random random) {
-        return WeightedRandom.getWeightedItem(this.list, Math.abs((int)random.nextLong()) % this.totalWeight).map(wrapper -> ((BakedModel)wrapper.getData()).getQuads(blockState, direction, random)).orElse(Collections.emptyList());
+    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {
+        return WeightedRandom.getWeightedItem(this.list, Math.abs((int)randomSource.nextLong()) % this.totalWeight).map(wrapper -> ((BakedModel)wrapper.getData()).getQuads(blockState, direction, randomSource)).orElse(Collections.emptyList());
     }
 
     @Override

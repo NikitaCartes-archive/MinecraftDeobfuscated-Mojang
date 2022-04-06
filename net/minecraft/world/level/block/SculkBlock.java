@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -27,23 +27,23 @@ implements SculkBehaviour {
     }
 
     @Override
-    public int attemptUseCharge(SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl) {
+    public int attemptUseCharge(SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl) {
         int i = chargeCursor.getCharge();
-        if (i == 0 || random.nextInt(sculkSpreader.chargeDecayRate()) != 0) {
+        if (i == 0 || randomSource.nextInt(sculkSpreader.chargeDecayRate()) != 0) {
             return i;
         }
         BlockPos blockPos2 = chargeCursor.getPos();
         boolean bl2 = blockPos2.closerThan(blockPos, sculkSpreader.noGrowthRadius());
         if (bl2 || !SculkBlock.canPlaceGrowth(levelAccessor, blockPos2)) {
-            if (random.nextInt(sculkSpreader.additionalDecayRate()) != 0) {
+            if (randomSource.nextInt(sculkSpreader.additionalDecayRate()) != 0) {
                 return i;
             }
             return i - (bl2 ? 1 : SculkBlock.getDecayPenalty(sculkSpreader, blockPos2, blockPos, i));
         }
         int j = sculkSpreader.growthSpawnCost();
-        if (random.nextInt(j) < i) {
+        if (randomSource.nextInt(j) < i) {
             BlockPos blockPos3 = blockPos2.above();
-            BlockState blockState = this.getRandomGrowthState(levelAccessor, blockPos3, random, sculkSpreader.isWorldGeneration());
+            BlockState blockState = this.getRandomGrowthState(levelAccessor, blockPos3, randomSource, sculkSpreader.isWorldGeneration());
             levelAccessor.setBlock(blockPos3, blockState, 3);
             levelAccessor.playSound(null, blockPos2, blockState.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
         }
@@ -58,8 +58,8 @@ implements SculkBehaviour {
         return Math.max(1, (int)((float)i * g * 0.5f));
     }
 
-    private BlockState getRandomGrowthState(LevelAccessor levelAccessor, BlockPos blockPos, Random random, boolean bl) {
-        BlockState blockState = random.nextInt(11) == 0 ? (BlockState)Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, bl) : Blocks.SCULK_SENSOR.defaultBlockState();
+    private BlockState getRandomGrowthState(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, boolean bl) {
+        BlockState blockState = randomSource.nextInt(11) == 0 ? (BlockState)Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, bl) : Blocks.SCULK_SENSOR.defaultBlockState();
         if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && !levelAccessor.getFluidState(blockPos).isEmpty()) {
             return (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, true);
         }

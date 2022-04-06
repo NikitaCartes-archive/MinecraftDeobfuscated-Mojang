@@ -6,11 +6,11 @@ package net.minecraft.world.level.levelgen.structure.structures;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -40,24 +40,24 @@ public class EndCityPieces {
         }
 
         @Override
-        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
+        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, RandomSource randomSource) {
             if (i > 8) {
                 return false;
             }
             Rotation rotation = endCityPiece.placeSettings().getRotation();
             EndCityPiece endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece, blockPos, "base_floor", rotation, true));
-            int j = random.nextInt(3);
+            int j = randomSource.nextInt(3);
             if (j == 0) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 4, -1), "base_roof", rotation, true));
             } else if (j == 1) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 0, -1), "second_floor_2", rotation, false));
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 8, -1), "second_roof", rotation, false));
-                EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_GENERATOR, i + 1, endCityPiece2, null, list, random);
+                EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_GENERATOR, i + 1, endCityPiece2, null, list, randomSource);
             } else if (j == 2) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 0, -1), "second_floor_2", rotation, false));
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 4, -1), "third_floor_2", rotation, false));
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 8, -1), "third_roof", rotation, true));
-                EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_GENERATOR, i + 1, endCityPiece2, null, list, random);
+                EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_GENERATOR, i + 1, endCityPiece2, null, list, randomSource);
             }
             return true;
         }
@@ -70,29 +70,29 @@ public class EndCityPieces {
         }
 
         @Override
-        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
+        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, RandomSource randomSource) {
             Rotation rotation = endCityPiece.placeSettings().getRotation();
             EndCityPiece endCityPiece2 = endCityPiece;
-            endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(3 + random.nextInt(2), -3, 3 + random.nextInt(2)), "tower_base", rotation, true));
+            endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(3 + randomSource.nextInt(2), -3, 3 + randomSource.nextInt(2)), "tower_base", rotation, true));
             endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, 7, 0), "tower_piece", rotation, true));
-            EndCityPiece endCityPiece3 = random.nextInt(3) == 0 ? endCityPiece2 : null;
-            int j = 1 + random.nextInt(3);
+            EndCityPiece endCityPiece3 = randomSource.nextInt(3) == 0 ? endCityPiece2 : null;
+            int j = 1 + randomSource.nextInt(3);
             for (int k = 0; k < j; ++k) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, 4, 0), "tower_piece", rotation, true));
-                if (k >= j - 1 || !random.nextBoolean()) continue;
+                if (k >= j - 1 || !randomSource.nextBoolean()) continue;
                 endCityPiece3 = endCityPiece2;
             }
             if (endCityPiece3 != null) {
                 for (Tuple<Rotation, BlockPos> tuple : TOWER_BRIDGES) {
-                    if (!random.nextBoolean()) continue;
+                    if (!randomSource.nextBoolean()) continue;
                     EndCityPiece endCityPiece4 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece3, tuple.getB(), "bridge_end", rotation.getRotated(tuple.getA()), true));
-                    EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_BRIDGE_GENERATOR, i + 1, endCityPiece4, null, list, random);
+                    EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_BRIDGE_GENERATOR, i + 1, endCityPiece4, null, list, randomSource);
                 }
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 4, -1), "tower_top", rotation, true));
             } else if (i == 7) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-1, 4, -1), "tower_top", rotation, true));
             } else {
-                return EndCityPieces.recursiveChildren(structureTemplateManager, FAT_TOWER_GENERATOR, i + 1, endCityPiece2, null, list, random);
+                return EndCityPieces.recursiveChildren(structureTemplateManager, FAT_TOWER_GENERATOR, i + 1, endCityPiece2, null, list, randomSource);
             }
             return true;
         }
@@ -106,27 +106,27 @@ public class EndCityPieces {
         }
 
         @Override
-        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
+        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, RandomSource randomSource) {
             Rotation rotation = endCityPiece.placeSettings().getRotation();
-            int j = random.nextInt(4) + 1;
+            int j = randomSource.nextInt(4) + 1;
             EndCityPiece endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece, new BlockPos(0, 0, -4), "bridge_piece", rotation, true));
             endCityPiece2.setGenDepth(-1);
             int k = 0;
             for (int l = 0; l < j; ++l) {
-                if (random.nextBoolean()) {
+                if (randomSource.nextBoolean()) {
                     endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, k, -4), "bridge_piece", rotation, true));
                     k = 0;
                     continue;
                 }
-                endCityPiece2 = random.nextBoolean() ? EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, k, -4), "bridge_steep_stairs", rotation, true)) : EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, k, -8), "bridge_gentle_stairs", rotation, true));
+                endCityPiece2 = randomSource.nextBoolean() ? EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, k, -4), "bridge_steep_stairs", rotation, true)) : EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, k, -8), "bridge_gentle_stairs", rotation, true));
                 k = 4;
             }
-            if (this.shipCreated || random.nextInt(10 - i) != 0) {
-                if (!EndCityPieces.recursiveChildren(structureTemplateManager, HOUSE_TOWER_GENERATOR, i + 1, endCityPiece2, new BlockPos(-3, k + 1, -11), list, random)) {
+            if (this.shipCreated || randomSource.nextInt(10 - i) != 0) {
+                if (!EndCityPieces.recursiveChildren(structureTemplateManager, HOUSE_TOWER_GENERATOR, i + 1, endCityPiece2, new BlockPos(-3, k + 1, -11), list, randomSource)) {
                     return false;
                 }
             } else {
-                EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-8 + random.nextInt(8), k, -70 + random.nextInt(10)), "ship", rotation, true));
+                EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-8 + randomSource.nextInt(8), k, -70 + randomSource.nextInt(10)), "ship", rotation, true));
                 this.shipCreated = true;
             }
             endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(4, k, 0), "bridge_end", rotation.getRotated(Rotation.CLOCKWISE_180), true));
@@ -142,16 +142,16 @@ public class EndCityPieces {
         }
 
         @Override
-        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
+        public boolean generate(StructureTemplateManager structureTemplateManager, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, RandomSource randomSource) {
             Rotation rotation = endCityPiece.placeSettings().getRotation();
             EndCityPiece endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece, new BlockPos(-3, 4, -3), "fat_tower_base", rotation, true));
             endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, 4, 0), "fat_tower_middle", rotation, true));
-            for (int j = 0; j < 2 && random.nextInt(3) != 0; ++j) {
+            for (int j = 0; j < 2 && randomSource.nextInt(3) != 0; ++j) {
                 endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(0, 8, 0), "fat_tower_middle", rotation, true));
                 for (Tuple<Rotation, BlockPos> tuple : FAT_TOWER_BRIDGES) {
-                    if (!random.nextBoolean()) continue;
+                    if (!randomSource.nextBoolean()) continue;
                     EndCityPiece endCityPiece3 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, tuple.getB(), "bridge_end", rotation.getRotated(tuple.getA()), true));
-                    EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_BRIDGE_GENERATOR, i + 1, endCityPiece3, null, list, random);
+                    EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_BRIDGE_GENERATOR, i + 1, endCityPiece3, null, list, randomSource);
                 }
             }
             endCityPiece2 = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece2, new BlockPos(-2, 8, -2), "fat_tower_top", rotation, true));
@@ -166,7 +166,7 @@ public class EndCityPieces {
         return endCityPiece2;
     }
 
-    public static void startHouseTower(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, List<StructurePiece> list, Random random) {
+    public static void startHouseTower(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, List<StructurePiece> list, RandomSource randomSource) {
         FAT_TOWER_GENERATOR.init();
         HOUSE_TOWER_GENERATOR.init();
         TOWER_BRIDGE_GENERATOR.init();
@@ -175,7 +175,7 @@ public class EndCityPieces {
         endCityPiece = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece, new BlockPos(-1, 0, -1), "second_floor_1", rotation, false));
         endCityPiece = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece, new BlockPos(-1, 4, -1), "third_floor_1", rotation, false));
         endCityPiece = EndCityPieces.addHelper(list, EndCityPieces.addPiece(structureTemplateManager, endCityPiece, new BlockPos(-1, 8, -1), "third_roof", rotation, true));
-        EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_GENERATOR, 1, endCityPiece, null, list, random);
+        EndCityPieces.recursiveChildren(structureTemplateManager, TOWER_GENERATOR, 1, endCityPiece, null, list, randomSource);
     }
 
     static EndCityPiece addHelper(List<StructurePiece> list, EndCityPiece endCityPiece) {
@@ -183,14 +183,14 @@ public class EndCityPieces {
         return endCityPiece;
     }
 
-    static boolean recursiveChildren(StructureTemplateManager structureTemplateManager, SectionGenerator sectionGenerator, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, Random random) {
+    static boolean recursiveChildren(StructureTemplateManager structureTemplateManager, SectionGenerator sectionGenerator, int i, EndCityPiece endCityPiece, BlockPos blockPos, List<StructurePiece> list, RandomSource randomSource) {
         if (i > 8) {
             return false;
         }
         ArrayList<StructurePiece> list2 = Lists.newArrayList();
-        if (sectionGenerator.generate(structureTemplateManager, i, endCityPiece, blockPos, list2, random)) {
+        if (sectionGenerator.generate(structureTemplateManager, i, endCityPiece, blockPos, list2, randomSource)) {
             boolean bl = false;
-            int j = random.nextInt();
+            int j = randomSource.nextInt();
             for (StructurePiece structurePiece : list2) {
                 structurePiece.setGenDepth(j);
                 StructurePiece structurePiece2 = StructurePiece.findCollisionPiece(list, structurePiece.getBoundingBox());
@@ -238,11 +238,11 @@ public class EndCityPieces {
         }
 
         @Override
-        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
             if (string.startsWith("Chest")) {
                 BlockPos blockPos2 = blockPos.below();
                 if (boundingBox.isInside(blockPos2)) {
-                    RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos2, BuiltInLootTables.END_CITY_TREASURE);
+                    RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, randomSource, blockPos2, BuiltInLootTables.END_CITY_TREASURE);
                 }
             } else if (boundingBox.isInside(blockPos) && Level.isInSpawnableBounds(blockPos)) {
                 if (string.startsWith("Sentry")) {
@@ -261,7 +261,7 @@ public class EndCityPieces {
     static interface SectionGenerator {
         public void init();
 
-        public boolean generate(StructureTemplateManager var1, int var2, EndCityPiece var3, BlockPos var4, List<StructurePiece> var5, Random var6);
+        public boolean generate(StructureTemplateManager var1, int var2, EndCityPiece var3, BlockPos var4, List<StructurePiece> var5, RandomSource var6);
     }
 }
 

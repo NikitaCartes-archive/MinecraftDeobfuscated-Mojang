@@ -5,10 +5,10 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -36,8 +36,8 @@ extends CaveWorldCarver {
     }
 
     @Override
-    protected float getThickness(Random random) {
-        return (random.nextFloat() * 2.0f + random.nextFloat()) * 2.0f;
+    protected float getThickness(RandomSource randomSource) {
+        return (randomSource.nextFloat() * 2.0f + randomSource.nextFloat()) * 2.0f;
     }
 
     @Override

@@ -82,6 +82,7 @@ public final class ItemTags {
     public static final TagKey<Item> AXOLOTL_TEMPT_ITEMS = ItemTags.bind("axolotl_tempt_items");
     public static final TagKey<Item> OCCLUDES_VIBRATION_SIGNALS = ItemTags.bind("occludes_vibration_signals");
     public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = ItemTags.bind("cluster_max_harvestables");
+    public static final TagKey<Item> COMPASSES = ItemTags.bind("compasses");
 
     private ItemTags() {
     }

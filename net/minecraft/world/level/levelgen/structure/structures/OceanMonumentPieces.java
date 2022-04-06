@@ -6,13 +6,13 @@ package net.minecraft.world.level.levelgen.structure.structures;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.ElderGuardian;
@@ -47,7 +47,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             roomDefinition.claimed = true;
             roomDefinition.connections[Direction.NORTH.get3DDataValue()].claimed = true;
             roomDefinition.connections[Direction.UP.get3DDataValue()].claimed = true;
@@ -71,7 +71,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             roomDefinition.claimed = true;
             roomDefinition.connections[Direction.EAST.get3DDataValue()].claimed = true;
             roomDefinition.connections[Direction.UP.get3DDataValue()].claimed = true;
@@ -91,7 +91,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             RoomDefinition roomDefinition2 = roomDefinition;
             if (!roomDefinition.hasOpening[Direction.NORTH.get3DDataValue()] || roomDefinition.connections[Direction.NORTH.get3DDataValue()].claimed) {
                 roomDefinition2 = roomDefinition.connections[Direction.SOUTH.get3DDataValue()];
@@ -113,7 +113,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             roomDefinition.claimed = true;
             roomDefinition.connections[Direction.EAST.get3DDataValue()].claimed = true;
             return new OceanMonumentDoubleXRoom(direction, roomDefinition);
@@ -131,7 +131,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             roomDefinition.claimed = true;
             roomDefinition.connections[Direction.UP.get3DDataValue()].claimed = true;
             return new OceanMonumentDoubleYRoom(direction, roomDefinition);
@@ -149,7 +149,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             roomDefinition.claimed = true;
             return new OceanMonumentSimpleTopRoom(direction, roomDefinition);
         }
@@ -166,16 +166,16 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentPiece create(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             roomDefinition.claimed = true;
-            return new OceanMonumentSimpleRoom(direction, roomDefinition, random);
+            return new OceanMonumentSimpleRoom(direction, roomDefinition, randomSource);
         }
     }
 
     static interface MonumentRoomFitter {
         public boolean fits(RoomDefinition var1);
 
-        public OceanMonumentPiece create(Direction var1, RoomDefinition var2, Random var3);
+        public OceanMonumentPiece create(Direction var1, RoomDefinition var2, RandomSource var3);
     }
 
     static class RoomDefinition {
@@ -238,7 +238,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int i;
             this.generateBox(worldGenLevel, boundingBox, 2, -1, 2, 11, -1, 11, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 0, -1, 0, 1, -1, 11, BASE_GRAY, BASE_GRAY, false);
@@ -293,7 +293,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.mainDesign == 0) {
                 int i;
                 for (i = 0; i < 4; ++i) {
@@ -388,7 +388,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBoxOnFillOnly(worldGenLevel, boundingBox, 1, 8, 0, 14, 8, 14, BASE_GRAY);
             int i = 7;
             BlockState blockState = BASE_LIGHT;
@@ -461,7 +461,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState;
             int i;
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.NORTH.get3DDataValue()];
@@ -557,7 +557,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.EAST.get3DDataValue()];
             RoomDefinition roomDefinition2 = this.roomDefinition;
             RoomDefinition roomDefinition3 = roomDefinition2.connections[Direction.UP.get3DDataValue()];
@@ -655,7 +655,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.NORTH.get3DDataValue()];
             RoomDefinition roomDefinition2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
@@ -736,7 +736,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             RoomDefinition roomDefinition = this.roomDefinition.connections[Direction.EAST.get3DDataValue()];
             RoomDefinition roomDefinition2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
@@ -798,7 +798,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
             }
@@ -872,7 +872,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
             }
@@ -881,8 +881,8 @@ public class OceanMonumentPieces {
             }
             for (int i = 1; i <= 6; ++i) {
                 for (int j = 1; j <= 6; ++j) {
-                    if (random.nextInt(3) == 0) continue;
-                    int k = 2 + (random.nextInt(4) == 0 ? 0 : 1);
+                    if (randomSource.nextInt(3) == 0) continue;
+                    int k = 2 + (randomSource.nextInt(4) == 0 ? 0 : 1);
                     BlockState blockState = Blocks.WET_SPONGE.defaultBlockState();
                     this.generateBox(worldGenLevel, boundingBox, i, k, j, i, 3, j, blockState, blockState, false);
                 }
@@ -913,9 +913,9 @@ public class OceanMonumentPieces {
     extends OceanMonumentPiece {
         private int mainDesign;
 
-        public OceanMonumentSimpleRoom(Direction direction, RoomDefinition roomDefinition, Random random) {
+        public OceanMonumentSimpleRoom(Direction direction, RoomDefinition roomDefinition, RandomSource randomSource) {
             super(StructurePieceType.OCEAN_MONUMENT_SIMPLE_ROOM, 1, direction, roomDefinition, 1, 1, 1);
-            this.mainDesign = random.nextInt(3);
+            this.mainDesign = randomSource.nextInt(3);
         }
 
         public OceanMonumentSimpleRoom(CompoundTag compoundTag) {
@@ -923,7 +923,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             boolean bl;
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(worldGenLevel, boundingBox, 0, 0, this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()]);
@@ -931,7 +931,7 @@ public class OceanMonumentPieces {
             if (this.roomDefinition.connections[Direction.UP.get3DDataValue()] == null) {
                 this.generateBoxOnFillOnly(worldGenLevel, boundingBox, 1, 4, 1, 6, 4, 6, BASE_GRAY);
             }
-            boolean bl2 = bl = this.mainDesign != 0 && random.nextBoolean() && !this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()] && !this.roomDefinition.hasOpening[Direction.UP.get3DDataValue()] && this.roomDefinition.countOpenings() > 1;
+            boolean bl2 = bl = this.mainDesign != 0 && randomSource.nextBoolean() && !this.roomDefinition.hasOpening[Direction.DOWN.get3DDataValue()] && !this.roomDefinition.hasOpening[Direction.UP.get3DDataValue()] && this.roomDefinition.countOpenings() > 1;
             if (this.mainDesign == 0) {
                 this.generateBox(worldGenLevel, boundingBox, 0, 1, 0, 2, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
                 this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 2, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
@@ -1075,7 +1075,7 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 2, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 5, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 1, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
@@ -1108,10 +1108,10 @@ public class OceanMonumentPieces {
         private RoomDefinition coreRoom;
         private final List<OceanMonumentPiece> childPieces = Lists.newArrayList();
 
-        public MonumentBuilding(Random random, int i, int j, Direction direction) {
+        public MonumentBuilding(RandomSource randomSource, int i, int j, Direction direction) {
             super(StructurePieceType.OCEAN_MONUMENT_BUILDING, direction, 0, MonumentBuilding.makeBoundingBox(i, 39, j, direction, 58, 23, 58));
             this.setOrientation(direction);
-            List<RoomDefinition> list = this.generateRoomGraph(random);
+            List<RoomDefinition> list = this.generateRoomGraph(randomSource);
             this.sourceRoom.claimed = true;
             this.childPieces.add(new OceanMonumentEntryRoom(direction, this.sourceRoom));
             this.childPieces.add(new OceanMonumentCoreRoom(direction, this.coreRoom));
@@ -1127,7 +1127,7 @@ public class OceanMonumentPieces {
                 if (roomDefinition.claimed || roomDefinition.isSpecial()) continue;
                 for (MonumentRoomFitter monumentRoomFitter : list2) {
                     if (!monumentRoomFitter.fits(roomDefinition)) continue;
-                    this.childPieces.add(monumentRoomFitter.create(direction, roomDefinition, random));
+                    this.childPieces.add(monumentRoomFitter.create(direction, roomDefinition, randomSource));
                     continue block0;
                 }
             }
@@ -1138,7 +1138,7 @@ public class OceanMonumentPieces {
             BoundingBox boundingBox = BoundingBox.fromCorners(this.getWorldPos(1, 1, 1), this.getWorldPos(23, 8, 21));
             BoundingBox boundingBox2 = BoundingBox.fromCorners(this.getWorldPos(34, 1, 1), this.getWorldPos(56, 8, 21));
             BoundingBox boundingBox3 = BoundingBox.fromCorners(this.getWorldPos(22, 13, 22), this.getWorldPos(35, 17, 35));
-            int k = random.nextInt();
+            int k = randomSource.nextInt();
             this.childPieces.add(new OceanMonumentWingRoom(direction, boundingBox, k++));
             this.childPieces.add(new OceanMonumentWingRoom(direction, boundingBox2, k++));
             this.childPieces.add(new OceanMonumentPenthouse(direction, boundingBox3));
@@ -1148,7 +1148,7 @@ public class OceanMonumentPieces {
             super(StructurePieceType.OCEAN_MONUMENT_BUILDING, compoundTag);
         }
 
-        private List<RoomDefinition> generateRoomGraph(Random random) {
+        private List<RoomDefinition> generateRoomGraph(RandomSource randomSource) {
             int o;
             int n;
             int m;
@@ -1209,7 +1209,7 @@ public class OceanMonumentPieces {
             roomDefinition2.claimed = true;
             roomDefinition3.claimed = true;
             this.sourceRoom.isSource = true;
-            this.coreRoom = roomDefinitions[MonumentBuilding.getRoomIndex(random.nextInt(4), 0, 2)];
+            this.coreRoom = roomDefinitions[MonumentBuilding.getRoomIndex(randomSource.nextInt(4), 0, 2)];
             this.coreRoom.claimed = true;
             this.coreRoom.connections[Direction.EAST.get3DDataValue()].claimed = true;
             this.coreRoom.connections[Direction.NORTH.get3DDataValue()].claimed = true;
@@ -1225,12 +1225,12 @@ public class OceanMonumentPieces {
                 list.add(roomDefinition4);
             }
             roomDefinition.updateOpenings();
-            Collections.shuffle(list, random);
+            Util.shuffle(list, randomSource);
             int q = 1;
             for (RoomDefinition roomDefinition5 : list) {
                 int r = 0;
                 for (m = 0; r < 2 && m < 5; ++m) {
-                    n = random.nextInt(6);
+                    n = randomSource.nextInt(6);
                     if (!roomDefinition5.hasOpening[n]) continue;
                     o = Direction.from3DDataValue(n).getOpposite().get3DDataValue();
                     roomDefinition5.hasOpening[n] = false;
@@ -1250,18 +1250,18 @@ public class OceanMonumentPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i = Math.max(worldGenLevel.getSeaLevel(), 64) - this.boundingBox.minY();
             this.generateWaterBox(worldGenLevel, boundingBox, 0, 0, 0, 58, i, 58);
-            this.generateWing(false, 0, worldGenLevel, random, boundingBox);
-            this.generateWing(true, 33, worldGenLevel, random, boundingBox);
-            this.generateEntranceArchs(worldGenLevel, random, boundingBox);
-            this.generateEntranceWall(worldGenLevel, random, boundingBox);
-            this.generateRoofPiece(worldGenLevel, random, boundingBox);
-            this.generateLowerWall(worldGenLevel, random, boundingBox);
-            this.generateMiddleWall(worldGenLevel, random, boundingBox);
-            this.generateUpperWall(worldGenLevel, random, boundingBox);
+            this.generateWing(false, 0, worldGenLevel, randomSource, boundingBox);
+            this.generateWing(true, 33, worldGenLevel, randomSource, boundingBox);
+            this.generateEntranceArchs(worldGenLevel, randomSource, boundingBox);
+            this.generateEntranceWall(worldGenLevel, randomSource, boundingBox);
+            this.generateRoofPiece(worldGenLevel, randomSource, boundingBox);
+            this.generateLowerWall(worldGenLevel, randomSource, boundingBox);
+            this.generateMiddleWall(worldGenLevel, randomSource, boundingBox);
+            this.generateUpperWall(worldGenLevel, randomSource, boundingBox);
             for (j = 0; j < 7; ++j) {
                 int k = 0;
                 while (k < 7) {
@@ -1291,11 +1291,11 @@ public class OceanMonumentPieces {
             }
             for (OceanMonumentPiece oceanMonumentPiece : this.childPieces) {
                 if (!oceanMonumentPiece.getBoundingBox().intersects(boundingBox)) continue;
-                oceanMonumentPiece.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+                oceanMonumentPiece.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
             }
         }
 
-        private void generateWing(boolean bl, int i, WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateWing(boolean bl, int i, WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             int j = 24;
             if (this.chunkIntersects(boundingBox, i, 0, i + 23, 20)) {
                 int m;
@@ -1335,7 +1335,7 @@ public class OceanMonumentPieces {
             }
         }
 
-        private void generateEntranceArchs(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateEntranceArchs(WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             if (this.chunkIntersects(boundingBox, 22, 5, 35, 17)) {
                 this.generateWaterBox(worldGenLevel, boundingBox, 25, 0, 0, 32, 8, 20);
                 for (int i = 0; i < 4; ++i) {
@@ -1354,7 +1354,7 @@ public class OceanMonumentPieces {
             }
         }
 
-        private void generateEntranceWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateEntranceWall(WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             if (this.chunkIntersects(boundingBox, 15, 20, 42, 21)) {
                 int i;
                 this.generateBox(worldGenLevel, boundingBox, 15, 0, 21, 42, 0, 21, BASE_GRAY, BASE_GRAY, false);
@@ -1409,7 +1409,7 @@ public class OceanMonumentPieces {
             }
         }
 
-        private void generateRoofPiece(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateRoofPiece(WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             if (this.chunkIntersects(boundingBox, 21, 21, 36, 36)) {
                 this.generateBox(worldGenLevel, boundingBox, 21, 0, 22, 36, 0, 36, BASE_GRAY, BASE_GRAY, false);
                 this.generateWaterBox(worldGenLevel, boundingBox, 21, 1, 22, 36, 23, 36);
@@ -1443,7 +1443,7 @@ public class OceanMonumentPieces {
             }
         }
 
-        private void generateLowerWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateLowerWall(WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             int i;
             if (this.chunkIntersects(boundingBox, 0, 21, 6, 58)) {
                 this.generateBox(worldGenLevel, boundingBox, 0, 0, 21, 6, 0, 57, BASE_GRAY, BASE_GRAY, false);
@@ -1485,7 +1485,7 @@ public class OceanMonumentPieces {
             }
         }
 
-        private void generateMiddleWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateMiddleWall(WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             int i;
             if (this.chunkIntersects(boundingBox, 7, 21, 13, 50)) {
                 this.generateBox(worldGenLevel, boundingBox, 7, 0, 21, 13, 0, 50, BASE_GRAY, BASE_GRAY, false);
@@ -1535,7 +1535,7 @@ public class OceanMonumentPieces {
             }
         }
 
-        private void generateUpperWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
+        private void generateUpperWall(WorldGenLevel worldGenLevel, RandomSource randomSource, BoundingBox boundingBox) {
             int i;
             if (this.chunkIntersects(boundingBox, 14, 21, 20, 43)) {
                 this.generateBox(worldGenLevel, boundingBox, 14, 0, 21, 20, 0, 43, BASE_GRAY, BASE_GRAY, false);

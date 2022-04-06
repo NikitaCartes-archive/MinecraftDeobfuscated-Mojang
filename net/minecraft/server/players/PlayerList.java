@@ -428,7 +428,7 @@ public abstract class PlayerList {
         serverPlayer2.initInventoryMenu();
         serverPlayer2.setHealth(serverPlayer2.getHealth());
         if (bl3) {
-            serverPlayer2.connection.send(new ClientboundSoundPacket(SoundEvents.RESPAWN_ANCHOR_DEPLETE, SoundSource.BLOCKS, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0f, 1.0f));
+            serverPlayer2.connection.send(new ClientboundSoundPacket(SoundEvents.RESPAWN_ANCHOR_DEPLETE, SoundSource.BLOCKS, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0f, 1.0f, serverLevel2.getRandom().nextLong()));
         }
         return serverPlayer2;
     }

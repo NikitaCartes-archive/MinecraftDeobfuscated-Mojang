@@ -4,11 +4,11 @@
 package net.minecraft.world.level.block;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -61,16 +61,16 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         Optional<BlockPos> optional = this.getHeadPos(serverLevel, blockPos, blockState.getBlock());
         if (optional.isPresent()) {
             BlockState blockState2 = serverLevel.getBlockState(optional.get());
-            ((GrowingPlantHeadBlock)blockState2.getBlock()).performBonemeal(serverLevel, random, optional.get(), blockState2);
+            ((GrowingPlantHeadBlock)blockState2.getBlock()).performBonemeal(serverLevel, randomSource, optional.get(), blockState2);
         }
     }
 

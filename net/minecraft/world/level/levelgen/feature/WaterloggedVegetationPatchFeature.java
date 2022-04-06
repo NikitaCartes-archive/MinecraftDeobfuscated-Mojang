@@ -5,12 +5,12 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,8 +26,8 @@ extends VegetationPatchFeature {
     }
 
     @Override
-    protected Set<BlockPos> placeGroundPatch(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Random random, BlockPos blockPos, Predicate<BlockState> predicate, int i, int j) {
-        Set<BlockPos> set = super.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, random, blockPos, predicate, i, j);
+    protected Set<BlockPos> placeGroundPatch(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, RandomSource randomSource, BlockPos blockPos, Predicate<BlockState> predicate, int i, int j) {
+        Set<BlockPos> set = super.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, randomSource, blockPos, predicate, i, j);
         HashSet<BlockPos> set2 = new HashSet<BlockPos>();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (BlockPos blockPos2 : set) {
@@ -50,8 +50,8 @@ extends VegetationPatchFeature {
     }
 
     @Override
-    protected boolean placeVegetation(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-        if (super.placeVegetation(worldGenLevel, vegetationPatchConfiguration, chunkGenerator, random, blockPos.below())) {
+    protected boolean placeVegetation(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos) {
+        if (super.placeVegetation(worldGenLevel, vegetationPatchConfiguration, chunkGenerator, randomSource, blockPos.below())) {
             BlockState blockState = worldGenLevel.getBlockState(blockPos);
             if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && !blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue()) {
                 worldGenLevel.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, true), 2);

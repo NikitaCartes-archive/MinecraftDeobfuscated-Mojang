@@ -5,10 +5,10 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,15 +31,15 @@ extends BlobFoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
+    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
         for (int m = l; m >= l - j; --m) {
             int n = k + (m == l || m == l - j ? 0 : 1);
-            this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, foliageAttachment.pos(), n, m, foliageAttachment.doubleTrunk());
+            this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, foliageAttachment.pos(), n, m, foliageAttachment.doubleTrunk());
         }
     }
 
     @Override
-    protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+    protected boolean shouldSkipLocation(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
         return Mth.square((float)i + 0.5f) + Mth.square((float)k + 0.5f) > (float)(l * l);
     }
 }

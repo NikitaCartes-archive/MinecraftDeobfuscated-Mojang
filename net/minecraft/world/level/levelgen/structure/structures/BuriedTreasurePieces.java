@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -38,7 +38,7 @@ public class BuriedTreasurePieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.boundingBox.minX(), this.boundingBox.minZ());
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.minX(), i, this.boundingBox.minZ());
             while (mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight()) {
@@ -59,7 +59,7 @@ public class BuriedTreasurePieces {
                         worldGenLevel.setBlock((BlockPos)blockPos2, blockState3, 3);
                     }
                     this.boundingBox = new BoundingBox(mutableBlockPos);
-                    this.createChest(worldGenLevel, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
+                    this.createChest(worldGenLevel, boundingBox, randomSource, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
                     return;
                 }
                 mutableBlockPos.move(0, -1, 0);

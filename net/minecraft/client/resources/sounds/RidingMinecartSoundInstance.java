@@ -23,7 +23,7 @@ extends AbstractTickableSoundInstance {
     private final boolean underwaterSound;
 
     public RidingMinecartSoundInstance(Player player, AbstractMinecart abstractMinecart, boolean bl) {
-        super(bl ? SoundEvents.MINECART_INSIDE_UNDERWATER : SoundEvents.MINECART_INSIDE, SoundSource.NEUTRAL);
+        super(bl ? SoundEvents.MINECART_INSIDE_UNDERWATER : SoundEvents.MINECART_INSIDE, SoundSource.NEUTRAL, SoundInstance.createUnseededRandom());
         this.player = player;
         this.minecart = abstractMinecart;
         this.underwaterSound = bl;

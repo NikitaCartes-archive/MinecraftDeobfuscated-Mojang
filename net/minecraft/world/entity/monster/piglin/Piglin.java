@@ -6,7 +6,6 @@ package net.minecraft.world.entity.monster.piglin;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -16,6 +15,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
@@ -149,7 +149,7 @@ InventoryCarrier {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 16.0).add(Attributes.MOVEMENT_SPEED, 0.35f).add(Attributes.ATTACK_DAMAGE, 5.0);
     }
 
-    public static boolean checkPiglinSpawnRules(EntityType<Piglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkPiglinSpawnRules(EntityType<Piglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
     }
 
@@ -443,13 +443,13 @@ InventoryCarrier {
         this.playSound(SoundEvents.PIGLIN_STEP, 0.15f, 1.0f);
     }
 
-    protected void playSound(SoundEvent soundEvent) {
+    protected void playSoundEvent(SoundEvent soundEvent) {
         this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
     }
 
     @Override
     protected void playConvertedSound() {
-        this.playSound(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
+        this.playSoundEvent(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
     }
 }
 

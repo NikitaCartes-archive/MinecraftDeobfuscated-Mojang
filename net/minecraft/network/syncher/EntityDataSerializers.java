@@ -8,6 +8,7 @@ import java.util.OptionalInt;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.particles.ParticleOptions;
@@ -18,6 +19,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.animal.CatVariant;
+import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -26,143 +29,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class EntityDataSerializers {
     private static final CrudeIncrementalIntIdentityHashBiMap<EntityDataSerializer<?>> SERIALIZERS = CrudeIncrementalIntIdentityHashBiMap.create(16);
-    public static final EntityDataSerializer<Byte> BYTE = new EntityDataSerializer<Byte>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Byte byte_) {
-            friendlyByteBuf.writeByte(byte_.byteValue());
-        }
-
-        @Override
-        public Byte read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readByte();
-        }
-
-        @Override
-        public Byte copy(Byte byte_) {
-            return byte_;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Integer> INT = new EntityDataSerializer<Integer>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Integer integer) {
-            friendlyByteBuf.writeVarInt(integer);
-        }
-
-        @Override
-        public Integer read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readVarInt();
-        }
-
-        @Override
-        public Integer copy(Integer integer) {
-            return integer;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Float> FLOAT = new EntityDataSerializer<Float>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Float float_) {
-            friendlyByteBuf.writeFloat(float_.floatValue());
-        }
-
-        @Override
-        public Float read(FriendlyByteBuf friendlyByteBuf) {
-            return Float.valueOf(friendlyByteBuf.readFloat());
-        }
-
-        @Override
-        public Float copy(Float float_) {
-            return float_;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<String> STRING = new EntityDataSerializer<String>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, String string) {
-            friendlyByteBuf.writeUtf(string);
-        }
-
-        @Override
-        public String read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readUtf();
-        }
-
-        @Override
-        public String copy(String string) {
-            return string;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Component> COMPONENT = new EntityDataSerializer<Component>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Component component) {
-            friendlyByteBuf.writeComponent(component);
-        }
-
-        @Override
-        public Component read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readComponent();
-        }
-
-        @Override
-        public Component copy(Component component) {
-            return component;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Optional<Component>> OPTIONAL_COMPONENT = new EntityDataSerializer<Optional<Component>>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Optional<Component> optional) {
-            if (optional.isPresent()) {
-                friendlyByteBuf.writeBoolean(true);
-                friendlyByteBuf.writeComponent(optional.get());
-            } else {
-                friendlyByteBuf.writeBoolean(false);
-            }
-        }
-
-        @Override
-        public Optional<Component> read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readBoolean() ? Optional.of(friendlyByteBuf.readComponent()) : Optional.empty();
-        }
-
-        @Override
-        public Optional<Component> copy(Optional<Component> optional) {
-            return optional;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
+    public static final EntityDataSerializer<Byte> BYTE = EntityDataSerializer.simple((friendlyByteBuf, byte_) -> friendlyByteBuf.writeByte(byte_.byteValue()), FriendlyByteBuf::readByte);
+    public static final EntityDataSerializer<Integer> INT = EntityDataSerializer.simple(FriendlyByteBuf::writeVarInt, FriendlyByteBuf::readVarInt);
+    public static final EntityDataSerializer<Float> FLOAT = EntityDataSerializer.simple(FriendlyByteBuf::writeFloat, FriendlyByteBuf::readFloat);
+    public static final EntityDataSerializer<String> STRING = EntityDataSerializer.simple(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf);
+    public static final EntityDataSerializer<Component> COMPONENT = EntityDataSerializer.simple(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
+    public static final EntityDataSerializer<Optional<Component>> OPTIONAL_COMPONENT = EntityDataSerializer.optional(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
     public static final EntityDataSerializer<ItemStack> ITEM_STACK = new EntityDataSerializer<ItemStack>(){
 
         @Override
@@ -185,7 +57,7 @@ public class EntityDataSerializers {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<Optional<BlockState>> BLOCK_STATE = new EntityDataSerializer<Optional<BlockState>>(){
+    public static final EntityDataSerializer<Optional<BlockState>> BLOCK_STATE = new EntityDataSerializer.ForValueType<Optional<BlockState>>(){
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, Optional<BlockState> optional) {
@@ -206,38 +78,12 @@ public class EntityDataSerializers {
         }
 
         @Override
-        public Optional<BlockState> copy(Optional<BlockState> optional) {
-            return optional;
-        }
-
-        @Override
         public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<Boolean> BOOLEAN = new EntityDataSerializer<Boolean>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Boolean boolean_) {
-            friendlyByteBuf.writeBoolean(boolean_);
-        }
-
-        @Override
-        public Boolean read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readBoolean();
-        }
-
-        @Override
-        public Boolean copy(Boolean boolean_) {
-            return boolean_;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<ParticleOptions> PARTICLE = new EntityDataSerializer<ParticleOptions>(){
+    public static final EntityDataSerializer<Boolean> BOOLEAN = EntityDataSerializer.simple(FriendlyByteBuf::writeBoolean, FriendlyByteBuf::readBoolean);
+    public static final EntityDataSerializer<ParticleOptions> PARTICLE = new EntityDataSerializer.ForValueType<ParticleOptions>(){
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, ParticleOptions particleOptions) {
@@ -255,16 +101,11 @@ public class EntityDataSerializers {
         }
 
         @Override
-        public ParticleOptions copy(ParticleOptions particleOptions) {
-            return particleOptions;
-        }
-
-        @Override
         public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<Rotations> ROTATIONS = new EntityDataSerializer<Rotations>(){
+    public static final EntityDataSerializer<Rotations> ROTATIONS = new EntityDataSerializer.ForValueType<Rotations>(){
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, Rotations rotations) {
@@ -279,115 +120,15 @@ public class EntityDataSerializers {
         }
 
         @Override
-        public Rotations copy(Rotations rotations) {
-            return rotations;
-        }
-
-        @Override
         public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<BlockPos> BLOCK_POS = new EntityDataSerializer<BlockPos>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, BlockPos blockPos) {
-            friendlyByteBuf.writeBlockPos(blockPos);
-        }
-
-        @Override
-        public BlockPos read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readBlockPos();
-        }
-
-        @Override
-        public BlockPos copy(BlockPos blockPos) {
-            return blockPos;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Optional<BlockPos>> OPTIONAL_BLOCK_POS = new EntityDataSerializer<Optional<BlockPos>>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Optional<BlockPos> optional) {
-            friendlyByteBuf.writeBoolean(optional.isPresent());
-            if (optional.isPresent()) {
-                friendlyByteBuf.writeBlockPos(optional.get());
-            }
-        }
-
-        @Override
-        public Optional<BlockPos> read(FriendlyByteBuf friendlyByteBuf) {
-            if (!friendlyByteBuf.readBoolean()) {
-                return Optional.empty();
-            }
-            return Optional.of(friendlyByteBuf.readBlockPos());
-        }
-
-        @Override
-        public Optional<BlockPos> copy(Optional<BlockPos> optional) {
-            return optional;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Direction> DIRECTION = new EntityDataSerializer<Direction>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Direction direction) {
-            friendlyByteBuf.writeEnum(direction);
-        }
-
-        @Override
-        public Direction read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readEnum(Direction.class);
-        }
-
-        @Override
-        public Direction copy(Direction direction) {
-            return direction;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
-    public static final EntityDataSerializer<Optional<UUID>> OPTIONAL_UUID = new EntityDataSerializer<Optional<UUID>>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Optional<UUID> optional) {
-            friendlyByteBuf.writeBoolean(optional.isPresent());
-            if (optional.isPresent()) {
-                friendlyByteBuf.writeUUID(optional.get());
-            }
-        }
-
-        @Override
-        public Optional<UUID> read(FriendlyByteBuf friendlyByteBuf) {
-            if (!friendlyByteBuf.readBoolean()) {
-                return Optional.empty();
-            }
-            return Optional.of(friendlyByteBuf.readUUID());
-        }
-
-        @Override
-        public Optional<UUID> copy(Optional<UUID> optional) {
-            return optional;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
+    public static final EntityDataSerializer<BlockPos> BLOCK_POS = EntityDataSerializer.simple(FriendlyByteBuf::writeBlockPos, FriendlyByteBuf::readBlockPos);
+    public static final EntityDataSerializer<Optional<BlockPos>> OPTIONAL_BLOCK_POS = EntityDataSerializer.optional(FriendlyByteBuf::writeBlockPos, FriendlyByteBuf::readBlockPos);
+    public static final EntityDataSerializer<Direction> DIRECTION = EntityDataSerializer.simpleEnum(Direction.class);
+    public static final EntityDataSerializer<Optional<UUID>> OPTIONAL_UUID = EntityDataSerializer.optional(FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID);
+    public static final EntityDataSerializer<Optional<GlobalPos>> OPTIONAL_GLOBAL_POS = EntityDataSerializer.optional((friendlyByteBuf, globalPos) -> friendlyByteBuf.writeWithCodec(GlobalPos.CODEC, globalPos), friendlyByteBuf -> friendlyByteBuf.readWithCodec(GlobalPos.CODEC));
     public static final EntityDataSerializer<CompoundTag> COMPOUND_TAG = new EntityDataSerializer<CompoundTag>(){
 
         @Override
@@ -410,7 +151,7 @@ public class EntityDataSerializers {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<VillagerData> VILLAGER_DATA = new EntityDataSerializer<VillagerData>(){
+    public static final EntityDataSerializer<VillagerData> VILLAGER_DATA = new EntityDataSerializer.ForValueType<VillagerData>(){
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, VillagerData villagerData) {
@@ -425,16 +166,11 @@ public class EntityDataSerializers {
         }
 
         @Override
-        public VillagerData copy(VillagerData villagerData) {
-            return villagerData;
-        }
-
-        @Override
         public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT = new EntityDataSerializer<OptionalInt>(){
+    public static final EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT = new EntityDataSerializer.ForValueType<OptionalInt>(){
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, OptionalInt optionalInt) {
@@ -448,37 +184,13 @@ public class EntityDataSerializers {
         }
 
         @Override
-        public OptionalInt copy(OptionalInt optionalInt) {
-            return optionalInt;
-        }
-
-        @Override
         public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<Pose> POSE = new EntityDataSerializer<Pose>(){
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Pose pose) {
-            friendlyByteBuf.writeEnum(pose);
-        }
-
-        @Override
-        public Pose read(FriendlyByteBuf friendlyByteBuf) {
-            return friendlyByteBuf.readEnum(Pose.class);
-        }
-
-        @Override
-        public Pose copy(Pose pose) {
-            return pose;
-        }
-
-        @Override
-        public /* synthetic */ Object read(FriendlyByteBuf friendlyByteBuf) {
-            return this.read(friendlyByteBuf);
-        }
-    };
+    public static final EntityDataSerializer<Pose> POSE = EntityDataSerializer.simpleEnum(Pose.class);
+    public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.simpleId(Registry.CAT_VARIANT);
+    public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.simpleId(Registry.FROG_VARIANT);
 
     public static void registerSerializer(EntityDataSerializer<?> entityDataSerializer) {
         SERIALIZERS.add(entityDataSerializer);
@@ -516,6 +228,9 @@ public class EntityDataSerializers {
         EntityDataSerializers.registerSerializer(VILLAGER_DATA);
         EntityDataSerializers.registerSerializer(OPTIONAL_UNSIGNED_INT);
         EntityDataSerializers.registerSerializer(POSE);
+        EntityDataSerializers.registerSerializer(CAT_VARIANT);
+        EntityDataSerializers.registerSerializer(FROG_VARIANT);
+        EntityDataSerializers.registerSerializer(OPTIONAL_GLOBAL_POS);
     }
 }
 

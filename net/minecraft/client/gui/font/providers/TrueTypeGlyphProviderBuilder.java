@@ -12,12 +12,12 @@ import com.mojang.blaze3d.font.TrueTypeGlyphProvider;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -80,23 +80,23 @@ implements GlyphProviderBuilder {
         block10: {
             Struct sTBTTFontinfo = null;
             ByteBuffer byteBuffer = null;
-            Resource resource = resourceManager.getResource(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
+            InputStream inputStream = resourceManager.open(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
             try {
                 LOGGER.debug("Loading font {}", (Object)this.location);
                 sTBTTFontinfo = STBTTFontinfo.malloc();
-                byteBuffer = TextureUtil.readResource(resource.getInputStream());
+                byteBuffer = TextureUtil.readResource(inputStream);
                 byteBuffer.flip();
                 LOGGER.debug("Reading font {}", (Object)this.location);
                 if (!STBTruetype.stbtt_InitFont((STBTTFontinfo)sTBTTFontinfo, byteBuffer)) {
                     throw new IOException("Invalid ttf");
                 }
                 trueTypeGlyphProvider = new TrueTypeGlyphProvider(byteBuffer, (STBTTFontinfo)sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
-                if (resource == null) break block10;
+                if (inputStream == null) break block10;
             } catch (Throwable throwable) {
                 try {
-                    if (resource != null) {
+                    if (inputStream != null) {
                         try {
-                            resource.close();
+                            inputStream.close();
                         } catch (Throwable throwable2) {
                             throwable.addSuppressed(throwable2);
                         }
@@ -111,7 +111,7 @@ implements GlyphProviderBuilder {
                     return null;
                 }
             }
-            resource.close();
+            inputStream.close();
         }
         return trueTypeGlyphProvider;
     }

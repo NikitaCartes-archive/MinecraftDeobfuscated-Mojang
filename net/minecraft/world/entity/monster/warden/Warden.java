@@ -8,7 +8,6 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -17,6 +16,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -24,10 +25,10 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -37,6 +38,7 @@ import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,17 +54,16 @@ import net.minecraft.world.entity.monster.warden.AngerLevel;
 import net.minecraft.world.entity.monster.warden.AngerManagement;
 import net.minecraft.world.entity.monster.warden.WardenAi;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -85,39 +86,54 @@ implements VibrationListener.VibrationListenerConfig {
     private static final int DARKNESS_RADIUS = 20;
     private static final int DARKNESS_INTERVAL = 120;
     private static final int ANGERMANAGEMENT_TICK_DELAY = 20;
-    private static final int ANGER_DECAY_SOUND_TRESHOLD = 70;
     private static final int DEFAULT_ANGER = 35;
-    private static final int PROJECTILE_ANGER = 20;
+    private static final int PROJECTILE_ANGER = 10;
     private static final int RECENT_PROJECTILE_TICK_THRESHOLD = 100;
     private static final int TOUCH_COOLDOWN_TICKS = 20;
     private static final int DIGGING_PARTICLES_AMOUNT = 30;
     private static final float DIGGING_PARTICLES_DURATION = 4.5f;
     private static final float DIGGING_PARTICLES_OFFSET = 0.7f;
-    private float earAnimation;
-    private float earAnimationO;
-    private float heartAnimation;
-    private float heartAnimationO;
+    private int tendrilAnimation;
+    private int tendrilAnimationO;
+    private int heartAnimation;
+    private int heartAnimationO;
     public AnimationState roarAnimationState = new AnimationState();
     public AnimationState sniffAnimationState = new AnimationState();
     public AnimationState emergeAnimationState = new AnimationState();
     public AnimationState diggingAnimationState = new AnimationState();
     public AnimationState attackAnimationState = new AnimationState();
-    private final DynamicGameEventListener dynamicGameEventListener;
-    private VibrationListener vibrationListener;
-    private AngerManagement angerManagement = new AngerManagement(Collections.emptyMap());
+    private final DynamicGameEventListener<VibrationListener> dynamicGameEventListener;
+    private AngerManagement angerManagement = new AngerManagement(Collections.emptyList());
 
     public Warden(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
-        this.vibrationListener = new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0, 0);
-        this.dynamicGameEventListener = new DynamicGameEventListener(this.vibrationListener);
+        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0, 0));
         this.xpReward = 5;
         this.getNavigation().setCanFloat(true);
         this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0f);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, 8.0f);
+        this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, 8.0f);
+        this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0f);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0.0f);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0.0f);
+    }
+
+    @Override
+    public Packet<?> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this, this.hasPose(Pose.EMERGING) ? 1 : 0);
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        if (clientboundAddEntityPacket.getData() == 1) {
+            this.setPose(Pose.EMERGING);
+        }
     }
 
     @Override
     public boolean checkSpawnObstruction(LevelReader levelReader) {
-        return levelReader.noCollision(this);
+        return super.checkSpawnObstruction(levelReader) && levelReader.noCollision(this);
     }
 
     @Override
@@ -127,7 +143,11 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        return this.hasPose(Pose.DIGGING) || this.hasPose(Pose.EMERGING) || super.isInvulnerableTo(damageSource);
+        return this.isDiggingOrEmerging() || super.isInvulnerableTo(damageSource);
+    }
+
+    private boolean isDiggingOrEmerging() {
+        return this.hasPose(Pose.DIGGING) || this.hasPose(Pose.EMERGING);
     }
 
     @Override
@@ -145,26 +165,6 @@ implements VibrationListener.VibrationListenerConfig {
         return this.moveDist + 0.55f;
     }
 
-    @Override
-    public double getFluidJumpThreshold() {
-        return (double)this.getEyeHeight() * 0.9;
-    }
-
-    @Override
-    protected void jumpInLiquid(TagKey<Fluid> tagKey) {
-        this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.4, 0.0));
-    }
-
-    @Override
-    protected float getWaterSlowDown() {
-        return 0.98f;
-    }
-
-    @Override
-    public boolean isPushedByFluid() {
-        return false;
-    }
-
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 500.0).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.KNOCKBACK_RESISTANCE, 1.0).add(Attributes.ATTACK_KNOCKBACK, 1.5).add(Attributes.ATTACK_DAMAGE, 30.0);
     }
@@ -175,11 +175,6 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public SoundSource getSoundSource() {
-        return SoundSource.HOSTILE;
-    }
-
-    @Override
     protected float getSoundVolume() {
         return 4.0f;
     }
@@ -187,7 +182,7 @@ implements VibrationListener.VibrationListenerConfig {
     @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
-        if (this.hasPose(Pose.ROARING)) {
+        if (this.hasPose(Pose.ROARING) || this.isDiggingOrEmerging()) {
             return null;
         }
         return this.getAngerLevel().getAmbientSound();
@@ -234,7 +229,7 @@ implements VibrationListener.VibrationListenerConfig {
         Level level = this.level;
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            this.vibrationListener.tick(serverLevel);
+            this.dynamicGameEventListener.getListener().tick(serverLevel);
             if (this.hasCustomName()) {
                 WardenAi.setDigCooldown(this);
             }
@@ -242,16 +237,18 @@ implements VibrationListener.VibrationListenerConfig {
         super.tick();
         if (this.level.isClientSide()) {
             if (this.tickCount % this.getHeartBeatDelay() == 0) {
-                this.heartAnimation = 0.0f;
-                this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_HEARTBEAT, this.getSoundSource(), 5.0f, this.getVoicePitch(), false);
+                this.heartAnimation = 10;
+                if (!this.isSilent()) {
+                    this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_HEARTBEAT, this.getSoundSource(), 5.0f, this.getVoicePitch(), false);
+                }
             }
-            this.earAnimationO = this.earAnimation;
-            if (this.earAnimation < 1.0f) {
-                this.earAnimation += 0.1f;
+            this.tendrilAnimationO = this.tendrilAnimation;
+            if (this.tendrilAnimation > 0) {
+                --this.tendrilAnimation;
             }
             this.heartAnimationO = this.heartAnimation;
-            if (this.heartAnimation < 1.0f) {
-                this.heartAnimation += 0.1f;
+            if (this.heartAnimation > 0) {
+                --this.heartAnimation;
             }
             switch (this.getPose()) {
                 case EMERGING: {
@@ -267,17 +264,16 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     protected void customServerAiStep() {
-        this.level.getProfiler().push("wardenBrain");
-        this.getBrain().tick((ServerLevel)this.level, this);
+        ServerLevel serverLevel = (ServerLevel)this.level;
+        serverLevel.getProfiler().push("wardenBrain");
+        this.getBrain().tick(serverLevel, this);
         this.level.getProfiler().pop();
         super.customServerAiStep();
         if ((this.tickCount + this.getId()) % 120 == 0) {
-            Warden.applyDarknessAround((ServerLevel)this.level, this.position(), this, 20);
+            Warden.applyDarknessAround(serverLevel, this.position(), this, 20);
         }
         if (this.tickCount % 20 == 0) {
-            int i = this.angerManagement.getActiveAnger();
-            this.angerManagement.tick();
-            this.onDecayedAnger(i, this.angerManagement.getActiveAnger());
+            this.angerManagement.tick(serverLevel, this::canTargetEntity);
         }
         this.syncClientAngerLevel();
         WardenAi.updateActivity(this);
@@ -288,7 +284,7 @@ implements VibrationListener.VibrationListenerConfig {
         if (b == 4) {
             this.attackAnimationState.start();
         } else if (b == 61) {
-            this.earAnimation = 0.0f;
+            this.tendrilAnimation = 10;
         } else {
             super.handleEntityEvent(b);
         }
@@ -300,22 +296,24 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     public float getTendrilAnimation(float f) {
-        return Math.max(1.0f - Mth.lerp(f, this.earAnimationO, this.earAnimation), 0.0f);
+        return Mth.lerp(f, this.tendrilAnimationO, this.tendrilAnimation) / 10.0f;
     }
 
     public float getHeartAnimation(float f) {
-        return Math.max(1.0f - Mth.lerp(f, this.heartAnimationO, this.heartAnimation), 0.0f);
+        return Mth.lerp(f, this.heartAnimationO, this.heartAnimation) / 10.0f;
     }
 
     private void clientDiggingParticles(AnimationState animationState) {
         if ((float)(Util.getMillis() - animationState.startTime()) < 4500.0f) {
-            Random random = this.getRandom();
+            RandomSource randomSource = this.getRandom();
             BlockState blockState = this.level.getBlockState(this.blockPosition().below());
-            for (int i = 0; i < 30; ++i) {
-                double d = this.getX() + (double)Mth.randomBetween(random, -0.7f, 0.7f);
-                double e = this.getY();
-                double f = this.getZ() + (double)Mth.randomBetween(random, -0.7f, 0.7f);
-                this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), d, e, f, 0.0, 0.0, 0.0);
+            if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
+                for (int i = 0; i < 30; ++i) {
+                    double d = this.getX() + (double)Mth.randomBetween(randomSource, -0.7f, 0.7f);
+                    double e = this.getY();
+                    double f = this.getZ() + (double)Mth.randomBetween(randomSource, -0.7f, 0.7f);
+                    this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), d, e, f, 0.0, 0.0, 0.0);
+                }
             }
         }
     }
@@ -360,7 +358,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener, ServerLevel> biConsumer) {
+    public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> biConsumer) {
         Level level = this.level;
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
@@ -370,19 +368,21 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public TagKey<GameEvent> getListenableEvents() {
-        return GameEventTags.WARDEN_EVENTS_CAN_LISTEN;
+        return GameEventTags.WARDEN_CAN_LISTEN;
     }
 
     /*
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    public static boolean canTargetEntity(@Nullable Entity entity) {
+    public boolean canTargetEntity(@Nullable Entity entity) {
         if (!(entity instanceof LivingEntity)) return false;
         LivingEntity livingEntity = (LivingEntity)entity;
         if (!EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)) return false;
+        if (this.isAlliedTo(entity)) return false;
         if (livingEntity.getType() == EntityType.ARMOR_STAND) return false;
         if (livingEntity.getType() == EntityType.WARDEN) return false;
+        if (livingEntity.isInvulnerable()) return false;
         if (livingEntity.isDeadOrDying()) return false;
         return true;
     }
@@ -396,7 +396,7 @@ implements VibrationListener.VibrationListenerConfig {
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         AngerManagement.CODEC.encodeStart(NbtOps.INSTANCE, this.angerManagement).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("anger", (Tag)tag));
-        VibrationListener.codec(this).encodeStart(NbtOps.INSTANCE, this.vibrationListener).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", (Tag)tag));
+        VibrationListener.codec(this).encodeStart(NbtOps.INSTANCE, this.dynamicGameEventListener.getListener()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", (Tag)tag));
     }
 
     @Override
@@ -409,22 +409,13 @@ implements VibrationListener.VibrationListenerConfig {
             this.syncClientAngerLevel();
         }
         if (compoundTag.contains("listener", 10)) {
-            VibrationListener.codec(this).parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("listener"))).resultOrPartial(LOGGER::error).ifPresent(vibrationListener -> {
-                this.vibrationListener = vibrationListener;
-            });
-        }
-    }
-
-    private void onDecayedAnger(int i, int j) {
-        if (i >= 70 && j < 70) {
-            this.playListeningSound();
+            VibrationListener.codec(this).parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("listener"))).resultOrPartial(LOGGER::error).ifPresent(vibrationListener -> this.dynamicGameEventListener.updateListener((VibrationListener)vibrationListener, this.level));
         }
     }
 
     private void playListeningSound() {
         if (!this.hasPose(Pose.ROARING)) {
-            SoundEvent soundEvent = this.getAngerLevel() == AngerLevel.CALM ? SoundEvents.WARDEN_LISTENING : SoundEvents.WARDEN_LISTENING_ANGRY;
-            this.playSound(soundEvent, 10.0f, this.getVoicePitch());
+            this.playSound(this.getAngerLevel().getListeningSound(), 10.0f, this.getVoicePitch());
         }
     }
 
@@ -437,28 +428,27 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     public void increaseAngerAt(@Nullable Entity entity) {
-        this.increaseAngerAt(entity, entity instanceof Projectile ? 20 : 35);
+        this.increaseAngerAt(entity, 35, true);
     }
 
     @VisibleForTesting
-    public void increaseAngerAt(@Nullable Entity entity, int i) {
-        if (Warden.canTargetEntity(entity)) {
+    public void increaseAngerAt(@Nullable Entity entity, int i, boolean bl) {
+        if (this.canTargetEntity(entity)) {
             WardenAi.setDigCooldown(this);
-            boolean bl = this.getEntityAngryAt().filter(livingEntity -> !(livingEntity instanceof Player)).isPresent();
-            int j = this.angerManagement.addAnger(entity, i);
-            if (entity instanceof Player) {
-                Player player = (Player)entity;
-                if (bl && AngerLevel.byAnger(j) == AngerLevel.ANGRY) {
-                    this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, player);
-                }
+            boolean bl2 = this.getEntityAngryAt().filter(livingEntity -> !(livingEntity instanceof Player)).isPresent();
+            int j = this.angerManagement.increaseAnger(entity, i);
+            if (entity instanceof Player && bl2 && AngerLevel.byAnger(j) == AngerLevel.ANGRY) {
+                this.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
             }
-            this.playListeningSound();
+            if (bl) {
+                this.playListeningSound();
+            }
         }
     }
 
     public Optional<LivingEntity> getEntityAngryAt() {
         if (this.getAngerLevel() == AngerLevel.ANGRY) {
-            return this.angerManagement.getActiveEntity(this.level);
+            return this.angerManagement.getActiveEntity();
         }
         return Optional.empty();
     }
@@ -473,6 +463,11 @@ implements VibrationListener.VibrationListenerConfig {
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 1200L);
+        if (mobSpawnType == MobSpawnType.TRIGGERED) {
+            this.setPose(Pose.EMERGING);
+            this.getBrain().setMemoryWithExpiry(MemoryModuleType.IS_EMERGING, Unit.INSTANCE, WardenAi.EMERGE_DURATION);
+            this.setPersistenceRequired();
+        }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -495,7 +490,7 @@ implements VibrationListener.VibrationListenerConfig {
         }
         if (bl) {
             Entity entity = damageSource.getEntity();
-            this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20);
+            this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
             if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity)entity;
                 if (!(damageSource instanceof IndirectEntityDamageSource) || this.closerThan(livingEntity, 5.0)) {
@@ -507,24 +502,38 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public void playerTouch(Player player) {
+    public EntityDimensions getDimensions(Pose pose) {
+        EntityDimensions entityDimensions = super.getDimensions(pose);
+        if (this.isDiggingOrEmerging()) {
+            return EntityDimensions.fixed(entityDimensions.width, 1.0f);
+        }
+        return entityDimensions;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return !this.isDiggingOrEmerging() && super.isPushable();
+    }
+
+    @Override
+    protected void doPush(Entity entity) {
         if (!this.getBrain().hasMemoryValue(MemoryModuleType.TOUCH_COOLDOWN)) {
             this.getBrain().setMemoryWithExpiry(MemoryModuleType.TOUCH_COOLDOWN, Unit.INSTANCE, 20L);
-            this.increaseAngerAt(player);
-            WardenAi.setDisturbanceLocation(this, player.blockPosition());
+            this.increaseAngerAt(entity);
+            WardenAi.setDisturbanceLocation(this, entity.blockPosition());
         }
+        super.doPush(entity);
     }
 
     @Override
     public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity) {
-        if (this.getBrain().getMemory(MemoryModuleType.VIBRATION_COOLDOWN).isPresent()) {
+        if (this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN)) {
             return false;
         }
-        Pose pose = this.getPose();
-        if (pose == Pose.DIGGING || pose == Pose.EMERGING) {
+        if (this.isDiggingOrEmerging()) {
             return false;
         }
-        return !(entity instanceof LivingEntity) || Warden.canTargetEntity(entity);
+        return !(entity instanceof LivingEntity) || this.canTargetEntity(entity);
     }
 
     @Override
@@ -534,15 +543,21 @@ implements VibrationListener.VibrationListenerConfig {
         this.playSound(SoundEvents.WARDEN_TENDRIL_CLICKS, 5.0f, this.getVoicePitch());
         BlockPos blockPos2 = blockPos;
         if (entity2 != null) {
-            if (this.getBrain().hasMemoryValue(MemoryModuleType.RECENT_PROJECTILE) && Warden.canTargetEntity(entity2) && this.closerThan(entity2, 30.0)) {
-                blockPos2 = entity2.blockPosition();
-                this.increaseAngerAt(entity2);
+            if (this.closerThan(entity2, 30.0)) {
+                if (this.getBrain().hasMemoryValue(MemoryModuleType.RECENT_PROJECTILE)) {
+                    if (this.canTargetEntity(entity2)) {
+                        blockPos2 = entity2.blockPosition();
+                    }
+                    this.increaseAngerAt(entity2);
+                } else {
+                    this.increaseAngerAt(entity2, 10, true);
+                }
             }
             this.getBrain().setMemoryWithExpiry(MemoryModuleType.RECENT_PROJECTILE, Unit.INSTANCE, 100L);
         } else {
             this.increaseAngerAt(entity);
         }
-        if (this.getAngerLevel() != AngerLevel.ANGRY && (entity2 != null || this.angerManagement.getActiveEntity(serverLevel).map(livingEntity -> livingEntity == entity).orElse(true).booleanValue())) {
+        if (this.getAngerLevel() != AngerLevel.ANGRY && (entity2 != null || this.angerManagement.getActiveEntity().map(livingEntity -> livingEntity == entity).orElse(true).booleanValue())) {
             WardenAi.setDisturbanceLocation(this, blockPos2);
         }
     }

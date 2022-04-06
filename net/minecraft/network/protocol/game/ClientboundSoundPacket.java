@@ -21,8 +21,9 @@ implements Packet<ClientGamePacketListener> {
     private final int z;
     private final float volume;
     private final float pitch;
+    private final long seed;
 
-    public ClientboundSoundPacket(SoundEvent soundEvent, SoundSource soundSource, double d, double e, double f, float g, float h) {
+    public ClientboundSoundPacket(SoundEvent soundEvent, SoundSource soundSource, double d, double e, double f, float g, float h, long l) {
         Validate.notNull(soundEvent, "sound", new Object[0]);
         this.sound = soundEvent;
         this.source = soundSource;
@@ -31,6 +32,7 @@ implements Packet<ClientGamePacketListener> {
         this.z = (int)(f * 8.0);
         this.volume = g;
         this.pitch = h;
+        this.seed = l;
     }
 
     public ClientboundSoundPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -41,6 +43,7 @@ implements Packet<ClientGamePacketListener> {
         this.z = friendlyByteBuf.readInt();
         this.volume = friendlyByteBuf.readFloat();
         this.pitch = friendlyByteBuf.readFloat();
+        this.seed = friendlyByteBuf.readLong();
     }
 
     @Override
@@ -52,6 +55,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeInt(this.z);
         friendlyByteBuf.writeFloat(this.volume);
         friendlyByteBuf.writeFloat(this.pitch);
+        friendlyByteBuf.writeLong(this.seed);
     }
 
     public SoundEvent getSound() {
@@ -80,6 +84,10 @@ implements Packet<ClientGamePacketListener> {
 
     public float getPitch() {
         return this.pitch;
+    }
+
+    public long getSeed() {
+        return this.seed;
     }
 
     @Override

@@ -9,8 +9,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -52,12 +52,12 @@ extends BlockStateProvider {
     }
 
     @Override
-    public BlockState getState(Random random, BlockPos blockPos) {
-        BlockState blockState = this.source.getState(random, blockPos);
+    public BlockState getState(RandomSource randomSource, BlockPos blockPos) {
+        BlockState blockState = this.source.getState(randomSource, blockPos);
         if (this.property == null || !blockState.hasProperty(this.property)) {
             this.property = RandomizedIntStateProvider.findProperty(blockState, this.propertyName);
         }
-        return (BlockState)blockState.setValue(this.property, this.values.sample(random));
+        return (BlockState)blockState.setValue(this.property, this.values.sample(randomSource));
     }
 
     private static IntegerProperty findProperty(BlockState blockState, String string) {

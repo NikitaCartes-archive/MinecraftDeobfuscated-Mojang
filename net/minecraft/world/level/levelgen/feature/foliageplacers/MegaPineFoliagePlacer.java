@@ -7,10 +7,10 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,25 +34,25 @@ extends FoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
+    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
         BlockPos blockPos = foliageAttachment.pos();
         int m = 0;
         for (int n = blockPos.getY() - j + l; n <= blockPos.getY() + l; ++n) {
             int o = blockPos.getY() - n;
             int p = k + foliageAttachment.radiusOffset() + Mth.floor((float)o / (float)j * 3.5f);
             int q = o > 0 && p == m && (n & 1) == 0 ? p + 1 : p;
-            this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, 0, foliageAttachment.doubleTrunk());
+            this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, 0, foliageAttachment.doubleTrunk());
             m = p;
         }
     }
 
     @Override
-    public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-        return this.crownHeight.sample(random);
+    public int foliageHeight(RandomSource randomSource, int i, TreeConfiguration treeConfiguration) {
+        return this.crownHeight.sample(randomSource);
     }
 
     @Override
-    protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+    protected boolean shouldSkipLocation(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
         if (i + k >= 7) {
             return true;
         }

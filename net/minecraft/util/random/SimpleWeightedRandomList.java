@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandomList;
 
@@ -38,8 +38,8 @@ extends WeightedRandomList<WeightedEntry.Wrapper<E>> {
         return new SimpleWeightedRandomList<E>(List.of(WeightedEntry.wrap(object, 1)));
     }
 
-    public Optional<E> getRandomValue(Random random) {
-        return this.getRandom(random).map(WeightedEntry.Wrapper::getData);
+    public Optional<E> getRandomValue(RandomSource randomSource) {
+        return this.getRandom(randomSource).map(WeightedEntry.Wrapper::getData);
     }
 
     public static class Builder<E> {

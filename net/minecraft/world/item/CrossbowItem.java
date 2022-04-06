@@ -8,7 +8,6 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -22,6 +21,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -260,14 +260,14 @@ implements Vanishable {
         CrossbowItem.onCrossbowShot(level, livingEntity, itemStack);
     }
 
-    private static float[] getShotPitches(Random random) {
-        boolean bl = random.nextBoolean();
-        return new float[]{1.0f, CrossbowItem.getRandomShotPitch(bl, random), CrossbowItem.getRandomShotPitch(!bl, random)};
+    private static float[] getShotPitches(RandomSource randomSource) {
+        boolean bl = randomSource.nextBoolean();
+        return new float[]{1.0f, CrossbowItem.getRandomShotPitch(bl, randomSource), CrossbowItem.getRandomShotPitch(!bl, randomSource)};
     }
 
-    private static float getRandomShotPitch(boolean bl, Random random) {
+    private static float getRandomShotPitch(boolean bl, RandomSource randomSource) {
         float f = bl ? 0.63f : 0.43f;
-        return 1.0f / (random.nextFloat() * 0.5f + 1.8f) + f;
+        return 1.0f / (randomSource.nextFloat() * 0.5f + 1.8f) + f;
     }
 
     private static void onCrossbowShot(Level level, LivingEntity livingEntity, ItemStack itemStack) {

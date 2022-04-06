@@ -3,14 +3,12 @@
  */
 package net.minecraft.world.level.block;
 
-import com.google.common.collect.Lists;
 import com.mojang.math.OctahedralGroup;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 
 public enum Rotation {
     NONE(OctahedralGroup.IDENTITY),
@@ -115,14 +113,12 @@ public enum Rotation {
         return i;
     }
 
-    public static Rotation getRandom(Random random) {
-        return Util.getRandom(Rotation.values(), random);
+    public static Rotation getRandom(RandomSource randomSource) {
+        return Util.getRandom(Rotation.values(), randomSource);
     }
 
-    public static List<Rotation> getShuffled(Random random) {
-        ArrayList<Rotation> list = Lists.newArrayList(Rotation.values());
-        Collections.shuffle(list, random);
-        return list;
+    public static List<Rotation> getShuffled(RandomSource randomSource) {
+        return Util.shuffledCopy(Arrays.asList(Rotation.values()), randomSource);
     }
 }
 

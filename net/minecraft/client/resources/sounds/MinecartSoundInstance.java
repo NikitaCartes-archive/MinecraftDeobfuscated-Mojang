@@ -6,6 +6,7 @@ package net.minecraft.client.resources.sounds;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -23,7 +24,7 @@ extends AbstractTickableSoundInstance {
     private float pitch = 0.0f;
 
     public MinecartSoundInstance(AbstractMinecart abstractMinecart) {
-        super(SoundEvents.MINECART_RIDING, SoundSource.NEUTRAL);
+        super(SoundEvents.MINECART_RIDING, SoundSource.NEUTRAL, SoundInstance.createUnseededRandom());
         this.minecart = abstractMinecart;
         this.looping = true;
         this.delay = 0;

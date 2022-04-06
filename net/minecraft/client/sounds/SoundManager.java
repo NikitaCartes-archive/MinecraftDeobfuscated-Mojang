@@ -8,12 +8,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.logging.LogUtils;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,18 +36,20 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.valueproviders.ConstantFloat;
+import net.minecraft.util.valueproviders.MultipliedFloats;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class SoundManager
 extends SimplePreparableReloadListener<Preparations> {
-    public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", 1.0f, 1.0f, 1, Sound.Type.FILE, false, false, 16);
+    public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", ConstantFloat.of(1.0f), ConstantFloat.of(1.0f), 1, Sound.Type.FILE, false, false, 16);
     static final Logger LOGGER = LogUtils.getLogger();
     private static final String SOUNDS_PATH = "sounds.json";
     private static final Gson GSON = new GsonBuilder().registerTypeHierarchyAdapter(Component.class, new Component.Serializer()).registerTypeAdapter((Type)((Object)SoundEventRegistration.class), new SoundEventRegistrationSerializer()).create();
@@ -68,12 +68,10 @@ extends SimplePreparableReloadListener<Preparations> {
         for (String string : resourceManager.getNamespaces()) {
             profilerFiller.push(string);
             try {
-                List<ResourceThunk> list = resourceManager.getResourceStack(new ResourceLocation(string, SOUNDS_PATH));
-                for (ResourceThunk resourceThunk : list) {
-                    profilerFiller.push(resourceThunk.sourcePackId());
-                    try (Resource resource = resourceThunk.open();
-                         InputStream inputStream = resource.getInputStream();
-                         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);){
+                List<Resource> list = resourceManager.getResourceStack(new ResourceLocation(string, SOUNDS_PATH));
+                for (Resource resource : list) {
+                    profilerFiller.push(resource.sourcePackId());
+                    try (BufferedReader reader = resource.openAsReader();){
                         profilerFiller.push("parse");
                         Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, (Reader)reader, SOUND_EVENT_REGISTRATION_TYPE);
                         profilerFiller.popPush("register");
@@ -82,7 +80,7 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
                         profilerFiller.pop();
                     } catch (RuntimeException runtimeException) {
-                        LOGGER.warn("Invalid {} in resourcepack: '{}'", SOUNDS_PATH, resourceThunk.sourcePackId(), runtimeException);
+                        LOGGER.warn("Invalid {} in resourcepack: '{}'", SOUNDS_PATH, resource.sourcePackId(), runtimeException);
                     }
                     profilerFiller.pop();
                 }
@@ -121,7 +119,7 @@ extends SimplePreparableReloadListener<Preparations> {
 
     static boolean validateSoundResource(Sound sound, ResourceLocation resourceLocation, ResourceManager resourceManager) {
         ResourceLocation resourceLocation2 = sound.getPath();
-        if (!resourceManager.hasResource(resourceLocation2)) {
+        if (resourceManager.getResource(resourceLocation2).isEmpty()) {
             LOGGER.warn("File {} does not exist, cannot add it to event {}", (Object)resourceLocation2, (Object)resourceLocation);
             return false;
         }
@@ -247,13 +245,13 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
 
                         @Override
-                        public Sound getSound() {
+                        public Sound getSound(RandomSource randomSource) {
                             WeighedSoundEvents weighedSoundEvents = registry.get(resourceLocation2);
                             if (weighedSoundEvents == null) {
                                 return EMPTY_SOUND;
                             }
-                            Sound sound2 = weighedSoundEvents.getSound();
-                            return new Sound(sound2.getLocation().toString(), sound2.getVolume() * sound.getVolume(), sound2.getPitch() * sound.getPitch(), sound.getWeight(), Sound.Type.FILE, sound2.shouldStream() || sound.shouldStream(), sound2.shouldPreload(), sound2.getAttenuationDistance());
+                            Sound sound2 = weighedSoundEvents.getSound(randomSource);
+                            return new Sound(sound2.getLocation().toString(), new MultipliedFloats(sound2.getVolume(), sound.getVolume()), new MultipliedFloats(sound2.getPitch(), sound.getPitch()), sound.getWeight(), Sound.Type.FILE, sound2.shouldStream() || sound.shouldStream(), sound2.shouldPreload(), sound2.getAttenuationDistance());
                         }
 
                         @Override
@@ -266,8 +264,8 @@ extends SimplePreparableReloadListener<Preparations> {
                         }
 
                         @Override
-                        public /* synthetic */ Object getSound() {
-                            return this.getSound();
+                        public /* synthetic */ Object getSound(RandomSource randomSource) {
+                            return this.getSound(randomSource);
                         }
                     };
                     default -> throw new IllegalStateException("Unknown SoundEventRegistration type: " + sound.getType());

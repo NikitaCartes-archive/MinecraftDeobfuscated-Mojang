@@ -8,9 +8,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.util.valueproviders.FloatProviderType;
 
@@ -38,8 +38,8 @@ extends FloatProvider {
     }
 
     @Override
-    public float sample(Random random) {
-        return Mth.randomBetween(random, this.minInclusive, this.maxExclusive);
+    public float sample(RandomSource randomSource) {
+        return Mth.randomBetween(randomSource, this.minInclusive, this.maxExclusive);
     }
 
     @Override

@@ -8,13 +8,13 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -79,12 +79,12 @@ extends StructurePiece {
     }
 
     @Override
-    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-        this.place(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, blockPos, false);
+    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        this.place(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, blockPos, false);
     }
 
-    public void place(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, BlockPos blockPos, boolean bl) {
-        this.element.place(this.structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
+    public void place(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, BlockPos blockPos, boolean bl) {
+        this.element.place(this.structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, randomSource, bl);
     }
 
     @Override

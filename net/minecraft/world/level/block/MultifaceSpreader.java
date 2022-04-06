@@ -5,9 +5,9 @@ package net.minecraft.world.level.block;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -31,16 +31,16 @@ public class MultifaceSpreader {
         return Direction.stream().anyMatch(direction2 -> this.getSpreadFromFaceTowardDirection(blockState, blockGetter, blockPos, direction, (Direction)direction2, this.config::canSpreadInto).isPresent());
     }
 
-    public Optional<SpreadPos> spreadFromRandomFaceTowardRandomDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
-        return Direction.allShuffled(random).stream().filter(direction -> this.config.canSpreadFrom(blockState, (Direction)direction)).map(direction -> this.spreadFromFaceTowardRandomDirection(blockState, levelAccessor, blockPos, (Direction)direction, random, false)).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
+    public Optional<SpreadPos> spreadFromRandomFaceTowardRandomDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource) {
+        return Direction.allShuffled(randomSource).stream().filter(direction -> this.config.canSpreadFrom(blockState, (Direction)direction)).map(direction -> this.spreadFromFaceTowardRandomDirection(blockState, levelAccessor, blockPos, (Direction)direction, randomSource, false)).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
     }
 
     public long spreadAll(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
         return Direction.stream().filter(direction -> this.config.canSpreadFrom(blockState, (Direction)direction)).map(direction -> this.spreadFromFaceTowardAllDirections(blockState, levelAccessor, blockPos, (Direction)direction, bl)).reduce(0L, Long::sum);
     }
 
-    public Optional<SpreadPos> spreadFromFaceTowardRandomDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Random random, boolean bl) {
-        return Direction.allShuffled(random).stream().map(direction2 -> this.spreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, (Direction)direction2, bl)).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
+    public Optional<SpreadPos> spreadFromFaceTowardRandomDirection(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, RandomSource randomSource, boolean bl) {
+        return Direction.allShuffled(randomSource).stream().map(direction2 -> this.spreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, (Direction)direction2, bl)).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
     }
 
     private long spreadFromFaceTowardAllDirections(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, boolean bl) {

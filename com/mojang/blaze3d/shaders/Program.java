@@ -5,22 +5,20 @@ package com.mojang.blaze3d.shaders;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Shader;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class Program {
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_LOG_LENGTH = 32768;
     private final Type type;
     private final String name;
@@ -60,7 +58,7 @@ public class Program {
     }
 
     protected static int compileShaderInternal(Type type, String string, InputStream inputStream, String string2, GlslPreprocessor glslPreprocessor) throws IOException {
-        String string3 = TextureUtil.readResourceAsString(inputStream);
+        String string3 = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         if (string3 == null) {
             throw new IOException("Could not load program " + type.getName());
         }
@@ -72,10 +70,6 @@ public class Program {
             throw new IOException("Couldn't compile " + type.getName() + " program (" + string2 + ", " + string + ") : " + string4);
         }
         return i;
-    }
-
-    private static Program createProgram(Type type, String string, int i) {
-        return new Program(type, i, string);
     }
 
     protected int getId() {

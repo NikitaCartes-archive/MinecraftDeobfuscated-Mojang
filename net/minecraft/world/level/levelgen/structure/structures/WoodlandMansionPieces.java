@@ -5,13 +5,13 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -34,18 +34,18 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jetbrains.annotations.Nullable;
 
 public class WoodlandMansionPieces {
-    public static void generateMansion(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, List<WoodlandMansionPiece> list, Random random) {
-        MansionGrid mansionGrid = new MansionGrid(random);
-        MansionPiecePlacer mansionPiecePlacer = new MansionPiecePlacer(structureTemplateManager, random);
+    public static void generateMansion(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, List<WoodlandMansionPiece> list, RandomSource randomSource) {
+        MansionGrid mansionGrid = new MansionGrid(randomSource);
+        MansionPiecePlacer mansionPiecePlacer = new MansionPiecePlacer(structureTemplateManager, randomSource);
         mansionPiecePlacer.createMansion(blockPos, rotation, list, mansionGrid);
     }
 
     public static void main(String[] strings) {
-        Random random = new Random();
-        long l = random.nextLong();
+        RandomSource randomSource = RandomSource.create();
+        long l = randomSource.nextLong();
         System.out.println("Seed: " + l);
-        random.setSeed(l);
-        MansionGrid mansionGrid = new MansionGrid(random);
+        randomSource.setSeed(l);
+        MansionGrid mansionGrid = new MansionGrid(randomSource);
         mansionGrid.print();
     }
 
@@ -66,15 +66,15 @@ public class WoodlandMansionPieces {
         private static final int ROOM_CORRIDOR_FLAG = 0x800000;
         private static final int ROOM_TYPE_MASK = 983040;
         private static final int ROOM_ID_MASK = 65535;
-        private final Random random;
+        private final RandomSource random;
         final SimpleGrid baseGrid;
         final SimpleGrid thirdFloorGrid;
         final SimpleGrid[] floorRooms;
         final int entranceX;
         final int entranceY;
 
-        public MansionGrid(Random random) {
-            this.random = random;
+        public MansionGrid(RandomSource randomSource) {
+            this.random = randomSource;
             int i = 11;
             this.entranceX = 7;
             this.entranceY = 4;
@@ -242,7 +242,7 @@ public class WoodlandMansionPieces {
                     list.add(new Tuple<Integer, Integer>(j, i));
                 }
             }
-            Collections.shuffle(list, this.random);
+            Util.shuffle(list, this.random);
             i = 10;
             for (Tuple tuple : list) {
                 int l;
@@ -347,13 +347,13 @@ public class WoodlandMansionPieces {
 
     static class MansionPiecePlacer {
         private final StructureTemplateManager structureTemplateManager;
-        private final Random random;
+        private final RandomSource random;
         private int startX;
         private int startY;
 
-        public MansionPiecePlacer(StructureTemplateManager structureTemplateManager, Random random) {
+        public MansionPiecePlacer(StructureTemplateManager structureTemplateManager, RandomSource randomSource) {
             this.structureTemplateManager = structureTemplateManager;
-            this.random = random;
+            this.random = randomSource;
         }
 
         public void createMansion(BlockPos blockPos, Rotation rotation, List<WoodlandMansionPiece> list, MansionGrid mansionGrid) {
@@ -811,43 +811,43 @@ public class WoodlandMansionPieces {
         }
 
         @Override
-        public String get1x1(Random random) {
-            return "1x1_b" + (random.nextInt(4) + 1);
+        public String get1x1(RandomSource randomSource) {
+            return "1x1_b" + (randomSource.nextInt(4) + 1);
         }
 
         @Override
-        public String get1x1Secret(Random random) {
-            return "1x1_as" + (random.nextInt(4) + 1);
+        public String get1x1Secret(RandomSource randomSource) {
+            return "1x1_as" + (randomSource.nextInt(4) + 1);
         }
 
         @Override
-        public String get1x2SideEntrance(Random random, boolean bl) {
+        public String get1x2SideEntrance(RandomSource randomSource, boolean bl) {
             if (bl) {
                 return "1x2_c_stairs";
             }
-            return "1x2_c" + (random.nextInt(4) + 1);
+            return "1x2_c" + (randomSource.nextInt(4) + 1);
         }
 
         @Override
-        public String get1x2FrontEntrance(Random random, boolean bl) {
+        public String get1x2FrontEntrance(RandomSource randomSource, boolean bl) {
             if (bl) {
                 return "1x2_d_stairs";
             }
-            return "1x2_d" + (random.nextInt(5) + 1);
+            return "1x2_d" + (randomSource.nextInt(5) + 1);
         }
 
         @Override
-        public String get1x2Secret(Random random) {
-            return "1x2_se" + (random.nextInt(1) + 1);
+        public String get1x2Secret(RandomSource randomSource) {
+            return "1x2_se" + (randomSource.nextInt(1) + 1);
         }
 
         @Override
-        public String get2x2(Random random) {
-            return "2x2_b" + (random.nextInt(5) + 1);
+        public String get2x2(RandomSource randomSource) {
+            return "2x2_b" + (randomSource.nextInt(5) + 1);
         }
 
         @Override
-        public String get2x2Secret(Random random) {
+        public String get2x2Secret(RandomSource randomSource) {
             return "2x2_s1";
         }
     }
@@ -858,37 +858,37 @@ public class WoodlandMansionPieces {
         }
 
         @Override
-        public String get1x1(Random random) {
-            return "1x1_a" + (random.nextInt(5) + 1);
+        public String get1x1(RandomSource randomSource) {
+            return "1x1_a" + (randomSource.nextInt(5) + 1);
         }
 
         @Override
-        public String get1x1Secret(Random random) {
-            return "1x1_as" + (random.nextInt(4) + 1);
+        public String get1x1Secret(RandomSource randomSource) {
+            return "1x1_as" + (randomSource.nextInt(4) + 1);
         }
 
         @Override
-        public String get1x2SideEntrance(Random random, boolean bl) {
-            return "1x2_a" + (random.nextInt(9) + 1);
+        public String get1x2SideEntrance(RandomSource randomSource, boolean bl) {
+            return "1x2_a" + (randomSource.nextInt(9) + 1);
         }
 
         @Override
-        public String get1x2FrontEntrance(Random random, boolean bl) {
-            return "1x2_b" + (random.nextInt(5) + 1);
+        public String get1x2FrontEntrance(RandomSource randomSource, boolean bl) {
+            return "1x2_b" + (randomSource.nextInt(5) + 1);
         }
 
         @Override
-        public String get1x2Secret(Random random) {
-            return "1x2_s" + (random.nextInt(2) + 1);
+        public String get1x2Secret(RandomSource randomSource) {
+            return "1x2_s" + (randomSource.nextInt(2) + 1);
         }
 
         @Override
-        public String get2x2(Random random) {
-            return "2x2_a" + (random.nextInt(4) + 1);
+        public String get2x2(RandomSource randomSource) {
+            return "2x2_a" + (randomSource.nextInt(4) + 1);
         }
 
         @Override
-        public String get2x2Secret(Random random) {
+        public String get2x2Secret(RandomSource randomSource) {
             return "2x2_s1";
         }
     }
@@ -897,19 +897,19 @@ public class WoodlandMansionPieces {
         FloorRoomCollection() {
         }
 
-        public abstract String get1x1(Random var1);
+        public abstract String get1x1(RandomSource var1);
 
-        public abstract String get1x1Secret(Random var1);
+        public abstract String get1x1Secret(RandomSource var1);
 
-        public abstract String get1x2SideEntrance(Random var1, boolean var2);
+        public abstract String get1x2SideEntrance(RandomSource var1, boolean var2);
 
-        public abstract String get1x2FrontEntrance(Random var1, boolean var2);
+        public abstract String get1x2FrontEntrance(RandomSource var1, boolean var2);
 
-        public abstract String get1x2Secret(Random var1);
+        public abstract String get1x2Secret(RandomSource var1);
 
-        public abstract String get2x2(Random var1);
+        public abstract String get2x2(RandomSource var1);
 
-        public abstract String get2x2Secret(Random var1);
+        public abstract String get2x2Secret(RandomSource var1);
     }
 
     static class SimpleGrid {
@@ -1001,7 +1001,7 @@ public class WoodlandMansionPieces {
         }
 
         @Override
-        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
             if (string.startsWith("Chest")) {
                 Rotation rotation = this.placeSettings.getRotation();
                 BlockState blockState = Blocks.CHEST.defaultBlockState();
@@ -1014,7 +1014,7 @@ public class WoodlandMansionPieces {
                 } else if ("ChestNorth".equals(string)) {
                     blockState = (BlockState)blockState.setValue(ChestBlock.FACING, rotation.rotate(Direction.NORTH));
                 }
-                this.createChest(serverLevelAccessor, boundingBox, random, blockPos, BuiltInLootTables.WOODLAND_MANSION, blockState);
+                this.createChest(serverLevelAccessor, boundingBox, randomSource, blockPos, BuiltInLootTables.WOODLAND_MANSION, blockState);
             } else {
                 ArrayList<Mob> list = new ArrayList<Mob>();
                 switch (string) {

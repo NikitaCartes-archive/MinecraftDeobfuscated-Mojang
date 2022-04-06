@@ -5,9 +5,9 @@ package net.minecraft.world.entity;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.GlowSquid;
@@ -66,9 +66,9 @@ public class SpawnPlacements {
         return data == null ? Heightmap.Types.MOTION_BLOCKING_NO_LEAVES : data.heightMap;
     }
 
-    public static <T extends Entity> boolean checkSpawnRules(EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static <T extends Entity> boolean checkSpawnRules(EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         Data data = DATA_BY_TYPE.get(entityType);
-        return data == null || data.predicate.test(entityType, serverLevelAccessor, mobSpawnType, blockPos, random);
+        return data == null || data.predicate.test(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource);
     }
 
     static {
@@ -168,7 +168,7 @@ public class SpawnPlacements {
 
     @FunctionalInterface
     public static interface SpawnPredicate<T extends Entity> {
-        public boolean test(EntityType<T> var1, ServerLevelAccessor var2, MobSpawnType var3, BlockPos var4, Random var5);
+        public boolean test(EntityType<T> var1, ServerLevelAccessor var2, MobSpawnType var3, BlockPos var4, RandomSource var5);
     }
 }
 

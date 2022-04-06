@@ -6,7 +6,6 @@ package net.minecraft.world.level.block;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -17,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
@@ -393,7 +393,7 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
         if (blockEntity instanceof ChestBlockEntity) {
             ((ChestBlockEntity)blockEntity).recheckOpen();

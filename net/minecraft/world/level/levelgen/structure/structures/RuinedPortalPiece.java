@@ -11,7 +11,6 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +18,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
@@ -116,37 +116,37 @@ extends TemplateStructurePiece {
     }
 
     @Override
-    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
         BoundingBox boundingBox2 = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
         if (!boundingBox.isInside(boundingBox2.getCenter())) {
             return;
         }
         boundingBox.encapsulate(boundingBox2);
-        super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
-        this.spreadNetherrack(random, worldGenLevel);
-        this.addNetherrackDripColumnsBelowPortal(random, worldGenLevel);
+        super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos2);
+        this.spreadNetherrack(randomSource, worldGenLevel);
+        this.addNetherrackDripColumnsBelowPortal(randomSource, worldGenLevel);
         if (this.properties.vines || this.properties.overgrown) {
             BlockPos.betweenClosedStream(this.getBoundingBox()).forEach(blockPos -> {
                 if (this.properties.vines) {
-                    this.maybeAddVines(random, worldGenLevel, (BlockPos)blockPos);
+                    this.maybeAddVines(randomSource, worldGenLevel, (BlockPos)blockPos);
                 }
                 if (this.properties.overgrown) {
-                    this.maybeAddLeavesAbove(random, worldGenLevel, (BlockPos)blockPos);
+                    this.maybeAddLeavesAbove(randomSource, worldGenLevel, (BlockPos)blockPos);
                 }
             });
         }
     }
 
     @Override
-    protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+    protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
     }
 
-    private void maybeAddVines(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
+    private void maybeAddVines(RandomSource randomSource, LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockState blockState = levelAccessor.getBlockState(blockPos);
         if (blockState.isAir() || blockState.is(Blocks.VINE)) {
             return;
         }
-        Direction direction = RuinedPortalPiece.getRandomHorizontalDirection(random);
+        Direction direction = RuinedPortalPiece.getRandomHorizontalDirection(randomSource);
         BlockPos blockPos2 = blockPos.relative(direction);
         BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
         if (!blockState2.isAir()) {
@@ -159,32 +159,32 @@ extends TemplateStructurePiece {
         levelAccessor.setBlock(blockPos2, (BlockState)Blocks.VINE.defaultBlockState().setValue(booleanProperty, true), 3);
     }
 
-    private void maybeAddLeavesAbove(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
-        if (random.nextFloat() < 0.5f && levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK) && levelAccessor.getBlockState(blockPos.above()).isAir()) {
+    private void maybeAddLeavesAbove(RandomSource randomSource, LevelAccessor levelAccessor, BlockPos blockPos) {
+        if (randomSource.nextFloat() < 0.5f && levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK) && levelAccessor.getBlockState(blockPos.above()).isAir()) {
             levelAccessor.setBlock(blockPos.above(), (BlockState)Blocks.JUNGLE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true), 3);
         }
     }
 
-    private void addNetherrackDripColumnsBelowPortal(Random random, LevelAccessor levelAccessor) {
+    private void addNetherrackDripColumnsBelowPortal(RandomSource randomSource, LevelAccessor levelAccessor) {
         for (int i = this.boundingBox.minX() + 1; i < this.boundingBox.maxX(); ++i) {
             for (int j = this.boundingBox.minZ() + 1; j < this.boundingBox.maxZ(); ++j) {
                 BlockPos blockPos = new BlockPos(i, this.boundingBox.minY(), j);
                 if (!levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK)) continue;
-                this.addNetherrackDripColumn(random, levelAccessor, blockPos.below());
+                this.addNetherrackDripColumn(randomSource, levelAccessor, blockPos.below());
             }
         }
     }
 
-    private void addNetherrackDripColumn(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
+    private void addNetherrackDripColumn(RandomSource randomSource, LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-        this.placeNetherrackOrMagma(random, levelAccessor, mutableBlockPos);
-        for (int i = 8; i > 0 && random.nextFloat() < 0.5f; --i) {
+        this.placeNetherrackOrMagma(randomSource, levelAccessor, mutableBlockPos);
+        for (int i = 8; i > 0 && randomSource.nextFloat() < 0.5f; --i) {
             mutableBlockPos.move(Direction.DOWN);
-            this.placeNetherrackOrMagma(random, levelAccessor, mutableBlockPos);
+            this.placeNetherrackOrMagma(randomSource, levelAccessor, mutableBlockPos);
         }
     }
 
-    private void spreadNetherrack(Random random, LevelAccessor levelAccessor) {
+    private void spreadNetherrack(RandomSource randomSource, LevelAccessor levelAccessor) {
         boolean bl = this.verticalPlacement == VerticalPlacement.ON_LAND_SURFACE || this.verticalPlacement == VerticalPlacement.ON_OCEAN_FLOOR;
         BlockPos blockPos = this.boundingBox.getCenter();
         int i = blockPos.getX();
@@ -192,7 +192,7 @@ extends TemplateStructurePiece {
         float[] fs = new float[]{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.9f, 0.9f, 0.8f, 0.7f, 0.6f, 0.4f, 0.2f};
         int k = fs.length;
         int l = (this.boundingBox.getXSpan() + this.boundingBox.getZSpan()) / 2;
-        int m = random.nextInt(Math.max(1, 8 - l / 2));
+        int m = randomSource.nextInt(Math.max(1, 8 - l / 2));
         int n = 3;
         BlockPos.MutableBlockPos mutableBlockPos = BlockPos.ZERO.mutable();
         for (int o = i - k; o <= i + k; ++o) {
@@ -201,16 +201,16 @@ extends TemplateStructurePiece {
                 int r = Math.max(0, q + m);
                 if (r >= k) continue;
                 float f = fs[r];
-                if (!(random.nextDouble() < (double)f)) continue;
+                if (!(randomSource.nextDouble() < (double)f)) continue;
                 int s = RuinedPortalPiece.getSurfaceY(levelAccessor, o, p, this.verticalPlacement);
                 int t = bl ? s : Math.min(this.boundingBox.minY(), s);
                 mutableBlockPos.set(o, t, p);
                 if (Math.abs(t - this.boundingBox.minY()) > 3 || !this.canBlockBeReplacedByNetherrackOrMagma(levelAccessor, mutableBlockPos)) continue;
-                this.placeNetherrackOrMagma(random, levelAccessor, mutableBlockPos);
+                this.placeNetherrackOrMagma(randomSource, levelAccessor, mutableBlockPos);
                 if (this.properties.overgrown) {
-                    this.maybeAddLeavesAbove(random, levelAccessor, mutableBlockPos);
+                    this.maybeAddLeavesAbove(randomSource, levelAccessor, mutableBlockPos);
                 }
-                this.addNetherrackDripColumn(random, levelAccessor, (BlockPos)mutableBlockPos.below());
+                this.addNetherrackDripColumn(randomSource, levelAccessor, (BlockPos)mutableBlockPos.below());
             }
         }
     }
@@ -220,8 +220,8 @@ extends TemplateStructurePiece {
         return !blockState.is(Blocks.AIR) && !blockState.is(Blocks.OBSIDIAN) && !blockState.is(BlockTags.FEATURES_CANNOT_REPLACE) && (this.verticalPlacement == VerticalPlacement.IN_NETHER || !blockState.is(Blocks.LAVA));
     }
 
-    private void placeNetherrackOrMagma(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
-        if (!this.properties.cold && random.nextFloat() < 0.07f) {
+    private void placeNetherrackOrMagma(RandomSource randomSource, LevelAccessor levelAccessor, BlockPos blockPos) {
+        if (!this.properties.cold && randomSource.nextFloat() < 0.07f) {
             levelAccessor.setBlock(blockPos, Blocks.MAGMA_BLOCK.defaultBlockState(), 3);
         } else {
             levelAccessor.setBlock(blockPos, Blocks.NETHERRACK.defaultBlockState(), 3);

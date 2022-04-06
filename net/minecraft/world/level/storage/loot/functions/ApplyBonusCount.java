@@ -10,11 +10,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -82,7 +82,7 @@ extends LootItemConditionalFunction {
     }
 
     static interface Formula {
-        public int calculateNewCount(Random var1, int var2, int var3);
+        public int calculateNewCount(RandomSource var1, int var2, int var3);
 
         public void serializeParams(JsonObject var1, JsonSerializationContext var2);
 
@@ -99,8 +99,8 @@ extends LootItemConditionalFunction {
         }
 
         @Override
-        public int calculateNewCount(Random random, int i, int j) {
-            return i + random.nextInt(this.bonusMultiplier * j + 1);
+        public int calculateNewCount(RandomSource randomSource, int i, int j) {
+            return i + randomSource.nextInt(this.bonusMultiplier * j + 1);
         }
 
         @Override
@@ -127,9 +127,9 @@ extends LootItemConditionalFunction {
         }
 
         @Override
-        public int calculateNewCount(Random random, int i, int j) {
+        public int calculateNewCount(RandomSource randomSource, int i, int j) {
             if (j > 0) {
-                int k = random.nextInt(j + 2) - 1;
+                int k = randomSource.nextInt(j + 2) - 1;
                 if (k < 0) {
                     k = 0;
                 }
@@ -164,9 +164,9 @@ extends LootItemConditionalFunction {
         }
 
         @Override
-        public int calculateNewCount(Random random, int i, int j) {
+        public int calculateNewCount(RandomSource randomSource, int i, int j) {
             for (int k = 0; k < j + this.extraRounds; ++k) {
-                if (!(random.nextFloat() < this.probability)) continue;
+                if (!(randomSource.nextFloat() < this.probability)) continue;
                 ++i;
             }
             return i;

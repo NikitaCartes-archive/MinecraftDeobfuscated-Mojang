@@ -17,6 +17,7 @@ import net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler;
 import net.minecraft.client.multiplayer.prediction.PredictiveAction;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -209,7 +210,7 @@ public class MultiPlayerGameMode {
             this.destroyProgress += blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos);
             if (this.destroyTicks % 4.0f == 0.0f) {
                 SoundType soundType = blockState.getSoundType();
-                this.minecraft.getSoundManager().play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0f) / 8.0f, soundType.getPitch() * 0.5f, blockPos));
+                this.minecraft.getSoundManager().play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0f) / 8.0f, soundType.getPitch() * 0.5f, SoundInstance.createUnseededRandom(), blockPos));
             }
             this.destroyTicks += 1.0f;
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, Mth.clamp(this.destroyProgress, 0.0f, 1.0f));

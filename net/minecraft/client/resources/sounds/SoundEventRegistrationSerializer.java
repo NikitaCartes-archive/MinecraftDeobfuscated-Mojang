@@ -18,11 +18,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundEventRegistration;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.valueproviders.ConstantFloat;
+import net.minecraft.util.valueproviders.FloatProvider;
 import org.apache.commons.lang3.Validate;
 
 @Environment(value=EnvType.CLIENT)
 public class SoundEventRegistrationSerializer
 implements JsonDeserializer<SoundEventRegistration> {
+    private static final FloatProvider DEFAULT_FLOAT = ConstantFloat.of(1.0f);
+
     @Override
     public SoundEventRegistration deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "entry");
@@ -40,7 +44,7 @@ implements JsonDeserializer<SoundEventRegistration> {
                 JsonElement jsonElement = jsonArray.get(i);
                 if (GsonHelper.isStringValue(jsonElement)) {
                     String string = GsonHelper.convertToString(jsonElement, "sound");
-                    list.add(new Sound(string, 1.0f, 1.0f, 1, Sound.Type.FILE, false, false, 16));
+                    list.add(new Sound(string, DEFAULT_FLOAT, DEFAULT_FLOAT, 1, Sound.Type.FILE, false, false, 16));
                     continue;
                 }
                 list.add(this.getSound(GsonHelper.convertToJsonObject(jsonElement, "sound")));
@@ -61,7 +65,7 @@ implements JsonDeserializer<SoundEventRegistration> {
         boolean bl = GsonHelper.getAsBoolean(jsonObject, "preload", false);
         boolean bl2 = GsonHelper.getAsBoolean(jsonObject, "stream", false);
         int j = GsonHelper.getAsInt(jsonObject, "attenuation_distance", 16);
-        return new Sound(string, f, g, i, type, bl2, bl, j);
+        return new Sound(string, ConstantFloat.of(f), ConstantFloat.of(g), i, type, bl2, bl, j);
     }
 
     private Sound.Type getType(JsonObject jsonObject, Sound.Type type) {

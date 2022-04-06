@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.synth;
 
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.synth.NoiseUtils;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 

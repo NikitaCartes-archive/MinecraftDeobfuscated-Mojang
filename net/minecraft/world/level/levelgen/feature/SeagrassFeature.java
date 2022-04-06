@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TallSeagrassBlock;
@@ -25,17 +25,17 @@ extends Feature<ProbabilityFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<ProbabilityFeatureConfiguration> featurePlaceContext) {
         boolean bl = false;
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
         ProbabilityFeatureConfiguration probabilityFeatureConfiguration = featurePlaceContext.config();
-        int i = random.nextInt(8) - random.nextInt(8);
-        int j = random.nextInt(8) - random.nextInt(8);
+        int i = randomSource.nextInt(8) - randomSource.nextInt(8);
+        int j = randomSource.nextInt(8) - randomSource.nextInt(8);
         int k = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX() + i, blockPos.getZ() + j);
         BlockPos blockPos2 = new BlockPos(blockPos.getX() + i, k, blockPos.getZ() + j);
         if (worldGenLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
             BlockState blockState;
-            boolean bl2 = random.nextDouble() < (double)probabilityFeatureConfiguration.probability;
+            boolean bl2 = randomSource.nextDouble() < (double)probabilityFeatureConfiguration.probability;
             BlockState blockState2 = blockState = bl2 ? Blocks.TALL_SEAGRASS.defaultBlockState() : Blocks.SEAGRASS.defaultBlockState();
             if (blockState.canSurvive(worldGenLevel, blockPos2)) {
                 if (bl2) {

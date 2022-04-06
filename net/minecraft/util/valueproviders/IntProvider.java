@@ -6,9 +6,9 @@ package net.minecraft.util.valueproviders;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProviderType;
 
@@ -31,7 +31,7 @@ public abstract class IntProvider {
         return CODEC.flatXmap(function, function);
     }
 
-    public abstract int sample(Random var1);
+    public abstract int sample(RandomSource var1);
 
     public abstract int getMinValue();
 

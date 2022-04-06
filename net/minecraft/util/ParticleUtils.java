@@ -3,12 +3,12 @@
  */
 package net.minecraft.util;
 
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
@@ -28,8 +28,8 @@ public class ParticleUtils {
         }
     }
 
-    private static Vec3 getRandomSpeedRanges(Random random) {
-        return new Vec3(Mth.nextDouble(random, -0.5, 0.5), Mth.nextDouble(random, -0.5, 0.5), Mth.nextDouble(random, -0.5, 0.5));
+    private static Vec3 getRandomSpeedRanges(RandomSource randomSource) {
+        return new Vec3(Mth.nextDouble(randomSource, -0.5, 0.5), Mth.nextDouble(randomSource, -0.5, 0.5), Mth.nextDouble(randomSource, -0.5, 0.5));
     }
 
     public static void spawnParticlesAlongAxis(Direction.Axis axis, Level level, BlockPos blockPos, double d, ParticleOptions particleOptions, UniformInt uniformInt) {

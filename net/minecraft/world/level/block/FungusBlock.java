@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -52,13 +52,13 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        return (double)random.nextFloat() < 0.4;
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
+        return (double)randomSource.nextFloat() < 0.4;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        this.feature.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos);
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
+        this.feature.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos);
     }
 }
 

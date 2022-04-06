@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
-import java.util.Random;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
@@ -30,10 +30,10 @@ extends AbstractDragonPhaseInstance {
         double e = this.dragon.head.getY(0.5);
         double f = this.dragon.head.getZ();
         for (int i = 0; i < 8; ++i) {
-            Random random = this.dragon.getRandom();
-            double g = d + random.nextGaussian() / 2.0;
-            double h = e + random.nextGaussian() / 2.0;
-            double j = f + random.nextGaussian() / 2.0;
+            RandomSource randomSource = this.dragon.getRandom();
+            double g = d + randomSource.nextGaussian() / 2.0;
+            double h = e + randomSource.nextGaussian() / 2.0;
+            double j = f + randomSource.nextGaussian() / 2.0;
             Vec3 vec32 = this.dragon.getDeltaMovement();
             this.dragon.level.addParticle(ParticleTypes.DRAGON_BREATH, g, h, j, -vec3.x * (double)0.08f + vec32.x, -vec3.y * (double)0.3f + vec32.y, -vec3.z * (double)0.08f + vec32.z);
             vec3.yRot(0.19634955f);

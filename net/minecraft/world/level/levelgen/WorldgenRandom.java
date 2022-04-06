@@ -3,16 +3,14 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import java.util.Random;
 import java.util.function.LongFunction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
 public class WorldgenRandom
-extends Random
-implements RandomSource {
+extends LegacyRandomSource {
     private final RandomSource randomSource;
     private int count;
 
@@ -81,8 +79,8 @@ implements RandomSource {
         this.setSeed(m);
     }
 
-    public static Random seedSlimeChunk(int i, int j, long l, long m) {
-        return new Random(l + (long)(i * i * 4987142) + (long)(i * 5947611) + (long)(j * j) * 4392871L + (long)(j * 389711) ^ m);
+    public static RandomSource seedSlimeChunk(int i, int j, long l, long m) {
+        return RandomSource.create(l + (long)(i * i * 4987142) + (long)(i * 5947611) + (long)(j * j) * 4392871L + (long)(j * 389711) ^ m);
     }
 
     public static enum Algorithm {

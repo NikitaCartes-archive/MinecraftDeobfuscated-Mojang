@@ -3,15 +3,12 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.CoralFeature;
@@ -24,40 +21,39 @@ extends CoralFeature {
     }
 
     @Override
-    protected boolean placeFeature(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockState blockState) {
-        if (!this.placeCoralBlock(levelAccessor, random, blockPos, blockState)) {
+    protected boolean placeFeature(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
+        if (!this.placeCoralBlock(levelAccessor, randomSource, blockPos, blockState)) {
             return false;
         }
-        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-        int i = random.nextInt(2) + 2;
-        ArrayList<Direction> list = Lists.newArrayList(direction, direction.getClockWise(), direction.getCounterClockWise());
-        Collections.shuffle(list, random);
-        List list2 = list.subList(0, i);
+        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
+        int i = randomSource.nextInt(2) + 2;
+        List<Direction> list = Util.shuffledCopy(List.of(direction, direction.getClockWise(), direction.getCounterClockWise()), randomSource);
+        List<Direction> list2 = list.subList(0, i);
         block0: for (Direction direction2 : list2) {
             int l;
             int k;
             Direction direction3;
             BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-            int j = random.nextInt(2) + 1;
+            int j = randomSource.nextInt(2) + 1;
             mutableBlockPos.move(direction2);
             if (direction2 == direction) {
                 direction3 = direction;
-                k = random.nextInt(3) + 2;
+                k = randomSource.nextInt(3) + 2;
             } else {
                 mutableBlockPos.move(Direction.UP);
                 Direction[] directions = new Direction[]{direction2, Direction.UP};
-                direction3 = Util.getRandom(directions, random);
-                k = random.nextInt(3) + 3;
+                direction3 = Util.getRandom(directions, randomSource);
+                k = randomSource.nextInt(3) + 3;
             }
-            for (l = 0; l < j && this.placeCoralBlock(levelAccessor, random, mutableBlockPos, blockState); ++l) {
+            for (l = 0; l < j && this.placeCoralBlock(levelAccessor, randomSource, mutableBlockPos, blockState); ++l) {
                 mutableBlockPos.move(direction3);
             }
             mutableBlockPos.move(direction3.getOpposite());
             mutableBlockPos.move(Direction.UP);
             for (l = 0; l < k; ++l) {
                 mutableBlockPos.move(direction);
-                if (!this.placeCoralBlock(levelAccessor, random, mutableBlockPos, blockState)) continue block0;
-                if (!(random.nextFloat() < 0.25f)) continue;
+                if (!this.placeCoralBlock(levelAccessor, randomSource, mutableBlockPos, blockState)) continue block0;
+                if (!(randomSource.nextFloat() < 0.25f)) continue;
                 mutableBlockPos.move(Direction.UP);
             }
         }

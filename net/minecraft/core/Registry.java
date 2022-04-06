@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -43,6 +42,7 @@ import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.world.effect.MobEffect;
@@ -53,6 +53,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.animal.CatVariant;
+import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
@@ -90,6 +92,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacerType;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
@@ -248,6 +251,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<FoliagePlacerType<?>>> FOLIAGE_PLACER_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/foliage_placer_type");
     public static final ResourceKey<Registry<TrunkPlacerType<?>>> TRUNK_PLACER_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/trunk_placer_type");
     public static final ResourceKey<Registry<TreeDecoratorType<?>>> TREE_DECORATOR_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/tree_decorator_type");
+    public static final ResourceKey<Registry<RootPlacerType<?>>> ROOT_PLACER_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/root_placer_type");
     public static final ResourceKey<Registry<FeatureSizeType<?>>> FEATURE_SIZE_TYPE_REGISTRY = Registry.createRegistryKey("worldgen/feature_size_type");
     public static final ResourceKey<Registry<Codec<? extends BiomeSource>>> BIOME_SOURCE_REGISTRY = Registry.createRegistryKey("worldgen/biome_source");
     public static final ResourceKey<Registry<Codec<? extends ChunkGenerator>>> CHUNK_GENERATOR_REGISTRY = Registry.createRegistryKey("worldgen/chunk_generator");
@@ -259,6 +263,7 @@ IdMap<T> {
     public static final Registry<BlockStateProviderType<?>> BLOCKSTATE_PROVIDER_TYPES = Registry.registerSimple(BLOCK_STATE_PROVIDER_TYPE_REGISTRY, registry -> BlockStateProviderType.SIMPLE_STATE_PROVIDER);
     public static final Registry<FoliagePlacerType<?>> FOLIAGE_PLACER_TYPES = Registry.registerSimple(FOLIAGE_PLACER_TYPE_REGISTRY, registry -> FoliagePlacerType.BLOB_FOLIAGE_PLACER);
     public static final Registry<TrunkPlacerType<?>> TRUNK_PLACER_TYPES = Registry.registerSimple(TRUNK_PLACER_TYPE_REGISTRY, registry -> TrunkPlacerType.STRAIGHT_TRUNK_PLACER);
+    public static final Registry<RootPlacerType<?>> ROOT_PLACER_TYPES = Registry.registerSimple(ROOT_PLACER_TYPE_REGISTRY, registry -> RootPlacerType.MANGROVE_ROOT_PLACER);
     public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPES = Registry.registerSimple(TREE_DECORATOR_TYPE_REGISTRY, registry -> TreeDecoratorType.LEAVE_VINE);
     public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPES = Registry.registerSimple(FEATURE_SIZE_TYPE_REGISTRY, registry -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE);
     public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = Registry.registerSimple(BIOME_SOURCE_REGISTRY, Lifecycle.stable(), registry -> BiomeSource.CODEC);
@@ -268,6 +273,10 @@ IdMap<T> {
     public static final Registry<Codec<? extends DensityFunction>> DENSITY_FUNCTION_TYPES = Registry.registerSimple(DENSITY_FUNCTION_TYPE_REGISTRY, DensityFunctions::bootstrap);
     public static final Registry<StructureProcessorType<?>> STRUCTURE_PROCESSOR = Registry.registerSimple(STRUCTURE_PROCESSOR_REGISTRY, registry -> StructureProcessorType.BLOCK_IGNORE);
     public static final Registry<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT = Registry.registerSimple(STRUCTURE_POOL_ELEMENT_REGISTRY, registry -> StructurePoolElementType.EMPTY);
+    public static final ResourceKey<Registry<CatVariant>> CAT_VARIANT_REGISTRY = Registry.createRegistryKey("cat_variant");
+    public static final Registry<CatVariant> CAT_VARIANT = Registry.registerSimple(CAT_VARIANT_REGISTRY, registry -> CatVariant.BLACK);
+    public static final ResourceKey<Registry<FrogVariant>> FROG_VARIANT_REGISTRY = Registry.createRegistryKey("frog_variant");
+    public static final Registry<FrogVariant> FROG_VARIANT = Registry.registerSimple(FROG_VARIANT_REGISTRY, registry -> FrogVariant.TEMPERATE);
     private final ResourceKey<? extends Registry<T>> key;
     private final Lifecycle lifecycle;
 
@@ -401,7 +410,7 @@ IdMap<T> {
 
     public abstract Set<ResourceKey<T>> registryKeySet();
 
-    public abstract Optional<Holder<T>> getRandom(Random var1);
+    public abstract Optional<Holder<T>> getRandom(RandomSource var1);
 
     public Stream<T> stream() {
         return StreamSupport.stream(this.spliterator(), false);

@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -23,6 +22,7 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.Entity;
@@ -221,12 +221,12 @@ public final class NaturalSpawner {
         return mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) && mob.checkSpawnObstruction(serverLevel);
     }
 
-    private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(ServerLevel serverLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, Random random, BlockPos blockPos) {
+    private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(ServerLevel serverLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, RandomSource randomSource, BlockPos blockPos) {
         Holder<Biome> holder = serverLevel.getBiome(blockPos);
-        if (mobCategory == MobCategory.WATER_AMBIENT && holder.is(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS) && random.nextFloat() < 0.98f) {
+        if (mobCategory == MobCategory.WATER_AMBIENT && holder.is(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS) && randomSource.nextFloat() < 0.98f) {
             return Optional.empty();
         }
-        return NaturalSpawner.mobsAt(serverLevel, structureManager, chunkGenerator, mobCategory, blockPos, holder).getRandom(random);
+        return NaturalSpawner.mobsAt(serverLevel, structureManager, chunkGenerator, mobCategory, blockPos, holder).getRandom(randomSource);
     }
 
     private static boolean canSpawnMobAt(ServerLevel serverLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, MobSpawnSettings.SpawnerData spawnerData, BlockPos blockPos) {
@@ -302,7 +302,7 @@ public final class NaturalSpawner {
         return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState, entityType) && NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2), entityType);
     }
 
-    public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Holder<Biome> holder, ChunkPos chunkPos, Random random) {
+    public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Holder<Biome> holder, ChunkPos chunkPos, RandomSource randomSource) {
         MobSpawnSettings mobSpawnSettings = holder.value().getMobSettings();
         WeightedRandomList<MobSpawnSettings.SpawnerData> weightedRandomList = mobSpawnSettings.getMobs(MobCategory.CREATURE);
         if (weightedRandomList.isEmpty()) {
@@ -310,14 +310,14 @@ public final class NaturalSpawner {
         }
         int i = chunkPos.getMinBlockX();
         int j = chunkPos.getMinBlockZ();
-        while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
-            Optional<MobSpawnSettings.SpawnerData> optional = weightedRandomList.getRandom(random);
+        while (randomSource.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
+            Optional<MobSpawnSettings.SpawnerData> optional = weightedRandomList.getRandom(randomSource);
             if (!optional.isPresent()) continue;
             MobSpawnSettings.SpawnerData spawnerData = optional.get();
-            int k = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
+            int k = spawnerData.minCount + randomSource.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
             SpawnGroupData spawnGroupData = null;
-            int l = i + random.nextInt(16);
-            int m = j + random.nextInt(16);
+            int l = i + randomSource.nextInt(16);
+            int m = j + randomSource.nextInt(16);
             int n = l;
             int o = m;
             for (int p = 0; p < k; ++p) {
@@ -337,18 +337,18 @@ public final class NaturalSpawner {
                             LOGGER.warn("Failed to create mob", exception);
                             continue;
                         }
-                        ((Entity)entity).moveTo(d, blockPos.getY(), e, random.nextFloat() * 360.0f, 0.0f);
+                        ((Entity)entity).moveTo(d, blockPos.getY(), e, randomSource.nextFloat() * 360.0f, 0.0f);
                         if (entity instanceof Mob && (mob = (Mob)entity).checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(serverLevelAccessor)) {
                             spawnGroupData = mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null);
                             serverLevelAccessor.addFreshEntityWithPassengers(mob);
                             bl = true;
                         }
                     }
-                    l += random.nextInt(5) - random.nextInt(5);
-                    m += random.nextInt(5) - random.nextInt(5);
+                    l += randomSource.nextInt(5) - randomSource.nextInt(5);
+                    m += randomSource.nextInt(5) - randomSource.nextInt(5);
                     while (l < i || l >= i + 16 || m < j || m >= j + 16) {
-                        l = n + random.nextInt(5) - random.nextInt(5);
-                        m = o + random.nextInt(5) - random.nextInt(5);
+                        l = n + randomSource.nextInt(5) - randomSource.nextInt(5);
+                        m = o + randomSource.nextInt(5) - randomSource.nextInt(5);
                     }
                 }
             }

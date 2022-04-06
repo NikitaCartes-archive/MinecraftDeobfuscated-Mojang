@@ -5,9 +5,9 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementFilter;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
@@ -26,8 +26,8 @@ extends PlacementFilter {
     }
 
     @Override
-    protected boolean shouldPlace(PlacementContext placementContext, Random random, BlockPos blockPos) {
-        return random.nextFloat() < 1.0f / (float)this.chance;
+    protected boolean shouldPlace(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
+        return randomSource.nextFloat() < 1.0f / (float)this.chance;
     }
 
     @Override

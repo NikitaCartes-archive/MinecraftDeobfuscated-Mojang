@@ -5,7 +5,6 @@ package net.minecraft.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -24,6 +23,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
@@ -37,7 +37,7 @@ implements ResourceManagerReloadListener {
     private final ModelBlockRenderer modelRenderer;
     private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
     private final LiquidBlockRenderer liquidBlockRenderer;
-    private final Random random = new Random();
+    private final RandomSource random = RandomSource.create();
     private final BlockColors blockColors;
 
     public BlockRenderDispatcher(BlockModelShaper blockModelShaper, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer, BlockColors blockColors) {
@@ -61,13 +61,13 @@ implements ResourceManagerReloadListener {
         this.modelRenderer.tesselateBlock(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l, OverlayTexture.NO_OVERLAY);
     }
 
-    public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random) {
+    public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, RandomSource randomSource) {
         try {
             RenderShape renderShape = blockState.getRenderShape();
             if (renderShape != RenderShape.MODEL) {
                 return false;
             }
-            return this.modelRenderer.tesselateBlock(blockAndTintGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, random, blockState.getSeed(blockPos), OverlayTexture.NO_OVERLAY);
+            return this.modelRenderer.tesselateBlock(blockAndTintGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, blockState.getSeed(blockPos), OverlayTexture.NO_OVERLAY);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");

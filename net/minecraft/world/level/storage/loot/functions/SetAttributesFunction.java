@@ -16,13 +16,13 @@ import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -58,13 +58,13 @@ extends LootItemConditionalFunction {
 
     @Override
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-        Random random = lootContext.getRandom();
+        RandomSource randomSource = lootContext.getRandom();
         for (Modifier modifier : this.modifiers) {
             UUID uUID = modifier.id;
             if (uUID == null) {
                 uUID = UUID.randomUUID();
             }
-            EquipmentSlot equipmentSlot = Util.getRandom(modifier.slots, random);
+            EquipmentSlot equipmentSlot = Util.getRandom(modifier.slots, randomSource);
             itemStack.addAttributeModifier(modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot);
         }
         return itemStack;

@@ -3,25 +3,56 @@
  */
 package net.minecraft.server.packs.resources;
 
-import com.google.common.annotations.VisibleForTesting;
-import java.io.Closeable;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import org.jetbrains.annotations.Nullable;
 
-public interface Resource
-extends Closeable {
-    public ResourceLocation getLocation();
-
-    public InputStream getInputStream();
-
-    @VisibleForTesting
-    public boolean hasMetadata();
-
+public class Resource {
+    private final String packId;
+    private final IoSupplier<InputStream> streamSupplier;
+    private final IoSupplier<ResourceMetadata> metadataSupplier;
     @Nullable
-    public <T> T getMetadata(MetadataSectionSerializer<T> var1);
+    private ResourceMetadata cachedMetadata;
 
-    public String getSourceName();
+    public Resource(String string, IoSupplier<InputStream> ioSupplier, IoSupplier<ResourceMetadata> ioSupplier2) {
+        this.packId = string;
+        this.streamSupplier = ioSupplier;
+        this.metadataSupplier = ioSupplier2;
+    }
+
+    public Resource(String string, IoSupplier<InputStream> ioSupplier) {
+        this.packId = string;
+        this.streamSupplier = ioSupplier;
+        this.metadataSupplier = () -> ResourceMetadata.EMPTY;
+        this.cachedMetadata = ResourceMetadata.EMPTY;
+    }
+
+    public String sourcePackId() {
+        return this.packId;
+    }
+
+    public InputStream open() throws IOException {
+        return this.streamSupplier.get();
+    }
+
+    public BufferedReader openAsReader() throws IOException {
+        return new BufferedReader(new InputStreamReader(this.open(), StandardCharsets.UTF_8));
+    }
+
+    public ResourceMetadata metadata() throws IOException {
+        if (this.cachedMetadata == null) {
+            this.cachedMetadata = this.metadataSupplier.get();
+        }
+        return this.cachedMetadata;
+    }
+
+    @FunctionalInterface
+    public static interface IoSupplier<T> {
+        public T get() throws IOException;
+    }
 }
 

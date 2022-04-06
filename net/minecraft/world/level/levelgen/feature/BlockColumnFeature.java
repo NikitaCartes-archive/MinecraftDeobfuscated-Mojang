@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -22,12 +22,12 @@ extends Feature<BlockColumnConfiguration> {
         int l;
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockColumnConfiguration blockColumnConfiguration = featurePlaceContext.config();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         int i = blockColumnConfiguration.layers().size();
         int[] is = new int[i];
         int j = 0;
         for (int k = 0; k < i; ++k) {
-            is[k] = blockColumnConfiguration.layers().get(k).height().sample(random);
+            is[k] = blockColumnConfiguration.layers().get(k).height().sample(randomSource);
             j += is[k];
         }
         if (j == 0) {
@@ -47,7 +47,7 @@ extends Feature<BlockColumnConfiguration> {
             if (m == 0) continue;
             BlockColumnConfiguration.Layer layer = blockColumnConfiguration.layers().get(l);
             for (int n = 0; n < m; ++n) {
-                worldGenLevel.setBlock(mutableBlockPos, layer.state().getState(random, mutableBlockPos), 2);
+                worldGenLevel.setBlock(mutableBlockPos, layer.state().getState(randomSource, mutableBlockPos), 2);
                 mutableBlockPos.move(blockColumnConfiguration.direction());
             }
         }

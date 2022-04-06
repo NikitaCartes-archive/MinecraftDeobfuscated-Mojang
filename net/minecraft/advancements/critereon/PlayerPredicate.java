@@ -6,7 +6,6 @@ package net.minecraft.advancements.critereon;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
@@ -19,11 +18,13 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.EntitySubPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.stats.ServerStatsCounter;
@@ -39,8 +40,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class PlayerPredicate {
-    public static final PlayerPredicate ANY = new Builder().build();
+public class PlayerPredicate
+implements EntitySubPredicate {
     public static final int LOOKING_AT_RANGE = 100;
     private final MinMaxBounds.Ints level;
     @Nullable
@@ -73,10 +74,8 @@ public class PlayerPredicate {
         this.lookingAt = entityPredicate;
     }
 
-    public boolean matches(Entity entity2) {
-        if (this == ANY) {
-            return true;
-        }
+    @Override
+    public boolean matches(Entity entity2, ServerLevel serverLevel, @Nullable Vec3 vec3) {
         if (!(entity2 instanceof ServerPlayer)) {
             return false;
         }
@@ -108,10 +107,10 @@ public class PlayerPredicate {
             }
         }
         if (this.lookingAt != EntityPredicate.ANY) {
-            Vec3 vec3 = serverPlayer.getEyePosition();
-            Vec3 vec32 = serverPlayer.getViewVector(1.0f);
-            Vec3 vec33 = vec3.add(vec32.x * 100.0, vec32.y * 100.0, vec32.z * 100.0);
-            EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(serverPlayer.level, serverPlayer, vec3, vec33, new AABB(vec3, vec33).inflate(1.0), entity -> !entity.isSpectator(), 0.0f);
+            Vec3 vec32 = serverPlayer.getEyePosition();
+            Vec3 vec33 = serverPlayer.getViewVector(1.0f);
+            Vec3 vec34 = vec32.add(vec33.x * 100.0, vec33.y * 100.0, vec33.z * 100.0);
+            EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(serverPlayer.level, serverPlayer, vec32, vec34, new AABB(vec32, vec34).inflate(1.0), entity -> !entity.isSpectator(), 0.0f);
             if (entityHitResult == null || entityHitResult.getType() != HitResult.Type.ENTITY) {
                 return false;
             }
@@ -123,19 +122,15 @@ public class PlayerPredicate {
         return true;
     }
 
-    public static PlayerPredicate fromJson(@Nullable JsonElement jsonElement) {
-        if (jsonElement == null || jsonElement.isJsonNull()) {
-            return ANY;
-        }
-        JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "player");
+    public static PlayerPredicate fromJson(JsonObject jsonObject) {
         MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("level"));
         String string = GsonHelper.getAsString(jsonObject, "gamemode", "");
         GameType gameType = GameType.byName(string, null);
         HashMap<Stat<?>, MinMaxBounds.Ints> map = Maps.newHashMap();
         JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "stats", null);
         if (jsonArray != null) {
-            for (JsonElement jsonElement2 : jsonArray) {
-                JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement2, "stats entry");
+            for (JsonElement jsonElement : jsonArray) {
+                JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement, "stats entry");
                 ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject2, "type"));
                 StatType<?> statType = Registry.STAT_TYPE.get(resourceLocation);
                 if (statType == null) {
@@ -178,11 +173,9 @@ public class PlayerPredicate {
         return stat.getType().getRegistry().getKey(stat.getValue());
     }
 
-    public JsonElement serializeToJson() {
+    @Override
+    public JsonObject serializeCustomData() {
         JsonObject jsonObject2;
-        if (this == ANY) {
-            return JsonNull.INSTANCE;
-        }
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("level", this.level.serializeToJson());
         if (this.gameType != null) {
@@ -211,6 +204,11 @@ public class PlayerPredicate {
         }
         jsonObject.add("looking_at", this.lookingAt.serializeToJson());
         return jsonObject;
+    }
+
+    @Override
+    public EntitySubPredicate.Type type() {
+        return EntitySubPredicate.Types.PLAYER;
     }
 
     static class AdvancementDonePredicate

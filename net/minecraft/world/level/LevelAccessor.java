@@ -3,13 +3,13 @@
  */
 package net.minecraft.world.level;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
@@ -85,7 +85,7 @@ LevelTimeAccess {
         return this.getChunkSource().hasChunk(i, j);
     }
 
-    public Random getRandom();
+    public RandomSource getRandom();
 
     default public void blockUpdated(BlockPos blockPos, Block block) {
     }

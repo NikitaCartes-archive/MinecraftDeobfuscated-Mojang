@@ -4,9 +4,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +25,7 @@ extends Feature<NoneFeatureConfiguration> {
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
         BlockPos blockPos = featurePlaceContext.origin();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         if (blockPos.getY() > worldGenLevel.getSeaLevel() - 1) {
             return false;
         }
@@ -45,12 +45,12 @@ extends Feature<NoneFeatureConfiguration> {
         block1: for (int i = 0; i < 200; ++i) {
             BlockPos blockPos2;
             BlockState blockState;
-            int j = random.nextInt(5) - random.nextInt(6);
+            int j = randomSource.nextInt(5) - randomSource.nextInt(6);
             int k = 3;
             if (j < 2) {
                 k += j / 2;
             }
-            if (k < 1 || (blockState = worldGenLevel.getBlockState(blockPos2 = blockPos.offset(random.nextInt(k) - random.nextInt(k), j, random.nextInt(k) - random.nextInt(k)))).getMaterial() != Material.AIR && !blockState.is(Blocks.WATER) && !blockState.is(Blocks.PACKED_ICE) && !blockState.is(Blocks.ICE)) continue;
+            if (k < 1 || (blockState = worldGenLevel.getBlockState(blockPos2 = blockPos.offset(randomSource.nextInt(k) - randomSource.nextInt(k), j, randomSource.nextInt(k) - randomSource.nextInt(k)))).getMaterial() != Material.AIR && !blockState.is(Blocks.WATER) && !blockState.is(Blocks.PACKED_ICE) && !blockState.is(Blocks.ICE)) continue;
             for (Direction direction2 : Direction.values()) {
                 BlockState blockState2 = worldGenLevel.getBlockState(blockPos2.relative(direction2));
                 if (!blockState2.is(Blocks.BLUE_ICE)) continue;

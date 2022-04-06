@@ -19,6 +19,7 @@ public final class EntityTypeTags {
     public static final TagKey<EntityType<?>> AXOLOTL_HUNT_TARGETS = EntityTypeTags.create("axolotl_hunt_targets");
     public static final TagKey<EntityType<?>> FREEZE_IMMUNE_ENTITY_TYPES = EntityTypeTags.create("freeze_immune_entity_types");
     public static final TagKey<EntityType<?>> FREEZE_HURTS_EXTRA_TYPES = EntityTypeTags.create("freeze_hurts_extra_types");
+    public static final TagKey<EntityType<?>> FROG_FOOD = EntityTypeTags.create("frog_food");
 
     private EntityTypeTags() {
     }

@@ -424,5 +424,10 @@ extends Entity {
     public SoundSource getSoundSource() {
         return SoundSource.AMBIENT;
     }
+
+    @Override
+    public float getVisualRotationYInDegrees() {
+        return 180.0f - this.getSpin(0.5f) / ((float)Math.PI * 2) * 360.0f;
+    }
 }
 

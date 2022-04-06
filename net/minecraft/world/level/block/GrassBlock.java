@@ -4,11 +4,11 @@
 package net.minecraft.world.level.block;
 
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.placement.VegetationPlacements;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -33,33 +33,33 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         BlockPos blockPos2 = blockPos.above();
         BlockState blockState2 = Blocks.GRASS.defaultBlockState();
         block0: for (int i = 0; i < 128; ++i) {
             Holder<PlacedFeature> holder;
             BlockPos blockPos3 = blockPos2;
             for (int j = 0; j < i / 16; ++j) {
-                if (!serverLevel.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
+                if (!serverLevel.getBlockState((blockPos3 = blockPos3.offset(randomSource.nextInt(3) - 1, (randomSource.nextInt(3) - 1) * randomSource.nextInt(3) / 2, randomSource.nextInt(3) - 1)).below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
             }
             BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-            if (blockState3.is(blockState2.getBlock()) && random.nextInt(10) == 0) {
-                ((BonemealableBlock)((Object)blockState2.getBlock())).performBonemeal(serverLevel, random, blockPos3, blockState3);
+            if (blockState3.is(blockState2.getBlock()) && randomSource.nextInt(10) == 0) {
+                ((BonemealableBlock)((Object)blockState2.getBlock())).performBonemeal(serverLevel, randomSource, blockPos3, blockState3);
             }
             if (!blockState3.isAir()) continue;
-            if (random.nextInt(8) == 0) {
+            if (randomSource.nextInt(8) == 0) {
                 List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).value().getGenerationSettings().getFlowerFeatures();
                 if (list.isEmpty()) continue;
                 holder = ((RandomPatchConfiguration)list.get(0).config()).feature();
             } else {
                 holder = VegetationPlacements.GRASS_BONEMEAL;
             }
-            holder.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos3);
+            holder.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos3);
         }
     }
 }

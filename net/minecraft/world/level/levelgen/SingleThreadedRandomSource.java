@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.levelgen;
 
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.BitRandomSource;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.MarsagliaPolarGaussian;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.RandomSource;
 
 public class SingleThreadedRandomSource
 implements BitRandomSource {

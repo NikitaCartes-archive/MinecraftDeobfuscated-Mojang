@@ -4,10 +4,10 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,17 +21,17 @@ extends Feature<HugeMushroomFeatureConfiguration> {
         super(codec);
     }
 
-    protected void placeTrunk(LevelAccessor levelAccessor, Random random, BlockPos blockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration, int i, BlockPos.MutableBlockPos mutableBlockPos) {
+    protected void placeTrunk(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration, int i, BlockPos.MutableBlockPos mutableBlockPos) {
         for (int j = 0; j < i; ++j) {
             mutableBlockPos.set(blockPos).move(Direction.UP, j);
             if (levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) continue;
-            this.setBlock(levelAccessor, mutableBlockPos, hugeMushroomFeatureConfiguration.stemProvider.getState(random, blockPos));
+            this.setBlock(levelAccessor, mutableBlockPos, hugeMushroomFeatureConfiguration.stemProvider.getState(randomSource, blockPos));
         }
     }
 
-    protected int getTreeHeight(Random random) {
-        int i = random.nextInt(3) + 4;
-        if (random.nextInt(12) == 0) {
+    protected int getTreeHeight(RandomSource randomSource) {
+        int i = randomSource.nextInt(3) + 4;
+        if (randomSource.nextInt(12) == 0) {
             i *= 2;
         }
         return i;
@@ -64,19 +64,19 @@ extends Feature<HugeMushroomFeatureConfiguration> {
         BlockPos.MutableBlockPos mutableBlockPos;
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration = featurePlaceContext.config();
-        int i = this.getTreeHeight(random);
+        int i = this.getTreeHeight(randomSource);
         if (!this.isValidPosition(worldGenLevel, blockPos, i, mutableBlockPos = new BlockPos.MutableBlockPos(), hugeMushroomFeatureConfiguration)) {
             return false;
         }
-        this.makeCap(worldGenLevel, random, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration);
-        this.placeTrunk(worldGenLevel, random, blockPos, hugeMushroomFeatureConfiguration, i, mutableBlockPos);
+        this.makeCap(worldGenLevel, randomSource, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration);
+        this.placeTrunk(worldGenLevel, randomSource, blockPos, hugeMushroomFeatureConfiguration, i, mutableBlockPos);
         return true;
     }
 
     protected abstract int getTreeRadiusForHeight(int var1, int var2, int var3, int var4);
 
-    protected abstract void makeCap(LevelAccessor var1, Random var2, BlockPos var3, int var4, BlockPos.MutableBlockPos var5, HugeMushroomFeatureConfiguration var6);
+    protected abstract void makeCap(LevelAccessor var1, RandomSource var2, BlockPos var3, int var4, BlockPos.MutableBlockPos var5, HugeMushroomFeatureConfiguration var6);
 }
 

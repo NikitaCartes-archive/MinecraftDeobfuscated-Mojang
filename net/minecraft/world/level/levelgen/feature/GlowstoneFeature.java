@@ -4,9 +4,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +24,7 @@ extends Feature<NoneFeatureConfiguration> {
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         if (!worldGenLevel.isEmptyBlock(blockPos)) {
             return false;
         }
@@ -34,7 +34,7 @@ extends Feature<NoneFeatureConfiguration> {
         }
         worldGenLevel.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);
         for (int i = 0; i < 1500; ++i) {
-            BlockPos blockPos2 = blockPos.offset(random.nextInt(8) - random.nextInt(8), -random.nextInt(12), random.nextInt(8) - random.nextInt(8));
+            BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(8) - randomSource.nextInt(8), -randomSource.nextInt(12), randomSource.nextInt(8) - randomSource.nextInt(8));
             if (!worldGenLevel.getBlockState(blockPos2).isAir()) continue;
             int j = 0;
             for (Direction direction : Direction.values()) {

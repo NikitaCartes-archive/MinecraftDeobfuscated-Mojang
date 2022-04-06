@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -15,15 +15,15 @@ public class FeaturePlaceContext<FC extends FeatureConfiguration> {
     private final Optional<ConfiguredFeature<?, ?>> topFeature;
     private final WorldGenLevel level;
     private final ChunkGenerator chunkGenerator;
-    private final Random random;
+    private final RandomSource random;
     private final BlockPos origin;
     private final FC config;
 
-    public FeaturePlaceContext(Optional<ConfiguredFeature<?, ?>> optional, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, FC featureConfiguration) {
+    public FeaturePlaceContext(Optional<ConfiguredFeature<?, ?>> optional, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos, FC featureConfiguration) {
         this.topFeature = optional;
         this.level = worldGenLevel;
         this.chunkGenerator = chunkGenerator;
-        this.random = random;
+        this.random = randomSource;
         this.origin = blockPos;
         this.config = featureConfiguration;
     }
@@ -40,7 +40,7 @@ public class FeaturePlaceContext<FC extends FeatureConfiguration> {
         return this.chunkGenerator;
     }
 
-    public Random random() {
+    public RandomSource random() {
         return this.random;
     }
 

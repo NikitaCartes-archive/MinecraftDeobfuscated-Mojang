@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.structure.structures;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Drowned;
@@ -55,58 +55,58 @@ public class OceanRuinPieces {
     private static final ResourceLocation[] BIG_RUINS_CRACKED = new ResourceLocation[]{new ResourceLocation("underwater_ruin/big_cracked_1"), new ResourceLocation("underwater_ruin/big_cracked_2"), new ResourceLocation("underwater_ruin/big_cracked_3"), new ResourceLocation("underwater_ruin/big_cracked_8")};
     private static final ResourceLocation[] BIG_WARM_RUINS = new ResourceLocation[]{new ResourceLocation("underwater_ruin/big_warm_4"), new ResourceLocation("underwater_ruin/big_warm_5"), new ResourceLocation("underwater_ruin/big_warm_6"), new ResourceLocation("underwater_ruin/big_warm_7")};
 
-    private static ResourceLocation getSmallWarmRuin(Random random) {
-        return Util.getRandom(WARM_RUINS, random);
+    private static ResourceLocation getSmallWarmRuin(RandomSource randomSource) {
+        return Util.getRandom(WARM_RUINS, randomSource);
     }
 
-    private static ResourceLocation getBigWarmRuin(Random random) {
-        return Util.getRandom(BIG_WARM_RUINS, random);
+    private static ResourceLocation getBigWarmRuin(RandomSource randomSource) {
+        return Util.getRandom(BIG_WARM_RUINS, randomSource);
     }
 
-    public static void addPieces(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, Random random, OceanRuinStructure oceanRuinStructure) {
-        boolean bl = random.nextFloat() <= oceanRuinStructure.largeProbability;
+    public static void addPieces(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, OceanRuinStructure oceanRuinStructure) {
+        boolean bl = randomSource.nextFloat() <= oceanRuinStructure.largeProbability;
         float f = bl ? 0.9f : 0.8f;
-        OceanRuinPieces.addPiece(structureTemplateManager, blockPos, rotation, structurePieceAccessor, random, oceanRuinStructure, bl, f);
-        if (bl && random.nextFloat() <= oceanRuinStructure.clusterProbability) {
-            OceanRuinPieces.addClusterRuins(structureTemplateManager, random, rotation, blockPos, oceanRuinStructure, structurePieceAccessor);
+        OceanRuinPieces.addPiece(structureTemplateManager, blockPos, rotation, structurePieceAccessor, randomSource, oceanRuinStructure, bl, f);
+        if (bl && randomSource.nextFloat() <= oceanRuinStructure.clusterProbability) {
+            OceanRuinPieces.addClusterRuins(structureTemplateManager, randomSource, rotation, blockPos, oceanRuinStructure, structurePieceAccessor);
         }
     }
 
-    private static void addClusterRuins(StructureTemplateManager structureTemplateManager, Random random, Rotation rotation, BlockPos blockPos, OceanRuinStructure oceanRuinStructure, StructurePieceAccessor structurePieceAccessor) {
+    private static void addClusterRuins(StructureTemplateManager structureTemplateManager, RandomSource randomSource, Rotation rotation, BlockPos blockPos, OceanRuinStructure oceanRuinStructure, StructurePieceAccessor structurePieceAccessor) {
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), 90, blockPos.getZ());
         BlockPos blockPos3 = StructureTemplate.transform(new BlockPos(15, 0, 15), Mirror.NONE, rotation, BlockPos.ZERO).offset(blockPos2);
         BoundingBox boundingBox = BoundingBox.fromCorners(blockPos2, blockPos3);
         BlockPos blockPos4 = new BlockPos(Math.min(blockPos2.getX(), blockPos3.getX()), blockPos2.getY(), Math.min(blockPos2.getZ(), blockPos3.getZ()));
-        List<BlockPos> list = OceanRuinPieces.allPositions(random, blockPos4);
-        int i = Mth.nextInt(random, 4, 8);
+        List<BlockPos> list = OceanRuinPieces.allPositions(randomSource, blockPos4);
+        int i = Mth.nextInt(randomSource, 4, 8);
         for (int j = 0; j < i; ++j) {
             Rotation rotation2;
             BlockPos blockPos6;
             int k;
             BlockPos blockPos5;
             BoundingBox boundingBox2;
-            if (list.isEmpty() || (boundingBox2 = BoundingBox.fromCorners(blockPos5 = list.remove(k = random.nextInt(list.size())), blockPos6 = StructureTemplate.transform(new BlockPos(5, 0, 6), Mirror.NONE, rotation2 = Rotation.getRandom(random), BlockPos.ZERO).offset(blockPos5))).intersects(boundingBox)) continue;
-            OceanRuinPieces.addPiece(structureTemplateManager, blockPos5, rotation2, structurePieceAccessor, random, oceanRuinStructure, false, 0.8f);
+            if (list.isEmpty() || (boundingBox2 = BoundingBox.fromCorners(blockPos5 = list.remove(k = randomSource.nextInt(list.size())), blockPos6 = StructureTemplate.transform(new BlockPos(5, 0, 6), Mirror.NONE, rotation2 = Rotation.getRandom(randomSource), BlockPos.ZERO).offset(blockPos5))).intersects(boundingBox)) continue;
+            OceanRuinPieces.addPiece(structureTemplateManager, blockPos5, rotation2, structurePieceAccessor, randomSource, oceanRuinStructure, false, 0.8f);
         }
     }
 
-    private static List<BlockPos> allPositions(Random random, BlockPos blockPos) {
+    private static List<BlockPos> allPositions(RandomSource randomSource, BlockPos blockPos) {
         ArrayList<BlockPos> list = Lists.newArrayList();
-        list.add(blockPos.offset(-16 + Mth.nextInt(random, 1, 8), 0, 16 + Mth.nextInt(random, 1, 7)));
-        list.add(blockPos.offset(-16 + Mth.nextInt(random, 1, 8), 0, Mth.nextInt(random, 1, 7)));
-        list.add(blockPos.offset(-16 + Mth.nextInt(random, 1, 8), 0, -16 + Mth.nextInt(random, 4, 8)));
-        list.add(blockPos.offset(Mth.nextInt(random, 1, 7), 0, 16 + Mth.nextInt(random, 1, 7)));
-        list.add(blockPos.offset(Mth.nextInt(random, 1, 7), 0, -16 + Mth.nextInt(random, 4, 6)));
-        list.add(blockPos.offset(16 + Mth.nextInt(random, 1, 7), 0, 16 + Mth.nextInt(random, 3, 8)));
-        list.add(blockPos.offset(16 + Mth.nextInt(random, 1, 7), 0, Mth.nextInt(random, 1, 7)));
-        list.add(blockPos.offset(16 + Mth.nextInt(random, 1, 7), 0, -16 + Mth.nextInt(random, 4, 8)));
+        list.add(blockPos.offset(-16 + Mth.nextInt(randomSource, 1, 8), 0, 16 + Mth.nextInt(randomSource, 1, 7)));
+        list.add(blockPos.offset(-16 + Mth.nextInt(randomSource, 1, 8), 0, Mth.nextInt(randomSource, 1, 7)));
+        list.add(blockPos.offset(-16 + Mth.nextInt(randomSource, 1, 8), 0, -16 + Mth.nextInt(randomSource, 4, 8)));
+        list.add(blockPos.offset(Mth.nextInt(randomSource, 1, 7), 0, 16 + Mth.nextInt(randomSource, 1, 7)));
+        list.add(blockPos.offset(Mth.nextInt(randomSource, 1, 7), 0, -16 + Mth.nextInt(randomSource, 4, 6)));
+        list.add(blockPos.offset(16 + Mth.nextInt(randomSource, 1, 7), 0, 16 + Mth.nextInt(randomSource, 3, 8)));
+        list.add(blockPos.offset(16 + Mth.nextInt(randomSource, 1, 7), 0, Mth.nextInt(randomSource, 1, 7)));
+        list.add(blockPos.offset(16 + Mth.nextInt(randomSource, 1, 7), 0, -16 + Mth.nextInt(randomSource, 4, 8)));
         return list;
     }
 
-    private static void addPiece(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, Random random, OceanRuinStructure oceanRuinStructure, boolean bl, float f) {
+    private static void addPiece(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, OceanRuinStructure oceanRuinStructure, boolean bl, float f) {
         switch (oceanRuinStructure.biomeTemp) {
             default: {
-                ResourceLocation resourceLocation = bl ? OceanRuinPieces.getBigWarmRuin(random) : OceanRuinPieces.getSmallWarmRuin(random);
+                ResourceLocation resourceLocation = bl ? OceanRuinPieces.getBigWarmRuin(randomSource) : OceanRuinPieces.getSmallWarmRuin(randomSource);
                 structurePieceAccessor.addPiece(new OceanRuinPiece(structureTemplateManager, resourceLocation, blockPos, rotation, f, oceanRuinStructure.biomeTemp, bl));
                 break;
             }
@@ -114,7 +114,7 @@ public class OceanRuinPieces {
                 ResourceLocation[] resourceLocations = bl ? BIG_RUINS_BRICK : RUINS_BRICK;
                 ResourceLocation[] resourceLocations2 = bl ? BIG_RUINS_CRACKED : RUINS_CRACKED;
                 ResourceLocation[] resourceLocations3 = bl ? BIG_RUINS_MOSSY : RUINS_MOSSY;
-                int i = random.nextInt(resourceLocations.length);
+                int i = randomSource.nextInt(resourceLocations.length);
                 structurePieceAccessor.addPiece(new OceanRuinPiece(structureTemplateManager, resourceLocations[i], blockPos, rotation, f, oceanRuinStructure.biomeTemp, bl));
                 structurePieceAccessor.addPiece(new OceanRuinPiece(structureTemplateManager, resourceLocations2[i], blockPos, rotation, 0.7f, oceanRuinStructure.biomeTemp, bl));
                 structurePieceAccessor.addPiece(new OceanRuinPiece(structureTemplateManager, resourceLocations3[i], blockPos, rotation, 0.5f, oceanRuinStructure.biomeTemp, bl));
@@ -156,12 +156,12 @@ public class OceanRuinPieces {
         }
 
         @Override
-        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
             if ("chest".equals(string)) {
                 serverLevelAccessor.setBlock(blockPos, (BlockState)Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER)), 2);
                 BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
                 if (blockEntity instanceof ChestBlockEntity) {
-                    ((ChestBlockEntity)blockEntity).setLootTable(this.isLarge ? BuiltInLootTables.UNDERWATER_RUIN_BIG : BuiltInLootTables.UNDERWATER_RUIN_SMALL, random.nextLong());
+                    ((ChestBlockEntity)blockEntity).setLootTable(this.isLarge ? BuiltInLootTables.UNDERWATER_RUIN_BIG : BuiltInLootTables.UNDERWATER_RUIN_SMALL, randomSource.nextLong());
                 }
             } else if ("drowned".equals(string)) {
                 Drowned drowned = EntityType.DROWNED.create(serverLevelAccessor.getLevel());
@@ -178,13 +178,13 @@ public class OceanRuinPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.placeSettings.clearProcessors().addProcessor(new BlockRotProcessor(this.integrity)).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
             int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
             this.templatePosition = new BlockPos(this.templatePosition.getX(), i, this.templatePosition.getZ());
             BlockPos blockPos2 = StructureTemplate.transform(new BlockPos(this.template.getSize().getX() - 1, 0, this.template.getSize().getZ() - 1), Mirror.NONE, this.placeSettings.getRotation(), BlockPos.ZERO).offset(this.templatePosition);
             this.templatePosition = new BlockPos(this.templatePosition.getX(), this.getHeight(this.templatePosition, worldGenLevel, blockPos2), this.templatePosition.getZ());
-            super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
         }
 
         private int getHeight(BlockPos blockPos, BlockGetter blockGetter, BlockPos blockPos2) {

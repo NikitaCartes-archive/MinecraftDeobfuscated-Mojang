@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -51,19 +51,19 @@ extends Block {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
         if (!blockState.getValue(LIT).booleanValue()) {
             return;
         }
-        this.getParticleOffsets(blockState).forEach(vec3 -> AbstractCandleBlock.addParticlesAndSound(level, vec3.add(blockPos.getX(), blockPos.getY(), blockPos.getZ()), random));
+        this.getParticleOffsets(blockState).forEach(vec3 -> AbstractCandleBlock.addParticlesAndSound(level, vec3.add(blockPos.getX(), blockPos.getY(), blockPos.getZ()), randomSource));
     }
 
-    private static void addParticlesAndSound(Level level, Vec3 vec3, Random random) {
-        float f = random.nextFloat();
+    private static void addParticlesAndSound(Level level, Vec3 vec3, RandomSource randomSource) {
+        float f = randomSource.nextFloat();
         if (f < 0.3f) {
             level.addParticle(ParticleTypes.SMOKE, vec3.x, vec3.y, vec3.z, 0.0, 0.0, 0.0);
             if (f < 0.17f) {
-                level.playLocalSound(vec3.x + 0.5, vec3.y + 0.5, vec3.z + 0.5, SoundEvents.CANDLE_AMBIENT, SoundSource.BLOCKS, 1.0f + random.nextFloat(), random.nextFloat() * 0.7f + 0.3f, false);
+                level.playLocalSound(vec3.x + 0.5, vec3.y + 0.5, vec3.z + 0.5, SoundEvents.CANDLE_AMBIENT, SoundSource.BLOCKS, 1.0f + randomSource.nextFloat(), randomSource.nextFloat() * 0.7f + 0.3f, false);
             }
         }
         level.addParticle(ParticleTypes.SMALL_FLAME, vec3.x, vec3.y, vec3.z, 0.0, 0.0, 0.0);

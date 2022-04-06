@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -83,36 +84,22 @@ extends AbstractTexture {
         }
 
         public static TextureImage load(ResourceManager resourceManager, ResourceLocation resourceLocation) {
-            TextureImage textureImage;
-            block10: {
-                Resource resource = resourceManager.getResource(resourceLocation);
-                try {
-                    NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-                    TextureMetadataSection textureMetadataSection = null;
-                    try {
-                        textureMetadataSection = resource.getMetadata(TextureMetadataSection.SERIALIZER);
-                    } catch (RuntimeException runtimeException) {
-                        LOGGER.warn("Failed reading metadata of: {}", (Object)resourceLocation, (Object)runtimeException);
-                    }
-                    textureImage = new TextureImage(textureMetadataSection, nativeImage);
-                    if (resource == null) break block10;
-                } catch (Throwable throwable) {
-                    try {
-                        if (resource != null) {
-                            try {
-                                resource.close();
-                            } catch (Throwable throwable2) {
-                                throwable.addSuppressed(throwable2);
-                            }
-                        }
-                        throw throwable;
-                    } catch (IOException iOException) {
-                        return new TextureImage(iOException);
-                    }
+            try {
+                NativeImage nativeImage;
+                Resource resource = resourceManager.getResourceOrThrow(resourceLocation);
+                try (InputStream inputStream = resource.open();){
+                    nativeImage = NativeImage.read(inputStream);
                 }
-                resource.close();
+                TextureMetadataSection textureMetadataSection = null;
+                try {
+                    textureMetadataSection = resource.metadata().getSection(TextureMetadataSection.SERIALIZER).orElse(null);
+                } catch (RuntimeException runtimeException) {
+                    LOGGER.warn("Failed reading metadata of: {}", (Object)resourceLocation, (Object)runtimeException);
+                }
+                return new TextureImage(textureMetadataSection, nativeImage);
+            } catch (IOException iOException) {
+                return new TextureImage(iOException);
             }
-            return textureImage;
         }
 
         @Nullable

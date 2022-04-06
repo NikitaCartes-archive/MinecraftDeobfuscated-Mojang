@@ -4,7 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -12,6 +11,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -69,10 +69,10 @@ implements BucketPickup {
             entity.makeStuckInBlock(blockState, new Vec3(0.9f, 1.5, 0.9f));
             if (level.isClientSide) {
                 boolean bl;
-                Random random = level.getRandom();
+                RandomSource randomSource = level.getRandom();
                 boolean bl2 = bl = entity.xOld != entity.getX() || entity.zOld != entity.getZ();
-                if (bl && random.nextBoolean()) {
-                    level.addParticle(ParticleTypes.SNOWFLAKE, entity.getX(), blockPos.getY() + 1, entity.getZ(), Mth.randomBetween(random, -1.0f, 1.0f) * 0.083333336f, 0.05f, Mth.randomBetween(random, -1.0f, 1.0f) * 0.083333336f);
+                if (bl && randomSource.nextBoolean()) {
+                    level.addParticle(ParticleTypes.SNOWFLAKE, entity.getX(), blockPos.getY() + 1, entity.getZ(), Mth.randomBetween(randomSource, -1.0f, 1.0f) * 0.083333336f, 0.05f, Mth.randomBetween(randomSource, -1.0f, 1.0f) * 0.083333336f);
                 }
             }
         }

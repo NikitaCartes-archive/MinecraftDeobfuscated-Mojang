@@ -4,9 +4,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -26,15 +26,15 @@ extends Feature<ReplaceSphereConfiguration> {
     public boolean place(FeaturePlaceContext<ReplaceSphereConfiguration> featurePlaceContext) {
         ReplaceSphereConfiguration replaceSphereConfiguration = featurePlaceContext.config();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         Block block = replaceSphereConfiguration.targetState.getBlock();
         BlockPos blockPos = ReplaceBlobsFeature.findTarget(worldGenLevel, featurePlaceContext.origin().mutable().clamp(Direction.Axis.Y, worldGenLevel.getMinBuildHeight() + 1, worldGenLevel.getMaxBuildHeight() - 1), block);
         if (blockPos == null) {
             return false;
         }
-        int i = replaceSphereConfiguration.radius().sample(random);
-        int j = replaceSphereConfiguration.radius().sample(random);
-        int k = replaceSphereConfiguration.radius().sample(random);
+        int i = replaceSphereConfiguration.radius().sample(randomSource);
+        int j = replaceSphereConfiguration.radius().sample(randomSource);
+        int k = replaceSphereConfiguration.radius().sample(randomSource);
         int l = Math.max(i, Math.max(j, k));
         boolean bl = false;
         for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, i, j, k)) {

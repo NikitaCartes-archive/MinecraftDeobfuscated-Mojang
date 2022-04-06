@@ -8,9 +8,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviderType;
 
@@ -37,8 +37,8 @@ extends IntProvider {
     }
 
     @Override
-    public int sample(Random random) {
-        return Mth.clamp(this.source.sample(random), this.minInclusive, this.maxInclusive);
+    public int sample(RandomSource randomSource) {
+        return Mth.clamp(this.source.sample(randomSource), this.minInclusive, this.maxInclusive);
     }
 
     @Override

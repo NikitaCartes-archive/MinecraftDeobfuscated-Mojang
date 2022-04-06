@@ -4,9 +4,9 @@
 package net.minecraft.world.level.block;
 
 import java.util.Collection;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.MultifaceBlock;
@@ -34,7 +34,7 @@ public interface SculkBehaviour {
         }
 
         @Override
-        public int attemptUseCharge(SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl) {
+        public int attemptUseCharge(SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl) {
             return chargeCursor.getDecayDelay() > 0 ? chargeCursor.getCharge() : 0;
         }
 
@@ -48,10 +48,10 @@ public interface SculkBehaviour {
         return 1;
     }
 
-    default public void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, Random random) {
+    default public void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, RandomSource randomSource) {
     }
 
-    default public boolean depositCharge(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
+    default public boolean depositCharge(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource) {
         return false;
     }
 
@@ -67,6 +67,6 @@ public interface SculkBehaviour {
         return 1;
     }
 
-    public int attemptUseCharge(SculkSpreader.ChargeCursor var1, LevelAccessor var2, BlockPos var3, Random var4, SculkSpreader var5, boolean var6);
+    public int attemptUseCharge(SculkSpreader.ChargeCursor var1, LevelAccessor var2, BlockPos var3, RandomSource var4, SculkSpreader var5, boolean var6);
 }
 

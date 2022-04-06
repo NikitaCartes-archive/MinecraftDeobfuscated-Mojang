@@ -4,7 +4,6 @@
 package net.minecraft.data.worldgen.features;
 
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -19,6 +18,7 @@ import net.minecraft.data.worldgen.features.PileFeatures;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.data.worldgen.features.VegetationFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 public class FeatureUtils {
     public static Holder<? extends ConfiguredFeature<?, ?>> bootstrap() {
         List<Holder<ConfiguredFeature<RandomFeatureConfiguration, ?>>> list = List.of(AquaticFeatures.KELP, CaveFeatures.MOSS_PATCH_BONEMEAL, EndFeatures.CHORUS_PLANT, MiscOverworldFeatures.SPRING_LAVA_OVERWORLD, NetherFeatures.BASALT_BLOBS, OreFeatures.ORE_ANCIENT_DEBRIS_LARGE, PileFeatures.PILE_HAY, TreeFeatures.AZALEA_TREE, VegetationFeatures.TREES_OLD_GROWTH_PINE_TAIGA);
-        return Util.getRandom(list, new Random());
+        return Util.getRandom(list, RandomSource.create());
     }
 
     private static BlockPredicate simplePatchPredicate(List<Block> list) {

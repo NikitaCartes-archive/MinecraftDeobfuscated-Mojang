@@ -14,8 +14,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2BooleanFunction;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -56,21 +54,32 @@ implements AutoCloseable {
         this.selector = object2BooleanFunction;
     }
 
-    /*
-     * Enabled aggressive exception aggregation
-     */
     @Override
     protected Map<String, List<Notification>> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        try (Resource resource = resourceManager.getResource(this.notifications);){
-            Map map;
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));){
-                map = (Map)CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(bufferedReader)).result().orElseThrow();
+        Map map;
+        block8: {
+            BufferedReader reader = resourceManager.openAsReader(this.notifications);
+            try {
+                map = (Map)CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader)).result().orElseThrow();
+                if (reader == null) break block8;
+            } catch (Throwable throwable) {
+                try {
+                    if (reader != null) {
+                        try {
+                            ((Reader)reader).close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (Exception exception) {
+                    LOGGER.warn("Failed to load {}", (Object)this.notifications, (Object)exception);
+                    return ImmutableMap.of();
+                }
             }
-            return map;
-        } catch (Exception exception) {
-            LOGGER.warn("Failed to load {}", (Object)this.notifications, (Object)exception);
-            return ImmutableMap.of();
+            ((Reader)reader).close();
         }
+        return map;
     }
 
     @Override

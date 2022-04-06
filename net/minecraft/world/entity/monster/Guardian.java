@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,6 +14,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -285,8 +285,8 @@ extends Monster {
         return levelReader.isUnobstructed(this);
     }
 
-    public static boolean checkGuardianSpawnRules(EntityType<? extends Guardian> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return !(random.nextInt(20) != 0 && levelAccessor.canSeeSkyFromBelowWater(blockPos) || levelAccessor.getDifficulty() == Difficulty.PEACEFUL || mobSpawnType != MobSpawnType.SPAWNER && !levelAccessor.getFluidState(blockPos).is(FluidTags.WATER) || !levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER));
+    public static boolean checkGuardianSpawnRules(EntityType<? extends Guardian> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
+        return !(randomSource.nextInt(20) != 0 && levelAccessor.canSeeSkyFromBelowWater(blockPos) || levelAccessor.getDifficulty() == Difficulty.PEACEFUL || mobSpawnType != MobSpawnType.SPAWNER && !levelAccessor.getFluidState(blockPos).is(FluidTags.WATER) || !levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER));
     }
 
     @Override

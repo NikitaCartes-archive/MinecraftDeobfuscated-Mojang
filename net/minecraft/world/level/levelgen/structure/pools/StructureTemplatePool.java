@@ -11,15 +11,15 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -79,12 +79,12 @@ public class StructureTemplatePool {
         return this.fallback;
     }
 
-    public StructurePoolElement getRandomTemplate(Random random) {
-        return this.templates.get(random.nextInt(this.templates.size()));
+    public StructurePoolElement getRandomTemplate(RandomSource randomSource) {
+        return this.templates.get(randomSource.nextInt(this.templates.size()));
     }
 
-    public List<StructurePoolElement> getShuffledTemplates(Random random) {
-        return ImmutableList.copyOf(ObjectArrays.shuffle(this.templates.toArray(new StructurePoolElement[0]), random));
+    public List<StructurePoolElement> getShuffledTemplates(RandomSource randomSource) {
+        return Util.shuffledCopy(this.templates, randomSource);
     }
 
     public ResourceLocation getName() {

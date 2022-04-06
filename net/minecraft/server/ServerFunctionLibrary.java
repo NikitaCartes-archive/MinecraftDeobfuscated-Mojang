@@ -8,8 +8,8 @@ import com.google.common.collect.Maps;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +26,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class ServerFunctionLibrary
@@ -79,7 +77,7 @@ implements PreparableReloadListener {
                 String string = resourceLocation.getPath();
                 ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string.substring(PATH_PREFIX_LENGTH, string.length() - PATH_SUFFIX_LENGTH));
                 map2.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
-                    List<String> list = ServerFunctionLibrary.readLines((ResourceThunk)entry.getValue());
+                    List<String> list = ServerFunctionLibrary.readLines((Resource)entry.getValue());
                     return CommandFunction.fromLines(resourceLocation2, this.dispatcher, commandSourceStack, list);
                 }, executor));
             }
@@ -102,18 +100,18 @@ implements PreparableReloadListener {
         }, executor2);
     }
 
-    private static List<String> readLines(ResourceThunk resourceThunk) {
+    private static List<String> readLines(Resource resource) {
         List<String> list;
         block8: {
-            Resource resource = resourceThunk.open();
+            BufferedReader bufferedReader = resource.openAsReader();
             try {
-                list = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
-                if (resource == null) break block8;
+                list = bufferedReader.lines().toList();
+                if (bufferedReader == null) break block8;
             } catch (Throwable throwable) {
                 try {
-                    if (resource != null) {
+                    if (bufferedReader != null) {
                         try {
-                            resource.close();
+                            bufferedReader.close();
                         } catch (Throwable throwable2) {
                             throwable.addSuppressed(throwable2);
                         }
@@ -123,7 +121,7 @@ implements PreparableReloadListener {
                     throw new CompletionException(iOException);
                 }
             }
-            resource.close();
+            bufferedReader.close();
         }
         return list;
     }

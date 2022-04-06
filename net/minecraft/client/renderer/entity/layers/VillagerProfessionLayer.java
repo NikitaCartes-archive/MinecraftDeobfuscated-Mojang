@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.IOException;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -21,7 +22,6 @@ import net.minecraft.client.resources.metadata.animation.VillagerMetaDataSection
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -82,17 +82,13 @@ extends RenderLayer<T, M> {
     }
 
     public <K> VillagerMetaDataSection.Hat getHatData(Object2ObjectMap<K, VillagerMetaDataSection.Hat> object2ObjectMap, String string, DefaultedRegistry<K> defaultedRegistry, K object) {
-        return object2ObjectMap.computeIfAbsent(object, object2 -> {
-            try (Resource resource = this.resourceManager.getResource(this.getResourceLocation(string, defaultedRegistry.getKey(object)));){
-                VillagerMetaDataSection villagerMetaDataSection = resource.getMetadata(VillagerMetaDataSection.SERIALIZER);
-                if (villagerMetaDataSection == null) return VillagerMetaDataSection.Hat.NONE;
-                VillagerMetaDataSection.Hat hat = villagerMetaDataSection.getHat();
-                return hat;
+        return object2ObjectMap.computeIfAbsent(object, object2 -> this.resourceManager.getResource(this.getResourceLocation(string, defaultedRegistry.getKey(object))).flatMap(resource -> {
+            try {
+                return resource.metadata().getSection(VillagerMetaDataSection.SERIALIZER).map(VillagerMetaDataSection::getHat);
             } catch (IOException iOException) {
-                // empty catch block
+                return Optional.empty();
             }
-            return VillagerMetaDataSection.Hat.NONE;
-        });
+        }).orElse(VillagerMetaDataSection.Hat.NONE));
     }
 }
 

@@ -11,14 +11,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
@@ -44,15 +45,11 @@ extends Feature<TreeConfiguration> {
         super(codec);
     }
 
-    public static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return TreeFeature.validTreePos(levelSimulatedReader, blockPos) || levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(BlockTags.LOGS));
-    }
-
     private static boolean isVine(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(Blocks.VINE));
     }
 
-    private static boolean isBlockWater(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+    public static boolean isBlockWater(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(Blocks.WATER));
     }
 
@@ -63,7 +60,7 @@ extends Feature<TreeConfiguration> {
     private static boolean isReplaceablePlant(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Material material = blockState.getMaterial();
-            return material == Material.REPLACEABLE_PLANT;
+            return material == Material.REPLACEABLE_PLANT || material == Material.REPLACEABLE_WATER_PLANT;
         });
     }
 
@@ -75,11 +72,11 @@ extends Feature<TreeConfiguration> {
         return TreeFeature.isAirOrLeaves(levelSimulatedReader, blockPos) || TreeFeature.isReplaceablePlant(levelSimulatedReader, blockPos) || TreeFeature.isBlockWater(levelSimulatedReader, blockPos);
     }
 
-    private boolean doPlace(WorldGenLevel worldGenLevel, Random random, BlockPos blockPos, BiConsumer<BlockPos, BlockState> biConsumer, BiConsumer<BlockPos, BlockState> biConsumer2, TreeConfiguration treeConfiguration) {
-        int i = treeConfiguration.trunkPlacer.getTreeHeight(random);
-        int j = treeConfiguration.foliagePlacer.foliageHeight(random, i, treeConfiguration);
+    private boolean doPlace(WorldGenLevel worldGenLevel, RandomSource randomSource, BlockPos blockPos, BiConsumer<BlockPos, BlockState> biConsumer, BiConsumer<BlockPos, BlockState> biConsumer2, BiConsumer<BlockPos, BlockState> biConsumer3, TreeConfiguration treeConfiguration) {
+        int i = treeConfiguration.trunkPlacer.getTreeHeight(randomSource);
+        int j = treeConfiguration.foliagePlacer.foliageHeight(randomSource, i, treeConfiguration);
         int k = i - j;
-        int l = treeConfiguration.foliagePlacer.foliageRadius(random, k);
+        int l = treeConfiguration.foliagePlacer.foliageRadius(randomSource, k);
         if (blockPos.getY() < worldGenLevel.getMinBuildHeight() + 1 || blockPos.getY() + i + 1 > worldGenLevel.getMaxBuildHeight()) {
             return false;
         }
@@ -88,8 +85,16 @@ extends Feature<TreeConfiguration> {
         if (!(m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt())) {
             return false;
         }
-        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, biConsumer, random, m, blockPos, treeConfiguration);
-        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, biConsumer2, random, treeConfiguration, m, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l));
+        BlockPos blockPos2 = blockPos;
+        if (treeConfiguration.rootPlacer.isPresent()) {
+            Optional<BlockPos> optional = treeConfiguration.rootPlacer.get().placeRoots(worldGenLevel, biConsumer, randomSource, blockPos, treeConfiguration);
+            if (optional.isEmpty()) {
+                return false;
+            }
+            blockPos2 = optional.get();
+        }
+        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, biConsumer2, randomSource, m, blockPos2, treeConfiguration);
+        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, biConsumer3, randomSource, treeConfiguration, m, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l));
         return true;
     }
 
@@ -100,7 +105,7 @@ extends Feature<TreeConfiguration> {
             for (int l = -k; l <= k; ++l) {
                 for (int m = -k; m <= k; ++m) {
                     mutableBlockPos.setWithOffset(blockPos, l, j, m);
-                    if (TreeFeature.isFree(levelSimulatedReader, mutableBlockPos) && (treeConfiguration.ignoreVines || !TreeFeature.isVine(levelSimulatedReader, mutableBlockPos))) continue;
+                    if (treeConfiguration.trunkPlacer.isFree(levelSimulatedReader, mutableBlockPos) && (treeConfiguration.ignoreVines || !TreeFeature.isVine(levelSimulatedReader, mutableBlockPos))) continue;
                     return j - 2;
                 }
             }
@@ -116,12 +121,13 @@ extends Feature<TreeConfiguration> {
     @Override
     public final boolean place(FeaturePlaceContext<TreeConfiguration> featurePlaceContext) {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         BlockPos blockPos2 = featurePlaceContext.origin();
         TreeConfiguration treeConfiguration = featurePlaceContext.config();
         HashSet set = Sets.newHashSet();
         HashSet set2 = Sets.newHashSet();
         HashSet set3 = Sets.newHashSet();
+        HashSet set4 = Sets.newHashSet();
         BiConsumer<BlockPos, BlockState> biConsumer = (blockPos, blockState) -> {
             set.add(blockPos.immutable());
             worldGenLevel.setBlock((BlockPos)blockPos, (BlockState)blockState, 19);
@@ -134,19 +140,25 @@ extends Feature<TreeConfiguration> {
             set3.add(blockPos.immutable());
             worldGenLevel.setBlock((BlockPos)blockPos, (BlockState)blockState, 19);
         };
-        boolean bl = this.doPlace(worldGenLevel, random, blockPos2, biConsumer, biConsumer2, treeConfiguration);
-        if (!bl || set.isEmpty() && set2.isEmpty()) {
+        BiConsumer<BlockPos, BlockState> biConsumer4 = (blockPos, blockState) -> {
+            set4.add(blockPos.immutable());
+            worldGenLevel.setBlock((BlockPos)blockPos, (BlockState)blockState, 19);
+        };
+        boolean bl = this.doPlace(worldGenLevel, randomSource, blockPos2, biConsumer, biConsumer2, biConsumer3, treeConfiguration);
+        if (!bl || set2.isEmpty() && set3.isEmpty()) {
             return false;
         }
         if (!treeConfiguration.decorators.isEmpty()) {
             ArrayList<BlockPos> list = Lists.newArrayList(set);
             ArrayList<BlockPos> list2 = Lists.newArrayList(set2);
-            list.sort(Comparator.comparingInt(Vec3i::getY));
+            ArrayList<BlockPos> list3 = Lists.newArrayList(set3);
             list2.sort(Comparator.comparingInt(Vec3i::getY));
-            treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(worldGenLevel, biConsumer3, random, list, list2));
+            list3.sort(Comparator.comparingInt(Vec3i::getY));
+            list.sort(Comparator.comparingInt(Vec3i::getY));
+            treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(worldGenLevel, biConsumer4, randomSource, list2, list3, list));
         }
-        return BoundingBox.encapsulatingPositions(Iterables.concat(set, set2, set3)).map(boundingBox -> {
-            DiscreteVoxelShape discreteVoxelShape = TreeFeature.updateLeaves(worldGenLevel, boundingBox, set, set3);
+        return BoundingBox.encapsulatingPositions(Iterables.concat(set2, set3, set4)).map(boundingBox -> {
+            DiscreteVoxelShape discreteVoxelShape = TreeFeature.updateLeaves(worldGenLevel, boundingBox, set2, set4);
             StructureTemplate.updateShapeAtEdge(worldGenLevel, 3, discreteVoxelShape, boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
             return true;
         }).orElse(false);

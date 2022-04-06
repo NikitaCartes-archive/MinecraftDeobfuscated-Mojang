@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.WorldGenLevel;
@@ -78,6 +78,7 @@ import net.minecraft.world.level.levelgen.feature.SimpleRandomSelectorFeature;
 import net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
 import net.minecraft.world.level.levelgen.feature.SpringFeature;
+import net.minecraft.world.level.levelgen.feature.SurfaceDiskFeature;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.TwistingVinesFeature;
 import net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature;
@@ -145,13 +146,14 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<VegetationPatchConfiguration> VEGETATION_PATCH = Feature.register("vegetation_patch", new VegetationPatchFeature(VegetationPatchConfiguration.CODEC));
     public static final Feature<VegetationPatchConfiguration> WATERLOGGED_VEGETATION_PATCH = Feature.register("waterlogged_vegetation_patch", new WaterloggedVegetationPatchFeature(VegetationPatchConfiguration.CODEC));
     public static final Feature<RootSystemConfiguration> ROOT_SYSTEM = Feature.register("root_system", new RootSystemFeature(RootSystemConfiguration.CODEC));
-    public static final Feature<MultifaceGrowthConfiguration> MULTIFACE_GROWTH = Feature.register("glow_lichen", new MultifaceGrowthFeature(MultifaceGrowthConfiguration.CODEC));
+    public static final Feature<MultifaceGrowthConfiguration> MULTIFACE_GROWTH = Feature.register("multiface_growth", new MultifaceGrowthFeature(MultifaceGrowthConfiguration.CODEC));
     public static final Feature<UnderwaterMagmaConfiguration> UNDERWATER_MAGMA = Feature.register("underwater_magma", new UnderwaterMagmaFeature(UnderwaterMagmaConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> MONSTER_ROOM = Feature.register("monster_room", new MonsterRoomFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<NoneFeatureConfiguration> BLUE_ICE = Feature.register("blue_ice", new BlueIceFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<BlockStateConfiguration> ICEBERG = Feature.register("iceberg", new IcebergFeature(BlockStateConfiguration.CODEC));
     public static final Feature<BlockStateConfiguration> FOREST_ROCK = Feature.register("forest_rock", new BlockBlobFeature(BlockStateConfiguration.CODEC));
     public static final Feature<DiskConfiguration> DISK = Feature.register("disk", new DiskReplaceFeature(DiskConfiguration.CODEC));
+    public static final Feature<DiskConfiguration> SURFACE_DISK = Feature.register("surface_disk", new SurfaceDiskFeature(DiskConfiguration.CODEC));
     public static final Feature<DiskConfiguration> ICE_PATCH = Feature.register("ice_patch", new IcePatchFeature(DiskConfiguration.CODEC));
     public static final Feature<LakeFeature.Configuration> LAKE = Feature.register("lake", new LakeFeature(LakeFeature.Configuration.CODEC));
     public static final Feature<OreConfiguration> ORE = Feature.register("ore", new OreFeature(OreConfiguration.CODEC));
@@ -215,9 +217,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 
     public abstract boolean place(FeaturePlaceContext<FC> var1);
 
-    public boolean place(FC featureConfiguration, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
+    public boolean place(FC featureConfiguration, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos) {
         if (worldGenLevel.ensureCanWrite(blockPos)) {
-            return this.place(new FeaturePlaceContext<FC>(Optional.empty(), worldGenLevel, chunkGenerator, random, blockPos, featureConfiguration));
+            return this.place(new FeaturePlaceContext<FC>(Optional.empty(), worldGenLevel, chunkGenerator, randomSource, blockPos, featureConfiguration));
         }
         return false;
     }

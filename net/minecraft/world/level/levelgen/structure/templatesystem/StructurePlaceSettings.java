@@ -5,10 +5,10 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -25,7 +25,7 @@ public class StructurePlaceSettings {
     private BoundingBox boundingBox;
     private boolean keepLiquids = true;
     @Nullable
-    private Random random;
+    private RandomSource random;
     private int palette;
     private final List<StructureProcessor> processors = Lists.newArrayList();
     private boolean knownShape;
@@ -72,8 +72,8 @@ public class StructurePlaceSettings {
         return this;
     }
 
-    public StructurePlaceSettings setRandom(@Nullable Random random) {
-        this.random = random;
+    public StructurePlaceSettings setRandom(@Nullable RandomSource randomSource) {
+        this.random = randomSource;
         return this;
     }
 
@@ -114,14 +114,14 @@ public class StructurePlaceSettings {
         return this.rotationPivot;
     }
 
-    public Random getRandom(@Nullable BlockPos blockPos) {
+    public RandomSource getRandom(@Nullable BlockPos blockPos) {
         if (this.random != null) {
             return this.random;
         }
         if (blockPos == null) {
-            return new Random(Util.getMillis());
+            return RandomSource.create(Util.getMillis());
         }
-        return new Random(Mth.getSeed(blockPos));
+        return RandomSource.create(Mth.getSeed(blockPos));
     }
 
     public boolean isIgnoreEntities() {

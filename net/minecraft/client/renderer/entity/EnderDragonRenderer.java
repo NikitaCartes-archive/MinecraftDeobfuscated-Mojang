@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -27,6 +26,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,20 +77,20 @@ extends EntityRenderer<EnderDragon> {
         if (enderDragon.dragonDeathTime > 0) {
             float l = ((float)enderDragon.dragonDeathTime + g) / 200.0f;
             float m = Math.min(l > 0.8f ? (l - 0.8f) / 0.2f : 0.0f, 1.0f);
-            Random random = new Random(432L);
+            RandomSource randomSource = RandomSource.create(432L);
             VertexConsumer vertexConsumer4 = multiBufferSource.getBuffer(RenderType.lightning());
             poseStack.pushPose();
             poseStack.translate(0.0, -1.0, -2.0);
             int n = 0;
             while ((float)n < (l + l * l) / 2.0f * 60.0f) {
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(random.nextFloat() * 360.0f));
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(random.nextFloat() * 360.0f));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(random.nextFloat() * 360.0f));
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(random.nextFloat() * 360.0f));
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(random.nextFloat() * 360.0f));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(random.nextFloat() * 360.0f + l * 90.0f));
-                float o = random.nextFloat() * 20.0f + 5.0f + m * 10.0f;
-                float p = random.nextFloat() * 2.0f + 1.0f + m * 2.0f;
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(randomSource.nextFloat() * 360.0f));
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(randomSource.nextFloat() * 360.0f));
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees(randomSource.nextFloat() * 360.0f));
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(randomSource.nextFloat() * 360.0f));
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(randomSource.nextFloat() * 360.0f));
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees(randomSource.nextFloat() * 360.0f + l * 90.0f));
+                float o = randomSource.nextFloat() * 20.0f + 5.0f + m * 10.0f;
+                float p = randomSource.nextFloat() * 2.0f + 1.0f + m * 2.0f;
                 Matrix4f matrix4f = poseStack.last().pose();
                 int q = (int)(255.0f * (1.0f - m));
                 EnderDragonRenderer.vertex01(vertexConsumer4, matrix4f, q);

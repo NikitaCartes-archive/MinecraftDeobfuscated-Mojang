@@ -7,7 +7,7 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
@@ -24,8 +24,8 @@ extends RuleTest {
     }
 
     @Override
-    public boolean test(BlockState blockState, Random random) {
-        return blockState == this.blockState && random.nextFloat() < this.probability;
+    public boolean test(BlockState blockState, RandomSource randomSource) {
+        return blockState == this.blockState && randomSource.nextFloat() < this.probability;
     }
 
     @Override

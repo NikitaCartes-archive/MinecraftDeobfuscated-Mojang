@@ -125,6 +125,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
                 entitySection.add(this.entity);
                 this.currentSection = entitySection;
                 this.currentSectionKey = l;
+                this.field_27285.callbacks.onSectionChange(this.entity);
                 if (!this.entity.isAlwaysTicking()) {
                     boolean bl = visibility.isTicking();
                     boolean bl2 = entitySection.getStatus().isTicking();

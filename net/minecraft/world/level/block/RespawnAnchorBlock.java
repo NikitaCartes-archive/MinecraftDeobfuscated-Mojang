@@ -5,7 +5,6 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -15,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -135,17 +135,17 @@ extends Block {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
         if (blockState.getValue(CHARGE) == 0) {
             return;
         }
-        if (random.nextInt(100) == 0) {
+        if (randomSource.nextInt(100) == 0) {
             level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.0f);
         }
-        double d = (double)blockPos.getX() + 0.5 + (0.5 - random.nextDouble());
+        double d = (double)blockPos.getX() + 0.5 + (0.5 - randomSource.nextDouble());
         double e = (double)blockPos.getY() + 1.0;
-        double f = (double)blockPos.getZ() + 0.5 + (0.5 - random.nextDouble());
-        double g = (double)random.nextFloat() * 0.04;
+        double f = (double)blockPos.getZ() + 0.5 + (0.5 - randomSource.nextDouble());
+        double g = (double)randomSource.nextFloat() * 0.04;
         level.addParticle(ParticleTypes.REVERSE_PORTAL, d, e, f, 0.0, g, 0.0);
     }
 

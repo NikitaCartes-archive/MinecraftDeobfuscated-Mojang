@@ -13,7 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -476,8 +476,8 @@ implements Enemy {
     }
 
     @Override
-    public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
-        super.recreateFromPacket(clientboundAddMobPacket);
+    public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
         this.yBodyRot = 0.0f;
         this.yBodyRotO = 0.0f;
     }

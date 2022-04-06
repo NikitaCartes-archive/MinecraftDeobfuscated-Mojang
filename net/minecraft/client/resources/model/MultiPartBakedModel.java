@@ -10,7 +10,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,6 +20,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +49,7 @@ implements BakedModel {
     }
 
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, Random random) {
+    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {
         if (blockState == null) {
             return Collections.emptyList();
         }
@@ -64,10 +64,10 @@ implements BakedModel {
             this.selectorCache.put(blockState, bitSet);
         }
         ArrayList<BakedQuad> list = Lists.newArrayList();
-        long l = random.nextLong();
+        long l = randomSource.nextLong();
         for (int j = 0; j < bitSet.length(); ++j) {
             if (!bitSet.get(j)) continue;
-            list.addAll(this.selectors.get(j).getRight().getQuads(blockState, direction, new Random(l)));
+            list.addAll(this.selectors.get(j).getRight().getQuads(blockState, direction, RandomSource.create(l)));
         }
         return list;
     }

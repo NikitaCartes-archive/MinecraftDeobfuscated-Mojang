@@ -4,12 +4,12 @@
 package net.minecraft.world.level.block;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -58,7 +58,7 @@ extends Block {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
         block12: {
             double f;
             double e;
@@ -67,55 +67,55 @@ extends Block {
             block11: {
                 BlockPos blockPos2;
                 BlockState blockState2;
-                if (random.nextInt(24) == 0) {
-                    level.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 1.0f + random.nextFloat(), random.nextFloat() * 0.7f + 0.3f, false);
+                if (randomSource.nextInt(24) == 0) {
+                    level.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 1.0f + randomSource.nextFloat(), randomSource.nextFloat() * 0.7f + 0.3f, false);
                 }
                 if (!this.canBurn(blockState2 = level.getBlockState(blockPos2 = blockPos.below())) && !blockState2.isFaceSturdy(level, blockPos2, Direction.UP)) break block11;
                 for (int i2 = 0; i2 < 3; ++i2) {
-                    double d2 = (double)blockPos.getX() + random.nextDouble();
-                    double e2 = (double)blockPos.getY() + random.nextDouble() * 0.5 + 0.5;
-                    double f2 = (double)blockPos.getZ() + random.nextDouble();
+                    double d2 = (double)blockPos.getX() + randomSource.nextDouble();
+                    double e2 = (double)blockPos.getY() + randomSource.nextDouble() * 0.5 + 0.5;
+                    double f2 = (double)blockPos.getZ() + randomSource.nextDouble();
                     level.addParticle(ParticleTypes.LARGE_SMOKE, d2, e2, f2, 0.0, 0.0, 0.0);
                 }
                 break block12;
             }
             if (this.canBurn(level.getBlockState(blockPos.west()))) {
                 for (i = 0; i < 2; ++i) {
-                    d = (double)blockPos.getX() + random.nextDouble() * (double)0.1f;
-                    e = (double)blockPos.getY() + random.nextDouble();
-                    f = (double)blockPos.getZ() + random.nextDouble();
+                    d = (double)blockPos.getX() + randomSource.nextDouble() * (double)0.1f;
+                    e = (double)blockPos.getY() + randomSource.nextDouble();
+                    f = (double)blockPos.getZ() + randomSource.nextDouble();
                     level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
                 }
             }
             if (this.canBurn(level.getBlockState(blockPos.east()))) {
                 for (i = 0; i < 2; ++i) {
-                    d = (double)(blockPos.getX() + 1) - random.nextDouble() * (double)0.1f;
-                    e = (double)blockPos.getY() + random.nextDouble();
-                    f = (double)blockPos.getZ() + random.nextDouble();
+                    d = (double)(blockPos.getX() + 1) - randomSource.nextDouble() * (double)0.1f;
+                    e = (double)blockPos.getY() + randomSource.nextDouble();
+                    f = (double)blockPos.getZ() + randomSource.nextDouble();
                     level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
                 }
             }
             if (this.canBurn(level.getBlockState(blockPos.north()))) {
                 for (i = 0; i < 2; ++i) {
-                    d = (double)blockPos.getX() + random.nextDouble();
-                    e = (double)blockPos.getY() + random.nextDouble();
-                    f = (double)blockPos.getZ() + random.nextDouble() * (double)0.1f;
+                    d = (double)blockPos.getX() + randomSource.nextDouble();
+                    e = (double)blockPos.getY() + randomSource.nextDouble();
+                    f = (double)blockPos.getZ() + randomSource.nextDouble() * (double)0.1f;
                     level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
                 }
             }
             if (this.canBurn(level.getBlockState(blockPos.south()))) {
                 for (i = 0; i < 2; ++i) {
-                    d = (double)blockPos.getX() + random.nextDouble();
-                    e = (double)blockPos.getY() + random.nextDouble();
-                    f = (double)(blockPos.getZ() + 1) - random.nextDouble() * (double)0.1f;
+                    d = (double)blockPos.getX() + randomSource.nextDouble();
+                    e = (double)blockPos.getY() + randomSource.nextDouble();
+                    f = (double)(blockPos.getZ() + 1) - randomSource.nextDouble() * (double)0.1f;
                     level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
                 }
             }
             if (!this.canBurn(level.getBlockState(blockPos.above()))) break block12;
             for (i = 0; i < 2; ++i) {
-                d = (double)blockPos.getX() + random.nextDouble();
-                e = (double)(blockPos.getY() + 1) - random.nextDouble() * (double)0.1f;
-                f = (double)blockPos.getZ() + random.nextDouble();
+                d = (double)blockPos.getX() + randomSource.nextDouble();
+                e = (double)(blockPos.getY() + 1) - randomSource.nextDouble() * (double)0.1f;
+                f = (double)blockPos.getZ() + randomSource.nextDouble();
                 level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
             }
         }

@@ -5,13 +5,13 @@ package net.minecraft.world.level.levelgen.presets;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
@@ -68,7 +68,7 @@ public class WorldPresets {
     }
 
     public static WorldGenSettings createNormalWorldFromPreset(RegistryAccess registryAccess) {
-        return WorldPresets.createNormalWorldFromPreset(registryAccess, new Random().nextLong());
+        return WorldPresets.createNormalWorldFromPreset(registryAccess, RandomSource.create().nextLong());
     }
 
     public static WorldGenSettings demoSettings(RegistryAccess registryAccess) {

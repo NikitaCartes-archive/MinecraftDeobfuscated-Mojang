@@ -5,25 +5,19 @@ package net.minecraft.client.renderer.item;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+import net.minecraft.client.renderer.item.CompassItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.CompassItem;
@@ -35,7 +29,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LightBlock;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -132,84 +125,19 @@ public class ItemProperties {
                 return this.rotation;
             }
         });
-        ItemProperties.register(Items.COMPASS, new ResourceLocation("angle"), new ClampedItemPropertyFunction(){
-            private final CompassWobble wobble = new CompassWobble();
-            private final CompassWobble wobbleRandom = new CompassWobble();
-
-            @Override
-            public float unclampedCall(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
-                double g;
-                Entity entity;
-                Entity entity2 = entity = livingEntity != null ? livingEntity : itemStack.getEntityRepresentation();
-                if (entity == null) {
-                    return 0.0f;
-                }
-                if (clientLevel == null && entity.level instanceof ClientLevel) {
-                    clientLevel = (ClientLevel)entity.level;
-                }
-                BlockPos blockPos = CompassItem.isLodestoneCompass(itemStack) ? this.getLodestonePosition(clientLevel, itemStack.getOrCreateTag()) : this.getSpawnPosition(clientLevel);
-                long l = clientLevel.getGameTime();
-                if (blockPos == null || entity.position().distanceToSqr((double)blockPos.getX() + 0.5, entity.position().y(), (double)blockPos.getZ() + 0.5) < (double)1.0E-5f) {
-                    if (this.wobbleRandom.shouldUpdate(l)) {
-                        this.wobbleRandom.update(l, Math.random());
-                    }
-                    double d = this.wobbleRandom.rotation + (double)((float)this.hash(i) / 2.14748365E9f);
-                    return Mth.positiveModulo((float)d, 1.0f);
-                }
-                boolean bl = livingEntity instanceof Player && ((Player)livingEntity).isLocalPlayer();
-                double e = 0.0;
-                if (bl) {
-                    e = livingEntity.getYRot();
-                } else if (entity instanceof ItemFrame) {
-                    e = this.getFrameRotation((ItemFrame)entity);
-                } else if (entity instanceof ItemEntity) {
-                    e = 180.0f - ((ItemEntity)entity).getSpin(0.5f) / ((float)Math.PI * 2) * 360.0f;
-                } else if (livingEntity != null) {
-                    e = livingEntity.yBodyRot;
-                }
-                e = Mth.positiveModulo(e / 360.0, 1.0);
-                double f = this.getAngleTo(Vec3.atCenterOf(blockPos), entity) / 6.2831854820251465;
-                if (bl) {
-                    if (this.wobble.shouldUpdate(l)) {
-                        this.wobble.update(l, 0.5 - (e - 0.25));
-                    }
-                    g = f + this.wobble.rotation;
-                } else {
-                    g = 0.5 - (e - 0.25 - f);
-                }
-                return Mth.positiveModulo((float)g, 1.0f);
+        ItemProperties.register(Items.COMPASS, new ResourceLocation("angle"), new CompassItemPropertyFunction((clientLevel, itemStack, entity) -> {
+            if (CompassItem.isLodestoneCompass(itemStack)) {
+                return CompassItem.getLodestonePosition(itemStack.getOrCreateTag());
             }
-
-            private int hash(int i) {
-                return i * 1327217883;
+            return CompassItem.getSpawnPosition(clientLevel);
+        }));
+        ItemProperties.register(Items.RECOVERY_COMPASS, new ResourceLocation("angle"), new CompassItemPropertyFunction((clientLevel, itemStack, entity) -> {
+            if (entity instanceof Player) {
+                Player player = (Player)entity;
+                return player.getLastDeathLocation().orElse(null);
             }
-
-            @Nullable
-            private BlockPos getSpawnPosition(ClientLevel clientLevel) {
-                return clientLevel.dimensionType().natural() ? clientLevel.getSharedSpawnPos() : null;
-            }
-
-            @Nullable
-            private BlockPos getLodestonePosition(Level level, CompoundTag compoundTag) {
-                Optional<ResourceKey<Level>> optional;
-                boolean bl = compoundTag.contains("LodestonePos");
-                boolean bl2 = compoundTag.contains("LodestoneDimension");
-                if (bl && bl2 && (optional = CompassItem.getLodestoneDimension(compoundTag)).isPresent() && level.dimension() == optional.get()) {
-                    return NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
-                }
-                return null;
-            }
-
-            private double getFrameRotation(ItemFrame itemFrame) {
-                Direction direction = itemFrame.getDirection();
-                int i = direction.getAxis().isVertical() ? 90 * direction.getAxisDirection().getStep() : 0;
-                return Mth.wrapDegrees(180 + direction.get2DDataValue() * 90 + itemFrame.getRotation() * 45 + i);
-            }
-
-            private double getAngleTo(Vec3 vec3, Entity entity) {
-                return Math.atan2(vec3.z() - entity.getZ(), vec3.x() - entity.getX());
-            }
-        });
+            return null;
+        }));
         ItemProperties.register(Items.CROSSBOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
             if (livingEntity == null) {
                 return 0.0f;
@@ -249,29 +177,6 @@ public class ItemProperties {
             }
             return 1.0f;
         });
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class CompassWobble {
-        double rotation;
-        private double deltaRotation;
-        private long lastUpdateTick;
-
-        CompassWobble() {
-        }
-
-        boolean shouldUpdate(long l) {
-            return this.lastUpdateTick != l;
-        }
-
-        void update(long l, double d) {
-            this.lastUpdateTick = l;
-            double e = d - this.rotation;
-            e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;
-            this.deltaRotation += e * 0.1;
-            this.deltaRotation *= 0.8;
-            this.rotation = Mth.positiveModulo(this.rotation + this.deltaRotation, 1.0);
-        }
     }
 }
 

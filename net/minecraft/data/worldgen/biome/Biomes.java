@@ -28,6 +28,7 @@ public abstract class Biomes {
         Biomes.register(net.minecraft.world.level.biome.Biomes.ICE_SPIKES, OverworldBiomes.plains(false, true, true));
         Biomes.register(net.minecraft.world.level.biome.Biomes.DESERT, OverworldBiomes.desert());
         Biomes.register(net.minecraft.world.level.biome.Biomes.SWAMP, OverworldBiomes.swamp());
+        Biomes.register(net.minecraft.world.level.biome.Biomes.MANGROVE_SWAMP, OverworldBiomes.mangroveSwamp());
         Biomes.register(net.minecraft.world.level.biome.Biomes.FOREST, OverworldBiomes.forest(false, false, false));
         Biomes.register(net.minecraft.world.level.biome.Biomes.FLOWER_FOREST, OverworldBiomes.forest(false, false, true));
         Biomes.register(net.minecraft.world.level.biome.Biomes.BIRCH_FOREST, OverworldBiomes.forest(true, false, false));

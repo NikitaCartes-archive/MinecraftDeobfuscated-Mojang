@@ -6,11 +6,11 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -33,14 +33,14 @@ extends Feature<UnderwaterMagmaConfiguration> {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos2 = featurePlaceContext.origin();
         UnderwaterMagmaConfiguration underwaterMagmaConfiguration = featurePlaceContext.config();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         OptionalInt optionalInt = UnderwaterMagmaFeature.getFloorY(worldGenLevel, blockPos2, underwaterMagmaConfiguration);
         if (!optionalInt.isPresent()) {
             return false;
         }
         BlockPos blockPos22 = blockPos2.atY(optionalInt.getAsInt());
         AABB aABB = new AABB(blockPos22.subtract(vec3i = new Vec3i(underwaterMagmaConfiguration.placementRadiusAroundFloor, underwaterMagmaConfiguration.placementRadiusAroundFloor, underwaterMagmaConfiguration.placementRadiusAroundFloor)), blockPos22.offset(vec3i));
-        return BlockPos.betweenClosedStream(aABB).filter(blockPos -> random.nextFloat() < underwaterMagmaConfiguration.placementProbabilityPerValidPosition).filter(blockPos -> this.isValidPlacement(worldGenLevel, (BlockPos)blockPos)).mapToInt(blockPos -> {
+        return BlockPos.betweenClosedStream(aABB).filter(blockPos -> randomSource.nextFloat() < underwaterMagmaConfiguration.placementProbabilityPerValidPosition).filter(blockPos -> this.isValidPlacement(worldGenLevel, (BlockPos)blockPos)).mapToInt(blockPos -> {
             worldGenLevel.setBlock((BlockPos)blockPos, Blocks.MAGMA_BLOCK.defaultBlockState(), 2);
             return 1;
         }).sum() > 0;

@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
@@ -22,8 +22,8 @@ extends GrowingPlantHeadBlock {
     }
 
     @Override
-    protected int getBlocksToGrowWhenBonemealed(Random random) {
-        return NetherVines.getBlocksToGrowWhenBonemealed(random);
+    protected int getBlocksToGrowWhenBonemealed(RandomSource randomSource) {
+        return NetherVines.getBlocksToGrowWhenBonemealed(randomSource);
     }
 
     @Override

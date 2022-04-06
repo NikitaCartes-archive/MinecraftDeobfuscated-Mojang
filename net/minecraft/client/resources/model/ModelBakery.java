@@ -14,14 +14,11 @@ import com.mojang.logging.LogUtils;
 import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.io.Closeable;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -64,7 +61,6 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -317,80 +313,47 @@ public class ModelBakery {
             ModelGroupKey modelGroupKey2 = new ModelGroupKey(ImmutableList.of(unbakedModel), ImmutableList.of());
             Pair<UnbakedModel, Supplier<ModelGroupKey>> pair = Pair.of(unbakedModel, () -> modelGroupKey2);
             try {
-                List list2;
-                try {
-                    list2 = this.resourceManager.getResourceStack(resourceLocation3).stream().map(resourceThunk -> {
-                        try (Resource resource = resourceThunk.open();){
-                            Pair<String, BlockModelDefinition> pair;
-                            block14: {
-                                InputStream inputStream = resource.getInputStream();
-                                try {
-                                    pair = Pair.of(resourceThunk.sourcePackId(), BlockModelDefinition.fromStream(this.context, new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
-                                    if (inputStream == null) break block14;
-                                } catch (Throwable throwable) {
-                                    if (inputStream != null) {
-                                        try {
-                                            inputStream.close();
-                                        } catch (Throwable throwable2) {
-                                            throwable.addSuppressed(throwable2);
-                                        }
-                                    }
-                                    throw throwable;
-                                }
-                                inputStream.close();
-                            }
-                            return pair;
-                        } catch (Exception exception) {
-                            throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resourceLocation3, resourceThunk.sourcePackId(), exception.getMessage()));
-                        }
-                    }).collect(Collectors.toList());
-                } catch (IOException iOException) {
-                    LOGGER.warn("Exception loading blockstate definition: {}: {}", (Object)resourceLocation3, (Object)iOException);
-                    HashMap<ModelGroupKey, Set> map3 = Maps.newHashMap();
-                    map.forEach((modelResourceLocation, blockState) -> {
-                        Pair pair2 = (Pair)map2.get(blockState);
-                        if (pair2 == null) {
-                            LOGGER.warn("Exception loading blockstate definition: '{}' missing model for variant: '{}'", (Object)resourceLocation3, modelResourceLocation);
-                            pair2 = pair;
-                        }
-                        this.cacheAndQueueDependencies((ResourceLocation)modelResourceLocation, (UnbakedModel)pair2.getFirst());
+                List<Pair> list2 = this.resourceManager.getResourceStack(resourceLocation3).stream().map(resource -> {
+                    Pair<String, BlockModelDefinition> pair;
+                    block8: {
+                        BufferedReader reader = resource.openAsReader();
                         try {
-                            ModelGroupKey modelGroupKey2 = (ModelGroupKey)((Supplier)pair2.getSecond()).get();
-                            map3.computeIfAbsent(modelGroupKey2, modelGroupKey -> Sets.newIdentityHashSet()).add(blockState);
-                        } catch (Exception exception) {
-                            LOGGER.warn("Exception evaluating model definition: '{}'", modelResourceLocation, (Object)exception);
+                            pair = Pair.of(resource.sourcePackId(), BlockModelDefinition.fromStream(this.context, reader));
+                            if (reader == null) break block8;
+                        } catch (Throwable throwable) {
+                            try {
+                                if (reader != null) {
+                                    try {
+                                        ((Reader)reader).close();
+                                    } catch (Throwable throwable2) {
+                                        throwable.addSuppressed(throwable2);
+                                    }
+                                }
+                                throw throwable;
+                            } catch (Exception exception) {
+                                throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resourceLocation3, resource.sourcePackId(), exception.getMessage()));
+                            }
                         }
-                    });
-                    map3.forEach((modelGroupKey, set) -> {
-                        Iterator iterator = set.iterator();
-                        while (iterator.hasNext()) {
-                            BlockState blockState = (BlockState)iterator.next();
-                            if (blockState.getRenderShape() == RenderShape.MODEL) continue;
-                            iterator.remove();
-                            this.modelGroups.put(blockState, 0);
-                        }
-                        if (set.size() > 1) {
-                            this.registerModelGroup((Iterable<BlockState>)set);
-                        }
-                    });
-                    return;
-                }
+                        ((Reader)reader).close();
+                    }
+                    return pair;
+                }).toList();
                 for (Pair pair2 : list2) {
                     MultiPart multiPart;
                     BlockModelDefinition blockModelDefinition = (BlockModelDefinition)pair2.getSecond();
-                    IdentityHashMap map4 = Maps.newIdentityHashMap();
+                    IdentityHashMap map3 = Maps.newIdentityHashMap();
                     if (blockModelDefinition.isMultiPart()) {
                         multiPart = blockModelDefinition.getMultiPart();
-                        immutableList.forEach(blockState -> map4.put(blockState, Pair.of(multiPart, () -> ModelGroupKey.create(blockState, multiPart, list))));
+                        immutableList.forEach(blockState -> map3.put(blockState, Pair.of(multiPart, () -> ModelGroupKey.create(blockState, multiPart, list))));
                     } else {
                         multiPart = null;
                     }
                     blockModelDefinition.getVariants().forEach((string, multiVariant) -> {
                         try {
                             immutableList.stream().filter(ModelBakery.predicate(stateDefinition, string)).forEach(blockState -> {
-                                Pair<MultiVariant, Supplier<ModelGroupKey>> pair2 = map4.put(blockState, Pair.of(multiVariant, () -> ModelGroupKey.create(blockState, multiVariant, list)));
+                                Pair<MultiVariant, Supplier<ModelGroupKey>> pair2 = map3.put(blockState, Pair.of(multiVariant, () -> ModelGroupKey.create(blockState, multiVariant, list)));
                                 if (pair2 != null && pair2.getFirst() != multiPart) {
-                                    map4.put(blockState, pair);
+                                    map3.put(blockState, pair);
                                     throw new RuntimeException("Overlapping definition with: " + (String)blockModelDefinition.getVariants().entrySet().stream().filter(entry -> entry.getValue() == pair2.getFirst()).findFirst().get().getKey());
                                 }
                             });
@@ -398,14 +361,14 @@ public class ModelBakery {
                             LOGGER.warn("Exception loading blockstate definition: '{}' in resourcepack: '{}' for variant: '{}': {}", resourceLocation3, pair2.getFirst(), string, exception.getMessage());
                         }
                     });
-                    map2.putAll(map4);
+                    map2.putAll(map3);
                 }
             } catch (BlockStateDefinitionException blockStateDefinitionException) {
                 throw blockStateDefinitionException;
             } catch (Exception exception) {
                 throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s': %s", resourceLocation3, exception));
             } finally {
-                HashMap<ModelGroupKey, Set> map6 = Maps.newHashMap();
+                HashMap<ModelGroupKey, Set> map5 = Maps.newHashMap();
                 map.forEach((modelResourceLocation, blockState) -> {
                     Pair pair2 = (Pair)map2.get(blockState);
                     if (pair2 == null) {
@@ -415,12 +378,12 @@ public class ModelBakery {
                     this.cacheAndQueueDependencies((ResourceLocation)modelResourceLocation, (UnbakedModel)pair2.getFirst());
                     try {
                         ModelGroupKey modelGroupKey2 = (ModelGroupKey)((Supplier)pair2.getSecond()).get();
-                        map3.computeIfAbsent(modelGroupKey2, modelGroupKey -> Sets.newIdentityHashSet()).add(blockState);
+                        map5.computeIfAbsent(modelGroupKey2, modelGroupKey -> Sets.newIdentityHashSet()).add(blockState);
                     } catch (Exception exception) {
                         LOGGER.warn("Exception evaluating model definition: '{}'", modelResourceLocation, (Object)exception);
                     }
                 });
-                map6.forEach((modelGroupKey, set) -> {
+                map5.forEach((modelGroupKey, set) -> {
                     Iterator iterator = set.iterator();
                     while (iterator.hasNext()) {
                         BlockState blockState = (BlockState)iterator.next();
@@ -476,30 +439,25 @@ public class ModelBakery {
      */
     private BlockModel loadBlockModel(ResourceLocation resourceLocation) throws IOException {
         String string;
-        Resource resource;
         Reader reader;
         block8: {
             block7: {
                 BlockModel blockModel;
                 reader = null;
-                resource = null;
                 try {
                     string = resourceLocation.getPath();
                     if (!BUILTIN_SLASH_GENERATED.equals(string)) break block7;
                     blockModel = GENERATION_MARKER;
                 } catch (Throwable throwable) {
                     IOUtils.closeQuietly(reader);
-                    IOUtils.closeQuietly(resource);
                     throw throwable;
                 }
                 IOUtils.closeQuietly(reader);
-                IOUtils.closeQuietly(resource);
                 return blockModel;
             }
             if (!BUILTIN_BLOCK_ENTITY.equals(string)) break block8;
             BlockModel blockModel = BLOCK_ENTITY_MARKER;
             IOUtils.closeQuietly(reader);
-            IOUtils.closeQuietly(resource);
             return blockModel;
         }
         if (string.startsWith(BUILTIN_SLASH)) {
@@ -510,14 +468,12 @@ public class ModelBakery {
             }
             reader = new StringReader(string3);
         } else {
-            resource = this.resourceManager.getResource(new ResourceLocation(resourceLocation.getNamespace(), "models/" + resourceLocation.getPath() + ".json"));
-            reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+            reader = this.resourceManager.openAsReader(new ResourceLocation(resourceLocation.getNamespace(), "models/" + resourceLocation.getPath() + ".json"));
         }
         BlockModel blockModel = BlockModel.fromStream(reader);
         blockModel.name = resourceLocation.toString();
         BlockModel blockModel2 = blockModel;
         IOUtils.closeQuietly(reader);
-        IOUtils.closeQuietly((Closeable)resource);
         return blockModel2;
     }
 

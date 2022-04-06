@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -58,7 +58,7 @@ implements LiquidBlockContainer {
     }
 
     @Override
-    protected int getBlocksToGrowWhenBonemealed(Random random) {
+    protected int getBlocksToGrowWhenBonemealed(RandomSource randomSource) {
         return 1;
     }
 

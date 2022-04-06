@@ -5,7 +5,6 @@ package net.minecraft.world.level.block;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -17,6 +16,7 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -83,7 +83,7 @@ extends BaseEntityBlock {
     protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
         BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
         DispenserBlockEntity dispenserBlockEntity = (DispenserBlockEntity)blockSourceImpl.getEntity();
-        int i = dispenserBlockEntity.getRandomSlot();
+        int i = dispenserBlockEntity.getRandomSlot(serverLevel.random);
         if (i < 0) {
             serverLevel.levelEvent(1001, blockPos, 0);
             serverLevel.gameEvent(null, GameEvent.DISPENSE_FAIL, blockPos);
@@ -113,7 +113,7 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         this.dispenseFrom(serverLevel, blockPos);
     }
 

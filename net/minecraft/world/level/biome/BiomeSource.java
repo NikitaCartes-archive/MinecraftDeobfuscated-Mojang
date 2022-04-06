@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -38,6 +37,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.util.Graph;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
@@ -166,8 +166,8 @@ implements BiomeResolver {
     }
 
     @Nullable
-    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler) {
-        return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false, sampler);
+    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, RandomSource randomSource, Climate.Sampler sampler) {
+        return this.findBiomeHorizontal(i, j, k, l, 1, predicate, randomSource, false, sampler);
     }
 
     @Nullable
@@ -194,7 +194,7 @@ implements BiomeResolver {
     }
 
     @Nullable
-    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler) {
+    public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, RandomSource randomSource, boolean bl, Climate.Sampler sampler) {
         int s;
         int n = QuartPos.fromBlock(i);
         int o = QuartPos.fromBlock(k);
@@ -217,7 +217,7 @@ implements BiomeResolver {
                         if (!bl3 && !bl2) continue;
                     }
                     if (!predicate.test(holder = this.getNoiseBiome(w = n + v, q, x = o + u, sampler))) continue;
-                    if (pair == null || random.nextInt(r + 1) == 0) {
+                    if (pair == null || randomSource.nextInt(r + 1) == 0) {
                         BlockPos blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
                         if (bl) {
                             return Pair.of(blockPos, holder);

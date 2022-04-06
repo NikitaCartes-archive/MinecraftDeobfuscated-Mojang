@@ -3,12 +3,9 @@
  */
 package net.minecraft.world.entity.animal;
 
-import com.google.common.collect.Maps;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,8 +15,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.CatVariantTags;
 import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -53,6 +53,7 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -81,36 +82,10 @@ extends TamableAnimal {
     public static final double WALK_SPEED_MOD = 0.8;
     public static final double SPRINT_SPEED_MOD = 1.33;
     private static final Ingredient TEMPT_INGREDIENT = Ingredient.of(Items.COD, Items.SALMON);
-    private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<CatVariant> DATA_VARIANT_ID = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.CAT_VARIANT);
     private static final EntityDataAccessor<Boolean> IS_LYING = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> RELAX_STATE_ONE = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.INT);
-    public static final int TYPE_TABBY = 0;
-    public static final int TYPE_BLACK = 1;
-    public static final int TYPE_RED = 2;
-    public static final int TYPE_SIAMESE = 3;
-    public static final int TYPE_BRITISH = 4;
-    public static final int TYPE_CALICO = 5;
-    public static final int TYPE_PERSIAN = 6;
-    public static final int TYPE_RAGDOLL = 7;
-    public static final int TYPE_WHITE = 8;
-    public static final int TYPE_JELLIE = 9;
-    public static final int TYPE_ALL_BLACK = 10;
-    private static final int NUMBER_OF_CAT_TYPES = 11;
-    private static final int NUMBER_OF_CAT_TYPES_EXCEPT_ALL_BLACK = 10;
-    public static final Map<Integer, ResourceLocation> TEXTURE_BY_TYPE = Util.make(Maps.newHashMap(), hashMap -> {
-        hashMap.put(0, new ResourceLocation("textures/entity/cat/tabby.png"));
-        hashMap.put(1, new ResourceLocation("textures/entity/cat/black.png"));
-        hashMap.put(2, new ResourceLocation("textures/entity/cat/red.png"));
-        hashMap.put(3, new ResourceLocation("textures/entity/cat/siamese.png"));
-        hashMap.put(4, new ResourceLocation("textures/entity/cat/british_shorthair.png"));
-        hashMap.put(5, new ResourceLocation("textures/entity/cat/calico.png"));
-        hashMap.put(6, new ResourceLocation("textures/entity/cat/persian.png"));
-        hashMap.put(7, new ResourceLocation("textures/entity/cat/ragdoll.png"));
-        hashMap.put(8, new ResourceLocation("textures/entity/cat/white.png"));
-        hashMap.put(9, new ResourceLocation("textures/entity/cat/jellie.png"));
-        hashMap.put(10, new ResourceLocation("textures/entity/cat/all_black.png"));
-    });
     private CatAvoidEntityGoal<Player> avoidPlayersGoal;
     @Nullable
     private TemptGoal temptGoal;
@@ -126,7 +101,7 @@ extends TamableAnimal {
     }
 
     public ResourceLocation getResourceLocation() {
-        return TEXTURE_BY_TYPE.getOrDefault(this.getCatType(), TEXTURE_BY_TYPE.get(0));
+        return this.getCatVariant().texture();
     }
 
     @Override
@@ -148,15 +123,12 @@ extends TamableAnimal {
         this.targetSelector.addGoal(1, new NonTameRandomTargetGoal<Turtle>(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
     }
 
-    public int getCatType() {
-        return this.entityData.get(DATA_TYPE_ID);
+    public CatVariant getCatVariant() {
+        return this.entityData.get(DATA_VARIANT_ID);
     }
 
-    public void setCatType(int i) {
-        if (i < 0 || i >= 11) {
-            i = this.random.nextInt(10);
-        }
-        this.entityData.set(DATA_TYPE_ID, i);
+    public void setCatVariant(CatVariant catVariant) {
+        this.entityData.set(DATA_VARIANT_ID, catVariant);
     }
 
     public void setLying(boolean bl) {
@@ -186,7 +158,7 @@ extends TamableAnimal {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(DATA_TYPE_ID, 1);
+        this.entityData.define(DATA_VARIANT_ID, CatVariant.BLACK);
         this.entityData.define(IS_LYING, false);
         this.entityData.define(RELAX_STATE_ONE, false);
         this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
@@ -195,14 +167,17 @@ extends TamableAnimal {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("CatType", this.getCatType());
+        compoundTag.putString("variant", Registry.CAT_VARIANT.getKey(this.getCatVariant()).toString());
         compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.setCatType(compoundTag.getInt("CatType"));
+        CatVariant catVariant = Registry.CAT_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
+        if (catVariant != null) {
+            this.setCatVariant(catVariant);
+        }
         if (compoundTag.contains("CollarColor", 99)) {
             this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
         }
@@ -339,9 +314,9 @@ extends TamableAnimal {
         Cat cat = EntityType.CAT.create(serverLevel);
         if (ageableMob instanceof Cat) {
             if (this.random.nextBoolean()) {
-                cat.setCatType(this.getCatType());
+                cat.setCatVariant(this.getCatVariant());
             } else {
-                cat.setCatType(((Cat)ageableMob).getCatType());
+                cat.setCatVariant(((Cat)ageableMob).getCatVariant());
             }
             if (this.isTame()) {
                 cat.setOwnerUUID(this.getOwnerUUID());
@@ -371,16 +346,13 @@ extends TamableAnimal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        ServerLevel serverLevel;
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-        if (serverLevelAccessor.getMoonBrightness() > 0.9f) {
-            this.setCatType(this.random.nextInt(11));
-        } else {
-            this.setCatType(this.random.nextInt(10));
-        }
-        ServerLevel level = serverLevelAccessor.getLevel();
-        if (level instanceof ServerLevel && (serverLevel = level).structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
-            this.setCatType(10);
+        boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9f;
+        TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
+        Registry.CAT_VARIANT.getTag(tagKey).flatMap(named -> named.getRandomElement(this.random)).ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
+        ServerLevel serverLevel = serverLevelAccessor.getLevel();
+        if (serverLevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
+            this.setCatVariant(CatVariant.ALL_BLACK);
             this.setPersistenceRequired();
         }
         return spawnGroupData;
@@ -592,13 +564,13 @@ extends TamableAnimal {
         }
 
         private void giveMorningGift() {
-            Random random = this.cat.getRandom();
+            RandomSource randomSource = this.cat.getRandom();
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
             mutableBlockPos.set(this.cat.blockPosition());
-            this.cat.randomTeleport(mutableBlockPos.getX() + random.nextInt(11) - 5, mutableBlockPos.getY() + random.nextInt(5) - 2, mutableBlockPos.getZ() + random.nextInt(11) - 5, false);
+            this.cat.randomTeleport(mutableBlockPos.getX() + randomSource.nextInt(11) - 5, mutableBlockPos.getY() + randomSource.nextInt(5) - 2, mutableBlockPos.getZ() + randomSource.nextInt(11) - 5, false);
             mutableBlockPos.set(this.cat.blockPosition());
             LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);
-            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.ORIGIN, this.cat.position()).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(random);
+            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.ORIGIN, this.cat.position()).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(randomSource);
             List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
             for (ItemStack itemStack : list) {
                 this.cat.level.addFreshEntity(new ItemEntity(this.cat.level, (double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * ((float)Math.PI / 180)), mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * ((float)Math.PI / 180)), itemStack));

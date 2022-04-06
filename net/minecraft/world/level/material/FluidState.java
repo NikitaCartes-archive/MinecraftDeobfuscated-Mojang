@@ -6,7 +6,6 @@ package net.minecraft.world.level.material;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,6 +14,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -79,16 +79,16 @@ extends StateHolder<Fluid, FluidState> {
         this.getType().tick(level, blockPos, this);
     }
 
-    public void animateTick(Level level, BlockPos blockPos, Random random) {
-        this.getType().animateTick(level, blockPos, this, random);
+    public void animateTick(Level level, BlockPos blockPos, RandomSource randomSource) {
+        this.getType().animateTick(level, blockPos, this, randomSource);
     }
 
     public boolean isRandomlyTicking() {
         return this.getType().isRandomlyTicking();
     }
 
-    public void randomTick(Level level, BlockPos blockPos, Random random) {
-        this.getType().randomTick(level, blockPos, this, random);
+    public void randomTick(Level level, BlockPos blockPos, RandomSource randomSource) {
+        this.getType().randomTick(level, blockPos, this, randomSource);
     }
 
     public Vec3 getFlow(BlockGetter blockGetter, BlockPos blockPos) {

@@ -97,7 +97,7 @@ public class HoglinAi {
         brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.AVOID, Activity.IDLE));
         Activity activity2 = brain.getActiveNonCoreActivity().orElse(null);
         if (activity != activity2) {
-            HoglinAi.getSoundForCurrentActivity(hoglin).ifPresent(hoglin::playSound);
+            HoglinAi.getSoundForCurrentActivity(hoglin).ifPresent(hoglin::playSoundEvent);
         }
         hoglin.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
     }

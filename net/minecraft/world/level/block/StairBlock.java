@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -107,8 +107,8 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        this.base.animateTick(blockState, level, blockPos, random);
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+        this.base.animateTick(blockState, level, blockPos, randomSource);
     }
 
     @Override
@@ -154,13 +154,13 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        this.base.randomTick(blockState, serverLevel, blockPos, random);
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+        this.base.randomTick(blockState, serverLevel, blockPos, randomSource);
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        this.base.tick(blockState, serverLevel, blockPos, random);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+        this.base.tick(blockState, serverLevel, blockPos, randomSource);
     }
 
     @Override

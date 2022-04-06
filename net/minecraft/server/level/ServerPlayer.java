@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.UUID;
 import net.minecraft.BlockUtil;
 import net.minecraft.ChatFormatting;
@@ -24,6 +23,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -86,6 +86,7 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -270,7 +271,7 @@ extends Player {
             }
             int k = (m = (l = (long)(i * 2 + 1)) * l) > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)m;
             int n = this.getCoprime(k);
-            int o = new Random().nextInt(k);
+            int o = RandomSource.create().nextInt(k);
             for (int p = 0; p < k; ++p) {
                 int q = (o + n * p) % k;
                 int r = q % (i * 2 + 1);
@@ -577,6 +578,7 @@ extends Player {
         this.setTicksFrozen(0);
         this.setSharedFlagOnFire(false);
         this.getCombatTracker().recheckStatus();
+        this.setLastDeathLocation(Optional.of(GlobalPos.of(this.level.dimension(), this.blockPosition())));
     }
 
     private void tellNeutralMobsThatIDied() {
@@ -1090,6 +1092,7 @@ extends Player {
         this.enteredNetherPosition = serverPlayer.enteredNetherPosition;
         this.setShoulderEntityLeft(serverPlayer.getShoulderEntityLeft());
         this.setShoulderEntityRight(serverPlayer.getShoulderEntityRight());
+        this.setLastDeathLocation(serverPlayer.getLastDeathLocation());
     }
 
     @Override
@@ -1402,7 +1405,7 @@ extends Player {
 
     @Override
     public void playNotifySound(SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-        this.connection.send(new ClientboundSoundPacket(soundEvent, soundSource, this.getX(), this.getY(), this.getZ(), f, g));
+        this.connection.send(new ClientboundSoundPacket(soundEvent, soundSource, this.getX(), this.getY(), this.getZ(), f, g, this.random.nextLong()));
     }
 
     @Override

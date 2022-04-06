@@ -4,7 +4,6 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.levelgen.feature.BaseDiskFeature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
@@ -17,7 +16,7 @@ extends BaseDiskFeature {
 
     @Override
     public boolean place(FeaturePlaceContext<DiskConfiguration> featurePlaceContext) {
-        if (!featurePlaceContext.level().getFluidState(featurePlaceContext.origin()).is(FluidTags.WATER)) {
+        if (!featurePlaceContext.level().getBlockState(featurePlaceContext.origin()).is(featurePlaceContext.config().canOriginReplace())) {
             return false;
         }
         return super.place(featurePlaceContext);

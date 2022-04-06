@@ -10,7 +10,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -19,6 +18,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
@@ -83,7 +83,7 @@ extends Structure {
         properties.replaceWithBlackstone = setup4.replaceWithBlackstone();
         ResourceLocation resourceLocation = worldgenRandom.nextFloat() < 0.05f ? new ResourceLocation(STRUCTURE_LOCATION_GIANT_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_GIANT_PORTALS.length)]) : new ResourceLocation(STRUCTURE_LOCATION_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_PORTALS.length)]);
         StructureTemplate structureTemplate = generationContext.structureTemplateManager().getOrCreate(resourceLocation);
-        Rotation rotation = Util.getRandom(Rotation.values(), (Random)worldgenRandom);
+        Rotation rotation = Util.getRandom(Rotation.values(), (RandomSource)worldgenRandom);
         Mirror mirror = worldgenRandom.nextFloat() < 0.5f ? Mirror.NONE : Mirror.FRONT_BACK;
         BlockPos blockPos = new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
         ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
@@ -117,19 +117,19 @@ extends Structure {
         return holder.value().coldEnoughToSnow(blockPos);
     }
 
-    private static int findSuitableY(Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+    private static int findSuitableY(RandomSource randomSource, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
         int n;
         int k = levelHeightAccessor.getMinBuildHeight() + 15;
         if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
-            l = bl ? Mth.randomBetweenInclusive(random, 32, 100) : (random.nextFloat() < 0.5f ? Mth.randomBetweenInclusive(random, 27, 29) : Mth.randomBetweenInclusive(random, 29, 100));
+            l = bl ? Mth.randomBetweenInclusive(randomSource, 32, 100) : (randomSource.nextFloat() < 0.5f ? Mth.randomBetweenInclusive(randomSource, 27, 29) : Mth.randomBetweenInclusive(randomSource, 29, 100));
         } else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
             m = i - j;
-            l = RuinedPortalStructure.getRandomWithinInterval(random, 70, m);
+            l = RuinedPortalStructure.getRandomWithinInterval(randomSource, 70, m);
         } else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.UNDERGROUND) {
             m = i - j;
-            l = RuinedPortalStructure.getRandomWithinInterval(random, k, m);
+            l = RuinedPortalStructure.getRandomWithinInterval(randomSource, k, m);
         } else {
-            l = verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED ? i - j + Mth.randomBetweenInclusive(random, 2, 8) : i;
+            l = verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED ? i - j + Mth.randomBetweenInclusive(randomSource, 2, 8) : i;
         }
         ImmutableList<BlockPos> list = ImmutableList.of(new BlockPos(boundingBox.minX(), 0, boundingBox.minZ()), new BlockPos(boundingBox.maxX(), 0, boundingBox.minZ()), new BlockPos(boundingBox.minX(), 0, boundingBox.maxZ()), new BlockPos(boundingBox.maxX(), 0, boundingBox.maxZ()));
         List list2 = list.stream().map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ(), levelHeightAccessor, randomState)).collect(Collectors.toList());
@@ -145,9 +145,9 @@ extends Structure {
         return n;
     }
 
-    private static int getRandomWithinInterval(Random random, int i, int j) {
+    private static int getRandomWithinInterval(RandomSource randomSource, int i, int j) {
         if (i < j) {
-            return Mth.randomBetweenInclusive(random, i, j);
+            return Mth.randomBetweenInclusive(randomSource, i, j);
         }
         return j;
     }

@@ -5,9 +5,9 @@ package net.minecraft.world.level.block;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -18,16 +18,16 @@ public interface ChangeOverTimeBlock<T extends Enum<T>> {
 
     public float getChanceModifier();
 
-    default public void onRandomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    default public void onRandomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         float f = 0.05688889f;
-        if (random.nextFloat() < 0.05688889f) {
-            this.applyChangeOverTime(blockState, serverLevel, blockPos, random);
+        if (randomSource.nextFloat() < 0.05688889f) {
+            this.applyChangeOverTime(blockState, serverLevel, blockPos, randomSource);
         }
     }
 
     public T getAge();
 
-    default public void applyChangeOverTime(BlockState blockState2, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    default public void applyChangeOverTime(BlockState blockState2, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         BlockPos blockPos2;
         int l;
         int i = ((Enum)this.getAge()).ordinal();
@@ -52,7 +52,7 @@ public interface ChangeOverTimeBlock<T extends Enum<T>> {
         }
         float f = (float)(k + 1) / (float)(k + j + 1);
         float g = f * f * this.getChanceModifier();
-        if (random.nextFloat() < g) {
+        if (randomSource.nextFloat() < g) {
             this.getNext(blockState2).ifPresent(blockState -> serverLevel.setBlockAndUpdate(blockPos, (BlockState)blockState));
         }
     }

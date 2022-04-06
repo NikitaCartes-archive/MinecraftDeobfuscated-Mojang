@@ -8,11 +8,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
@@ -54,8 +54,8 @@ extends StructurePoolElement {
     }
 
     @Override
-    public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random) {
-        return this.elements.get(0).getShuffledJigsawBlocks(structureTemplateManager, blockPos, rotation, random);
+    public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource) {
+        return this.elements.get(0).getShuffledJigsawBlocks(structureTemplateManager, blockPos, rotation, randomSource);
     }
 
     @Override
@@ -65,9 +65,9 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureTemplateManager structureTemplateManager, WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random, boolean bl) {
+    public boolean place(StructureTemplateManager structureTemplateManager, WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, RandomSource randomSource, boolean bl) {
         for (StructurePoolElement structurePoolElement : this.elements) {
-            if (structurePoolElement.place(structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, random, bl)) continue;
+            if (structurePoolElement.place(structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, randomSource, bl)) continue;
             return false;
         }
         return true;

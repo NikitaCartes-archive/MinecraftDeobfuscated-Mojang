@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.util.RandomSource;
 
 public interface BitRandomSource
 extends RandomSource {

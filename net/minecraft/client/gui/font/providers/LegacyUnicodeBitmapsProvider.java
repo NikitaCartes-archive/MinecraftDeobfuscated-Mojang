@@ -14,6 +14,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.IllegalFormatException;
 import java.util.Map;
@@ -24,7 +25,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -50,8 +50,8 @@ implements GlyphProvider {
         for (int i = 0; i < 256; ++i) {
             int j = i * 256;
             ResourceLocation resourceLocation = this.getSheetLocation(j);
-            try (Resource resource = this.resourceManager.getResource(resourceLocation);
-                 NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());){
+            try (InputStream inputStream = this.resourceManager.open(resourceLocation);
+                 NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);){
                 if (nativeImage.getWidth() == 256 && nativeImage.getHeight() == 256) {
                     for (int k = 0; k < 256; ++k) {
                         byte b = bs[j + k];
@@ -106,15 +106,15 @@ implements GlyphProvider {
     private NativeImage loadTexture(ResourceLocation resourceLocation) {
         NativeImage nativeImage;
         block8: {
-            Resource resource = this.resourceManager.getResource(resourceLocation);
+            InputStream inputStream = this.resourceManager.open(resourceLocation);
             try {
-                nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
-                if (resource == null) break block8;
+                nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
+                if (inputStream == null) break block8;
             } catch (Throwable throwable) {
                 try {
-                    if (resource != null) {
+                    if (inputStream != null) {
                         try {
-                            resource.close();
+                            inputStream.close();
                         } catch (Throwable throwable2) {
                             throwable.addSuppressed(throwable2);
                         }
@@ -125,7 +125,7 @@ implements GlyphProvider {
                     return null;
                 }
             }
-            resource.close();
+            inputStream.close();
         }
         return nativeImage;
     }
@@ -218,16 +218,16 @@ implements GlyphProvider {
         public GlyphProvider create(ResourceManager resourceManager) {
             LegacyUnicodeBitmapsProvider legacyUnicodeBitmapsProvider;
             block8: {
-                Resource resource = Minecraft.getInstance().getResourceManager().getResource(this.metadata);
+                InputStream inputStream = Minecraft.getInstance().getResourceManager().open(this.metadata);
                 try {
-                    byte[] bs = resource.getInputStream().readNBytes(65536);
+                    byte[] bs = inputStream.readNBytes(65536);
                     legacyUnicodeBitmapsProvider = new LegacyUnicodeBitmapsProvider(resourceManager, bs, this.texturePattern);
-                    if (resource == null) break block8;
+                    if (inputStream == null) break block8;
                 } catch (Throwable throwable) {
                     try {
-                        if (resource != null) {
+                        if (inputStream != null) {
                             try {
-                                resource.close();
+                                inputStream.close();
                             } catch (Throwable throwable2) {
                                 throwable.addSuppressed(throwable2);
                             }
@@ -238,7 +238,7 @@ implements GlyphProvider {
                         return null;
                     }
                 }
-                resource.close();
+                inputStream.close();
             }
             return legacyUnicodeBitmapsProvider;
         }

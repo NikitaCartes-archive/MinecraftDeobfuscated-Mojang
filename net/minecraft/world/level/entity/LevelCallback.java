@@ -15,5 +15,7 @@ public interface LevelCallback<T> {
     public void onTrackingStart(T var1);
 
     public void onTrackingEnd(T var1);
+
+    public void onSectionChange(T var1);
 }
 

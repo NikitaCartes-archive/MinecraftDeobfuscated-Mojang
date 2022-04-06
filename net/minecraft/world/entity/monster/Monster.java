@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.entity.monster;
 
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -91,23 +91,23 @@ implements Enemy {
         return -levelReader.getPathfindingCostFromLightLevels(blockPos);
     }
 
-    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, Random random) {
-        if (serverLevelAccessor.getBrightness(LightLayer.SKY, blockPos) > random.nextInt(32)) {
+    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, RandomSource randomSource) {
+        if (serverLevelAccessor.getBrightness(LightLayer.SKY, blockPos) > randomSource.nextInt(32)) {
             return false;
         }
         if (serverLevelAccessor.getBrightness(LightLayer.BLOCK, blockPos) > 0) {
             return false;
         }
         int i = serverLevelAccessor.getLevel().isThundering() ? serverLevelAccessor.getMaxLocalRawBrightness(blockPos, 10) : serverLevelAccessor.getMaxLocalRawBrightness(blockPos);
-        return i <= random.nextInt(8);
+        return i <= randomSource.nextInt(8);
     }
 
-    public static boolean checkMonsterSpawnRules(EntityType<? extends Monster> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL && Monster.isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random) && Monster.checkMobSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random);
+    public static boolean checkMonsterSpawnRules(EntityType<? extends Monster> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
+        return serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL && Monster.isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource) && Monster.checkMobSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource);
     }
 
-    public static boolean checkAnyLightMonsterSpawnRules(EntityType<? extends Monster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && Monster.checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+    public static boolean checkAnyLightMonsterSpawnRules(EntityType<? extends Monster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
+        return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && Monster.checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
     }
 
     public static AttributeSupplier.Builder createMonsterAttributes() {

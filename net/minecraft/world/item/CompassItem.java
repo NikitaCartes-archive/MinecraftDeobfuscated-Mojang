@@ -6,6 +6,7 @@ package net.minecraft.world.item;
 import com.mojang.logging.LogUtils;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
@@ -25,6 +26,7 @@ import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class CompassItem
@@ -44,13 +46,30 @@ implements Vanishable {
         return compoundTag != null && (compoundTag.contains(TAG_LODESTONE_DIMENSION) || compoundTag.contains(TAG_LODESTONE_POS));
     }
 
+    private static Optional<ResourceKey<Level>> getLodestoneDimension(CompoundTag compoundTag) {
+        return Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get(TAG_LODESTONE_DIMENSION)).result();
+    }
+
+    @Nullable
+    public static GlobalPos getLodestonePosition(CompoundTag compoundTag) {
+        Optional<ResourceKey<Level>> optional;
+        boolean bl = compoundTag.contains(TAG_LODESTONE_POS);
+        boolean bl2 = compoundTag.contains(TAG_LODESTONE_DIMENSION);
+        if (bl && bl2 && (optional = CompassItem.getLodestoneDimension(compoundTag)).isPresent()) {
+            BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound(TAG_LODESTONE_POS));
+            return GlobalPos.of(optional.get(), blockPos);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static GlobalPos getSpawnPosition(Level level) {
+        return level.dimensionType().natural() ? GlobalPos.of(level.dimension(), level.getSharedSpawnPos()) : null;
+    }
+
     @Override
     public boolean isFoil(ItemStack itemStack) {
         return CompassItem.isLodestoneCompass(itemStack) || super.isFoil(itemStack);
-    }
-
-    public static Optional<ResourceKey<Level>> getLodestoneDimension(CompoundTag compoundTag) {
-        return Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get(TAG_LODESTONE_DIMENSION)).result();
     }
 
     @Override

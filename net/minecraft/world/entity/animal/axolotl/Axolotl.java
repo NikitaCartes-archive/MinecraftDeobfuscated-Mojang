@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +25,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -197,8 +197,8 @@ Bucketable {
         this.entityData.set(DATA_VARIANT, variant.getId());
     }
 
-    private static boolean useRareVariant(Random random) {
-        return random.nextInt(1200) == 0;
+    private static boolean useRareVariant(RandomSource randomSource) {
+        return randomSource.nextInt(1200) == 0;
     }
 
     @Override
@@ -472,7 +472,7 @@ Bucketable {
         return !this.fromBucket() && !this.hasCustomName();
     }
 
-    public static boolean checkAxolotlSpawnRules(EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkAxolotlSpawnRules(EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         return serverLevelAccessor.getBlockState(blockPos.below()).is(BlockTags.AXOLOTLS_SPAWNABLE_ON);
     }
 
@@ -533,17 +533,17 @@ Bucketable {
             return this.name;
         }
 
-        public static Variant getCommonSpawnVariant(Random random) {
-            return Variant.getSpawnVariant(random, true);
+        public static Variant getCommonSpawnVariant(RandomSource randomSource) {
+            return Variant.getSpawnVariant(randomSource, true);
         }
 
-        public static Variant getRareSpawnVariant(Random random) {
-            return Variant.getSpawnVariant(random, false);
+        public static Variant getRareSpawnVariant(RandomSource randomSource) {
+            return Variant.getSpawnVariant(randomSource, false);
         }
 
-        private static Variant getSpawnVariant(Random random, boolean bl) {
+        private static Variant getSpawnVariant(RandomSource randomSource, boolean bl) {
             Variant[] variants = (Variant[])Arrays.stream(BY_ID).filter(variant -> variant.common == bl).toArray(Variant[]::new);
-            return Util.getRandom(variants, random);
+            return Util.getRandom(variants, randomSource);
         }
 
         static {
@@ -560,8 +560,8 @@ Bucketable {
             this.types = variants;
         }
 
-        public Variant getVariant(Random random) {
-            return this.types[random.nextInt(this.types.length)];
+        public Variant getVariant(RandomSource randomSource) {
+            return this.types[randomSource.nextInt(this.types.length)];
         }
     }
 

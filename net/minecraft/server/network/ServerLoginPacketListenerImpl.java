@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.network;
 
+import com.google.common.primitives.Ints;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.logging.LogUtils;
@@ -12,7 +13,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PrivateKey;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.crypto.Cipher;
@@ -34,6 +34,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
@@ -44,8 +45,8 @@ implements ServerLoginPacketListener {
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_TICKS_BEFORE_LOGIN = 600;
-    private static final Random RANDOM = new Random();
-    private final byte[] nonce = new byte[4];
+    private static final RandomSource RANDOM = RandomSource.create();
+    private final byte[] nonce;
     final MinecraftServer server;
     public final Connection connection;
     State state = State.HELLO;
@@ -59,7 +60,7 @@ implements ServerLoginPacketListener {
     public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
         this.server = minecraftServer;
         this.connection = connection;
-        RANDOM.nextBytes(this.nonce);
+        this.nonce = Ints.toByteArray(RANDOM.nextInt());
     }
 
     public void tick() {

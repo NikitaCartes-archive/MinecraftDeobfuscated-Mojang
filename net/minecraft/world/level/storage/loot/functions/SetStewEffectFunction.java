@@ -16,11 +16,11 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -58,8 +58,8 @@ extends LootItemConditionalFunction {
         if (!itemStack.is(Items.SUSPICIOUS_STEW) || this.effectDurationMap.isEmpty()) {
             return itemStack;
         }
-        Random random = lootContext.getRandom();
-        int i = random.nextInt(this.effectDurationMap.size());
+        RandomSource randomSource = lootContext.getRandom();
+        int i = randomSource.nextInt(this.effectDurationMap.size());
         Map.Entry<MobEffect, NumberProvider> entry = Iterables.get(this.effectDurationMap.entrySet(), i);
         MobEffect mobEffect = entry.getKey();
         int j = entry.getValue().getInt(lootContext);

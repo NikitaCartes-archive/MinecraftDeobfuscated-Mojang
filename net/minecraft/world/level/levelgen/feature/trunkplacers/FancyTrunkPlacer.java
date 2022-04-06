@@ -9,15 +9,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
@@ -41,12 +40,12 @@ extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         int o;
         int j = 5;
         int k = i + 2;
         int l = Mth.floor((double)k * 0.618);
-        FancyTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
+        FancyTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, randomSource, blockPos.below(), treeConfiguration);
         double d = 1.0;
         int m = Math.min(1, Mth.floor(1.382 + Math.pow(1.0 * (double)k / 13.0, 2.0)));
         int n = blockPos.getY() + l;
@@ -60,21 +59,21 @@ extends TrunkPlacer {
                 double r;
                 double h;
                 double e = 1.0;
-                double g = 1.0 * (double)f * ((double)random.nextFloat() + 0.328);
-                double q = g * Math.sin(h = (double)(random.nextFloat() * 2.0f) * Math.PI) + 0.5;
+                double g = 1.0 * (double)f * ((double)randomSource.nextFloat() + 0.328);
+                double q = g * Math.sin(h = (double)(randomSource.nextFloat() * 2.0f) * Math.PI) + 0.5;
                 BlockPos blockPos2 = blockPos.offset(q, (double)(o - 1), r = g * Math.cos(h) + 0.5);
-                if (!this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos2, blockPos3 = blockPos2.above(5), false, treeConfiguration)) continue;
+                if (!this.makeLimb(levelSimulatedReader, biConsumer, randomSource, blockPos2, blockPos3 = blockPos2.above(5), false, treeConfiguration)) continue;
                 int s = blockPos.getX() - blockPos2.getX();
                 int t = blockPos.getZ() - blockPos2.getZ();
                 double u = (double)blockPos2.getY() - Math.sqrt(s * s + t * t) * 0.381;
                 int v = u > (double)n ? n : (int)u;
                 BlockPos blockPos4 = new BlockPos(blockPos.getX(), v, blockPos.getZ());
-                if (!this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos4, blockPos2, false, treeConfiguration)) continue;
+                if (!this.makeLimb(levelSimulatedReader, biConsumer, randomSource, blockPos4, blockPos2, false, treeConfiguration)) continue;
                 list.add(new FoliageCoords(blockPos2, blockPos4.getY()));
             }
         }
-        this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos, blockPos.above(l), true, treeConfiguration);
-        this.makeBranches(levelSimulatedReader, biConsumer, random, k, blockPos, list, treeConfiguration);
+        this.makeLimb(levelSimulatedReader, biConsumer, randomSource, blockPos, blockPos.above(l), true, treeConfiguration);
+        this.makeBranches(levelSimulatedReader, biConsumer, randomSource, k, blockPos, list, treeConfiguration);
         ArrayList<FoliagePlacer.FoliageAttachment> list2 = Lists.newArrayList();
         for (FoliageCoords foliageCoords : list) {
             if (!this.trimBranches(k, foliageCoords.getBranchBase() - blockPos.getY())) continue;
@@ -83,7 +82,7 @@ extends TrunkPlacer {
         return list2;
     }
 
-    private boolean makeLimb(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, BlockPos blockPos, BlockPos blockPos2, boolean bl, TreeConfiguration treeConfiguration) {
+    private boolean makeLimb(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, BlockPos blockPos, BlockPos blockPos2, boolean bl, TreeConfiguration treeConfiguration) {
         if (!bl && Objects.equals(blockPos, blockPos2)) {
             return true;
         }
@@ -95,10 +94,10 @@ extends TrunkPlacer {
         for (int j = 0; j <= i; ++j) {
             BlockPos blockPos4 = blockPos.offset(0.5f + (float)j * f, 0.5f + (float)j * g, 0.5f + (float)j * h);
             if (bl) {
-                TrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, blockPos4, treeConfiguration, blockState -> (BlockState)blockState.setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)));
+                this.placeLog(levelSimulatedReader, biConsumer, randomSource, blockPos4, treeConfiguration, blockState -> (BlockState)blockState.setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)));
                 continue;
             }
-            if (TreeFeature.isFree(levelSimulatedReader, blockPos4)) continue;
+            if (this.isFree(levelSimulatedReader, blockPos4)) continue;
             return false;
         }
         return true;
@@ -126,12 +125,12 @@ extends TrunkPlacer {
         return (double)j >= (double)i * 0.2;
     }
 
-    private void makeBranches(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, List<FoliageCoords> list, TreeConfiguration treeConfiguration) {
+    private void makeBranches(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, int i, BlockPos blockPos, List<FoliageCoords> list, TreeConfiguration treeConfiguration) {
         for (FoliageCoords foliageCoords : list) {
             int j = foliageCoords.getBranchBase();
             BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ());
             if (blockPos2.equals(foliageCoords.attachment.pos()) || !this.trimBranches(i, j - blockPos.getY())) continue;
-            this.makeLimb(levelSimulatedReader, biConsumer, random, blockPos2, foliageCoords.attachment.pos(), true, treeConfiguration);
+            this.makeLimb(levelSimulatedReader, biConsumer, randomSource, blockPos2, foliageCoords.attachment.pos(), true, treeConfiguration);
         }
     }
 

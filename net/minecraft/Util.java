@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -67,6 +66,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
@@ -444,23 +444,23 @@ public class Util {
         return throwable.toString();
     }
 
-    public static <T> T getRandom(T[] objects, Random random) {
-        return objects[random.nextInt(objects.length)];
+    public static <T> T getRandom(T[] objects, RandomSource randomSource) {
+        return objects[randomSource.nextInt(objects.length)];
     }
 
-    public static int getRandom(int[] is, Random random) {
-        return is[random.nextInt(is.length)];
+    public static int getRandom(int[] is, RandomSource randomSource) {
+        return is[randomSource.nextInt(is.length)];
     }
 
-    public static <T> T getRandom(List<T> list, Random random) {
-        return list.get(random.nextInt(list.size()));
+    public static <T> T getRandom(List<T> list, RandomSource randomSource) {
+        return list.get(randomSource.nextInt(list.size()));
     }
 
-    public static <T> Optional<T> getRandomSafe(List<T> list, Random random) {
+    public static <T> Optional<T> getRandomSafe(List<T> list, RandomSource randomSource) {
         if (list.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(Util.getRandom(list, random));
+        return Optional.of(Util.getRandom(list, randomSource));
     }
 
     private static BooleanSupplier createRenamer(final Path path, final Path path2) {
@@ -677,6 +677,20 @@ public class Util {
                 return "memoize/2[function=" + biFunction + ", size=" + this.cache.size() + "]";
             }
         };
+    }
+
+    public static <T> List<T> shuffledCopy(List<T> list, RandomSource randomSource) {
+        ArrayList<T> list2 = new ArrayList<T>(list);
+        Util.shuffle(list2, randomSource);
+        return list2;
+    }
+
+    public static <T> void shuffle(List<T> list, RandomSource randomSource) {
+        int i;
+        for (int j = i = list.size(); j > 1; --j) {
+            int k = randomSource.nextInt(j);
+            list.set(j - 1, list.set(k, list.get(j - 1)));
+        }
     }
 
     /*

@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -26,8 +26,8 @@ extends ScatteredFeaturePiece {
     public static final int DEPTH = 21;
     private final boolean[] hasPlacedChest = new boolean[4];
 
-    public DesertPyramidPiece(Random random, int i, int j) {
-        super(StructurePieceType.DESERT_PYRAMID_PIECE, i, 64, j, 21, 15, 21, DesertPyramidPiece.getRandomHorizontalDirection(random));
+    public DesertPyramidPiece(RandomSource randomSource, int i, int j) {
+        super(StructurePieceType.DESERT_PYRAMID_PIECE, i, 64, j, 21, 15, 21, DesertPyramidPiece.getRandomHorizontalDirection(randomSource));
     }
 
     public DesertPyramidPiece(CompoundTag compoundTag) {
@@ -48,10 +48,10 @@ extends ScatteredFeaturePiece {
     }
 
     @Override
-    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         int l;
         int i;
-        if (!this.updateHeightPositionToLowestGroundHeight(worldGenLevel, -random.nextInt(3))) {
+        if (!this.updateHeightPositionToLowestGroundHeight(worldGenLevel, -randomSource.nextInt(3))) {
             return;
         }
         this.generateBox(worldGenLevel, boundingBox, 0, -4, 0, this.width - 1, 0, this.depth - 1, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false);
@@ -228,7 +228,7 @@ extends ScatteredFeaturePiece {
             if (this.hasPlacedChest[direction.get2DDataValue()]) continue;
             int m = direction.getStepX() * 2;
             int n = direction.getStepZ() * 2;
-            this.hasPlacedChest[direction.get2DDataValue()] = this.createChest(worldGenLevel, boundingBox, random, 10 + m, -11, 10 + n, BuiltInLootTables.DESERT_PYRAMID);
+            this.hasPlacedChest[direction.get2DDataValue()] = this.createChest(worldGenLevel, boundingBox, randomSource, 10 + m, -11, 10 + n, BuiltInLootTables.DESERT_PYRAMID);
         }
     }
 }

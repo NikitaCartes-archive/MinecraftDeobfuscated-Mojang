@@ -8,7 +8,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.util.valueproviders.FloatProviderType;
 
@@ -34,7 +34,7 @@ extends FloatProvider {
     }
 
     @Override
-    public float sample(Random random) {
+    public float sample(RandomSource randomSource) {
         return this.value;
     }
 

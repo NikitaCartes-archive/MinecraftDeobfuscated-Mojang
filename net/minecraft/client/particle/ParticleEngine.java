@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.particle;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -16,8 +15,8 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
@@ -108,10 +106,10 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.RenderShape;
@@ -129,7 +127,7 @@ implements PreparableReloadListener {
     private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.newIdentityHashMap();
     private final Queue<TrackingEmitter> trackingEmitters = Queues.newArrayDeque();
     private final TextureManager textureManager;
-    private final Random random = new Random();
+    private final RandomSource random = RandomSource.create();
     private final Int2ObjectMap<ParticleProvider<?>> providers = new Int2ObjectOpenHashMap();
     private final Queue<Particle> particlesToAdd = Queues.newArrayDeque();
     private final Map<ResourceLocation, MutableSpriteSet> spriteSets = Maps.newHashMap();
@@ -283,8 +281,7 @@ implements PreparableReloadListener {
 
     private void loadParticleDescription(ResourceManager resourceManager, ResourceLocation resourceLocation2, Map<ResourceLocation, List<ResourceLocation>> map) {
         ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), "particles/" + resourceLocation2.getPath() + ".json");
-        try (Resource resource = resourceManager.getResource(resourceLocation22);
-             InputStreamReader reader = new InputStreamReader(resource.getInputStream(), Charsets.UTF_8);){
+        try (BufferedReader reader = resourceManager.openAsReader(resourceLocation22);){
             ParticleDescription particleDescription = ParticleDescription.fromJson(GsonHelper.parse(reader));
             List<ResourceLocation> list = particleDescription.getTextures();
             boolean bl = this.spriteSets.containsKey(resourceLocation2);
@@ -527,8 +524,8 @@ implements PreparableReloadListener {
         }
 
         @Override
-        public TextureAtlasSprite get(Random random) {
-            return this.sprites.get(random.nextInt(this.sprites.size()));
+        public TextureAtlasSprite get(RandomSource randomSource) {
+            return this.sprites.get(randomSource.nextInt(this.sprites.size()));
         }
 
         public void rebind(List<TextureAtlasSprite> list) {

@@ -374,6 +374,9 @@ implements AutoCloseable {
             Visibility visibility4;
             Visibility visibility3 = PersistentEntitySectionManager.getEffectiveStatus(this.entity, visibility);
             if (visibility3 == (visibility4 = PersistentEntitySectionManager.getEffectiveStatus(this.entity, visibility2))) {
+                if (visibility4.isAccessible()) {
+                    this.field_27271.callbacks.onSectionChange(this.entity);
+                }
                 return;
             }
             boolean bl = visibility3.isAccessible();
@@ -389,6 +392,9 @@ implements AutoCloseable {
                 this.field_27271.stopTicking(this.entity);
             } else if (!bl3 && bl4) {
                 this.field_27271.startTicking(this.entity);
+            }
+            if (bl2) {
+                this.field_27271.callbacks.onSectionChange(this.entity);
             }
         }
 

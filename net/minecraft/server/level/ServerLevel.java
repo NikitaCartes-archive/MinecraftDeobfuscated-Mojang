@@ -748,13 +748,13 @@ implements WorldGenLevel {
     }
 
     @Override
-    public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
-        this.server.getPlayerList().broadcast(player, d, e, f, g > 1.0f ? (double)(16.0f * g) : 16.0, this.dimension(), new ClientboundSoundPacket(soundEvent, soundSource, d, e, f, g, h));
+    public void playSeededSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, long l) {
+        this.server.getPlayerList().broadcast(player, d, e, f, soundEvent.getRange(g), this.dimension(), new ClientboundSoundPacket(soundEvent, soundSource, d, e, f, g, h, l));
     }
 
     @Override
-    public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), f > 1.0f ? (double)(16.0f * f) : 16.0, this.dimension(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g));
+    public void playSeededSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g, long l) {
+        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), soundEvent.getRange(f), this.dimension(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g, l));
     }
 
     @Override
@@ -1025,18 +1025,6 @@ implements WorldGenLevel {
         this.getChunkSource().removeRegionTicket(TicketType.START, chunkPos, 11, Unit.INSTANCE);
         this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(blockPos), 11, Unit.INSTANCE);
         this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos, f));
-    }
-
-    public BlockPos getSharedSpawnPos() {
-        BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
-        if (!this.getWorldBorder().isWithinBounds(blockPos)) {
-            blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
-        }
-        return blockPos;
-    }
-
-    public float getSharedSpawnAngle() {
-        return this.levelData.getSpawnAngle();
     }
 
     public LongSet getForcedChunks() {
@@ -1399,6 +1387,16 @@ implements WorldGenLevel {
         }
 
         @Override
+        public void onSectionChange(Entity entity) {
+            entity.updateDynamicGameEventListener(DynamicGameEventListener::move);
+        }
+
+        @Override
+        public /* synthetic */ void onSectionChange(Object object) {
+            this.onSectionChange((Entity)object);
+        }
+
+        @Override
         public /* synthetic */ void onTrackingEnd(Object object) {
             this.onTrackingEnd((Entity)object);
         }
@@ -1406,11 +1404,6 @@ implements WorldGenLevel {
         @Override
         public /* synthetic */ void onTrackingStart(Object object) {
             this.onTrackingStart((Entity)object);
-        }
-
-        @Override
-        public /* synthetic */ void onTickingEnd(Object object) {
-            this.onTickingEnd((Entity)object);
         }
 
         @Override

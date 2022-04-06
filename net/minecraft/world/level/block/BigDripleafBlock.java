@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -80,9 +80,9 @@ SimpleWaterloggedBlock {
         return Shapes.or(LEAF_SHAPES.get(blockState.getValue(TILT)), STEM_SHAPES.get(blockState.getValue(FACING)));
     }
 
-    public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos, Direction direction) {
+    public static void placeWithRandomHeight(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, Direction direction) {
         int j;
-        int i = Mth.nextInt(random, 2, 5);
+        int i = Mth.nextInt(randomSource, 2, 5);
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (j = 0; j < i && BigDripleafBlock.canPlaceAt(levelAccessor, mutableBlockPos, levelAccessor.getBlockState(mutableBlockPos)); ++j) {
             mutableBlockPos.move(Direction.UP);
@@ -150,12 +150,12 @@ SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         BlockState blockState2;
         BlockPos blockPos2 = blockPos.above();
         if (BigDripleafBlock.canPlaceAt(serverLevel, blockPos2, blockState2 = serverLevel.getBlockState(blockPos2))) {
@@ -176,7 +176,7 @@ SimpleWaterloggedBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (serverLevel.hasNeighborSignal(blockPos)) {
             BigDripleafBlock.resetTilt(blockState, serverLevel, blockPos);
             return;

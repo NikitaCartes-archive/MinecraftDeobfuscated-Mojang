@@ -5,10 +5,10 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -36,11 +36,11 @@ public class NetherFortressPieces {
     static final PieceWeight[] BRIDGE_PIECE_WEIGHTS = new PieceWeight[]{new PieceWeight(BridgeStraight.class, 30, 0, true), new PieceWeight(BridgeCrossing.class, 10, 4), new PieceWeight(RoomCrossing.class, 10, 4), new PieceWeight(StairsRoom.class, 10, 3), new PieceWeight(MonsterThrone.class, 5, 2), new PieceWeight(CastleEntrance.class, 5, 1)};
     static final PieceWeight[] CASTLE_PIECE_WEIGHTS = new PieceWeight[]{new PieceWeight(CastleSmallCorridorPiece.class, 25, 0, true), new PieceWeight(CastleSmallCorridorCrossingPiece.class, 15, 5), new PieceWeight(CastleSmallCorridorRightTurnPiece.class, 5, 10), new PieceWeight(CastleSmallCorridorLeftTurnPiece.class, 5, 10), new PieceWeight(CastleCorridorStairsPiece.class, 10, 3, true), new PieceWeight(CastleCorridorTBalconyPiece.class, 7, 2), new PieceWeight(CastleStalkRoom.class, 5, 2)};
 
-    static NetherBridgePiece findAndCreateBridgePieceFactory(PieceWeight pieceWeight, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+    static NetherBridgePiece findAndCreateBridgePieceFactory(PieceWeight pieceWeight, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
         Class<? extends NetherBridgePiece> class_ = pieceWeight.pieceClass;
         NetherBridgePiece netherBridgePiece = null;
         if (class_ == BridgeStraight.class) {
-            netherBridgePiece = BridgeStraight.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
+            netherBridgePiece = BridgeStraight.createPiece(structurePieceAccessor, randomSource, i, j, k, direction, l);
         } else if (class_ == BridgeCrossing.class) {
             netherBridgePiece = BridgeCrossing.createPiece(structurePieceAccessor, i, j, k, direction, l);
         } else if (class_ == RoomCrossing.class) {
@@ -50,13 +50,13 @@ public class NetherFortressPieces {
         } else if (class_ == MonsterThrone.class) {
             netherBridgePiece = MonsterThrone.createPiece(structurePieceAccessor, i, j, k, l, direction);
         } else if (class_ == CastleEntrance.class) {
-            netherBridgePiece = CastleEntrance.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
+            netherBridgePiece = CastleEntrance.createPiece(structurePieceAccessor, randomSource, i, j, k, direction, l);
         } else if (class_ == CastleSmallCorridorPiece.class) {
             netherBridgePiece = CastleSmallCorridorPiece.createPiece(structurePieceAccessor, i, j, k, direction, l);
         } else if (class_ == CastleSmallCorridorRightTurnPiece.class) {
-            netherBridgePiece = CastleSmallCorridorRightTurnPiece.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
+            netherBridgePiece = CastleSmallCorridorRightTurnPiece.createPiece(structurePieceAccessor, randomSource, i, j, k, direction, l);
         } else if (class_ == CastleSmallCorridorLeftTurnPiece.class) {
-            netherBridgePiece = CastleSmallCorridorLeftTurnPiece.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
+            netherBridgePiece = CastleSmallCorridorLeftTurnPiece.createPiece(structurePieceAccessor, randomSource, i, j, k, direction, l);
         } else if (class_ == CastleCorridorStairsPiece.class) {
             netherBridgePiece = CastleCorridorStairsPiece.createPiece(structurePieceAccessor, i, j, k, direction, l);
         } else if (class_ == CastleCorridorTBalconyPiece.class) {
@@ -102,7 +102,7 @@ public class NetherFortressPieces {
         private static final int HEIGHT = 10;
         private static final int DEPTH = 19;
 
-        public BridgeStraight(int i, Random random, BoundingBox boundingBox, Direction direction) {
+        public BridgeStraight(int i, RandomSource randomSource, BoundingBox boundingBox, Direction direction) {
             super(StructurePieceType.NETHER_FORTRESS_BRIDGE_STRAIGHT, i, boundingBox);
             this.setOrientation(direction);
         }
@@ -112,20 +112,20 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 1, 3, false);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 1, 3, false);
         }
 
-        public static BridgeStraight createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+        public static BridgeStraight createPiece(StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
             BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -3, 0, 5, 10, 19, direction);
             if (!BridgeStraight.isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
                 return null;
             }
-            return new BridgeStraight(l, random, boundingBox, direction);
+            return new BridgeStraight(l, randomSource, boundingBox, direction);
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 4, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 1, 5, 0, 3, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 5, 0, 0, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -179,10 +179,10 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 8, 3, false);
-            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, random, 3, 8, false);
-            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, random, 3, 8, false);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 8, 3, false);
+            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, randomSource, 3, 8, false);
+            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, randomSource, 3, 8, false);
         }
 
         public static BridgeCrossing createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -194,7 +194,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i;
             this.generateBox(worldGenLevel, boundingBox, 7, 3, 0, 11, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -248,10 +248,10 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 2, 0, false);
-            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, random, 0, 2, false);
-            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, random, 0, 2, false);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 2, 0, false);
+            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, 2, false);
+            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, 2, false);
         }
 
         public static RoomCrossing createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -263,7 +263,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 6, 7, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -308,8 +308,8 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, random, 6, 2, false);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, randomSource, 6, 2, false);
         }
 
         public static StairsRoom createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, int l, Direction direction) {
@@ -321,7 +321,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 6, 10, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -383,7 +383,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockPos.MutableBlockPos blockPos2;
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 6, 7, 7, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -436,7 +436,7 @@ public class NetherFortressPieces {
         private static final int HEIGHT = 14;
         private static final int DEPTH = 13;
 
-        public CastleEntrance(int i, Random random, BoundingBox boundingBox, Direction direction) {
+        public CastleEntrance(int i, RandomSource randomSource, BoundingBox boundingBox, Direction direction) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_ENTRANCE, i, boundingBox);
             this.setOrientation(direction);
         }
@@ -446,20 +446,20 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 5, 3, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 5, 3, true);
         }
 
-        public static CastleEntrance createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+        public static CastleEntrance createPiece(StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
             BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -5, -3, 0, 13, 14, 13, direction);
             if (!CastleEntrance.isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
                 return null;
             }
-            return new CastleEntrance(l, random, boundingBox, direction);
+            return new CastleEntrance(l, randomSource, boundingBox, direction);
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i;
             this.generateBox(worldGenLevel, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -544,8 +544,8 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 1, 0, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 1, 0, true);
         }
 
         public static CastleSmallCorridorPiece createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -557,7 +557,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
@@ -583,10 +583,10 @@ public class NetherFortressPieces {
         private static final int DEPTH = 5;
         private boolean isNeedingChest;
 
-        public CastleSmallCorridorRightTurnPiece(int i, Random random, BoundingBox boundingBox, Direction direction) {
+        public CastleSmallCorridorRightTurnPiece(int i, RandomSource randomSource, BoundingBox boundingBox, Direction direction) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_RIGHT_TURN, i, boundingBox);
             this.setOrientation(direction);
-            this.isNeedingChest = random.nextInt(3) == 0;
+            this.isNeedingChest = randomSource.nextInt(3) == 0;
         }
 
         public CastleSmallCorridorRightTurnPiece(CompoundTag compoundTag) {
@@ -601,20 +601,20 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, 1, true);
         }
 
-        public static CastleSmallCorridorRightTurnPiece createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+        public static CastleSmallCorridorRightTurnPiece createPiece(StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
             BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, 0, 0, 5, 7, 5, direction);
             if (!CastleSmallCorridorRightTurnPiece.isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
                 return null;
             }
-            return new CastleSmallCorridorRightTurnPiece(l, random, boundingBox, direction);
+            return new CastleSmallCorridorRightTurnPiece(l, randomSource, boundingBox, direction);
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
@@ -628,7 +628,7 @@ public class NetherFortressPieces {
             this.generateBox(worldGenLevel, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
             if (this.isNeedingChest && boundingBox.isInside(this.getWorldPos(1, 2, 3))) {
                 this.isNeedingChest = false;
-                this.createChest(worldGenLevel, boundingBox, random, 1, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
+                this.createChest(worldGenLevel, boundingBox, randomSource, 1, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
             }
             this.generateBox(worldGenLevel, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
@@ -646,10 +646,10 @@ public class NetherFortressPieces {
         private static final int DEPTH = 5;
         private boolean isNeedingChest;
 
-        public CastleSmallCorridorLeftTurnPiece(int i, Random random, BoundingBox boundingBox, Direction direction) {
+        public CastleSmallCorridorLeftTurnPiece(int i, RandomSource randomSource, BoundingBox boundingBox, Direction direction) {
             super(StructurePieceType.NETHER_FORTRESS_CASTLE_SMALL_CORRIDOR_LEFT_TURN, i, boundingBox);
             this.setOrientation(direction);
-            this.isNeedingChest = random.nextInt(3) == 0;
+            this.isNeedingChest = randomSource.nextInt(3) == 0;
         }
 
         public CastleSmallCorridorLeftTurnPiece(CompoundTag compoundTag) {
@@ -664,20 +664,20 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, 1, true);
         }
 
-        public static CastleSmallCorridorLeftTurnPiece createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+        public static CastleSmallCorridorLeftTurnPiece createPiece(StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
             BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, 0, 0, 5, 7, 5, direction);
             if (!CastleSmallCorridorLeftTurnPiece.isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
                 return null;
             }
-            return new CastleSmallCorridorLeftTurnPiece(l, random, boundingBox, direction);
+            return new CastleSmallCorridorLeftTurnPiece(l, randomSource, boundingBox, direction);
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
@@ -691,7 +691,7 @@ public class NetherFortressPieces {
             this.generateBox(worldGenLevel, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
             if (this.isNeedingChest && boundingBox.isInside(this.getWorldPos(3, 2, 3))) {
                 this.isNeedingChest = false;
-                this.createChest(worldGenLevel, boundingBox, random, 3, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
+                this.createChest(worldGenLevel, boundingBox, randomSource, 3, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
             }
             this.generateBox(worldGenLevel, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
@@ -718,8 +718,8 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 1, 0, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 1, 0, true);
         }
 
         public static CastleCorridorStairsPiece createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -731,7 +731,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState = (BlockState)Blocks.NETHER_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             for (int i = 0; i <= 9; ++i) {
@@ -775,14 +775,14 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
             int i = 1;
             Direction direction = this.getOrientation();
             if (direction == Direction.WEST || direction == Direction.NORTH) {
                 i = 5;
             }
-            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, random, 0, i, random.nextInt(8) > 0);
-            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, random, 0, i, random.nextInt(8) > 0);
+            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, i, randomSource.nextInt(8) > 0);
+            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, i, randomSource.nextInt(8) > 0);
         }
 
         public static CastleCorridorTBalconyPiece createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -794,7 +794,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 8, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -842,10 +842,10 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 1, 0, true);
-            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
-            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, random, 0, 1, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 1, 0, true);
+            this.generateChildLeft((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, 1, true);
+            this.generateChildRight((StartPiece)structurePiece, structurePieceAccessor, randomSource, 0, 1, true);
         }
 
         public static CastleSmallCorridorCrossingPiece createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -857,7 +857,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             this.generateBox(worldGenLevel, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -889,9 +889,9 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 5, 3, true);
-            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, random, 5, 11, true);
+        public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 5, 3, true);
+            this.generateChildForward((StartPiece)structurePiece, structurePieceAccessor, randomSource, 5, 11, true);
         }
 
         public static CastleStalkRoom createPiece(StructurePieceAccessor structurePieceAccessor, int i, int j, int k, Direction direction, int l) {
@@ -903,7 +903,7 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int m;
             int l;
             int j;
@@ -1014,10 +1014,10 @@ public class NetherFortressPieces {
         private static final int DEPTH = 8;
         private final int selfSeed;
 
-        public BridgeEndFiller(int i, Random random, BoundingBox boundingBox, Direction direction) {
+        public BridgeEndFiller(int i, RandomSource randomSource, BoundingBox boundingBox, Direction direction) {
             super(StructurePieceType.NETHER_FORTRESS_BRIDGE_END_FILLER, i, boundingBox);
             this.setOrientation(direction);
-            this.selfSeed = random.nextInt();
+            this.selfSeed = randomSource.nextInt();
         }
 
         public BridgeEndFiller(CompoundTag compoundTag) {
@@ -1025,12 +1025,12 @@ public class NetherFortressPieces {
             this.selfSeed = compoundTag.getInt("Seed");
         }
 
-        public static BridgeEndFiller createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+        public static BridgeEndFiller createPiece(StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
             BoundingBox boundingBox = BoundingBox.orientBox(i, j, k, -1, -3, 0, 5, 10, 8, direction);
             if (!BridgeEndFiller.isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
                 return null;
             }
-            return new BridgeEndFiller(l, random, boundingBox, direction);
+            return new BridgeEndFiller(l, randomSource, boundingBox, direction);
         }
 
         @Override
@@ -1040,28 +1040,28 @@ public class NetherFortressPieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int k;
             int j;
             int i;
-            Random random2 = new Random(this.selfSeed);
+            RandomSource randomSource2 = RandomSource.create(this.selfSeed);
             for (i = 0; i <= 4; ++i) {
                 for (j = 3; j <= 4; ++j) {
-                    k = random2.nextInt(8);
+                    k = randomSource2.nextInt(8);
                     this.generateBox(worldGenLevel, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 }
             }
-            i = random2.nextInt(8);
+            i = randomSource2.nextInt(8);
             this.generateBox(worldGenLevel, boundingBox, 0, 5, 0, 0, 5, i, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            i = random2.nextInt(8);
+            i = randomSource2.nextInt(8);
             this.generateBox(worldGenLevel, boundingBox, 4, 5, 0, 4, 5, i, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (i = 0; i <= 4; ++i) {
-                j = random2.nextInt(5);
+                j = randomSource2.nextInt(5);
                 this.generateBox(worldGenLevel, boundingBox, i, 2, 0, i, 2, j, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             }
             for (i = 0; i <= 4; ++i) {
                 for (j = 0; j <= 1; ++j) {
-                    k = random2.nextInt(3);
+                    k = randomSource2.nextInt(3);
                     this.generateBox(worldGenLevel, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 }
             }
@@ -1075,8 +1075,8 @@ public class NetherFortressPieces {
         public List<PieceWeight> availableCastlePieces;
         public final List<StructurePiece> pendingChildren = Lists.newArrayList();
 
-        public StartPiece(Random random, int i, int j) {
-            super(i, j, StartPiece.getRandomHorizontalDirection(random));
+        public StartPiece(RandomSource randomSource, int i, int j) {
+            super(i, j, StartPiece.getRandomHorizontalDirection(randomSource));
             this.availableBridgePieces = Lists.newArrayList();
             for (PieceWeight pieceWeight : BRIDGE_PIECE_WEIGHTS) {
                 pieceWeight.placeCount = 0;
@@ -1120,17 +1120,17 @@ public class NetherFortressPieces {
             return bl ? i : -1;
         }
 
-        private NetherBridgePiece generatePiece(StartPiece startPiece, List<PieceWeight> list, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, Direction direction, int l) {
+        private NetherBridgePiece generatePiece(StartPiece startPiece, List<PieceWeight> list, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction, int l) {
             int m = this.updatePieceWeight(list);
             boolean bl = m > 0 && l <= 30;
             int n = 0;
             block0: while (n < 5 && bl) {
                 ++n;
-                int o = random.nextInt(m);
+                int o = randomSource.nextInt(m);
                 for (PieceWeight pieceWeight : list) {
                     if ((o -= pieceWeight.weight) >= 0) continue;
                     if (!pieceWeight.doPlace(l) || pieceWeight == startPiece.previousPiece && !pieceWeight.allowInRow) continue block0;
-                    NetherBridgePiece netherBridgePiece = NetherFortressPieces.findAndCreateBridgePieceFactory(pieceWeight, structurePieceAccessor, random, i, j, k, direction, l);
+                    NetherBridgePiece netherBridgePiece = NetherFortressPieces.findAndCreateBridgePieceFactory(pieceWeight, structurePieceAccessor, randomSource, i, j, k, direction, l);
                     if (netherBridgePiece == null) continue;
                     ++pieceWeight.placeCount;
                     startPiece.previousPiece = pieceWeight;
@@ -1140,19 +1140,19 @@ public class NetherFortressPieces {
                     return netherBridgePiece;
                 }
             }
-            return BridgeEndFiller.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
+            return BridgeEndFiller.createPiece(structurePieceAccessor, randomSource, i, j, k, direction, l);
         }
 
-        private StructurePiece generateAndAddPiece(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, int k, @Nullable Direction direction, int l, boolean bl) {
+        private StructurePiece generateAndAddPiece(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, @Nullable Direction direction, int l, boolean bl) {
             NetherBridgePiece structurePiece;
             if (Math.abs(i - startPiece.getBoundingBox().minX()) > 112 || Math.abs(k - startPiece.getBoundingBox().minZ()) > 112) {
-                return BridgeEndFiller.createPiece(structurePieceAccessor, random, i, j, k, direction, l);
+                return BridgeEndFiller.createPiece(structurePieceAccessor, randomSource, i, j, k, direction, l);
             }
             List<PieceWeight> list = startPiece.availableBridgePieces;
             if (bl) {
                 list = startPiece.availableCastlePieces;
             }
-            if ((structurePiece = this.generatePiece(startPiece, list, structurePieceAccessor, random, i, j, k, direction, l + 1)) != null) {
+            if ((structurePiece = this.generatePiece(startPiece, list, structurePieceAccessor, randomSource, i, j, k, direction, l + 1)) != null) {
                 structurePieceAccessor.addPiece(structurePiece);
                 startPiece.pendingChildren.add(structurePiece);
             }
@@ -1160,21 +1160,21 @@ public class NetherFortressPieces {
         }
 
         @Nullable
-        protected StructurePiece generateChildForward(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, boolean bl) {
+        protected StructurePiece generateChildForward(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, boolean bl) {
             Direction direction = this.getOrientation();
             if (direction != null) {
                 switch (direction) {
                     case NORTH: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() + i, this.boundingBox.minY() + j, this.boundingBox.minZ() - 1, direction, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() + i, this.boundingBox.minY() + j, this.boundingBox.minZ() - 1, direction, this.getGenDepth(), bl);
                     }
                     case SOUTH: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() + i, this.boundingBox.minY() + j, this.boundingBox.maxZ() + 1, direction, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() + i, this.boundingBox.minY() + j, this.boundingBox.maxZ() + 1, direction, this.getGenDepth(), bl);
                     }
                     case WEST: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + j, this.boundingBox.minZ() + i, direction, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() - 1, this.boundingBox.minY() + j, this.boundingBox.minZ() + i, direction, this.getGenDepth(), bl);
                     }
                     case EAST: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + j, this.boundingBox.minZ() + i, direction, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.maxX() + 1, this.boundingBox.minY() + j, this.boundingBox.minZ() + i, direction, this.getGenDepth(), bl);
                     }
                 }
             }
@@ -1182,21 +1182,21 @@ public class NetherFortressPieces {
         }
 
         @Nullable
-        protected StructurePiece generateChildLeft(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, boolean bl) {
+        protected StructurePiece generateChildLeft(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, boolean bl) {
             Direction direction = this.getOrientation();
             if (direction != null) {
                 switch (direction) {
                     case NORTH: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.WEST, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() - 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.WEST, this.getGenDepth(), bl);
                     }
                     case SOUTH: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.WEST, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() - 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.WEST, this.getGenDepth(), bl);
                     }
                     case WEST: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.minZ() - 1, Direction.NORTH, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.minZ() - 1, Direction.NORTH, this.getGenDepth(), bl);
                     }
                     case EAST: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.minZ() - 1, Direction.NORTH, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.minZ() - 1, Direction.NORTH, this.getGenDepth(), bl);
                     }
                 }
             }
@@ -1204,21 +1204,21 @@ public class NetherFortressPieces {
         }
 
         @Nullable
-        protected StructurePiece generateChildRight(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, Random random, int i, int j, boolean bl) {
+        protected StructurePiece generateChildRight(StartPiece startPiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, boolean bl) {
             Direction direction = this.getOrientation();
             if (direction != null) {
                 switch (direction) {
                     case NORTH: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.EAST, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.maxX() + 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.EAST, this.getGenDepth(), bl);
                     }
                     case SOUTH: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.EAST, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.maxX() + 1, this.boundingBox.minY() + i, this.boundingBox.minZ() + j, Direction.EAST, this.getGenDepth(), bl);
                     }
                     case WEST: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.maxZ() + 1, Direction.SOUTH, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.maxZ() + 1, Direction.SOUTH, this.getGenDepth(), bl);
                     }
                     case EAST: {
-                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, random, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.maxZ() + 1, Direction.SOUTH, this.getGenDepth(), bl);
+                        return this.generateAndAddPiece(startPiece, structurePieceAccessor, randomSource, this.boundingBox.minX() + j, this.boundingBox.minY() + i, this.boundingBox.maxZ() + 1, Direction.SOUTH, this.getGenDepth(), bl);
                     }
                 }
             }

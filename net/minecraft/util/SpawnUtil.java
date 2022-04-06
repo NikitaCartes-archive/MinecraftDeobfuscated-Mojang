@@ -14,14 +14,14 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnUtil {
-    public static <T extends Mob> Optional<T> trySpawnMob(EntityType<T> entityType, ServerLevel serverLevel, BlockPos blockPos, int i, int j, int k) {
+    public static <T extends Mob> Optional<T> trySpawnMob(EntityType<T> entityType, MobSpawnType mobSpawnType, ServerLevel serverLevel, BlockPos blockPos, int i, int j, int k) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (int l = 0; l < i; ++l) {
             Mob mob;
             int n;
             int m = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
-            if (!SpawnUtil.moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos.setWithOffset(blockPos, m, k, n = Mth.randomBetweenInclusive(serverLevel.random, -j, j))) || (mob = (Mob)entityType.create(serverLevel, null, null, null, mutableBlockPos, MobSpawnType.MOB_SUMMONED, false, false)) == null) continue;
-            if (mob.checkSpawnRules(serverLevel, MobSpawnType.MOB_SUMMONED) && mob.checkSpawnObstruction(serverLevel)) {
+            if (!SpawnUtil.moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos.setWithOffset(blockPos, m, k, n = Mth.randomBetweenInclusive(serverLevel.random, -j, j))) || (mob = (Mob)entityType.create(serverLevel, null, null, null, mutableBlockPos, mobSpawnType, false, false)) == null) continue;
+            if (mob.checkSpawnRules(serverLevel, mobSpawnType) && mob.checkSpawnObstruction(serverLevel)) {
                 serverLevel.addFreshEntityWithPassengers(mob);
                 return Optional.of(mob);
             }

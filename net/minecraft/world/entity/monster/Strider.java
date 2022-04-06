@@ -5,7 +5,6 @@ package net.minecraft.world.entity.monster;
 
 import com.google.common.collect.Sets;
 import java.util.LinkedHashSet;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -99,7 +99,7 @@ Saddleable {
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0.0f);
     }
 
-    public static boolean checkStriderSpawnRules(EntityType<Strider> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static boolean checkStriderSpawnRules(EntityType<Strider> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         do {
             mutableBlockPos.move(Direction.UP);

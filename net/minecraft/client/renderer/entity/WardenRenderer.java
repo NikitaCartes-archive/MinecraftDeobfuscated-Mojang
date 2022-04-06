@@ -3,18 +3,15 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WardenModel;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WardenEmissiveLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.warden.Warden;
 
 @Environment(value=EnvType.CLIENT)
@@ -27,20 +24,12 @@ extends MobRenderer<Warden, WardenModel<Warden>> {
     private static final ResourceLocation PULSATING_SPOTS_TEXTURE_2 = new ResourceLocation("textures/entity/warden/warden_pulsating_spots_2.png");
 
     public WardenRenderer(EntityRendererProvider.Context context) {
-        super(context, new WardenModel(context.bakeLayer(ModelLayers.WARDEN)), 0.5f);
+        super(context, new WardenModel(context.bakeLayer(ModelLayers.WARDEN)), 0.9f);
         this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, BIOLUMINESCENT_LAYER_TEXTURE, (warden, f, g) -> 1.0f, WardenModel::getBioluminescentLayerModelParts));
         this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, PULSATING_SPOTS_TEXTURE_1, (warden, f, g) -> Math.max(0.0f, Mth.cos(g * 0.045f) * 0.25f), WardenModel::getPulsatingSpotsLayerModelParts));
         this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, PULSATING_SPOTS_TEXTURE_2, (warden, f, g) -> Math.max(0.0f, Mth.cos(g * 0.045f + (float)Math.PI) * 0.25f), WardenModel::getPulsatingSpotsLayerModelParts));
         this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, TEXTURE, (warden, f, g) -> warden.getTendrilAnimation(f), WardenModel::getTendrilsLayerModelParts));
         this.addLayer(new WardenEmissiveLayer<Warden, WardenModel>(this, HEART_TEXTURE, (warden, f, g) -> warden.getHeartAnimation(f), WardenModel::getHeartLayerModelParts));
-    }
-
-    @Override
-    public void render(Warden warden, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-        if (warden.tickCount <= 2 && !warden.hasPose(Pose.EMERGING)) {
-            return;
-        }
-        super.render(warden, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

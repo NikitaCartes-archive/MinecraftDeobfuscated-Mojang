@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.item.ItemStack;
@@ -77,10 +77,10 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         float f;
         int i;
-        if (serverLevel.getRawBrightness(blockPos, 0) >= 9 && (i = this.getAge(blockState)) < this.getMaxAge() && random.nextInt((int)(25.0f / (f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos))) + 1) == 0) {
+        if (serverLevel.getRawBrightness(blockPos, 0) >= 9 && (i = this.getAge(blockState)) < this.getMaxAge() && randomSource.nextInt((int)(25.0f / (f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos))) + 1) == 0) {
             serverLevel.setBlock(blockPos, this.getStateForAge(i + 1), 2);
         }
     }
@@ -164,12 +164,12 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         this.growCrops(serverLevel, blockPos, blockState);
     }
 

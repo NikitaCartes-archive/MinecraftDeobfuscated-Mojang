@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -19,7 +20,7 @@ extends AbstractTickableSoundInstance {
     private int time;
 
     public ElytraOnPlayerSoundInstance(LocalPlayer localPlayer) {
-        super(SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS);
+        super(SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
         this.player = localPlayer;
         this.looping = true;
         this.delay = 0;

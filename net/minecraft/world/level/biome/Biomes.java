@@ -16,6 +16,7 @@ public abstract class Biomes {
     public static final ResourceKey<Biome> ICE_SPIKES = Biomes.register("ice_spikes");
     public static final ResourceKey<Biome> DESERT = Biomes.register("desert");
     public static final ResourceKey<Biome> SWAMP = Biomes.register("swamp");
+    public static final ResourceKey<Biome> MANGROVE_SWAMP = Biomes.register("mangrove_swamp");
     public static final ResourceKey<Biome> FOREST = Biomes.register("forest");
     public static final ResourceKey<Biome> FLOWER_FOREST = Biomes.register("flower_forest");
     public static final ResourceKey<Biome> BIRCH_FOREST = Biomes.register("birch_forest");

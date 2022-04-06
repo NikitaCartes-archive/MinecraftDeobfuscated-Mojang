@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -19,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -273,7 +273,7 @@ public class EnchantmentHelper {
         return list.isEmpty() ? null : (Map.Entry)list.get(livingEntity.getRandom().nextInt(list.size()));
     }
 
-    public static int getEnchantmentCost(Random random, int i, int j, ItemStack itemStack) {
+    public static int getEnchantmentCost(RandomSource randomSource, int i, int j, ItemStack itemStack) {
         Item item = itemStack.getItem();
         int k = item.getEnchantmentValue();
         if (k <= 0) {
@@ -282,7 +282,7 @@ public class EnchantmentHelper {
         if (j > 15) {
             j = 15;
         }
-        int l = random.nextInt(8) + 1 + (j >> 1) + random.nextInt(j + 1);
+        int l = randomSource.nextInt(8) + 1 + (j >> 1) + randomSource.nextInt(j + 1);
         if (i == 0) {
             return Math.max(l / 3, 1);
         }
@@ -292,8 +292,8 @@ public class EnchantmentHelper {
         return Math.max(l, j * 2);
     }
 
-    public static ItemStack enchantItem(Random random, ItemStack itemStack, int i, boolean bl) {
-        List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(random, itemStack, i, bl);
+    public static ItemStack enchantItem(RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
+        List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(randomSource, itemStack, i, bl);
         boolean bl2 = itemStack.is(Items.BOOK);
         if (bl2) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
@@ -308,24 +308,24 @@ public class EnchantmentHelper {
         return itemStack;
     }
 
-    public static List<EnchantmentInstance> selectEnchantment(Random random, ItemStack itemStack, int i, boolean bl) {
+    public static List<EnchantmentInstance> selectEnchantment(RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
         ArrayList<EnchantmentInstance> list = Lists.newArrayList();
         Item item = itemStack.getItem();
         int j = item.getEnchantmentValue();
         if (j <= 0) {
             return list;
         }
-        i += 1 + random.nextInt(j / 4 + 1) + random.nextInt(j / 4 + 1);
-        float f = (random.nextFloat() + random.nextFloat() - 1.0f) * 0.15f;
+        i += 1 + randomSource.nextInt(j / 4 + 1) + randomSource.nextInt(j / 4 + 1);
+        float f = (randomSource.nextFloat() + randomSource.nextFloat() - 1.0f) * 0.15f;
         List<EnchantmentInstance> list2 = EnchantmentHelper.getAvailableEnchantmentResults(i = Mth.clamp(Math.round((float)i + (float)i * f), 1, Integer.MAX_VALUE), itemStack, bl);
         if (!list2.isEmpty()) {
-            WeightedRandom.getRandomItem(random, list2).ifPresent(list::add);
-            while (random.nextInt(50) <= i) {
+            WeightedRandom.getRandomItem(randomSource, list2).ifPresent(list::add);
+            while (randomSource.nextInt(50) <= i) {
                 if (!list.isEmpty()) {
                     EnchantmentHelper.filterCompatibleEnchantments(list2, Util.lastOf(list));
                 }
                 if (list2.isEmpty()) break;
-                WeightedRandom.getRandomItem(random, list2).ifPresent(list::add);
+                WeightedRandom.getRandomItem(randomSource, list2).ifPresent(list::add);
                 i /= 2;
             }
         }

@@ -5,8 +5,8 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,38 +29,49 @@ extends Feature<DiskConfiguration> {
         int i = blockPos.getY();
         int j = i + diskConfiguration.halfHeight();
         int k = i - diskConfiguration.halfHeight() - 1;
-        boolean bl2 = diskConfiguration.state().getBlock() instanceof FallingBlock;
         int l = diskConfiguration.radius().sample(featurePlaceContext.random());
-        for (int m = blockPos.getX() - l; m <= blockPos.getX() + l; ++m) {
-            for (int n = blockPos.getZ() - l; n <= blockPos.getZ() + l; ++n) {
-                int p;
-                int o = m - blockPos.getX();
-                if (o * o + (p = n - blockPos.getZ()) * p > l * l) continue;
-                boolean bl3 = false;
-                for (int q = j; q >= k; --q) {
-                    BlockPos blockPos2 = new BlockPos(m, q, n);
-                    BlockState blockState = worldGenLevel.getBlockState(blockPos2);
-                    Block block = blockState.getBlock();
-                    boolean bl4 = false;
-                    if (q > k) {
-                        for (BlockState blockState2 : diskConfiguration.targets()) {
-                            if (!blockState2.is(block)) continue;
-                            worldGenLevel.setBlock(blockPos2, diskConfiguration.state(), 2);
-                            this.markAboveForPostProcessing(worldGenLevel, blockPos2);
-                            bl = true;
-                            bl4 = true;
-                            break;
-                        }
-                    }
-                    if (bl2 && bl3 && blockState.isAir()) {
-                        BlockState blockState3 = diskConfiguration.state().is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
-                        worldGenLevel.setBlock(new BlockPos(m, q + 1, n), blockState3, 2);
-                    }
-                    bl3 = bl4;
-                }
-            }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-l, 0, -l), blockPos.offset(l, 0, l))) {
+            int n;
+            int m = blockPos2.getX() - blockPos.getX();
+            if (m * m + (n = blockPos2.getZ() - blockPos.getZ()) * n > l * l) continue;
+            bl |= this.placeColumn(diskConfiguration, worldGenLevel, j, k, mutableBlockPos.set(blockPos2));
         }
         return bl;
+    }
+
+    protected boolean placeColumn(DiskConfiguration diskConfiguration, WorldGenLevel worldGenLevel, int i, int j, BlockPos.MutableBlockPos mutableBlockPos) {
+        boolean bl = false;
+        boolean bl2 = false;
+        boolean bl3 = diskConfiguration.state().getBlock() instanceof FallingBlock;
+        for (int k = i; k >= j; --k) {
+            mutableBlockPos.setY(k);
+            BlockState blockState = worldGenLevel.getBlockState(mutableBlockPos);
+            boolean bl4 = false;
+            if (k > j && this.matchesTargetBlock(diskConfiguration, blockState)) {
+                worldGenLevel.setBlock(mutableBlockPos, diskConfiguration.state(), 2);
+                this.markAboveForPostProcessing(worldGenLevel, mutableBlockPos);
+                bl2 = true;
+                bl4 = true;
+            }
+            if (bl3 && bl && blockState.isAir()) {
+                worldGenLevel.setBlock(mutableBlockPos.move(Direction.UP), this.getSupportState(diskConfiguration), 2);
+            }
+            bl = bl4;
+        }
+        return bl2;
+    }
+
+    protected BlockState getSupportState(DiskConfiguration diskConfiguration) {
+        return diskConfiguration.state().is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
+    }
+
+    protected boolean matchesTargetBlock(DiskConfiguration diskConfiguration, BlockState blockState) {
+        for (BlockState blockState2 : diskConfiguration.targets()) {
+            if (!blockState2.is(blockState.getBlock())) continue;
+            return true;
+        }
+        return false;
     }
 }
 

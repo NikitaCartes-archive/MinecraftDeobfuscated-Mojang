@@ -3,10 +3,10 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.util.Random;
 import java.util.UUID;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -26,16 +26,16 @@ public class DebugEntityNameGenerator {
     }
 
     public static String getEntityName(UUID uUID) {
-        Random random = DebugEntityNameGenerator.getRandom(uUID);
-        return DebugEntityNameGenerator.getRandomString(random, NAMES_FIRST_PART) + DebugEntityNameGenerator.getRandomString(random, NAMES_SECOND_PART);
+        RandomSource randomSource = DebugEntityNameGenerator.getRandom(uUID);
+        return DebugEntityNameGenerator.getRandomString(randomSource, NAMES_FIRST_PART) + DebugEntityNameGenerator.getRandomString(randomSource, NAMES_SECOND_PART);
     }
 
-    private static String getRandomString(Random random, String[] strings) {
-        return Util.getRandom(strings, random);
+    private static String getRandomString(RandomSource randomSource, String[] strings) {
+        return Util.getRandom(strings, randomSource);
     }
 
-    private static Random getRandom(UUID uUID) {
-        return new Random(uUID.hashCode() >> 2);
+    private static RandomSource getRandom(UUID uUID) {
+        return RandomSource.create(uUID.hashCode() >> 2);
     }
 }
 

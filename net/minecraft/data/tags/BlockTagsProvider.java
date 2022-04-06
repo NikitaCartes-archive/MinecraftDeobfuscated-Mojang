@@ -157,8 +157,10 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.SCULK_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.DIRT).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.NYLIUM).addTag(BlockTags.BASE_STONE_NETHER).addTag(BlockTags.SAND).add(Blocks.GRAVEL).add(Blocks.SOUL_SAND).add(Blocks.SOUL_SOIL).add(Blocks.CALCITE).add(Blocks.SMOOTH_BASALT).add(Blocks.CLAY).add(Blocks.DRIPSTONE_BLOCK).add(Blocks.END_STONE).add(Blocks.RED_SANDSTONE).add(Blocks.SANDSTONE);
         this.tag(BlockTags.SCULK_REPLACEABLE_WORLD_GEN).addTag(BlockTags.SCULK_REPLACEABLE).add(Blocks.DEEPSLATE_BRICKS).add(Blocks.DEEPSLATE_TILES).add(Blocks.COBBLED_DEEPSLATE).add(Blocks.CRACKED_DEEPSLATE_BRICKS).add(Blocks.CRACKED_DEEPSLATE_TILES);
         this.tag(BlockTags.CONVERTABLE_TO_MUD).add((Block[])new Block[]{Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT});
-        this.tag(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE).add(Blocks.DEEPSLATE).add(Blocks.DEEPSLATE_BRICKS).add(Blocks.DEEPSLATE_TILES).add(Blocks.DEEPSLATE_BRICK_SLAB).add(Blocks.DEEPSLATE_TILE_SLAB).add(Blocks.DEEPSLATE_BRICK_STAIRS).add(Blocks.DEEPSLATE_TILE_WALL).add(Blocks.DEEPSLATE_BRICK_WALL).add(Blocks.COBBLED_DEEPSLATE).add(Blocks.CRACKED_DEEPSLATE_BRICKS).add(Blocks.CRACKED_DEEPSLATE_TILES);
-        this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE).addTag(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE).add(Blocks.GRAY_WOOL);
+        this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE).add(Blocks.DEEPSLATE).add(Blocks.DEEPSLATE_BRICKS).add(Blocks.DEEPSLATE_TILES).add(Blocks.DEEPSLATE_BRICK_SLAB).add(Blocks.DEEPSLATE_TILE_SLAB).add(Blocks.DEEPSLATE_BRICK_STAIRS).add(Blocks.DEEPSLATE_TILE_WALL).add(Blocks.DEEPSLATE_BRICK_WALL).add(Blocks.COBBLED_DEEPSLATE).add(Blocks.CRACKED_DEEPSLATE_BRICKS).add(Blocks.CRACKED_DEEPSLATE_TILES).add(Blocks.GRAY_WOOL);
+        this.tag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH).add((Block[])new Block[]{Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MANGROVE_LEAVES, Blocks.MANGROVE_LOG, Blocks.MANGROVE_PROPAGULE});
+        this.tag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH).add((Block[])new Block[]{Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS});
+        this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT).add(Blocks.MUD);
     }
 }
 

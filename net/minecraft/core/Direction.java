@@ -4,7 +4,6 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -13,13 +12,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +23,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
@@ -112,10 +109,8 @@ public enum Direction implements StringRepresentable
         return Direction.getNearest(vector4f.x(), vector4f.y(), vector4f.z());
     }
 
-    public static Collection<Direction> allShuffled(Random random) {
-        ArrayList<Direction> list = Lists.newArrayList(Direction.values());
-        Collections.shuffle(list, random);
-        return list;
+    public static Collection<Direction> allShuffled(RandomSource randomSource) {
+        return Util.shuffledCopy(Arrays.asList(Direction.values()), randomSource);
     }
 
     public static Stream<Direction> stream() {
@@ -351,8 +346,8 @@ public enum Direction implements StringRepresentable
         return (this.data2d & 3) * 90;
     }
 
-    public static Direction getRandom(Random random) {
-        return Util.getRandom(VALUES, random);
+    public static Direction getRandom(RandomSource randomSource) {
+        return Util.getRandom(VALUES, randomSource);
     }
 
     public static Direction getNearest(double d, double e, double f) {
@@ -503,8 +498,8 @@ public enum Direction implements StringRepresentable
             return this.name;
         }
 
-        public static Axis getRandom(Random random) {
-            return Util.getRandom(VALUES, random);
+        public static Axis getRandom(RandomSource randomSource) {
+            return Util.getRandom(VALUES, randomSource);
         }
 
         @Override
@@ -583,12 +578,12 @@ public enum Direction implements StringRepresentable
             this.axis = axiss;
         }
 
-        public Direction getRandomDirection(Random random) {
-            return Util.getRandom(this.faces, random);
+        public Direction getRandomDirection(RandomSource randomSource) {
+            return Util.getRandom(this.faces, randomSource);
         }
 
-        public Axis getRandomAxis(Random random) {
-            return Util.getRandom(this.axis, random);
+        public Axis getRandomAxis(RandomSource randomSource) {
+            return Util.getRandom(this.axis, randomSource);
         }
 
         @Override

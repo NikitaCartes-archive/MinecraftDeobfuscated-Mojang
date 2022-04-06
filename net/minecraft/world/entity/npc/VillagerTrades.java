@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -21,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -90,7 +90,7 @@ public class VillagerTrades {
 
     public static interface ItemListing {
         @Nullable
-        public MerchantOffer getOffer(Entity var1, Random var2);
+        public MerchantOffer getOffer(Entity var1, RandomSource var2);
     }
 
     static class EmeraldForItems
@@ -110,7 +110,7 @@ public class VillagerTrades {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             ItemStack itemStack = new ItemStack(this.item, this.cost);
             return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, this.priceMultiplier);
         }
@@ -151,7 +151,7 @@ public class VillagerTrades {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(this.itemStack.getItem(), this.numberOfItems), this.maxUses, this.villagerXp, this.priceMultiplier);
         }
     }
@@ -172,7 +172,7 @@ public class VillagerTrades {
 
         @Override
         @Nullable
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
             SuspiciousStewItem.saveMobEffect(itemStack, this.effect, this.duration);
             return new MerchantOffer(new ItemStack(Items.EMERALD, 1), itemStack, 12, this.xp, this.priceMultiplier);
@@ -207,7 +207,7 @@ public class VillagerTrades {
 
         @Override
         @Nullable
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(this.fromItem.getItem(), this.fromCount), new ItemStack(this.toItem.getItem(), this.toCount), this.maxUses, this.villagerXp, this.priceMultiplier);
         }
     }
@@ -233,9 +233,9 @@ public class VillagerTrades {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
-            int i = 5 + random.nextInt(15);
-            ItemStack itemStack = EnchantmentHelper.enchantItem(random, new ItemStack(this.itemStack.getItem()), i, false);
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
+            int i = 5 + randomSource.nextInt(15);
+            ItemStack itemStack = EnchantmentHelper.enchantItem(randomSource, new ItemStack(this.itemStack.getItem()), i, false);
             int j = Math.min(this.baseEmeraldCost + i, 64);
             ItemStack itemStack2 = new ItemStack(Items.EMERALD, j);
             return new MerchantOffer(itemStack2, itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
@@ -261,7 +261,7 @@ public class VillagerTrades {
 
         @Override
         @Nullable
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             if (entity instanceof VillagerDataHolder) {
                 ItemStack itemStack = new ItemStack(this.trades.get(((VillagerDataHolder)((Object)entity)).getVillagerData().getType()), this.cost);
                 return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, 0.05f);
@@ -293,10 +293,10 @@ public class VillagerTrades {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             ItemStack itemStack = new ItemStack(Items.EMERALD, this.emeraldCost);
             List list = Registry.POTION.stream().filter(potion -> !potion.getEffects().isEmpty() && PotionBrewing.isBrewablePotion(potion)).collect(Collectors.toList());
-            Potion potion2 = (Potion)list.get(random.nextInt(list.size()));
+            Potion potion2 = (Potion)list.get(randomSource.nextInt(list.size()));
             ItemStack itemStack2 = PotionUtils.setPotion(new ItemStack(this.toItem.getItem(), this.toCount), potion2);
             return new MerchantOffer(itemStack, new ItemStack(this.fromItem, this.fromCount), itemStack2, this.maxUses, this.villagerXp, this.priceMultiplier);
         }
@@ -311,12 +311,12 @@ public class VillagerTrades {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             List list = Registry.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
-            Enchantment enchantment = (Enchantment)list.get(random.nextInt(list.size()));
-            int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+            Enchantment enchantment = (Enchantment)list.get(randomSource.nextInt(list.size()));
+            int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
             ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i));
-            int j = 2 + random.nextInt(5 + i * 10) + 3 * i;
+            int j = 2 + randomSource.nextInt(5 + i * 10) + 3 * i;
             if (enchantment.isTreasureOnly()) {
                 j *= 2;
             }
@@ -347,7 +347,7 @@ public class VillagerTrades {
 
         @Override
         @Nullable
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             if (!(entity.level instanceof ServerLevel)) {
                 return null;
             }
@@ -383,25 +383,25 @@ public class VillagerTrades {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             ItemStack itemStack = new ItemStack(Items.EMERALD, this.value);
             ItemStack itemStack2 = new ItemStack(this.item);
             if (this.item instanceof DyeableArmorItem) {
                 ArrayList<DyeItem> list = Lists.newArrayList();
-                list.add(DyedArmorForEmeralds.getRandomDye(random));
-                if (random.nextFloat() > 0.7f) {
-                    list.add(DyedArmorForEmeralds.getRandomDye(random));
+                list.add(DyedArmorForEmeralds.getRandomDye(randomSource));
+                if (randomSource.nextFloat() > 0.7f) {
+                    list.add(DyedArmorForEmeralds.getRandomDye(randomSource));
                 }
-                if (random.nextFloat() > 0.8f) {
-                    list.add(DyedArmorForEmeralds.getRandomDye(random));
+                if (randomSource.nextFloat() > 0.8f) {
+                    list.add(DyedArmorForEmeralds.getRandomDye(randomSource));
                 }
                 itemStack2 = DyeableLeatherItem.dyeArmor(itemStack2, list);
             }
             return new MerchantOffer(itemStack, itemStack2, this.maxUses, this.villagerXp, 0.2f);
         }
 
-        private static DyeItem getRandomDye(Random random) {
-            return DyeItem.byColor(DyeColor.byId(random.nextInt(16)));
+        private static DyeItem getRandomDye(RandomSource randomSource) {
+            return DyeItem.byColor(DyeColor.byId(randomSource.nextInt(16)));
         }
     }
 }

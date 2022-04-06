@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -36,7 +36,7 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
         }
@@ -48,7 +48,7 @@ extends Block {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         int j;
         BlockPos blockPos2 = blockPos.above();
         if (!serverLevel.isEmptyBlock(blockPos2) || blockPos2.getY() >= serverLevel.getMaxBuildHeight()) {
@@ -75,7 +75,7 @@ extends Block {
                 bl2 = true;
                 break;
             }
-            if (j < 2 || j <= random.nextInt(bl2 ? 5 : 4)) {
+            if (j < 2 || j <= randomSource.nextInt(bl2 ? 5 : 4)) {
                 bl = true;
             }
         } else if (blockState2.isAir()) {
@@ -85,13 +85,13 @@ extends Block {
             serverLevel.setBlock(blockPos, this.plant.getStateForPlacement(serverLevel, blockPos), 2);
             this.placeGrownFlower(serverLevel, blockPos2, i);
         } else if (i < 4) {
-            j = random.nextInt(4);
+            j = randomSource.nextInt(4);
             if (bl2) {
                 ++j;
             }
             boolean bl3 = false;
             for (int l = 0; l < j; ++l) {
-                Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+                Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
                 BlockPos blockPos3 = blockPos.relative(direction);
                 if (!serverLevel.isEmptyBlock(blockPos3) || !serverLevel.isEmptyBlock(blockPos3.below()) || !ChorusFlowerBlock.allNeighborsEmpty(serverLevel, blockPos3, direction.getOpposite())) continue;
                 this.placeGrownFlower(serverLevel, blockPos3, i + 1);
@@ -163,14 +163,14 @@ extends Block {
         builder.add(AGE);
     }
 
-    public static void generatePlant(LevelAccessor levelAccessor, BlockPos blockPos, Random random, int i) {
+    public static void generatePlant(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, int i) {
         levelAccessor.setBlock(blockPos, ((ChorusPlantBlock)Blocks.CHORUS_PLANT).getStateForPlacement(levelAccessor, blockPos), 2);
-        ChorusFlowerBlock.growTreeRecursive(levelAccessor, blockPos, random, blockPos, i, 0);
+        ChorusFlowerBlock.growTreeRecursive(levelAccessor, blockPos, randomSource, blockPos, i, 0);
     }
 
-    private static void growTreeRecursive(LevelAccessor levelAccessor, BlockPos blockPos, Random random, BlockPos blockPos2, int i, int j) {
+    private static void growTreeRecursive(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, BlockPos blockPos2, int i, int j) {
         ChorusPlantBlock chorusPlantBlock = (ChorusPlantBlock)Blocks.CHORUS_PLANT;
-        int k = random.nextInt(4) + 1;
+        int k = randomSource.nextInt(4) + 1;
         if (j == 0) {
             ++k;
         }
@@ -184,18 +184,18 @@ extends Block {
         }
         boolean bl = false;
         if (j < 4) {
-            int m = random.nextInt(4);
+            int m = randomSource.nextInt(4);
             if (j == 0) {
                 ++m;
             }
             for (int n = 0; n < m; ++n) {
-                Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+                Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
                 BlockPos blockPos4 = blockPos.above(k).relative(direction);
                 if (Math.abs(blockPos4.getX() - blockPos2.getX()) >= i || Math.abs(blockPos4.getZ() - blockPos2.getZ()) >= i || !levelAccessor.isEmptyBlock(blockPos4) || !levelAccessor.isEmptyBlock(blockPos4.below()) || !ChorusFlowerBlock.allNeighborsEmpty(levelAccessor, blockPos4, direction.getOpposite())) continue;
                 bl = true;
                 levelAccessor.setBlock(blockPos4, chorusPlantBlock.getStateForPlacement(levelAccessor, blockPos4), 2);
                 levelAccessor.setBlock(blockPos4.relative(direction.getOpposite()), chorusPlantBlock.getStateForPlacement(levelAccessor, blockPos4.relative(direction.getOpposite())), 2);
-                ChorusFlowerBlock.growTreeRecursive(levelAccessor, blockPos4, random, blockPos2, i, j + 1);
+                ChorusFlowerBlock.growTreeRecursive(levelAccessor, blockPos4, randomSource, blockPos2, i, j + 1);
             }
         }
         if (!bl) {

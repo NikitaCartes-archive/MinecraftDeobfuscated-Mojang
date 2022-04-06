@@ -4,7 +4,6 @@
 package net.minecraft.client.particle;
 
 import java.util.Optional;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -16,6 +15,7 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 @Environment(value=EnvType.CLIENT)
 public class SuspendedParticle
@@ -77,10 +77,10 @@ extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            Random random = clientLevel.random;
-            double j = random.nextGaussian() * (double)1.0E-6f;
-            double k = random.nextGaussian() * (double)1.0E-4f;
-            double l = random.nextGaussian() * (double)1.0E-6f;
+            RandomSource randomSource = clientLevel.random;
+            double j = randomSource.nextGaussian() * (double)1.0E-6f;
+            double k = randomSource.nextGaussian() * (double)1.0E-4f;
+            double l = randomSource.nextGaussian() * (double)1.0E-6f;
             SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, this.sprite, d, e, f, j, k, l);
             suspendedParticle.setColor(0.9f, 0.4f, 0.5f);
             return suspendedParticle;

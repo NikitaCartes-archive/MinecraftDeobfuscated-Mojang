@@ -3,14 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -20,7 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.grower.OakTreeGrower;
+import net.minecraft.world.level.block.grower.MangroveTreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -29,7 +25,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -41,11 +36,12 @@ implements SimpleWaterloggedBlock {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_4;
     public static final int MAX_AGE = 4;
     private static final VoxelShape[] SHAPE_PER_AGE = new VoxelShape[]{Block.box(7.0, 13.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 10.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 7.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 3.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)};
-    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
+    private static final float GROW_TALL_MANGROVE_PROBABILITY = 0.75f;
 
     public MangrovePropaguleBlock(BlockBehaviour.Properties properties) {
-        super(new OakTreeGrower(), properties);
+        super(new MangroveTreeGrower(0.75f), properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(STAGE, 0)).setValue(AGE, 0)).setValue(WATERLOGGED, false)).setValue(HANGING, false));
     }
 
@@ -56,7 +52,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.is(BlockTags.DIRT) || blockState.is(Blocks.FARMLAND) || blockState.is(Blocks.CLAY) || blockState.is(Blocks.MUD);
+        return super.mayPlaceOn(blockState, blockGetter, blockPos) || blockState.is(Blocks.CLAY);
     }
 
     @Override
@@ -65,11 +61,6 @@ implements SimpleWaterloggedBlock {
         FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
         boolean bl = fluidState.getType() == Fluids.WATER;
         return (BlockState)((BlockState)super.getStateForPlacement(blockPlaceContext).setValue(WATERLOGGED, bl)).setValue(AGE, 4);
-    }
-
-    @Override
-    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }
 
     @Override
@@ -112,10 +103,10 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (!MangrovePropaguleBlock.isHanging(blockState)) {
-            if (random.nextInt(7) == 0) {
-                this.advanceTree(serverLevel, blockPos, blockState, random);
+            if (randomSource.nextInt(7) == 0) {
+                this.advanceTree(serverLevel, blockPos, blockState, randomSource);
             }
             return;
         }
@@ -130,16 +121,16 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        return MangrovePropaguleBlock.isHanging(blockState) ? !MangrovePropaguleBlock.isFullyGrown(blockState) : super.isBonemealSuccess(level, random, blockPos, blockState);
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
+        return MangrovePropaguleBlock.isHanging(blockState) ? !MangrovePropaguleBlock.isFullyGrown(blockState) : super.isBonemealSuccess(level, randomSource, blockPos, blockState);
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         if (MangrovePropaguleBlock.isHanging(blockState) && !MangrovePropaguleBlock.isFullyGrown(blockState)) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.cycle(AGE), 2);
         } else {
-            super.performBonemeal(serverLevel, random, blockPos, blockState);
+            super.performBonemeal(serverLevel, randomSource, blockPos, blockState);
         }
     }
 
@@ -152,7 +143,11 @@ implements SimpleWaterloggedBlock {
     }
 
     public static BlockState createNewHangingPropagule() {
-        return (BlockState)((BlockState)Blocks.MANGROVE_PROPAGULE.defaultBlockState().setValue(HANGING, true)).setValue(AGE, 0);
+        return MangrovePropaguleBlock.createNewHangingPropagule(0);
+    }
+
+    public static BlockState createNewHangingPropagule(int i) {
+        return (BlockState)((BlockState)Blocks.MANGROVE_PROPAGULE.defaultBlockState().setValue(HANGING, true)).setValue(AGE, i);
     }
 }
 

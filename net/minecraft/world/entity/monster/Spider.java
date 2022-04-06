@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.monster;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -11,6 +10,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -229,8 +229,8 @@ extends Monster {
         @Nullable
         public MobEffect effect;
 
-        public void setRandomEffect(Random random) {
-            int i = random.nextInt(5);
+        public void setRandomEffect(RandomSource randomSource) {
+            int i = randomSource.nextInt(5);
             if (i <= 1) {
                 this.effect = MobEffects.MOVEMENT_SPEED;
             } else if (i <= 2) {

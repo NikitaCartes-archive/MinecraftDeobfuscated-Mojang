@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.entity.ai.goal;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
@@ -86,7 +86,7 @@ extends MoveToBlockGoal {
         Level level = this.removerMob.level;
         BlockPos blockPos = this.removerMob.blockPosition();
         BlockPos blockPos2 = this.getPosWithBlock(blockPos, level);
-        Random random = this.removerMob.getRandom();
+        RandomSource randomSource = this.removerMob.getRandom();
         if (this.isReachedTarget() && blockPos2 != null) {
             double d;
             Vec3 vec3;
@@ -95,7 +95,7 @@ extends MoveToBlockGoal {
                 this.removerMob.setDeltaMovement(vec3.x, 0.3, vec3.z);
                 if (!level.isClientSide) {
                     d = 0.08;
-                    ((ServerLevel)level).sendParticles(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.EGG)), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.7, (double)blockPos2.getZ() + 0.5, 3, ((double)random.nextFloat() - 0.5) * 0.08, ((double)random.nextFloat() - 0.5) * 0.08, ((double)random.nextFloat() - 0.5) * 0.08, 0.15f);
+                    ((ServerLevel)level).sendParticles(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.EGG)), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.7, (double)blockPos2.getZ() + 0.5, 3, ((double)randomSource.nextFloat() - 0.5) * 0.08, ((double)randomSource.nextFloat() - 0.5) * 0.08, ((double)randomSource.nextFloat() - 0.5) * 0.08, 0.15f);
                 }
             }
             if (this.ticksSinceReachedGoal % 2 == 0) {
@@ -109,9 +109,9 @@ extends MoveToBlockGoal {
                 level.removeBlock(blockPos2, false);
                 if (!level.isClientSide) {
                     for (int i = 0; i < 20; ++i) {
-                        d = random.nextGaussian() * 0.02;
-                        double e = random.nextGaussian() * 0.02;
-                        double f = random.nextGaussian() * 0.02;
+                        d = randomSource.nextGaussian() * 0.02;
+                        double e = randomSource.nextGaussian() * 0.02;
+                        double f = randomSource.nextGaussian() * 0.02;
                         ((ServerLevel)level).sendParticles(ParticleTypes.POOF, (double)blockPos2.getX() + 0.5, blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 1, d, e, f, 0.15f);
                     }
                     this.playBreakSound(level, blockPos2);

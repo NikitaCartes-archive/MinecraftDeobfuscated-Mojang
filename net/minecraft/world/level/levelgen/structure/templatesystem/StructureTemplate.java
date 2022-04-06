@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -26,6 +25,7 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -177,7 +177,7 @@ public class StructureTemplate {
         return StructureTemplate.transform(blockPos, structurePlaceSettings.getMirror(), structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot());
     }
 
-    public boolean placeInWorld(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, Random random, int i) {
+    public boolean placeInWorld(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, RandomSource randomSource, int i) {
         if (this.palettes.isEmpty()) {
             return false;
         }
@@ -217,7 +217,7 @@ public class StructureTemplate {
             list4.add(Pair.of(blockPos3, structureBlockInfo.nbt));
             if (structureBlockInfo.nbt != null && (blockEntity = serverLevelAccessor.getBlockEntity(blockPos3)) != null) {
                 if (blockEntity instanceof RandomizableContainerBlockEntity) {
-                    structureBlockInfo.nbt.putLong("LootTableSeed", random.nextLong());
+                    structureBlockInfo.nbt.putLong("LootTableSeed", randomSource.nextLong());
                 }
                 blockEntity.load(structureBlockInfo.nbt);
             }

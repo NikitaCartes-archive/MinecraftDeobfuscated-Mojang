@@ -24,7 +24,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -74,15 +73,15 @@ public class StructureTemplateManager {
         Optional<StructureTemplate> optional;
         block9: {
             ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + STRUCTURE_FILE_EXTENSION);
-            Resource resource = this.resourceManager.getResource(resourceLocation2);
+            InputStream inputStream = this.resourceManager.open(resourceLocation2);
             try {
-                optional = Optional.of(this.readStructure(resource.getInputStream()));
-                if (resource == null) break block9;
+                optional = Optional.of(this.readStructure(inputStream));
+                if (inputStream == null) break block9;
             } catch (Throwable throwable) {
                 try {
-                    if (resource != null) {
+                    if (inputStream != null) {
                         try {
-                            resource.close();
+                            inputStream.close();
                         } catch (Throwable throwable2) {
                             throwable.addSuppressed(throwable2);
                         }
@@ -95,7 +94,7 @@ public class StructureTemplateManager {
                     return Optional.empty();
                 }
             }
-            resource.close();
+            inputStream.close();
         }
         return optional;
     }

@@ -9,12 +9,12 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
@@ -191,7 +191,7 @@ public class PiglinAi {
         brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.ADMIRE_ITEM, Activity.FIGHT, Activity.AVOID, Activity.CELEBRATE, Activity.RIDE, Activity.IDLE));
         Activity activity2 = brain.getActiveNonCoreActivity().orElse(null);
         if (activity != activity2) {
-            PiglinAi.getSoundForCurrentActivity(piglin).ifPresent(piglin::playSound);
+            PiglinAi.getSoundForCurrentActivity(piglin).ifPresent(piglin::playSoundEvent);
         }
         piglin.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
         if (!brain.hasMemoryValue(MemoryModuleType.RIDE_TARGET) && PiglinAi.isBabyRidingBaby(piglin)) {
@@ -330,7 +330,7 @@ public class PiglinAi {
         if (livingEntity2.getType() != EntityType.HOGLIN) {
             return false;
         }
-        return new Random(livingEntity.level.getGameTime()).nextFloat() < 0.1f;
+        return RandomSource.create(livingEntity.level.getGameTime()).nextFloat() < 0.1f;
     }
 
     protected static boolean wantsToPickup(Piglin piglin, ItemStack itemStack) {

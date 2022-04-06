@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -22,7 +23,7 @@ extends AbstractTickableSoundInstance {
     private boolean hasSwitched;
 
     public BeeSoundInstance(Bee bee, SoundEvent soundEvent, SoundSource soundSource) {
-        super(soundEvent, soundSource);
+        super(soundEvent, soundSource, SoundInstance.createUnseededRandom());
         this.bee = bee;
         this.x = (float)bee.getX();
         this.y = (float)bee.getY();

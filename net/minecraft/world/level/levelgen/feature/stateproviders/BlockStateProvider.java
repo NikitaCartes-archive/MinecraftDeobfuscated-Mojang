@@ -4,9 +4,9 @@
 package net.minecraft.world.level.levelgen.feature.stateproviders;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
@@ -25,6 +25,6 @@ public abstract class BlockStateProvider {
 
     protected abstract BlockStateProviderType<?> type();
 
-    public abstract BlockState getState(Random var1, BlockPos var2);
+    public abstract BlockState getState(RandomSource var1, BlockPos var2);
 }
 

@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.block.entity;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class DispenserBlockEntity
 extends RandomizableContainerBlockEntity {
-    private static final Random RANDOM = new Random();
     public static final int CONTAINER_SIZE = 9;
     private NonNullList<ItemStack> items = NonNullList.withSize(9, ItemStack.EMPTY);
 
@@ -37,12 +36,12 @@ extends RandomizableContainerBlockEntity {
         return 9;
     }
 
-    public int getRandomSlot() {
+    public int getRandomSlot(RandomSource randomSource) {
         this.unpackLootTable(null);
         int i = -1;
         int j = 1;
         for (int k = 0; k < this.items.size(); ++k) {
-            if (this.items.get(k).isEmpty() || RANDOM.nextInt(j++) != 0) continue;
+            if (this.items.get(k).isEmpty() || randomSource.nextInt(j++) != 0) continue;
             i = k;
         }
         return i;

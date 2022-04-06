@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.sounds;
 
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -12,12 +11,13 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class MusicManager {
     private static final int STARTING_DELAY = 100;
-    private final Random random = new Random();
+    private final RandomSource random = RandomSource.create();
     private final Minecraft minecraft;
     @Nullable
     private SoundInstance currentMusic;

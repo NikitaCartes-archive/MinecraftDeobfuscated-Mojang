@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 
@@ -37,11 +37,11 @@ public class WeightedRandomList<E extends WeightedEntry> {
         return this.items.isEmpty();
     }
 
-    public Optional<E> getRandom(Random random) {
+    public Optional<E> getRandom(RandomSource randomSource) {
         if (this.totalWeight == 0) {
             return Optional.empty();
         }
-        int i = random.nextInt(this.totalWeight);
+        int i = randomSource.nextInt(this.totalWeight);
         return WeightedRandom.getWeightedItem(this.items, i);
     }
 

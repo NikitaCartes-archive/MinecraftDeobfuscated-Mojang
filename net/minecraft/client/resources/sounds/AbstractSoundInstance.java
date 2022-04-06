@@ -12,6 +12,7 @@ import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractSoundInstance
@@ -28,14 +29,16 @@ implements SoundInstance {
     protected int delay;
     protected SoundInstance.Attenuation attenuation = SoundInstance.Attenuation.LINEAR;
     protected boolean relative;
+    protected RandomSource random;
 
-    protected AbstractSoundInstance(SoundEvent soundEvent, SoundSource soundSource) {
-        this(soundEvent.getLocation(), soundSource);
+    protected AbstractSoundInstance(SoundEvent soundEvent, SoundSource soundSource, RandomSource randomSource) {
+        this(soundEvent.getLocation(), soundSource, randomSource);
     }
 
-    protected AbstractSoundInstance(ResourceLocation resourceLocation, SoundSource soundSource) {
+    protected AbstractSoundInstance(ResourceLocation resourceLocation, SoundSource soundSource, RandomSource randomSource) {
         this.location = resourceLocation;
         this.source = soundSource;
+        this.random = randomSource;
     }
 
     @Override
@@ -46,7 +49,7 @@ implements SoundInstance {
     @Override
     public WeighedSoundEvents resolve(SoundManager soundManager) {
         WeighedSoundEvents weighedSoundEvents = soundManager.getSoundEvent(this.location);
-        this.sound = weighedSoundEvents == null ? SoundManager.EMPTY_SOUND : weighedSoundEvents.getSound();
+        this.sound = weighedSoundEvents == null ? SoundManager.EMPTY_SOUND : weighedSoundEvents.getSound(this.random);
         return weighedSoundEvents;
     }
 
@@ -72,12 +75,12 @@ implements SoundInstance {
 
     @Override
     public float getVolume() {
-        return this.volume * this.sound.getVolume();
+        return this.volume * this.sound.getVolume().sample(this.random);
     }
 
     @Override
     public float getPitch() {
-        return this.pitch * this.sound.getPitch();
+        return this.pitch * this.sound.getPitch().sample(this.random);
     }
 
     @Override

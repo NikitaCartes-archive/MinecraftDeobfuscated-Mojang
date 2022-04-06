@@ -13,10 +13,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -146,23 +148,29 @@ implements Tickable {
         for (ResourceLocation resourceLocation : set) {
             if (MissingTextureAtlasSprite.getLocation().equals(resourceLocation)) continue;
             list.add(CompletableFuture.runAsync(() -> {
-                TextureAtlasSprite.Info info;
+                AnimationMetadataSection animationMetadataSection;
+                PngInfo pngInfo;
                 ResourceLocation resourceLocation2 = this.getResourceLocation(resourceLocation);
-                try (Resource resource = resourceManager.getResource(resourceLocation2);){
-                    PngInfo pngInfo = new PngInfo(resourceLocation2::toString, resource.getInputStream());
-                    AnimationMetadataSection animationMetadataSection = resource.getMetadata(AnimationMetadataSection.SERIALIZER);
-                    if (animationMetadataSection == null) {
-                        animationMetadataSection = AnimationMetadataSection.EMPTY;
-                    }
-                    Pair<Integer, Integer> pair = animationMetadataSection.getFrameSize(pngInfo.width, pngInfo.height);
-                    info = new TextureAtlasSprite.Info(resourceLocation, pair.getFirst(), pair.getSecond(), animationMetadataSection);
-                } catch (RuntimeException runtimeException) {
-                    LOGGER.error("Unable to parse metadata from {} : {}", (Object)resourceLocation2, (Object)runtimeException);
+                Optional<Resource> optional = resourceManager.getResource(resourceLocation2);
+                if (optional.isEmpty()) {
+                    LOGGER.error("Using missing texture, file {} not found", (Object)resourceLocation2);
                     return;
+                }
+                Resource resource = optional.get();
+                try (InputStream inputStream = resource.open();){
+                    pngInfo = new PngInfo(resourceLocation2::toString, inputStream);
                 } catch (IOException iOException) {
                     LOGGER.error("Using missing texture, unable to load {} : {}", (Object)resourceLocation2, (Object)iOException);
                     return;
                 }
+                try {
+                    animationMetadataSection = resource.metadata().getSection(AnimationMetadataSection.SERIALIZER).orElse(AnimationMetadataSection.EMPTY);
+                } catch (Exception exception) {
+                    LOGGER.error("Unable to parse metadata from {} : {}", (Object)resourceLocation2, (Object)exception);
+                    return;
+                }
+                Pair<Integer, Integer> pair = animationMetadataSection.getFrameSize(pngInfo.width, pngInfo.height);
+                TextureAtlasSprite.Info info = new TextureAtlasSprite.Info(resourceLocation, pair.getFirst(), pair.getSecond(), animationMetadataSection);
                 queue.add(info);
             }, Util.backgroundExecutor()));
         }
@@ -195,16 +203,16 @@ implements Tickable {
         TextureAtlasSprite textureAtlasSprite;
         block9: {
             ResourceLocation resourceLocation = this.getResourceLocation(info.name());
-            Resource resource = resourceManager.getResource(resourceLocation);
+            InputStream inputStream = resourceManager.open(resourceLocation);
             try {
-                NativeImage nativeImage = NativeImage.read(resource.getInputStream());
+                NativeImage nativeImage = NativeImage.read(inputStream);
                 textureAtlasSprite = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
-                if (resource == null) break block9;
+                if (inputStream == null) break block9;
             } catch (Throwable throwable) {
                 try {
-                    if (resource != null) {
+                    if (inputStream != null) {
                         try {
-                            resource.close();
+                            inputStream.close();
                         } catch (Throwable throwable2) {
                             throwable.addSuppressed(throwable2);
                         }
@@ -218,7 +226,7 @@ implements Tickable {
                     return null;
                 }
             }
-            resource.close();
+            inputStream.close();
         }
         return textureAtlasSprite;
     }

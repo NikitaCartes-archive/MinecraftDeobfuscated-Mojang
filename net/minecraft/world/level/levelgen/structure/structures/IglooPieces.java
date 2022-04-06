@@ -5,10 +5,10 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -40,9 +40,9 @@ public class IglooPieces {
     static final Map<ResourceLocation, BlockPos> PIVOTS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, new BlockPos(3, 5, 5), STRUCTURE_LOCATION_LADDER, new BlockPos(1, 3, 1), STRUCTURE_LOCATION_LABORATORY, new BlockPos(3, 6, 7));
     static final Map<ResourceLocation, BlockPos> OFFSETS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, BlockPos.ZERO, STRUCTURE_LOCATION_LADDER, new BlockPos(2, -3, 4), STRUCTURE_LOCATION_LABORATORY, new BlockPos(0, -3, -2));
 
-    public static void addPieces(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, Random random) {
-        if (random.nextDouble() < 0.5) {
-            int i = random.nextInt(8) + 4;
+    public static void addPieces(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
+        if (randomSource.nextDouble() < 0.5) {
+            int i = randomSource.nextInt(8) + 4;
             structurePieceAccessor.addPiece(new IglooPiece(structureTemplateManager, STRUCTURE_LOCATION_LABORATORY, blockPos, rotation, i * 3));
             for (int j = 0; j < i - 1; ++j) {
                 structurePieceAccessor.addPiece(new IglooPiece(structureTemplateManager, STRUCTURE_LOCATION_LADDER, blockPos, rotation, j * 3));
@@ -76,19 +76,19 @@ public class IglooPieces {
         }
 
         @Override
-        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
             if (!"chest".equals(string)) {
                 return;
             }
             serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
             BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos.below());
             if (blockEntity instanceof ChestBlockEntity) {
-                ((ChestBlockEntity)blockEntity).setLootTable(BuiltInLootTables.IGLOO_CHEST, random.nextLong());
+                ((ChestBlockEntity)blockEntity).setLootTable(BuiltInLootTables.IGLOO_CHEST, randomSource.nextLong());
             }
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockPos blockPos5;
             BlockState blockState;
             ResourceLocation resourceLocation = new ResourceLocation(this.templateName);
@@ -98,7 +98,7 @@ public class IglooPieces {
             int i = worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
             BlockPos blockPos4 = this.templatePosition;
             this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-            super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
             if (resourceLocation.equals(STRUCTURE_LOCATION_IGLOO) && !(blockState = worldGenLevel.getBlockState((blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)))).below())).isAir() && !blockState.is(Blocks.LADDER)) {
                 worldGenLevel.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
             }

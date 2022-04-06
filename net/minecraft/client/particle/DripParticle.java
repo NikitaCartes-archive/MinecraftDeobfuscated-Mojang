@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.particle;
 
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -20,6 +19,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -153,11 +153,11 @@ extends TextureSheetParticle {
     public static class SporeBlossomFallProvider
     implements ParticleProvider<SimpleParticleType> {
         protected final SpriteSet sprite;
-        private final Random random;
+        private final RandomSource random;
 
         public SporeBlossomFallProvider(SpriteSet spriteSet) {
             this.sprite = spriteSet;
-            this.random = new Random();
+            this.random = RandomSource.create();
         }
 
         @Override

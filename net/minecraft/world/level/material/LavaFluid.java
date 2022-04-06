@@ -4,7 +4,6 @@
 package net.minecraft.world.level.material;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -13,6 +12,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -51,32 +51,32 @@ extends FlowingFluid {
     }
 
     @Override
-    public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
+    public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
         BlockPos blockPos2 = blockPos.above();
         if (level.getBlockState(blockPos2).isAir() && !level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
-            if (random.nextInt(100) == 0) {
-                double d = (double)blockPos.getX() + random.nextDouble();
+            if (randomSource.nextInt(100) == 0) {
+                double d = (double)blockPos.getX() + randomSource.nextDouble();
                 double e = (double)blockPos.getY() + 1.0;
-                double f = (double)blockPos.getZ() + random.nextDouble();
+                double f = (double)blockPos.getZ() + randomSource.nextDouble();
                 level.addParticle(ParticleTypes.LAVA, d, e, f, 0.0, 0.0, 0.0);
-                level.playLocalSound(d, e, f, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.2f + random.nextFloat() * 0.2f, 0.9f + random.nextFloat() * 0.15f, false);
+                level.playLocalSound(d, e, f, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.2f + randomSource.nextFloat() * 0.2f, 0.9f + randomSource.nextFloat() * 0.15f, false);
             }
-            if (random.nextInt(200) == 0) {
-                level.playLocalSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 0.2f + random.nextFloat() * 0.2f, 0.9f + random.nextFloat() * 0.15f, false);
+            if (randomSource.nextInt(200) == 0) {
+                level.playLocalSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 0.2f + randomSource.nextFloat() * 0.2f, 0.9f + randomSource.nextFloat() * 0.15f, false);
             }
         }
     }
 
     @Override
-    public void randomTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
+    public void randomTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
         if (!level.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             return;
         }
-        int i = random.nextInt(3);
+        int i = randomSource.nextInt(3);
         if (i > 0) {
             BlockPos blockPos2 = blockPos;
             for (int j = 0; j < i; ++j) {
-                if (!level.isLoaded(blockPos2 = blockPos2.offset(random.nextInt(3) - 1, 1, random.nextInt(3) - 1))) {
+                if (!level.isLoaded(blockPos2 = blockPos2.offset(randomSource.nextInt(3) - 1, 1, randomSource.nextInt(3) - 1))) {
                     return;
                 }
                 BlockState blockState = level.getBlockState(blockPos2);
@@ -90,7 +90,7 @@ extends FlowingFluid {
             }
         } else {
             for (int k = 0; k < 3; ++k) {
-                BlockPos blockPos3 = blockPos.offset(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
+                BlockPos blockPos3 = blockPos.offset(randomSource.nextInt(3) - 1, 0, randomSource.nextInt(3) - 1);
                 if (!level.isLoaded(blockPos3)) {
                     return;
                 }

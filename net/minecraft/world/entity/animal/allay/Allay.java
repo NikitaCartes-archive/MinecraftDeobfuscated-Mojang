@@ -65,14 +65,14 @@ GameEventListener {
     protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
     private final EntityPositionSource entityPositionSource = new EntityPositionSource(this, this.getEyeHeight());
-    private final DynamicGameEventListener dynamicGameEventListener;
+    private final DynamicGameEventListener<Allay> dynamicGameEventListener;
     private final SimpleContainer inventory = new SimpleContainer(1);
 
     public Allay(EntityType<? extends Allay> entityType, Level level) {
         super((EntityType<? extends PathfinderMob>)entityType, level);
         this.moveControl = new FlyingMoveControl(this, 20, true);
         this.setCanPickUpLoot(this.canPickUpLoot());
-        this.dynamicGameEventListener = new DynamicGameEventListener(this);
+        this.dynamicGameEventListener = new DynamicGameEventListener<Allay>(this);
     }
 
     protected Brain.Provider<Allay> brainProvider() {
@@ -284,7 +284,7 @@ GameEventListener {
     }
 
     @Override
-    public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener, ServerLevel> biConsumer) {
+    public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> biConsumer) {
         Level level = this.level;
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;

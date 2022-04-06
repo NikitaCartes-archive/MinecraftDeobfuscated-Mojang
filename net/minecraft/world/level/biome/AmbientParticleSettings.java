@@ -7,9 +7,9 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 
 public class AmbientParticleSettings {
     public static final Codec<AmbientParticleSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ParticleTypes.CODEC.fieldOf("options")).forGetter(ambientParticleSettings -> ambientParticleSettings.options), ((MapCodec)Codec.FLOAT.fieldOf("probability")).forGetter(ambientParticleSettings -> Float.valueOf(ambientParticleSettings.probability))).apply((Applicative<AmbientParticleSettings, ?>)instance, AmbientParticleSettings::new));
@@ -25,8 +25,8 @@ public class AmbientParticleSettings {
         return this.options;
     }
 
-    public boolean canSpawn(Random random) {
-        return random.nextFloat() <= this.probability;
+    public boolean canSpawn(RandomSource randomSource) {
+        return randomSource.nextFloat() <= this.probability;
     }
 }
 

@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Random;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -29,6 +28,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -53,13 +53,13 @@ public class SpreadPlayersCommand {
         if (i < j) {
             throw ERROR_INVALID_MAX_HEIGHT.create(i, j);
         }
-        Random random = new Random();
+        RandomSource randomSource = RandomSource.create();
         double d = vec2.x - g;
         double e = vec2.y - g;
         double h = vec2.x + g;
         double k = vec2.y + g;
-        Position[] positions = SpreadPlayersCommand.createInitialPositions(random, bl ? SpreadPlayersCommand.getNumberOfTeams(collection) : collection.size(), d, e, h, k);
-        SpreadPlayersCommand.spreadPositions(vec2, f, serverLevel, random, d, e, h, k, i, positions, bl);
+        Position[] positions = SpreadPlayersCommand.createInitialPositions(randomSource, bl ? SpreadPlayersCommand.getNumberOfTeams(collection) : collection.size(), d, e, h, k);
+        SpreadPlayersCommand.spreadPositions(vec2, f, serverLevel, randomSource, d, e, h, k, i, positions, bl);
         double l = SpreadPlayersCommand.setPlayerPositions(collection, serverLevel, positions, i, bl);
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, Float.valueOf(vec2.x), Float.valueOf(vec2.y), String.format(Locale.ROOT, "%.2f", l)), true);
         return positions.length;
@@ -77,7 +77,7 @@ public class SpreadPlayersCommand {
         return set.size();
     }
 
-    private static void spreadPositions(Vec2 vec2, double d, ServerLevel serverLevel, Random random, double e, double f, double g, double h, int i, Position[] positions, boolean bl) throws CommandSyntaxException {
+    private static void spreadPositions(Vec2 vec2, double d, ServerLevel serverLevel, RandomSource randomSource, double e, double f, double g, double h, int i, Position[] positions, boolean bl) throws CommandSyntaxException {
         int k;
         boolean bl2 = true;
         double j = 3.4028234663852886E38;
@@ -106,7 +106,7 @@ public class SpreadPlayersCommand {
                         position2.normalize();
                         position.moveAway(position2);
                     } else {
-                        position.randomize(random, e, f, g, h);
+                        position.randomize(randomSource, e, f, g, h);
                     }
                     bl2 = true;
                 }
@@ -116,7 +116,7 @@ public class SpreadPlayersCommand {
             if (bl2) continue;
             for (Position position2 : positions) {
                 if (position2.isSafe(serverLevel, i)) continue;
-                position2.randomize(random, e, f, g, h);
+                position2.randomize(randomSource, e, f, g, h);
                 bl2 = true;
             }
         }
@@ -162,11 +162,11 @@ public class SpreadPlayersCommand {
         return d /= (double)collection.size();
     }
 
-    private static Position[] createInitialPositions(Random random, int i, double d, double e, double f, double g) {
+    private static Position[] createInitialPositions(RandomSource randomSource, int i, double d, double e, double f, double g) {
         Position[] positions = new Position[i];
         for (int j = 0; j < positions.length; ++j) {
             Position position = new Position();
-            position.randomize(random, d, e, f, g);
+            position.randomize(randomSource, d, e, f, g);
             positions[j] = position;
         }
         return positions;
@@ -243,9 +243,9 @@ public class SpreadPlayersCommand {
             return blockPos.getY() < i && !material.isLiquid() && material != Material.FIRE;
         }
 
-        public void randomize(Random random, double d, double e, double f, double g) {
-            this.x = Mth.nextDouble(random, d, f);
-            this.z = Mth.nextDouble(random, e, g);
+        public void randomize(RandomSource randomSource, double d, double e, double f, double g) {
+            this.x = Mth.nextDouble(randomSource, d, f);
+            this.z = Mth.nextDouble(randomSource, e, g);
         }
     }
 }

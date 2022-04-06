@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.structure;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
@@ -14,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -73,15 +73,15 @@ extends StructurePiece {
     }
 
     @Override
-    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         this.placeSettings.setBoundingBox(boundingBox);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-        if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, random, 2)) {
+        if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, randomSource, 2)) {
             List<StructureTemplate.StructureBlockInfo> list = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK);
             for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
                 StructureMode structureMode;
                 if (structureBlockInfo.nbt == null || (structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"))) != StructureMode.DATA) continue;
-                this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, random, boundingBox);
+                this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, randomSource, boundingBox);
             }
             List<StructureTemplate.StructureBlockInfo> list2 = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW);
             for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : list2) {
@@ -98,7 +98,7 @@ extends StructurePiece {
         }
     }
 
-    protected abstract void handleDataMarker(String var1, BlockPos var2, ServerLevelAccessor var3, Random var4, BoundingBox var5);
+    protected abstract void handleDataMarker(String var1, BlockPos var2, ServerLevelAccessor var3, RandomSource var4, BoundingBox var5);
 
     @Override
     @Deprecated

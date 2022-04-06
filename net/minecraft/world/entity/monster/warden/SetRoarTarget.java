@@ -24,7 +24,7 @@ extends Behavior<E> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E warden) {
-        return this.targetFinderFunction.apply(warden).filter(Warden::canTargetEntity).isPresent();
+        return this.targetFinderFunction.apply(warden).filter(arg_0 -> warden.canTargetEntity(arg_0)).isPresent();
     }
 
     @Override

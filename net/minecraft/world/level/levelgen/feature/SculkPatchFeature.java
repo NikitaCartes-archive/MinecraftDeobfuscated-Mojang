@@ -4,9 +4,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -34,7 +34,7 @@ extends Feature<SculkPatchConfiguration> {
             return false;
         }
         SculkPatchConfiguration sculkPatchConfiguration = featurePlaceContext.config();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         SculkSpreader sculkSpreader = SculkSpreader.createWorldGenSpreader();
         int i = sculkPatchConfiguration.spreadRounds() + sculkPatchConfiguration.growthRounds();
         for (int j = 0; j < i; ++j) {
@@ -43,17 +43,17 @@ extends Feature<SculkPatchConfiguration> {
             }
             boolean bl = j < sculkPatchConfiguration.spreadRounds();
             for (l = 0; l < sculkPatchConfiguration.spreadAttempts(); ++l) {
-                sculkSpreader.updateCursors(worldGenLevel, blockPos, random, bl);
+                sculkSpreader.updateCursors(worldGenLevel, blockPos, randomSource, bl);
             }
             sculkSpreader.clear();
         }
         BlockPos blockPos2 = blockPos.below();
-        if (random.nextFloat() <= sculkPatchConfiguration.catalystChance() && worldGenLevel.getBlockState(blockPos2).isCollisionShapeFullBlock(worldGenLevel, blockPos2)) {
+        if (randomSource.nextFloat() <= sculkPatchConfiguration.catalystChance() && worldGenLevel.getBlockState(blockPos2).isCollisionShapeFullBlock(worldGenLevel, blockPos2)) {
             worldGenLevel.setBlock(blockPos, Blocks.SCULK_CATALYST.defaultBlockState(), 3);
         }
-        k = sculkPatchConfiguration.extraRareGrowths().sample(random);
+        k = sculkPatchConfiguration.extraRareGrowths().sample(randomSource);
         for (l = 0; l < k; ++l) {
-            BlockPos blockPos3 = blockPos.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2);
+            BlockPos blockPos3 = blockPos.offset(randomSource.nextInt(5) - 2, 0, randomSource.nextInt(5) - 2);
             if (!worldGenLevel.getBlockState(blockPos3).isAir() || !worldGenLevel.getBlockState(blockPos3.below()).isFaceSturdy(worldGenLevel, blockPos3.below(), Direction.UP)) continue;
             worldGenLevel.setBlock(blockPos3, (BlockState)Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, true), 3);
         }

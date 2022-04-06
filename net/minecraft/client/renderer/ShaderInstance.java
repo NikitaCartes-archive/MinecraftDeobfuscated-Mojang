@@ -22,10 +22,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import java.io.Closeable;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -104,12 +104,10 @@ AutoCloseable {
         this.name = string;
         this.vertexFormat = vertexFormat;
         ResourceLocation resourceLocation = new ResourceLocation(SHADER_PATH + string + ".json");
-        Resource resource = null;
-        try {
+        try (BufferedReader reader = resourceProvider.openAsReader(resourceLocation);){
             JsonArray jsonArray3;
             JsonArray jsonArray2;
-            resource = resourceProvider.getResource(resourceLocation);
-            JsonObject jsonObject = GsonHelper.parse(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+            JsonObject jsonObject = GsonHelper.parse(reader);
             String string2 = GsonHelper.getAsString(jsonObject, "vertex");
             String string3 = GsonHelper.getAsString(jsonObject, "fragment");
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "samplers", null);
@@ -175,8 +173,6 @@ AutoCloseable {
             ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(exception4);
             chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath());
             throw chainedJsonException4;
-        } finally {
-            IOUtils.closeQuietly((Closeable)resource);
         }
         this.markDirty();
         this.MODEL_VIEW_MATRIX = this.getUniform("ModelViewMat");
@@ -196,19 +192,15 @@ AutoCloseable {
         this.CHUNK_OFFSET = this.getUniform("ChunkOffset");
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     private static Program getOrCreate(final ResourceProvider resourceProvider, Program.Type type, String string) throws IOException {
         Program program2;
         Program program = type.getPrograms().get(string);
         if (program == null) {
             String string2 = SHADER_PATH + string + type.getExtension();
-            ResourceLocation resourceLocation = new ResourceLocation(string2);
-            Resource resource = resourceProvider.getResource(resourceLocation);
-            final String string3 = FileUtil.getFullResourcePath(string2);
-            try {
-                program2 = Program.compileShader(type, string, resource.getInputStream(), resource.getSourceName(), new GlslPreprocessor(){
+            Resource resource = resourceProvider.getResourceOrThrow(new ResourceLocation(string2));
+            try (InputStream inputStream = resource.open();){
+                final String string3 = FileUtil.getFullResourcePath(string2);
+                program2 = Program.compileShader(type, string, inputStream, resource.sourcePackId(), new GlslPreprocessor(){
                     private final Set<String> importedPaths = Sets.newHashSet();
 
                     @Override
@@ -220,15 +212,15 @@ AutoCloseable {
                                 return null;
                             }
                             ResourceLocation resourceLocation = new ResourceLocation(string);
-                            Resource resource = resourceProvider.getResource(resourceLocation);
+                            BufferedReader reader = resourceProvider.openAsReader(resourceLocation);
                             try {
-                                string2 = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
-                                if (resource == null) break block9;
+                                string2 = IOUtils.toString(reader);
+                                if (reader == null) break block9;
                             } catch (Throwable throwable) {
                                 try {
-                                    if (resource != null) {
+                                    if (reader != null) {
                                         try {
-                                            resource.close();
+                                            ((Reader)reader).close();
                                         } catch (Throwable throwable2) {
                                             throwable.addSuppressed(throwable2);
                                         }
@@ -239,13 +231,11 @@ AutoCloseable {
                                     return "#error " + iOException.getMessage();
                                 }
                             }
-                            resource.close();
+                            ((Reader)reader).close();
                         }
                         return string2;
                     }
                 });
-            } finally {
-                IOUtils.closeQuietly((Closeable)resource);
             }
         } else {
             program2 = program;

@@ -6,14 +6,20 @@ package net.minecraft.world.entity.ai.behavior;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.animal.allay.AllayAi;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -56,9 +62,24 @@ extends Behavior<E> {
         PositionTracker positionTracker = optional.get();
         double d = positionTracker.currentPosition().distanceTo(((Entity)livingEntity).getEyePosition());
         if (d < 3.0 && !(itemStack = ((InventoryCarrier)livingEntity).getInventory().removeItem(0, 1)).isEmpty()) {
+            EntityTracker entityTracker;
+            Entity entity;
             BehaviorUtils.throwItem(livingEntity, itemStack, GoAndGiveItemsToTarget.getThrowPosition(positionTracker));
+            if (positionTracker instanceof EntityTracker && (entity = (entityTracker = (EntityTracker)positionTracker).getEntity()) instanceof ServerPlayer) {
+                ServerPlayer serverPlayer2 = (ServerPlayer)entity;
+                CriteriaTriggers.ITEM_DELIVERED_TO_PLAYER.trigger(serverPlayer2);
+            }
+            if (livingEntity instanceof Allay) {
+                Allay allay = (Allay)livingEntity;
+                AllayAi.getLikedPlayer(allay).ifPresent(serverPlayer -> this.triggerDropItemOnBlock(positionTracker, itemStack, (ServerPlayer)serverPlayer));
+            }
             ((LivingEntity)livingEntity).getBrain().setMemory(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, 100);
         }
+    }
+
+    private void triggerDropItemOnBlock(PositionTracker positionTracker, ItemStack itemStack, ServerPlayer serverPlayer) {
+        BlockPos blockPos = positionTracker.currentBlockPosition().below();
+        CriteriaTriggers.ALLAY_DROP_ITEM_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack);
     }
 
     private boolean canThrowItemToTarget(E livingEntity) {

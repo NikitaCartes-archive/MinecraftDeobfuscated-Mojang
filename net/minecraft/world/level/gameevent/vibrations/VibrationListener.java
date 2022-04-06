@@ -10,6 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.server.level.ServerLevel;
@@ -109,9 +110,14 @@ implements GameEventListener {
     }
 
     private static boolean isOccluded(Level level, Vec3 vec3, Vec3 vec32) {
-        Vec3 vec34;
         Vec3 vec33 = new Vec3((double)Mth.floor(vec3.x) + 0.5, (double)Mth.floor(vec3.y) + 0.5, (double)Mth.floor(vec3.z) + 0.5);
-        return level.isBlockInLine(new ClipBlockStateContext(vec33, vec34 = new Vec3((double)Mth.floor(vec32.x) + 0.5, (double)Mth.floor(vec32.y) + 0.5, (double)Mth.floor(vec32.z) + 0.5), blockState -> blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType() == HitResult.Type.BLOCK;
+        Vec3 vec34 = new Vec3((double)Mth.floor(vec32.x) + 0.5, (double)Mth.floor(vec32.y) + 0.5, (double)Mth.floor(vec32.z) + 0.5);
+        for (Direction direction : Direction.values()) {
+            Vec3 vec35 = vec33.relative(direction, 1.0E-5f);
+            if (level.isBlockInLine(new ClipBlockStateContext(vec35, vec34, blockState -> blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType() == HitResult.Type.BLOCK) continue;
+            return false;
+        }
+        return true;
     }
 
     public static interface VibrationListenerConfig {
@@ -124,7 +130,6 @@ implements GameEventListener {
                 return false;
             }
             if (entity != null) {
-                BlockState blockState;
                 if (entity.isSpectator()) {
                     return false;
                 }
@@ -134,8 +139,9 @@ implements GameEventListener {
                 if (entity.occludesVibrations()) {
                     return false;
                 }
-                if (gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK) && (blockState = entity.getLevel().getBlockState(entity.getOnPos())).is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
-                    return false;
+                if (gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK)) {
+                    BlockState blockState = entity.getLevel().getBlockState(entity.getOnPos());
+                    return !blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS);
                 }
             }
             return true;

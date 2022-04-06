@@ -7,10 +7,10 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 
@@ -35,13 +35,13 @@ extends PosRuleTest {
     }
 
     @Override
-    public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
+    public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, RandomSource randomSource) {
         Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, this.axis);
         float f = Math.abs((blockPos2.getX() - blockPos3.getX()) * direction.getStepX());
         float g = Math.abs((blockPos2.getY() - blockPos3.getY()) * direction.getStepY());
         float h = Math.abs((blockPos2.getZ() - blockPos3.getZ()) * direction.getStepZ());
         int i = (int)(f + g + h);
-        float j = random.nextFloat();
+        float j = randomSource.nextFloat();
         return j <= Mth.clampedLerp(this.minChance, this.maxChance, Mth.inverseLerp(i, this.minDist, this.maxDist));
     }
 

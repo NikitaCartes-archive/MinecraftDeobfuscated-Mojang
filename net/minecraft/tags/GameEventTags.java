@@ -10,7 +10,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 
 public class GameEventTags {
     public static final TagKey<GameEvent> VIBRATIONS = GameEventTags.create("vibrations");
-    public static final TagKey<GameEvent> WARDEN_EVENTS_CAN_LISTEN = GameEventTags.create("warden_events_can_listen");
+    public static final TagKey<GameEvent> WARDEN_CAN_LISTEN = GameEventTags.create("warden_can_listen");
+    public static final TagKey<GameEvent> SHRIEKER_CAN_LISTEN = GameEventTags.create("shrieker_can_listen");
     public static final TagKey<GameEvent> IGNORE_VIBRATIONS_SNEAKING = GameEventTags.create("ignore_vibrations_sneaking");
     public static final TagKey<GameEvent> IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK = GameEventTags.create("ignore_vibrations_on_occluding_block");
 

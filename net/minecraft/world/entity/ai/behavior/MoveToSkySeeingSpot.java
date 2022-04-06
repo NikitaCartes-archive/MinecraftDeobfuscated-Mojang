@@ -5,9 +5,9 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -41,10 +41,10 @@ extends Behavior<LivingEntity> {
 
     @Nullable
     private Vec3 getOutdoorPosition(ServerLevel serverLevel, LivingEntity livingEntity) {
-        Random random = livingEntity.getRandom();
+        RandomSource randomSource = livingEntity.getRandom();
         BlockPos blockPos = livingEntity.blockPosition();
         for (int i = 0; i < 10; ++i) {
-            BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);
+            BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(20) - 10, randomSource.nextInt(6) - 3, randomSource.nextInt(20) - 10);
             if (!MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, livingEntity, blockPos2)) continue;
             return Vec3.atBottomCenterOf(blockPos2);
         }

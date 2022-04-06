@@ -4,11 +4,11 @@
 package net.minecraft.world.level.block;
 
 import java.util.Iterator;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -98,7 +98,7 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         int i = ScaffoldingBlock.getDistance(serverLevel, blockPos);
         BlockState blockState2 = (BlockState)((BlockState)blockState.setValue(DISTANCE, i)).setValue(BOTTOM, this.isBottom(serverLevel, blockPos, i));
         if (blockState2.getValue(DISTANCE) == 7) {

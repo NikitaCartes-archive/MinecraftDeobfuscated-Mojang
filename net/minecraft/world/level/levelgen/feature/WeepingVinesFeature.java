@@ -4,11 +4,11 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -30,7 +30,7 @@ extends Feature<NoneFeatureConfiguration> {
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         if (!worldGenLevel.isEmptyBlock(blockPos)) {
             return false;
         }
@@ -38,17 +38,17 @@ extends Feature<NoneFeatureConfiguration> {
         if (!blockState.is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) {
             return false;
         }
-        this.placeRoofNetherWart(worldGenLevel, random, blockPos);
-        this.placeRoofWeepingVines(worldGenLevel, random, blockPos);
+        this.placeRoofNetherWart(worldGenLevel, randomSource, blockPos);
+        this.placeRoofWeepingVines(worldGenLevel, randomSource, blockPos);
         return true;
     }
 
-    private void placeRoofNetherWart(LevelAccessor levelAccessor, Random random, BlockPos blockPos) {
+    private void placeRoofNetherWart(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos) {
         levelAccessor.setBlock(blockPos, Blocks.NETHER_WART_BLOCK.defaultBlockState(), 2);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 200; ++i) {
-            mutableBlockPos.setWithOffset(blockPos, random.nextInt(6) - random.nextInt(6), random.nextInt(2) - random.nextInt(5), random.nextInt(6) - random.nextInt(6));
+            mutableBlockPos.setWithOffset(blockPos, randomSource.nextInt(6) - randomSource.nextInt(6), randomSource.nextInt(2) - randomSource.nextInt(5), randomSource.nextInt(6) - randomSource.nextInt(6));
             if (!levelAccessor.isEmptyBlock(mutableBlockPos)) continue;
             int j = 0;
             for (Direction direction : DIRECTIONS) {
@@ -63,30 +63,30 @@ extends Feature<NoneFeatureConfiguration> {
         }
     }
 
-    private void placeRoofWeepingVines(LevelAccessor levelAccessor, Random random, BlockPos blockPos) {
+    private void placeRoofWeepingVines(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 100; ++i) {
             BlockState blockState;
-            mutableBlockPos.setWithOffset(blockPos, random.nextInt(8) - random.nextInt(8), random.nextInt(2) - random.nextInt(7), random.nextInt(8) - random.nextInt(8));
+            mutableBlockPos.setWithOffset(blockPos, randomSource.nextInt(8) - randomSource.nextInt(8), randomSource.nextInt(2) - randomSource.nextInt(7), randomSource.nextInt(8) - randomSource.nextInt(8));
             if (!levelAccessor.isEmptyBlock(mutableBlockPos) || !(blockState = levelAccessor.getBlockState((BlockPos)mutableBlockPos.above())).is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) continue;
-            int j = Mth.nextInt(random, 1, 8);
-            if (random.nextInt(6) == 0) {
+            int j = Mth.nextInt(randomSource, 1, 8);
+            if (randomSource.nextInt(6) == 0) {
                 j *= 2;
             }
-            if (random.nextInt(5) == 0) {
+            if (randomSource.nextInt(5) == 0) {
                 j = 1;
             }
             int k = 17;
             int l = 25;
-            WeepingVinesFeature.placeWeepingVinesColumn(levelAccessor, random, mutableBlockPos, j, 17, 25);
+            WeepingVinesFeature.placeWeepingVinesColumn(levelAccessor, randomSource, mutableBlockPos, j, 17, 25);
         }
     }
 
-    public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
+    public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
         for (int l = 0; l <= i; ++l) {
             if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
                 if (l == i || !levelAccessor.isEmptyBlock((BlockPos)mutableBlockPos.below())) {
-                    levelAccessor.setBlock(mutableBlockPos, (BlockState)Blocks.WEEPING_VINES.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, Mth.nextInt(random, j, k)), 2);
+                    levelAccessor.setBlock(mutableBlockPos, (BlockState)Blocks.WEEPING_VINES.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, Mth.nextInt(randomSource, j, k)), 2);
                     break;
                 }
                 levelAccessor.setBlock(mutableBlockPos, Blocks.WEEPING_VINES_PLANT.defaultBlockState(), 2);

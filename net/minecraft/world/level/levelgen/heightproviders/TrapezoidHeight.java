@@ -8,8 +8,8 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
@@ -39,7 +39,7 @@ extends HeightProvider {
     }
 
     @Override
-    public int sample(Random random, WorldGenerationContext worldGenerationContext) {
+    public int sample(RandomSource randomSource, WorldGenerationContext worldGenerationContext) {
         int j;
         int i = this.minInclusive.resolveY(worldGenerationContext);
         if (i > (j = this.maxInclusive.resolveY(worldGenerationContext))) {
@@ -48,11 +48,11 @@ extends HeightProvider {
         }
         int k = j - i;
         if (this.plateau >= k) {
-            return Mth.randomBetweenInclusive(random, i, j);
+            return Mth.randomBetweenInclusive(randomSource, i, j);
         }
         int l = (k - this.plateau) / 2;
         int m = k - l;
-        return i + Mth.randomBetweenInclusive(random, 0, m) + Mth.randomBetweenInclusive(random, 0, l);
+        return i + Mth.randomBetweenInclusive(randomSource, 0, m) + Mth.randomBetweenInclusive(randomSource, 0, l);
     }
 
     @Override

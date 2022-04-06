@@ -8,7 +8,6 @@ import com.mojang.serialization.MapCodec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.BeehiveBlock;
@@ -43,27 +43,27 @@ extends TreeDecorator {
     }
 
     @Override
-    public void place(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2) {
-        if (random.nextFloat() >= this.probability) {
+    public void place(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, List<BlockPos> list, List<BlockPos> list2, List<BlockPos> list3) {
+        if (randomSource.nextFloat() >= this.probability) {
             return;
         }
-        int i = !list2.isEmpty() ? Math.max(list2.get(0).getY() - 1, list.get(0).getY() + 1) : Math.min(list.get(0).getY() + 1 + random.nextInt(3), list.get(list.size() - 1).getY());
-        List list3 = list.stream().filter(blockPos -> blockPos.getY() == i).flatMap(blockPos -> Stream.of(SPAWN_DIRECTIONS).map(blockPos::relative)).collect(Collectors.toList());
-        if (list3.isEmpty()) {
+        int i = !list2.isEmpty() ? Math.max(list2.get(0).getY() - 1, list.get(0).getY() + 1) : Math.min(list.get(0).getY() + 1 + randomSource.nextInt(3), list.get(list.size() - 1).getY());
+        List list4 = list.stream().filter(blockPos -> blockPos.getY() == i).flatMap(blockPos -> Stream.of(SPAWN_DIRECTIONS).map(blockPos::relative)).collect(Collectors.toList());
+        if (list4.isEmpty()) {
             return;
         }
-        Collections.shuffle(list3);
-        Optional<BlockPos> optional = list3.stream().filter(blockPos -> Feature.isAir(levelSimulatedReader, blockPos) && Feature.isAir(levelSimulatedReader, blockPos.relative(WORLDGEN_FACING))).findFirst();
+        Collections.shuffle(list4);
+        Optional<BlockPos> optional = list4.stream().filter(blockPos -> Feature.isAir(levelSimulatedReader, blockPos) && Feature.isAir(levelSimulatedReader, blockPos.relative(WORLDGEN_FACING))).findFirst();
         if (optional.isEmpty()) {
             return;
         }
         biConsumer.accept(optional.get(), (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, WORLDGEN_FACING));
         levelSimulatedReader.getBlockEntity(optional.get(), BlockEntityType.BEEHIVE).ifPresent(beehiveBlockEntity -> {
-            int i = 2 + random.nextInt(2);
+            int i = 2 + randomSource.nextInt(2);
             for (int j = 0; j < i; ++j) {
                 CompoundTag compoundTag = new CompoundTag();
                 compoundTag.putString("id", Registry.ENTITY_TYPE.getKey(EntityType.BEE).toString());
-                beehiveBlockEntity.storeBee(compoundTag, random.nextInt(599), false);
+                beehiveBlockEntity.storeBee(compoundTag, randomSource.nextInt(599), false);
             }
         });
     }

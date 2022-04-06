@@ -5,7 +5,6 @@ package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,6 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -231,23 +231,23 @@ extends BlockEntity {
 
     private static void animationTick(Level level, BlockPos blockPos, List<BlockPos> list, @Nullable Entity entity, int i) {
         float f;
-        Random random = level.random;
+        RandomSource randomSource = level.random;
         double d = Mth.sin((float)(i + 35) * 0.1f) / 2.0f + 0.5f;
         d = (d * d + d) * (double)0.3f;
         Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.5 + d, (double)blockPos.getZ() + 0.5);
         for (BlockPos blockPos2 : list) {
-            if (random.nextInt(50) != 0) continue;
+            if (randomSource.nextInt(50) != 0) continue;
             BlockPos blockPos3 = blockPos2.subtract(blockPos);
-            f = -0.5f + random.nextFloat() + (float)blockPos3.getX();
-            float g = -2.0f + random.nextFloat() + (float)blockPos3.getY();
-            float h = -0.5f + random.nextFloat() + (float)blockPos3.getZ();
+            f = -0.5f + randomSource.nextFloat() + (float)blockPos3.getX();
+            float g = -2.0f + randomSource.nextFloat() + (float)blockPos3.getY();
+            float h = -0.5f + randomSource.nextFloat() + (float)blockPos3.getZ();
             level.addParticle(ParticleTypes.NAUTILUS, vec3.x, vec3.y, vec3.z, f, g, h);
         }
         if (entity != null) {
             Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
-            float j = (-0.5f + random.nextFloat()) * (3.0f + entity.getBbWidth());
-            float k = -1.0f + random.nextFloat() * entity.getBbHeight();
-            f = (-0.5f + random.nextFloat()) * (3.0f + entity.getBbWidth());
+            float j = (-0.5f + randomSource.nextFloat()) * (3.0f + entity.getBbWidth());
+            float k = -1.0f + randomSource.nextFloat() * entity.getBbHeight();
+            f = (-0.5f + randomSource.nextFloat()) * (3.0f + entity.getBbWidth());
             Vec3 vec33 = new Vec3(j, k, f);
             level.addParticle(ParticleTypes.NAUTILUS, vec32.x, vec32.y, vec32.z, vec33.x, vec33.y, vec33.z);
         }

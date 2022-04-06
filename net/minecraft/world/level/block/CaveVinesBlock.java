@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +36,7 @@ CaveVines {
     }
 
     @Override
-    protected int getBlocksToGrowWhenBonemealed(Random random) {
+    protected int getBlocksToGrowWhenBonemealed(RandomSource randomSource) {
         return 1;
     }
 
@@ -56,8 +56,8 @@ CaveVines {
     }
 
     @Override
-    protected BlockState getGrowIntoState(BlockState blockState, Random random) {
-        return (BlockState)super.getGrowIntoState(blockState, random).setValue(BERRIES, random.nextFloat() < 0.11f);
+    protected BlockState getGrowIntoState(BlockState blockState, RandomSource randomSource) {
+        return (BlockState)super.getGrowIntoState(blockState, randomSource).setValue(BERRIES, randomSource.nextFloat() < 0.11f);
     }
 
     @Override
@@ -82,12 +82,12 @@ CaveVines {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(BERRIES, true), 2);
     }
 }

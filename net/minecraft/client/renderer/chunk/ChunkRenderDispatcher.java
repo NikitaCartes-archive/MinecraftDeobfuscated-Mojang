@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -51,6 +50,7 @@ import net.minecraft.client.renderer.chunk.VisibilitySet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -579,7 +579,7 @@ public class ChunkRenderDispatcher {
                 PoseStack poseStack = new PoseStack();
                 if (renderChunkRegion != null) {
                     ModelBlockRenderer.enableCaching();
-                    Random random = new Random();
+                    RandomSource randomSource = RandomSource.create();
                     BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
                     for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
                         BufferBuilder bufferBuilder;
@@ -613,7 +613,7 @@ public class ChunkRenderDispatcher {
                         }
                         poseStack.pushPose();
                         poseStack.translate(blockPos3.getX() & 0xF, blockPos3.getY() & 0xF, blockPos3.getZ() & 0xF);
-                        if (blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, random)) {
+                        if (blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, randomSource)) {
                             compiledChunk.isCompletelyEmpty = false;
                             compiledChunk.hasBlocks.add(renderType);
                         }

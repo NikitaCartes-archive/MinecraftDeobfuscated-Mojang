@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -24,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.dedicated.Settings;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
@@ -126,7 +126,7 @@ extends Settings<DedicatedServerProperties> {
         private static final Map<String, ResourceKey<WorldPreset>> LEGACY_PRESET_NAMES = Map.of("default", WorldPresets.NORMAL, "largebiomes", WorldPresets.LARGE_BIOMES);
 
         public WorldGenSettings create(RegistryAccess registryAccess) {
-            long l = WorldGenSettings.parseSeed(this.levelSeed()).orElse(new Random().nextLong());
+            long l = WorldGenSettings.parseSeed(this.levelSeed()).orElse(RandomSource.create().nextLong());
             Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
             Holder<WorldPreset> holder = registry.getHolder(WorldPresets.NORMAL).or(() -> registry.holders().findAny()).orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default preset"));
             Holder holder2 = Optional.ofNullable(ResourceLocation.tryParse(this.levelType)).map(resourceLocation -> ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, resourceLocation)).or(() -> Optional.ofNullable(LEGACY_PRESET_NAMES.get(this.levelType))).flatMap(registry::getHolder).orElseGet(() -> {

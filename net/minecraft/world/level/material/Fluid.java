@@ -4,7 +4,6 @@
 package net.minecraft.world.level.material;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -13,6 +12,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -54,13 +54,13 @@ public abstract class Fluid {
 
     public abstract Item getBucket();
 
-    protected void animateTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
+    protected void animateTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
     }
 
     protected void tick(Level level, BlockPos blockPos, FluidState fluidState) {
     }
 
-    protected void randomTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
+    protected void randomTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
     }
 
     @Nullable

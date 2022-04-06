@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
@@ -15,8 +16,8 @@ public class EntityBoundSoundInstance
 extends AbstractTickableSoundInstance {
     private final Entity entity;
 
-    public EntityBoundSoundInstance(SoundEvent soundEvent, SoundSource soundSource, float f, float g, Entity entity) {
-        super(soundEvent, soundSource);
+    public EntityBoundSoundInstance(SoundEvent soundEvent, SoundSource soundSource, float f, float g, Entity entity, long l) {
+        super(soundEvent, soundSource, RandomSource.create(l));
         this.volume = f;
         this.pitch = g;
         this.entity = entity;

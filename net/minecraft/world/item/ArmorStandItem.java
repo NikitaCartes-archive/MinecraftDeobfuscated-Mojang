@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.item;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Rotations;
@@ -11,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -62,14 +62,14 @@ extends Item {
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    private void randomizePose(ArmorStand armorStand, Random random) {
+    private void randomizePose(ArmorStand armorStand, RandomSource randomSource) {
         Rotations rotations = armorStand.getHeadPose();
-        float f = random.nextFloat() * 5.0f;
-        float g = random.nextFloat() * 20.0f - 10.0f;
+        float f = randomSource.nextFloat() * 5.0f;
+        float g = randomSource.nextFloat() * 20.0f - 10.0f;
         Rotations rotations2 = new Rotations(rotations.getX() + f, rotations.getY() + g, rotations.getZ());
         armorStand.setHeadPose(rotations2);
         rotations = armorStand.getBodyPose();
-        f = random.nextFloat() * 10.0f - 5.0f;
+        f = randomSource.nextFloat() * 10.0f - 5.0f;
         rotations2 = new Rotations(rotations.getX(), rotations.getY() + f, rotations.getZ());
         armorStand.setBodyPose(rotations2);
     }

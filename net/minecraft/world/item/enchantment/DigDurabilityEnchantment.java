@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.item.enchantment;
 
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
@@ -39,11 +39,11 @@ extends Enchantment {
         return super.canEnchant(itemStack);
     }
 
-    public static boolean shouldIgnoreDurabilityDrop(ItemStack itemStack, int i, Random random) {
-        if (itemStack.getItem() instanceof ArmorItem && random.nextFloat() < 0.6f) {
+    public static boolean shouldIgnoreDurabilityDrop(ItemStack itemStack, int i, RandomSource randomSource) {
+        if (itemStack.getItem() instanceof ArmorItem && randomSource.nextFloat() < 0.6f) {
             return false;
         }
-        return random.nextInt(i + 1) > 0;
+        return randomSource.nextInt(i + 1) > 0;
     }
 }
 

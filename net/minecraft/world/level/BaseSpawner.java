@@ -5,7 +5,6 @@ package net.minecraft.world.level;
 
 import com.mojang.logging.LogUtils;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -14,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
@@ -44,7 +44,7 @@ public abstract class BaseSpawner {
     private int maxNearbyEntities = 6;
     private int requiredPlayerRange = 16;
     private int spawnRange = 4;
-    private final Random random = new Random();
+    private final RandomSource random = RandomSource.create();
 
     public void setEntityId(EntityType<?> entityType) {
         this.nextSpawnData.getEntityToSpawn().putString("id", Registry.ENTITY_TYPE.getKey(entityType).toString());

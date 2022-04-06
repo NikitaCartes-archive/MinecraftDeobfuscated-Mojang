@@ -18,12 +18,9 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.List;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -34,10 +31,9 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.io.IOUtils;
+import net.minecraft.util.RandomSource;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -138,38 +134,25 @@ extends Screen {
         this.totalScrollLength = this.lines.size() * 12;
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     private void wrapCreditsIO(String string, CreditsReader creditsReader) {
-        Resource resource = null;
-        try {
-            resource = this.minecraft.getResourceManager().getResource(new ResourceLocation(string));
-            InputStreamReader inputStreamReader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
-            creditsReader.read(inputStreamReader);
+        try (BufferedReader reader = this.minecraft.getResourceManager().openAsReader(new ResourceLocation(string));){
+            creditsReader.read(reader);
         } catch (Exception exception) {
-            try {
-                LOGGER.error("Couldn't load credits", exception);
-            } catch (Throwable throwable) {
-                IOUtils.closeQuietly(resource);
-                throw throwable;
-            }
-            IOUtils.closeQuietly((Closeable)resource);
+            LOGGER.error("Couldn't load credits", exception);
         }
-        IOUtils.closeQuietly((Closeable)resource);
     }
 
-    private void addPoemFile(InputStreamReader inputStreamReader) throws IOException {
+    private void addPoemFile(Reader reader) throws IOException {
         int i;
         Object string;
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        Random random = new Random(8124371L);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        RandomSource randomSource = RandomSource.create(8124371L);
         while ((string = bufferedReader.readLine()) != null) {
             string = ((String)string).replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
             while ((i = ((String)string).indexOf(OBFUSCATE_TOKEN)) != -1) {
                 String string2 = ((String)string).substring(0, i);
                 String string3 = ((String)string).substring(i + OBFUSCATE_TOKEN.length());
-                string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
+                string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, randomSource.nextInt(4) + 3) + string3;
             }
             this.addPoemLines((String)string);
             this.addEmptyLine();
@@ -179,8 +162,8 @@ extends Screen {
         }
     }
 
-    private void addCreditsFile(InputStreamReader inputStreamReader) {
-        JsonArray jsonArray = GsonHelper.parseArray(inputStreamReader);
+    private void addCreditsFile(Reader reader) {
+        JsonArray jsonArray = GsonHelper.parseArray(reader);
         for (JsonElement jsonElement : jsonArray) {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             String string = jsonObject.get("section").getAsString();
@@ -307,7 +290,7 @@ extends Screen {
     @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
     static interface CreditsReader {
-        public void read(InputStreamReader var1) throws IOException;
+        public void read(Reader var1) throws IOException;
     }
 }
 

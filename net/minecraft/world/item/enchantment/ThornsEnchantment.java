@@ -4,7 +4,7 @@
 package net.minecraft.world.item.enchantment;
 
 import java.util.Map;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -49,11 +49,11 @@ extends Enchantment {
 
     @Override
     public void doPostHurt(LivingEntity livingEntity2, Entity entity, int i) {
-        Random random = livingEntity2.getRandom();
+        RandomSource randomSource = livingEntity2.getRandom();
         Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.THORNS, livingEntity2);
-        if (ThornsEnchantment.shouldHit(i, random)) {
+        if (ThornsEnchantment.shouldHit(i, randomSource)) {
             if (entity != null) {
-                entity.hurt(DamageSource.thorns(livingEntity2), ThornsEnchantment.getDamage(i, random));
+                entity.hurt(DamageSource.thorns(livingEntity2), ThornsEnchantment.getDamage(i, randomSource));
             }
             if (entry != null) {
                 entry.getValue().hurtAndBreak(2, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent((EquipmentSlot)((Object)((Object)entry.getKey()))));
@@ -61,18 +61,18 @@ extends Enchantment {
         }
     }
 
-    public static boolean shouldHit(int i, Random random) {
+    public static boolean shouldHit(int i, RandomSource randomSource) {
         if (i <= 0) {
             return false;
         }
-        return random.nextFloat() < 0.15f * (float)i;
+        return randomSource.nextFloat() < 0.15f * (float)i;
     }
 
-    public static int getDamage(int i, Random random) {
+    public static int getDamage(int i, RandomSource randomSource) {
         if (i > 10) {
             return i - 10;
         }
-        return 1 + random.nextInt(4);
+        return 1 + randomSource.nextInt(4);
     }
 }
 

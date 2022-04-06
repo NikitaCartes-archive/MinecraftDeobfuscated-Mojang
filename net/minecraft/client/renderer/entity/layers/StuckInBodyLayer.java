@@ -4,7 +4,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -13,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -30,18 +30,18 @@ extends RenderLayer<T, M> {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         int m = this.numStuck(livingEntity);
-        Random random = new Random(((Entity)livingEntity).getId());
+        RandomSource randomSource = RandomSource.create(((Entity)livingEntity).getId());
         if (m <= 0) {
             return;
         }
         for (int n = 0; n < m; ++n) {
             poseStack.pushPose();
-            ModelPart modelPart = ((PlayerModel)this.getParentModel()).getRandomModelPart(random);
-            ModelPart.Cube cube = modelPart.getRandomCube(random);
+            ModelPart modelPart = ((PlayerModel)this.getParentModel()).getRandomModelPart(randomSource);
+            ModelPart.Cube cube = modelPart.getRandomCube(randomSource);
             modelPart.translateAndRotate(poseStack);
-            float o = random.nextFloat();
-            float p = random.nextFloat();
-            float q = random.nextFloat();
+            float o = randomSource.nextFloat();
+            float p = randomSource.nextFloat();
+            float q = randomSource.nextFloat();
             float r = Mth.lerp(o, cube.minX, cube.maxX) / 16.0f;
             float s = Mth.lerp(p, cube.minY, cube.maxY) / 16.0f;
             float t = Mth.lerp(q, cube.minZ, cube.maxZ) / 16.0f;

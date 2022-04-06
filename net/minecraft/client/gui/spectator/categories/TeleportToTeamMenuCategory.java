@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -24,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.scores.PlayerTeam;
 
 @Environment(value=EnvType.CLIENT)
@@ -94,7 +94,7 @@ SpectatorMenuItem {
             if (this.players.isEmpty()) {
                 this.location = DefaultPlayerSkin.getDefaultSkin();
             } else {
-                String string2 = this.players.get(new Random().nextInt(this.players.size())).getProfile().getName();
+                String string2 = this.players.get(RandomSource.create().nextInt(this.players.size())).getProfile().getName();
                 this.location = AbstractClientPlayer.getSkinLocation(string2);
                 AbstractClientPlayer.registerSkinTexture(this.location, string2);
             }

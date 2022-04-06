@@ -5,12 +5,12 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,17 +29,17 @@ extends Feature<VegetationPatchConfiguration> {
     public boolean place(FeaturePlaceContext<VegetationPatchConfiguration> featurePlaceContext) {
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         VegetationPatchConfiguration vegetationPatchConfiguration = featurePlaceContext.config();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         BlockPos blockPos = featurePlaceContext.origin();
         Predicate<BlockState> predicate = blockState -> blockState.is(vegetationPatchConfiguration.replaceable);
-        int i = vegetationPatchConfiguration.xzRadius.sample(random) + 1;
-        int j = vegetationPatchConfiguration.xzRadius.sample(random) + 1;
-        Set<BlockPos> set = this.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, random, blockPos, predicate, i, j);
-        this.distributeVegetation(featurePlaceContext, worldGenLevel, vegetationPatchConfiguration, random, set, i, j);
+        int i = vegetationPatchConfiguration.xzRadius.sample(randomSource) + 1;
+        int j = vegetationPatchConfiguration.xzRadius.sample(randomSource) + 1;
+        Set<BlockPos> set = this.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, randomSource, blockPos, predicate, i, j);
+        this.distributeVegetation(featurePlaceContext, worldGenLevel, vegetationPatchConfiguration, randomSource, set, i, j);
         return !set.isEmpty();
     }
 
-    protected Set<BlockPos> placeGroundPatch(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Random random, BlockPos blockPos, Predicate<BlockState> predicate, int i, int j) {
+    protected Set<BlockPos> placeGroundPatch(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, RandomSource randomSource, BlockPos blockPos, Predicate<BlockState> predicate, int i, int j) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         BlockPos.MutableBlockPos mutableBlockPos2 = mutableBlockPos.mutable();
         Direction direction = vegetationPatchConfiguration.surface.getDirection();
@@ -54,7 +54,7 @@ extends Feature<VegetationPatchConfiguration> {
                 boolean bl3 = bl || bl2;
                 boolean bl4 = bl && bl2;
                 boolean bl6 = bl5 = bl3 && !bl4;
-                if (bl4 || bl5 && (vegetationPatchConfiguration.extraEdgeColumnChance == 0.0f || random.nextFloat() > vegetationPatchConfiguration.extraEdgeColumnChance)) continue;
+                if (bl4 || bl5 && (vegetationPatchConfiguration.extraEdgeColumnChance == 0.0f || randomSource.nextFloat() > vegetationPatchConfiguration.extraEdgeColumnChance)) continue;
                 mutableBlockPos.setWithOffset(blockPos, k, 0, l);
                 for (m = 0; worldGenLevel.isStateAtPosition(mutableBlockPos, BlockBehaviour.BlockStateBase::isAir) && m < vegetationPatchConfiguration.verticalRange; ++m) {
                     mutableBlockPos.move(direction);
@@ -65,9 +65,9 @@ extends Feature<VegetationPatchConfiguration> {
                 mutableBlockPos2.setWithOffset((Vec3i)mutableBlockPos, vegetationPatchConfiguration.surface.getDirection());
                 BlockState blockState2 = worldGenLevel.getBlockState(mutableBlockPos2);
                 if (!worldGenLevel.isEmptyBlock(mutableBlockPos) || !blockState2.isFaceSturdy(worldGenLevel, mutableBlockPos2, vegetationPatchConfiguration.surface.getDirection().getOpposite())) continue;
-                int n = vegetationPatchConfiguration.depth.sample(random) + (vegetationPatchConfiguration.extraBottomBlockChance > 0.0f && random.nextFloat() < vegetationPatchConfiguration.extraBottomBlockChance ? 1 : 0);
+                int n = vegetationPatchConfiguration.depth.sample(randomSource) + (vegetationPatchConfiguration.extraBottomBlockChance > 0.0f && randomSource.nextFloat() < vegetationPatchConfiguration.extraBottomBlockChance ? 1 : 0);
                 BlockPos blockPos2 = mutableBlockPos2.immutable();
-                boolean bl62 = this.placeGround(worldGenLevel, vegetationPatchConfiguration, predicate, random, mutableBlockPos2, n);
+                boolean bl62 = this.placeGround(worldGenLevel, vegetationPatchConfiguration, predicate, randomSource, mutableBlockPos2, n);
                 if (!bl62) continue;
                 set.add(blockPos2);
             }
@@ -75,21 +75,21 @@ extends Feature<VegetationPatchConfiguration> {
         return set;
     }
 
-    protected void distributeVegetation(FeaturePlaceContext<VegetationPatchConfiguration> featurePlaceContext, WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Random random, Set<BlockPos> set, int i, int j) {
+    protected void distributeVegetation(FeaturePlaceContext<VegetationPatchConfiguration> featurePlaceContext, WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, RandomSource randomSource, Set<BlockPos> set, int i, int j) {
         for (BlockPos blockPos : set) {
-            if (!(vegetationPatchConfiguration.vegetationChance > 0.0f) || !(random.nextFloat() < vegetationPatchConfiguration.vegetationChance)) continue;
-            this.placeVegetation(worldGenLevel, vegetationPatchConfiguration, featurePlaceContext.chunkGenerator(), random, blockPos);
+            if (!(vegetationPatchConfiguration.vegetationChance > 0.0f) || !(randomSource.nextFloat() < vegetationPatchConfiguration.vegetationChance)) continue;
+            this.placeVegetation(worldGenLevel, vegetationPatchConfiguration, featurePlaceContext.chunkGenerator(), randomSource, blockPos);
         }
     }
 
-    protected boolean placeVegetation(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-        return vegetationPatchConfiguration.vegetationFeature.value().place(worldGenLevel, chunkGenerator, random, blockPos.relative(vegetationPatchConfiguration.surface.getDirection().getOpposite()));
+    protected boolean placeVegetation(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos) {
+        return vegetationPatchConfiguration.vegetationFeature.value().place(worldGenLevel, chunkGenerator, randomSource, blockPos.relative(vegetationPatchConfiguration.surface.getDirection().getOpposite()));
     }
 
-    protected boolean placeGround(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Predicate<BlockState> predicate, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i) {
+    protected boolean placeGround(WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, Predicate<BlockState> predicate, RandomSource randomSource, BlockPos.MutableBlockPos mutableBlockPos, int i) {
         for (int j = 0; j < i; ++j) {
             BlockState blockState2;
-            BlockState blockState = vegetationPatchConfiguration.groundState.getState(random, mutableBlockPos);
+            BlockState blockState = vegetationPatchConfiguration.groundState.getState(randomSource, mutableBlockPos);
             if (blockState.is((blockState2 = worldGenLevel.getBlockState(mutableBlockPos)).getBlock())) continue;
             if (!predicate.test(blockState2)) {
                 return j != 0;

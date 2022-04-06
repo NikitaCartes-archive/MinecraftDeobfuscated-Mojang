@@ -35,6 +35,7 @@ public class MiscOverworldPlacements {
     public static final Holder<PlacedFeature> DISK_CLAY = PlacementUtils.register("disk_clay", MiscOverworldFeatures.DISK_CLAY, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());
     public static final Holder<PlacedFeature> DISK_GRAVEL = PlacementUtils.register("disk_gravel", MiscOverworldFeatures.DISK_GRAVEL, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());
     public static final Holder<PlacedFeature> DISK_SAND = PlacementUtils.register("disk_sand", MiscOverworldFeatures.DISK_SAND, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());
+    public static final Holder<PlacedFeature> DISK_GRASS = PlacementUtils.register("disk_grass", MiscOverworldFeatures.DISK_GRASS, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());
     public static final Holder<PlacedFeature> FREEZE_TOP_LAYER = PlacementUtils.register("freeze_top_layer", MiscOverworldFeatures.FREEZE_TOP_LAYER, BiomeFilter.biome());
     public static final Holder<PlacedFeature> VOID_START_PLATFORM = PlacementUtils.register("void_start_platform", MiscOverworldFeatures.VOID_START_PLATFORM, BiomeFilter.biome());
     public static final Holder<PlacedFeature> DESERT_WELL = PlacementUtils.register("desert_well", MiscOverworldFeatures.DESERT_WELL, RarityFilter.onAverageOnceEvery(1000), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());

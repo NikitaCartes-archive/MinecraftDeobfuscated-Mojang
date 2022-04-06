@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
 import org.jetbrains.annotations.Nullable;
 

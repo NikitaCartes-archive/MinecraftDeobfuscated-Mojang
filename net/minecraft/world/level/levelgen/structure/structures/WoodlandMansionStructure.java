@@ -7,8 +7,8 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.LinkedList;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -47,7 +47,7 @@ extends Structure {
     }
 
     @Override
-    public void afterPlace(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, PiecesContainer piecesContainer) {
+    public void afterPlace(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, PiecesContainer piecesContainer) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int i = worldGenLevel.getMinBuildHeight();
         BoundingBox boundingBox2 = piecesContainer.calculateBoundingBox();

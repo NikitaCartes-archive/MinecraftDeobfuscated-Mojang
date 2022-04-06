@@ -7,7 +7,7 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
@@ -23,8 +23,8 @@ extends HeightProvider {
     }
 
     @Override
-    public int sample(Random random, WorldGenerationContext worldGenerationContext) {
-        return this.distribution.getRandomValue(random).orElseThrow(IllegalStateException::new).sample(random, worldGenerationContext);
+    public int sample(RandomSource randomSource, WorldGenerationContext worldGenerationContext) {
+        return this.distribution.getRandomValue(randomSource).orElseThrow(IllegalStateException::new).sample(randomSource, worldGenerationContext);
     }
 
     @Override

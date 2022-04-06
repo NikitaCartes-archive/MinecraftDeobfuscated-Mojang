@@ -4,10 +4,10 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -30,25 +30,25 @@ extends Feature<TwistingVinesConfig> {
         if (TwistingVinesFeature.isInvalidPlacementLocation(worldGenLevel, blockPos = featurePlaceContext.origin())) {
             return false;
         }
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         TwistingVinesConfig twistingVinesConfig = featurePlaceContext.config();
         int i = twistingVinesConfig.spreadWidth();
         int j = twistingVinesConfig.spreadHeight();
         int k = twistingVinesConfig.maxHeight();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int l = 0; l < i * i; ++l) {
-            mutableBlockPos.set(blockPos).move(Mth.nextInt(random, -i, i), Mth.nextInt(random, -j, j), Mth.nextInt(random, -i, i));
+            mutableBlockPos.set(blockPos).move(Mth.nextInt(randomSource, -i, i), Mth.nextInt(randomSource, -j, j), Mth.nextInt(randomSource, -i, i));
             if (!TwistingVinesFeature.findFirstAirBlockAboveGround(worldGenLevel, mutableBlockPos) || TwistingVinesFeature.isInvalidPlacementLocation(worldGenLevel, mutableBlockPos)) continue;
-            int m = Mth.nextInt(random, 1, k);
-            if (random.nextInt(6) == 0) {
+            int m = Mth.nextInt(randomSource, 1, k);
+            if (randomSource.nextInt(6) == 0) {
                 m *= 2;
             }
-            if (random.nextInt(5) == 0) {
+            if (randomSource.nextInt(5) == 0) {
                 m = 1;
             }
             int n = 17;
             int o = 25;
-            TwistingVinesFeature.placeWeepingVinesColumn(worldGenLevel, random, mutableBlockPos, m, 17, 25);
+            TwistingVinesFeature.placeWeepingVinesColumn(worldGenLevel, randomSource, mutableBlockPos, m, 17, 25);
         }
         return true;
     }
@@ -63,11 +63,11 @@ extends Feature<TwistingVinesConfig> {
         return true;
     }
 
-    public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
+    public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
         for (int l = 1; l <= i; ++l) {
             if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
                 if (l == i || !levelAccessor.isEmptyBlock((BlockPos)mutableBlockPos.above())) {
-                    levelAccessor.setBlock(mutableBlockPos, (BlockState)Blocks.TWISTING_VINES.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, Mth.nextInt(random, j, k)), 2);
+                    levelAccessor.setBlock(mutableBlockPos, (BlockState)Blocks.TWISTING_VINES.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, Mth.nextInt(randomSource, j, k)), 2);
                     break;
                 }
                 levelAccessor.setBlock(mutableBlockPos, Blocks.TWISTING_VINES_PLANT.defaultBlockState(), 2);

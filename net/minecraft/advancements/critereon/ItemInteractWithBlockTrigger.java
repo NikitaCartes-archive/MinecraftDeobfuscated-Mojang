@@ -4,6 +4,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -18,20 +19,24 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class ItemUsedOnBlockTrigger
+public class ItemInteractWithBlockTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    static final ResourceLocation ID = new ResourceLocation("item_used_on_block");
+    final ResourceLocation id;
+
+    public ItemInteractWithBlockTrigger(ResourceLocation resourceLocation) {
+        this.id = resourceLocation;
+    }
 
     @Override
     public ResourceLocation getId() {
-        return ID;
+        return this.id;
     }
 
     @Override
     public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         LocationPredicate locationPredicate = LocationPredicate.fromJson(jsonObject.get("location"));
         ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-        return new TriggerInstance(composite, locationPredicate, itemPredicate);
+        return new TriggerInstance(this.id, composite, locationPredicate, itemPredicate);
     }
 
     public void trigger(ServerPlayer serverPlayer, BlockPos blockPos, ItemStack itemStack) {
@@ -49,14 +54,18 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         private final LocationPredicate location;
         private final ItemPredicate item;
 
-        public TriggerInstance(EntityPredicate.Composite composite, LocationPredicate locationPredicate, ItemPredicate itemPredicate) {
-            super(ID, composite);
+        public TriggerInstance(ResourceLocation resourceLocation, EntityPredicate.Composite composite, LocationPredicate locationPredicate, ItemPredicate itemPredicate) {
+            super(resourceLocation, composite);
             this.location = locationPredicate;
             this.item = itemPredicate;
         }
 
         public static TriggerInstance itemUsedOnBlock(LocationPredicate.Builder builder, ItemPredicate.Builder builder2) {
-            return new TriggerInstance(EntityPredicate.Composite.ANY, builder.build(), builder2.build());
+            return new TriggerInstance(CriteriaTriggers.ITEM_USED_ON_BLOCK.id, EntityPredicate.Composite.ANY, builder.build(), builder2.build());
+        }
+
+        public static TriggerInstance allayDropItemOnBlock(LocationPredicate.Builder builder, ItemPredicate.Builder builder2) {
+            return new TriggerInstance(CriteriaTriggers.ALLAY_DROP_ITEM_ON_BLOCK.id, EntityPredicate.Composite.ANY, builder.build(), builder2.build());
         }
 
         public boolean matches(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {

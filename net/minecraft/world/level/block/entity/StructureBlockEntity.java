@@ -6,7 +6,6 @@ package net.minecraft.world.level.block.entity;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
@@ -18,6 +17,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -330,11 +330,11 @@ extends BlockEntity {
         return this.loadStructure(serverLevel, true);
     }
 
-    private static Random createRandom(long l) {
+    private static RandomSource createRandom(long l) {
         if (l == 0L) {
-            return new Random(Util.getMillis());
+            return RandomSource.create(Util.getMillis());
         }
-        return new Random(l);
+        return RandomSource.create(l);
     }
 
     public boolean loadStructure(ServerLevel serverLevel, boolean bl) {

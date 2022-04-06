@@ -10,16 +10,12 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -42,29 +38,23 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         HashMap<ResourceLocation, JsonElement> map = Maps.newHashMap();
         int i = this.directory.length() + 1;
-        for (Map.Entry<ResourceLocation, ResourceThunk> entry : resourceManager.listResources(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
+        for (Map.Entry<ResourceLocation, Resource> entry : resourceManager.listResources(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
             ResourceLocation resourceLocation2 = entry.getKey();
             String string = resourceLocation2.getPath();
             ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring(i, string.length() - PATH_SUFFIX_LENGTH));
             try {
-                Resource resource = entry.getValue().open();
+                BufferedReader reader = entry.getValue().openAsReader();
                 try {
-                    InputStream inputStream = resource.getInputStream();
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){
-                        JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
-                        if (jsonElement != null) {
-                            JsonElement jsonElement2 = map.put(resourceLocation22, jsonElement);
-                            if (jsonElement2 == null) continue;
-                            throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation22);
-                        }
-                        LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation22, (Object)resourceLocation2);
-                    } finally {
-                        if (inputStream == null) continue;
-                        inputStream.close();
+                    JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
+                    if (jsonElement != null) {
+                        JsonElement jsonElement2 = map.put(resourceLocation22, jsonElement);
+                        if (jsonElement2 == null) continue;
+                        throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation22);
                     }
+                    LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation22, (Object)resourceLocation2);
                 } finally {
-                    if (resource == null) continue;
-                    resource.close();
+                    if (reader == null) continue;
+                    ((Reader)reader).close();
                 }
             } catch (JsonParseException | IOException | IllegalArgumentException exception) {
                 LOGGER.error("Couldn't parse data file {} from {}", resourceLocation22, resourceLocation2, exception);

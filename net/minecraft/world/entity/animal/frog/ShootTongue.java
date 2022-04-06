@@ -17,10 +17,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.animal.frog.Frog;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.MagmaCube;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public class ShootTongue
@@ -73,23 +69,12 @@ extends Behavior<Frog> {
         serverLevel.playSound(null, frog, this.eatSound, SoundSource.NEUTRAL, 2.0f, 1.0f);
         Optional<Entity> optional = frog.getTongueTarget();
         if (optional.isPresent() && (entity = optional.get()).isAlive()) {
-            entity.remove(Entity.RemovalReason.KILLED);
-            ItemStack itemStack = ShootTongue.getLootItem(frog, entity);
-            serverLevel.addFreshEntity(new ItemEntity(serverLevel, this.itemSpawnPos.x(), this.itemSpawnPos.y(), this.itemSpawnPos.z(), itemStack));
+            frog.doHurtTarget(entity);
+            if (!entity.isAlive()) {
+                entity.remove(Entity.RemovalReason.KILLED);
+            }
         }
         frog.eraseTongueTarget();
-    }
-
-    private static ItemStack getLootItem(Frog frog, Entity entity) {
-        if (entity instanceof MagmaCube) {
-            return new ItemStack(switch (frog.getVariant()) {
-                default -> throw new IncompatibleClassChangeError();
-                case Frog.Variant.TEMPERATE -> Items.OCHRE_FROGLIGHT;
-                case Frog.Variant.WARM -> Items.PEARLESCENT_FROGLIGHT;
-                case Frog.Variant.COLD -> Items.VERDANT_FROGLIGHT;
-            });
-        }
-        return new ItemStack(Items.SLIME_BALL);
     }
 
     @Override

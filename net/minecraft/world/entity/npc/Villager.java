@@ -787,7 +787,7 @@ VillagerDataHolder {
         if (list2.size() < i) {
             return;
         }
-        if (!SpawnUtil.trySpawnMob(EntityType.IRON_GOLEM, serverLevel, this.blockPosition(), 10, 8, 6).isPresent()) {
+        if (!SpawnUtil.trySpawnMob(EntityType.IRON_GOLEM, MobSpawnType.MOB_SUMMONED, serverLevel, this.blockPosition(), 10, 8, 6).isPresent()) {
             return;
         }
         list.forEach(GolemSensor::golemDetected);

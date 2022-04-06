@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.item;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -12,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -80,12 +80,12 @@ extends Item {
         if (!(level instanceof ServerLevel)) {
             return true;
         }
-        Random random = level.getRandom();
+        RandomSource randomSource = level.getRandom();
         block0: for (int i = 0; i < 128; ++i) {
             BlockPos blockPos2 = blockPos;
             BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
             for (int j = 0; j < i / 16; ++j) {
-                if (level.getBlockState(blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).isCollisionShapeFullBlock(level, blockPos2)) continue block0;
+                if (level.getBlockState(blockPos2 = blockPos2.offset(randomSource.nextInt(3) - 1, (randomSource.nextInt(3) - 1) * randomSource.nextInt(3) / 2, randomSource.nextInt(3) - 1)).isCollisionShapeFullBlock(level, blockPos2)) continue block0;
             }
             Holder<Biome> holder2 = level.getBiome(blockPos2);
             if (holder2.is(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL)) {
@@ -94,13 +94,13 @@ extends Item {
                     if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
                         blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, direction);
                     }
-                } else if (random.nextInt(4) == 0) {
+                } else if (randomSource.nextInt(4) == 0) {
                     blockState = Registry.BLOCK.getTag(BlockTags.UNDERWATER_BONEMEALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
                 }
             }
             if (blockState.is(BlockTags.WALL_CORALS, blockStateBase -> blockStateBase.hasProperty(BaseCoralWallFanBlock.FACING))) {
                 for (int k = 0; !blockState.canSurvive(level, blockPos2) && k < 4; ++k) {
-                    blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
+                    blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(randomSource));
                 }
             }
             if (!blockState.canSurvive(level, blockPos2)) continue;
@@ -109,8 +109,8 @@ extends Item {
                 level.setBlock(blockPos2, blockState, 3);
                 continue;
             }
-            if (!blockState2.is(Blocks.SEAGRASS) || random.nextInt(10) != 0) continue;
-            ((BonemealableBlock)((Object)Blocks.SEAGRASS)).performBonemeal((ServerLevel)level, random, blockPos2, blockState2);
+            if (!blockState2.is(Blocks.SEAGRASS) || randomSource.nextInt(10) != 0) continue;
+            ((BonemealableBlock)((Object)Blocks.SEAGRASS)).performBonemeal((ServerLevel)level, randomSource, blockPos2, blockState2);
         }
         itemStack.shrink(1);
         return true;
@@ -139,16 +139,16 @@ extends Item {
             e = blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
         }
         levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
-        Random random = levelAccessor.getRandom();
+        RandomSource randomSource = levelAccessor.getRandom();
         for (int j = 0; j < i; ++j) {
             double n;
             double m;
-            double f = random.nextGaussian() * 0.02;
-            double g = random.nextGaussian() * 0.02;
-            double h = random.nextGaussian() * 0.02;
+            double f = randomSource.nextGaussian() * 0.02;
+            double g = randomSource.nextGaussian() * 0.02;
+            double h = randomSource.nextGaussian() * 0.02;
             double k = 0.5 - d;
-            double l = (double)blockPos.getX() + k + random.nextDouble() * d * 2.0;
-            if (levelAccessor.getBlockState(new BlockPos(l, m = (double)blockPos.getY() + random.nextDouble() * e, n = (double)blockPos.getZ() + k + random.nextDouble() * d * 2.0).below()).isAir()) continue;
+            double l = (double)blockPos.getX() + k + randomSource.nextDouble() * d * 2.0;
+            if (levelAccessor.getBlockState(new BlockPos(l, m = (double)blockPos.getY() + randomSource.nextDouble() * e, n = (double)blockPos.getZ() + k + randomSource.nextDouble() * d * 2.0).below()).isAir()) continue;
             levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, l, m, n, f, g, h);
         }
     }

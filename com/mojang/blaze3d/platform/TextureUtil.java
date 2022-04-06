@@ -21,7 +21,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
@@ -98,28 +97,6 @@ public class TextureUtil {
             }
         }
         return byteBuffer;
-    }
-
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    @Nullable
-    public static String readResourceAsString(InputStream inputStream) {
-        RenderSystem.assertOnRenderThread();
-        ByteBuffer byteBuffer = null;
-        try {
-            byteBuffer = TextureUtil.readResource(inputStream);
-            int i = byteBuffer.position();
-            byteBuffer.rewind();
-            String string = MemoryUtil.memASCII(byteBuffer, i);
-            return string;
-        } catch (IOException iOException) {
-        } finally {
-            if (byteBuffer != null) {
-                MemoryUtil.memFree(byteBuffer);
-            }
-        }
-        return null;
     }
 
     public static void writeAsPNG(String string, int i, int j, int k, int l) {

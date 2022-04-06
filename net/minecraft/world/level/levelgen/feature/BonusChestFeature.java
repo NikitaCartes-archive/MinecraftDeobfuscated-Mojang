@@ -4,13 +4,13 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -30,13 +30,11 @@ extends Feature<NoneFeatureConfiguration> {
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         ChunkPos chunkPos = new ChunkPos(featurePlaceContext.origin());
-        List list = IntStream.rangeClosed(chunkPos.getMinBlockX(), chunkPos.getMaxBlockX()).boxed().collect(Collectors.toList());
-        Collections.shuffle(list, random);
-        List list2 = IntStream.rangeClosed(chunkPos.getMinBlockZ(), chunkPos.getMaxBlockZ()).boxed().collect(Collectors.toList());
-        Collections.shuffle(list2, random);
+        List<Integer> list = Util.shuffledCopy(IntStream.rangeClosed(chunkPos.getMinBlockX(), chunkPos.getMaxBlockX()).boxed().collect(Collectors.toList()), randomSource);
+        List<Integer> list2 = Util.shuffledCopy(IntStream.rangeClosed(chunkPos.getMinBlockZ(), chunkPos.getMaxBlockZ()).boxed().collect(Collectors.toList()), randomSource);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Integer integer : list) {
             for (Integer integer2 : list2) {
@@ -44,7 +42,7 @@ extends Feature<NoneFeatureConfiguration> {
                 BlockPos blockPos = worldGenLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos);
                 if (!worldGenLevel.isEmptyBlock(blockPos) && !worldGenLevel.getBlockState(blockPos).getCollisionShape(worldGenLevel, blockPos).isEmpty()) continue;
                 worldGenLevel.setBlock(blockPos, Blocks.CHEST.defaultBlockState(), 2);
-                RandomizableContainerBlockEntity.setLootTable(worldGenLevel, random, blockPos, BuiltInLootTables.SPAWN_BONUS_CHEST);
+                RandomizableContainerBlockEntity.setLootTable(worldGenLevel, randomSource, blockPos, BuiltInLootTables.SPAWN_BONUS_CHEST);
                 BlockState blockState = Blocks.TORCH.defaultBlockState();
                 for (Direction direction : Direction.Plane.HORIZONTAL) {
                     BlockPos blockPos2 = blockPos.relative(direction);

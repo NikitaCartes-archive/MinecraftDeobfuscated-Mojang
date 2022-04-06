@@ -6,6 +6,7 @@ package net.minecraft.world.entity.ai.sensing;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.sensing.AdultSensor;
 import net.minecraft.world.entity.ai.sensing.AxolotlAttackablesSensor;
 import net.minecraft.world.entity.ai.sensing.DummySensor;
@@ -33,7 +34,7 @@ import net.minecraft.world.entity.animal.goat.GoatAi;
 public class SensorType<U extends Sensor<?>> {
     public static final SensorType<DummySensor> DUMMY = SensorType.register("dummy", DummySensor::new);
     public static final SensorType<NearestItemSensor> NEAREST_ITEMS = SensorType.register("nearest_items", NearestItemSensor::new);
-    public static final SensorType<NearestLivingEntitySensor> NEAREST_LIVING_ENTITIES = SensorType.register("nearest_living_entities", NearestLivingEntitySensor::new);
+    public static final SensorType<NearestLivingEntitySensor<LivingEntity>> NEAREST_LIVING_ENTITIES = SensorType.register("nearest_living_entities", NearestLivingEntitySensor::new);
     public static final SensorType<PlayerSensor> NEAREST_PLAYERS = SensorType.register("nearest_players", PlayerSensor::new);
     public static final SensorType<NearestBedSensor> NEAREST_BED = SensorType.register("nearest_bed", NearestBedSensor::new);
     public static final SensorType<HurtBySensor> HURT_BY = SensorType.register("hurt_by", HurtBySensor::new);

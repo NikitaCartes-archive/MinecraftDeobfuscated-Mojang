@@ -3,13 +3,13 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -54,8 +54,8 @@ extends Block {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (serverLevel.dimensionType().natural() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+        if (serverLevel.dimensionType().natural() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && randomSource.nextInt(2000) < serverLevel.getDifficulty().getId()) {
             ZombifiedPiglin entity;
             while (serverLevel.getBlockState(blockPos).is(this)) {
                 blockPos = blockPos.below();
@@ -86,24 +86,24 @@ extends Block {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (random.nextInt(100) == 0) {
-            level.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 0.5f, random.nextFloat() * 0.4f + 0.8f, false);
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+        if (randomSource.nextInt(100) == 0) {
+            level.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 0.5f, randomSource.nextFloat() * 0.4f + 0.8f, false);
         }
         for (int i = 0; i < 4; ++i) {
-            double d = (double)blockPos.getX() + random.nextDouble();
-            double e = (double)blockPos.getY() + random.nextDouble();
-            double f = (double)blockPos.getZ() + random.nextDouble();
-            double g = ((double)random.nextFloat() - 0.5) * 0.5;
-            double h = ((double)random.nextFloat() - 0.5) * 0.5;
-            double j = ((double)random.nextFloat() - 0.5) * 0.5;
-            int k = random.nextInt(2) * 2 - 1;
+            double d = (double)blockPos.getX() + randomSource.nextDouble();
+            double e = (double)blockPos.getY() + randomSource.nextDouble();
+            double f = (double)blockPos.getZ() + randomSource.nextDouble();
+            double g = ((double)randomSource.nextFloat() - 0.5) * 0.5;
+            double h = ((double)randomSource.nextFloat() - 0.5) * 0.5;
+            double j = ((double)randomSource.nextFloat() - 0.5) * 0.5;
+            int k = randomSource.nextInt(2) * 2 - 1;
             if (level.getBlockState(blockPos.west()).is(this) || level.getBlockState(blockPos.east()).is(this)) {
                 f = (double)blockPos.getZ() + 0.5 + 0.25 * (double)k;
-                j = random.nextFloat() * 2.0f * (float)k;
+                j = randomSource.nextFloat() * 2.0f * (float)k;
             } else {
                 d = (double)blockPos.getX() + 0.5 + 0.25 * (double)k;
-                g = random.nextFloat() * 2.0f * (float)k;
+                g = randomSource.nextFloat() * 2.0f * (float)k;
             }
             level.addParticle(ParticleTypes.PORTAL, d, e, f, g, h, j);
         }

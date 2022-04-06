@@ -7,48 +7,29 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
-import net.minecraft.util.SpawnUtil;
-import net.minecraft.util.Unit;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.warden.Warden;
-import net.minecraft.world.entity.monster.warden.WardenAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class WardenSpawnTracker {
     public static final Codec<WardenSpawnTracker> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("ticks_since_last_warning")).orElse(0).forGetter(wardenSpawnTracker -> wardenSpawnTracker.ticksSinceLastWarning), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("warning_level")).orElse(0).forGetter(wardenSpawnTracker -> wardenSpawnTracker.warningLevel), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks")).orElse(0).forGetter(wardenSpawnTracker -> wardenSpawnTracker.cooldownTicks)).apply((Applicative<WardenSpawnTracker, ?>)instance, WardenSpawnTracker::new));
-    public static final int WARNINGS_UNTIL_SPAWN = 3;
-    private static final int WARNING_SOUND_RADIUS = 10;
+    public static final int MAX_WARNING_LEVEL = 3;
+    private static final double PLAYER_SEARCH_RADIUS = 16.0;
     private static final int WARNING_CHECK_DIAMETER = 48;
     private static final int DECREASE_WARNING_LEVEL_EVERY_INTERVAL = 12000;
     private static final int WARNING_COOLDOWN_AFTER_DISTANT_SOUND = 200;
-    private static final int WARDEN_SPAWN_ATTEMPTS = 20;
-    private static final int WARDEN_SPAWN_RANGE_XZ = 5;
-    private static final int WARDEN_SPAWN_RANGE_Y = 6;
-    private static final int DARKNESS_RADIUS = 40;
-    private static final Int2ObjectMap<SoundEvent> SOUND_BY_LEVEL = Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
-        int2ObjectOpenHashMap.put(1, SoundEvents.WARDEN_NEARBY_CLOSE);
-        int2ObjectOpenHashMap.put(2, SoundEvents.WARDEN_NEARBY_CLOSER);
-        int2ObjectOpenHashMap.put(3, SoundEvents.WARDEN_NEARBY_CLOSEST);
-    });
     private int ticksSinceLastWarning;
     private int warningLevel;
     private int cooldownTicks;
@@ -77,8 +58,8 @@ public class WardenSpawnTracker {
         this.cooldownTicks = 0;
     }
 
-    public boolean prepareWarningEvent(ServerLevel serverLevel, BlockPos blockPos) {
-        if (!this.canPrepareWarningEvent(serverLevel, blockPos)) {
+    public boolean warn(ServerLevel serverLevel, BlockPos blockPos) {
+        if (!this.canWarn(serverLevel, blockPos)) {
             return false;
         }
         List<ServerPlayer> list = WardenSpawnTracker.getNearbyPlayers(serverLevel, blockPos);
@@ -93,8 +74,8 @@ public class WardenSpawnTracker {
         return true;
     }
 
-    public boolean canPrepareWarningEvent(ServerLevel serverLevel, BlockPos blockPos) {
-        if (this.cooldownTicks > 0) {
+    public boolean canWarn(ServerLevel serverLevel, BlockPos blockPos) {
+        if (this.cooldownTicks > 0 || serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
             return false;
         }
         AABB aABB = AABB.ofSize(Vec3.atCenterOf(blockPos), 48.0, 48.0, 48.0);
@@ -103,36 +84,8 @@ public class WardenSpawnTracker {
 
     private static List<ServerPlayer> getNearbyPlayers(ServerLevel serverLevel, BlockPos blockPos) {
         Vec3 vec3 = Vec3.atCenterOf(blockPos);
-        double d = 16.0;
         Predicate<ServerPlayer> predicate = serverPlayer -> serverPlayer.position().closerThan(vec3, 16.0);
         return serverLevel.getPlayers(predicate.and(LivingEntity::isAlive));
-    }
-
-    public void triggerWarningEvent(ServerLevel serverLevel, BlockPos blockPos) {
-        if (this.getWarningLevel() < 3) {
-            Warden.applyDarknessAround(serverLevel, Vec3.atCenterOf(blockPos), null, 40);
-            WardenSpawnTracker.playWarningSound(serverLevel, blockPos, this.warningLevel);
-        } else {
-            WardenSpawnTracker.summonWarden(serverLevel, blockPos);
-        }
-    }
-
-    private static void playWarningSound(ServerLevel serverLevel, BlockPos blockPos, int i) {
-        SoundEvent soundEvent = (SoundEvent)SOUND_BY_LEVEL.get(i);
-        if (soundEvent != null) {
-            int j = blockPos.getX() + Mth.randomBetweenInclusive(serverLevel.random, -10, 10);
-            int k = blockPos.getY() + Mth.randomBetweenInclusive(serverLevel.random, -10, 10);
-            int l = blockPos.getZ() + Mth.randomBetweenInclusive(serverLevel.random, -10, 10);
-            serverLevel.playSound(null, j, k, l, soundEvent, SoundSource.HOSTILE, 5.0f, 1.0f);
-        }
-    }
-
-    private static void summonWarden(ServerLevel serverLevel, BlockPos blockPos) {
-        Optional<Warden> optional = SpawnUtil.trySpawnMob(EntityType.WARDEN, serverLevel, blockPos, 20, 5, 6);
-        optional.ifPresent(warden -> {
-            warden.getBrain().setMemoryWithExpiry(MemoryModuleType.IS_EMERGING, Unit.INSTANCE, WardenAi.EMERGE_DURATION);
-            serverLevel.playSound(null, warden.getX(), warden.getY(), warden.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.BLOCKS, 5.0f, 1.0f);
-        });
     }
 
     private void increaseWarningLevel() {
@@ -151,7 +104,7 @@ public class WardenSpawnTracker {
         this.warningLevel = Mth.clamp(i, 0, 3);
     }
 
-    private int getWarningLevel() {
+    public int getWarningLevel() {
         return this.warningLevel;
     }
 

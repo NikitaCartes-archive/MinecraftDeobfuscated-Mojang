@@ -14,11 +14,8 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
-import java.io.Closeable;
-import java.io.FileNotFoundException;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -32,7 +29,6 @@ import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -64,14 +60,12 @@ implements AutoCloseable {
     }
 
     private void load(TextureManager textureManager, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
-        Resource resource;
-        block11: {
-            resource = null;
-            try {
+        block15: {
+            Resource resource = this.resourceManager.getResourceOrThrow(resourceLocation);
+            try (BufferedReader reader = resource.openAsReader();){
                 int i;
                 JsonArray jsonArray;
-                resource = this.resourceManager.getResource(resourceLocation);
-                JsonObject jsonObject = GsonHelper.parse(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+                JsonObject jsonObject = GsonHelper.parse(reader);
                 if (GsonHelper.isArrayNode(jsonObject, "targets")) {
                     jsonArray = jsonObject.getAsJsonArray("targets");
                     i = 0;
@@ -86,7 +80,7 @@ implements AutoCloseable {
                         ++i;
                     }
                 }
-                if (!GsonHelper.isArrayNode(jsonObject, "passes")) break block11;
+                if (!GsonHelper.isArrayNode(jsonObject, "passes")) break block15;
                 jsonArray = jsonObject.getAsJsonArray("passes");
                 i = 0;
                 for (JsonElement jsonElement : jsonArray) {
@@ -100,18 +94,11 @@ implements AutoCloseable {
                     ++i;
                 }
             } catch (Exception exception2) {
-                try {
-                    Object string = resource != null ? " (" + resource.getSourceName() + ")" : "";
-                    ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(exception2);
-                    chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + (String)string);
-                    throw chainedJsonException2;
-                } catch (Throwable throwable) {
-                    IOUtils.closeQuietly(resource);
-                    throw throwable;
-                }
+                ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(exception2);
+                chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + " (" + resource.sourcePackId() + ")");
+                throw chainedJsonException2;
             }
         }
-        IOUtils.closeQuietly((Closeable)resource);
     }
 
     private void parseTargetNode(JsonElement jsonElement) throws ChainedJsonException {
@@ -131,86 +118,66 @@ implements AutoCloseable {
 
     private void parsePassNode(TextureManager textureManager, JsonElement jsonElement) throws IOException {
         JsonArray jsonArray2;
-        JsonObject jsonObject;
-        block21: {
-            jsonObject = GsonHelper.convertToJsonObject(jsonElement, "pass");
-            String string = GsonHelper.getAsString(jsonObject, "name");
-            String string2 = GsonHelper.getAsString(jsonObject, "intarget");
-            String string3 = GsonHelper.getAsString(jsonObject, "outtarget");
-            RenderTarget renderTarget = this.getRenderTarget(string2);
-            RenderTarget renderTarget2 = this.getRenderTarget(string3);
-            if (renderTarget == null) {
-                throw new ChainedJsonException("Input target '" + string2 + "' does not exist");
-            }
-            if (renderTarget2 == null) {
-                throw new ChainedJsonException("Output target '" + string3 + "' does not exist");
-            }
-            PostPass postPass = this.addPass(string, renderTarget, renderTarget2);
-            JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "auxtargets", null);
-            if (jsonArray == null) break block21;
+        JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "pass");
+        String string = GsonHelper.getAsString(jsonObject, "name");
+        String string2 = GsonHelper.getAsString(jsonObject, "intarget");
+        String string3 = GsonHelper.getAsString(jsonObject, "outtarget");
+        RenderTarget renderTarget = this.getRenderTarget(string2);
+        RenderTarget renderTarget2 = this.getRenderTarget(string3);
+        if (renderTarget == null) {
+            throw new ChainedJsonException("Input target '" + string2 + "' does not exist");
+        }
+        if (renderTarget2 == null) {
+            throw new ChainedJsonException("Output target '" + string3 + "' does not exist");
+        }
+        PostPass postPass = this.addPass(string, renderTarget, renderTarget2);
+        JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "auxtargets", null);
+        if (jsonArray != null) {
             int i = 0;
             for (JsonElement jsonElement2 : jsonArray) {
-                block20: {
-                    try {
-                        RenderTarget renderTarget3;
-                        boolean bl;
-                        String string4;
-                        block22: {
-                            String string6;
-                            JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement2, "auxtarget");
-                            string4 = GsonHelper.getAsString(jsonObject2, "name");
-                            String string5 = GsonHelper.getAsString(jsonObject2, "id");
-                            if (string5.endsWith(":depth")) {
-                                bl = true;
-                                string6 = string5.substring(0, string5.lastIndexOf(58));
-                            } else {
-                                bl = false;
-                                string6 = string5;
-                            }
-                            renderTarget3 = this.getRenderTarget(string6);
-                            if (renderTarget3 != null) break block22;
-                            if (bl) {
-                                throw new ChainedJsonException("Render target '" + string6 + "' can't be used as depth buffer");
-                            }
-                            ResourceLocation resourceLocation = new ResourceLocation("textures/effect/" + string6 + ".png");
-                            Resource resource = null;
-                            try {
-                                resource = this.resourceManager.getResource(resourceLocation);
-                            } catch (FileNotFoundException fileNotFoundException) {
-                                try {
-                                    throw new ChainedJsonException("Render target or texture '" + string6 + "' does not exist");
-                                } catch (Throwable throwable) {
-                                    IOUtils.closeQuietly(resource);
-                                    throw throwable;
-                                }
-                            }
-                            IOUtils.closeQuietly((Closeable)resource);
-                            RenderSystem.setShaderTexture(0, resourceLocation);
-                            textureManager.bindForSetup(resourceLocation);
-                            AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
-                            int j = GsonHelper.getAsInt(jsonObject2, "width");
-                            int k = GsonHelper.getAsInt(jsonObject2, "height");
-                            boolean bl2 = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
-                            if (bl2) {
-                                RenderSystem.texParameter(3553, 10241, 9729);
-                                RenderSystem.texParameter(3553, 10240, 9729);
-                            } else {
-                                RenderSystem.texParameter(3553, 10241, 9728);
-                                RenderSystem.texParameter(3553, 10240, 9728);
-                            }
-                            postPass.addAuxAsset(string4, abstractTexture::getId, j, k);
-                            break block20;
-                        }
-                        if (bl) {
-                            postPass.addAuxAsset(string4, renderTarget3::getDepthTextureId, renderTarget3.width, renderTarget3.height);
-                        } else {
-                            postPass.addAuxAsset(string4, renderTarget3::getColorTextureId, renderTarget3.width, renderTarget3.height);
-                        }
-                    } catch (Exception exception) {
-                        ChainedJsonException chainedJsonException = ChainedJsonException.forException(exception);
-                        chainedJsonException.prependJsonKey("auxtargets[" + i + "]");
-                        throw chainedJsonException;
+                try {
+                    String string6;
+                    boolean bl;
+                    JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement2, "auxtarget");
+                    String string4 = GsonHelper.getAsString(jsonObject2, "name");
+                    String string5 = GsonHelper.getAsString(jsonObject2, "id");
+                    if (string5.endsWith(":depth")) {
+                        bl = true;
+                        string6 = string5.substring(0, string5.lastIndexOf(58));
+                    } else {
+                        bl = false;
+                        string6 = string5;
                     }
+                    RenderTarget renderTarget3 = this.getRenderTarget(string6);
+                    if (renderTarget3 == null) {
+                        if (bl) {
+                            throw new ChainedJsonException("Render target '" + string6 + "' can't be used as depth buffer");
+                        }
+                        ResourceLocation resourceLocation = new ResourceLocation("textures/effect/" + string6 + ".png");
+                        this.resourceManager.getResource(resourceLocation).orElseThrow(() -> new ChainedJsonException("Render target or texture '" + string6 + "' does not exist"));
+                        RenderSystem.setShaderTexture(0, resourceLocation);
+                        textureManager.bindForSetup(resourceLocation);
+                        AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
+                        int j = GsonHelper.getAsInt(jsonObject2, "width");
+                        int k = GsonHelper.getAsInt(jsonObject2, "height");
+                        boolean bl2 = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
+                        if (bl2) {
+                            RenderSystem.texParameter(3553, 10241, 9729);
+                            RenderSystem.texParameter(3553, 10240, 9729);
+                        } else {
+                            RenderSystem.texParameter(3553, 10241, 9728);
+                            RenderSystem.texParameter(3553, 10240, 9728);
+                        }
+                        postPass.addAuxAsset(string4, abstractTexture::getId, j, k);
+                    } else if (bl) {
+                        postPass.addAuxAsset(string4, renderTarget3::getDepthTextureId, renderTarget3.width, renderTarget3.height);
+                    } else {
+                        postPass.addAuxAsset(string4, renderTarget3::getColorTextureId, renderTarget3.width, renderTarget3.height);
+                    }
+                } catch (Exception exception) {
+                    ChainedJsonException chainedJsonException = ChainedJsonException.forException(exception);
+                    chainedJsonException.prependJsonKey("auxtargets[" + i + "]");
+                    throw chainedJsonException;
                 }
                 ++i;
             }

@@ -8,9 +8,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosAlwaysTrueTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTest;
@@ -42,8 +42,8 @@ public class ProcessorRule {
         this.outputTag = optional.orElse(null);
     }
 
-    public boolean test(BlockState blockState, BlockState blockState2, BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
-        return this.inputPredicate.test(blockState, random) && this.locPredicate.test(blockState2, random) && this.posPredicate.test(blockPos, blockPos2, blockPos3, random);
+    public boolean test(BlockState blockState, BlockState blockState2, BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, RandomSource randomSource) {
+        return this.inputPredicate.test(blockState, randomSource) && this.locPredicate.test(blockState2, randomSource) && this.posPredicate.test(blockPos, blockPos2, blockPos3, randomSource);
     }
 
     public BlockState getOutputState() {

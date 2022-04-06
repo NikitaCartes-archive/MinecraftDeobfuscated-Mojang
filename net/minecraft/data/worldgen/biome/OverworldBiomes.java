@@ -447,6 +447,21 @@ public class OverworldBiomes {
         return new Biome.BiomeBuilder().precipitation(Biome.Precipitation.RAIN).temperature(0.8f).downfall(0.9f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(6388580).waterFogColor(2302743).fogColor(12638463).skyColor(OverworldBiomes.calculateSkyColor(0.8f)).foliageColorOverride(6975545).grassColorModifier(BiomeSpecialEffects.GrassColorModifier.SWAMP).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).mobSpawnSettings(builder.build()).generationSettings(builder2.build()).build();
     }
 
+    public static Biome mangroveSwamp() {
+        MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
+        BiomeDefaultFeatures.commonSpawns(builder);
+        builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SLIME, 1, 1, 1));
+        builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.FROG, 10, 2, 5));
+        BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder();
+        BiomeDefaultFeatures.addFossilDecoration(builder2);
+        OverworldBiomes.globalOverworldGeneration(builder2);
+        BiomeDefaultFeatures.addDefaultOres(builder2);
+        BiomeDefaultFeatures.addMangroveSwampDisks(builder2);
+        BiomeDefaultFeatures.addMangroveSwampVegetation(builder2);
+        builder2.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, AquaticPlacements.SEAGRASS_SWAMP);
+        return new Biome.BiomeBuilder().precipitation(Biome.Precipitation.RAIN).temperature(0.8f).downfall(0.9f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(3832426).waterFogColor(2302743).fogColor(12638463).skyColor(OverworldBiomes.calculateSkyColor(0.8f)).foliageColorOverride(9285927).grassColorModifier(BiomeSpecialEffects.GrassColorModifier.SWAMP).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).mobSpawnSettings(builder.build()).generationSettings(builder2.build()).build();
+    }
+
     public static Biome river(boolean bl) {
         MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder().addSpawn(MobCategory.WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.SQUID, 2, 1, 4)).addSpawn(MobCategory.WATER_AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.SALMON, 5, 1, 5));
         BiomeDefaultFeatures.commonSpawns(builder);

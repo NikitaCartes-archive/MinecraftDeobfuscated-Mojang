@@ -3,13 +3,13 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -57,18 +57,18 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (serverLevel.getRawBrightness(blockPos, 0) < 9) {
             return;
         }
         float f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos);
-        if (random.nextInt((int)(25.0f / f) + 1) == 0) {
+        if (randomSource.nextInt((int)(25.0f / f) + 1) == 0) {
             int i = blockState.getValue(AGE);
             if (i < 7) {
                 blockState = (BlockState)blockState.setValue(AGE, i + 1);
                 serverLevel.setBlock(blockPos, blockState, 2);
             } else {
-                Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+                Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
                 BlockPos blockPos2 = blockPos.relative(direction);
                 BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
                 if (serverLevel.getBlockState(blockPos2).isAir() && (blockState2.is(Blocks.FARMLAND) || blockState2.is(BlockTags.DIRT))) {
@@ -90,12 +90,12 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         int i = Math.min(7, blockState.getValue(AGE) + Mth.nextInt(serverLevel.random, 2, 5));
         BlockState blockState2 = (BlockState)blockState.setValue(AGE, i);
         serverLevel.setBlock(blockPos, blockState2, 2);

@@ -17,6 +17,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -25,7 +26,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -147,9 +147,9 @@ implements GlyphProvider {
         public GlyphProvider create(ResourceManager resourceManager) {
             BitmapProvider bitmapProvider;
             block10: {
-                Resource resource = resourceManager.getResource(this.texture);
+                InputStream inputStream = resourceManager.open(this.texture);
                 try {
-                    NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
+                    NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
                     int i = nativeImage.getWidth();
                     int j = nativeImage.getHeight();
                     int k = i / this.chars.get(0).length;
@@ -167,12 +167,12 @@ implements GlyphProvider {
                         }
                     }
                     bitmapProvider = new BitmapProvider(nativeImage, int2ObjectMap);
-                    if (resource == null) break block10;
+                    if (inputStream == null) break block10;
                 } catch (Throwable throwable) {
                     try {
-                        if (resource != null) {
+                        if (inputStream != null) {
                             try {
-                                resource.close();
+                                inputStream.close();
                             } catch (Throwable throwable2) {
                                 throwable.addSuppressed(throwable2);
                             }
@@ -182,7 +182,7 @@ implements GlyphProvider {
                         throw new RuntimeException(iOException.getMessage());
                     }
                 }
-                resource.close();
+                inputStream.close();
             }
             return bitmapProvider;
         }

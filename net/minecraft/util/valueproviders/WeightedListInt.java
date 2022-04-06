@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.valueproviders.IntProvider;
@@ -37,8 +37,8 @@ extends IntProvider {
     }
 
     @Override
-    public int sample(Random random) {
-        return this.distribution.getRandomValue(random).orElseThrow(IllegalStateException::new).sample(random);
+    public int sample(RandomSource randomSource) {
+        return this.distribution.getRandomValue(randomSource).orElseThrow(IllegalStateException::new).sample(randomSource);
     }
 
     @Override

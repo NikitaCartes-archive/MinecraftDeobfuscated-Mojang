@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -31,6 +30,7 @@ import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -97,13 +97,13 @@ AutoCloseable {
     private final Thread thread;
     private final boolean isDebug;
     private int skyDarken;
-    protected int randValue = new Random().nextInt();
+    protected int randValue = RandomSource.create().nextInt();
     protected final int addend = 1013904223;
     protected float oRainLevel;
     protected float rainLevel;
     protected float oThunderLevel;
     protected float thunderLevel;
-    public final Random random = new Random();
+    public final RandomSource random = RandomSource.create();
     final DimensionType dimensionType;
     private final Holder<DimensionType> dimensionTypeRegistration;
     protected final WritableLevelData levelData;
@@ -335,9 +335,17 @@ AutoCloseable {
         this.playSound(player, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, soundEvent, soundSource, f, g);
     }
 
-    public abstract void playSound(@Nullable Player var1, double var2, double var4, double var6, SoundEvent var8, SoundSource var9, float var10, float var11);
+    public abstract void playSeededSound(@Nullable Player var1, double var2, double var4, double var6, SoundEvent var8, SoundSource var9, float var10, float var11, long var12);
 
-    public abstract void playSound(@Nullable Player var1, Entity var2, SoundEvent var3, SoundSource var4, float var5, float var6);
+    public abstract void playSeededSound(@Nullable Player var1, Entity var2, SoundEvent var3, SoundSource var4, float var5, float var6, long var7);
+
+    public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
+        this.playSeededSound(player, d, e, f, soundEvent, soundSource, g, h, this.random.nextLong());
+    }
+
+    public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
+        this.playSeededSound(player, entity, soundEvent, soundSource, f, g, this.random.nextLong());
+    }
 
     public void playLocalSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl) {
     }
@@ -484,6 +492,18 @@ AutoCloseable {
 
     public void setSpawnSettings(boolean bl, boolean bl2) {
         this.getChunkSource().setSpawnSettings(bl, bl2);
+    }
+
+    public BlockPos getSharedSpawnPos() {
+        BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
+        if (!this.getWorldBorder().isWithinBounds(blockPos)) {
+            blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
+        }
+        return blockPos;
+    }
+
+    public float getSharedSpawnAngle() {
+        return this.levelData.getSpawnAngle();
     }
 
     protected void prepareWeather() {
@@ -793,7 +813,7 @@ AutoCloseable {
     }
 
     @Override
-    public Random getRandom() {
+    public RandomSource getRandom() {
         return this.random;
     }
 

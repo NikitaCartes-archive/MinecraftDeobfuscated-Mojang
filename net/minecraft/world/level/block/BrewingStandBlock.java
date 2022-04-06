@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -89,10 +89,10 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        double d = (double)blockPos.getX() + 0.4 + (double)random.nextFloat() * 0.2;
-        double e = (double)blockPos.getY() + 0.7 + (double)random.nextFloat() * 0.3;
-        double f = (double)blockPos.getZ() + 0.4 + (double)random.nextFloat() * 0.2;
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+        double d = (double)blockPos.getX() + 0.4 + (double)randomSource.nextFloat() * 0.2;
+        double e = (double)blockPos.getY() + 0.7 + (double)randomSource.nextFloat() * 0.3;
+        double f = (double)blockPos.getZ() + 0.4 + (double)randomSource.nextFloat() * 0.2;
         level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
     }
 

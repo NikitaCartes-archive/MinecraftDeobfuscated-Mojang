@@ -12,15 +12,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -45,8 +45,8 @@ extends Feature<SpikeConfiguration> {
     }
 
     public static List<EndSpike> getSpikesForLevel(WorldGenLevel worldGenLevel) {
-        Random random = new Random(worldGenLevel.getSeed());
-        long l = random.nextLong() & 0xFFFFL;
+        RandomSource randomSource = RandomSource.create(worldGenLevel.getSeed());
+        long l = randomSource.nextLong() & 0xFFFFL;
         return SPIKE_CACHE.getUnchecked(l);
     }
 
@@ -54,7 +54,7 @@ extends Feature<SpikeConfiguration> {
     public boolean place(FeaturePlaceContext<SpikeConfiguration> featurePlaceContext) {
         SpikeConfiguration spikeConfiguration = featurePlaceContext.config();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
-        Random random = featurePlaceContext.random();
+        RandomSource randomSource = featurePlaceContext.random();
         BlockPos blockPos = featurePlaceContext.origin();
         List<EndSpike> list = spikeConfiguration.getSpikes();
         if (list.isEmpty()) {
@@ -62,12 +62,12 @@ extends Feature<SpikeConfiguration> {
         }
         for (EndSpike endSpike : list) {
             if (!endSpike.isCenterWithinChunk(blockPos)) continue;
-            this.placeSpike(worldGenLevel, random, spikeConfiguration, endSpike);
+            this.placeSpike(worldGenLevel, randomSource, spikeConfiguration, endSpike);
         }
         return true;
     }
 
-    private void placeSpike(ServerLevelAccessor serverLevelAccessor, Random random, SpikeConfiguration spikeConfiguration, EndSpike endSpike) {
+    private void placeSpike(ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, SpikeConfiguration spikeConfiguration, EndSpike endSpike) {
         int i = endSpike.getRadius();
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(endSpike.getCenterX() - i, serverLevelAccessor.getMinBuildHeight(), endSpike.getCenterZ() - i), new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i))) {
             if (blockPos.distToLowCornerSqr(endSpike.getCenterX(), blockPos.getY(), endSpike.getCenterZ()) <= (double)(i * i + 1) && blockPos.getY() < endSpike.getHeight()) {
@@ -101,7 +101,7 @@ extends Feature<SpikeConfiguration> {
         EndCrystal endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel());
         endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
         endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
-        endCrystal.moveTo((double)endSpike.getCenterX() + 0.5, endSpike.getHeight() + 1, (double)endSpike.getCenterZ() + 0.5, random.nextFloat() * 360.0f, 0.0f);
+        endCrystal.moveTo((double)endSpike.getCenterX() + 0.5, endSpike.getHeight() + 1, (double)endSpike.getCenterZ() + 0.5, randomSource.nextFloat() * 360.0f, 0.0f);
         serverLevelAccessor.addFreshEntity(endCrystal);
         this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
     }
@@ -160,8 +160,7 @@ extends Feature<SpikeConfiguration> {
 
         @Override
         public List<EndSpike> load(Long long_) {
-            List list = IntStream.range(0, 10).boxed().collect(Collectors.toList());
-            Collections.shuffle(list, new Random(long_));
+            List list = Util.shuffledCopy(IntStream.range(0, 10).boxed().collect(Collectors.toList()), RandomSource.create(long_));
             ArrayList<EndSpike> list2 = Lists.newArrayList();
             for (int i = 0; i < 10; ++i) {
                 int j = Mth.floor(42.0 * Math.cos(2.0 * (-Math.PI + 0.3141592653589793 * (double)i)));

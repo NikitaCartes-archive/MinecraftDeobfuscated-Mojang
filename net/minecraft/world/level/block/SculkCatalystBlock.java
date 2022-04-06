@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.item.ItemStack;
@@ -45,17 +45,17 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (blockState.getValue(PULSE).booleanValue()) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(PULSE, false), 3);
         }
     }
 
-    public static void bloom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
+    public static void bloom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
         serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(PULSE, true), 3);
         serverLevel.scheduleTick(blockPos, blockState.getBlock(), 8);
         serverLevel.sendParticles(ParticleTypes.SCULK_SOUL, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.15, (double)blockPos.getZ() + 0.5, 2, 0.2, 0.0, 0.2, 0.0);
-        serverLevel.playSound(null, blockPos, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.BLOCKS, 2.0f, 0.6f + random.nextFloat() * 0.4f);
+        serverLevel.playSound(null, blockPos, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.BLOCKS, 2.0f, 0.6f + randomSource.nextFloat() * 0.4f);
     }
 
     @Override

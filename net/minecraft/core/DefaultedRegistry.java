@@ -5,13 +5,13 @@ package net.minecraft.core;
 
 import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,8 +67,8 @@ extends MappedRegistry<T> {
     }
 
     @Override
-    public Optional<Holder<T>> getRandom(Random random) {
-        return super.getRandom(random).or(() -> Optional.of(this.defaultValue));
+    public Optional<Holder<T>> getRandom(RandomSource randomSource) {
+        return super.getRandom(randomSource).or(() -> Optional.of(this.defaultValue));
     }
 
     public ResourceLocation getDefaultKey() {

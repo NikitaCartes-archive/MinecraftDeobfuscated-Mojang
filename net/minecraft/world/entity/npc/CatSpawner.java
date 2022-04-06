@@ -4,11 +4,11 @@
 package net.minecraft.world.entity.npc;
 
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.StructureTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -39,9 +39,9 @@ implements CustomSpawner {
         if (player == null) {
             return 0;
         }
-        Random random = serverLevel.random;
-        int i = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-        int j = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
+        RandomSource randomSource = serverLevel.random;
+        int i = (8 + randomSource.nextInt(24)) * (randomSource.nextBoolean() ? -1 : 1);
+        int j = (8 + randomSource.nextInt(24)) * (randomSource.nextBoolean() ? -1 : 1);
         BlockPos blockPos = player.blockPosition().offset(i, 0, j);
         int k = 10;
         if (!serverLevel.hasChunksAt(blockPos.getX() - 10, blockPos.getZ() - 10, blockPos.getX() + 10, blockPos.getZ() + 10)) {

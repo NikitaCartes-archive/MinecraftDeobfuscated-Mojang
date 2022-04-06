@@ -10,12 +10,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,30 +43,30 @@ extends TrunkPlacer {
     }
 
     @Override
-    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         int k;
-        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
         int j = i - 1;
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         Vec3i blockPos2 = mutableBlockPos.below();
-        BendingTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, random, (BlockPos)blockPos2, treeConfiguration);
+        BendingTrunkPlacer.setDirtAt(levelSimulatedReader, biConsumer, randomSource, (BlockPos)blockPos2, treeConfiguration);
         ArrayList<FoliagePlacer.FoliageAttachment> list = Lists.newArrayList();
         for (k = 0; k <= j; ++k) {
-            if (k + 1 >= j + random.nextInt(2)) {
+            if (k + 1 >= j + randomSource.nextInt(2)) {
                 mutableBlockPos.move(direction);
             }
             if (TreeFeature.validTreePos(levelSimulatedReader, mutableBlockPos)) {
-                BendingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration);
+                this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos, treeConfiguration);
             }
             if (k >= this.minHeightForLeaves) {
                 list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));
             }
             mutableBlockPos.move(Direction.UP);
         }
-        k = this.bendLength.sample(random);
+        k = this.bendLength.sample(randomSource);
         for (int l = 0; l <= k; ++l) {
             if (TreeFeature.validTreePos(levelSimulatedReader, mutableBlockPos)) {
-                BendingTrunkPlacer.placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration);
+                this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos, treeConfiguration);
             }
             list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));
             mutableBlockPos.move(direction);

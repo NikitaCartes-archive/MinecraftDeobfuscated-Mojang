@@ -3,10 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Cat;
@@ -30,8 +30,8 @@ extends ScatteredFeaturePiece {
     private boolean spawnedWitch;
     private boolean spawnedCat;
 
-    public SwampHutPiece(Random random, int i, int j) {
-        super(StructurePieceType.SWAMPLAND_HUT, i, 64, j, 7, 7, 9, SwampHutPiece.getRandomHorizontalDirection(random));
+    public SwampHutPiece(RandomSource randomSource, int i, int j) {
+        super(StructurePieceType.SWAMPLAND_HUT, i, 64, j, 7, 7, 9, SwampHutPiece.getRandomHorizontalDirection(randomSource));
     }
 
     public SwampHutPiece(CompoundTag compoundTag) {
@@ -48,7 +48,7 @@ extends ScatteredFeaturePiece {
     }
 
     @Override
-    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource randomSource, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         BlockPos.MutableBlockPos blockPos2;
         if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
             return;

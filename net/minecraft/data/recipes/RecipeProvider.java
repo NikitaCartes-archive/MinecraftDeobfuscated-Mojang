@@ -651,6 +651,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.CHAIN).define(Character.valueOf('I'), Items.IRON_INGOT).define(Character.valueOf('N'), Items.IRON_NUGGET).pattern("N").pattern("I").pattern("N").unlockedBy("has_iron_nugget", RecipeProvider.has(Items.IRON_NUGGET)).unlockedBy("has_iron_ingot", RecipeProvider.has(Items.IRON_INGOT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.TINTED_GLASS, 2).define(Character.valueOf('G'), Blocks.GLASS).define(Character.valueOf('S'), Items.AMETHYST_SHARD).pattern(" S ").pattern("SGS").pattern(" S ").unlockedBy("has_amethyst_shard", RecipeProvider.has(Items.AMETHYST_SHARD)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.AMETHYST_BLOCK).define(Character.valueOf('S'), Items.AMETHYST_SHARD).pattern("SS").pattern("SS").unlockedBy("has_amethyst_shard", RecipeProvider.has(Items.AMETHYST_SHARD)).save(consumer);
+        ShapedRecipeBuilder.shaped(Items.RECOVERY_COMPASS).define(Character.valueOf('C'), Items.COMPASS).define(Character.valueOf('S'), Items.ECHO_SHARD).pattern("SSS").pattern("SCS").pattern("SSS").unlockedBy("has_echo_shard", RecipeProvider.has(Items.ECHO_SHARD)).save(consumer);
         SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
         SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
         SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");
