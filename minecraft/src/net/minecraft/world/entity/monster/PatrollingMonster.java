@@ -2,11 +2,11 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -99,11 +99,11 @@ public abstract class PatrollingMonster extends Monster {
 	}
 
 	public static boolean checkPatrollingMonsterSpawnRules(
-		EntityType<? extends PatrollingMonster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<? extends PatrollingMonster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getBrightness(LightLayer.BLOCK, blockPos) > 8
 			? false
-			: checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+			: checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
 	}
 
 	@Override
@@ -220,10 +220,12 @@ public abstract class PatrollingMonster extends Monster {
 		}
 
 		private boolean moveRandomly() {
-			Random random = this.mob.getRandom();
+			RandomSource randomSource = this.mob.getRandom();
 			BlockPos blockPos = this.mob
 				.level
-				.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
+				.getHeightmapPos(
+					Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + randomSource.nextInt(16), 0, -8 + randomSource.nextInt(16))
+				);
 			return this.mob.getNavigation().moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), this.speedModifier);
 		}
 	}

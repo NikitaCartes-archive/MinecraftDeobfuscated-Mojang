@@ -12,6 +12,7 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> ICE_SPIKES = register("ice_spikes");
 	public static final ResourceKey<Biome> DESERT = register("desert");
 	public static final ResourceKey<Biome> SWAMP = register("swamp");
+	public static final ResourceKey<Biome> MANGROVE_SWAMP = register("mangrove_swamp");
 	public static final ResourceKey<Biome> FOREST = register("forest");
 	public static final ResourceKey<Biome> FLOWER_FOREST = register("flower_forest");
 	public static final ResourceKey<Biome> BIRCH_FOREST = register("birch_forest");

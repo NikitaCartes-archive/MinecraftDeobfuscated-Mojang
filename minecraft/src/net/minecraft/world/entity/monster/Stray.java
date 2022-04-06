@@ -1,9 +1,9 @@
 package net.minecraft.world.entity.monster;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -22,7 +22,7 @@ public class Stray extends AbstractSkeleton {
 	}
 
 	public static boolean checkStraySpawnRules(
-		EntityType<Stray> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Stray> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		BlockPos blockPos2 = blockPos;
 
@@ -30,7 +30,7 @@ public class Stray extends AbstractSkeleton {
 			blockPos2 = blockPos2.above();
 		} while (serverLevelAccessor.getBlockState(blockPos2).is(Blocks.POWDER_SNOW));
 
-		return checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random)
+		return checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource)
 			&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos2.below()));
 	}
 

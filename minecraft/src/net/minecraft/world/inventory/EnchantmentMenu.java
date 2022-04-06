@@ -1,7 +1,6 @@
 package net.minecraft.world.inventory;
 
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -11,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,7 +32,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		}
 	};
 	private final ContainerLevelAccess access;
-	private final Random random = new Random();
+	private final RandomSource random = RandomSource.create();
 	private final DataSlot enchantmentSeed = DataSlot.standalone();
 	public final int[] costs = new int[3];
 	public final int[] enchantClue = new int[]{-1, -1, -1};

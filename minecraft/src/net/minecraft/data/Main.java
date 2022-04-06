@@ -23,6 +23,7 @@ import net.minecraft.data.structures.SnbtToNbt;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.data.tags.BiomeTagsProvider;
 import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.data.tags.CatVariantTagsProvider;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.data.tags.FlatLevelGeneratorPresetTagsProvider;
 import net.minecraft.data.tags.FluidTagsProvider;
@@ -88,6 +89,7 @@ public class Main {
 			dataGenerator.addProvider(new StructureTagsProvider(dataGenerator));
 			dataGenerator.addProvider(new WorldPresetTagsProvider(dataGenerator));
 			dataGenerator.addProvider(new FlatLevelGeneratorPresetTagsProvider(dataGenerator));
+			dataGenerator.addProvider(new CatVariantTagsProvider(dataGenerator));
 		}
 
 		if (bl3) {

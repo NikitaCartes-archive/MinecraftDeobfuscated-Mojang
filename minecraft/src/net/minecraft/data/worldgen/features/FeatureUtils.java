@@ -1,12 +1,12 @@
 package net.minecraft.data.worldgen.features;
 
 import java.util.List;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -29,7 +29,7 @@ public class FeatureUtils {
 			TreeFeatures.AZALEA_TREE,
 			VegetationFeatures.TREES_OLD_GROWTH_PINE_TAIGA
 		);
-		return Util.getRandom(list, new Random());
+		return Util.getRandom(list, RandomSource.create());
 	}
 
 	private static BlockPredicate simplePatchPredicate(List<Block> list) {

@@ -3,12 +3,12 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -95,7 +95,7 @@ public class WallTorchBlock extends TorchBlock {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		Direction direction = blockState.getValue(FACING);
 		double d = (double)blockPos.getX() + 0.5;
 		double e = (double)blockPos.getY() + 0.7;

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.server.level.ServerLevel;
@@ -133,8 +134,16 @@ public class VibrationListener implements GameEventListener {
 	private static boolean isOccluded(Level level, Vec3 vec3, Vec3 vec32) {
 		Vec3 vec33 = new Vec3((double)Mth.floor(vec3.x) + 0.5, (double)Mth.floor(vec3.y) + 0.5, (double)Mth.floor(vec3.z) + 0.5);
 		Vec3 vec34 = new Vec3((double)Mth.floor(vec32.x) + 0.5, (double)Mth.floor(vec32.y) + 0.5, (double)Mth.floor(vec32.z) + 0.5);
-		return level.isBlockInLine(new ClipBlockStateContext(vec33, vec34, blockState -> blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType()
-			== HitResult.Type.BLOCK;
+
+		for (Direction direction : Direction.values()) {
+			Vec3 vec35 = vec33.relative(direction, 1.0E-5F);
+			if (level.isBlockInLine(new ClipBlockStateContext(vec35, vec34, blockState -> blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))).getType()
+				!= HitResult.Type.BLOCK) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public static record ReceivingEvent(
@@ -210,9 +219,7 @@ public class VibrationListener implements GameEventListener {
 
 					if (gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK)) {
 						BlockState blockState = entity.getLevel().getBlockState(entity.getOnPos());
-						if (blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS)) {
-							return false;
-						}
+						return !blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS);
 					}
 				}
 

@@ -42,6 +42,7 @@ public final class VillagerType {
 		hashMap.put(Biomes.FROZEN_PEAKS, SNOW);
 		hashMap.put(Biomes.JAGGED_PEAKS, SNOW);
 		hashMap.put(Biomes.SWAMP, SWAMP);
+		hashMap.put(Biomes.MANGROVE_SWAMP, SWAMP);
 		hashMap.put(Biomes.OLD_GROWTH_SPRUCE_TAIGA, TAIGA);
 		hashMap.put(Biomes.OLD_GROWTH_PINE_TAIGA, TAIGA);
 		hashMap.put(Biomes.WINDSWEPT_GRAVELLY_HILLS, TAIGA);

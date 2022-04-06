@@ -70,14 +70,14 @@ public class Allay extends PathfinderMob implements InventoryCarrier, GameEventL
 		MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS
 	);
 	private final EntityPositionSource entityPositionSource = new EntityPositionSource(this, this.getEyeHeight());
-	private final DynamicGameEventListener dynamicGameEventListener;
+	private final DynamicGameEventListener<Allay> dynamicGameEventListener;
 	private final SimpleContainer inventory = new SimpleContainer(1);
 
 	public Allay(EntityType<? extends Allay> entityType, Level level) {
 		super(entityType, level);
 		this.moveControl = new FlyingMoveControl(this, 20, true);
 		this.setCanPickUpLoot(this.canPickUpLoot());
-		this.dynamicGameEventListener = new DynamicGameEventListener(this);
+		this.dynamicGameEventListener = new DynamicGameEventListener<>(this);
 	}
 
 	@Override
@@ -305,7 +305,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, GameEventL
 	}
 
 	@Override
-	public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener, ServerLevel> biConsumer) {
+	public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> biConsumer) {
 		if (this.level instanceof ServerLevel serverLevel) {
 			biConsumer.accept(this.dynamicGameEventListener, serverLevel);
 		}

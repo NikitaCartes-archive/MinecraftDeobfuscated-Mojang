@@ -13,7 +13,7 @@ import net.minecraft.advancements.critereon.EntityHurtPlayerTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
-import net.minecraft.advancements.critereon.LocationTrigger;
+import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -244,7 +244,7 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("in_stronghold", LocationTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.STRONGHOLD)))
+			.addCriterion("in_stronghold", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.STRONGHOLD)))
 			.save(consumer, "story/follow_ender_eye");
 		Advancement.Builder.advancement()
 			.parent(advancement11)

@@ -3,7 +3,6 @@ package net.minecraft.world.entity.monster;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -21,6 +20,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
@@ -451,11 +451,11 @@ public class EnderMan extends Monster implements NeutralMob {
 
 		@Override
 		public void tick() {
-			Random random = this.enderman.getRandom();
+			RandomSource randomSource = this.enderman.getRandom();
 			Level level = this.enderman.level;
-			int i = Mth.floor(this.enderman.getX() - 1.0 + random.nextDouble() * 2.0);
-			int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 2.0);
-			int k = Mth.floor(this.enderman.getZ() - 1.0 + random.nextDouble() * 2.0);
+			int i = Mth.floor(this.enderman.getX() - 1.0 + randomSource.nextDouble() * 2.0);
+			int j = Mth.floor(this.enderman.getY() + randomSource.nextDouble() * 2.0);
+			int k = Mth.floor(this.enderman.getZ() - 1.0 + randomSource.nextDouble() * 2.0);
 			BlockPos blockPos = new BlockPos(i, j, k);
 			BlockState blockState = level.getBlockState(blockPos);
 			BlockPos blockPos2 = blockPos.below();
@@ -581,11 +581,11 @@ public class EnderMan extends Monster implements NeutralMob {
 
 		@Override
 		public void tick() {
-			Random random = this.enderman.getRandom();
+			RandomSource randomSource = this.enderman.getRandom();
 			Level level = this.enderman.level;
-			int i = Mth.floor(this.enderman.getX() - 2.0 + random.nextDouble() * 4.0);
-			int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 3.0);
-			int k = Mth.floor(this.enderman.getZ() - 2.0 + random.nextDouble() * 4.0);
+			int i = Mth.floor(this.enderman.getX() - 2.0 + randomSource.nextDouble() * 4.0);
+			int j = Mth.floor(this.enderman.getY() + randomSource.nextDouble() * 3.0);
+			int k = Mth.floor(this.enderman.getZ() - 2.0 + randomSource.nextDouble() * 4.0);
 			BlockPos blockPos = new BlockPos(i, j, k);
 			BlockState blockState = level.getBlockState(blockPos);
 			Vec3 vec3 = new Vec3((double)this.enderman.getBlockX() + 0.5, (double)j + 0.5, (double)this.enderman.getBlockZ() + 0.5);

@@ -2,10 +2,9 @@ package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,41 +12,53 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 public class LeaveVineDecorator extends TreeDecorator {
-	public static final Codec<LeaveVineDecorator> CODEC = Codec.unit((Supplier<LeaveVineDecorator>)(() -> LeaveVineDecorator.INSTANCE));
-	public static final LeaveVineDecorator INSTANCE = new LeaveVineDecorator();
+	public static final Codec<LeaveVineDecorator> CODEC = Codec.floatRange(0.0F, 1.0F)
+		.fieldOf("probability")
+		.<LeaveVineDecorator>xmap(LeaveVineDecorator::new, leaveVineDecorator -> leaveVineDecorator.probability)
+		.codec();
+	private final float probability;
 
 	@Override
 	protected TreeDecoratorType<?> type() {
 		return TreeDecoratorType.LEAVE_VINE;
 	}
 
+	public LeaveVineDecorator(float f) {
+		this.probability = f;
+	}
+
 	@Override
 	public void place(
-		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		RandomSource randomSource,
+		List<BlockPos> list,
+		List<BlockPos> list2,
+		List<BlockPos> list3
 	) {
 		list2.forEach(blockPos -> {
-			if (random.nextInt(4) == 0) {
+			if (randomSource.nextFloat() < this.probability) {
 				BlockPos blockPos2 = blockPos.west();
 				if (Feature.isAir(levelSimulatedReader, blockPos2)) {
 					addHangingVine(levelSimulatedReader, blockPos2, VineBlock.EAST, biConsumer);
 				}
 			}
 
-			if (random.nextInt(4) == 0) {
+			if (randomSource.nextFloat() < this.probability) {
 				BlockPos blockPos2 = blockPos.east();
 				if (Feature.isAir(levelSimulatedReader, blockPos2)) {
 					addHangingVine(levelSimulatedReader, blockPos2, VineBlock.WEST, biConsumer);
 				}
 			}
 
-			if (random.nextInt(4) == 0) {
+			if (randomSource.nextFloat() < this.probability) {
 				BlockPos blockPos2 = blockPos.north();
 				if (Feature.isAir(levelSimulatedReader, blockPos2)) {
 					addHangingVine(levelSimulatedReader, blockPos2, VineBlock.SOUTH, biConsumer);
 				}
 			}
 
-			if (random.nextInt(4) == 0) {
+			if (randomSource.nextFloat() < this.probability) {
 				BlockPos blockPos2 = blockPos.south();
 				if (Feature.isAir(levelSimulatedReader, blockPos2)) {
 					addHangingVine(levelSimulatedReader, blockPos2, VineBlock.NORTH, biConsumer);

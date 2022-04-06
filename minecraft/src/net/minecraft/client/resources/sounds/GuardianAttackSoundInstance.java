@@ -15,7 +15,7 @@ public class GuardianAttackSoundInstance extends AbstractTickableSoundInstance {
 	private final Guardian guardian;
 
 	public GuardianAttackSoundInstance(Guardian guardian) {
-		super(SoundEvents.GUARDIAN_ATTACK, SoundSource.HOSTILE);
+		super(SoundEvents.GUARDIAN_ATTACK, SoundSource.HOSTILE, SoundInstance.createUnseededRandom());
 		this.guardian = guardian;
 		this.attenuation = SoundInstance.Attenuation.NONE;
 		this.looping = true;

@@ -3,7 +3,6 @@ package net.minecraft.world.entity.monster.piglin;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -14,6 +13,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
@@ -186,7 +186,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	public static boolean checkPiglinSpawnRules(
-		EntityType<Piglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Piglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
 	}
@@ -476,12 +476,12 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		this.playSound(SoundEvents.PIGLIN_STEP, 0.15F, 1.0F);
 	}
 
-	protected void playSound(SoundEvent soundEvent) {
+	protected void playSoundEvent(SoundEvent soundEvent) {
 		this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
 	}
 
 	@Override
 	protected void playConvertedSound() {
-		this.playSound(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
+		this.playSoundEvent(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
 	}
 }

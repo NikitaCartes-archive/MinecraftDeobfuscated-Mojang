@@ -1,10 +1,10 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -40,10 +40,10 @@ public class NetherFossilPieces {
 	};
 
 	public static void addPieces(
-		StructureTemplateManager structureTemplateManager, StructurePieceAccessor structurePieceAccessor, Random random, BlockPos blockPos
+		StructureTemplateManager structureTemplateManager, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, BlockPos blockPos
 	) {
-		Rotation rotation = Rotation.getRandom(random);
-		structurePieceAccessor.addPiece(new NetherFossilPieces.NetherFossilPiece(structureTemplateManager, Util.getRandom(FOSSILS, random), blockPos, rotation));
+		Rotation rotation = Rotation.getRandom(randomSource);
+		structurePieceAccessor.addPiece(new NetherFossilPieces.NetherFossilPiece(structureTemplateManager, Util.getRandom(FOSSILS, randomSource), blockPos, rotation));
 	}
 
 	public static class NetherFossilPiece extends TemplateStructurePiece {
@@ -68,7 +68,7 @@ public class NetherFossilPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 		}
 
 		@Override
@@ -76,13 +76,13 @@ public class NetherFossilPieces {
 			WorldGenLevel worldGenLevel,
 			StructureManager structureManager,
 			ChunkGenerator chunkGenerator,
-			Random random,
+			RandomSource randomSource,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
 			boundingBox.encapsulate(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
-			super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
 		}
 	}
 }

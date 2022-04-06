@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,6 +17,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
@@ -127,7 +127,7 @@ public abstract class Structure {
 		WorldGenLevel worldGenLevel,
 		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
-		Random random,
+		RandomSource randomSource,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
 		PiecesContainer piecesContainer

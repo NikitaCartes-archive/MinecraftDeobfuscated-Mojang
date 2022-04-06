@@ -1,5 +1,7 @@
 package net.minecraft.world.level.levelgen;
 
+import net.minecraft.util.RandomSource;
+
 public class SingleThreadedRandomSource implements BitRandomSource {
 	private static final int MODULUS_BITS = 48;
 	private static final long MODULUS_MASK = 281474976710655L;

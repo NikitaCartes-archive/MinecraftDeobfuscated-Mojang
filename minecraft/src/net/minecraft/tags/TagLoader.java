@@ -7,11 +7,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +21,6 @@ import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.util.GsonHelper;
 import org.slf4j.Logger;
 
@@ -45,7 +40,7 @@ public class TagLoader<T> {
 	public Map<ResourceLocation, Tag.Builder> load(ResourceManager resourceManager) {
 		Map<ResourceLocation, Tag.Builder> map = Maps.<ResourceLocation, Tag.Builder>newHashMap();
 
-		for (Entry<ResourceLocation, List<ResourceThunk>> entry : resourceManager.listResourceStacks(
+		for (Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks(
 				this.directory, resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
 			)
 			.entrySet()) {
@@ -55,66 +50,34 @@ public class TagLoader<T> {
 				resourceLocation.getNamespace(), string.substring(this.directory.length() + 1, string.length() - PATH_SUFFIX_LENGTH)
 			);
 
-			for (ResourceThunk resourceThunk : (List)entry.getValue()) {
+			for (Resource resource : (List)entry.getValue()) {
 				try {
-					Resource resource = resourceThunk.open();
+					Reader reader = resource.openAsReader();
 
 					try {
-						InputStream inputStream = resource.getInputStream();
+						JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
+						if (jsonObject == null) {
+							throw new NullPointerException("Invalid JSON contents");
+						}
 
-						try {
-							Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
+						((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject, resource.sourcePackId());
+					} catch (Throwable var14) {
+						if (reader != null) {
 							try {
-								JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
-								if (jsonObject == null) {
-									throw new NullPointerException("Invalid JSON contents");
-								}
-
-								((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject, resourceThunk.sourcePackId());
-							} catch (Throwable var18) {
-								try {
-									reader.close();
-								} catch (Throwable var17) {
-									var18.addSuppressed(var17);
-								}
-
-								throw var18;
-							}
-
-							reader.close();
-						} catch (Throwable var19) {
-							if (inputStream != null) {
-								try {
-									inputStream.close();
-								} catch (Throwable var16) {
-									var19.addSuppressed(var16);
-								}
-							}
-
-							throw var19;
-						}
-
-						if (inputStream != null) {
-							inputStream.close();
-						}
-					} catch (Throwable var20) {
-						if (resource != null) {
-							try {
-								resource.close();
-							} catch (Throwable var15) {
-								var20.addSuppressed(var15);
+								reader.close();
+							} catch (Throwable var13) {
+								var14.addSuppressed(var13);
 							}
 						}
 
-						throw var20;
+						throw var14;
 					}
 
-					if (resource != null) {
-						resource.close();
+					if (reader != null) {
+						reader.close();
 					}
-				} catch (Exception var21) {
-					LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation2, resourceLocation, resourceThunk.sourcePackId(), var21);
+				} catch (Exception var15) {
+					LOGGER.error("Couldn't read tag list {} from {} in data pack {}", resourceLocation2, resourceLocation, resource.sourcePackId(), var15);
 				}
 			}
 		}

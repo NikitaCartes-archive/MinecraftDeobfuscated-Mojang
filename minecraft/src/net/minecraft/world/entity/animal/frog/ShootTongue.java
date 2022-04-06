@@ -13,10 +13,6 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.MagmaCube;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public class ShootTongue extends Behavior<Frog> {
@@ -77,25 +73,14 @@ public class ShootTongue extends Behavior<Frog> {
 		if (optional.isPresent()) {
 			Entity entity = (Entity)optional.get();
 			if (entity.isAlive()) {
-				entity.remove(Entity.RemovalReason.KILLED);
-				ItemStack itemStack = getLootItem(frog, entity);
-				serverLevel.addFreshEntity(new ItemEntity(serverLevel, this.itemSpawnPos.x(), this.itemSpawnPos.y(), this.itemSpawnPos.z(), itemStack));
+				frog.doHurtTarget(entity);
+				if (!entity.isAlive()) {
+					entity.remove(Entity.RemovalReason.KILLED);
+				}
 			}
 		}
 
 		frog.eraseTongueTarget();
-	}
-
-	private static ItemStack getLootItem(Frog frog, Entity entity) {
-		if (entity instanceof MagmaCube) {
-			return new ItemStack(switch (frog.getVariant()) {
-				case TEMPERATE -> Items.OCHRE_FROGLIGHT;
-				case WARM -> Items.PEARLESCENT_FROGLIGHT;
-				case COLD -> Items.VERDANT_FROGLIGHT;
-			});
-		} else {
-			return new ItemStack(Items.SLIME_BALL);
-		}
 	}
 
 	protected void tick(ServerLevel serverLevel, Frog frog, long l) {

@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -109,19 +109,19 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		if (blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER) {
 			BlockPos blockPos2 = blockPos.above();
 			serverLevel.setBlock(blockPos2, serverLevel.getFluidState(blockPos2).createLegacyBlock(), 18);
-			BigDripleafBlock.placeWithRandomHeight(serverLevel, random, blockPos, blockState.getValue(FACING));
+			BigDripleafBlock.placeWithRandomHeight(serverLevel, randomSource, blockPos, blockState.getValue(FACING));
 		} else {
 			BlockPos blockPos2 = blockPos.below();
-			this.performBonemeal(serverLevel, random, blockPos2, serverLevel.getBlockState(blockPos2));
+			this.performBonemeal(serverLevel, randomSource, blockPos2, serverLevel.getBlockState(blockPos2));
 		}
 	}
 

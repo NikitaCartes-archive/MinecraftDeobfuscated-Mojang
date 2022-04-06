@@ -45,7 +45,7 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 23.5F, 0.0F));
 		partDefinition2.addOrReplaceChild(
-			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -5.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -4.0F, 0.0F)
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -5.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.99F, 0.0F)
 		);
 		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
 			"body",
@@ -58,23 +58,23 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		);
 		partDefinition3.addOrReplaceChild(
 			"right_arm",
-			CubeListBuilder.create().texOffs(23, 0).addBox(-0.75F, -0.5F, -1.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)),
+			CubeListBuilder.create().texOffs(23, 0).addBox(-0.75F, -0.5F, -1.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(-0.01F)),
 			PartPose.offset(-1.75F, 0.5F, 0.0F)
 		);
 		partDefinition3.addOrReplaceChild(
 			"left_arm",
-			CubeListBuilder.create().texOffs(23, 6).addBox(-0.25F, -0.5F, -1.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)),
+			CubeListBuilder.create().texOffs(23, 6).addBox(-0.25F, -0.5F, -1.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(-0.01F)),
 			PartPose.offset(1.75F, 0.5F, 0.0F)
 		);
 		partDefinition3.addOrReplaceChild(
 			"right_wing",
 			CubeListBuilder.create().texOffs(16, 14).addBox(0.0F, 1.0F, 0.0F, 0.0F, 5.0F, 8.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(-0.5F, 0.0F, 1.0F)
+			PartPose.offset(-0.5F, 0.0F, 0.65F)
 		);
 		partDefinition3.addOrReplaceChild(
 			"left_wing",
 			CubeListBuilder.create().texOffs(16, 14).addBox(0.0F, 1.0F, 0.0F, 0.0F, 5.0F, 8.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(0.5F, 0.0F, 1.0F)
+			PartPose.offset(0.5F, 0.0F, 0.65F)
 		);
 		return LayerDefinition.create(meshDefinition, 32, 32);
 	}

@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -9,6 +8,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -76,9 +76,9 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	public static void particleTick(Level level, BlockPos blockPos, BlockState blockState, CampfireBlockEntity campfireBlockEntity) {
-		Random random = level.random;
-		if (random.nextFloat() < 0.11F) {
-			for (int i = 0; i < random.nextInt(2) + 2; i++) {
+		RandomSource randomSource = level.random;
+		if (randomSource.nextFloat() < 0.11F) {
+			for (int i = 0; i < randomSource.nextInt(2) + 2; i++) {
 				CampfireBlock.makeParticles(level, blockPos, (Boolean)blockState.getValue(CampfireBlock.SIGNAL_FIRE), false);
 			}
 		}
@@ -86,7 +86,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 		int i = ((Direction)blockState.getValue(CampfireBlock.FACING)).get2DDataValue();
 
 		for (int j = 0; j < campfireBlockEntity.items.size(); j++) {
-			if (!campfireBlockEntity.items.get(j).isEmpty() && random.nextFloat() < 0.2F) {
+			if (!campfireBlockEntity.items.get(j).isEmpty() && randomSource.nextFloat() < 0.2F) {
 				Direction direction = Direction.from2DDataValue(Math.floorMod(j + i, 4));
 				float f = 0.3125F;
 				double d = (double)blockPos.getX() + 0.5 - (double)((float)direction.getStepX() * 0.3125F) + (double)((float)direction.getClockWise().getStepX() * 0.3125F);

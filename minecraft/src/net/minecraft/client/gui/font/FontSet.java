@@ -13,7 +13,6 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,10 +21,11 @@ import net.minecraft.client.gui.font.glyphs.SpecialGlyphs;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 @Environment(EnvType.CLIENT)
 public class FontSet implements AutoCloseable {
-	private static final Random RANDOM = new Random();
+	private static final RandomSource RANDOM = RandomSource.create();
 	private final TextureManager textureManager;
 	private final ResourceLocation name;
 	private BakedGlyph missingGlyph;

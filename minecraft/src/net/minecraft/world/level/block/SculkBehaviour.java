@@ -1,10 +1,10 @@
 package net.minecraft.world.level.block;
 
 import java.util.Collection;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -26,7 +26,7 @@ public interface SculkBehaviour {
 
 		@Override
 		public int attemptUseCharge(
-			SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl
+			SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl
 		) {
 			return chargeCursor.getDecayDelay() > 0 ? chargeCursor.getCharge() : 0;
 		}
@@ -41,10 +41,10 @@ public interface SculkBehaviour {
 		return 1;
 	}
 
-	default void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, Random random) {
+	default void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, RandomSource randomSource) {
 	}
 
-	default boolean depositCharge(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
+	default boolean depositCharge(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource) {
 		return false;
 	}
 
@@ -63,6 +63,6 @@ public interface SculkBehaviour {
 	}
 
 	int attemptUseCharge(
-		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl
+		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl
 	);
 }

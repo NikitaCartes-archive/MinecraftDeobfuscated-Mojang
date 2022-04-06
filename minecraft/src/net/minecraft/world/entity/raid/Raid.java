@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -32,6 +31,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -98,7 +98,7 @@ public class Raid {
 	private final ServerBossEvent raidEvent = new ServerBossEvent(RAID_NAME_COMPONENT, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
 	private int postRaidTicks;
 	private int raidCooldownTicks;
-	private final Random random = new Random();
+	private final RandomSource random = RandomSource.create();
 	private final int numGroups;
 	private Raid.RaidStatus status;
 	private int celebrationTicks;
@@ -464,6 +464,7 @@ public class Raid {
 		float f = 13.0F;
 		int i = 64;
 		Collection<ServerPlayer> collection = this.raidEvent.getPlayers();
+		long l = this.random.nextLong();
 
 		for (ServerPlayer serverPlayer : this.level.players()) {
 			Vec3 vec3 = serverPlayer.position();
@@ -472,7 +473,7 @@ public class Raid {
 			double e = vec3.x + 13.0 / d * (vec32.x - vec3.x);
 			double g = vec3.z + 13.0 / d * (vec32.z - vec3.z);
 			if (d <= 64.0 || collection.contains(serverPlayer)) {
-				serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, e, serverPlayer.getY(), g, 64.0F, 1.0F));
+				serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, e, serverPlayer.getY(), g, 64.0F, 1.0F, l));
 			}
 		}
 	}
@@ -695,7 +696,7 @@ public class Raid {
 		return bl ? raiderType.spawnsPerWaveBeforeBonus[this.numGroups] : raiderType.spawnsPerWaveBeforeBonus[i];
 	}
 
-	private int getPotentialBonusSpawns(Raid.RaiderType raiderType, Random random, int i, DifficultyInstance difficultyInstance, boolean bl) {
+	private int getPotentialBonusSpawns(Raid.RaiderType raiderType, RandomSource randomSource, int i, DifficultyInstance difficultyInstance, boolean bl) {
 		Difficulty difficulty = difficultyInstance.getDifficulty();
 		boolean bl2 = difficulty == Difficulty.EASY;
 		boolean bl3 = difficulty == Difficulty.NORMAL;
@@ -711,7 +712,7 @@ public class Raid {
 			case PILLAGER:
 			case VINDICATOR:
 				if (bl2) {
-					j = random.nextInt(2);
+					j = randomSource.nextInt(2);
 				} else if (bl3) {
 					j = 1;
 				} else {
@@ -725,7 +726,7 @@ public class Raid {
 				return 0;
 		}
 
-		return j > 0 ? random.nextInt(j + 1) : 0;
+		return j > 0 ? randomSource.nextInt(j + 1) : 0;
 	}
 
 	public boolean isActive() {

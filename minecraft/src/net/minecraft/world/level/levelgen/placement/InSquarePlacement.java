@@ -1,10 +1,10 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 
 public class InSquarePlacement extends PlacementModifier {
 	private static final InSquarePlacement INSTANCE = new InSquarePlacement();
@@ -15,9 +15,9 @@ public class InSquarePlacement extends PlacementModifier {
 	}
 
 	@Override
-	public Stream<BlockPos> getPositions(PlacementContext placementContext, Random random, BlockPos blockPos) {
-		int i = random.nextInt(16) + blockPos.getX();
-		int j = random.nextInt(16) + blockPos.getZ();
+	public Stream<BlockPos> getPositions(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
+		int i = randomSource.nextInt(16) + blockPos.getX();
+		int j = randomSource.nextInt(16) + blockPos.getZ();
 		return Stream.of(new BlockPos(i, blockPos.getY(), j));
 	}
 

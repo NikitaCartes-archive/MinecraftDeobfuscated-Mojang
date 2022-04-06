@@ -1,8 +1,8 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -45,9 +45,9 @@ public class NetherWartBlock extends BushBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		int i = (Integer)blockState.getValue(AGE);
-		if (i < 3 && random.nextInt(10) == 0) {
+		if (i < 3 && randomSource.nextInt(10) == 0) {
 			blockState = blockState.setValue(AGE, Integer.valueOf(i + 1));
 			serverLevel.setBlock(blockPos, blockState, 2);
 		}

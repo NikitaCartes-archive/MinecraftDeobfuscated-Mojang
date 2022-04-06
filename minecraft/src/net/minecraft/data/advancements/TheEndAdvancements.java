@@ -12,8 +12,8 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
-import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -92,7 +92,7 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("in_city", LocationTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.END_CITY)))
+			.addCriterion("in_city", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.END_CITY)))
 			.save(consumer, "end/find_end_city");
 		Advancement.Builder.advancement()
 			.parent(advancement2)

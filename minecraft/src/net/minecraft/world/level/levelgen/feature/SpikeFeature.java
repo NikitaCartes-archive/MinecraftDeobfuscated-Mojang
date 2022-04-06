@@ -6,15 +6,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -38,8 +38,8 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 	}
 
 	public static List<SpikeFeature.EndSpike> getSpikesForLevel(WorldGenLevel worldGenLevel) {
-		Random random = new Random(worldGenLevel.getSeed());
-		long l = random.nextLong() & 65535L;
+		RandomSource randomSource = RandomSource.create(worldGenLevel.getSeed());
+		long l = randomSource.nextLong() & 65535L;
 		return SPIKE_CACHE.getUnchecked(l);
 	}
 
@@ -47,7 +47,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 	public boolean place(FeaturePlaceContext<SpikeConfiguration> featurePlaceContext) {
 		SpikeConfiguration spikeConfiguration = featurePlaceContext.config();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		BlockPos blockPos = featurePlaceContext.origin();
 		List<SpikeFeature.EndSpike> list = spikeConfiguration.getSpikes();
 		if (list.isEmpty()) {
@@ -56,14 +56,16 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 
 		for (SpikeFeature.EndSpike endSpike : list) {
 			if (endSpike.isCenterWithinChunk(blockPos)) {
-				this.placeSpike(worldGenLevel, random, spikeConfiguration, endSpike);
+				this.placeSpike(worldGenLevel, randomSource, spikeConfiguration, endSpike);
 			}
 		}
 
 		return true;
 	}
 
-	private void placeSpike(ServerLevelAccessor serverLevelAccessor, Random random, SpikeConfiguration spikeConfiguration, SpikeFeature.EndSpike endSpike) {
+	private void placeSpike(
+		ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, SpikeConfiguration spikeConfiguration, SpikeFeature.EndSpike endSpike
+	) {
 		int i = endSpike.getRadius();
 
 		for (BlockPos blockPos : BlockPos.betweenClosed(
@@ -110,7 +112,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
 		endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
 		endCrystal.moveTo(
-			(double)endSpike.getCenterX() + 0.5, (double)(endSpike.getHeight() + 1), (double)endSpike.getCenterZ() + 0.5, random.nextFloat() * 360.0F, 0.0F
+			(double)endSpike.getCenterX() + 0.5, (double)(endSpike.getHeight() + 1), (double)endSpike.getCenterZ() + 0.5, randomSource.nextFloat() * 360.0F, 0.0F
 		);
 		serverLevelAccessor.addFreshEntity(endCrystal);
 		this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
@@ -175,8 +177,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 
 	static class SpikeCacheLoader extends CacheLoader<Long, List<SpikeFeature.EndSpike>> {
 		public List<SpikeFeature.EndSpike> load(Long long_) {
-			List<Integer> list = (List<Integer>)IntStream.range(0, 10).boxed().collect(Collectors.toList());
-			Collections.shuffle(list, new Random(long_));
+			List<Integer> list = Util.shuffledCopy((List<Integer>)IntStream.range(0, 10).boxed().collect(Collectors.toList()), RandomSource.create(long_));
 			List<SpikeFeature.EndSpike> list2 = Lists.<SpikeFeature.EndSpike>newArrayList();
 
 			for (int i = 0; i < 10; i++) {

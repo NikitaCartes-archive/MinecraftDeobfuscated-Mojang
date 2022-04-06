@@ -1,10 +1,10 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -73,7 +73,7 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(LIT)) {
 			serverLevel.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)), 3);
 		}
@@ -89,7 +89,7 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(LIT)) {
 			spawnParticles(level, blockPos);
 		}
@@ -97,15 +97,15 @@ public class RedStoneOreBlock extends Block {
 
 	private static void spawnParticles(Level level, BlockPos blockPos) {
 		double d = 0.5625;
-		Random random = level.random;
+		RandomSource randomSource = level.random;
 
 		for (Direction direction : Direction.values()) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			if (!level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
 				Direction.Axis axis = direction.getAxis();
-				double e = axis == Direction.Axis.X ? 0.5 + 0.5625 * (double)direction.getStepX() : (double)random.nextFloat();
-				double f = axis == Direction.Axis.Y ? 0.5 + 0.5625 * (double)direction.getStepY() : (double)random.nextFloat();
-				double g = axis == Direction.Axis.Z ? 0.5 + 0.5625 * (double)direction.getStepZ() : (double)random.nextFloat();
+				double e = axis == Direction.Axis.X ? 0.5 + 0.5625 * (double)direction.getStepX() : (double)randomSource.nextFloat();
+				double f = axis == Direction.Axis.Y ? 0.5 + 0.5625 * (double)direction.getStepY() : (double)randomSource.nextFloat();
+				double g = axis == Direction.Axis.Z ? 0.5 + 0.5625 * (double)direction.getStepZ() : (double)randomSource.nextFloat();
 				level.addParticle(DustParticleOptions.REDSTONE, (double)blockPos.getX() + e, (double)blockPos.getY() + f, (double)blockPos.getZ() + g, 0.0, 0.0, 0.0);
 			}
 		}

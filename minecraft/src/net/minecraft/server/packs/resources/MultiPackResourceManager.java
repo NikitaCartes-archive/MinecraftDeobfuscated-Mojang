@@ -1,11 +1,11 @@
 package net.minecraft.server.packs.resources;
 
 import com.mojang.logging.LogUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -73,34 +73,20 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 	}
 
 	@Override
-	public Resource getResource(ResourceLocation resourceLocation) throws IOException {
+	public Optional<Resource> getResource(ResourceLocation resourceLocation) {
 		ResourceManager resourceManager = (ResourceManager)this.namespacedManagers.get(resourceLocation.getNamespace());
-		if (resourceManager != null) {
-			return resourceManager.getResource(resourceLocation);
-		} else {
-			throw new FileNotFoundException(resourceLocation.toString());
-		}
+		return resourceManager != null ? resourceManager.getResource(resourceLocation) : Optional.empty();
 	}
 
 	@Override
-	public boolean hasResource(ResourceLocation resourceLocation) {
+	public List<Resource> getResourceStack(ResourceLocation resourceLocation) {
 		ResourceManager resourceManager = (ResourceManager)this.namespacedManagers.get(resourceLocation.getNamespace());
-		return resourceManager != null ? resourceManager.hasResource(resourceLocation) : false;
+		return resourceManager != null ? resourceManager.getResourceStack(resourceLocation) : List.of();
 	}
 
 	@Override
-	public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
-		ResourceManager resourceManager = (ResourceManager)this.namespacedManagers.get(resourceLocation.getNamespace());
-		if (resourceManager != null) {
-			return resourceManager.getResourceStack(resourceLocation);
-		} else {
-			throw new FileNotFoundException(resourceLocation.toString());
-		}
-	}
-
-	@Override
-	public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
-		Map<ResourceLocation, ResourceThunk> map = new TreeMap();
+	public Map<ResourceLocation, Resource> listResources(String string, Predicate<ResourceLocation> predicate) {
+		Map<ResourceLocation, Resource> map = new TreeMap();
 
 		for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
 			map.putAll(fallbackResourceManager.listResources(string, predicate));
@@ -110,8 +96,8 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 	}
 
 	@Override
-	public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
-		Map<ResourceLocation, List<ResourceThunk>> map = new TreeMap();
+	public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+		Map<ResourceLocation, List<Resource>> map = new TreeMap();
 
 		for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
 			map.putAll(fallbackResourceManager.listResourceStacks(string, predicate));

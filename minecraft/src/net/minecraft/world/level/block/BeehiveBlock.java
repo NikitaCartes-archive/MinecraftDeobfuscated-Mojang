@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -14,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -174,9 +174,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		if ((Integer)blockState.getValue(HONEY_LEVEL) >= 5) {
-			for (int i = 0; i < random.nextInt(1) + 1; i++) {
+			for (int i = 0; i < randomSource.nextInt(1) + 1; i++) {
 				this.trySpawnDripParticles(level, blockPos, blockState);
 			}
 		}

@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.animal;
 
-import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.DifficultyInstance;
@@ -100,11 +100,11 @@ public class PolarBear extends Animal implements NeutralMob {
 	}
 
 	public static boolean checkPolarBearSpawnRules(
-		EntityType<PolarBear> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<PolarBear> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		Holder<Biome> holder = levelAccessor.getBiome(blockPos);
 		return !holder.is(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS)
-			? checkAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)
+			? checkAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource)
 			: isBrightEnoughToSpawn(levelAccessor, blockPos) && levelAccessor.getBlockState(blockPos.below()).is(BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE);
 	}
 

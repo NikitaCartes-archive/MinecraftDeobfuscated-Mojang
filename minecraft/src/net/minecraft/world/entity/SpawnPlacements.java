@@ -2,10 +2,10 @@ package net.minecraft.world.entity;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Fox;
@@ -61,10 +61,10 @@ public class SpawnPlacements {
 	}
 
 	public static <T extends Entity> boolean checkSpawnRules(
-		EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		SpawnPlacements.Data data = (SpawnPlacements.Data)DATA_BY_TYPE.get(entityType);
-		return data == null || data.predicate.test(entityType, serverLevelAccessor, mobSpawnType, blockPos, random);
+		return data == null || data.predicate.test(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource);
 	}
 
 	static {
@@ -158,7 +158,7 @@ public class SpawnPlacements {
 
 	@FunctionalInterface
 	public interface SpawnPredicate<T extends Entity> {
-		boolean test(EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random);
+		boolean test(EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource);
 	}
 
 	public static enum Type {

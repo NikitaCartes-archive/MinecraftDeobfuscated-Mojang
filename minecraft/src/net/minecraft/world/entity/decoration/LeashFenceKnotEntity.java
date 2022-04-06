@@ -142,7 +142,7 @@ public class LeashFenceKnotEntity extends HangingEntity {
 
 	@Override
 	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this, this.getType(), 0, this.getPos());
+		return new ClientboundAddEntityPacket(this, 0, this.getPos());
 	}
 
 	@Override

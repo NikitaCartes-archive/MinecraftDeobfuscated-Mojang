@@ -78,6 +78,7 @@ public final class ItemTags {
 	public static final TagKey<Item> AXOLOTL_TEMPT_ITEMS = bind("axolotl_tempt_items");
 	public static final TagKey<Item> OCCLUDES_VIBRATION_SIGNALS = bind("occludes_vibration_signals");
 	public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = bind("cluster_max_harvestables");
+	public static final TagKey<Item> COMPASSES = bind("compasses");
 
 	private ItemTags() {
 	}

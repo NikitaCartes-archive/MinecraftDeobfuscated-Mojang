@@ -3,11 +3,11 @@ package net.minecraft.world.level.levelgen.structure.pools;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
@@ -51,9 +51,9 @@ public class ListPoolElement extends StructurePoolElement {
 
 	@Override
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
-		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random
+		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource
 	) {
-		return ((StructurePoolElement)this.elements.get(0)).getShuffledJigsawBlocks(structureTemplateManager, blockPos, rotation, random);
+		return ((StructurePoolElement)this.elements.get(0)).getShuffledJigsawBlocks(structureTemplateManager, blockPos, rotation, randomSource);
 	}
 
 	@Override
@@ -76,12 +76,12 @@ public class ListPoolElement extends StructurePoolElement {
 		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
-		Random random,
+		RandomSource randomSource,
 		boolean bl
 	) {
 		for (StructurePoolElement structurePoolElement : this.elements) {
 			if (!structurePoolElement.place(
-				structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, random, bl
+				structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, randomSource, bl
 			)) {
 				return false;
 			}

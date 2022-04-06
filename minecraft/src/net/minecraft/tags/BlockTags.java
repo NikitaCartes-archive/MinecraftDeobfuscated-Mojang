@@ -132,7 +132,6 @@ public final class BlockTags {
 	public static final TagKey<Block> FROG_PREFER_JUMP_TO = create("frog_prefer_jump_to");
 	public static final TagKey<Block> SCULK_REPLACEABLE = create("sculk_replaceable");
 	public static final TagKey<Block> SCULK_REPLACEABLE_WORLD_GEN = create("sculk_replaceable_world_gen");
-	public static final TagKey<Block> ANCIENT_CITY_CENTER_REPLACEABLE = create("ancient_city_center_replaceable");
 	public static final TagKey<Block> ANCIENT_CITY_REPLACEABLE = create("ancient_city_replaceable");
 	public static final TagKey<Block> ANIMALS_SPAWNABLE_ON = create("animals_spawnable_on");
 	public static final TagKey<Block> AXOLOTLS_SPAWNABLE_ON = create("axolotls_spawnable_on");
@@ -146,6 +145,9 @@ public final class BlockTags {
 	public static final TagKey<Block> AZALEA_GROWS_ON = create("azalea_grows_on");
 	public static final TagKey<Block> REPLACEABLE_PLANTS = create("replaceable_plants");
 	public static final TagKey<Block> CONVERTABLE_TO_MUD = create("convertable_to_mud");
+	public static final TagKey<Block> MANGROVE_LOGS_CAN_GROW_THROUGH = create("mangrove_logs_can_grow_through");
+	public static final TagKey<Block> MANGROVE_ROOTS_CAN_GROW_THROUGH = create("mangrove_roots_can_grow_through");
+	public static final TagKey<Block> DEAD_BUSH_MAY_PLACE_ON = create("dead_bush_may_place_on");
 
 	private BlockTags() {
 	}

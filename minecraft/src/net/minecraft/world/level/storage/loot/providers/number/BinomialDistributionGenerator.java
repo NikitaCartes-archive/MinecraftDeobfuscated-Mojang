@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import java.util.Random;
 import java.util.Set;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 
@@ -28,11 +28,11 @@ public final class BinomialDistributionGenerator implements NumberProvider {
 	public int getInt(LootContext lootContext) {
 		int i = this.n.getInt(lootContext);
 		float f = this.p.getFloat(lootContext);
-		Random random = lootContext.getRandom();
+		RandomSource randomSource = lootContext.getRandom();
 		int j = 0;
 
 		for (int k = 0; k < i; k++) {
-			if (random.nextFloat() < f) {
+			if (randomSource.nextFloat() < f) {
 				j++;
 			}
 		}

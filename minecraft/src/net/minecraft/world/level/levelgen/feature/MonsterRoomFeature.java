@@ -2,12 +2,12 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -34,15 +34,15 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
 		Predicate<BlockState> predicate = Feature.isReplaceable(BlockTags.FEATURES_CANNOT_REPLACE);
 		BlockPos blockPos = featurePlaceContext.origin();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		int i = 3;
-		int j = random.nextInt(2) + 2;
+		int j = randomSource.nextInt(2) + 2;
 		int k = -j - 1;
 		int l = j + 1;
 		int m = -1;
 		int n = 4;
-		int o = random.nextInt(2) + 2;
+		int o = randomSource.nextInt(2) + 2;
 		int p = -o - 1;
 		int q = o + 1;
 		int r = 0;
@@ -78,7 +78,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 							if (blockPos2x.getY() >= worldGenLevel.getMinBuildHeight() && !worldGenLevel.getBlockState(blockPos2x.below()).getMaterial().isSolid()) {
 								worldGenLevel.setBlock(blockPos2x, AIR, 2);
 							} else if (blockState.getMaterial().isSolid() && !blockState.is(Blocks.CHEST)) {
-								if (t == -1 && random.nextInt(4) != 0) {
+								if (t == -1 && randomSource.nextInt(4) != 0) {
 									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), predicate);
 								} else {
 									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), predicate);
@@ -93,9 +93,9 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 
 			for (int s = 0; s < 2; s++) {
 				for (int t = 0; t < 3; t++) {
-					int ux = blockPos.getX() + random.nextInt(j * 2 + 1) - j;
+					int ux = blockPos.getX() + randomSource.nextInt(j * 2 + 1) - j;
 					int v = blockPos.getY();
-					int w = blockPos.getZ() + random.nextInt(o * 2 + 1) - o;
+					int w = blockPos.getZ() + randomSource.nextInt(o * 2 + 1) - o;
 					BlockPos blockPos3 = new BlockPos(ux, v, w);
 					if (worldGenLevel.isEmptyBlock(blockPos3)) {
 						int x = 0;
@@ -108,7 +108,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 
 						if (x == 1) {
 							this.safeSetBlock(worldGenLevel, blockPos3, StructurePiece.reorient(worldGenLevel, blockPos3, Blocks.CHEST.defaultBlockState()), predicate);
-							RandomizableContainerBlockEntity.setLootTable(worldGenLevel, random, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
+							RandomizableContainerBlockEntity.setLootTable(worldGenLevel, randomSource, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
 							break;
 						}
 					}
@@ -118,7 +118,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 			this.safeSetBlock(worldGenLevel, blockPos, Blocks.SPAWNER.defaultBlockState(), predicate);
 			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
 			if (blockEntity instanceof SpawnerBlockEntity) {
-				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random));
+				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(randomSource));
 			} else {
 				LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
 			}
@@ -129,7 +129,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 		}
 	}
 
-	private EntityType<?> randomEntityId(Random random) {
-		return Util.getRandom(MOBS, random);
+	private EntityType<?> randomEntityId(RandomSource randomSource) {
+		return Util.getRandom(MOBS, randomSource);
 	}
 }

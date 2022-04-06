@@ -21,6 +21,7 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -142,6 +143,9 @@ public abstract class Player extends LivingEntity {
 	private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MAIN_HAND = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
+	protected static final EntityDataAccessor<Optional<GlobalPos>> DATA_LAST_DEATH_LOCATION = SynchedEntityData.defineId(
+		Player.class, EntityDataSerializers.OPTIONAL_GLOBAL_POS
+	);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_LEFT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_RIGHT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	private long timeEntitySatOnShoulder;
@@ -218,6 +222,7 @@ public abstract class Player extends LivingEntity {
 		this.entityData.define(DATA_PLAYER_MAIN_HAND, (byte)1);
 		this.entityData.define(DATA_SHOULDER_LEFT, new CompoundTag());
 		this.entityData.define(DATA_SHOULDER_RIGHT, new CompoundTag());
+		this.entityData.define(DATA_LAST_DEATH_LOCATION, Optional.empty());
 	}
 
 	@Override
@@ -628,6 +633,7 @@ public abstract class Player extends LivingEntity {
 		this.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
 		this.clearFire();
 		this.setSharedFlagOnFire(false);
+		this.setLastDeathLocation(Optional.of(GlobalPos.of(this.level.dimension(), this.blockPosition())));
 	}
 
 	@Override
@@ -786,6 +792,10 @@ public abstract class Player extends LivingEntity {
 		if (compoundTag.contains("ShoulderEntityRight", 10)) {
 			this.setShoulderEntityRight(compoundTag.getCompound("ShoulderEntityRight"));
 		}
+
+		if (compoundTag.contains("LastDeathLocation", 10)) {
+			this.setLastDeathLocation(GlobalPos.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("LastDeathLocation")).resultOrPartial(LOGGER::error));
+		}
 	}
 
 	@Override
@@ -814,6 +824,10 @@ public abstract class Player extends LivingEntity {
 		if (!this.getShoulderEntityRight().isEmpty()) {
 			compoundTag.put("ShoulderEntityRight", this.getShoulderEntityRight());
 		}
+
+		this.getLastDeathLocation()
+			.flatMap(globalPos -> GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, globalPos).resultOrPartial(LOGGER::error))
+			.ifPresent(tag -> compoundTag.put("LastDeathLocation", tag));
 	}
 
 	@Override
@@ -2072,6 +2086,14 @@ public abstract class Player extends LivingEntity {
 	@Override
 	public boolean shouldBeSaved() {
 		return false;
+	}
+
+	public Optional<GlobalPos> getLastDeathLocation() {
+		return this.entityData.get(DATA_LAST_DEATH_LOCATION);
+	}
+
+	public void setLastDeathLocation(Optional<GlobalPos> optional) {
+		this.entityData.set(DATA_LAST_DEATH_LOCATION, optional);
 	}
 
 	public static enum BedSleepingProblem {

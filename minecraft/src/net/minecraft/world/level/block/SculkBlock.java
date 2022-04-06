@@ -1,9 +1,9 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -18,24 +18,24 @@ public class SculkBlock extends DropExperienceBlock implements SculkBehaviour {
 
 	@Override
 	public int attemptUseCharge(
-		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl
+		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl
 	) {
 		int i = chargeCursor.getCharge();
-		if (i != 0 && random.nextInt(sculkSpreader.chargeDecayRate()) == 0) {
+		if (i != 0 && randomSource.nextInt(sculkSpreader.chargeDecayRate()) == 0) {
 			BlockPos blockPos2 = chargeCursor.getPos();
 			boolean bl2 = blockPos2.closerThan(blockPos, (double)sculkSpreader.noGrowthRadius());
 			if (!bl2 && canPlaceGrowth(levelAccessor, blockPos2)) {
 				int j = sculkSpreader.growthSpawnCost();
-				if (random.nextInt(j) < i) {
+				if (randomSource.nextInt(j) < i) {
 					BlockPos blockPos3 = blockPos2.above();
-					BlockState blockState = this.getRandomGrowthState(levelAccessor, blockPos3, random, sculkSpreader.isWorldGeneration());
+					BlockState blockState = this.getRandomGrowthState(levelAccessor, blockPos3, randomSource, sculkSpreader.isWorldGeneration());
 					levelAccessor.setBlock(blockPos3, blockState, 3);
 					levelAccessor.playSound(null, blockPos2, blockState.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 
 				return Math.max(0, i - j);
 			} else {
-				return random.nextInt(sculkSpreader.additionalDecayRate()) != 0 ? i : i - (bl2 ? 1 : getDecayPenalty(sculkSpreader, blockPos2, blockPos, i));
+				return randomSource.nextInt(sculkSpreader.additionalDecayRate()) != 0 ? i : i - (bl2 ? 1 : getDecayPenalty(sculkSpreader, blockPos2, blockPos, i));
 			}
 		} else {
 			return i;
@@ -50,9 +50,9 @@ public class SculkBlock extends DropExperienceBlock implements SculkBehaviour {
 		return Math.max(1, (int)((float)i * g * 0.5F));
 	}
 
-	private BlockState getRandomGrowthState(LevelAccessor levelAccessor, BlockPos blockPos, Random random, boolean bl) {
+	private BlockState getRandomGrowthState(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, boolean bl) {
 		BlockState blockState;
-		if (random.nextInt(11) == 0) {
+		if (randomSource.nextInt(11) == 0) {
 			blockState = Blocks.SCULK_SHRIEKER.defaultBlockState().setValue(SculkShriekerBlock.CAN_SUMMON, Boolean.valueOf(bl));
 		} else {
 			blockState = Blocks.SCULK_SENSOR.defaultBlockState();

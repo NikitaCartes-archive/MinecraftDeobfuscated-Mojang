@@ -1,15 +1,15 @@
 package net.minecraft.client.particle;
 
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 @Environment(EnvType.CLIENT)
 public class GlowParticle extends TextureSheetParticle {
-	static final Random RANDOM = new Random();
+	static final RandomSource RANDOM = RandomSource.create();
 	private final SpriteSet sprites;
 
 	GlowParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {

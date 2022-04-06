@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -79,39 +80,39 @@ public class SimpleTexture extends AbstractTexture {
 
 		public static SimpleTexture.TextureImage load(ResourceManager resourceManager, ResourceLocation resourceLocation) {
 			try {
-				Resource resource = resourceManager.getResource(resourceLocation);
+				Resource resource = resourceManager.getResourceOrThrow(resourceLocation);
+				InputStream inputStream = resource.open();
 
-				SimpleTexture.TextureImage runtimeException;
+				NativeImage nativeImage;
 				try {
-					NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-					TextureMetadataSection textureMetadataSection = null;
-
-					try {
-						textureMetadataSection = resource.getMetadata(TextureMetadataSection.SERIALIZER);
-					} catch (RuntimeException var7) {
-						SimpleTexture.LOGGER.warn("Failed reading metadata of: {}", resourceLocation, var7);
-					}
-
-					runtimeException = new SimpleTexture.TextureImage(textureMetadataSection, nativeImage);
-				} catch (Throwable var8) {
-					if (resource != null) {
+					nativeImage = NativeImage.read(inputStream);
+				} catch (Throwable var9) {
+					if (inputStream != null) {
 						try {
-							resource.close();
-						} catch (Throwable var6) {
-							var8.addSuppressed(var6);
+							inputStream.close();
+						} catch (Throwable var7) {
+							var9.addSuppressed(var7);
 						}
 					}
 
-					throw var8;
+					throw var9;
 				}
 
-				if (resource != null) {
-					resource.close();
+				if (inputStream != null) {
+					inputStream.close();
 				}
 
-				return runtimeException;
-			} catch (IOException var9) {
-				return new SimpleTexture.TextureImage(var9);
+				TextureMetadataSection textureMetadataSection = null;
+
+				try {
+					textureMetadataSection = (TextureMetadataSection)resource.metadata().getSection(TextureMetadataSection.SERIALIZER).orElse(null);
+				} catch (RuntimeException var8) {
+					SimpleTexture.LOGGER.warn("Failed reading metadata of: {}", resourceLocation, var8);
+				}
+
+				return new SimpleTexture.TextureImage(textureMetadataSection, nativeImage);
+			} catch (IOException var10) {
+				return new SimpleTexture.TextureImage(var10);
 			}
 		}
 

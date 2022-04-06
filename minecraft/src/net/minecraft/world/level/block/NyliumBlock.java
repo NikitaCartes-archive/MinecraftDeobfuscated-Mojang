@@ -1,10 +1,10 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -28,7 +28,7 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!canBeNylium(blockState, serverLevel, blockPos)) {
 			serverLevel.setBlockAndUpdate(blockPos, Blocks.NETHERRACK.defaultBlockState());
 		}
@@ -40,22 +40,22 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		BlockState blockState2 = serverLevel.getBlockState(blockPos);
 		BlockPos blockPos2 = blockPos.above();
 		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
 		if (blockState2.is(Blocks.CRIMSON_NYLIUM)) {
-			NetherFeatures.CRIMSON_FOREST_VEGETATION_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
+			NetherFeatures.CRIMSON_FOREST_VEGETATION_BONEMEAL.value().place(serverLevel, chunkGenerator, randomSource, blockPos2);
 		} else if (blockState2.is(Blocks.WARPED_NYLIUM)) {
-			NetherFeatures.WARPED_FOREST_VEGETATION_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
-			NetherFeatures.NETHER_SPROUTS_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
-			if (random.nextInt(8) == 0) {
-				NetherFeatures.TWISTING_VINES_BONEMEAL.value().place(serverLevel, chunkGenerator, random, blockPos2);
+			NetherFeatures.WARPED_FOREST_VEGETATION_BONEMEAL.value().place(serverLevel, chunkGenerator, randomSource, blockPos2);
+			NetherFeatures.NETHER_SPROUTS_BONEMEAL.value().place(serverLevel, chunkGenerator, randomSource, blockPos2);
+			if (randomSource.nextInt(8) == 0) {
+				NetherFeatures.TWISTING_VINES_BONEMEAL.value().place(serverLevel, chunkGenerator, randomSource, blockPos2);
 			}
 		}
 	}

@@ -2,9 +2,9 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public class LinearPosTest extends PosRuleTest {
 	public static final Codec<LinearPosTest> CODEC = RecordCodecBuilder.create(
@@ -33,9 +33,9 @@ public class LinearPosTest extends PosRuleTest {
 	}
 
 	@Override
-	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
+	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, RandomSource randomSource) {
 		int i = blockPos2.distManhattan(blockPos3);
-		float f = random.nextFloat();
+		float f = randomSource.nextFloat();
 		return f <= Mth.clampedLerp(this.minChance, this.maxChance, Mth.inverseLerp((float)i, (float)this.minDist, (float)this.maxDist));
 	}
 

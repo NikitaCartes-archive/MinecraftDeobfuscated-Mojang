@@ -7,7 +7,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -15,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
@@ -116,12 +116,12 @@ public class JigsawPlacement {
 		ChunkGenerator chunkGenerator,
 		StructureTemplateManager structureTemplateManager,
 		List<? super PoolElementStructurePiece> list,
-		Random random,
+		RandomSource randomSource,
 		LevelHeightAccessor levelHeightAccessor,
 		RandomState randomState
 	) {
 		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(registry, i, pieceFactory, chunkGenerator, structureTemplateManager, list, random);
+		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(registry, i, pieceFactory, chunkGenerator, structureTemplateManager, list, randomSource);
 		placer.placing.addLast(new JigsawPlacement.PieceState(poolElementStructurePiece, new MutableObject<>(Shapes.INFINITY), 0));
 
 		while (!placer.placing.isEmpty()) {
@@ -161,7 +161,7 @@ public class JigsawPlacement {
 		private final ChunkGenerator chunkGenerator;
 		private final StructureTemplateManager structureTemplateManager;
 		private final List<? super PoolElementStructurePiece> pieces;
-		private final Random random;
+		private final RandomSource random;
 		final Deque<JigsawPlacement.PieceState> placing = Queues.<JigsawPlacement.PieceState>newArrayDeque();
 
 		Placer(
@@ -171,7 +171,7 @@ public class JigsawPlacement {
 			ChunkGenerator chunkGenerator,
 			StructureTemplateManager structureTemplateManager,
 			List<? super PoolElementStructurePiece> list,
-			Random random
+			RandomSource randomSource
 		) {
 			this.pools = registry;
 			this.maxDepth = i;
@@ -179,7 +179,7 @@ public class JigsawPlacement {
 			this.chunkGenerator = chunkGenerator;
 			this.structureTemplateManager = structureTemplateManager;
 			this.pieces = list;
-			this.random = random;
+			this.random = randomSource;
 		}
 
 		void tryPlacingChildren(

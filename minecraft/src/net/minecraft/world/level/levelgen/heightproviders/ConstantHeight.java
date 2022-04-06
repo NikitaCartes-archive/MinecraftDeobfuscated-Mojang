@@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen.heightproviders;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 
@@ -31,7 +31,7 @@ public class ConstantHeight extends HeightProvider {
 	}
 
 	@Override
-	public int sample(Random random, WorldGenerationContext worldGenerationContext) {
+	public int sample(RandomSource randomSource, WorldGenerationContext worldGenerationContext) {
 		return this.value.resolveY(worldGenerationContext);
 	}
 

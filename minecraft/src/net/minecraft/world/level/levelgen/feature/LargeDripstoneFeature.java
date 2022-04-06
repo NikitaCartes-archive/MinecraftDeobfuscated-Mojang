@@ -2,12 +2,12 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.Optional;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -27,7 +27,7 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
 		LargeDripstoneConfiguration largeDripstoneConfiguration = featurePlaceContext.config();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
 			return false;
 		} else {
@@ -41,16 +41,16 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 				} else {
 					int i = (int)((float)range.height() * largeDripstoneConfiguration.maxColumnRadiusToCaveHeightRatio);
 					int j = Mth.clamp(i, largeDripstoneConfiguration.columnRadius.getMinValue(), largeDripstoneConfiguration.columnRadius.getMaxValue());
-					int k = Mth.randomBetweenInclusive(random, largeDripstoneConfiguration.columnRadius.getMinValue(), j);
+					int k = Mth.randomBetweenInclusive(randomSource, largeDripstoneConfiguration.columnRadius.getMinValue(), j);
 					LargeDripstoneFeature.LargeDripstone largeDripstone = makeDripstone(
-						blockPos.atY(range.ceiling() - 1), false, random, k, largeDripstoneConfiguration.stalactiteBluntness, largeDripstoneConfiguration.heightScale
+						blockPos.atY(range.ceiling() - 1), false, randomSource, k, largeDripstoneConfiguration.stalactiteBluntness, largeDripstoneConfiguration.heightScale
 					);
 					LargeDripstoneFeature.LargeDripstone largeDripstone2 = makeDripstone(
-						blockPos.atY(range.floor() + 1), true, random, k, largeDripstoneConfiguration.stalagmiteBluntness, largeDripstoneConfiguration.heightScale
+						blockPos.atY(range.floor() + 1), true, randomSource, k, largeDripstoneConfiguration.stalagmiteBluntness, largeDripstoneConfiguration.heightScale
 					);
 					LargeDripstoneFeature.WindOffsetter windOffsetter;
 					if (largeDripstone.isSuitableForWind(largeDripstoneConfiguration) && largeDripstone2.isSuitableForWind(largeDripstoneConfiguration)) {
-						windOffsetter = new LargeDripstoneFeature.WindOffsetter(blockPos.getY(), random, largeDripstoneConfiguration.windSpeed);
+						windOffsetter = new LargeDripstoneFeature.WindOffsetter(blockPos.getY(), randomSource, largeDripstoneConfiguration.windSpeed);
 					} else {
 						windOffsetter = LargeDripstoneFeature.WindOffsetter.noWind();
 					}
@@ -58,11 +58,11 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 					boolean bl = largeDripstone.moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(worldGenLevel, windOffsetter);
 					boolean bl2 = largeDripstone2.moveBackUntilBaseIsInsideStoneAndShrinkRadiusIfNecessary(worldGenLevel, windOffsetter);
 					if (bl) {
-						largeDripstone.placeBlocks(worldGenLevel, random, windOffsetter);
+						largeDripstone.placeBlocks(worldGenLevel, randomSource, windOffsetter);
 					}
 
 					if (bl2) {
-						largeDripstone2.placeBlocks(worldGenLevel, random, windOffsetter);
+						largeDripstone2.placeBlocks(worldGenLevel, randomSource, windOffsetter);
 					}
 
 					return true;
@@ -74,9 +74,9 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 	}
 
 	private static LargeDripstoneFeature.LargeDripstone makeDripstone(
-		BlockPos blockPos, boolean bl, Random random, int i, FloatProvider floatProvider, FloatProvider floatProvider2
+		BlockPos blockPos, boolean bl, RandomSource randomSource, int i, FloatProvider floatProvider, FloatProvider floatProvider2
 	) {
-		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(random), (double)floatProvider2.sample(random));
+		return new LargeDripstoneFeature.LargeDripstone(blockPos, bl, i, (double)floatProvider.sample(randomSource), (double)floatProvider2.sample(randomSource));
 	}
 
 	private void placeDebugMarkers(WorldGenLevel worldGenLevel, BlockPos blockPos, Column.Range range, LargeDripstoneFeature.WindOffsetter windOffsetter) {
@@ -149,15 +149,15 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 			return (int)DripstoneUtils.getDripstoneHeight((double)f, (double)this.radius, this.scale, this.bluntness);
 		}
 
-		void placeBlocks(WorldGenLevel worldGenLevel, Random random, LargeDripstoneFeature.WindOffsetter windOffsetter) {
+		void placeBlocks(WorldGenLevel worldGenLevel, RandomSource randomSource, LargeDripstoneFeature.WindOffsetter windOffsetter) {
 			for (int i = -this.radius; i <= this.radius; i++) {
 				for (int j = -this.radius; j <= this.radius; j++) {
 					float f = Mth.sqrt((float)(i * i + j * j));
 					if (!(f > (float)this.radius)) {
 						int k = this.getHeightAtRadius(f);
 						if (k > 0) {
-							if ((double)random.nextFloat() < 0.2) {
-								k = (int)((float)k * Mth.randomBetween(random, 0.8F, 1.0F));
+							if ((double)randomSource.nextFloat() < 0.2) {
+								k = (int)((float)k * Mth.randomBetween(randomSource, 0.8F, 1.0F));
 							}
 
 							BlockPos.MutableBlockPos mutableBlockPos = this.root.offset(i, 0, j).mutable();
@@ -192,10 +192,10 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 		@Nullable
 		private final Vec3 windSpeed;
 
-		WindOffsetter(int i, Random random, FloatProvider floatProvider) {
+		WindOffsetter(int i, RandomSource randomSource, FloatProvider floatProvider) {
 			this.originY = i;
-			float f = floatProvider.sample(random);
-			float g = Mth.randomBetween(random, 0.0F, (float) Math.PI);
+			float f = floatProvider.sample(randomSource);
+			float g = Mth.randomBetween(randomSource, 0.0F, (float) Math.PI);
 			this.windSpeed = new Vec3((double)(Mth.cos(g) * f), 0.0, (double)(Mth.sin(g) * f));
 		}
 

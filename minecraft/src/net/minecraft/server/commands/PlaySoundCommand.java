@@ -125,25 +125,26 @@ public class PlaySoundCommand {
 	) throws CommandSyntaxException {
 		double d = Math.pow(f > 1.0F ? (double)(f * 16.0F) : 16.0, 2.0);
 		int i = 0;
+		long l = commandSourceStack.getLevel().getRandom().nextLong();
 
 		for (ServerPlayer serverPlayer : collection) {
 			double e = vec3.x - serverPlayer.getX();
 			double j = vec3.y - serverPlayer.getY();
 			double k = vec3.z - serverPlayer.getZ();
-			double l = e * e + j * j + k * k;
+			double m = e * e + j * j + k * k;
 			Vec3 vec32 = vec3;
-			float m = f;
-			if (l > d) {
+			float n = f;
+			if (m > d) {
 				if (h <= 0.0F) {
 					continue;
 				}
 
-				double n = Math.sqrt(l);
-				vec32 = new Vec3(serverPlayer.getX() + e / n * 2.0, serverPlayer.getY() + j / n * 2.0, serverPlayer.getZ() + k / n * 2.0);
-				m = h;
+				double o = Math.sqrt(m);
+				vec32 = new Vec3(serverPlayer.getX() + e / o * 2.0, serverPlayer.getY() + j / o * 2.0, serverPlayer.getZ() + k / o * 2.0);
+				n = h;
 			}
 
-			serverPlayer.connection.send(new ClientboundCustomSoundPacket(resourceLocation, soundSource, vec32, m, g));
+			serverPlayer.connection.send(new ClientboundCustomSoundPacket(resourceLocation, soundSource, vec32, n, g, l));
 			i++;
 		}
 

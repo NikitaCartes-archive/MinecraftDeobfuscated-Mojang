@@ -10,15 +10,15 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mojang.logging.LogUtils;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
@@ -102,9 +102,9 @@ public class LootTable {
 
 	public void fill(Container container, LootContext lootContext) {
 		List<ItemStack> list = this.getRandomItems(lootContext);
-		Random random = lootContext.getRandom();
-		List<Integer> list2 = this.getAvailableSlots(container, random);
-		this.shuffleAndSplitItems(list, list2.size(), random);
+		RandomSource randomSource = lootContext.getRandom();
+		List<Integer> list2 = this.getAvailableSlots(container, randomSource);
+		this.shuffleAndSplitItems(list, list2.size(), randomSource);
 
 		for (ItemStack itemStack : list) {
 			if (list2.isEmpty()) {
@@ -120,7 +120,7 @@ public class LootTable {
 		}
 	}
 
-	private void shuffleAndSplitItems(List<ItemStack> list, int i, Random random) {
+	private void shuffleAndSplitItems(List<ItemStack> list, int i, RandomSource randomSource) {
 		List<ItemStack> list2 = Lists.<ItemStack>newArrayList();
 		Iterator<ItemStack> iterator = list.iterator();
 
@@ -135,16 +135,16 @@ public class LootTable {
 		}
 
 		while (i - list.size() - list2.size() > 0 && !list2.isEmpty()) {
-			ItemStack itemStack2 = (ItemStack)list2.remove(Mth.nextInt(random, 0, list2.size() - 1));
-			int j = Mth.nextInt(random, 1, itemStack2.getCount() / 2);
+			ItemStack itemStack2 = (ItemStack)list2.remove(Mth.nextInt(randomSource, 0, list2.size() - 1));
+			int j = Mth.nextInt(randomSource, 1, itemStack2.getCount() / 2);
 			ItemStack itemStack3 = itemStack2.split(j);
-			if (itemStack2.getCount() > 1 && random.nextBoolean()) {
+			if (itemStack2.getCount() > 1 && randomSource.nextBoolean()) {
 				list2.add(itemStack2);
 			} else {
 				list.add(itemStack2);
 			}
 
-			if (itemStack3.getCount() > 1 && random.nextBoolean()) {
+			if (itemStack3.getCount() > 1 && randomSource.nextBoolean()) {
 				list2.add(itemStack3);
 			} else {
 				list.add(itemStack3);
@@ -152,10 +152,10 @@ public class LootTable {
 		}
 
 		list.addAll(list2);
-		Collections.shuffle(list, random);
+		Util.shuffle(list, randomSource);
 	}
 
-	private List<Integer> getAvailableSlots(Container container, Random random) {
+	private List<Integer> getAvailableSlots(Container container, RandomSource randomSource) {
 		List<Integer> list = Lists.<Integer>newArrayList();
 
 		for (int i = 0; i < container.getContainerSize(); i++) {
@@ -164,7 +164,7 @@ public class LootTable {
 			}
 		}
 
-		Collections.shuffle(list, random);
+		Util.shuffle(list, randomSource);
 		return list;
 	}
 

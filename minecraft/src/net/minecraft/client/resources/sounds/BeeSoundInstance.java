@@ -17,7 +17,7 @@ public abstract class BeeSoundInstance extends AbstractTickableSoundInstance {
 	private boolean hasSwitched;
 
 	public BeeSoundInstance(Bee bee, SoundEvent soundEvent, SoundSource soundSource) {
-		super(soundEvent, soundSource);
+		super(soundEvent, soundSource, SoundInstance.createUnseededRandom());
 		this.bee = bee;
 		this.x = (double)((float)bee.getX());
 		this.y = (double)((float)bee.getY());

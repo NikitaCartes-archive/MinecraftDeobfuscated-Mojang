@@ -18,7 +18,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -190,7 +189,6 @@ public enum ConnectionProtocol {
 				new ConnectionProtocol.PacketSet()
 					.addPacket(ClientboundAddEntityPacket.class, ClientboundAddEntityPacket::new)
 					.addPacket(ClientboundAddExperienceOrbPacket.class, ClientboundAddExperienceOrbPacket::new)
-					.addPacket(ClientboundAddMobPacket.class, ClientboundAddMobPacket::new)
 					.addPacket(ClientboundAddPaintingPacket.class, ClientboundAddPaintingPacket::new)
 					.addPacket(ClientboundAddPlayerPacket.class, ClientboundAddPlayerPacket::new)
 					.addPacket(ClientboundAnimatePacket.class, ClientboundAnimatePacket::new)

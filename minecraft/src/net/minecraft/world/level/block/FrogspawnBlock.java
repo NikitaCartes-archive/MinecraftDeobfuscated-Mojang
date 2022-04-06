@@ -1,12 +1,12 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.frog.Tadpole;
@@ -49,8 +49,8 @@ public class FrogspawnBlock extends Block {
 		level.scheduleTick(blockPos, this, getFrogspawnHatchDelay(level.getRandom()));
 	}
 
-	private static int getFrogspawnHatchDelay(Random random) {
-		return random.nextInt(minHatchTickDelay, maxHatchTickDelay);
+	private static int getFrogspawnHatchDelay(RandomSource randomSource) {
+		return randomSource.nextInt(minHatchTickDelay, maxHatchTickDelay);
 	}
 
 	@Override
@@ -63,11 +63,11 @@ public class FrogspawnBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!this.canSurvive(blockState, serverLevel, blockPos)) {
 			this.destroyBlock(serverLevel, blockPos);
 		} else {
-			this.hatchFrogspawn(serverLevel, blockPos, random);
+			this.hatchFrogspawn(serverLevel, blockPos, randomSource);
 		}
 	}
 
@@ -84,26 +84,26 @@ public class FrogspawnBlock extends Block {
 		return fluidState.getType() == Fluids.WATER && fluidState2.getType() == Fluids.EMPTY;
 	}
 
-	private void hatchFrogspawn(ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	private void hatchFrogspawn(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		this.destroyBlock(serverLevel, blockPos);
 		serverLevel.playSound(null, blockPos, SoundEvents.FROGSPAWN_HATCH, SoundSource.BLOCKS, 1.0F, 1.0F);
-		this.spawnTadpoles(serverLevel, blockPos, random);
+		this.spawnTadpoles(serverLevel, blockPos, randomSource);
 	}
 
 	private void destroyBlock(Level level, BlockPos blockPos) {
 		level.destroyBlock(blockPos, false);
 	}
 
-	private void spawnTadpoles(ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		int i = random.nextInt(2, 6);
+	private void spawnTadpoles(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		int i = randomSource.nextInt(2, 6);
 
 		for (int j = 1; j <= i; j++) {
 			Tadpole tadpole = EntityType.TADPOLE.create(serverLevel);
-			double d = random.nextDouble();
-			double e = random.nextDouble();
+			double d = randomSource.nextDouble();
+			double e = randomSource.nextDouble();
 			double f = (double)blockPos.getX() + d;
 			double g = (double)blockPos.getZ() + e;
-			int k = random.nextInt(1, 361);
+			int k = randomSource.nextInt(1, 361);
 			tadpole.moveTo(f, (double)blockPos.getY() - 0.5, g, (float)k, 0.0F);
 			tadpole.setPersistenceRequired();
 			serverLevel.addFreshEntity(tadpole);

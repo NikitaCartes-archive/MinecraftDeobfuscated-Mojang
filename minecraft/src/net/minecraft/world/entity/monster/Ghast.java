@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -11,6 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
@@ -116,11 +116,11 @@ public class Ghast extends FlyingMob implements Enemy {
 	}
 
 	public static boolean checkGhastSpawnRules(
-		EntityType<Ghast> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Ghast> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL
-			&& random.nextInt(20) == 0
-			&& checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+			&& randomSource.nextInt(20) == 0
+			&& checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
 	}
 
 	@Override
@@ -317,10 +317,10 @@ public class Ghast extends FlyingMob implements Enemy {
 
 		@Override
 		public void start() {
-			Random random = this.ghast.getRandom();
-			double d = this.ghast.getX() + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
-			double e = this.ghast.getY() + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
-			double f = this.ghast.getZ() + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
+			RandomSource randomSource = this.ghast.getRandom();
+			double d = this.ghast.getX() + (double)((randomSource.nextFloat() * 2.0F - 1.0F) * 16.0F);
+			double e = this.ghast.getY() + (double)((randomSource.nextFloat() * 2.0F - 1.0F) * 16.0F);
+			double f = this.ghast.getZ() + (double)((randomSource.nextFloat() * 2.0F - 1.0F) * 16.0F);
 			this.ghast.getMoveControl().setWantedPosition(d, e, f, 1.0);
 		}
 	}

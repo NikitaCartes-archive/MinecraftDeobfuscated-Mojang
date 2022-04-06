@@ -4,10 +4,10 @@ import com.mojang.datafixers.Products.P2;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,20 +38,20 @@ public abstract class FoliagePlacer {
 	public void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
 		int k
 	) {
-		this.createFoliage(levelSimulatedReader, biConsumer, random, treeConfiguration, i, foliageAttachment, j, k, this.offset(random));
+		this.createFoliage(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, i, foliageAttachment, j, k, this.offset(randomSource));
 	}
 
 	protected abstract void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
@@ -60,19 +60,19 @@ public abstract class FoliagePlacer {
 		int l
 	);
 
-	public abstract int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration);
+	public abstract int foliageHeight(RandomSource randomSource, int i, TreeConfiguration treeConfiguration);
 
-	public int foliageRadius(Random random, int i) {
-		return this.radius.sample(random);
+	public int foliageRadius(RandomSource randomSource, int i) {
+		return this.radius.sample(randomSource);
 	}
 
-	private int offset(Random random) {
-		return this.offset.sample(random);
+	private int offset(RandomSource randomSource) {
+		return this.offset.sample(randomSource);
 	}
 
-	protected abstract boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl);
+	protected abstract boolean shouldSkipLocation(RandomSource randomSource, int i, int j, int k, int l, boolean bl);
 
-	protected boolean shouldSkipLocationSigned(Random random, int i, int j, int k, int l, boolean bl) {
+	protected boolean shouldSkipLocationSigned(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
 		int m;
 		int n;
 		if (bl) {
@@ -83,13 +83,13 @@ public abstract class FoliagePlacer {
 			n = Math.abs(k);
 		}
 
-		return this.shouldSkipLocation(random, m, j, n, l, bl);
+		return this.shouldSkipLocation(randomSource, m, j, n, l, bl);
 	}
 
 	protected void placeLeavesRow(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		BlockPos blockPos,
 		int i,
@@ -101,19 +101,23 @@ public abstract class FoliagePlacer {
 
 		for (int l = -i; l <= i + k; l++) {
 			for (int m = -i; m <= i + k; m++) {
-				if (!this.shouldSkipLocationSigned(random, l, j, m, i, bl)) {
+				if (!this.shouldSkipLocationSigned(randomSource, l, j, m, i, bl)) {
 					mutableBlockPos.setWithOffset(blockPos, l, j, m);
-					tryPlaceLeaf(levelSimulatedReader, biConsumer, random, treeConfiguration, mutableBlockPos);
+					tryPlaceLeaf(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, mutableBlockPos);
 				}
 			}
 		}
 	}
 
 	protected static void tryPlaceLeaf(
-		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, TreeConfiguration treeConfiguration, BlockPos blockPos
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		RandomSource randomSource,
+		TreeConfiguration treeConfiguration,
+		BlockPos blockPos
 	) {
 		if (TreeFeature.validTreePos(levelSimulatedReader, blockPos)) {
-			BlockState blockState = treeConfiguration.foliageProvider.getState(random, blockPos);
+			BlockState blockState = treeConfiguration.foliageProvider.getState(randomSource, blockPos);
 			if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
 				blockState = blockState.setValue(
 					BlockStateProperties.WATERLOGGED, Boolean.valueOf(levelSimulatedReader.isFluidAtPosition(blockPos, fluidState -> fluidState.isSourceOfType(Fluids.WATER)))

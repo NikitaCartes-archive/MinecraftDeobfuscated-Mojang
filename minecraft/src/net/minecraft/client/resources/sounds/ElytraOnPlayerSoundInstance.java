@@ -14,7 +14,7 @@ public class ElytraOnPlayerSoundInstance extends AbstractTickableSoundInstance {
 	private int time;
 
 	public ElytraOnPlayerSoundInstance(LocalPlayer localPlayer) {
-		super(SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS);
+		super(SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
 		this.player = localPlayer;
 		this.looping = true;
 		this.delay = 0;

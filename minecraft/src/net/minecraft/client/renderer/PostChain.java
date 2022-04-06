@@ -11,10 +11,8 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -28,7 +26,6 @@ import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.io.IOUtils;
 
 @Environment(EnvType.CLIENT)
 public class PostChain implements AutoCloseable {
@@ -58,57 +55,65 @@ public class PostChain implements AutoCloseable {
 	}
 
 	private void load(TextureManager textureManager, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
-		Resource resource = null;
+		Resource resource = this.resourceManager.getResourceOrThrow(resourceLocation);
 
 		try {
-			resource = this.resourceManager.getResource(resourceLocation);
-			JsonObject jsonObject = GsonHelper.parse(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-			if (GsonHelper.isArrayNode(jsonObject, "targets")) {
-				JsonArray jsonArray = jsonObject.getAsJsonArray("targets");
-				int i = 0;
+			Reader reader = resource.openAsReader();
 
-				for (JsonElement jsonElement : jsonArray) {
-					try {
-						this.parseTargetNode(jsonElement);
-					} catch (Exception var17) {
-						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var17);
-						chainedJsonException.prependJsonKey("targets[" + i + "]");
-						throw chainedJsonException;
+			try {
+				JsonObject jsonObject = GsonHelper.parse(reader);
+				if (GsonHelper.isArrayNode(jsonObject, "targets")) {
+					JsonArray jsonArray = jsonObject.getAsJsonArray("targets");
+					int i = 0;
+
+					for (JsonElement jsonElement : jsonArray) {
+						try {
+							this.parseTargetNode(jsonElement);
+						} catch (Exception var14) {
+							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var14);
+							chainedJsonException.prependJsonKey("targets[" + i + "]");
+							throw chainedJsonException;
+						}
+
+						i++;
 					}
-
-					i++;
 				}
-			}
 
-			if (GsonHelper.isArrayNode(jsonObject, "passes")) {
-				JsonArray jsonArray = jsonObject.getAsJsonArray("passes");
-				int i = 0;
+				if (GsonHelper.isArrayNode(jsonObject, "passes")) {
+					JsonArray jsonArray = jsonObject.getAsJsonArray("passes");
+					int i = 0;
 
-				for (JsonElement jsonElement : jsonArray) {
-					try {
-						this.parsePassNode(textureManager, jsonElement);
-					} catch (Exception var16) {
-						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var16);
-						chainedJsonException.prependJsonKey("passes[" + i + "]");
-						throw chainedJsonException;
+					for (JsonElement jsonElement : jsonArray) {
+						try {
+							this.parsePassNode(textureManager, jsonElement);
+						} catch (Exception var13) {
+							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var13);
+							chainedJsonException.prependJsonKey("passes[" + i + "]");
+							throw chainedJsonException;
+						}
+
+						i++;
 					}
-
-					i++;
 				}
-			}
-		} catch (Exception var18) {
-			String string;
-			if (resource != null) {
-				string = " (" + resource.getSourceName() + ")";
-			} else {
-				string = "";
+			} catch (Throwable var15) {
+				if (reader != null) {
+					try {
+						reader.close();
+					} catch (Throwable var12) {
+						var15.addSuppressed(var12);
+					}
+				}
+
+				throw var15;
 			}
 
-			ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var18);
-			chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + string);
+			if (reader != null) {
+				reader.close();
+			}
+		} catch (Exception var16) {
+			ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var16);
+			chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + " (" + resource.sourcePackId() + ")");
 			throw chainedJsonException2;
-		} finally {
-			IOUtils.closeQuietly(resource);
 		}
 	}
 
@@ -167,16 +172,9 @@ public class PostChain implements AutoCloseable {
 							}
 
 							ResourceLocation resourceLocation = new ResourceLocation("textures/effect/" + string6 + ".png");
-							Resource resource = null;
-
-							try {
-								resource = this.resourceManager.getResource(resourceLocation);
-							} catch (FileNotFoundException var31) {
-								throw new ChainedJsonException("Render target or texture '" + string6 + "' does not exist");
-							} finally {
-								IOUtils.closeQuietly(resource);
-							}
-
+							this.resourceManager
+								.getResource(resourceLocation)
+								.orElseThrow(() -> new ChainedJsonException("Render target or texture '" + string6 + "' does not exist"));
 							RenderSystem.setShaderTexture(0, resourceLocation);
 							textureManager.bindForSetup(resourceLocation);
 							AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
@@ -197,8 +195,8 @@ public class PostChain implements AutoCloseable {
 						} else {
 							postPass.addAuxAsset(string4, renderTarget3::getColorTextureId, renderTarget3.width, renderTarget3.height);
 						}
-					} catch (Exception var33) {
-						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var33);
+					} catch (Exception var26) {
+						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var26);
 						chainedJsonException.prependJsonKey("auxtargets[" + i + "]");
 						throw chainedJsonException;
 					}
@@ -214,8 +212,8 @@ public class PostChain implements AutoCloseable {
 				for (JsonElement jsonElement3 : jsonArray2) {
 					try {
 						this.parseUniformNode(jsonElement3);
-					} catch (Exception var30) {
-						ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var30);
+					} catch (Exception var25) {
+						ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var25);
 						chainedJsonException2.prependJsonKey("uniforms[" + l + "]");
 						throw chainedJsonException2;
 					}

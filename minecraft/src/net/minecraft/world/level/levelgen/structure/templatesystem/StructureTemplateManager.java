@@ -21,7 +21,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.storage.LevelResource;
@@ -71,15 +70,15 @@ public class StructureTemplateManager {
 		ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + ".nbt");
 
 		try {
-			Resource resource = this.resourceManager.getResource(resourceLocation2);
+			InputStream inputStream = this.resourceManager.open(resourceLocation2);
 
 			Optional var4;
 			try {
-				var4 = Optional.of(this.readStructure(resource.getInputStream()));
+				var4 = Optional.of(this.readStructure(inputStream));
 			} catch (Throwable var7) {
-				if (resource != null) {
+				if (inputStream != null) {
 					try {
-						resource.close();
+						inputStream.close();
 					} catch (Throwable var6) {
 						var7.addSuppressed(var6);
 					}
@@ -88,8 +87,8 @@ public class StructureTemplateManager {
 				throw var7;
 			}
 
-			if (resource != null) {
-				resource.close();
+			if (inputStream != null) {
+				inputStream.close();
 			}
 
 			return var4;

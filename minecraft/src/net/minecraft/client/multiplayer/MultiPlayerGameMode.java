@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler;
 import net.minecraft.client.multiplayer.prediction.PredictiveAction;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -213,7 +214,16 @@ public class MultiPlayerGameMode {
 					SoundType soundType = blockState.getSoundType();
 					this.minecraft
 						.getSoundManager()
-						.play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F, blockPos));
+						.play(
+							new SimpleSoundInstance(
+								soundType.getHitSound(),
+								SoundSource.BLOCKS,
+								(soundType.getVolume() + 1.0F) / 8.0F,
+								soundType.getPitch() * 0.5F,
+								SoundInstance.createUnseededRandom(),
+								blockPos
+							)
+						);
 				}
 
 				this.destroyTicks++;

@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -47,7 +47,7 @@ public class WoodlandMansionStructure extends Structure {
 		WorldGenLevel worldGenLevel,
 		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
-		Random random,
+		RandomSource randomSource,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
 		PiecesContainer piecesContainer

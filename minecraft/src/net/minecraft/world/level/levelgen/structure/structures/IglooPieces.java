@@ -2,11 +2,11 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -43,10 +43,14 @@ public class IglooPieces {
 	);
 
 	public static void addPieces(
-		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, StructurePieceAccessor structurePieceAccessor, Random random
+		StructureTemplateManager structureTemplateManager,
+		BlockPos blockPos,
+		Rotation rotation,
+		StructurePieceAccessor structurePieceAccessor,
+		RandomSource randomSource
 	) {
-		if (random.nextDouble() < 0.5) {
-			int i = random.nextInt(8) + 4;
+		if (randomSource.nextDouble() < 0.5) {
+			int i = randomSource.nextInt(8) + 4;
 			structurePieceAccessor.addPiece(new IglooPieces.IglooPiece(structureTemplateManager, STRUCTURE_LOCATION_LABORATORY, blockPos, rotation, i * 3));
 
 			for (int j = 0; j < i - 1; j++) {
@@ -98,12 +102,12 @@ public class IglooPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			if ("chest".equals(string)) {
 				serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
 				BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos.below());
 				if (blockEntity instanceof ChestBlockEntity) {
-					((ChestBlockEntity)blockEntity).setLootTable(BuiltInLootTables.IGLOO_CHEST, random.nextLong());
+					((ChestBlockEntity)blockEntity).setLootTable(BuiltInLootTables.IGLOO_CHEST, randomSource.nextLong());
 				}
 			}
 		}
@@ -113,7 +117,7 @@ public class IglooPieces {
 			WorldGenLevel worldGenLevel,
 			StructureManager structureManager,
 			ChunkGenerator chunkGenerator,
-			Random random,
+			RandomSource randomSource,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos,
 			BlockPos blockPos
@@ -126,7 +130,7 @@ public class IglooPieces {
 			int i = worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
 			BlockPos blockPos4 = this.templatePosition;
 			this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-			super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
 			if (resourceLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
 				BlockPos blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)));
 				BlockState blockState = worldGenLevel.getBlockState(blockPos5.below());

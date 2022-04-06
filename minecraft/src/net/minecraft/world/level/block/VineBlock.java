@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -10,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
@@ -178,9 +178,9 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if (random.nextInt(4) == 0) {
-			Direction direction = Direction.getRandom(random);
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (randomSource.nextInt(4) == 0) {
+			Direction direction = Direction.getRandom(randomSource);
 			BlockPos blockPos2 = blockPos.above();
 			if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
 				if (this.canSpread(serverLevel, blockPos)) {
@@ -203,7 +203,7 @@ public class VineBlock extends Block {
 								serverLevel.setBlock(blockPos4, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
 							} else if (bl2 && serverLevel.isEmptyBlock(blockPos5) && isAcceptableNeighbour(serverLevel, blockPos.relative(direction3), direction4)) {
 								serverLevel.setBlock(blockPos5, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
-							} else if ((double)random.nextFloat() < 0.05 && isAcceptableNeighbour(serverLevel, blockPos3.above(), Direction.UP)) {
+							} else if ((double)randomSource.nextFloat() < 0.05 && isAcceptableNeighbour(serverLevel, blockPos3.above(), Direction.UP)) {
 								serverLevel.setBlock(blockPos3, this.defaultBlockState().setValue(UP, Boolean.valueOf(true)), 2);
 							}
 						}
@@ -226,7 +226,7 @@ public class VineBlock extends Block {
 						BlockState blockState3 = blockState;
 
 						for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-							if (random.nextBoolean() || !isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), direction2)) {
+							if (randomSource.nextBoolean() || !isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), direction2)) {
 								blockState3 = blockState3.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
 							}
 						}
@@ -244,7 +244,7 @@ public class VineBlock extends Block {
 					BlockState blockState2 = serverLevel.getBlockState(blockPos3);
 					if (blockState2.isAir() || blockState2.is(this)) {
 						BlockState blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2;
-						BlockState blockState5 = this.copyRandomFaces(blockState, blockState4, random);
+						BlockState blockState5 = this.copyRandomFaces(blockState, blockState4, randomSource);
 						if (blockState4 != blockState5 && this.hasHorizontalConnection(blockState5)) {
 							serverLevel.setBlock(blockPos3, blockState5, 2);
 						}
@@ -254,9 +254,9 @@ public class VineBlock extends Block {
 		}
 	}
 
-	private BlockState copyRandomFaces(BlockState blockState, BlockState blockState2, Random random) {
+	private BlockState copyRandomFaces(BlockState blockState, BlockState blockState2, RandomSource randomSource) {
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
-			if (random.nextBoolean()) {
+			if (randomSource.nextBoolean()) {
 				BooleanProperty booleanProperty = getPropertyForFace(direction);
 				if ((Boolean)blockState.getValue(booleanProperty)) {
 					blockState2 = blockState2.setValue(booleanProperty, Boolean.valueOf(true));

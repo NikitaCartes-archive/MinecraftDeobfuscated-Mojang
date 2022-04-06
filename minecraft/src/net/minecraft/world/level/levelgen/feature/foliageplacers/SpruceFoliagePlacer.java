@@ -2,9 +2,9 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,7 +32,7 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 	protected void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
@@ -41,12 +41,12 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 		int l
 	) {
 		BlockPos blockPos = foliageAttachment.pos();
-		int m = random.nextInt(2);
+		int m = randomSource.nextInt(2);
 		int n = 1;
 		int o = 0;
 
 		for (int p = l; p >= -j; p--) {
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, m, p, foliageAttachment.doubleTrunk());
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, m, p, foliageAttachment.doubleTrunk());
 			if (m >= n) {
 				m = o;
 				o = 1;
@@ -58,12 +58,12 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 	}
 
 	@Override
-	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-		return Math.max(4, i - this.trunkHeight.sample(random));
+	public int foliageHeight(RandomSource randomSource, int i, TreeConfiguration treeConfiguration) {
+		return Math.max(4, i - this.trunkHeight.sample(randomSource));
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+	protected boolean shouldSkipLocation(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
 		return i == l && k == l && l > 0;
 	}
 }

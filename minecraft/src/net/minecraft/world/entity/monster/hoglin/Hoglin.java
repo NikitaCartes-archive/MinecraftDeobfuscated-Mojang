@@ -2,7 +2,6 @@ package net.minecraft.world.entity.monster.hoglin;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -161,7 +161,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		if (this.isConverting()) {
 			this.timeInOverworld++;
 			if (this.timeInOverworld > 300) {
-				this.playSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);
+				this.playSoundEvent(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);
 				this.finishConversion((ServerLevel)this.level);
 			}
 		} else {
@@ -190,7 +190,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	public static boolean checkHoglinSpawnRules(
-		EntityType<Hoglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Hoglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
 	}
@@ -379,7 +379,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		this.playSound(SoundEvents.HOGLIN_STEP, 0.15F, 1.0F);
 	}
 
-	protected void playSound(SoundEvent soundEvent) {
+	protected void playSoundEvent(SoundEvent soundEvent) {
 		this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
 	}
 

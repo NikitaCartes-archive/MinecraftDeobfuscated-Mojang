@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 
 public class RarityFilter extends PlacementFilter {
 	public static final Codec<RarityFilter> CODEC = ExtraCodecs.POSITIVE_INT
@@ -21,8 +21,8 @@ public class RarityFilter extends PlacementFilter {
 	}
 
 	@Override
-	protected boolean shouldPlace(PlacementContext placementContext, Random random, BlockPos blockPos) {
-		return random.nextFloat() < 1.0F / (float)this.chance;
+	protected boolean shouldPlace(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
+		return randomSource.nextFloat() < 1.0F / (float)this.chance;
 	}
 
 	@Override

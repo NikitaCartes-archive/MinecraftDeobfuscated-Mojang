@@ -1,14 +1,14 @@
 package net.minecraft.world.entity.ai.sensing;
 
-import java.util.Random;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 public abstract class Sensor<E extends LivingEntity> {
-	private static final Random RANDOM = new Random();
+	private static final RandomSource RANDOM = RandomSource.createThreadSafe();
 	private static final int DEFAULT_SCAN_RATE = 20;
 	protected static final int TARGETING_RANGE = 16;
 	private static final TargetingConditions TARGET_CONDITIONS = TargetingConditions.forNonCombat().range(16.0);

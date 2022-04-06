@@ -2088,6 +2088,14 @@ public class RecipeProvider implements DataProvider {
 			.pattern("SS")
 			.unlockedBy("has_amethyst_shard", has(Items.AMETHYST_SHARD))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Items.RECOVERY_COMPASS)
+			.define('C', Items.COMPASS)
+			.define('S', Items.ECHO_SHARD)
+			.pattern("SSS")
+			.pattern("SCS")
+			.pattern("SSS")
+			.unlockedBy("has_echo_shard", has(Items.ECHO_SHARD))
+			.save(consumer);
 		SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
 		SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
 		SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");

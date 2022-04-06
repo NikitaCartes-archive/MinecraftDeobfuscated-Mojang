@@ -1,6 +1,5 @@
 package net.minecraft.world.item;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -81,7 +81,7 @@ public class BoneMealItem extends Item {
 			if (!(level instanceof ServerLevel)) {
 				return true;
 			} else {
-				Random random = level.getRandom();
+				RandomSource randomSource = level.getRandom();
 
 				label78:
 				for (int i = 0; i < 128; i++) {
@@ -89,7 +89,7 @@ public class BoneMealItem extends Item {
 					BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
 
 					for (int j = 0; j < i / 16; j++) {
-						blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
+						blockPos2 = blockPos2.offset(randomSource.nextInt(3) - 1, (randomSource.nextInt(3) - 1) * randomSource.nextInt(3) / 2, randomSource.nextInt(3) - 1);
 						if (level.getBlockState(blockPos2).isCollisionShapeFullBlock(level, blockPos2)) {
 							continue label78;
 						}
@@ -106,7 +106,7 @@ public class BoneMealItem extends Item {
 							if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
 								blockState = blockState.setValue(BaseCoralWallFanBlock.FACING, direction);
 							}
-						} else if (random.nextInt(4) == 0) {
+						} else if (randomSource.nextInt(4) == 0) {
 							blockState = (BlockState)Registry.BLOCK
 								.getTag(BlockTags.UNDERWATER_BONEMEALS)
 								.flatMap(named -> named.getRandomElement(level.random))
@@ -117,7 +117,7 @@ public class BoneMealItem extends Item {
 
 					if (blockState.is(BlockTags.WALL_CORALS, blockStateBase -> blockStateBase.hasProperty(BaseCoralWallFanBlock.FACING))) {
 						for (int k = 0; !blockState.canSurvive(level, blockPos2) && k < 4; k++) {
-							blockState = blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
+							blockState = blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(randomSource));
 						}
 					}
 
@@ -125,8 +125,8 @@ public class BoneMealItem extends Item {
 						BlockState blockState2 = level.getBlockState(blockPos2);
 						if (blockState2.is(Blocks.WATER) && level.getFluidState(blockPos2).getAmount() == 8) {
 							level.setBlock(blockPos2, blockState, 3);
-						} else if (blockState2.is(Blocks.SEAGRASS) && random.nextInt(10) == 0) {
-							((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)level, random, blockPos2, blockState2);
+						} else if (blockState2.is(Blocks.SEAGRASS) && randomSource.nextInt(10) == 0) {
+							((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)level, randomSource, blockPos2, blockState2);
 						}
 					}
 				}
@@ -164,16 +164,16 @@ public class BoneMealItem extends Item {
 			levelAccessor.addParticle(
 				ParticleTypes.HAPPY_VILLAGER, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0
 			);
-			Random random = levelAccessor.getRandom();
+			RandomSource randomSource = levelAccessor.getRandom();
 
 			for (int j = 0; j < i; j++) {
-				double f = random.nextGaussian() * 0.02;
-				double g = random.nextGaussian() * 0.02;
-				double h = random.nextGaussian() * 0.02;
+				double f = randomSource.nextGaussian() * 0.02;
+				double g = randomSource.nextGaussian() * 0.02;
+				double h = randomSource.nextGaussian() * 0.02;
 				double k = 0.5 - d;
-				double l = (double)blockPos.getX() + k + random.nextDouble() * d * 2.0;
-				double m = (double)blockPos.getY() + random.nextDouble() * e;
-				double n = (double)blockPos.getZ() + k + random.nextDouble() * d * 2.0;
+				double l = (double)blockPos.getX() + k + randomSource.nextDouble() * d * 2.0;
+				double m = (double)blockPos.getY() + randomSource.nextDouble() * e;
+				double n = (double)blockPos.getZ() + k + randomSource.nextDouble() * d * 2.0;
 				if (!levelAccessor.getBlockState(new BlockPos(l, m, n).below()).isAir()) {
 					levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, l, m, n, f, g, h);
 				}

@@ -739,11 +739,6 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		);
 	}
 
-	@Nullable
-	public static Entity create(Level level, @Nullable EntityType<?> entityType) {
-		return entityType == null ? null : entityType.create(level);
-	}
-
 	public AABB getAABB(double d, double e, double f) {
 		float g = this.getWidth() / 2.0F;
 		return new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)this.getHeight(), f + (double)g);

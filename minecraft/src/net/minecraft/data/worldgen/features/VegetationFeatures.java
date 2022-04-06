@@ -444,6 +444,11 @@ public class VegetationFeatures {
 			PlacementUtils.inlinePlaced(TreeFeatures.HUGE_RED_MUSHROOM), PlacementUtils.inlinePlaced(TreeFeatures.HUGE_BROWN_MUSHROOM)
 		)
 	);
+	public static final Holder<ConfiguredFeature<RandomFeatureConfiguration, ?>> MANGROVE_VEGETATION = FeatureUtils.register(
+		"mangrove_vegetation",
+		Feature.RANDOM_SELECTOR,
+		new RandomFeatureConfiguration(List.of(new WeightedPlacedFeature(TreePlacements.TALL_MANGROVE_CHECKED, 0.75F)), TreePlacements.MANGROVE_CHECKED)
+	);
 
 	private static RandomPatchConfiguration grassPatch(BlockStateProvider blockStateProvider, int i) {
 		return FeatureUtils.simpleRandomPatchConfiguration(i, PlacementUtils.onlyWhenEmpty(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(blockStateProvider)));

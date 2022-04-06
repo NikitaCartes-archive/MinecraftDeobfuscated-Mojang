@@ -2,9 +2,9 @@ package net.minecraft.world.level.biome;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 
 public class AmbientParticleSettings {
 	public static final Codec<AmbientParticleSettings> CODEC = RecordCodecBuilder.create(
@@ -26,7 +26,7 @@ public class AmbientParticleSettings {
 		return this.options;
 	}
 
-	public boolean canSpawn(Random random) {
-		return random.nextFloat() <= this.probability;
+	public boolean canSpawn(RandomSource randomSource) {
+		return randomSource.nextFloat() <= this.probability;
 	}
 }

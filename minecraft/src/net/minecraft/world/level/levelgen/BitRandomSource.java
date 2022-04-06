@@ -1,5 +1,7 @@
 package net.minecraft.world.level.levelgen;
 
+import net.minecraft.util.RandomSource;
+
 public interface BitRandomSource extends RandomSource {
 	float FLOAT_MULTIPLIER = 5.9604645E-8F;
 	double DOUBLE_MULTIPLIER = 1.110223E-16F;

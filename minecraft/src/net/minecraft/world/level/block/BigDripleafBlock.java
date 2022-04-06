@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Map;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -88,8 +88,8 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		return Shapes.or((VoxelShape)LEAF_SHAPES.get(blockState.getValue(TILT)), (VoxelShape)STEM_SHAPES.get(blockState.getValue(FACING)));
 	}
 
-	public static void placeWithRandomHeight(LevelAccessor levelAccessor, Random random, BlockPos blockPos, Direction direction) {
-		int i = Mth.nextInt(random, 2, 5);
+	public static void placeWithRandomHeight(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, Direction direction) {
+		int i = Mth.nextInt(randomSource, 2, 5);
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		int j = 0;
 
@@ -166,12 +166,12 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		BlockPos blockPos2 = blockPos.above();
 		BlockState blockState2 = serverLevel.getBlockState(blockPos2);
 		if (canPlaceAt(serverLevel, blockPos2, blockState2)) {
@@ -191,7 +191,7 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (serverLevel.hasNeighborSignal(blockPos)) {
 			resetTilt(blockState, serverLevel, blockPos);
 		} else {

@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.BambooBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -32,15 +32,15 @@ public class BambooFeature extends Feature<ProbabilityFeatureConfiguration> {
 		int i = 0;
 		BlockPos blockPos = featurePlaceContext.origin();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		ProbabilityFeatureConfiguration probabilityFeatureConfiguration = featurePlaceContext.config();
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		BlockPos.MutableBlockPos mutableBlockPos2 = blockPos.mutable();
 		if (worldGenLevel.isEmptyBlock(mutableBlockPos)) {
 			if (Blocks.BAMBOO.defaultBlockState().canSurvive(worldGenLevel, mutableBlockPos)) {
-				int j = random.nextInt(12) + 5;
-				if (random.nextFloat() < probabilityFeatureConfiguration.probability) {
-					int k = random.nextInt(4) + 1;
+				int j = randomSource.nextInt(12) + 5;
+				if (randomSource.nextFloat() < probabilityFeatureConfiguration.probability) {
+					int k = randomSource.nextInt(4) + 1;
 
 					for (int l = blockPos.getX() - k; l <= blockPos.getX() + k; l++) {
 						for (int m = blockPos.getZ() - k; m <= blockPos.getZ() + k; m++) {

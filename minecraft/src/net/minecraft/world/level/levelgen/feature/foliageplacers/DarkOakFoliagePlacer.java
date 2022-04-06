@@ -2,9 +2,9 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +28,7 @@ public class DarkOakFoliagePlacer extends FoliagePlacer {
 	protected void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
@@ -39,30 +39,30 @@ public class DarkOakFoliagePlacer extends FoliagePlacer {
 		BlockPos blockPos = foliageAttachment.pos().above(l);
 		boolean bl = foliageAttachment.doubleTrunk();
 		if (bl) {
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + 2, -1, bl);
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + 3, 0, bl);
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + 2, 1, bl);
-			if (random.nextBoolean()) {
-				this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k, 2, bl);
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, k + 2, -1, bl);
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, k + 3, 0, bl);
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, k + 2, 1, bl);
+			if (randomSource.nextBoolean()) {
+				this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, k, 2, bl);
 			}
 		} else {
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + 2, -1, bl);
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, random, treeConfiguration, blockPos, k + 1, 0, bl);
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, k + 2, -1, bl);
+			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, blockPos, k + 1, 0, bl);
 		}
 	}
 
 	@Override
-	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
+	public int foliageHeight(RandomSource randomSource, int i, TreeConfiguration treeConfiguration) {
 		return 4;
 	}
 
 	@Override
-	protected boolean shouldSkipLocationSigned(Random random, int i, int j, int k, int l, boolean bl) {
-		return j != 0 || !bl || i != -l && i < l || k != -l && k < l ? super.shouldSkipLocationSigned(random, i, j, k, l, bl) : true;
+	protected boolean shouldSkipLocationSigned(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
+		return j != 0 || !bl || i != -l && i < l || k != -l && k < l ? super.shouldSkipLocationSigned(randomSource, i, j, k, l, bl) : true;
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+	protected boolean shouldSkipLocation(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
 		if (j == -1 && !bl) {
 			return i == l && k == l;
 		} else {

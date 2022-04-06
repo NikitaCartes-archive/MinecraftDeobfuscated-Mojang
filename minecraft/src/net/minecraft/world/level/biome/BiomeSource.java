@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -39,6 +38,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.util.Graph;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -185,9 +185,9 @@ public abstract class BiomeSource implements BiomeResolver {
 
 	@Nullable
 	public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(
-		int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, Random random, Climate.Sampler sampler
+		int i, int j, int k, int l, Predicate<Holder<Biome>> predicate, RandomSource randomSource, Climate.Sampler sampler
 	) {
-		return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false, sampler);
+		return this.findBiomeHorizontal(i, j, k, l, 1, predicate, randomSource, false, sampler);
 	}
 
 	@Nullable
@@ -222,7 +222,7 @@ public abstract class BiomeSource implements BiomeResolver {
 
 	@Nullable
 	public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(
-		int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler
+		int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, RandomSource randomSource, boolean bl, Climate.Sampler sampler
 	) {
 		int n = QuartPos.fromBlock(i);
 		int o = QuartPos.fromBlock(k);
@@ -249,7 +249,7 @@ public abstract class BiomeSource implements BiomeResolver {
 					int x = o + u;
 					Holder<Biome> holder = this.getNoiseBiome(w, q, x, sampler);
 					if (predicate.test(holder)) {
-						if (pair == null || random.nextInt(r + 1) == 0) {
+						if (pair == null || randomSource.nextInt(r + 1) == 0) {
 							BlockPos blockPos = new BlockPos(QuartPos.toBlock(w), j, QuartPos.toBlock(x));
 							if (bl) {
 								return Pair.of(blockPos, holder);

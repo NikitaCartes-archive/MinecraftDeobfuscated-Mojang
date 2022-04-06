@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,6 +63,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
@@ -178,7 +178,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public double zOld;
 	public float maxUpStep;
 	public boolean noPhysics;
-	protected final Random random = new Random();
+	protected final RandomSource random = RandomSource.create();
 	public int tickCount;
 	private int remainingFireTicks = -this.getFireImmuneTicks();
 	protected boolean wasTouchingWater;
@@ -942,6 +942,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public void playSound(SoundEvent soundEvent, float f, float g) {
 		if (!this.isSilent()) {
 			this.level.playSound(null, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), f, g);
+		}
+	}
+
+	public void playSound(SoundEvent soundEvent) {
+		if (!this.isSilent()) {
+			this.playSound(soundEvent, 1.0F, 1.0F);
 		}
 	}
 
@@ -1995,7 +2001,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 	}
 
-	public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener, ServerLevel> biConsumer) {
+	public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> biConsumer) {
 	}
 
 	@Nullable
@@ -2963,7 +2969,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			}
 
 			this.levelCallback.onMove();
-			this.updateDynamicGameEventListener(DynamicGameEventListener::move);
 		}
 	}
 
@@ -2981,8 +2986,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		double f = clientboundAddEntityPacket.getZ();
 		this.setPacketCoordinates(d, e, f);
 		this.moveTo(d, e, f);
-		this.setXRot((float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0F);
-		this.setYRot((float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0F);
+		this.setXRot(clientboundAddEntityPacket.getXRot());
+		this.setYRot(clientboundAddEntityPacket.getYRot());
 		this.setId(i);
 		this.setUUID(clientboundAddEntityPacket.getUUID());
 	}
@@ -3006,6 +3011,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public float getYRot() {
 		return this.yRot;
+	}
+
+	public float getVisualRotationYInDegrees() {
+		return this.getYRot();
 	}
 
 	public void setYRot(float f) {

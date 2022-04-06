@@ -13,13 +13,13 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -45,7 +45,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		Random random = lootContext.getRandom();
+		RandomSource randomSource = lootContext.getRandom();
 		Enchantment enchantment;
 		if (this.enchantments.isEmpty()) {
 			boolean bl = itemStack.is(Items.BOOK);
@@ -59,16 +59,16 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 				return itemStack;
 			}
 
-			enchantment = (Enchantment)list.get(random.nextInt(list.size()));
+			enchantment = (Enchantment)list.get(randomSource.nextInt(list.size()));
 		} else {
-			enchantment = (Enchantment)this.enchantments.get(random.nextInt(this.enchantments.size()));
+			enchantment = (Enchantment)this.enchantments.get(randomSource.nextInt(this.enchantments.size()));
 		}
 
-		return enchantItem(itemStack, enchantment, random);
+		return enchantItem(itemStack, enchantment, randomSource);
 	}
 
-	private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, Random random) {
-		int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+	private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, RandomSource randomSource) {
+		int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
 		if (itemStack.is(Items.BOOK)) {
 			itemStack = new ItemStack(Items.ENCHANTED_BOOK);
 			EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));

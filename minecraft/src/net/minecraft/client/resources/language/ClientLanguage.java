@@ -3,7 +3,6 @@ package net.minecraft.client.resources.language;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -15,7 +14,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.util.FormattedCharSequence;
 import org.slf4j.Logger;
 
@@ -43,9 +41,8 @@ public class ClientLanguage extends Language {
 				try {
 					ResourceLocation resourceLocation = new ResourceLocation(string3, string2);
 					appendFrom(string, resourceManager.getResourceStack(resourceLocation), map);
-				} catch (FileNotFoundException var11) {
-				} catch (Exception var12) {
-					LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, var12.toString());
+				} catch (Exception var11) {
+					LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, var11.toString());
 				}
 			}
 		}
@@ -53,48 +50,30 @@ public class ClientLanguage extends Language {
 		return new ClientLanguage(ImmutableMap.copyOf(map), bl);
 	}
 
-	private static void appendFrom(String string, List<ResourceThunk> list, Map<String, String> map) {
-		for (ResourceThunk resourceThunk : list) {
+	private static void appendFrom(String string, List<Resource> list, Map<String, String> map) {
+		for (Resource resource : list) {
 			try {
-				Resource resource = resourceThunk.open();
+				InputStream inputStream = resource.open();
 
 				try {
-					InputStream inputStream = resource.getInputStream();
-
-					try {
-						Language.loadFromJson(inputStream, map::put);
-					} catch (Throwable var11) {
-						if (inputStream != null) {
-							try {
-								inputStream.close();
-							} catch (Throwable var10) {
-								var11.addSuppressed(var10);
-							}
-						}
-
-						throw var11;
-					}
-
+					Language.loadFromJson(inputStream, map::put);
+				} catch (Throwable var9) {
 					if (inputStream != null) {
-						inputStream.close();
-					}
-				} catch (Throwable var12) {
-					if (resource != null) {
 						try {
-							resource.close();
-						} catch (Throwable var9) {
-							var12.addSuppressed(var9);
+							inputStream.close();
+						} catch (Throwable var8) {
+							var9.addSuppressed(var8);
 						}
 					}
 
-					throw var12;
+					throw var9;
 				}
 
-				if (resource != null) {
-					resource.close();
+				if (inputStream != null) {
+					inputStream.close();
 				}
-			} catch (IOException var13) {
-				LOGGER.warn("Failed to load translations for {} from pack {}", string, resourceThunk.sourcePackId(), var13);
+			} catch (IOException var10) {
+				LOGGER.warn("Failed to load translations for {} from pack {}", string, resource.sourcePackId(), var10);
 			}
 		}
 	}

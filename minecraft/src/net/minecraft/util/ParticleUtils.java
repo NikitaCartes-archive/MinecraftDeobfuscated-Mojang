@@ -1,6 +1,5 @@
 package net.minecraft.util;
 
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,8 +26,8 @@ public class ParticleUtils {
 		}
 	}
 
-	private static Vec3 getRandomSpeedRanges(Random random) {
-		return new Vec3(Mth.nextDouble(random, -0.5, 0.5), Mth.nextDouble(random, -0.5, 0.5), Mth.nextDouble(random, -0.5, 0.5));
+	private static Vec3 getRandomSpeedRanges(RandomSource randomSource) {
+		return new Vec3(Mth.nextDouble(randomSource, -0.5, 0.5), Mth.nextDouble(randomSource, -0.5, 0.5), Mth.nextDouble(randomSource, -0.5, 0.5));
 	}
 
 	public static void spawnParticlesAlongAxis(

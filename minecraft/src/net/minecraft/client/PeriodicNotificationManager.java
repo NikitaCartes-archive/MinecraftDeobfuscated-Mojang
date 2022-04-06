@@ -8,9 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2BooleanFunction;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +24,6 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -64,44 +61,30 @@ public class PeriodicNotificationManager
 
 	protected Map<String, List<PeriodicNotificationManager.Notification>> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		try {
-			Resource resource = resourceManager.getResource(this.notifications);
+			Reader reader = resourceManager.openAsReader(this.notifications);
 
-			Map var5;
+			Map var4;
 			try {
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-
-				try {
-					var5 = (Map)CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(bufferedReader)).result().orElseThrow();
-				} catch (Throwable var9) {
+				var4 = (Map)CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader)).result().orElseThrow();
+			} catch (Throwable var7) {
+				if (reader != null) {
 					try {
-						bufferedReader.close();
-					} catch (Throwable var8) {
-						var9.addSuppressed(var8);
-					}
-
-					throw var9;
-				}
-
-				bufferedReader.close();
-			} catch (Throwable var10) {
-				if (resource != null) {
-					try {
-						resource.close();
-					} catch (Throwable var7) {
-						var10.addSuppressed(var7);
+						reader.close();
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
 				}
 
-				throw var10;
+				throw var7;
 			}
 
-			if (resource != null) {
-				resource.close();
+			if (reader != null) {
+				reader.close();
 			}
 
-			return var5;
-		} catch (Exception var11) {
-			LOGGER.warn("Failed to load {}", this.notifications, var11);
+			return var4;
+		} catch (Exception var8) {
+			LOGGER.warn("Failed to load {}", this.notifications, var8);
 			return ImmutableMap.of();
 		}
 	}

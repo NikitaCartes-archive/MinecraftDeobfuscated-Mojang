@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 
 public class PosAlwaysTrueTest extends PosRuleTest {
 	public static final Codec<PosAlwaysTrueTest> CODEC = Codec.unit((Supplier<PosAlwaysTrueTest>)(() -> PosAlwaysTrueTest.INSTANCE));
@@ -13,7 +13,7 @@ public class PosAlwaysTrueTest extends PosRuleTest {
 	}
 
 	@Override
-	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
+	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, RandomSource randomSource) {
 		return true;
 	}
 

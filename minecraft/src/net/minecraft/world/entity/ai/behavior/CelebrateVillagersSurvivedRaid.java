@@ -3,13 +3,13 @@ package net.minecraft.world.entity.ai.behavior;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.raid.Raid;
@@ -42,14 +42,14 @@ public class CelebrateVillagersSurvivedRaid extends Behavior<Villager> {
 	}
 
 	protected void tick(ServerLevel serverLevel, Villager villager, long l) {
-		Random random = villager.getRandom();
-		if (random.nextInt(100) == 0) {
+		RandomSource randomSource = villager.getRandom();
+		if (randomSource.nextInt(100) == 0) {
 			villager.playCelebrateSound();
 		}
 
-		if (random.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, villager.blockPosition())) {
-			DyeColor dyeColor = Util.getRandom(DyeColor.values(), random);
-			int i = random.nextInt(3);
+		if (randomSource.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, villager.blockPosition())) {
+			DyeColor dyeColor = Util.getRandom(DyeColor.values(), randomSource);
+			int i = randomSource.nextInt(3);
 			ItemStack itemStack = this.getFirework(dyeColor, i);
 			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
 				villager.level, villager, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack

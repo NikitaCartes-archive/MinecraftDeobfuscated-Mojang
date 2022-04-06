@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -119,12 +119,12 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		if (!isDead(blockState) && serverLevel.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
 			int i = 5;
 			int j = 1;
@@ -139,10 +139,10 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 
 					for (int r = q - 2; r < q; r++) {
 						BlockPos blockPos2 = new BlockPos(m + o, r, blockPos.getZ() - n + p);
-						if (blockPos2 != blockPos && random.nextInt(6) == 0 && serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
+						if (blockPos2 != blockPos && randomSource.nextInt(6) == 0 && serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
 							BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
 							if (blockState2.is(BlockTags.CORAL_BLOCKS)) {
-								serverLevel.setBlock(blockPos2, Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, Integer.valueOf(random.nextInt(4) + 1)), 3);
+								serverLevel.setBlock(blockPos2, Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, Integer.valueOf(randomSource.nextInt(4) + 1)), 3);
 							}
 						}
 					}

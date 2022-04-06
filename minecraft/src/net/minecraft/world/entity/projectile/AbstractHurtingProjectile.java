@@ -187,7 +187,8 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			this.getYRot(),
 			this.getType(),
 			i,
-			new Vec3(this.xPower, this.yPower, this.zPower)
+			new Vec3(this.xPower, this.yPower, this.zPower),
+			0.0
 		);
 	}
 

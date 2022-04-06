@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
@@ -21,6 +20,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -78,6 +78,7 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -262,7 +263,7 @@ public class ServerPlayer extends Player {
 			long m = l * l;
 			int k = m > 2147483647L ? Integer.MAX_VALUE : (int)m;
 			int n = this.getCoprime(k);
-			int o = new Random().nextInt(k);
+			int o = RandomSource.create().nextInt(k);
 
 			for (int p = 0; p < k; p++) {
 				int q = (o + n * p) % k;
@@ -612,6 +613,7 @@ public class ServerPlayer extends Player {
 		this.setTicksFrozen(0);
 		this.setSharedFlagOnFire(false);
 		this.getCombatTracker().recheckStatus();
+		this.setLastDeathLocation(Optional.of(GlobalPos.of(this.level.dimension(), this.blockPosition())));
 	}
 
 	private void tellNeutralMobsThatIDied() {
@@ -1172,6 +1174,7 @@ public class ServerPlayer extends Player {
 		this.enteredNetherPosition = serverPlayer.enteredNetherPosition;
 		this.setShoulderEntityLeft(serverPlayer.getShoulderEntityLeft());
 		this.setShoulderEntityRight(serverPlayer.getShoulderEntityRight());
+		this.setLastDeathLocation(serverPlayer.getLastDeathLocation());
 	}
 
 	@Override
@@ -1505,7 +1508,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void playNotifySound(SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-		this.connection.send(new ClientboundSoundPacket(soundEvent, soundSource, this.getX(), this.getY(), this.getZ(), f, g));
+		this.connection.send(new ClientboundSoundPacket(soundEvent, soundSource, this.getX(), this.getY(), this.getZ(), f, g, this.random.nextLong()));
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -14,6 +13,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
@@ -169,7 +169,7 @@ public class RuinedPortalStructure extends Structure {
 	}
 
 	private static int findSuitableY(
-		Random random,
+		RandomSource randomSource,
 		ChunkGenerator chunkGenerator,
 		RuinedPortalPiece.VerticalPlacement verticalPlacement,
 		boolean bl,
@@ -183,20 +183,20 @@ public class RuinedPortalStructure extends Structure {
 		int l;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
 			if (bl) {
-				l = Mth.randomBetweenInclusive(random, 32, 100);
-			} else if (random.nextFloat() < 0.5F) {
-				l = Mth.randomBetweenInclusive(random, 27, 29);
+				l = Mth.randomBetweenInclusive(randomSource, 32, 100);
+			} else if (randomSource.nextFloat() < 0.5F) {
+				l = Mth.randomBetweenInclusive(randomSource, 27, 29);
 			} else {
-				l = Mth.randomBetweenInclusive(random, 29, 100);
+				l = Mth.randomBetweenInclusive(randomSource, 29, 100);
 			}
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN) {
 			int m = i - j;
-			l = getRandomWithinInterval(random, 70, m);
+			l = getRandomWithinInterval(randomSource, 70, m);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.UNDERGROUND) {
 			int m = i - j;
-			l = getRandomWithinInterval(random, k, m);
+			l = getRandomWithinInterval(randomSource, k, m);
 		} else if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED) {
-			l = i - j + Mth.randomBetweenInclusive(random, 2, 8);
+			l = i - j + Mth.randomBetweenInclusive(randomSource, 2, 8);
 		} else {
 			l = i;
 		}
@@ -231,8 +231,8 @@ public class RuinedPortalStructure extends Structure {
 		return n;
 	}
 
-	private static int getRandomWithinInterval(Random random, int i, int j) {
-		return i < j ? Mth.randomBetweenInclusive(random, i, j) : j;
+	private static int getRandomWithinInterval(RandomSource randomSource, int i, int j) {
+		return i < j ? Mth.randomBetweenInclusive(randomSource, i, j) : j;
 	}
 
 	@Override

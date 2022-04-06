@@ -7,11 +7,9 @@ import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -22,6 +20,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.SectionTracker;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
@@ -117,10 +116,9 @@ public class PoiManager extends SectionStorage<PoiSection> {
 	}
 
 	public Optional<BlockPos> getRandom(
-		Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, PoiManager.Occupancy occupancy, BlockPos blockPos, int i, Random random
+		Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, PoiManager.Occupancy occupancy, BlockPos blockPos, int i, RandomSource randomSource
 	) {
-		List<PoiRecord> list = (List<PoiRecord>)this.getInRange(predicate, blockPos, i, occupancy).collect(Collectors.toList());
-		Collections.shuffle(list, random);
+		List<PoiRecord> list = Util.shuffledCopy((List<PoiRecord>)this.getInRange(predicate, blockPos, i, occupancy).collect(Collectors.toList()), randomSource);
 		return list.stream().filter(poiRecord -> predicate2.test(poiRecord.getPos())).findFirst().map(PoiRecord::getPos);
 	}
 

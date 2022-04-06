@@ -9,12 +9,12 @@ import com.mojang.blaze3d.font.TrueTypeGlyphProvider;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.lwjgl.stb.STBTTFontinfo;
@@ -85,13 +85,13 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 		ByteBuffer byteBuffer = null;
 
 		try {
-			Resource resource = resourceManager.getResource(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
+			InputStream inputStream = resourceManager.open(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
 
 			TrueTypeGlyphProvider var5;
 			try {
 				LOGGER.debug("Loading font {}", this.location);
 				sTBTTFontinfo = STBTTFontinfo.malloc();
-				byteBuffer = TextureUtil.readResource(resource.getInputStream());
+				byteBuffer = TextureUtil.readResource(inputStream);
 				byteBuffer.flip();
 				LOGGER.debug("Reading font {}", this.location);
 				if (!STBTruetype.stbtt_InitFont(sTBTTFontinfo, byteBuffer)) {
@@ -100,9 +100,9 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 
 				var5 = new TrueTypeGlyphProvider(byteBuffer, sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
 			} catch (Throwable var8) {
-				if (resource != null) {
+				if (inputStream != null) {
 					try {
-						resource.close();
+						inputStream.close();
 					} catch (Throwable var7) {
 						var8.addSuppressed(var7);
 					}
@@ -111,8 +111,8 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 				throw var8;
 			}
 
-			if (resource != null) {
-				resource.close();
+			if (inputStream != null) {
+				inputStream.close();
 			}
 
 			return var5;

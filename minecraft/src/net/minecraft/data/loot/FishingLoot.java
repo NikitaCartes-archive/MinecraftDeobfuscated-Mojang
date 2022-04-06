@@ -49,7 +49,7 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 								.setQuality(2)
 								.when(
 									LootItemEntityPropertyCondition.hasProperties(
-										LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().fishingHook(FishingHookPredicate.inOpenWater(true))
+										LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().subPredicate(FishingHookPredicate.inOpenWater(true))
 									)
 								)
 						)

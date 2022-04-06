@@ -3,13 +3,13 @@ package net.minecraft.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LightningBolt;
 
 @Environment(EnvType.CLIENT)
@@ -23,20 +23,20 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 		float[] gs = new float[8];
 		float h = 0.0F;
 		float j = 0.0F;
-		Random random = new Random(lightningBolt.seed);
+		RandomSource randomSource = RandomSource.create(lightningBolt.seed);
 
 		for (int k = 7; k >= 0; k--) {
 			fs[k] = h;
 			gs[k] = j;
-			h += (float)(random.nextInt(11) - 5);
-			j += (float)(random.nextInt(11) - 5);
+			h += (float)(randomSource.nextInt(11) - 5);
+			j += (float)(randomSource.nextInt(11) - 5);
 		}
 
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lightning());
 		Matrix4f matrix4f = poseStack.last().pose();
 
 		for (int l = 0; l < 4; l++) {
-			Random random2 = new Random(lightningBolt.seed);
+			RandomSource randomSource2 = RandomSource.create(lightningBolt.seed);
 
 			for (int m = 0; m < 3; m++) {
 				int n = 7;
@@ -56,11 +56,11 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 					float s = p;
 					float t = q;
 					if (m == 0) {
-						p += (float)(random2.nextInt(11) - 5);
-						q += (float)(random2.nextInt(11) - 5);
+						p += (float)(randomSource2.nextInt(11) - 5);
+						q += (float)(randomSource2.nextInt(11) - 5);
 					} else {
-						p += (float)(random2.nextInt(31) - 15);
-						q += (float)(random2.nextInt(31) - 15);
+						p += (float)(randomSource2.nextInt(31) - 15);
+						q += (float)(randomSource2.nextInt(31) - 15);
 					}
 
 					float u = 0.5F;

@@ -12,12 +12,10 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -31,6 +29,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
@@ -138,14 +137,14 @@ public class SculkSpreader {
 		}
 	}
 
-	public void updateCursors(LevelAccessor levelAccessor, BlockPos blockPos, Random random, boolean bl) {
+	public void updateCursors(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, boolean bl) {
 		if (!this.cursors.isEmpty()) {
 			List<SculkSpreader.ChargeCursor> list = new ArrayList();
 			Map<BlockPos, SculkSpreader.ChargeCursor> map = new HashMap();
 			Object2IntMap<BlockPos> object2IntMap = new Object2IntOpenHashMap<>();
 
 			for (SculkSpreader.ChargeCursor chargeCursor : this.cursors) {
-				chargeCursor.update(levelAccessor, blockPos, random, this, bl);
+				chargeCursor.update(levelAccessor, blockPos, randomSource, this, bl);
 				if (chargeCursor.charge <= 0) {
 					levelAccessor.levelEvent(3006, chargeCursor.getPos(), 0);
 				} else {
@@ -248,7 +247,7 @@ public class SculkSpreader {
 			}
 		}
 
-		public void update(LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl) {
+		public void update(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl) {
 			if (this.shouldUpdate(levelAccessor, blockPos, sculkSpreader.isWorldGeneration)) {
 				if (this.updateDelay > 0) {
 					this.updateDelay--;
@@ -264,13 +263,13 @@ public class SculkSpreader {
 						levelAccessor.playSound(null, this.pos, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 1.0F);
 					}
 
-					this.charge = sculkBehaviour.attemptUseCharge(this, levelAccessor, blockPos, random, sculkSpreader, bl);
+					this.charge = sculkBehaviour.attemptUseCharge(this, levelAccessor, blockPos, randomSource, sculkSpreader, bl);
 					if (this.charge <= 0) {
-						sculkBehaviour.onDischarged(levelAccessor, blockState, this.pos, random);
+						sculkBehaviour.onDischarged(levelAccessor, blockState, this.pos, randomSource);
 					} else {
-						BlockPos blockPos2 = getValidMovementPos(levelAccessor, this.pos, random);
+						BlockPos blockPos2 = getValidMovementPos(levelAccessor, this.pos, randomSource);
 						if (blockPos2 != null) {
-							sculkBehaviour.onDischarged(levelAccessor, blockState, this.pos, random);
+							sculkBehaviour.onDischarged(levelAccessor, blockState, this.pos, randomSource);
 							this.pos = blockPos2.immutable();
 							if (sculkSpreader.isWorldGeneration() && !this.pos.closerThan(new Vec3i(blockPos.getX(), this.pos.getY(), blockPos.getZ()), 15.0)) {
 								this.charge = 0;
@@ -301,18 +300,16 @@ public class SculkSpreader {
 			return blockState.getBlock() instanceof SculkBehaviour sculkBehaviour ? sculkBehaviour : SculkBehaviour.DEFAULT;
 		}
 
-		private static List<Vec3i> getRandomizedNonCornerNeighbourOffsets(Random random) {
-			List<Vec3i> list = new ArrayList(NON_CORNER_NEIGHBOURS);
-			Collections.shuffle(list, random);
-			return list;
+		private static List<Vec3i> getRandomizedNonCornerNeighbourOffsets(RandomSource randomSource) {
+			return Util.shuffledCopy(NON_CORNER_NEIGHBOURS, randomSource);
 		}
 
 		@Nullable
-		private static BlockPos getValidMovementPos(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
+		private static BlockPos getValidMovementPos(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource) {
 			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 			BlockPos.MutableBlockPos mutableBlockPos2 = blockPos.mutable();
 
-			for (Vec3i vec3i : getRandomizedNonCornerNeighbourOffsets(random)) {
+			for (Vec3i vec3i : getRandomizedNonCornerNeighbourOffsets(randomSource)) {
 				mutableBlockPos2.setWithOffset(blockPos, vec3i);
 				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos2);
 				if (blockState.getBlock() instanceof SculkBehaviour && isMovementUnobstructed(levelAccessor, blockPos, mutableBlockPos2)) {

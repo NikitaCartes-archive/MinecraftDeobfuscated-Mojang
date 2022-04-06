@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.DoublePredicate;
@@ -25,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.SerializableUUID;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 
 public class GossipContainer {
@@ -57,7 +57,7 @@ public class GossipContainer {
 		return this.gossips.entrySet().stream().flatMap(entry -> ((GossipContainer.EntityGossips)entry.getValue()).unpack((UUID)entry.getKey()));
 	}
 
-	private Collection<GossipContainer.GossipEntry> selectGossipsForTransfer(Random random, int i) {
+	private Collection<GossipContainer.GossipEntry> selectGossipsForTransfer(RandomSource randomSource, int i) {
 		List<GossipContainer.GossipEntry> list = (List<GossipContainer.GossipEntry>)this.unpack().collect(Collectors.toList());
 		if (list.isEmpty()) {
 			return Collections.emptyList();
@@ -74,7 +74,7 @@ public class GossipContainer {
 			Set<GossipContainer.GossipEntry> set = Sets.newIdentityHashSet();
 
 			for (int l = 0; l < i; l++) {
-				int m = random.nextInt(j);
+				int m = randomSource.nextInt(j);
 				int n = Arrays.binarySearch(is, m);
 				set.add((GossipContainer.GossipEntry)list.get(n < 0 ? -n - 1 : n));
 			}
@@ -87,8 +87,8 @@ public class GossipContainer {
 		return (GossipContainer.EntityGossips)this.gossips.computeIfAbsent(uUID, uUIDx -> new GossipContainer.EntityGossips());
 	}
 
-	public void transferFrom(GossipContainer gossipContainer, Random random, int i) {
-		Collection<GossipContainer.GossipEntry> collection = gossipContainer.selectGossipsForTransfer(random, i);
+	public void transferFrom(GossipContainer gossipContainer, RandomSource randomSource, int i) {
+		Collection<GossipContainer.GossipEntry> collection = gossipContainer.selectGossipsForTransfer(randomSource, i);
 		collection.forEach(gossipEntry -> {
 			int ix = gossipEntry.value - gossipEntry.type.decayPerTransfer;
 			if (ix >= 2) {

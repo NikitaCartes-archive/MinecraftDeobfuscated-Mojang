@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -12,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +27,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 	private static final float FLAT_ITEM_BUNDLE_OFFSET_Y = 0.0F;
 	private static final float FLAT_ITEM_BUNDLE_OFFSET_Z = 0.09375F;
 	private final ItemRenderer itemRenderer;
-	private final Random random = new Random();
+	private final RandomSource random = RandomSource.create();
 
 	public ItemEntityRenderer(EntityRendererProvider.Context context) {
 		super(context);

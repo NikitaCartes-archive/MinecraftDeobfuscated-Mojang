@@ -36,6 +36,9 @@ public class TreePlacements {
 	public static final Holder<PlacedFeature> SPRUCE_CHECKED = PlacementUtils.register(
 		"spruce_checked", TreeFeatures.SPRUCE, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING)
 	);
+	public static final Holder<PlacedFeature> MANGROVE_CHECKED = PlacementUtils.register(
+		"mangrove_checked", TreeFeatures.MANGROVE, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE)
+	);
 	public static final BlockPredicate SNOW_TREE_PREDICATE = BlockPredicate.matchesBlocks(List.of(Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW), new BlockPos(0, -1, 0));
 	public static final List<PlacementModifier> SNOW_TREE_FILTER_DECORATOR = List.of(
 		EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.not(BlockPredicate.matchesBlock(Blocks.POWDER_SNOW, BlockPos.ZERO)), 8),
@@ -60,6 +63,9 @@ public class TreePlacements {
 	);
 	public static final Holder<PlacedFeature> MEGA_PINE_CHECKED = PlacementUtils.register(
 		"mega_pine_checked", TreeFeatures.MEGA_PINE, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING)
+	);
+	public static final Holder<PlacedFeature> TALL_MANGROVE_CHECKED = PlacementUtils.register(
+		"tall_mangrove_checked", TreeFeatures.TALL_MANGROVE, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE)
 	);
 	public static final Holder<PlacedFeature> JUNGLE_BUSH = PlacementUtils.register(
 		"jungle_bush", TreeFeatures.JUNGLE_BUSH, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING)

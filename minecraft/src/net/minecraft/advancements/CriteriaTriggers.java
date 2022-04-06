@@ -21,17 +21,17 @@ import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
+import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
 import net.minecraft.advancements.critereon.ItemPickedUpByEntityTrigger;
-import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LightningStrikeTrigger;
-import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
+import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
@@ -39,7 +39,6 @@ import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
 import net.minecraft.advancements.critereon.TargetBlockTrigger;
-import net.minecraft.advancements.critereon.TickTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedEnderEyeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
@@ -63,14 +62,14 @@ public class CriteriaTriggers {
 	public static final UsedEnderEyeTrigger USED_ENDER_EYE = register(new UsedEnderEyeTrigger());
 	public static final SummonedEntityTrigger SUMMONED_ENTITY = register(new SummonedEntityTrigger());
 	public static final BredAnimalsTrigger BRED_ANIMALS = register(new BredAnimalsTrigger());
-	public static final LocationTrigger LOCATION = register(new LocationTrigger(new ResourceLocation("location")));
-	public static final LocationTrigger SLEPT_IN_BED = register(new LocationTrigger(new ResourceLocation("slept_in_bed")));
+	public static final PlayerTrigger LOCATION = register(new PlayerTrigger(new ResourceLocation("location")));
+	public static final PlayerTrigger SLEPT_IN_BED = register(new PlayerTrigger(new ResourceLocation("slept_in_bed")));
 	public static final CuredZombieVillagerTrigger CURED_ZOMBIE_VILLAGER = register(new CuredZombieVillagerTrigger());
 	public static final TradeTrigger TRADE = register(new TradeTrigger());
 	public static final ItemDurabilityTrigger ITEM_DURABILITY_CHANGED = register(new ItemDurabilityTrigger());
 	public static final LevitationTrigger LEVITATION = register(new LevitationTrigger());
 	public static final ChangeDimensionTrigger CHANGED_DIMENSION = register(new ChangeDimensionTrigger());
-	public static final TickTrigger TICK = register(new TickTrigger());
+	public static final PlayerTrigger TICK = register(new PlayerTrigger(new ResourceLocation("tick")));
 	public static final TameAnimalTrigger TAME_ANIMAL = register(new TameAnimalTrigger());
 	public static final PlacedBlockTrigger PLACED_BLOCK = register(new PlacedBlockTrigger());
 	public static final ConsumeItemTrigger CONSUME_ITEM = register(new ConsumeItemTrigger());
@@ -81,12 +80,12 @@ public class CriteriaTriggers {
 	public static final ChanneledLightningTrigger CHANNELED_LIGHTNING = register(new ChanneledLightningTrigger());
 	public static final ShotCrossbowTrigger SHOT_CROSSBOW = register(new ShotCrossbowTrigger());
 	public static final KilledByCrossbowTrigger KILLED_BY_CROSSBOW = register(new KilledByCrossbowTrigger());
-	public static final LocationTrigger RAID_WIN = register(new LocationTrigger(new ResourceLocation("hero_of_the_village")));
-	public static final LocationTrigger BAD_OMEN = register(new LocationTrigger(new ResourceLocation("voluntary_exile")));
+	public static final PlayerTrigger RAID_WIN = register(new PlayerTrigger(new ResourceLocation("hero_of_the_village")));
+	public static final PlayerTrigger BAD_OMEN = register(new PlayerTrigger(new ResourceLocation("voluntary_exile")));
 	public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = register(new SlideDownBlockTrigger());
 	public static final BeeNestDestroyedTrigger BEE_NEST_DESTROYED = register(new BeeNestDestroyedTrigger());
 	public static final TargetBlockTrigger TARGET_BLOCK_HIT = register(new TargetBlockTrigger());
-	public static final ItemUsedOnBlockTrigger ITEM_USED_ON_BLOCK = register(new ItemUsedOnBlockTrigger());
+	public static final ItemInteractWithBlockTrigger ITEM_USED_ON_BLOCK = register(new ItemInteractWithBlockTrigger(new ResourceLocation("item_used_on_block")));
 	public static final LootTableTrigger GENERATE_LOOT = register(new LootTableTrigger());
 	public static final ItemPickedUpByEntityTrigger ITEM_PICKED_UP_BY_ENTITY = register(new ItemPickedUpByEntityTrigger());
 	public static final PlayerInteractTrigger PLAYER_INTERACTED_WITH_ENTITY = register(new PlayerInteractTrigger());
@@ -96,6 +95,10 @@ public class CriteriaTriggers {
 	public static final DistanceTrigger FALL_FROM_HEIGHT = register(new DistanceTrigger(new ResourceLocation("fall_from_height")));
 	public static final DistanceTrigger RIDE_ENTITY_IN_LAVA_TRIGGER = register(new DistanceTrigger(new ResourceLocation("ride_entity_in_lava")));
 	public static final KilledTrigger KILL_MOB_NEAR_SCULK_CATALYST = register(new KilledTrigger(new ResourceLocation("kill_mob_near_sculk_catalyst")));
+	public static final PlayerTrigger ITEM_DELIVERED_TO_PLAYER = register(new PlayerTrigger(new ResourceLocation("item_delivered_to_player")));
+	public static final ItemInteractWithBlockTrigger ALLAY_DROP_ITEM_ON_BLOCK = register(
+		new ItemInteractWithBlockTrigger(new ResourceLocation("allay_drop_item_on_block"))
+	);
 
 	private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
 		if (CRITERIA.containsKey(criterionTrigger.getId())) {

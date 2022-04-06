@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.structure.placement;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.levelgen.RandomSource;
 
 public enum RandomSpreadType implements StringRepresentable {
 	LINEAR("linear"),

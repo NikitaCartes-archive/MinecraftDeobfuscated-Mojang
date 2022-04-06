@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -114,7 +114,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
 		}
@@ -126,12 +126,12 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Integer)blockState.getValue(STAGE) == 0) {
-			if (random.nextInt(3) == 0 && serverLevel.isEmptyBlock(blockPos.above()) && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
+			if (randomSource.nextInt(3) == 0 && serverLevel.isEmptyBlock(blockPos.above()) && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
 				int i = this.getHeightBelowUpToMax(serverLevel, blockPos) + 1;
 				if (i < 16) {
-					this.growBamboo(blockState, serverLevel, blockPos, random, i);
+					this.growBamboo(blockState, serverLevel, blockPos, randomSource, i);
 				}
 			}
 		}
@@ -165,16 +165,16 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		int i = this.getHeightAboveUpToMax(serverLevel, blockPos);
 		int j = this.getHeightBelowUpToMax(serverLevel, blockPos);
 		int k = i + j + 1;
-		int l = 1 + random.nextInt(2);
+		int l = 1 + randomSource.nextInt(2);
 
 		for (int m = 0; m < l; m++) {
 			BlockPos blockPos2 = blockPos.above(i);
@@ -183,7 +183,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 				return;
 			}
 
-			this.growBamboo(blockState2, serverLevel, blockPos2, random, k);
+			this.growBamboo(blockState2, serverLevel, blockPos2, randomSource, k);
 			i++;
 			k++;
 		}
@@ -194,7 +194,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 		return player.getMainHandItem().getItem() instanceof SwordItem ? 1.0F : super.getDestroyProgress(blockState, player, blockGetter, blockPos);
 	}
 
-	protected void growBamboo(BlockState blockState, Level level, BlockPos blockPos, Random random, int i) {
+	protected void growBamboo(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource, int i) {
 		BlockState blockState2 = level.getBlockState(blockPos.below());
 		BlockPos blockPos2 = blockPos.below(2);
 		BlockState blockState3 = level.getBlockState(blockPos2);
@@ -212,7 +212,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 		}
 
 		int j = blockState.getValue(AGE) != 1 && !blockState3.is(Blocks.BAMBOO) ? 0 : 1;
-		int k = (i < 11 || !(random.nextFloat() < 0.25F)) && i != 15 ? 0 : 1;
+		int k = (i < 11 || !(randomSource.nextFloat() < 0.25F)) && i != 15 ? 0 : 1;
 		level.setBlock(
 			blockPos.above(), this.defaultBlockState().setValue(AGE, Integer.valueOf(j)).setValue(LEAVES, bambooLeaves).setValue(STAGE, Integer.valueOf(k)), 3
 		);

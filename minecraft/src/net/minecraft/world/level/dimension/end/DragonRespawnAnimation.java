@@ -2,9 +2,9 @@ package net.minecraft.world.level.dimension.end;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -75,7 +75,7 @@ public enum DragonRespawnAnimation {
 								spikeConfiguration,
 								serverLevel,
 								serverLevel.getChunkSource().getGenerator(),
-								new Random(),
+								RandomSource.create(),
 								new BlockPos(endSpike.getCenterX(), 45, endSpike.getCenterZ())
 							);
 					}

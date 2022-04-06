@@ -1,10 +1,10 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -24,7 +24,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	public boolean place(FeaturePlaceContext<HugeFungusConfiguration> featurePlaceContext) {
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
 		HugeFungusConfiguration hugeFungusConfiguration = featurePlaceContext.config();
 		Block block = hugeFungusConfiguration.validBaseState.getBlock();
@@ -37,8 +37,8 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 		if (blockPos2 == null) {
 			return false;
 		} else {
-			int i = Mth.nextInt(random, 4, 13);
-			if (random.nextInt(12) == 0) {
+			int i = Mth.nextInt(randomSource, 4, 13);
+			if (randomSource.nextInt(12) == 0) {
 				i *= 2;
 			}
 
@@ -49,10 +49,10 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 				}
 			}
 
-			boolean bl = !hugeFungusConfiguration.planted && random.nextFloat() < 0.06F;
+			boolean bl = !hugeFungusConfiguration.planted && randomSource.nextFloat() < 0.06F;
 			worldGenLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-			this.placeStem(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
-			this.placeHat(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
+			this.placeStem(worldGenLevel, randomSource, hugeFungusConfiguration, blockPos2, i, bl);
+			this.placeHat(worldGenLevel, randomSource, hugeFungusConfiguration, blockPos2, i, bl);
 			return true;
 		}
 	}
@@ -64,7 +64,9 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 		});
 	}
 
-	private void placeStem(LevelAccessor levelAccessor, Random random, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl) {
+	private void placeStem(
+		LevelAccessor levelAccessor, RandomSource randomSource, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl
+	) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		BlockState blockState = hugeFungusConfiguration.stemState;
 		int j = bl ? 1 : 0;
@@ -83,7 +85,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 							levelAccessor.setBlock(mutableBlockPos, blockState, 3);
 						} else if (bl2) {
-							if (random.nextFloat() < 0.1F) {
+							if (randomSource.nextFloat() < 0.1F) {
 								this.setBlock(levelAccessor, mutableBlockPos, blockState);
 							}
 						} else {
@@ -95,14 +97,16 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 		}
 	}
 
-	private void placeHat(LevelAccessor levelAccessor, Random random, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl) {
+	private void placeHat(
+		LevelAccessor levelAccessor, RandomSource randomSource, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl
+	) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		boolean bl2 = hugeFungusConfiguration.hatState.is(Blocks.NETHER_WART_BLOCK);
-		int j = Math.min(random.nextInt(1 + i / 3) + 5, i);
+		int j = Math.min(randomSource.nextInt(1 + i / 3) + 5, i);
 		int k = i - j;
 
 		for (int l = k; l <= i; l++) {
-			int m = l < i - random.nextInt(3) ? 2 : 1;
+			int m = l < i - randomSource.nextInt(3) ? 2 : 1;
 			if (j > 8 && l < k + 4) {
 				m = 3;
 			}
@@ -126,14 +130,14 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 						if (bl7) {
 							if (!bl5) {
-								this.placeHatDropBlock(levelAccessor, random, mutableBlockPos, hugeFungusConfiguration.hatState, bl2);
+								this.placeHatDropBlock(levelAccessor, randomSource, mutableBlockPos, hugeFungusConfiguration.hatState, bl2);
 							}
 						} else if (bl5) {
-							this.placeHatBlock(levelAccessor, random, hugeFungusConfiguration, mutableBlockPos, 0.1F, 0.2F, bl2 ? 0.1F : 0.0F);
+							this.placeHatBlock(levelAccessor, randomSource, hugeFungusConfiguration, mutableBlockPos, 0.1F, 0.2F, bl2 ? 0.1F : 0.0F);
 						} else if (bl6) {
-							this.placeHatBlock(levelAccessor, random, hugeFungusConfiguration, mutableBlockPos, 0.01F, 0.7F, bl2 ? 0.083F : 0.0F);
+							this.placeHatBlock(levelAccessor, randomSource, hugeFungusConfiguration, mutableBlockPos, 0.01F, 0.7F, bl2 ? 0.083F : 0.0F);
 						} else {
-							this.placeHatBlock(levelAccessor, random, hugeFungusConfiguration, mutableBlockPos, 5.0E-4F, 0.98F, bl2 ? 0.07F : 0.0F);
+							this.placeHatBlock(levelAccessor, randomSource, hugeFungusConfiguration, mutableBlockPos, 5.0E-4F, 0.98F, bl2 ? 0.07F : 0.0F);
 						}
 					}
 				}
@@ -143,45 +147,45 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 	private void placeHatBlock(
 		LevelAccessor levelAccessor,
-		Random random,
+		RandomSource randomSource,
 		HugeFungusConfiguration hugeFungusConfiguration,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		float f,
 		float g,
 		float h
 	) {
-		if (random.nextFloat() < f) {
+		if (randomSource.nextFloat() < f) {
 			this.setBlock(levelAccessor, mutableBlockPos, hugeFungusConfiguration.decorState);
-		} else if (random.nextFloat() < g) {
+		} else if (randomSource.nextFloat() < g) {
 			this.setBlock(levelAccessor, mutableBlockPos, hugeFungusConfiguration.hatState);
-			if (random.nextFloat() < h) {
-				tryPlaceWeepingVines(mutableBlockPos, levelAccessor, random);
+			if (randomSource.nextFloat() < h) {
+				tryPlaceWeepingVines(mutableBlockPos, levelAccessor, randomSource);
 			}
 		}
 	}
 
-	private void placeHatDropBlock(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockState blockState, boolean bl) {
+	private void placeHatDropBlock(LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, BlockState blockState, boolean bl) {
 		if (levelAccessor.getBlockState(blockPos.below()).is(blockState.getBlock())) {
 			this.setBlock(levelAccessor, blockPos, blockState);
-		} else if ((double)random.nextFloat() < 0.15) {
+		} else if ((double)randomSource.nextFloat() < 0.15) {
 			this.setBlock(levelAccessor, blockPos, blockState);
-			if (bl && random.nextInt(11) == 0) {
-				tryPlaceWeepingVines(blockPos, levelAccessor, random);
+			if (bl && randomSource.nextInt(11) == 0) {
+				tryPlaceWeepingVines(blockPos, levelAccessor, randomSource);
 			}
 		}
 	}
 
-	private static void tryPlaceWeepingVines(BlockPos blockPos, LevelAccessor levelAccessor, Random random) {
+	private static void tryPlaceWeepingVines(BlockPos blockPos, LevelAccessor levelAccessor, RandomSource randomSource) {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
 		if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
-			int i = Mth.nextInt(random, 1, 5);
-			if (random.nextInt(7) == 0) {
+			int i = Mth.nextInt(randomSource, 1, 5);
+			if (randomSource.nextInt(7) == 0) {
 				i *= 2;
 			}
 
 			int j = 23;
 			int k = 25;
-			WeepingVinesFeature.placeWeepingVinesColumn(levelAccessor, random, mutableBlockPos, i, 23, 25);
+			WeepingVinesFeature.placeWeepingVinesColumn(levelAccessor, randomSource, mutableBlockPos, i, 23, 25);
 		}
 	}
 }

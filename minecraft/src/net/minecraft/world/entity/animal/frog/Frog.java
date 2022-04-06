@@ -2,8 +2,6 @@ package net.minecraft.world.entity.animal.frog;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -12,11 +10,13 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Unit;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -49,6 +50,7 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -89,11 +91,12 @@ public class Frog extends Animal {
 		MemoryModuleType.IS_IN_WATER,
 		MemoryModuleType.IS_PREGNANT
 	);
-	private static final EntityDataAccessor<Integer> DATA_VARIANT = SynchedEntityData.defineId(Frog.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<FrogVariant> DATA_VARIANT_ID = SynchedEntityData.defineId(Frog.class, EntityDataSerializers.FROG_VARIANT);
 	private static final EntityDataAccessor<OptionalInt> DATA_TONGUE_TARGET_ID = SynchedEntityData.defineId(
 		Frog.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT
 	);
 	private static final int FROG_FALL_DAMAGE_REDUCTION = 5;
+	public static final String VARIANT_KEY = "variant";
 	public final AnimationState jumpAnimationState = new AnimationState();
 	public final AnimationState croakAnimationState = new AnimationState();
 	public final AnimationState tongueAnimationState = new AnimationState();
@@ -127,7 +130,7 @@ public class Frog extends Animal {
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
-		this.entityData.define(DATA_VARIANT, 0);
+		this.entityData.define(DATA_VARIANT_ID, FrogVariant.TEMPERATE);
 		this.entityData.define(DATA_TONGUE_TARGET_ID, OptionalInt.empty());
 	}
 
@@ -153,24 +156,27 @@ public class Frog extends Animal {
 		return 5;
 	}
 
-	public Frog.Variant getVariant() {
-		return Frog.Variant.byId(this.entityData.get(DATA_VARIANT));
+	public FrogVariant getVariant() {
+		return this.entityData.get(DATA_VARIANT_ID);
 	}
 
-	public void setVariant(Frog.Variant variant) {
-		this.entityData.set(DATA_VARIANT, variant.getId());
+	public void setVariant(FrogVariant frogVariant) {
+		this.entityData.set(DATA_VARIANT_ID, frogVariant);
 	}
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putInt("Variant", this.getVariant().getId());
+		compoundTag.putString("variant", Registry.FROG_VARIANT.getKey(this.getVariant()).toString());
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setVariant(Frog.Variant.byId(compoundTag.getInt("Variant")));
+		FrogVariant frogVariant = Registry.FROG_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
+		if (frogVariant != null) {
+			this.setVariant(frogVariant);
+		}
 	}
 
 	@Override
@@ -300,11 +306,11 @@ public class Frog extends Animal {
 	) {
 		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
 		if (holder.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)) {
-			this.setVariant(Frog.Variant.COLD);
+			this.setVariant(FrogVariant.COLD);
 		} else if (holder.is(BiomeTags.SPAWNS_WARM_VARIANT_FROGS)) {
-			this.setVariant(Frog.Variant.WARM);
+			this.setVariant(FrogVariant.WARM);
 		} else {
-			this.setVariant(Frog.Variant.TEMPERATE);
+			this.setVariant(FrogVariant.TEMPERATE);
 		}
 
 		FrogAi.initMemories(this);
@@ -312,7 +318,7 @@ public class Frog extends Animal {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 1.0).add(Attributes.MAX_HEALTH, 10.0);
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 1.0).add(Attributes.MAX_HEALTH, 10.0).add(Attributes.ATTACK_DAMAGE, 10.0);
 	}
 
 	@Nullable
@@ -366,11 +372,11 @@ public class Frog extends Animal {
 	}
 
 	public static boolean canEat(LivingEntity livingEntity) {
-		if (livingEntity instanceof Slime slime && slime.getSize() == 1) {
-			return true;
+		if (livingEntity instanceof Slime slime && slime.getSize() != 1) {
+			return false;
 		}
 
-		return false;
+		return livingEntity.getType().is(EntityTypeTags.FROG_FOOD);
 	}
 
 	@Override
@@ -428,39 +434,6 @@ public class Frog extends Animal {
 		@Override
 		public boolean isStableDestination(BlockPos blockPos) {
 			return !this.level.getBlockState(blockPos.below()).isAir();
-		}
-	}
-
-	public static enum Variant {
-		TEMPERATE(0, "temperate"),
-		WARM(1, "warm"),
-		COLD(2, "cold");
-
-		private static final Frog.Variant[] BY_ID = (Frog.Variant[])Arrays.stream(values())
-			.sorted(Comparator.comparingInt(Frog.Variant::getId))
-			.toArray(Frog.Variant[]::new);
-		private final int id;
-		private final String name;
-
-		private Variant(int j, String string2) {
-			this.id = j;
-			this.name = string2;
-		}
-
-		public int getId() {
-			return this.id;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		public static Frog.Variant byId(int i) {
-			if (i < 0 || i >= BY_ID.length) {
-				i = 0;
-			}
-
-			return BY_ID[i];
 		}
 	}
 }

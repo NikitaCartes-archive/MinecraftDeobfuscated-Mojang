@@ -11,7 +11,7 @@ import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.util.RandomSource;
 
 public class NormalNoise {
 	private static final double INPUT_FACTOR = 1.0181268882175227;

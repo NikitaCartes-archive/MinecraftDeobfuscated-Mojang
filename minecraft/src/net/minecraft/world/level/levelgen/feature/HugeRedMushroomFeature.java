@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,7 +16,7 @@ public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
 	@Override
 	protected void makeCap(
 		LevelAccessor levelAccessor,
-		Random random,
+		RandomSource randomSource,
 		BlockPos blockPos,
 		int i,
 		BlockPos.MutableBlockPos mutableBlockPos,
@@ -37,7 +37,7 @@ public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
 					if (j >= i || bl5 != bl6) {
 						mutableBlockPos.setWithOffset(blockPos, m, j, n);
 						if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) {
-							BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos);
+							BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(randomSource, blockPos);
 							if (blockState.hasProperty(HugeMushroomBlock.WEST)
 								&& blockState.hasProperty(HugeMushroomBlock.EAST)
 								&& blockState.hasProperty(HugeMushroomBlock.NORTH)

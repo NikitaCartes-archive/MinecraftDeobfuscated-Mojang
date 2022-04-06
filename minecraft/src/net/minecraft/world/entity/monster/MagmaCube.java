@@ -1,14 +1,13 @@
 package net.minecraft.world.entity.monster;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +18,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
 
 public class MagmaCube extends Slime {
@@ -32,7 +30,7 @@ public class MagmaCube extends Slime {
 	}
 
 	public static boolean checkMagmaCubeSpawnRules(
-		EntityType<MagmaCube> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<MagmaCube> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL;
 	}
@@ -43,7 +41,7 @@ public class MagmaCube extends Slime {
 	}
 
 	@Override
-	protected void setSize(int i, boolean bl) {
+	public void setSize(int i, boolean bl) {
 		super.setSize(i, bl);
 		this.getAttribute(Attributes.ARMOR).setBaseValue((double)(i * 3));
 	}
@@ -56,11 +54,6 @@ public class MagmaCube extends Slime {
 	@Override
 	protected ParticleOptions getParticleType() {
 		return ParticleTypes.FLAME;
-	}
-
-	@Override
-	protected ResourceLocation getDefaultLootTable() {
-		return this.isTiny() ? BuiltInLootTables.EMPTY : this.getType().getDefaultLootTable();
 	}
 
 	@Override

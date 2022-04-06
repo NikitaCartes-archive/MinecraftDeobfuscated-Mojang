@@ -1,12 +1,12 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
 import java.util.Map;
-import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -72,10 +72,10 @@ public class ShipwreckPieces {
 		BlockPos blockPos,
 		Rotation rotation,
 		StructurePieceAccessor structurePieceAccessor,
-		Random random,
+		RandomSource randomSource,
 		boolean bl
 	) {
-		ResourceLocation resourceLocation = Util.getRandom(bl ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, random);
+		ResourceLocation resourceLocation = Util.getRandom(bl ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, randomSource);
 		structurePieceAccessor.addPiece(new ShipwreckPieces.ShipwreckPiece(structureTemplateManager, resourceLocation, blockPos, rotation, bl));
 	}
 
@@ -110,10 +110,10 @@ public class ShipwreckPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			ResourceLocation resourceLocation = (ResourceLocation)ShipwreckPieces.MARKERS_TO_LOOT.get(string);
 			if (resourceLocation != null) {
-				RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos.below(), resourceLocation);
+				RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, randomSource, blockPos.below(), resourceLocation);
 			}
 		}
 
@@ -122,7 +122,7 @@ public class ShipwreckPieces {
 			WorldGenLevel worldGenLevel,
 			StructureManager structureManager,
 			ChunkGenerator chunkGenerator,
-			Random random,
+			RandomSource randomSource,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos,
 			BlockPos blockPos
@@ -146,9 +146,9 @@ public class ShipwreckPieces {
 				j /= k;
 			}
 
-			int m = this.isBeached ? i - vec3i.getY() / 2 - random.nextInt(3) : j;
+			int m = this.isBeached ? i - vec3i.getY() / 2 - randomSource.nextInt(3) : j;
 			this.templatePosition = new BlockPos(this.templatePosition.getX(), m, this.templatePosition.getZ());
-			super.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
 		}
 	}
 }

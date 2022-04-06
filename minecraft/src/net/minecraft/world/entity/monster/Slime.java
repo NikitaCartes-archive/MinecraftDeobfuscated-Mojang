@@ -1,7 +1,7 @@
 package net.minecraft.world.entity.monster;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.EnumSet;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -11,11 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,7 +40,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
 
 public class Slime extends Mob implements Enemy {
@@ -74,7 +73,8 @@ public class Slime extends Mob implements Enemy {
 		this.entityData.define(ID_SIZE, 1);
 	}
 
-	protected void setSize(int i, boolean bl) {
+	@VisibleForTesting
+	public void setSize(int i, boolean bl) {
 		int j = Mth.clamp(i, 1, 127);
 		this.entityData.set(ID_SIZE, j);
 		this.reapplyPosition();
@@ -266,22 +266,17 @@ public class Slime extends Mob implements Enemy {
 		return this.isTiny() ? SoundEvents.SLIME_SQUISH_SMALL : SoundEvents.SLIME_SQUISH;
 	}
 
-	@Override
-	protected ResourceLocation getDefaultLootTable() {
-		return this.getSize() == 1 ? this.getType().getDefaultLootTable() : BuiltInLootTables.EMPTY;
-	}
-
 	public static boolean checkSlimeSpawnRules(
-		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
 			if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
 				&& blockPos.getY() > 50
 				&& blockPos.getY() < 70
-				&& random.nextFloat() < 0.5F
-				&& random.nextFloat() < levelAccessor.getMoonBrightness()
-				&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= random.nextInt(8)) {
-				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+				&& randomSource.nextFloat() < 0.5F
+				&& randomSource.nextFloat() < levelAccessor.getMoonBrightness()
+				&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= randomSource.nextInt(8)) {
+				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
 			}
 
 			if (!(levelAccessor instanceof WorldGenLevel)) {
@@ -290,8 +285,8 @@ public class Slime extends Mob implements Enemy {
 
 			ChunkPos chunkPos = new ChunkPos(blockPos);
 			boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
-			if (random.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
-				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+			if (randomSource.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
+				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
 			}
 		}
 

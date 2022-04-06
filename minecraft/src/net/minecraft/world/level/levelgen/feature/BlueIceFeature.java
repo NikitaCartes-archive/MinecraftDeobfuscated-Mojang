@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +19,7 @@ public class BlueIceFeature extends Feature<NoneFeatureConfiguration> {
 	public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext) {
 		BlockPos blockPos = featurePlaceContext.origin();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		if (blockPos.getY() > worldGenLevel.getSeaLevel() - 1) {
 			return false;
 		} else if (!worldGenLevel.getBlockState(blockPos).is(Blocks.WATER) && !worldGenLevel.getBlockState(blockPos.below()).is(Blocks.WATER)) {
@@ -40,14 +40,14 @@ public class BlueIceFeature extends Feature<NoneFeatureConfiguration> {
 				worldGenLevel.setBlock(blockPos, Blocks.BLUE_ICE.defaultBlockState(), 2);
 
 				for (int i = 0; i < 200; i++) {
-					int j = random.nextInt(5) - random.nextInt(6);
+					int j = randomSource.nextInt(5) - randomSource.nextInt(6);
 					int k = 3;
 					if (j < 2) {
 						k += j / 2;
 					}
 
 					if (k >= 1) {
-						BlockPos blockPos2 = blockPos.offset(random.nextInt(k) - random.nextInt(k), j, random.nextInt(k) - random.nextInt(k));
+						BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(k) - randomSource.nextInt(k), j, randomSource.nextInt(k) - randomSource.nextInt(k));
 						BlockState blockState = worldGenLevel.getBlockState(blockPos2);
 						if (blockState.getMaterial() == Material.AIR || blockState.is(Blocks.WATER) || blockState.is(Blocks.PACKED_ICE) || blockState.is(Blocks.ICE)) {
 							for (Direction direction2 : Direction.values()) {

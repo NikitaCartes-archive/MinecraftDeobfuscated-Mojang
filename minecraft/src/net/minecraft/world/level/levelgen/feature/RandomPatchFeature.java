@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 
@@ -14,7 +14,7 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
 	@Override
 	public boolean place(FeaturePlaceContext<RandomPatchConfiguration> featurePlaceContext) {
 		RandomPatchConfiguration randomPatchConfiguration = featurePlaceContext.config();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		BlockPos blockPos = featurePlaceContext.origin();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		int i = 0;
@@ -23,8 +23,13 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
 		int k = randomPatchConfiguration.ySpread() + 1;
 
 		for (int l = 0; l < randomPatchConfiguration.tries(); l++) {
-			mutableBlockPos.setWithOffset(blockPos, random.nextInt(j) - random.nextInt(j), random.nextInt(k) - random.nextInt(k), random.nextInt(j) - random.nextInt(j));
-			if (randomPatchConfiguration.feature().value().place(worldGenLevel, featurePlaceContext.chunkGenerator(), random, mutableBlockPos)) {
+			mutableBlockPos.setWithOffset(
+				blockPos,
+				randomSource.nextInt(j) - randomSource.nextInt(j),
+				randomSource.nextInt(k) - randomSource.nextInt(k),
+				randomSource.nextInt(j) - randomSource.nextInt(j)
+			);
+			if (randomPatchConfiguration.feature().value().place(worldGenLevel, featurePlaceContext.chunkGenerator(), randomSource, mutableBlockPos)) {
 				i++;
 			}
 		}

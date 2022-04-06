@@ -5,11 +5,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,14 +47,14 @@ public abstract class TrunkPlacer {
 	public abstract List<FoliagePlacer.FoliageAttachment> placeTrunk(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		int i,
 		BlockPos blockPos,
 		TreeConfiguration treeConfiguration
 	);
 
-	public int getTreeHeight(Random random) {
-		return this.baseHeight + random.nextInt(this.heightRandA + 1) + random.nextInt(this.heightRandB + 1);
+	public int getTreeHeight(RandomSource randomSource) {
+		return this.baseHeight + randomSource.nextInt(this.heightRandA + 1) + randomSource.nextInt(this.heightRandB + 1);
 	}
 
 	private static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
@@ -63,44 +64,60 @@ public abstract class TrunkPlacer {
 	}
 
 	protected static void setDirtAt(
-		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, BlockPos blockPos, TreeConfiguration treeConfiguration
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		RandomSource randomSource,
+		BlockPos blockPos,
+		TreeConfiguration treeConfiguration
 	) {
 		if (treeConfiguration.forceDirt || !isDirt(levelSimulatedReader, blockPos)) {
-			biConsumer.accept(blockPos, treeConfiguration.dirtProvider.getState(random, blockPos));
+			biConsumer.accept(blockPos, treeConfiguration.dirtProvider.getState(randomSource, blockPos));
 		}
 	}
 
-	protected static boolean placeLog(
-		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, BlockPos blockPos, TreeConfiguration treeConfiguration
-	) {
-		return placeLog(levelSimulatedReader, biConsumer, random, blockPos, treeConfiguration, Function.identity());
-	}
-
-	protected static boolean placeLog(
+	protected boolean placeLog(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
+		BlockPos blockPos,
+		TreeConfiguration treeConfiguration
+	) {
+		return this.placeLog(levelSimulatedReader, biConsumer, randomSource, blockPos, treeConfiguration, Function.identity());
+	}
+
+	protected boolean placeLog(
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		RandomSource randomSource,
 		BlockPos blockPos,
 		TreeConfiguration treeConfiguration,
 		Function<BlockState, BlockState> function
 	) {
-		if (TreeFeature.validTreePos(levelSimulatedReader, blockPos)) {
-			biConsumer.accept(blockPos, (BlockState)function.apply(treeConfiguration.trunkProvider.getState(random, blockPos)));
+		if (this.validTreePos(levelSimulatedReader, blockPos)) {
+			biConsumer.accept(blockPos, (BlockState)function.apply(treeConfiguration.trunkProvider.getState(randomSource, blockPos)));
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	protected static void placeLogIfFree(
+	protected void placeLogIfFree(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		TreeConfiguration treeConfiguration
 	) {
-		if (TreeFeature.isFree(levelSimulatedReader, mutableBlockPos)) {
-			placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos, treeConfiguration);
+		if (this.isFree(levelSimulatedReader, mutableBlockPos)) {
+			this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos, treeConfiguration);
 		}
+	}
+
+	protected boolean validTreePos(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+		return TreeFeature.validTreePos(levelSimulatedReader, blockPos);
+	}
+
+	public boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+		return this.validTreePos(levelSimulatedReader, blockPos) || levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(BlockTags.LOGS));
 	}
 }

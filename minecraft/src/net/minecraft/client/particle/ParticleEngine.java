@@ -1,6 +1,5 @@
 package net.minecraft.client.particle;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -14,7 +13,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Iterator;
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -50,10 +47,10 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.RenderShape;
@@ -75,7 +72,7 @@ public class ParticleEngine implements PreparableReloadListener {
 	private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.<ParticleRenderType, Queue<Particle>>newIdentityHashMap();
 	private final Queue<TrackingEmitter> trackingEmitters = Queues.<TrackingEmitter>newArrayDeque();
 	private final TextureManager textureManager;
-	private final Random random = new Random();
+	private final RandomSource random = RandomSource.create();
 	private final Int2ObjectMap<ParticleProvider<?>> providers = new Int2ObjectOpenHashMap<>();
 	private final Queue<Particle> particlesToAdd = Queues.<Particle>newArrayDeque();
 	private final Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets = Maps.<ResourceLocation, ParticleEngine.MutableSpriteSet>newHashMap();
@@ -256,59 +253,45 @@ public class ParticleEngine implements PreparableReloadListener {
 		ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "particles/" + resourceLocation.getPath() + ".json");
 
 		try {
-			Resource resource = resourceManager.getResource(resourceLocation2);
+			Reader reader = resourceManager.openAsReader(resourceLocation2);
 
 			try {
-				Reader reader = new InputStreamReader(resource.getInputStream(), Charsets.UTF_8);
-
-				try {
-					ParticleDescription particleDescription = ParticleDescription.fromJson(GsonHelper.parse(reader));
-					List<ResourceLocation> list = particleDescription.getTextures();
-					boolean bl = this.spriteSets.containsKey(resourceLocation);
-					if (list == null) {
-						if (bl) {
-							throw new IllegalStateException("Missing texture list for particle " + resourceLocation);
-						}
-					} else {
-						if (!bl) {
-							throw new IllegalStateException("Redundant texture list for particle " + resourceLocation);
-						}
-
-						map.put(
-							resourceLocation,
-							(List)list.stream()
-								.map(resourceLocationx -> new ResourceLocation(resourceLocationx.getNamespace(), "particle/" + resourceLocationx.getPath()))
-								.collect(Collectors.toList())
-						);
+				ParticleDescription particleDescription = ParticleDescription.fromJson(GsonHelper.parse(reader));
+				List<ResourceLocation> list = particleDescription.getTextures();
+				boolean bl = this.spriteSets.containsKey(resourceLocation);
+				if (list == null) {
+					if (bl) {
+						throw new IllegalStateException("Missing texture list for particle " + resourceLocation);
 					}
-				} catch (Throwable var12) {
+				} else {
+					if (!bl) {
+						throw new IllegalStateException("Redundant texture list for particle " + resourceLocation);
+					}
+
+					map.put(
+						resourceLocation,
+						(List)list.stream()
+							.map(resourceLocationx -> new ResourceLocation(resourceLocationx.getNamespace(), "particle/" + resourceLocationx.getPath()))
+							.collect(Collectors.toList())
+					);
+				}
+			} catch (Throwable var10) {
+				if (reader != null) {
 					try {
 						reader.close();
-					} catch (Throwable var11) {
-						var12.addSuppressed(var11);
+					} catch (Throwable var9) {
+						var10.addSuppressed(var9);
 					}
-
-					throw var12;
 				}
 
+				throw var10;
+			}
+
+			if (reader != null) {
 				reader.close();
-			} catch (Throwable var13) {
-				if (resource != null) {
-					try {
-						resource.close();
-					} catch (Throwable var10) {
-						var13.addSuppressed(var10);
-					}
-				}
-
-				throw var13;
 			}
-
-			if (resource != null) {
-				resource.close();
-			}
-		} catch (IOException var14) {
-			throw new IllegalStateException("Failed to load description for particle " + resourceLocation, var14);
+		} catch (IOException var11) {
+			throw new IllegalStateException("Failed to load description for particle " + resourceLocation, var11);
 		}
 	}
 
@@ -546,8 +529,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		}
 
 		@Override
-		public TextureAtlasSprite get(Random random) {
-			return (TextureAtlasSprite)this.sprites.get(random.nextInt(this.sprites.size()));
+		public TextureAtlasSprite get(RandomSource randomSource) {
+			return (TextureAtlasSprite)this.sprites.get(randomSource.nextInt(this.sprites.size()));
 		}
 
 		public void rebind(List<TextureAtlasSprite> list) {

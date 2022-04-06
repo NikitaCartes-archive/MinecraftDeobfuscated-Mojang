@@ -355,6 +355,7 @@ public class Items {
 	public static final Item SCULK = registerBlock(Blocks.SCULK, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SCULK_VEIN = registerBlock(Blocks.SCULK_VEIN, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SCULK_CATALYST = registerBlock(Blocks.SCULK_CATALYST, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item SCULK_SHRIEKER = registerBlock(Blocks.SCULK_SHRIEKER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item ENCHANTING_TABLE = registerBlock(Blocks.ENCHANTING_TABLE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item END_PORTAL_FRAME = registerBlock(Blocks.END_PORTAL_FRAME, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item END_STONE = registerBlock(Blocks.END_STONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -1389,11 +1390,11 @@ public class Items {
 	public static final Item VINDICATOR_SPAWN_EGG = registerItem(
 		"vindicator_spawn_egg", new SpawnEggItem(EntityType.VINDICATOR, 9804699, 2580065, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item WARDEN_SPAWN_EGG = registerItem(
-		"warden_spawn_egg", new SpawnEggItem(EntityType.WARDEN, 1001033, 3790560, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
-	);
 	public static final Item WANDERING_TRADER_SPAWN_EGG = registerItem(
 		"wandering_trader_spawn_egg", new SpawnEggItem(EntityType.WANDERING_TRADER, 4547222, 15377456, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
+	public static final Item WARDEN_SPAWN_EGG = registerItem(
+		"warden_spawn_egg", new SpawnEggItem(EntityType.WARDEN, 1001033, 3790560, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item WITCH_SPAWN_EGG = registerItem(
 		"witch_spawn_egg", new SpawnEggItem(EntityType.WITCH, 3407872, 5349438, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
@@ -1730,11 +1731,12 @@ public class Items {
 	public static final Item LARGE_AMETHYST_BUD = registerBlock(Blocks.LARGE_AMETHYST_BUD, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item AMETHYST_CLUSTER = registerBlock(Blocks.AMETHYST_CLUSTER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item POINTED_DRIPSTONE = registerBlock(Blocks.POINTED_DRIPSTONE, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item SCULK_SHRIEKER = registerBlock(Blocks.SCULK_SHRIEKER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item OCHRE_FROGLIGHT = registerBlock(Blocks.OCHRE_FROGLIGHT, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item VERDANT_FROGLIGHT = registerBlock(Blocks.VERDANT_FROGLIGHT, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item PEARLESCENT_FROGLIGHT = registerBlock(Blocks.PEARLESCENT_FROGLIGHT, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item FROGSPAWN = registerBlock(new PlaceOnWaterBlockItem(Blocks.FROGSPAWN, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+	public static final Item ECHO_SHARD = registerItem("echo_shard", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item RECOVERY_COMPASS = registerItem("recovery_compass", new CompassItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 
 	private static <T> Optional<T> ifPart2(T object) {
 		return Optional.empty();

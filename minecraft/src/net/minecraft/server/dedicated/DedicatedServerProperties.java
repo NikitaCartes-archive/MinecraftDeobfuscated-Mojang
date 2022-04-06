@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
@@ -21,6 +20,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
@@ -123,7 +123,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 		);
 
 		public WorldGenSettings create(RegistryAccess registryAccess) {
-			long l = WorldGenSettings.parseSeed(this.levelSeed()).orElse(new Random().nextLong());
+			long l = WorldGenSettings.parseSeed(this.levelSeed()).orElse(RandomSource.create().nextLong());
 			Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
 			Holder<WorldPreset> holder = (Holder<WorldPreset>)registry.getHolder(WorldPresets.NORMAL)
 				.or(() -> registry.holders().findAny())

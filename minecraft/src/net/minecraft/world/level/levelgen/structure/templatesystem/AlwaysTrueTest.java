@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Supplier;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class AlwaysTrueTest extends RuleTest {
@@ -13,7 +13,7 @@ public class AlwaysTrueTest extends RuleTest {
 	}
 
 	@Override
-	public boolean test(BlockState blockState, Random random) {
+	public boolean test(BlockState blockState, RandomSource randomSource) {
 		return true;
 	}
 

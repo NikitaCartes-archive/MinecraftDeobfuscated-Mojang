@@ -21,8 +21,8 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -99,91 +99,105 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		this.name = string;
 		this.vertexFormat = vertexFormat;
 		ResourceLocation resourceLocation = new ResourceLocation("shaders/core/" + string + ".json");
-		Resource resource = null;
 
 		try {
-			resource = resourceProvider.getResource(resourceLocation);
-			JsonObject jsonObject = GsonHelper.parse(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-			String string2 = GsonHelper.getAsString(jsonObject, "vertex");
-			String string3 = GsonHelper.getAsString(jsonObject, "fragment");
-			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "samplers", null);
-			if (jsonArray != null) {
-				int i = 0;
+			Reader reader = resourceProvider.openAsReader(resourceLocation);
 
-				for (JsonElement jsonElement : jsonArray) {
-					try {
-						this.parseSamplerNode(jsonElement);
-					} catch (Exception var25) {
-						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var25);
-						chainedJsonException.prependJsonKey("samplers[" + i + "]");
-						throw chainedJsonException;
+			try {
+				JsonObject jsonObject = GsonHelper.parse(reader);
+				String string2 = GsonHelper.getAsString(jsonObject, "vertex");
+				String string3 = GsonHelper.getAsString(jsonObject, "fragment");
+				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "samplers", null);
+				if (jsonArray != null) {
+					int i = 0;
+
+					for (JsonElement jsonElement : jsonArray) {
+						try {
+							this.parseSamplerNode(jsonElement);
+						} catch (Exception var20) {
+							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var20);
+							chainedJsonException.prependJsonKey("samplers[" + i + "]");
+							throw chainedJsonException;
+						}
+
+						i++;
 					}
-
-					i++;
 				}
-			}
 
-			JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "attributes", null);
-			if (jsonArray2 != null) {
-				int j = 0;
-				this.attributes = Lists.<Integer>newArrayListWithCapacity(jsonArray2.size());
-				this.attributeNames = Lists.<String>newArrayListWithCapacity(jsonArray2.size());
+				JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "attributes", null);
+				if (jsonArray2 != null) {
+					int j = 0;
+					this.attributes = Lists.<Integer>newArrayListWithCapacity(jsonArray2.size());
+					this.attributeNames = Lists.<String>newArrayListWithCapacity(jsonArray2.size());
 
-				for (JsonElement jsonElement2 : jsonArray2) {
-					try {
-						this.attributeNames.add(GsonHelper.convertToString(jsonElement2, "attribute"));
-					} catch (Exception var24) {
-						ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var24);
-						chainedJsonException2.prependJsonKey("attributes[" + j + "]");
-						throw chainedJsonException2;
+					for (JsonElement jsonElement2 : jsonArray2) {
+						try {
+							this.attributeNames.add(GsonHelper.convertToString(jsonElement2, "attribute"));
+						} catch (Exception var19) {
+							ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var19);
+							chainedJsonException2.prependJsonKey("attributes[" + j + "]");
+							throw chainedJsonException2;
+						}
+
+						j++;
 					}
-
-					j++;
+				} else {
+					this.attributes = null;
+					this.attributeNames = null;
 				}
-			} else {
-				this.attributes = null;
-				this.attributeNames = null;
-			}
 
-			JsonArray jsonArray3 = GsonHelper.getAsJsonArray(jsonObject, "uniforms", null);
-			if (jsonArray3 != null) {
-				int k = 0;
+				JsonArray jsonArray3 = GsonHelper.getAsJsonArray(jsonObject, "uniforms", null);
+				if (jsonArray3 != null) {
+					int k = 0;
 
-				for (JsonElement jsonElement3 : jsonArray3) {
-					try {
-						this.parseUniformNode(jsonElement3);
-					} catch (Exception var23) {
-						ChainedJsonException chainedJsonException3 = ChainedJsonException.forException(var23);
-						chainedJsonException3.prependJsonKey("uniforms[" + k + "]");
-						throw chainedJsonException3;
+					for (JsonElement jsonElement3 : jsonArray3) {
+						try {
+							this.parseUniformNode(jsonElement3);
+						} catch (Exception var18) {
+							ChainedJsonException chainedJsonException3 = ChainedJsonException.forException(var18);
+							chainedJsonException3.prependJsonKey("uniforms[" + k + "]");
+							throw chainedJsonException3;
+						}
+
+						k++;
 					}
-
-					k++;
 				}
+
+				this.blend = parseBlendNode(GsonHelper.getAsJsonObject(jsonObject, "blend", null));
+				this.vertexProgram = getOrCreate(resourceProvider, Program.Type.VERTEX, string2);
+				this.fragmentProgram = getOrCreate(resourceProvider, Program.Type.FRAGMENT, string3);
+				this.programId = ProgramManager.createProgram();
+				if (this.attributeNames != null) {
+					int k = 0;
+
+					for (String string4 : vertexFormat.getElementAttributeNames()) {
+						Uniform.glBindAttribLocation(this.programId, k, string4);
+						this.attributes.add(k);
+						k++;
+					}
+				}
+
+				ProgramManager.linkShader(this);
+				this.updateLocations();
+			} catch (Throwable var21) {
+				if (reader != null) {
+					try {
+						reader.close();
+					} catch (Throwable var17) {
+						var21.addSuppressed(var17);
+					}
+				}
+
+				throw var21;
 			}
 
-			this.blend = parseBlendNode(GsonHelper.getAsJsonObject(jsonObject, "blend", null));
-			this.vertexProgram = getOrCreate(resourceProvider, Program.Type.VERTEX, string2);
-			this.fragmentProgram = getOrCreate(resourceProvider, Program.Type.FRAGMENT, string3);
-			this.programId = ProgramManager.createProgram();
-			if (this.attributeNames != null) {
-				int k = 0;
-
-				for (String string4 : vertexFormat.getElementAttributeNames()) {
-					Uniform.glBindAttribLocation(this.programId, k, string4);
-					this.attributes.add(k);
-					k++;
-				}
+			if (reader != null) {
+				reader.close();
 			}
-
-			ProgramManager.linkShader(this);
-			this.updateLocations();
-		} catch (Exception var26) {
-			ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(var26);
+		} catch (Exception var22) {
+			ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(var22);
 			chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath());
 			throw chainedJsonException4;
-		} finally {
-			IOUtils.closeQuietly(resource);
 		}
 
 		this.markDirty();
@@ -209,12 +223,12 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		Program program2;
 		if (program == null) {
 			String string2 = "shaders/core/" + string + type.getExtension();
-			ResourceLocation resourceLocation = new ResourceLocation(string2);
-			Resource resource = resourceProvider.getResource(resourceLocation);
-			final String string3 = FileUtil.getFullResourcePath(string2);
+			Resource resource = resourceProvider.getResourceOrThrow(new ResourceLocation(string2));
+			InputStream inputStream = resource.open();
 
 			try {
-				program2 = Program.compileShader(type, string, resource.getInputStream(), resource.getSourceName(), new GlslPreprocessor() {
+				final String string3 = FileUtil.getFullResourcePath(string2);
+				program2 = Program.compileShader(type, string, inputStream, resource.sourcePackId(), new GlslPreprocessor() {
 					private final Set<String> importedPaths = Sets.<String>newHashSet();
 
 					@Override
@@ -226,15 +240,15 @@ public class ShaderInstance implements Shader, AutoCloseable {
 							ResourceLocation resourceLocation = new ResourceLocation(string);
 
 							try {
-								Resource resource = resourceProvider.getResource(resourceLocation);
+								Reader reader = resourceProvider.openAsReader(resourceLocation);
 
 								String var5;
 								try {
-									var5 = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
+									var5 = IOUtils.toString(reader);
 								} catch (Throwable var8) {
-									if (resource != null) {
+									if (reader != null) {
 										try {
-											resource.close();
+											reader.close();
 										} catch (Throwable var7) {
 											var8.addSuppressed(var7);
 										}
@@ -243,8 +257,8 @@ public class ShaderInstance implements Shader, AutoCloseable {
 									throw var8;
 								}
 
-								if (resource != null) {
-									resource.close();
+								if (reader != null) {
+									reader.close();
 								}
 
 								return var5;
@@ -255,8 +269,20 @@ public class ShaderInstance implements Shader, AutoCloseable {
 						}
 					}
 				});
-			} finally {
-				IOUtils.closeQuietly(resource);
+			} catch (Throwable var11) {
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (Throwable var10) {
+						var11.addSuppressed(var10);
+					}
+				}
+
+				throw var11;
+			}
+
+			if (inputStream != null) {
+				inputStream.close();
 			}
 		} else {
 			program2 = program;

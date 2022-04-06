@@ -11,6 +11,9 @@ public class TrunkPlacerType<P extends TrunkPlacer> {
 	public static final TrunkPlacerType<DarkOakTrunkPlacer> DARK_OAK_TRUNK_PLACER = register("dark_oak_trunk_placer", DarkOakTrunkPlacer.CODEC);
 	public static final TrunkPlacerType<FancyTrunkPlacer> FANCY_TRUNK_PLACER = register("fancy_trunk_placer", FancyTrunkPlacer.CODEC);
 	public static final TrunkPlacerType<BendingTrunkPlacer> BENDING_TRUNK_PLACER = register("bending_trunk_placer", BendingTrunkPlacer.CODEC);
+	public static final TrunkPlacerType<UpwardsBranchingTrunkPlacer> UPWARDS_BRANCHING_TRUNK_PLACER = register(
+		"upwards_branching_trunk_placer", UpwardsBranchingTrunkPlacer.CODEC
+	);
 	private final Codec<P> codec;
 
 	private static <P extends TrunkPlacer> TrunkPlacerType<P> register(String string, Codec<P> codec) {

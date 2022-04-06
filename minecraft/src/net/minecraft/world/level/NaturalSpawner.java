@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -20,6 +19,7 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.Entity;
@@ -273,12 +273,17 @@ public final class NaturalSpawner {
 	}
 
 	private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
-		ServerLevel serverLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, MobCategory mobCategory, Random random, BlockPos blockPos
+		ServerLevel serverLevel,
+		StructureManager structureManager,
+		ChunkGenerator chunkGenerator,
+		MobCategory mobCategory,
+		RandomSource randomSource,
+		BlockPos blockPos
 	) {
 		Holder<Biome> holder = serverLevel.getBiome(blockPos);
-		return mobCategory == MobCategory.WATER_AMBIENT && holder.is(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS) && random.nextFloat() < 0.98F
+		return mobCategory == MobCategory.WATER_AMBIENT && holder.is(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS) && randomSource.nextFloat() < 0.98F
 			? Optional.empty()
-			: mobsAt(serverLevel, structureManager, chunkGenerator, mobCategory, blockPos, holder).getRandom(random);
+			: mobsAt(serverLevel, structureManager, chunkGenerator, mobCategory, blockPos, holder).getRandom(randomSource);
 	}
 
 	private static boolean canSpawnMobAt(
@@ -363,21 +368,21 @@ public final class NaturalSpawner {
 		}
 	}
 
-	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Holder<Biome> holder, ChunkPos chunkPos, Random random) {
+	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Holder<Biome> holder, ChunkPos chunkPos, RandomSource randomSource) {
 		MobSpawnSettings mobSpawnSettings = holder.value().getMobSettings();
 		WeightedRandomList<MobSpawnSettings.SpawnerData> weightedRandomList = mobSpawnSettings.getMobs(MobCategory.CREATURE);
 		if (!weightedRandomList.isEmpty()) {
 			int i = chunkPos.getMinBlockX();
 			int j = chunkPos.getMinBlockZ();
 
-			while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
-				Optional<MobSpawnSettings.SpawnerData> optional = weightedRandomList.getRandom(random);
+			while (randomSource.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
+				Optional<MobSpawnSettings.SpawnerData> optional = weightedRandomList.getRandom(randomSource);
 				if (optional.isPresent()) {
 					MobSpawnSettings.SpawnerData spawnerData = (MobSpawnSettings.SpawnerData)optional.get();
-					int k = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
+					int k = spawnerData.minCount + randomSource.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
 					SpawnGroupData spawnGroupData = null;
-					int l = i + random.nextInt(16);
-					int m = j + random.nextInt(16);
+					int l = i + randomSource.nextInt(16);
+					int m = j + randomSource.nextInt(16);
 					int n = l;
 					int o = m;
 
@@ -406,7 +411,7 @@ public final class NaturalSpawner {
 									continue;
 								}
 
-								entity.moveTo(d, (double)blockPos.getY(), e, random.nextFloat() * 360.0F, 0.0F);
+								entity.moveTo(d, (double)blockPos.getY(), e, randomSource.nextFloat() * 360.0F, 0.0F);
 								if (entity instanceof Mob mob
 									&& mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION)
 									&& mob.checkSpawnObstruction(serverLevelAccessor)) {
@@ -418,10 +423,13 @@ public final class NaturalSpawner {
 								}
 							}
 
-							l += random.nextInt(5) - random.nextInt(5);
+							l += randomSource.nextInt(5) - randomSource.nextInt(5);
 
-							for (m += random.nextInt(5) - random.nextInt(5); l < i || l >= i + 16 || m < j || m >= j + 16; m = o + random.nextInt(5) - random.nextInt(5)) {
-								l = n + random.nextInt(5) - random.nextInt(5);
+							for (m += randomSource.nextInt(5) - randomSource.nextInt(5);
+								l < i || l >= i + 16 || m < j || m >= j + 16;
+								m = o + randomSource.nextInt(5) - randomSource.nextInt(5)
+							) {
+								l = n + randomSource.nextInt(5) - randomSource.nextInt(5);
 							}
 						}
 					}

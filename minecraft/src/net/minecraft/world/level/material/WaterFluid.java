@@ -1,7 +1,6 @@
 package net.minecraft.world.level.material;
 
 import java.util.Optional;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,6 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -41,26 +41,26 @@ public abstract class WaterFluid extends FlowingFluid {
 	}
 
 	@Override
-	public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, Random random) {
+	public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
 		if (!fluidState.isSource() && !(Boolean)fluidState.getValue(FALLING)) {
-			if (random.nextInt(64) == 0) {
+			if (randomSource.nextInt(64) == 0) {
 				level.playLocalSound(
 					(double)blockPos.getX() + 0.5,
 					(double)blockPos.getY() + 0.5,
 					(double)blockPos.getZ() + 0.5,
 					SoundEvents.WATER_AMBIENT,
 					SoundSource.BLOCKS,
-					random.nextFloat() * 0.25F + 0.75F,
-					random.nextFloat() + 0.5F,
+					randomSource.nextFloat() * 0.25F + 0.75F,
+					randomSource.nextFloat() + 0.5F,
 					false
 				);
 			}
-		} else if (random.nextInt(10) == 0) {
+		} else if (randomSource.nextInt(10) == 0) {
 			level.addParticle(
 				ParticleTypes.UNDERWATER,
-				(double)blockPos.getX() + random.nextDouble(),
-				(double)blockPos.getY() + random.nextDouble(),
-				(double)blockPos.getZ() + random.nextDouble(),
+				(double)blockPos.getX() + randomSource.nextDouble(),
+				(double)blockPos.getY() + randomSource.nextDouble(),
+				(double)blockPos.getZ() + randomSource.nextDouble(),
 				0.0,
 				0.0,
 				0.0

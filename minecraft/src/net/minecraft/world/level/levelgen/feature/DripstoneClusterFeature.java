@@ -3,12 +3,12 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ClampedNormalFloat;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -28,21 +28,21 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
 		DripstoneClusterConfiguration dripstoneClusterConfiguration = featurePlaceContext.config();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		if (!DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos)) {
 			return false;
 		} else {
-			int i = dripstoneClusterConfiguration.height.sample(random);
-			float f = dripstoneClusterConfiguration.wetness.sample(random);
-			float g = dripstoneClusterConfiguration.density.sample(random);
-			int j = dripstoneClusterConfiguration.radius.sample(random);
-			int k = dripstoneClusterConfiguration.radius.sample(random);
+			int i = dripstoneClusterConfiguration.height.sample(randomSource);
+			float f = dripstoneClusterConfiguration.wetness.sample(randomSource);
+			float g = dripstoneClusterConfiguration.density.sample(randomSource);
+			int j = dripstoneClusterConfiguration.radius.sample(randomSource);
+			int k = dripstoneClusterConfiguration.radius.sample(randomSource);
 
 			for (int l = -j; l <= j; l++) {
 				for (int m = -k; m <= k; m++) {
 					double d = this.getChanceOfStalagmiteOrStalactite(j, k, l, m, dripstoneClusterConfiguration);
 					BlockPos blockPos2 = blockPos.offset(l, 0, m);
-					this.placeColumn(worldGenLevel, random, blockPos2, l, m, f, d, i, g, dripstoneClusterConfiguration);
+					this.placeColumn(worldGenLevel, randomSource, blockPos2, l, m, f, d, i, g, dripstoneClusterConfiguration);
 				}
 			}
 
@@ -52,7 +52,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 
 	private void placeColumn(
 		WorldGenLevel worldGenLevel,
-		Random random,
+		RandomSource randomSource,
 		BlockPos blockPos,
 		int i,
 		int j,
@@ -69,7 +69,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 			OptionalInt optionalInt = ((Column)optional.get()).getCeiling();
 			OptionalInt optionalInt2 = ((Column)optional.get()).getFloor();
 			if (optionalInt.isPresent() || optionalInt2.isPresent()) {
-				boolean bl = random.nextFloat() < f;
+				boolean bl = randomSource.nextFloat() < f;
 				Column column;
 				if (bl && optionalInt2.isPresent() && this.canPlacePool(worldGenLevel, blockPos.atY(optionalInt2.getAsInt()))) {
 					int l = optionalInt2.getAsInt();
@@ -80,10 +80,10 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 				}
 
 				OptionalInt optionalInt3 = column.getFloor();
-				boolean bl2 = random.nextDouble() < d;
+				boolean bl2 = randomSource.nextDouble() < d;
 				int o;
 				if (optionalInt.isPresent() && bl2 && !this.isLava(worldGenLevel, blockPos.atY(optionalInt.getAsInt()))) {
-					int m = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(random);
+					int m = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(randomSource);
 					this.replaceBlocksWithDripstoneBlocks(worldGenLevel, blockPos.atY(optionalInt.getAsInt()), m, Direction.UP);
 					int n;
 					if (optionalInt3.isPresent()) {
@@ -92,26 +92,26 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 						n = k;
 					}
 
-					o = this.getDripstoneHeight(random, i, j, g, n, dripstoneClusterConfiguration);
+					o = this.getDripstoneHeight(randomSource, i, j, g, n, dripstoneClusterConfiguration);
 				} else {
 					o = 0;
 				}
 
-				boolean bl3 = random.nextDouble() < d;
+				boolean bl3 = randomSource.nextDouble() < d;
 				int m;
 				if (optionalInt3.isPresent() && bl3 && !this.isLava(worldGenLevel, blockPos.atY(optionalInt3.getAsInt()))) {
-					int p = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(random);
+					int p = dripstoneClusterConfiguration.dripstoneBlockLayerThickness.sample(randomSource);
 					this.replaceBlocksWithDripstoneBlocks(worldGenLevel, blockPos.atY(optionalInt3.getAsInt()), p, Direction.DOWN);
 					if (optionalInt.isPresent()) {
 						m = Math.max(
 							0,
 							o
 								+ Mth.randomBetweenInclusive(
-									random, -dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff, dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff
+									randomSource, -dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff, dripstoneClusterConfiguration.maxStalagmiteStalactiteHeightDiff
 								)
 						);
 					} else {
-						m = this.getDripstoneHeight(random, i, j, g, k, dripstoneClusterConfiguration);
+						m = this.getDripstoneHeight(randomSource, i, j, g, k, dripstoneClusterConfiguration);
 					}
 				} else {
 					m = 0;
@@ -124,7 +124,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 					int r = optionalInt.getAsInt();
 					int s = Math.max(r - o, q + 1);
 					int t = Math.min(q + m, r - 1);
-					int u = Mth.randomBetweenInclusive(random, s, t + 1);
+					int u = Mth.randomBetweenInclusive(randomSource, s, t + 1);
 					int v = u - 1;
 					p = r - u;
 					w = v - q;
@@ -133,7 +133,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 					w = m;
 				}
 
-				boolean bl4 = random.nextBoolean() && p > 0 && w > 0 && column.getHeight().isPresent() && p + w == column.getHeight().getAsInt();
+				boolean bl4 = randomSource.nextBoolean() && p > 0 && w > 0 && column.getHeight().isPresent() && p + w == column.getHeight().getAsInt();
 				if (optionalInt.isPresent()) {
 					DripstoneUtils.growPointedDripstone(worldGenLevel, blockPos.atY(optionalInt.getAsInt() - 1), Direction.DOWN, p, bl4);
 				}
@@ -149,13 +149,13 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 		return levelReader.getBlockState(blockPos).is(Blocks.LAVA);
 	}
 
-	private int getDripstoneHeight(Random random, int i, int j, float f, int k, DripstoneClusterConfiguration dripstoneClusterConfiguration) {
-		if (random.nextFloat() > f) {
+	private int getDripstoneHeight(RandomSource randomSource, int i, int j, float f, int k, DripstoneClusterConfiguration dripstoneClusterConfiguration) {
+		if (randomSource.nextFloat() > f) {
 			return 0;
 		} else {
 			int l = Math.abs(i) + Math.abs(j);
 			float g = (float)Mth.clampedMap((double)l, 0.0, (double)dripstoneClusterConfiguration.maxDistanceFromCenterAffectingHeightBias, (double)k / 2.0, 0.0);
-			return (int)randomBetweenBiased(random, 0.0F, (float)k, g, (float)dripstoneClusterConfiguration.heightDeviation);
+			return (int)randomBetweenBiased(randomSource, 0.0F, (float)k, g, (float)dripstoneClusterConfiguration.heightDeviation);
 		}
 	}
 
@@ -208,7 +208,7 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 		);
 	}
 
-	private static float randomBetweenBiased(Random random, float f, float g, float h, float i) {
-		return ClampedNormalFloat.sample(random, h, i, f, g);
+	private static float randomBetweenBiased(RandomSource randomSource, float f, float g, float h, float i) {
+		return ClampedNormalFloat.sample(randomSource, h, i, f, g);
 	}
 }

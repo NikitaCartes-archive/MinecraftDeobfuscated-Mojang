@@ -2,9 +2,9 @@ package net.minecraft.server.packs.resources;
 
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -44,7 +44,7 @@ public class ReloadableResourceManager implements ResourceManager, AutoCloseable
 	}
 
 	@Override
-	public Resource getResource(ResourceLocation resourceLocation) throws IOException {
+	public Optional<Resource> getResource(ResourceLocation resourceLocation) {
 		return this.resources.getResource(resourceLocation);
 	}
 
@@ -54,22 +54,17 @@ public class ReloadableResourceManager implements ResourceManager, AutoCloseable
 	}
 
 	@Override
-	public boolean hasResource(ResourceLocation resourceLocation) {
-		return this.resources.hasResource(resourceLocation);
-	}
-
-	@Override
-	public List<ResourceThunk> getResourceStack(ResourceLocation resourceLocation) throws IOException {
+	public List<Resource> getResourceStack(ResourceLocation resourceLocation) {
 		return this.resources.getResourceStack(resourceLocation);
 	}
 
 	@Override
-	public Map<ResourceLocation, ResourceThunk> listResources(String string, Predicate<ResourceLocation> predicate) {
+	public Map<ResourceLocation, Resource> listResources(String string, Predicate<ResourceLocation> predicate) {
 		return this.resources.listResources(string, predicate);
 	}
 
 	@Override
-	public Map<ResourceLocation, List<ResourceThunk>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+	public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
 		return this.resources.listResourceStacks(string, predicate);
 	}
 

@@ -1,10 +1,9 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 
@@ -17,7 +16,7 @@ public class IcePatchFeature extends BaseDiskFeature {
 	public boolean place(FeaturePlaceContext<DiskConfiguration> featurePlaceContext) {
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		ChunkGenerator chunkGenerator = featurePlaceContext.chunkGenerator();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		DiskConfiguration diskConfiguration = featurePlaceContext.config();
 		BlockPos blockPos = featurePlaceContext.origin();
 
@@ -25,7 +24,7 @@ public class IcePatchFeature extends BaseDiskFeature {
 			blockPos = blockPos.below();
 		}
 
-		return !worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)
+		return !featurePlaceContext.level().getBlockState(blockPos).is(diskConfiguration.canOriginReplace())
 			? false
 			: super.place(
 				new FeaturePlaceContext<>(

@@ -1,12 +1,12 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.CarvingMask;
@@ -18,8 +18,8 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		super(codec);
 	}
 
-	public boolean isStartChunk(CaveCarverConfiguration caveCarverConfiguration, Random random) {
-		return random.nextFloat() <= caveCarverConfiguration.probability;
+	public boolean isStartChunk(CaveCarverConfiguration caveCarverConfiguration, RandomSource randomSource) {
+		return randomSource.nextFloat() <= caveCarverConfiguration.probability;
 	}
 
 	public boolean carve(
@@ -27,42 +27,42 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		CaveCarverConfiguration caveCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Holder<Biome>> function,
-		Random random,
+		RandomSource randomSource,
 		Aquifer aquifer,
 		ChunkPos chunkPos,
 		CarvingMask carvingMask
 	) {
 		int i = SectionPos.sectionToBlockCoord(this.getRange() * 2 - 1);
-		int j = random.nextInt(random.nextInt(random.nextInt(this.getCaveBound()) + 1) + 1);
+		int j = randomSource.nextInt(randomSource.nextInt(randomSource.nextInt(this.getCaveBound()) + 1) + 1);
 
 		for (int k = 0; k < j; k++) {
-			double d = (double)chunkPos.getBlockX(random.nextInt(16));
-			double e = (double)caveCarverConfiguration.y.sample(random, carvingContext);
-			double f = (double)chunkPos.getBlockZ(random.nextInt(16));
-			double g = (double)caveCarverConfiguration.horizontalRadiusMultiplier.sample(random);
-			double h = (double)caveCarverConfiguration.verticalRadiusMultiplier.sample(random);
-			double l = (double)caveCarverConfiguration.floorLevel.sample(random);
+			double d = (double)chunkPos.getBlockX(randomSource.nextInt(16));
+			double e = (double)caveCarverConfiguration.y.sample(randomSource, carvingContext);
+			double f = (double)chunkPos.getBlockZ(randomSource.nextInt(16));
+			double g = (double)caveCarverConfiguration.horizontalRadiusMultiplier.sample(randomSource);
+			double h = (double)caveCarverConfiguration.verticalRadiusMultiplier.sample(randomSource);
+			double l = (double)caveCarverConfiguration.floorLevel.sample(randomSource);
 			WorldCarver.CarveSkipChecker carveSkipChecker = (carvingContextx, ex, fx, gx, ix) -> shouldSkip(ex, fx, gx, l);
 			int m = 1;
-			if (random.nextInt(4) == 0) {
-				double n = (double)caveCarverConfiguration.yScale.sample(random);
-				float o = 1.0F + random.nextFloat() * 6.0F;
+			if (randomSource.nextInt(4) == 0) {
+				double n = (double)caveCarverConfiguration.yScale.sample(randomSource);
+				float o = 1.0F + randomSource.nextFloat() * 6.0F;
 				this.createRoom(carvingContext, caveCarverConfiguration, chunkAccess, function, aquifer, d, e, f, o, n, carvingMask, carveSkipChecker);
-				m += random.nextInt(4);
+				m += randomSource.nextInt(4);
 			}
 
 			for (int p = 0; p < m; p++) {
-				float q = random.nextFloat() * (float) (Math.PI * 2);
-				float o = (random.nextFloat() - 0.5F) / 4.0F;
-				float r = this.getThickness(random);
-				int s = i - random.nextInt(i / 4);
+				float q = randomSource.nextFloat() * (float) (Math.PI * 2);
+				float o = (randomSource.nextFloat() - 0.5F) / 4.0F;
+				float r = this.getThickness(randomSource);
+				int s = i - randomSource.nextInt(i / 4);
 				int t = 0;
 				this.createTunnel(
 					carvingContext,
 					caveCarverConfiguration,
 					chunkAccess,
 					function,
-					random.nextLong(),
+					randomSource.nextLong(),
 					aquifer,
 					d,
 					e,
@@ -88,10 +88,10 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		return 15;
 	}
 
-	protected float getThickness(Random random) {
-		float f = random.nextFloat() * 2.0F + random.nextFloat();
-		if (random.nextInt(10) == 0) {
-			f *= random.nextFloat() * random.nextFloat() * 3.0F + 1.0F;
+	protected float getThickness(RandomSource randomSource) {
+		float f = randomSource.nextFloat() * 2.0F + randomSource.nextFloat();
+		if (randomSource.nextInt(10) == 0) {
+			f *= randomSource.nextFloat() * randomSource.nextFloat() * 3.0F + 1.0F;
 		}
 
 		return f;
@@ -141,9 +141,9 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 		CarvingMask carvingMask,
 		WorldCarver.CarveSkipChecker carveSkipChecker
 	) {
-		Random random = new Random(l);
-		int p = random.nextInt(n / 2) + n / 4;
-		boolean bl = random.nextInt(6) == 0;
+		RandomSource randomSource = RandomSource.create(l);
+		int p = randomSource.nextInt(n / 2) + n / 4;
+		boolean bl = randomSource.nextInt(6) == 0;
 		float q = 0.0F;
 		float r = 0.0F;
 
@@ -159,22 +159,22 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 			j += q * 0.1F;
 			r *= 0.9F;
 			q *= 0.75F;
-			r += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
-			q += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
+			r += (randomSource.nextFloat() - randomSource.nextFloat()) * randomSource.nextFloat() * 2.0F;
+			q += (randomSource.nextFloat() - randomSource.nextFloat()) * randomSource.nextFloat() * 4.0F;
 			if (s == p && i > 1.0F) {
 				this.createTunnel(
 					carvingContext,
 					caveCarverConfiguration,
 					chunkAccess,
 					function,
-					random.nextLong(),
+					randomSource.nextLong(),
 					aquifer,
 					d,
 					e,
 					f,
 					g,
 					h,
-					random.nextFloat() * 0.5F + 0.5F,
+					randomSource.nextFloat() * 0.5F + 0.5F,
 					j - (float) (Math.PI / 2),
 					k / 3.0F,
 					s,
@@ -188,14 +188,14 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 					caveCarverConfiguration,
 					chunkAccess,
 					function,
-					random.nextLong(),
+					randomSource.nextLong(),
 					aquifer,
 					d,
 					e,
 					f,
 					g,
 					h,
-					random.nextFloat() * 0.5F + 0.5F,
+					randomSource.nextFloat() * 0.5F + 0.5F,
 					j + (float) (Math.PI / 2),
 					k / 3.0F,
 					s,
@@ -207,7 +207,7 @@ public class CaveWorldCarver extends WorldCarver<CaveCarverConfiguration> {
 				return;
 			}
 
-			if (random.nextInt(4) != 0) {
+			if (randomSource.nextInt(4) != 0) {
 				if (!canReach(chunkAccess.getPos(), d, f, s, n, i)) {
 					return;
 				}

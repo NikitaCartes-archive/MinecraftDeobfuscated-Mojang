@@ -2,14 +2,14 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -32,73 +32,77 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class WoodlandMansionPieces {
 	public static void generateMansion(
-		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, List<WoodlandMansionPieces.WoodlandMansionPiece> list, Random random
+		StructureTemplateManager structureTemplateManager,
+		BlockPos blockPos,
+		Rotation rotation,
+		List<WoodlandMansionPieces.WoodlandMansionPiece> list,
+		RandomSource randomSource
 	) {
-		WoodlandMansionPieces.MansionGrid mansionGrid = new WoodlandMansionPieces.MansionGrid(random);
-		WoodlandMansionPieces.MansionPiecePlacer mansionPiecePlacer = new WoodlandMansionPieces.MansionPiecePlacer(structureTemplateManager, random);
+		WoodlandMansionPieces.MansionGrid mansionGrid = new WoodlandMansionPieces.MansionGrid(randomSource);
+		WoodlandMansionPieces.MansionPiecePlacer mansionPiecePlacer = new WoodlandMansionPieces.MansionPiecePlacer(structureTemplateManager, randomSource);
 		mansionPiecePlacer.createMansion(blockPos, rotation, list, mansionGrid);
 	}
 
 	public static void main(String[] strings) {
-		Random random = new Random();
-		long l = random.nextLong();
+		RandomSource randomSource = RandomSource.create();
+		long l = randomSource.nextLong();
 		System.out.println("Seed: " + l);
-		random.setSeed(l);
-		WoodlandMansionPieces.MansionGrid mansionGrid = new WoodlandMansionPieces.MansionGrid(random);
+		randomSource.setSeed(l);
+		WoodlandMansionPieces.MansionGrid mansionGrid = new WoodlandMansionPieces.MansionGrid(randomSource);
 		mansionGrid.print();
 	}
 
 	static class FirstFloorRoomCollection extends WoodlandMansionPieces.FloorRoomCollection {
 		@Override
-		public String get1x1(Random random) {
-			return "1x1_a" + (random.nextInt(5) + 1);
+		public String get1x1(RandomSource randomSource) {
+			return "1x1_a" + (randomSource.nextInt(5) + 1);
 		}
 
 		@Override
-		public String get1x1Secret(Random random) {
-			return "1x1_as" + (random.nextInt(4) + 1);
+		public String get1x1Secret(RandomSource randomSource) {
+			return "1x1_as" + (randomSource.nextInt(4) + 1);
 		}
 
 		@Override
-		public String get1x2SideEntrance(Random random, boolean bl) {
-			return "1x2_a" + (random.nextInt(9) + 1);
+		public String get1x2SideEntrance(RandomSource randomSource, boolean bl) {
+			return "1x2_a" + (randomSource.nextInt(9) + 1);
 		}
 
 		@Override
-		public String get1x2FrontEntrance(Random random, boolean bl) {
-			return "1x2_b" + (random.nextInt(5) + 1);
+		public String get1x2FrontEntrance(RandomSource randomSource, boolean bl) {
+			return "1x2_b" + (randomSource.nextInt(5) + 1);
 		}
 
 		@Override
-		public String get1x2Secret(Random random) {
-			return "1x2_s" + (random.nextInt(2) + 1);
+		public String get1x2Secret(RandomSource randomSource) {
+			return "1x2_s" + (randomSource.nextInt(2) + 1);
 		}
 
 		@Override
-		public String get2x2(Random random) {
-			return "2x2_a" + (random.nextInt(4) + 1);
+		public String get2x2(RandomSource randomSource) {
+			return "2x2_a" + (randomSource.nextInt(4) + 1);
 		}
 
 		@Override
-		public String get2x2Secret(Random random) {
+		public String get2x2Secret(RandomSource randomSource) {
 			return "2x2_s1";
 		}
 	}
 
 	abstract static class FloorRoomCollection {
-		public abstract String get1x1(Random random);
+		public abstract String get1x1(RandomSource randomSource);
 
-		public abstract String get1x1Secret(Random random);
+		public abstract String get1x1Secret(RandomSource randomSource);
 
-		public abstract String get1x2SideEntrance(Random random, boolean bl);
+		public abstract String get1x2SideEntrance(RandomSource randomSource, boolean bl);
 
-		public abstract String get1x2FrontEntrance(Random random, boolean bl);
+		public abstract String get1x2FrontEntrance(RandomSource randomSource, boolean bl);
 
-		public abstract String get1x2Secret(Random random);
+		public abstract String get1x2Secret(RandomSource randomSource);
 
-		public abstract String get2x2(Random random);
+		public abstract String get2x2(RandomSource randomSource);
 
-		public abstract String get2x2Secret(Random random);
+		public abstract String get2x2Secret(RandomSource randomSource);
 	}
 
 	static class MansionGrid {
@@ -118,15 +122,15 @@ public class WoodlandMansionPieces {
 		private static final int ROOM_CORRIDOR_FLAG = 8388608;
 		private static final int ROOM_TYPE_MASK = 983040;
 		private static final int ROOM_ID_MASK = 65535;
-		private final Random random;
+		private final RandomSource random;
 		final WoodlandMansionPieces.SimpleGrid baseGrid;
 		final WoodlandMansionPieces.SimpleGrid thirdFloorGrid;
 		final WoodlandMansionPieces.SimpleGrid[] floorRooms;
 		final int entranceX;
 		final int entranceY;
 
-		public MansionGrid(Random random) {
-			this.random = random;
+		public MansionGrid(RandomSource randomSource) {
+			this.random = randomSource;
 			int i = 11;
 			this.entranceX = 7;
 			this.entranceY = 4;
@@ -312,7 +316,7 @@ public class WoodlandMansionPieces {
 				}
 			}
 
-			Collections.shuffle(list, this.random);
+			Util.shuffle(list, this.random);
 			int i = 10;
 
 			for (Tuple<Integer, Integer> tuple : list) {
@@ -432,13 +436,13 @@ public class WoodlandMansionPieces {
 
 	static class MansionPiecePlacer {
 		private final StructureTemplateManager structureTemplateManager;
-		private final Random random;
+		private final RandomSource random;
 		private int startX;
 		private int startY;
 
-		public MansionPiecePlacer(StructureTemplateManager structureTemplateManager, Random random) {
+		public MansionPiecePlacer(StructureTemplateManager structureTemplateManager, RandomSource randomSource) {
 			this.structureTemplateManager = structureTemplateManager;
-			this.random = random;
+			this.random = randomSource;
 		}
 
 		public void createMansion(
@@ -1125,37 +1129,37 @@ public class WoodlandMansionPieces {
 
 	static class SecondFloorRoomCollection extends WoodlandMansionPieces.FloorRoomCollection {
 		@Override
-		public String get1x1(Random random) {
-			return "1x1_b" + (random.nextInt(4) + 1);
+		public String get1x1(RandomSource randomSource) {
+			return "1x1_b" + (randomSource.nextInt(4) + 1);
 		}
 
 		@Override
-		public String get1x1Secret(Random random) {
-			return "1x1_as" + (random.nextInt(4) + 1);
+		public String get1x1Secret(RandomSource randomSource) {
+			return "1x1_as" + (randomSource.nextInt(4) + 1);
 		}
 
 		@Override
-		public String get1x2SideEntrance(Random random, boolean bl) {
-			return bl ? "1x2_c_stairs" : "1x2_c" + (random.nextInt(4) + 1);
+		public String get1x2SideEntrance(RandomSource randomSource, boolean bl) {
+			return bl ? "1x2_c_stairs" : "1x2_c" + (randomSource.nextInt(4) + 1);
 		}
 
 		@Override
-		public String get1x2FrontEntrance(Random random, boolean bl) {
-			return bl ? "1x2_d_stairs" : "1x2_d" + (random.nextInt(5) + 1);
+		public String get1x2FrontEntrance(RandomSource randomSource, boolean bl) {
+			return bl ? "1x2_d_stairs" : "1x2_d" + (randomSource.nextInt(5) + 1);
 		}
 
 		@Override
-		public String get1x2Secret(Random random) {
-			return "1x2_se" + (random.nextInt(1) + 1);
+		public String get1x2Secret(RandomSource randomSource) {
+			return "1x2_se" + (randomSource.nextInt(1) + 1);
 		}
 
 		@Override
-		public String get2x2(Random random) {
-			return "2x2_b" + (random.nextInt(5) + 1);
+		public String get2x2(RandomSource randomSource) {
+			return "2x2_b" + (randomSource.nextInt(5) + 1);
 		}
 
 		@Override
-		public String get2x2Secret(Random random) {
+		public String get2x2Secret(RandomSource randomSource) {
 			return "2x2_s1";
 		}
 	}
@@ -1244,7 +1248,7 @@ public class WoodlandMansionPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			if (string.startsWith("Chest")) {
 				Rotation rotation = this.placeSettings.getRotation();
 				BlockState blockState = Blocks.CHEST.defaultBlockState();
@@ -1258,7 +1262,7 @@ public class WoodlandMansionPieces {
 					blockState = blockState.setValue(ChestBlock.FACING, rotation.rotate(Direction.NORTH));
 				}
 
-				this.createChest(serverLevelAccessor, boundingBox, random, blockPos, BuiltInLootTables.WOODLAND_MANSION, blockState);
+				this.createChest(serverLevelAccessor, boundingBox, randomSource, blockPos, BuiltInLootTables.WOODLAND_MANSION, blockState);
 			} else {
 				List<Mob> list = new ArrayList();
 				switch (string) {

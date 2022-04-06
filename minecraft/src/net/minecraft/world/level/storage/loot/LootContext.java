@@ -9,7 +9,6 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -17,6 +16,7 @@ import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -25,7 +25,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootContext {
-	private final Random random;
+	private final RandomSource random;
 	private final float luck;
 	private final ServerLevel level;
 	private final Function<ResourceLocation, LootTable> lootTables;
@@ -36,7 +36,7 @@ public class LootContext {
 	private final Map<ResourceLocation, LootContext.DynamicDrop> dynamicDrops;
 
 	LootContext(
-		Random random,
+		RandomSource randomSource,
 		float f,
 		ServerLevel serverLevel,
 		Function<ResourceLocation, LootTable> function,
@@ -44,7 +44,7 @@ public class LootContext {
 		Map<LootContextParam<?>, Object> map,
 		Map<ResourceLocation, LootContext.DynamicDrop> map2
 	) {
-		this.random = random;
+		this.random = randomSource;
 		this.luck = f;
 		this.level = serverLevel;
 		this.lootTables = function;
@@ -102,7 +102,7 @@ public class LootContext {
 		return (LootItemCondition)this.conditions.apply(resourceLocation);
 	}
 
-	public Random getRandom() {
+	public RandomSource getRandom() {
 		return this.random;
 	}
 
@@ -118,31 +118,31 @@ public class LootContext {
 		private final ServerLevel level;
 		private final Map<LootContextParam<?>, Object> params = Maps.<LootContextParam<?>, Object>newIdentityHashMap();
 		private final Map<ResourceLocation, LootContext.DynamicDrop> dynamicDrops = Maps.<ResourceLocation, LootContext.DynamicDrop>newHashMap();
-		private Random random;
+		private RandomSource random;
 		private float luck;
 
 		public Builder(ServerLevel serverLevel) {
 			this.level = serverLevel;
 		}
 
-		public LootContext.Builder withRandom(Random random) {
-			this.random = random;
+		public LootContext.Builder withRandom(RandomSource randomSource) {
+			this.random = randomSource;
 			return this;
 		}
 
 		public LootContext.Builder withOptionalRandomSeed(long l) {
 			if (l != 0L) {
-				this.random = new Random(l);
+				this.random = RandomSource.create(l);
 			}
 
 			return this;
 		}
 
-		public LootContext.Builder withOptionalRandomSeed(long l, Random random) {
+		public LootContext.Builder withOptionalRandomSeed(long l, RandomSource randomSource) {
 			if (l == 0L) {
-				this.random = random;
+				this.random = randomSource;
 			} else {
-				this.random = new Random(l);
+				this.random = RandomSource.create(l);
 			}
 
 			return this;
@@ -204,14 +204,14 @@ public class LootContext {
 				if (!set2.isEmpty()) {
 					throw new IllegalArgumentException("Missing required parameters: " + set2);
 				} else {
-					Random random = this.random;
-					if (random == null) {
-						random = new Random();
+					RandomSource randomSource = this.random;
+					if (randomSource == null) {
+						randomSource = RandomSource.create();
 					}
 
 					MinecraftServer minecraftServer = this.level.getServer();
 					return new LootContext(
-						random, this.luck, this.level, minecraftServer.getLootTables()::get, minecraftServer.getPredicateManager()::get, this.params, this.dynamicDrops
+						randomSource, this.luck, this.level, minecraftServer.getLootTables()::get, minecraftServer.getPredicateManager()::get, this.params, this.dynamicDrops
 					);
 				}
 			}

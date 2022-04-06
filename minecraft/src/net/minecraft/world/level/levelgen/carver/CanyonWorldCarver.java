@@ -1,11 +1,11 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.CarvingMask;
@@ -17,8 +17,8 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		super(codec);
 	}
 
-	public boolean isStartChunk(CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
-		return random.nextFloat() <= canyonCarverConfiguration.probability;
+	public boolean isStartChunk(CanyonCarverConfiguration canyonCarverConfiguration, RandomSource randomSource) {
+		return randomSource.nextFloat() <= canyonCarverConfiguration.probability;
 	}
 
 	public boolean carve(
@@ -26,22 +26,24 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		CanyonCarverConfiguration canyonCarverConfiguration,
 		ChunkAccess chunkAccess,
 		Function<BlockPos, Holder<Biome>> function,
-		Random random,
+		RandomSource randomSource,
 		Aquifer aquifer,
 		ChunkPos chunkPos,
 		CarvingMask carvingMask
 	) {
 		int i = (this.getRange() * 2 - 1) * 16;
-		double d = (double)chunkPos.getBlockX(random.nextInt(16));
-		int j = canyonCarverConfiguration.y.sample(random, carvingContext);
-		double e = (double)chunkPos.getBlockZ(random.nextInt(16));
-		float f = random.nextFloat() * (float) (Math.PI * 2);
-		float g = canyonCarverConfiguration.verticalRotation.sample(random);
-		double h = (double)canyonCarverConfiguration.yScale.sample(random);
-		float k = canyonCarverConfiguration.shape.thickness.sample(random);
-		int l = (int)((float)i * canyonCarverConfiguration.shape.distanceFactor.sample(random));
+		double d = (double)chunkPos.getBlockX(randomSource.nextInt(16));
+		int j = canyonCarverConfiguration.y.sample(randomSource, carvingContext);
+		double e = (double)chunkPos.getBlockZ(randomSource.nextInt(16));
+		float f = randomSource.nextFloat() * (float) (Math.PI * 2);
+		float g = canyonCarverConfiguration.verticalRotation.sample(randomSource);
+		double h = (double)canyonCarverConfiguration.yScale.sample(randomSource);
+		float k = canyonCarverConfiguration.shape.thickness.sample(randomSource);
+		int l = (int)((float)i * canyonCarverConfiguration.shape.distanceFactor.sample(randomSource));
 		int m = 0;
-		this.doCarve(carvingContext, canyonCarverConfiguration, chunkAccess, function, random.nextLong(), aquifer, d, (double)j, e, k, f, g, 0, l, h, carvingMask);
+		this.doCarve(
+			carvingContext, canyonCarverConfiguration, chunkAccess, function, randomSource.nextLong(), aquifer, d, (double)j, e, k, f, g, 0, l, h, carvingMask
+		);
 		return true;
 	}
 
@@ -63,16 +65,16 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		double m,
 		CarvingMask carvingMask
 	) {
-		Random random = new Random(l);
-		float[] fs = this.initWidthFactors(carvingContext, canyonCarverConfiguration, random);
+		RandomSource randomSource = RandomSource.create(l);
+		float[] fs = this.initWidthFactors(carvingContext, canyonCarverConfiguration, randomSource);
 		float n = 0.0F;
 		float o = 0.0F;
 
 		for (int p = j; p < k; p++) {
 			double q = 1.5 + (double)(Mth.sin((float)p * (float) Math.PI / (float)k) * g);
 			double r = q * m;
-			q *= (double)canyonCarverConfiguration.shape.horizontalRadiusFactor.sample(random);
-			r = this.updateVerticalRadius(canyonCarverConfiguration, random, r, (float)k, (float)p);
+			q *= (double)canyonCarverConfiguration.shape.horizontalRadiusFactor.sample(randomSource);
+			r = this.updateVerticalRadius(canyonCarverConfiguration, randomSource, r, (float)k, (float)p);
 			float s = Mth.cos(i);
 			float t = Mth.sin(i);
 			d += (double)(Mth.cos(h) * s);
@@ -83,9 +85,9 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 			h += n * 0.05F;
 			o *= 0.8F;
 			n *= 0.5F;
-			o += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
-			n += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
-			if (random.nextInt(4) != 0) {
+			o += (randomSource.nextFloat() - randomSource.nextFloat()) * randomSource.nextFloat() * 2.0F;
+			n += (randomSource.nextFloat() - randomSource.nextFloat()) * randomSource.nextFloat() * 4.0F;
+			if (randomSource.nextInt(4) != 0) {
 				if (!canReach(chunkAccess.getPos(), d, f, p, k, g)) {
 					return;
 				}
@@ -108,14 +110,14 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		}
 	}
 
-	private float[] initWidthFactors(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, Random random) {
+	private float[] initWidthFactors(CarvingContext carvingContext, CanyonCarverConfiguration canyonCarverConfiguration, RandomSource randomSource) {
 		int i = carvingContext.getGenDepth();
 		float[] fs = new float[i];
 		float f = 1.0F;
 
 		for (int j = 0; j < i; j++) {
-			if (j == 0 || random.nextInt(canyonCarverConfiguration.shape.widthSmoothness) == 0) {
-				f = 1.0F + random.nextFloat() * random.nextFloat();
+			if (j == 0 || randomSource.nextInt(canyonCarverConfiguration.shape.widthSmoothness) == 0) {
+				f = 1.0F + randomSource.nextFloat() * randomSource.nextFloat();
 			}
 
 			fs[j] = f * f;
@@ -124,10 +126,10 @@ public class CanyonWorldCarver extends WorldCarver<CanyonCarverConfiguration> {
 		return fs;
 	}
 
-	private double updateVerticalRadius(CanyonCarverConfiguration canyonCarverConfiguration, Random random, double d, float f, float g) {
+	private double updateVerticalRadius(CanyonCarverConfiguration canyonCarverConfiguration, RandomSource randomSource, double d, float f, float g) {
 		float h = 1.0F - Mth.abs(0.5F - g / f) * 2.0F;
 		float i = canyonCarverConfiguration.shape.verticalRadiusDefaultFactor + canyonCarverConfiguration.shape.verticalRadiusCenterFactor * h;
-		return (double)i * d * (double)Mth.randomBetween(random, 0.75F, 1.0F);
+		return (double)i * d * (double)Mth.randomBetween(randomSource, 0.75F, 1.0F);
 	}
 
 	private boolean shouldSkip(CarvingContext carvingContext, float[] fs, double d, double e, double f, int i) {

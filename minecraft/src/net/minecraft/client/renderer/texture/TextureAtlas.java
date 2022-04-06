@@ -10,9 +10,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -148,47 +150,60 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 
 		for (ResourceLocation resourceLocation : set) {
 			if (!MissingTextureAtlasSprite.getLocation().equals(resourceLocation)) {
-				list.add(CompletableFuture.runAsync(() -> {
-					ResourceLocation resourceLocation2 = this.getResourceLocation(resourceLocation);
+				list.add(
+					CompletableFuture.runAsync(
+						() -> {
+							ResourceLocation resourceLocation2 = this.getResourceLocation(resourceLocation);
+							Optional<Resource> optional = resourceManager.getResource(resourceLocation2);
+							if (optional.isEmpty()) {
+								LOGGER.error("Using missing texture, file {} not found", resourceLocation2);
+							} else {
+								Resource resource = (Resource)optional.get();
 
-					TextureAtlasSprite.Info info;
-					try {
-						Resource resource = resourceManager.getResource(resourceLocation2);
-
-						try {
-							PngInfo pngInfo = new PngInfo(resourceLocation2::toString, resource.getInputStream());
-							AnimationMetadataSection animationMetadataSection = resource.getMetadata(AnimationMetadataSection.SERIALIZER);
-							if (animationMetadataSection == null) {
-								animationMetadataSection = AnimationMetadataSection.EMPTY;
-							}
-
-							Pair<Integer, Integer> pair = animationMetadataSection.getFrameSize(pngInfo.width, pngInfo.height);
-							info = new TextureAtlasSprite.Info(resourceLocation, pair.getFirst(), pair.getSecond(), animationMetadataSection);
-						} catch (Throwable var11) {
-							if (resource != null) {
+								PngInfo pngInfo;
 								try {
-									resource.close();
-								} catch (Throwable var10) {
-									var11.addSuppressed(var10);
+									InputStream inputStream = resource.open();
+
+									try {
+										pngInfo = new PngInfo(resourceLocation2::toString, inputStream);
+									} catch (Throwable var14) {
+										if (inputStream != null) {
+											try {
+												inputStream.close();
+											} catch (Throwable var12) {
+												var14.addSuppressed(var12);
+											}
+										}
+
+										throw var14;
+									}
+
+									if (inputStream != null) {
+										inputStream.close();
+									}
+								} catch (IOException var15) {
+									LOGGER.error("Using missing texture, unable to load {} : {}", resourceLocation2, var15);
+									return;
 								}
+
+								AnimationMetadataSection animationMetadataSection;
+								try {
+									animationMetadataSection = (AnimationMetadataSection)resource.metadata()
+										.getSection(AnimationMetadataSection.SERIALIZER)
+										.orElse(AnimationMetadataSection.EMPTY);
+								} catch (Exception var13) {
+									LOGGER.error("Unable to parse metadata from {} : {}", resourceLocation2, var13);
+									return;
+								}
+
+								Pair<Integer, Integer> pair = animationMetadataSection.getFrameSize(pngInfo.width, pngInfo.height);
+								TextureAtlasSprite.Info info = new TextureAtlasSprite.Info(resourceLocation, pair.getFirst(), pair.getSecond(), animationMetadataSection);
+								queue.add(info);
 							}
-
-							throw var11;
-						}
-
-						if (resource != null) {
-							resource.close();
-						}
-					} catch (RuntimeException var12) {
-						LOGGER.error("Unable to parse metadata from {} : {}", resourceLocation2, var12);
-						return;
-					} catch (IOException var13) {
-						LOGGER.error("Using missing texture, unable to load {} : {}", resourceLocation2, var13);
-						return;
-					}
-
-					queue.add(info);
-				}, Util.backgroundExecutor()));
+						},
+						Util.backgroundExecutor()
+					)
+				);
 			}
 		}
 
@@ -221,16 +236,16 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 		ResourceLocation resourceLocation = this.getResourceLocation(info.name());
 
 		try {
-			Resource resource = resourceManager.getResource(resourceLocation);
+			InputStream inputStream = resourceManager.open(resourceLocation);
 
 			TextureAtlasSprite var11;
 			try {
-				NativeImage nativeImage = NativeImage.read(resource.getInputStream());
+				NativeImage nativeImage = NativeImage.read(inputStream);
 				var11 = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
 			} catch (Throwable var13) {
-				if (resource != null) {
+				if (inputStream != null) {
 					try {
-						resource.close();
+						inputStream.close();
 					} catch (Throwable var12) {
 						var13.addSuppressed(var12);
 					}
@@ -239,8 +254,8 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 				throw var13;
 			}
 
-			if (resource != null) {
-				resource.close();
+			if (inputStream != null) {
+				inputStream.close();
 			}
 
 			return var11;

@@ -55,8 +55,7 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.addTag(BiomeTags.IS_TAIGA)
 			.addTag(BiomeTags.IS_JUNGLE)
 			.addTag(BiomeTags.IS_FOREST)
-			.add(Biomes.STONY_SHORE);
-		this.tag(BiomeTags.HAS_MINESHAFT)
+			.add(Biomes.STONY_SHORE)
 			.add(Biomes.MUSHROOM_FIELDS)
 			.add(Biomes.ICE_SPIKES)
 			.add(Biomes.WINDSWEPT_SAVANNA)
@@ -66,6 +65,7 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.add(Biomes.PLAINS)
 			.add(Biomes.SUNFLOWER_PLAINS)
 			.add(Biomes.SWAMP)
+			.add(Biomes.MANGROVE_SWAMP)
 			.add(Biomes.SAVANNA_PLATEAU)
 			.add(Biomes.DRIPSTONE_CAVES)
 			.add(Biomes.LUSH_CAVES);
@@ -91,7 +91,7 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 		this.tag(BiomeTags.HAS_RUINED_PORTAL_DESERT).add(Biomes.DESERT);
 		this.tag(BiomeTags.HAS_RUINED_PORTAL_JUNGLE).addTag(BiomeTags.IS_JUNGLE);
 		this.tag(BiomeTags.HAS_RUINED_PORTAL_OCEAN).addTag(BiomeTags.IS_OCEAN);
-		this.tag(BiomeTags.HAS_RUINED_PORTAL_SWAMP).add(Biomes.SWAMP);
+		this.tag(BiomeTags.HAS_RUINED_PORTAL_SWAMP).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
 		this.tag(BiomeTags.HAS_RUINED_PORTAL_MOUNTAIN)
 			.addTag(BiomeTags.IS_BADLANDS)
 			.addTag(BiomeTags.IS_HILL)
@@ -166,8 +166,8 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 		this.tag(BiomeTags.HAS_END_CITY).add(Biomes.END_HIGHLANDS).add(Biomes.END_MIDLANDS);
 		this.tag(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL).add(Biomes.WARM_OCEAN);
 		this.tag(BiomeTags.PLAYS_UNDERWATER_MUSIC).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER);
-		this.tag(BiomeTags.HAS_CLOSER_WATER_FOG).add(Biomes.SWAMP);
-		this.tag(BiomeTags.WATER_ON_MAP_OUTLINES).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER).add(Biomes.SWAMP);
+		this.tag(BiomeTags.HAS_CLOSER_WATER_FOG).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
+		this.tag(BiomeTags.WATER_ON_MAP_OUTLINES).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
 		this.tag(BiomeTags.WITHOUT_ZOMBIE_SIEGES).add(Biomes.MUSHROOM_FIELDS);
 		this.tag(BiomeTags.WITHOUT_PATROL_SPAWNS).add(Biomes.MUSHROOM_FIELDS);
 		this.tag(BiomeTags.WITHOUT_WANDERING_TRADER_SPAWNS).add(Biomes.THE_VOID);
@@ -191,12 +191,13 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.addTag(BiomeTags.IS_JUNGLE)
 			.addTag(BiomeTags.IS_SAVANNA)
 			.addTag(BiomeTags.IS_NETHER)
-			.addTag(BiomeTags.IS_BADLANDS);
+			.addTag(BiomeTags.IS_BADLANDS)
+			.add(Biomes.MANGROVE_SWAMP);
 		this.tag(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS).add(Biomes.DESERT);
 		this.tag(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS).addTag(BiomeTags.IS_RIVER);
 		this.tag(BiomeTags.ALLOWS_TROPICAL_FISH_SPAWNS_AT_ANY_HEIGHT).add(Biomes.LUSH_CAVES);
 		this.tag(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS).add(Biomes.FROZEN_OCEAN).add(Biomes.DEEP_FROZEN_OCEAN);
 		this.tag(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS).addTag(BiomeTags.IS_RIVER);
-		this.tag(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS).add(Biomes.SWAMP);
+		this.tag(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
 	}
 }

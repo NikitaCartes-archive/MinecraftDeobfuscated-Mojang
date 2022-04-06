@@ -43,7 +43,7 @@ public class Roar extends Behavior<Warden> {
 		Optional<LivingEntity> optional = brain.getMemory(MemoryModuleType.ROAR_TARGET);
 		if (optional.isPresent()) {
 			LivingEntity livingEntity = (LivingEntity)optional.get();
-			if (Warden.canTargetEntity(livingEntity)) {
+			if (warden.canTargetEntity(livingEntity)) {
 				return true;
 			}
 

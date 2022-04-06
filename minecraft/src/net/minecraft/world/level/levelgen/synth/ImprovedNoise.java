@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen.synth;
 
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.RandomSource;
+import net.minecraft.util.RandomSource;
 
 public final class ImprovedNoise {
 	private static final float SHIFT_UP_EPSILON = 1.0E-7F;

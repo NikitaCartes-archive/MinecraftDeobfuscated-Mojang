@@ -1,13 +1,13 @@
 package net.minecraft.world.entity.ai.attributes;
 
 import com.mojang.logging.LogUtils;
-import io.netty.util.internal.ThreadLocalRandom;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.slf4j.Logger;
 
 public class AttributeModifier {
@@ -18,7 +18,7 @@ public class AttributeModifier {
 	private final UUID id;
 
 	public AttributeModifier(String string, double d, AttributeModifier.Operation operation) {
-		this(Mth.createInsecureUUID(ThreadLocalRandom.current()), (Supplier<String>)(() -> string), d, operation);
+		this(Mth.createInsecureUUID(RandomSource.createNewThreadLocalInstance()), (Supplier<String>)(() -> string), d, operation);
 	}
 
 	public AttributeModifier(UUID uUID, String string, double d, AttributeModifier.Operation operation) {

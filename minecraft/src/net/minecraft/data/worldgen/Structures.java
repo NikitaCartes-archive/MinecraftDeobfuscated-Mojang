@@ -301,7 +301,7 @@ public class Structures {
 			),
 			AncientCityStructurePieces.START,
 			7,
-			ConstantHeight.of(VerticalAnchor.absolute(-52)),
+			ConstantHeight.of(VerticalAnchor.absolute(-51)),
 			false,
 			Optional.empty(),
 			100

@@ -2,8 +2,8 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class SurfaceWaterDepthFilter extends PlacementFilter {
@@ -22,7 +22,7 @@ public class SurfaceWaterDepthFilter extends PlacementFilter {
 	}
 
 	@Override
-	protected boolean shouldPlace(PlacementContext placementContext, Random random, BlockPos blockPos) {
+	protected boolean shouldPlace(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
 		int i = placementContext.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX(), blockPos.getZ());
 		int j = placementContext.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX(), blockPos.getZ());
 		return j - i <= this.maxWaterDepth;

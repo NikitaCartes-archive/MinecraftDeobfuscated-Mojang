@@ -70,11 +70,11 @@ public class WardenModel<T extends Warden> extends HierarchicalModel<T> {
 			"body", CubeListBuilder.create().texOffs(0, 0).addBox(-9.0F, -13.0F, -4.0F, 18.0F, 21.0F, 11.0F), PartPose.offset(0.0F, -21.0F, 0.0F)
 		);
 		partDefinition3.addOrReplaceChild(
-			"right_ribcage", CubeListBuilder.create().texOffs(79, 11).addBox(-2.0F, -11.0F, -0.1F, 9.0F, 21.0F, 0.0F), PartPose.offset(-7.0F, -2.0F, -4.0F)
+			"right_ribcage", CubeListBuilder.create().texOffs(90, 11).addBox(-2.0F, -11.0F, -0.1F, 9.0F, 21.0F, 0.0F), PartPose.offset(-7.0F, -2.0F, -4.0F)
 		);
 		partDefinition3.addOrReplaceChild(
 			"left_ribcage",
-			CubeListBuilder.create().texOffs(79, 11).mirror().addBox(-7.0F, -11.0F, -0.1F, 9.0F, 21.0F, 0.0F).mirror(false),
+			CubeListBuilder.create().texOffs(90, 11).mirror().addBox(-7.0F, -11.0F, -0.1F, 9.0F, 21.0F, 0.0F).mirror(false),
 			PartPose.offset(7.0F, -2.0F, -4.0F)
 		);
 		PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild(

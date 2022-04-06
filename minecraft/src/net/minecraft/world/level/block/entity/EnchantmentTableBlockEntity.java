@@ -1,12 +1,12 @@
 package net.minecraft.world.level.block.entity;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -23,7 +23,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	public float rot;
 	public float oRot;
 	public float tRot;
-	private static final Random RANDOM = new Random();
+	private static final RandomSource RANDOM = RandomSource.create();
 	private Component name;
 
 	public EnchantmentTableBlockEntity(BlockPos blockPos, BlockState blockState) {

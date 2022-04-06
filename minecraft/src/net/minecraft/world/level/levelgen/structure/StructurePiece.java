@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.structure;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -13,6 +12,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelReader;
@@ -85,8 +85,8 @@ public abstract class StructurePiece {
 			: new BoundingBox(i, j, k, i + n - 1, j + m - 1, k + l - 1);
 	}
 
-	protected static Direction getRandomHorizontalDirection(Random random) {
-		return Direction.Plane.HORIZONTAL.getRandomDirection(random);
+	protected static Direction getRandomHorizontalDirection(RandomSource randomSource) {
+		return Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
 	}
 
 	public final CompoundTag createTag(StructurePieceSerializationContext structurePieceSerializationContext) {
@@ -102,14 +102,14 @@ public abstract class StructurePiece {
 
 	protected abstract void addAdditionalSaveData(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag);
 
-	public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, Random random) {
+	public void addChildren(StructurePiece structurePiece, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource) {
 	}
 
 	public abstract void postProcess(
 		WorldGenLevel worldGenLevel,
 		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
-		Random random,
+		RandomSource randomSource,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
 		BlockPos blockPos
@@ -278,14 +278,14 @@ public abstract class StructurePiece {
 		int m,
 		int n,
 		boolean bl,
-		Random random,
+		RandomSource randomSource,
 		StructurePiece.BlockSelector blockSelector
 	) {
 		for (int o = j; o <= m; o++) {
 			for (int p = i; p <= l; p++) {
 				for (int q = k; q <= n; q++) {
 					if (!bl || !this.getBlock(worldGenLevel, p, o, q, boundingBox).isAir()) {
-						blockSelector.next(random, p, o, q, o == j || o == m || p == i || p == l || q == k || q == n);
+						blockSelector.next(randomSource, p, o, q, o == j || o == m || p == i || p == l || q == k || q == n);
 						this.placeBlock(worldGenLevel, blockSelector.getNext(), p, o, q, boundingBox);
 					}
 				}
@@ -294,7 +294,12 @@ public abstract class StructurePiece {
 	}
 
 	protected void generateBox(
-		WorldGenLevel worldGenLevel, BoundingBox boundingBox, BoundingBox boundingBox2, boolean bl, Random random, StructurePiece.BlockSelector blockSelector
+		WorldGenLevel worldGenLevel,
+		BoundingBox boundingBox,
+		BoundingBox boundingBox2,
+		boolean bl,
+		RandomSource randomSource,
+		StructurePiece.BlockSelector blockSelector
 	) {
 		this.generateBox(
 			worldGenLevel,
@@ -306,7 +311,7 @@ public abstract class StructurePiece {
 			boundingBox2.maxY(),
 			boundingBox2.maxZ(),
 			bl,
-			random,
+			randomSource,
 			blockSelector
 		);
 	}
@@ -314,7 +319,7 @@ public abstract class StructurePiece {
 	protected void generateMaybeBox(
 		WorldGenLevel worldGenLevel,
 		BoundingBox boundingBox,
-		Random random,
+		RandomSource randomSource,
 		float f,
 		int i,
 		int j,
@@ -330,7 +335,7 @@ public abstract class StructurePiece {
 		for (int o = j; o <= m; o++) {
 			for (int p = i; p <= l; p++) {
 				for (int q = k; q <= n; q++) {
-					if (!(random.nextFloat() > f)
+					if (!(randomSource.nextFloat() > f)
 						&& (!bl || !this.getBlock(worldGenLevel, p, o, q, boundingBox).isAir())
 						&& (!bl2 || this.isInterior(worldGenLevel, p, o, q, boundingBox))) {
 						if (o != j && o != m && p != i && p != l && q != k && q != n) {
@@ -344,8 +349,10 @@ public abstract class StructurePiece {
 		}
 	}
 
-	protected void maybeGenerateBlock(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState) {
-		if (random.nextFloat() < f) {
+	protected void maybeGenerateBlock(
+		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, float f, int i, int j, int k, BlockState blockState
+	) {
+		if (randomSource.nextFloat() < f) {
 			this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
 		}
 	}
@@ -396,8 +403,10 @@ public abstract class StructurePiece {
 			|| blockState.is(Blocks.TALL_SEAGRASS);
 	}
 
-	protected boolean createChest(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
-		return this.createChest(worldGenLevel, boundingBox, random, this.getWorldPos(i, j, k), resourceLocation, null);
+	protected boolean createChest(
+		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, int i, int j, int k, ResourceLocation resourceLocation
+	) {
+		return this.createChest(worldGenLevel, boundingBox, randomSource, this.getWorldPos(i, j, k), resourceLocation, null);
 	}
 
 	public static BlockState reorient(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
@@ -447,7 +456,7 @@ public abstract class StructurePiece {
 	protected boolean createChest(
 		ServerLevelAccessor serverLevelAccessor,
 		BoundingBox boundingBox,
-		Random random,
+		RandomSource randomSource,
 		BlockPos blockPos,
 		ResourceLocation resourceLocation,
 		@Nullable BlockState blockState
@@ -460,7 +469,7 @@ public abstract class StructurePiece {
 			serverLevelAccessor.setBlock(blockPos, blockState, 2);
 			BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
 			if (blockEntity instanceof ChestBlockEntity) {
-				((ChestBlockEntity)blockEntity).setLootTable(resourceLocation, random.nextLong());
+				((ChestBlockEntity)blockEntity).setLootTable(resourceLocation, randomSource.nextLong());
 			}
 
 			return true;
@@ -470,14 +479,14 @@ public abstract class StructurePiece {
 	}
 
 	protected boolean createDispenser(
-		WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, Direction direction, ResourceLocation resourceLocation
+		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, int i, int j, int k, Direction direction, ResourceLocation resourceLocation
 	) {
 		BlockPos blockPos = this.getWorldPos(i, j, k);
 		if (boundingBox.isInside(blockPos) && !worldGenLevel.getBlockState(blockPos).is(Blocks.DISPENSER)) {
 			this.placeBlock(worldGenLevel, Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, direction), i, j, k, boundingBox);
 			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
 			if (blockEntity instanceof DispenserBlockEntity) {
-				((DispenserBlockEntity)blockEntity).setLootTable(resourceLocation, random.nextLong());
+				((DispenserBlockEntity)blockEntity).setLootTable(resourceLocation, randomSource.nextLong());
 			}
 
 			return true;
@@ -552,7 +561,7 @@ public abstract class StructurePiece {
 	public abstract static class BlockSelector {
 		protected BlockState next = Blocks.AIR.defaultBlockState();
 
-		public abstract void next(Random random, int i, int j, int k, boolean bl);
+		public abstract void next(RandomSource randomSource, int i, int j, int k, boolean bl);
 
 		public BlockState getNext() {
 			return this.next;

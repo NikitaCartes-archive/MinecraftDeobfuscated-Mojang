@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
@@ -220,7 +219,7 @@ public class ServerEntity {
 		}
 
 		this.ap = this.entity.getDeltaMovement();
-		if (bl && !(packet instanceof ClientboundAddMobPacket)) {
+		if (bl && !(this.entity instanceof LivingEntity)) {
 			consumer.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.ap));
 		}
 

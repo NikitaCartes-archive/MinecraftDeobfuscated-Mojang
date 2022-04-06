@@ -3,14 +3,11 @@ package net.minecraft.client.resources;
 import com.google.common.collect.Lists;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -18,15 +15,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 @Environment(EnvType.CLIENT)
 public class SplashManager extends SimplePreparableReloadListener<List<String>> {
 	private static final ResourceLocation SPLASHES_LOCATION = new ResourceLocation("texts/splashes.txt");
-	private static final Random RANDOM = new Random();
+	private static final RandomSource RANDOM = RandomSource.create();
 	private final List<String> splashes = Lists.<String>newArrayList();
 	private final User user;
 
@@ -36,43 +33,29 @@ public class SplashManager extends SimplePreparableReloadListener<List<String>> 
 
 	protected List<String> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		try {
-			Resource resource = Minecraft.getInstance().getResourceManager().getResource(SPLASHES_LOCATION);
+			BufferedReader bufferedReader = Minecraft.getInstance().getResourceManager().openAsReader(SPLASHES_LOCATION);
 
-			List var5;
+			List var4;
 			try {
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-
-				try {
-					var5 = (List)bufferedReader.lines().map(String::trim).filter(string -> string.hashCode() != 125780783).collect(Collectors.toList());
-				} catch (Throwable var9) {
+				var4 = (List)bufferedReader.lines().map(String::trim).filter(string -> string.hashCode() != 125780783).collect(Collectors.toList());
+			} catch (Throwable var7) {
+				if (bufferedReader != null) {
 					try {
 						bufferedReader.close();
-					} catch (Throwable var8) {
-						var9.addSuppressed(var8);
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
-
-					throw var9;
 				}
 
+				throw var7;
+			}
+
+			if (bufferedReader != null) {
 				bufferedReader.close();
-			} catch (Throwable var10) {
-				if (resource != null) {
-					try {
-						resource.close();
-					} catch (Throwable var7) {
-						var10.addSuppressed(var7);
-					}
-				}
-
-				throw var10;
 			}
 
-			if (resource != null) {
-				resource.close();
-			}
-
-			return var5;
-		} catch (IOException var11) {
+			return var4;
+		} catch (IOException var8) {
 			return Collections.emptyList();
 		}
 	}

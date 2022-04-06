@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -33,7 +32,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -55,6 +54,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
@@ -591,7 +591,7 @@ public abstract class LivingEntity extends Entity {
 		return false;
 	}
 
-	public Random getRandom() {
+	public RandomSource getRandom() {
 		return this.random;
 	}
 
@@ -3076,7 +3076,7 @@ public abstract class LivingEntity extends Entity {
 
 	@Override
 	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddMobPacket(this);
+		return new ClientboundAddEntityPacket(this);
 	}
 
 	@Override
@@ -3320,25 +3320,27 @@ public abstract class LivingEntity extends Entity {
 		return !this.level.isClientSide() && this.hasEffect(MobEffects.GLOWING) || super.isCurrentlyGlowing();
 	}
 
-	public void recreateFromPacket(ClientboundAddMobPacket clientboundAddMobPacket) {
-		double d = clientboundAddMobPacket.getX();
-		double e = clientboundAddMobPacket.getY();
-		double f = clientboundAddMobPacket.getZ();
-		float g = (float)(clientboundAddMobPacket.getyRot() * 360) / 256.0F;
-		float h = (float)(clientboundAddMobPacket.getxRot() * 360) / 256.0F;
+	@Override
+	public float getVisualRotationYInDegrees() {
+		return this.yBodyRot;
+	}
+
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+		double d = clientboundAddEntityPacket.getX();
+		double e = clientboundAddEntityPacket.getY();
+		double f = clientboundAddEntityPacket.getZ();
+		float g = clientboundAddEntityPacket.getYRot();
+		float h = clientboundAddEntityPacket.getXRot();
 		this.setPacketCoordinates(d, e, f);
-		this.yBodyRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
-		this.yHeadRot = (float)(clientboundAddMobPacket.getyHeadRot() * 360) / 256.0F;
+		this.yBodyRot = clientboundAddEntityPacket.getYHeadRot();
+		this.yHeadRot = clientboundAddEntityPacket.getYHeadRot();
 		this.yBodyRotO = this.yBodyRot;
 		this.yHeadRotO = this.yHeadRot;
-		this.setId(clientboundAddMobPacket.getId());
-		this.setUUID(clientboundAddMobPacket.getUUID());
+		this.setId(clientboundAddEntityPacket.getId());
+		this.setUUID(clientboundAddEntityPacket.getUUID());
 		this.absMoveTo(d, e, f, g, h);
-		this.setDeltaMovement(
-			(double)((float)clientboundAddMobPacket.getXd() / 8000.0F),
-			(double)((float)clientboundAddMobPacket.getYd() / 8000.0F),
-			(double)((float)clientboundAddMobPacket.getZd() / 8000.0F)
-		);
+		this.setDeltaMovement(clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
 	}
 
 	public boolean canDisableShield() {

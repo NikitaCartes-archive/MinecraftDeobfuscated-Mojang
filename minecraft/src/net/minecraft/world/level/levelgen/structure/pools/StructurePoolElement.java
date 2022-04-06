@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -14,6 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -43,7 +43,7 @@ public abstract class StructurePoolElement {
 	public abstract Vec3i getSize(StructureTemplateManager structureTemplateManager, Rotation rotation);
 
 	public abstract List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
-		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random
+		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource
 	);
 
 	public abstract BoundingBox getBoundingBox(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation);
@@ -57,7 +57,7 @@ public abstract class StructurePoolElement {
 		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
-		Random random,
+		RandomSource randomSource,
 		boolean bl
 	);
 
@@ -68,7 +68,7 @@ public abstract class StructurePoolElement {
 		StructureTemplate.StructureBlockInfo structureBlockInfo,
 		BlockPos blockPos,
 		Rotation rotation,
-		Random random,
+		RandomSource randomSource,
 		BoundingBox boundingBox
 	) {
 	}

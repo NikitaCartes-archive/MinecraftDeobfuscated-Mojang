@@ -3,7 +3,6 @@ package net.minecraft.world.entity.projectile;
 import com.mojang.logging.LogUtils;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -21,6 +20,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 
 public class FishingHook extends Projectile {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Random syncronizedRandom = new Random();
+	private final RandomSource syncronizedRandom = RandomSource.create();
 	private boolean biting;
 	private int outOfWaterTime;
 	private static final int MAX_OUT_OF_WATER_TIME = 10;

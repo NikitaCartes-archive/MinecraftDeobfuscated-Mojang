@@ -1311,6 +1311,10 @@ public class SoundEvents {
 	public static final SoundEvent ZOMBIE_VILLAGER_HURT = register("entity.zombie_villager.hurt");
 	public static final SoundEvent ZOMBIE_VILLAGER_STEP = register("entity.zombie_villager.step");
 
+	private static SoundEvent register(String string, float f) {
+		return Registry.register(Registry.SOUND_EVENT, string, new SoundEvent(new ResourceLocation(string), f));
+	}
+
 	private static SoundEvent register(String string) {
 		return Registry.register(Registry.SOUND_EVENT, string, new SoundEvent(new ResourceLocation(string)));
 	}

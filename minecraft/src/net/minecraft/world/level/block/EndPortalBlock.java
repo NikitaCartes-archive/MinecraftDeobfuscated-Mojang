@@ -1,10 +1,10 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -58,10 +58,10 @@ public class EndPortalBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		double d = (double)blockPos.getX() + random.nextDouble();
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+		double d = (double)blockPos.getX() + randomSource.nextDouble();
 		double e = (double)blockPos.getY() + 0.8;
-		double f = (double)blockPos.getZ() + random.nextDouble();
+		double f = (double)blockPos.getZ() + randomSource.nextDouble();
 		level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
 	}
 

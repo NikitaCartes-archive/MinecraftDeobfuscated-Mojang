@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -36,7 +36,7 @@ public class BuriedTreasurePieces {
 			WorldGenLevel worldGenLevel,
 			StructureManager structureManager,
 			ChunkGenerator chunkGenerator,
-			Random random,
+			RandomSource randomSource,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos,
 			BlockPos blockPos
@@ -69,7 +69,7 @@ public class BuriedTreasurePieces {
 					}
 
 					this.boundingBox = new BoundingBox(mutableBlockPos);
-					this.createChest(worldGenLevel, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
+					this.createChest(worldGenLevel, boundingBox, randomSource, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);
 					return;
 				}
 

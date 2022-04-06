@@ -12,7 +12,6 @@ import com.mojang.brigadier.exceptions.Dynamic4CommandExceptionType;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -23,6 +22,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -107,13 +107,13 @@ public class SpreadPlayersCommand {
 		if (i < j) {
 			throw ERROR_INVALID_MAX_HEIGHT.create(i, j);
 		} else {
-			Random random = new Random();
+			RandomSource randomSource = RandomSource.create();
 			double d = (double)(vec2.x - g);
 			double e = (double)(vec2.y - g);
 			double h = (double)(vec2.x + g);
 			double k = (double)(vec2.y + g);
-			SpreadPlayersCommand.Position[] positions = createInitialPositions(random, bl ? getNumberOfTeams(collection) : collection.size(), d, e, h, k);
-			spreadPositions(vec2, (double)f, serverLevel, random, d, e, h, k, i, positions, bl);
+			SpreadPlayersCommand.Position[] positions = createInitialPositions(randomSource, bl ? getNumberOfTeams(collection) : collection.size(), d, e, h, k);
+			spreadPositions(vec2, (double)f, serverLevel, randomSource, d, e, h, k, i, positions, bl);
 			double l = setPlayerPositions(collection, serverLevel, positions, i, bl);
 			commandSourceStack.sendSuccess(
 				new TranslatableComponent(
@@ -143,7 +143,7 @@ public class SpreadPlayersCommand {
 		Vec2 vec2,
 		double d,
 		ServerLevel serverLevel,
-		Random random,
+		RandomSource randomSource,
 		double e,
 		double f,
 		double g,
@@ -186,7 +186,7 @@ public class SpreadPlayersCommand {
 						position2.normalize();
 						position.moveAway(position2);
 					} else {
-						position.randomize(random, e, f, g, h);
+						position.randomize(randomSource, e, f, g, h);
 					}
 
 					bl2 = true;
@@ -200,7 +200,7 @@ public class SpreadPlayersCommand {
 			if (!bl2) {
 				for (SpreadPlayersCommand.Position position2 : positions) {
 					if (!position2.isSafe(serverLevel, i)) {
-						position2.randomize(random, e, f, g, h);
+						position2.randomize(randomSource, e, f, g, h);
 						bl2 = true;
 					}
 				}
@@ -256,12 +256,12 @@ public class SpreadPlayersCommand {
 		return collection.size() < 2 ? 0.0 : d / (double)collection.size();
 	}
 
-	private static SpreadPlayersCommand.Position[] createInitialPositions(Random random, int i, double d, double e, double f, double g) {
+	private static SpreadPlayersCommand.Position[] createInitialPositions(RandomSource randomSource, int i, double d, double e, double f, double g) {
 		SpreadPlayersCommand.Position[] positions = new SpreadPlayersCommand.Position[i];
 
 		for (int j = 0; j < positions.length; j++) {
 			SpreadPlayersCommand.Position position = new SpreadPlayersCommand.Position();
-			position.randomize(random, d, e, f, g);
+			position.randomize(randomSource, d, e, f, g);
 			positions[j] = position;
 		}
 
@@ -341,9 +341,9 @@ public class SpreadPlayersCommand {
 			return blockPos.getY() < i && !material.isLiquid() && material != Material.FIRE;
 		}
 
-		public void randomize(Random random, double d, double e, double f, double g) {
-			this.x = Mth.nextDouble(random, d, f);
-			this.z = Mth.nextDouble(random, e, g);
+		public void randomize(RandomSource randomSource, double d, double e, double f, double g) {
+			this.x = Mth.nextDouble(randomSource, d, f);
+			this.z = Mth.nextDouble(randomSource, e, g);
 		}
 	}
 }

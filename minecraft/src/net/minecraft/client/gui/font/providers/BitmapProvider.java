@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -21,7 +22,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.slf4j.Logger;
@@ -101,11 +101,11 @@ public class BitmapProvider implements GlyphProvider {
 		@Override
 		public GlyphProvider create(ResourceManager resourceManager) {
 			try {
-				Resource resource = resourceManager.getResource(this.texture);
+				InputStream inputStream = resourceManager.open(this.texture);
 
 				BitmapProvider var22;
 				try {
-					NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
+					NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
 					int i = nativeImage.getWidth();
 					int j = nativeImage.getHeight();
 					int k = i / ((int[])this.chars.get(0)).length;
@@ -132,9 +132,9 @@ public class BitmapProvider implements GlyphProvider {
 
 					var22 = new BitmapProvider(nativeImage, int2ObjectMap);
 				} catch (Throwable var20) {
-					if (resource != null) {
+					if (inputStream != null) {
 						try {
-							resource.close();
+							inputStream.close();
 						} catch (Throwable var19) {
 							var20.addSuppressed(var19);
 						}
@@ -143,8 +143,8 @@ public class BitmapProvider implements GlyphProvider {
 					throw var20;
 				}
 
-				if (resource != null) {
-					resource.close();
+				if (inputStream != null) {
+					inputStream.close();
 				}
 
 				return var22;

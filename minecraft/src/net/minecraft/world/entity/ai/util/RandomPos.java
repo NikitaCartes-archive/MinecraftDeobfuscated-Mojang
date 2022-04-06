@@ -1,35 +1,35 @@
 package net.minecraft.world.entity.ai.util;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.phys.Vec3;
 
 public class RandomPos {
 	private static final int RANDOM_POS_ATTEMPTS = 10;
 
-	public static BlockPos generateRandomDirection(Random random, int i, int j) {
-		int k = random.nextInt(2 * i + 1) - i;
-		int l = random.nextInt(2 * j + 1) - j;
-		int m = random.nextInt(2 * i + 1) - i;
+	public static BlockPos generateRandomDirection(RandomSource randomSource, int i, int j) {
+		int k = randomSource.nextInt(2 * i + 1) - i;
+		int l = randomSource.nextInt(2 * j + 1) - j;
+		int m = randomSource.nextInt(2 * i + 1) - i;
 		return new BlockPos(k, l, m);
 	}
 
 	@Nullable
-	public static BlockPos generateRandomDirectionWithinRadians(Random random, int i, int j, int k, double d, double e, double f) {
+	public static BlockPos generateRandomDirectionWithinRadians(RandomSource randomSource, int i, int j, int k, double d, double e, double f) {
 		double g = Mth.atan2(e, d) - (float) (Math.PI / 2);
-		double h = g + (double)(2.0F * random.nextFloat() - 1.0F) * f;
-		double l = Math.sqrt(random.nextDouble()) * (double)Mth.SQRT_OF_TWO * (double)i;
+		double h = g + (double)(2.0F * randomSource.nextFloat() - 1.0F) * f;
+		double l = Math.sqrt(randomSource.nextDouble()) * (double)Mth.SQRT_OF_TWO * (double)i;
 		double m = -l * Math.sin(h);
 		double n = l * Math.cos(h);
 		if (!(Math.abs(m) > (double)i) && !(Math.abs(n) > (double)i)) {
-			int o = random.nextInt(2 * j + 1) - j + k;
+			int o = randomSource.nextInt(2 * j + 1) - j + k;
 			return new BlockPos(m, (double)o, n);
 		} else {
 			return null;
@@ -103,21 +103,21 @@ public class RandomPos {
 		return blockPos != null ? Vec3.atBottomCenterOf(blockPos) : null;
 	}
 
-	public static BlockPos generateRandomPosTowardDirection(PathfinderMob pathfinderMob, int i, Random random, BlockPos blockPos) {
+	public static BlockPos generateRandomPosTowardDirection(PathfinderMob pathfinderMob, int i, RandomSource randomSource, BlockPos blockPos) {
 		int j = blockPos.getX();
 		int k = blockPos.getZ();
 		if (pathfinderMob.hasRestriction() && i > 1) {
 			BlockPos blockPos2 = pathfinderMob.getRestrictCenter();
 			if (pathfinderMob.getX() > (double)blockPos2.getX()) {
-				j -= random.nextInt(i / 2);
+				j -= randomSource.nextInt(i / 2);
 			} else {
-				j += random.nextInt(i / 2);
+				j += randomSource.nextInt(i / 2);
 			}
 
 			if (pathfinderMob.getZ() > (double)blockPos2.getZ()) {
-				k -= random.nextInt(i / 2);
+				k -= randomSource.nextInt(i / 2);
 			} else {
-				k += random.nextInt(i / 2);
+				k += randomSource.nextInt(i / 2);
 			}
 		}
 

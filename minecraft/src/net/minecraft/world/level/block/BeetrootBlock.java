@@ -1,8 +1,8 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ItemLike;
@@ -45,9 +45,9 @@ public class BeetrootBlock extends CropBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if (random.nextInt(3) != 0) {
-			super.randomTick(blockState, serverLevel, blockPos, random);
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (randomSource.nextInt(3) != 0) {
+			super.randomTick(blockState, serverLevel, blockPos, randomSource);
 		}
 	}
 

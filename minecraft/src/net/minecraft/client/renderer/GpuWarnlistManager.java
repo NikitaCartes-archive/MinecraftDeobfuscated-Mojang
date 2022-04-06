@@ -9,10 +9,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +18,6 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -124,40 +121,26 @@ public class GpuWarnlistManager extends SimplePreparableReloadListener<GpuWarnli
 		JsonObject jsonObject = null;
 
 		try {
-			Resource resource = resourceManager.getResource(GPU_WARNLIST_LOCATION);
+			Reader reader = resourceManager.openAsReader(GPU_WARNLIST_LOCATION);
 
 			try {
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-
-				try {
-					jsonObject = new JsonParser().parse(bufferedReader).getAsJsonObject();
-				} catch (Throwable var9) {
+				jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+			} catch (Throwable var7) {
+				if (reader != null) {
 					try {
-						bufferedReader.close();
-					} catch (Throwable var8) {
-						var9.addSuppressed(var8);
-					}
-
-					throw var9;
-				}
-
-				bufferedReader.close();
-			} catch (Throwable var10) {
-				if (resource != null) {
-					try {
-						resource.close();
-					} catch (Throwable var7) {
-						var10.addSuppressed(var7);
+						reader.close();
+					} catch (Throwable var6) {
+						var7.addSuppressed(var6);
 					}
 				}
 
-				throw var10;
+				throw var7;
 			}
 
-			if (resource != null) {
-				resource.close();
+			if (reader != null) {
+				reader.close();
 			}
-		} catch (JsonSyntaxException | IOException var11) {
+		} catch (JsonSyntaxException | IOException var8) {
 			LOGGER.warn("Failed to load GPU warnlist");
 		}
 

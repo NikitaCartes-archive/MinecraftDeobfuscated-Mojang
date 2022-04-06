@@ -7,7 +7,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -18,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -718,18 +718,18 @@ public class VillagerTrades {
 		}
 
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.EMERALD, this.value);
 			ItemStack itemStack2 = new ItemStack(this.item);
 			if (this.item instanceof DyeableArmorItem) {
 				List<DyeItem> list = Lists.<DyeItem>newArrayList();
-				list.add(getRandomDye(random));
-				if (random.nextFloat() > 0.7F) {
-					list.add(getRandomDye(random));
+				list.add(getRandomDye(randomSource));
+				if (randomSource.nextFloat() > 0.7F) {
+					list.add(getRandomDye(randomSource));
 				}
 
-				if (random.nextFloat() > 0.8F) {
-					list.add(getRandomDye(random));
+				if (randomSource.nextFloat() > 0.8F) {
+					list.add(getRandomDye(randomSource));
 				}
 
 				itemStack2 = DyeableLeatherItem.dyeArmor(itemStack2, list);
@@ -738,8 +738,8 @@ public class VillagerTrades {
 			return new MerchantOffer(itemStack, itemStack2, this.maxUses, this.villagerXp, 0.2F);
 		}
 
-		private static DyeItem getRandomDye(Random random) {
-			return DyeItem.byColor(DyeColor.byId(random.nextInt(16)));
+		private static DyeItem getRandomDye(RandomSource randomSource) {
+			return DyeItem.byColor(DyeColor.byId(randomSource.nextInt(16)));
 		}
 	}
 
@@ -759,7 +759,7 @@ public class VillagerTrades {
 		}
 
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(this.item, this.cost);
 			return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
@@ -783,7 +783,7 @@ public class VillagerTrades {
 
 		@Nullable
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			if (entity instanceof VillagerDataHolder) {
 				ItemStack itemStack = new ItemStack((ItemLike)this.trades.get(((VillagerDataHolder)entity).getVillagerData().getType()), this.cost);
 				return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, 0.05F);
@@ -801,12 +801,12 @@ public class VillagerTrades {
 		}
 
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			List<Enchantment> list = (List<Enchantment>)Registry.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
-			Enchantment enchantment = (Enchantment)list.get(random.nextInt(list.size()));
-			int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+			Enchantment enchantment = (Enchantment)list.get(randomSource.nextInt(list.size()));
+			int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
 			ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i));
-			int j = 2 + random.nextInt(5 + i * 10) + 3 * i;
+			int j = 2 + randomSource.nextInt(5 + i * 10) + 3 * i;
 			if (enchantment.isTreasureOnly()) {
 				j *= 2;
 			}
@@ -839,9 +839,9 @@ public class VillagerTrades {
 		}
 
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
-			int i = 5 + random.nextInt(15);
-			ItemStack itemStack = EnchantmentHelper.enchantItem(random, new ItemStack(this.itemStack.getItem()), i, false);
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
+			int i = 5 + randomSource.nextInt(15);
+			ItemStack itemStack = EnchantmentHelper.enchantItem(randomSource, new ItemStack(this.itemStack.getItem()), i, false);
 			int j = Math.min(this.baseEmeraldCost + i, 64);
 			ItemStack itemStack2 = new ItemStack(Items.EMERALD, j);
 			return new MerchantOffer(itemStack2, itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
@@ -850,7 +850,7 @@ public class VillagerTrades {
 
 	public interface ItemListing {
 		@Nullable
-		MerchantOffer getOffer(Entity entity, Random random);
+		MerchantOffer getOffer(Entity entity, RandomSource randomSource);
 	}
 
 	static class ItemsAndEmeraldsToItems implements VillagerTrades.ItemListing {
@@ -880,7 +880,7 @@ public class VillagerTrades {
 
 		@Nullable
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			return new MerchantOffer(
 				new ItemStack(Items.EMERALD, this.emeraldCost),
 				new ItemStack(this.fromItem.getItem(), this.fromCount),
@@ -926,7 +926,7 @@ public class VillagerTrades {
 		}
 
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			return new MerchantOffer(
 				new ItemStack(Items.EMERALD, this.emeraldCost),
 				new ItemStack(this.itemStack.getItem(), this.numberOfItems),
@@ -952,7 +952,7 @@ public class VillagerTrades {
 
 		@Nullable
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
 			SuspiciousStewItem.saveMobEffect(itemStack, this.effect, this.duration);
 			return new MerchantOffer(new ItemStack(Items.EMERALD, 1), itemStack, 12, this.xp, this.priceMultiplier);
@@ -981,13 +981,13 @@ public class VillagerTrades {
 		}
 
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.EMERALD, this.emeraldCost);
 			List<Potion> list = (List<Potion>)Registry.POTION
 				.stream()
 				.filter(potionx -> !potionx.getEffects().isEmpty() && PotionBrewing.isBrewablePotion(potionx))
 				.collect(Collectors.toList());
-			Potion potion = (Potion)list.get(random.nextInt(list.size()));
+			Potion potion = (Potion)list.get(randomSource.nextInt(list.size()));
 			ItemStack itemStack2 = PotionUtils.setPotion(new ItemStack(this.toItem.getItem(), this.toCount), potion);
 			return new MerchantOffer(itemStack, new ItemStack(this.fromItem, this.fromCount), itemStack2, this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
@@ -1012,7 +1012,7 @@ public class VillagerTrades {
 
 		@Nullable
 		@Override
-		public MerchantOffer getOffer(Entity entity, Random random) {
+		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			if (!(entity.level instanceof ServerLevel serverLevel)) {
 				return null;
 			} else {

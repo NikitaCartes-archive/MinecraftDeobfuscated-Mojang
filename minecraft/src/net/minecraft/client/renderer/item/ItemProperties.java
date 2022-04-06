@@ -2,24 +2,18 @@ package net.minecraft.client.renderer.item;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.CompassItem;
@@ -31,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LightBlock;
-import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ItemProperties {
@@ -151,97 +144,18 @@ public class ItemProperties {
 		register(
 			Items.COMPASS,
 			new ResourceLocation("angle"),
-			new ClampedItemPropertyFunction() {
-				private final ItemProperties.CompassWobble wobble = new ItemProperties.CompassWobble();
-				private final ItemProperties.CompassWobble wobbleRandom = new ItemProperties.CompassWobble();
-
-				@Override
-				public float unclampedCall(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
-					Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
-					if (entity == null) {
-						return 0.0F;
-					} else {
-						if (clientLevelx == null && entity.level instanceof ClientLevel clientLevelx) {
-							;
-						}
-
-						BlockPos blockPos = CompassItem.isLodestoneCompass(itemStack)
-							? this.getLodestonePosition(clientLevelx, itemStack.getOrCreateTag())
-							: this.getSpawnPosition(clientLevelx);
-						long l = clientLevelx.getGameTime();
-						if (blockPos != null && !(entity.position().distanceToSqr((double)blockPos.getX() + 0.5, entity.position().y(), (double)blockPos.getZ() + 0.5) < 1.0E-5F)
-							)
-						 {
-							boolean bl = livingEntity instanceof Player && ((Player)livingEntity).isLocalPlayer();
-							double e = 0.0;
-							if (bl) {
-								e = (double)livingEntity.getYRot();
-							} else if (entity instanceof ItemFrame) {
-								e = this.getFrameRotation((ItemFrame)entity);
-							} else if (entity instanceof ItemEntity) {
-								e = (double)(180.0F - ((ItemEntity)entity).getSpin(0.5F) / (float) (Math.PI * 2) * 360.0F);
-							} else if (livingEntity != null) {
-								e = (double)livingEntity.yBodyRot;
-							}
-
-							e = Mth.positiveModulo(e / 360.0, 1.0);
-							double f = this.getAngleTo(Vec3.atCenterOf(blockPos), entity) / (float) (Math.PI * 2);
-							double g;
-							if (bl) {
-								if (this.wobble.shouldUpdate(l)) {
-									this.wobble.update(l, 0.5 - (e - 0.25));
-								}
-
-								g = f + this.wobble.rotation;
-							} else {
-								g = 0.5 - (e - 0.25 - f);
-							}
-
-							return Mth.positiveModulo((float)g, 1.0F);
-						} else {
-							if (this.wobbleRandom.shouldUpdate(l)) {
-								this.wobbleRandom.update(l, Math.random());
-							}
-
-							double d = this.wobbleRandom.rotation + (double)((float)this.hash(i) / 2.1474836E9F);
-							return Mth.positiveModulo((float)d, 1.0F);
-						}
-					}
-				}
-
-				private int hash(int i) {
-					return i * 1327217883;
-				}
-
-				@Nullable
-				private BlockPos getSpawnPosition(ClientLevel clientLevel) {
-					return clientLevel.dimensionType().natural() ? clientLevel.getSharedSpawnPos() : null;
-				}
-
-				@Nullable
-				private BlockPos getLodestonePosition(Level level, CompoundTag compoundTag) {
-					boolean bl = compoundTag.contains("LodestonePos");
-					boolean bl2 = compoundTag.contains("LodestoneDimension");
-					if (bl && bl2) {
-						Optional<ResourceKey<Level>> optional = CompassItem.getLodestoneDimension(compoundTag);
-						if (optional.isPresent() && level.dimension() == optional.get()) {
-							return NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
-						}
-					}
-
-					return null;
-				}
-
-				private double getFrameRotation(ItemFrame itemFrame) {
-					Direction direction = itemFrame.getDirection();
-					int i = direction.getAxis().isVertical() ? 90 * direction.getAxisDirection().getStep() : 0;
-					return (double)Mth.wrapDegrees(180 + direction.get2DDataValue() * 90 + itemFrame.getRotation() * 45 + i);
-				}
-
-				private double getAngleTo(Vec3 vec3, Entity entity) {
-					return Math.atan2(vec3.z() - entity.getZ(), vec3.x() - entity.getX());
-				}
-			}
+			new CompassItemPropertyFunction(
+				(clientLevel, itemStack, entity) -> CompassItem.isLodestoneCompass(itemStack)
+						? CompassItem.getLodestonePosition(itemStack.getOrCreateTag())
+						: CompassItem.getSpawnPosition(clientLevel)
+			)
+		);
+		register(
+			Items.RECOVERY_COMPASS,
+			new ResourceLocation("angle"),
+			new CompassItemPropertyFunction(
+				(clientLevel, itemStack, entity) -> entity instanceof Player player ? (GlobalPos)player.getLastDeathLocation().orElse(null) : null
+			)
 		);
 		register(
 			Items.CROSSBOW,
@@ -319,25 +233,5 @@ public class ItemProperties {
 
 			return 1.0F;
 		});
-	}
-
-	@Environment(EnvType.CLIENT)
-	static class CompassWobble {
-		double rotation;
-		private double deltaRotation;
-		private long lastUpdateTick;
-
-		boolean shouldUpdate(long l) {
-			return this.lastUpdateTick != l;
-		}
-
-		void update(long l, double d) {
-			this.lastUpdateTick = l;
-			double e = d - this.rotation;
-			e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;
-			this.deltaRotation += e * 0.1;
-			this.deltaRotation *= 0.8;
-			this.rotation = Mth.positiveModulo(this.rotation + this.deltaRotation, 1.0);
-		}
 	}
 }

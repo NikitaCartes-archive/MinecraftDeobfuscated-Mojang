@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -49,6 +48,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
@@ -76,7 +76,6 @@ import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.TransientEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -351,13 +350,13 @@ public class ClientLevel extends Level {
 
 	public void animateTick(int i, int j, int k) {
 		int l = 32;
-		Random random = new Random();
+		RandomSource randomSource = RandomSource.create();
 		Block block = this.getMarkerParticleTarget();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int m = 0; m < 667; m++) {
-			this.doAnimateTick(i, j, k, 16, random, block, mutableBlockPos);
-			this.doAnimateTick(i, j, k, 32, random, block, mutableBlockPos);
+			this.doAnimateTick(i, j, k, 16, randomSource, block, mutableBlockPos);
+			this.doAnimateTick(i, j, k, 32, randomSource, block, mutableBlockPos);
 		}
 	}
 
@@ -374,16 +373,16 @@ public class ClientLevel extends Level {
 		return null;
 	}
 
-	public void doAnimateTick(int i, int j, int k, int l, Random random, @Nullable Block block, BlockPos.MutableBlockPos mutableBlockPos) {
+	public void doAnimateTick(int i, int j, int k, int l, RandomSource randomSource, @Nullable Block block, BlockPos.MutableBlockPos mutableBlockPos) {
 		int m = i + this.random.nextInt(l) - this.random.nextInt(l);
 		int n = j + this.random.nextInt(l) - this.random.nextInt(l);
 		int o = k + this.random.nextInt(l) - this.random.nextInt(l);
 		mutableBlockPos.set(m, n, o);
 		BlockState blockState = this.getBlockState(mutableBlockPos);
-		blockState.getBlock().animateTick(blockState, this, mutableBlockPos, random);
+		blockState.getBlock().animateTick(blockState, this, mutableBlockPos, randomSource);
 		FluidState fluidState = this.getFluidState(mutableBlockPos);
 		if (!fluidState.isEmpty()) {
-			fluidState.animateTick(this, mutableBlockPos, random);
+			fluidState.animateTick(this, mutableBlockPos, randomSource);
 			ParticleOptions particleOptions = fluidState.getDripParticle();
 			if (particleOptions != null && this.random.nextInt(10) == 0) {
 				boolean bl = blockState.isFaceSturdy(this, mutableBlockPos, Direction.DOWN);
@@ -477,16 +476,16 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
+	public void playSeededSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, long l) {
 		if (player == this.minecraft.player) {
-			this.playLocalSound(d, e, f, soundEvent, soundSource, g, h, false);
+			this.playSound(d, e, f, soundEvent, soundSource, g, h, false, l);
 		}
 	}
 
 	@Override
-	public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
+	public void playSeededSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g, long l) {
 		if (player == this.minecraft.player) {
-			this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(soundEvent, soundSource, f, g, entity));
+			this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(soundEvent, soundSource, f, g, entity, l));
 		}
 	}
 
@@ -496,8 +495,12 @@ public class ClientLevel extends Level {
 
 	@Override
 	public void playLocalSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl) {
+		this.playSound(d, e, f, soundEvent, soundSource, g, h, bl, this.random.nextLong());
+	}
+
+	private void playSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl, long l) {
 		double i = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(d, e, f);
-		SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, d, e, f);
+		SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, RandomSource.create(l), d, e, f);
 		if (bl && i > 100.0) {
 			double j = Math.sqrt(i) / 40.0;
 			this.minecraft.getSoundManager().playDelayed(simpleSoundInstance, (int)(j * 20.0));
@@ -794,19 +797,6 @@ public class ClientLevel extends Level {
 		}
 	}
 
-	public BlockPos getSharedSpawnPos() {
-		BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
-		if (!this.getWorldBorder().isWithinBounds(blockPos)) {
-			blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
-		}
-
-		return blockPos;
-	}
-
-	public float getSharedSpawnAngle() {
-		return this.levelData.getSpawnAngle();
-	}
-
 	public void setDefaultSpawnPos(BlockPos blockPos, float f) {
 		this.levelData.setSpawn(blockPos, f);
 	}
@@ -1024,6 +1014,9 @@ public class ClientLevel extends Level {
 		public void onTrackingEnd(Entity entity) {
 			entity.unRide();
 			ClientLevel.this.players.remove(entity);
+		}
+
+		public void onSectionChange(Entity entity) {
 		}
 	}
 }

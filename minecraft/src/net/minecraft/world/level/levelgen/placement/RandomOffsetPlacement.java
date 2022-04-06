@@ -2,9 +2,9 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 
@@ -37,10 +37,10 @@ public class RandomOffsetPlacement extends PlacementModifier {
 	}
 
 	@Override
-	public Stream<BlockPos> getPositions(PlacementContext placementContext, Random random, BlockPos blockPos) {
-		int i = blockPos.getX() + this.xzSpread.sample(random);
-		int j = blockPos.getY() + this.ySpread.sample(random);
-		int k = blockPos.getZ() + this.xzSpread.sample(random);
+	public Stream<BlockPos> getPositions(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
+		int i = blockPos.getX() + this.xzSpread.sample(randomSource);
+		int j = blockPos.getY() + this.ySpread.sample(randomSource);
+		int k = blockPos.getZ() + this.xzSpread.sample(randomSource);
 		return Stream.of(new BlockPos(i, j, k));
 	}
 

@@ -1,9 +1,9 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -40,12 +40,12 @@ public class GoToTargetLocation<E extends Mob> extends Behavior<E> {
 	}
 
 	private static BlockPos getNearbyPos(Mob mob, BlockPos blockPos) {
-		Random random = mob.level.random;
-		return blockPos.offset(getRandomOffset(random), 0, getRandomOffset(random));
+		RandomSource randomSource = mob.level.random;
+		return blockPos.offset(getRandomOffset(randomSource), 0, getRandomOffset(randomSource));
 	}
 
-	private static int getRandomOffset(Random random) {
-		return random.nextInt(3) - 1;
+	private static int getRandomOffset(RandomSource randomSource) {
+		return randomSource.nextInt(3) - 1;
 	}
 
 	private BlockPos getTargetLocation(Mob mob) {

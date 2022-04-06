@@ -1,10 +1,10 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.Blocks;
@@ -32,7 +32,7 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
 	}
 
 	@Override
-	public Stream<BlockPos> getPositions(PlacementContext placementContext, Random random, BlockPos blockPos) {
+	public Stream<BlockPos> getPositions(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
 		Builder<BlockPos> builder = Stream.builder();
 		int i = 0;
 
@@ -40,9 +40,9 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
 		do {
 			bl = false;
 
-			for (int j = 0; j < this.count.sample(random); j++) {
-				int k = random.nextInt(16) + blockPos.getX();
-				int l = random.nextInt(16) + blockPos.getZ();
+			for (int j = 0; j < this.count.sample(randomSource); j++) {
+				int k = randomSource.nextInt(16) + blockPos.getX();
+				int l = randomSource.nextInt(16) + blockPos.getZ();
 				int m = placementContext.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l);
 				int n = findOnGroundYPosition(placementContext, k, m, l, i);
 				if (n != Integer.MAX_VALUE) {

@@ -355,7 +355,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
-						.setRolls(UniformGenerator.between(4.0F, 9.0F))
+						.setRolls(UniformGenerator.between(5.0F, 10.0F))
 						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
 						.add(LootItem.lootTableItem(Items.MUSIC_DISC_OTHERSIDE).setWeight(1))
 						.add(LootItem.lootTableItem(Items.COMPASS).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
@@ -390,17 +390,18 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(3)
 								.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
 						)
+						.add(LootItem.lootTableItem(Items.ECHO_SHARD).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 						.add(
 							LootItem.lootTableItem(Items.POTION)
-								.setWeight(4)
+								.setWeight(5)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F)))
 								.apply(SetPotionFunction.setPotion(Potions.STRONG_REGENERATION))
 						)
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(4).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 10.0F))))
-						.add(LootItem.lootTableItem(Items.BONE).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
-						.add(LootItem.lootTableItem(Items.SOUL_TORCH).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
-						.add(LootItem.lootTableItem(Items.COAL).setWeight(6).apply(SetItemCountFunction.setCount(UniformGenerator.between(6.0F, 15.0F))))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 10.0F))))
+						.add(LootItem.lootTableItem(Items.BONE).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
+						.add(LootItem.lootTableItem(Items.SOUL_TORCH).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
+						.add(LootItem.lootTableItem(Items.COAL).setWeight(7).apply(SetItemCountFunction.setCount(UniformGenerator.between(6.0F, 15.0F))))
 				)
 		);
 		biConsumer.accept(

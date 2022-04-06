@@ -1,6 +1,5 @@
 package net.minecraft.util;
 
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
@@ -30,7 +29,7 @@ public class Mth {
 			fs[ix] = (float)Math.sin((double)ix * Math.PI * 2.0 / 65536.0);
 		}
 	});
-	private static final Random RANDOM = new Random();
+	private static final RandomSource RANDOM = RandomSource.createThreadSafe();
 	private static final int[] MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[]{
 		0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
 	};
@@ -166,16 +165,16 @@ public class Mth {
 		return Math.floorDiv(i, j);
 	}
 
-	public static int nextInt(Random random, int i, int j) {
-		return i >= j ? i : random.nextInt(j - i + 1) + i;
+	public static int nextInt(RandomSource randomSource, int i, int j) {
+		return i >= j ? i : randomSource.nextInt(j - i + 1) + i;
 	}
 
-	public static float nextFloat(Random random, float f, float g) {
-		return f >= g ? f : random.nextFloat() * (g - f) + f;
+	public static float nextFloat(RandomSource randomSource, float f, float g) {
+		return f >= g ? f : randomSource.nextFloat() * (g - f) + f;
 	}
 
-	public static double nextDouble(Random random, double d, double e) {
-		return d >= e ? d : random.nextDouble() * (e - d) + d;
+	public static double nextDouble(RandomSource randomSource, double d, double e) {
+		return d >= e ? d : randomSource.nextDouble() * (e - d) + d;
 	}
 
 	public static double average(long[] ls) {
@@ -376,9 +375,9 @@ public class Mth {
 		return l >> 16;
 	}
 
-	public static UUID createInsecureUUID(Random random) {
-		long l = random.nextLong() & -61441L | 16384L;
-		long m = random.nextLong() & 4611686018427387903L | Long.MIN_VALUE;
+	public static UUID createInsecureUUID(RandomSource randomSource) {
+		long l = randomSource.nextLong() & -61441L | 16384L;
+		long m = randomSource.nextLong() & 4611686018427387903L | Long.MIN_VALUE;
 		return new UUID(l, m);
 	}
 
@@ -590,8 +589,8 @@ public class Mth {
 		return ds;
 	}
 
-	public static int getRandomForDistributionIntegral(Random random, double[] ds) {
-		double d = random.nextDouble();
+	public static int getRandomForDistributionIntegral(RandomSource randomSource, double[] ds) {
+		double d = randomSource.nextDouble();
 
 		for (int i = 0; i < ds.length; i++) {
 			if (d < ds[i]) {
@@ -770,7 +769,7 @@ public class Mth {
 	}
 
 	public static double wobble(double d) {
-		return d + (2.0 * new Random((long)floor(d * 3000.0)).nextDouble() - 1.0) * 1.0E-7 / 2.0;
+		return d + (2.0 * RandomSource.create((long)floor(d * 3000.0)).nextDouble() - 1.0) * 1.0E-7 / 2.0;
 	}
 
 	public static int roundToward(int i, int j) {
@@ -781,16 +780,16 @@ public class Mth {
 		return -Math.floorDiv(-i, j);
 	}
 
-	public static int randomBetweenInclusive(Random random, int i, int j) {
-		return random.nextInt(j - i + 1) + i;
+	public static int randomBetweenInclusive(RandomSource randomSource, int i, int j) {
+		return randomSource.nextInt(j - i + 1) + i;
 	}
 
-	public static float randomBetween(Random random, float f, float g) {
-		return random.nextFloat() * (g - f) + f;
+	public static float randomBetween(RandomSource randomSource, float f, float g) {
+		return randomSource.nextFloat() * (g - f) + f;
 	}
 
-	public static float normal(Random random, float f, float g) {
-		return f + (float)random.nextGaussian() * g;
+	public static float normal(RandomSource randomSource, float f, float g) {
+		return f + (float)randomSource.nextGaussian() * g;
 	}
 
 	public static double lengthSquared(double d, double e) {

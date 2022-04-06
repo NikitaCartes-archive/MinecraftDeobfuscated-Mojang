@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -13,6 +12,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -313,9 +313,9 @@ public class Guardian extends Monster {
 	}
 
 	public static boolean checkGuardianSpawnRules(
-		EntityType<? extends Guardian> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<? extends Guardian> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
-		return (random.nextInt(20) == 0 || !levelAccessor.canSeeSkyFromBelowWater(blockPos))
+		return (randomSource.nextInt(20) == 0 || !levelAccessor.canSeeSkyFromBelowWater(blockPos))
 			&& levelAccessor.getDifficulty() != Difficulty.PEACEFUL
 			&& (mobSpawnType == MobSpawnType.SPAWNER || levelAccessor.getFluidState(blockPos).is(FluidTags.WATER))
 			&& levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER);

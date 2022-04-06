@@ -2,7 +2,6 @@ package net.minecraft.client.resources.sounds;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Optional;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
@@ -26,7 +26,7 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 	private final LocalPlayer player;
 	private final SoundManager soundManager;
 	private final BiomeManager biomeManager;
-	private final Random random;
+	private final RandomSource random;
 	private final Object2ObjectArrayMap<Biome, BiomeAmbientSoundsHandler.LoopSoundInstance> loopSounds = new Object2ObjectArrayMap<>();
 	private Optional<AmbientMoodSettings> moodSettings = Optional.empty();
 	private Optional<AmbientAdditionsSettings> additionsSettings = Optional.empty();
@@ -97,7 +97,7 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 						double l = Math.sqrt(g * g + h * h + k * k);
 						double m = l + ambientMoodSettings.getSoundPositionOffset();
 						SimpleSoundInstance simpleSoundInstance = SimpleSoundInstance.forAmbientMood(
-							ambientMoodSettings.getSoundEvent(), this.player.getX() + g / l * m, this.player.getEyeY() + h / l * m, this.player.getZ() + k / l * m
+							ambientMoodSettings.getSoundEvent(), this.random, this.player.getX() + g / l * m, this.player.getEyeY() + h / l * m, this.player.getZ() + k / l * m
 						);
 						this.soundManager.play(simpleSoundInstance);
 						this.moodiness = 0.0F;
@@ -114,7 +114,7 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 		private int fade;
 
 		public LoopSoundInstance(SoundEvent soundEvent) {
-			super(soundEvent, SoundSource.AMBIENT);
+			super(soundEvent, SoundSource.AMBIENT, SoundInstance.createUnseededRandom());
 			this.looping = true;
 			this.delay = 0;
 			this.volume = 1.0F;

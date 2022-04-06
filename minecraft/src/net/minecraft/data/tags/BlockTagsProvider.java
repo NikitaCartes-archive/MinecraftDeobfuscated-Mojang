@@ -1358,7 +1358,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.CRACKED_DEEPSLATE_BRICKS)
 			.add(Blocks.CRACKED_DEEPSLATE_TILES);
 		this.tag(BlockTags.CONVERTABLE_TO_MUD).add(Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT);
-		this.tag(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE)
+		this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE)
 			.add(Blocks.DEEPSLATE)
 			.add(Blocks.DEEPSLATE_BRICKS)
 			.add(Blocks.DEEPSLATE_TILES)
@@ -1369,7 +1369,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.DEEPSLATE_BRICK_WALL)
 			.add(Blocks.COBBLED_DEEPSLATE)
 			.add(Blocks.CRACKED_DEEPSLATE_BRICKS)
-			.add(Blocks.CRACKED_DEEPSLATE_TILES);
-		this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE).addTag(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE).add(Blocks.GRAY_WOOL);
+			.add(Blocks.CRACKED_DEEPSLATE_TILES)
+			.add(Blocks.GRAY_WOOL);
+		this.tag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)
+			.add(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MANGROVE_LEAVES, Blocks.MANGROVE_LOG, Blocks.MANGROVE_PROPAGULE);
+		this.tag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH).add(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS);
+		this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT).add(Blocks.MUD);
 	}
 }

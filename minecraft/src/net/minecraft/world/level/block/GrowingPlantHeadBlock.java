@@ -1,9 +1,9 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -37,8 +37,8 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if ((Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if ((Integer)blockState.getValue(AGE) < 25 && randomSource.nextDouble() < this.growPerTickProbability) {
 			BlockPos blockPos2 = blockPos.relative(this.growthDirection);
 			if (this.canGrowInto(serverLevel.getBlockState(blockPos2))) {
 				serverLevel.setBlockAndUpdate(blockPos2, this.getGrowIntoState(blockState, serverLevel.random));
@@ -46,7 +46,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 		}
 	}
 
-	protected BlockState getGrowIntoState(BlockState blockState, Random random) {
+	protected BlockState getGrowIntoState(BlockState blockState, RandomSource randomSource) {
 		return blockState.cycle(AGE);
 	}
 
@@ -92,15 +92,15 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		BlockPos blockPos2 = blockPos.relative(this.growthDirection);
 		int i = Math.min((Integer)blockState.getValue(AGE) + 1, 25);
-		int j = this.getBlocksToGrowWhenBonemealed(random);
+		int j = this.getBlocksToGrowWhenBonemealed(randomSource);
 
 		for (int k = 0; k < j && this.canGrowInto(serverLevel.getBlockState(blockPos2)); k++) {
 			serverLevel.setBlockAndUpdate(blockPos2, blockState.setValue(AGE, Integer.valueOf(i)));
@@ -109,7 +109,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 		}
 	}
 
-	protected abstract int getBlocksToGrowWhenBonemealed(Random random);
+	protected abstract int getBlocksToGrowWhenBonemealed(RandomSource randomSource);
 
 	protected abstract boolean canGrowInto(BlockState blockState);
 

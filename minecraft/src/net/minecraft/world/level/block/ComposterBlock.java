@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -12,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -179,17 +179,17 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		double d = blockState.getShape(level, blockPos).max(Direction.Axis.Y, 0.5, 0.5) + 0.03125;
 		double e = 0.13125F;
 		double f = 0.7375F;
-		Random random = level.getRandom();
+		RandomSource randomSource = level.getRandom();
 
 		for (int i = 0; i < 10; i++) {
-			double g = random.nextGaussian() * 0.02;
-			double h = random.nextGaussian() * 0.02;
-			double j = random.nextGaussian() * 0.02;
+			double g = randomSource.nextGaussian() * 0.02;
+			double h = randomSource.nextGaussian() * 0.02;
+			double j = randomSource.nextGaussian() * 0.02;
 			level.addParticle(
 				ParticleTypes.COMPOSTER,
-				(double)blockPos.getX() + 0.13125F + 0.7375F * (double)random.nextFloat(),
-				(double)blockPos.getY() + d + (double)random.nextFloat() * (1.0 - d),
-				(double)blockPos.getZ() + 0.13125F + 0.7375F * (double)random.nextFloat(),
+				(double)blockPos.getX() + 0.13125F + 0.7375F * (double)randomSource.nextFloat(),
+				(double)blockPos.getY() + d + (double)randomSource.nextFloat() * (1.0 - d),
+				(double)blockPos.getZ() + 0.13125F + 0.7375F * (double)randomSource.nextFloat(),
 				g,
 				h,
 				j
@@ -297,7 +297,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Integer)blockState.getValue(LEVEL) == 7) {
 			serverLevel.setBlock(blockPos, blockState.cycle(LEVEL), 3);
 			serverLevel.playSound(null, blockPos, SoundEvents.COMPOSTER_READY, SoundSource.BLOCKS, 1.0F, 1.0F);

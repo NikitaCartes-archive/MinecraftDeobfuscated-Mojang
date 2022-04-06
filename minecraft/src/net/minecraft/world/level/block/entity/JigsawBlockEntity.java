@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -13,6 +12,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.JigsawBlock;
@@ -121,7 +121,7 @@ public class JigsawBlockEntity extends BlockEntity {
 		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
 		StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
 		StructureManager structureManager = serverLevel.structureManager();
-		Random random = serverLevel.getRandom();
+		RandomSource randomSource = serverLevel.getRandom();
 		BlockPos blockPos = this.getBlockPos();
 		List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
 		StructureTemplate structureTemplate = new StructureTemplate();
@@ -138,13 +138,13 @@ public class JigsawBlockEntity extends BlockEntity {
 			chunkGenerator,
 			structureTemplateManager,
 			list,
-			random,
+			randomSource,
 			serverLevel,
 			serverLevel.getChunkSource().randomState()
 		);
 
 		for (PoolElementStructurePiece poolElementStructurePiece2 : list) {
-			poolElementStructurePiece2.place(serverLevel, structureManager, chunkGenerator, random, BoundingBox.infinite(), blockPos, bl);
+			poolElementStructurePiece2.place(serverLevel, structureManager, chunkGenerator, randomSource, BoundingBox.infinite(), blockPos, bl);
 		}
 	}
 

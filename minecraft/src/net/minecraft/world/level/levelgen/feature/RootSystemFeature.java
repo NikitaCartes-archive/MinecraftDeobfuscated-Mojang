@@ -1,11 +1,11 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -23,12 +23,12 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		if (!worldGenLevel.getBlockState(blockPos).isAir()) {
 			return false;
 		} else {
-			Random random = featurePlaceContext.random();
+			RandomSource randomSource = featurePlaceContext.random();
 			BlockPos blockPos2 = featurePlaceContext.origin();
 			RootSystemConfiguration rootSystemConfiguration = featurePlaceContext.config();
 			BlockPos.MutableBlockPos mutableBlockPos = blockPos2.mutable();
-			if (placeDirtAndTree(worldGenLevel, featurePlaceContext.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
-				placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
+			if (placeDirtAndTree(worldGenLevel, featurePlaceContext.chunkGenerator(), rootSystemConfiguration, randomSource, mutableBlockPos, blockPos2)) {
+				placeRoots(worldGenLevel, rootSystemConfiguration, randomSource, blockPos2, mutableBlockPos);
 			}
 
 			return true;
@@ -62,7 +62,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		WorldGenLevel worldGenLevel,
 		ChunkGenerator chunkGenerator,
 		RootSystemConfiguration rootSystemConfiguration,
-		Random random,
+		RandomSource randomSource,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		BlockPos blockPos
 	) {
@@ -75,8 +75,8 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 					return false;
 				}
 
-				if (rootSystemConfiguration.treeFeature.value().place(worldGenLevel, chunkGenerator, random, mutableBlockPos)) {
-					placeDirt(blockPos, blockPos.getY() + i, worldGenLevel, rootSystemConfiguration, random);
+				if (rootSystemConfiguration.treeFeature.value().place(worldGenLevel, chunkGenerator, randomSource, mutableBlockPos)) {
+					placeDirt(blockPos, blockPos.getY() + i, worldGenLevel, rootSystemConfiguration, randomSource);
 					return true;
 				}
 			}
@@ -85,26 +85,33 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 		return false;
 	}
 
-	private static void placeDirt(BlockPos blockPos, int i, WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random) {
+	private static void placeDirt(
+		BlockPos blockPos, int i, WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, RandomSource randomSource
+	) {
 		int j = blockPos.getX();
 		int k = blockPos.getZ();
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int l = blockPos.getY(); l < i; l++) {
-			placeRootedDirt(worldGenLevel, rootSystemConfiguration, random, j, k, mutableBlockPos.set(j, l, k));
+			placeRootedDirt(worldGenLevel, rootSystemConfiguration, randomSource, j, k, mutableBlockPos.set(j, l, k));
 		}
 	}
 
 	private static void placeRootedDirt(
-		WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, int i, int j, BlockPos.MutableBlockPos mutableBlockPos
+		WorldGenLevel worldGenLevel,
+		RootSystemConfiguration rootSystemConfiguration,
+		RandomSource randomSource,
+		int i,
+		int j,
+		BlockPos.MutableBlockPos mutableBlockPos
 	) {
 		int k = rootSystemConfiguration.rootRadius;
 		Predicate<BlockState> predicate = blockState -> blockState.is(rootSystemConfiguration.rootReplaceable);
 
 		for (int l = 0; l < rootSystemConfiguration.rootPlacementAttempts; l++) {
-			mutableBlockPos.setWithOffset(mutableBlockPos, random.nextInt(k) - random.nextInt(k), 0, random.nextInt(k) - random.nextInt(k));
+			mutableBlockPos.setWithOffset(mutableBlockPos, randomSource.nextInt(k) - randomSource.nextInt(k), 0, randomSource.nextInt(k) - randomSource.nextInt(k));
 			if (predicate.test(worldGenLevel.getBlockState(mutableBlockPos))) {
-				worldGenLevel.setBlock(mutableBlockPos, rootSystemConfiguration.rootStateProvider.getState(random, mutableBlockPos), 2);
+				worldGenLevel.setBlock(mutableBlockPos, rootSystemConfiguration.rootStateProvider.getState(randomSource, mutableBlockPos), 2);
 			}
 
 			mutableBlockPos.setX(i);
@@ -113,15 +120,24 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 	}
 
 	private static void placeRoots(
-		WorldGenLevel worldGenLevel, RootSystemConfiguration rootSystemConfiguration, Random random, BlockPos blockPos, BlockPos.MutableBlockPos mutableBlockPos
+		WorldGenLevel worldGenLevel,
+		RootSystemConfiguration rootSystemConfiguration,
+		RandomSource randomSource,
+		BlockPos blockPos,
+		BlockPos.MutableBlockPos mutableBlockPos
 	) {
 		int i = rootSystemConfiguration.hangingRootRadius;
 		int j = rootSystemConfiguration.hangingRootsVerticalSpan;
 
 		for (int k = 0; k < rootSystemConfiguration.hangingRootPlacementAttempts; k++) {
-			mutableBlockPos.setWithOffset(blockPos, random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
+			mutableBlockPos.setWithOffset(
+				blockPos,
+				randomSource.nextInt(i) - randomSource.nextInt(i),
+				randomSource.nextInt(j) - randomSource.nextInt(j),
+				randomSource.nextInt(i) - randomSource.nextInt(i)
+			);
 			if (worldGenLevel.isEmptyBlock(mutableBlockPos)) {
-				BlockState blockState = rootSystemConfiguration.hangingRootStateProvider.getState(random, mutableBlockPos);
+				BlockState blockState = rootSystemConfiguration.hangingRootStateProvider.getState(randomSource, mutableBlockPos);
 				if (blockState.canSurvive(worldGenLevel, mutableBlockPos)
 					&& worldGenLevel.getBlockState(mutableBlockPos.above()).isFaceSturdy(worldGenLevel, mutableBlockPos, Direction.DOWN)) {
 					worldGenLevel.setBlock(mutableBlockPos, blockState, 2);

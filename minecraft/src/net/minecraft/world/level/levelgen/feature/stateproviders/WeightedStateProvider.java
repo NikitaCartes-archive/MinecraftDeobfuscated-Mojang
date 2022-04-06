@@ -2,8 +2,8 @@ package net.minecraft.world.level.levelgen.feature.stateproviders;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -34,7 +34,7 @@ public class WeightedStateProvider extends BlockStateProvider {
 	}
 
 	@Override
-	public BlockState getState(Random random, BlockPos blockPos) {
-		return (BlockState)this.weightedList.getRandomValue(random).orElseThrow(IllegalStateException::new);
+	public BlockState getState(RandomSource randomSource, BlockPos blockPos) {
+		return (BlockState)this.weightedList.getRandomValue(randomSource).orElseThrow(IllegalStateException::new);
 	}
 }

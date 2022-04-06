@@ -2,13 +2,13 @@ package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -78,7 +78,12 @@ public final class StructureStart {
 	}
 
 	public void placeInChunk(
-		WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos
+		WorldGenLevel worldGenLevel,
+		StructureManager structureManager,
+		ChunkGenerator chunkGenerator,
+		RandomSource randomSource,
+		BoundingBox boundingBox,
+		ChunkPos chunkPos
 	) {
 		List<StructurePiece> list = this.pieceContainer.pieces();
 		if (!list.isEmpty()) {
@@ -88,11 +93,11 @@ public final class StructureStart {
 
 			for (StructurePiece structurePiece : list) {
 				if (structurePiece.getBoundingBox().intersects(boundingBox)) {
-					structurePiece.postProcess(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
+					structurePiece.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos2);
 				}
 			}
 
-			this.structure.afterPlace(worldGenLevel, structureManager, chunkGenerator, random, boundingBox, chunkPos, this.pieceContainer);
+			this.structure.afterPlace(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, this.pieceContainer);
 		}
 	}
 

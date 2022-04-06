@@ -1,6 +1,6 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class NetherVines {
@@ -11,11 +11,11 @@ public class NetherVines {
 		return blockState.isAir();
 	}
 
-	public static int getBlocksToGrowWhenBonemealed(Random random) {
+	public static int getBlocksToGrowWhenBonemealed(RandomSource randomSource) {
 		double d = 1.0;
 
 		int i;
-		for (i = 0; random.nextDouble() < d; i++) {
+		for (i = 0; randomSource.nextDouble() < d; i++) {
 			d *= 0.826;
 		}
 

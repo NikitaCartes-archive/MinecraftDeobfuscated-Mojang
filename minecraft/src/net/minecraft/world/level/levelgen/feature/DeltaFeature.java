@@ -2,9 +2,9 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -26,16 +26,16 @@ public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
 	@Override
 	public boolean place(FeaturePlaceContext<DeltaFeatureConfiguration> featurePlaceContext) {
 		boolean bl = false;
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		DeltaFeatureConfiguration deltaFeatureConfiguration = featurePlaceContext.config();
 		BlockPos blockPos = featurePlaceContext.origin();
-		boolean bl2 = random.nextDouble() < 0.9;
-		int i = bl2 ? deltaFeatureConfiguration.rimSize().sample(random) : 0;
-		int j = bl2 ? deltaFeatureConfiguration.rimSize().sample(random) : 0;
+		boolean bl2 = randomSource.nextDouble() < 0.9;
+		int i = bl2 ? deltaFeatureConfiguration.rimSize().sample(randomSource) : 0;
+		int j = bl2 ? deltaFeatureConfiguration.rimSize().sample(randomSource) : 0;
 		boolean bl3 = bl2 && i != 0 && j != 0;
-		int k = deltaFeatureConfiguration.size().sample(random);
-		int l = deltaFeatureConfiguration.size().sample(random);
+		int k = deltaFeatureConfiguration.size().sample(randomSource);
+		int l = deltaFeatureConfiguration.size().sample(randomSource);
 		int m = Math.max(k, l);
 
 		for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, k, 0, l)) {

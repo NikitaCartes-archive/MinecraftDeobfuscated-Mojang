@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Optional;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -156,31 +156,31 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(LIT)) {
-			if (random.nextInt(10) == 0) {
+			if (randomSource.nextInt(10) == 0) {
 				level.playLocalSound(
 					(double)blockPos.getX() + 0.5,
 					(double)blockPos.getY() + 0.5,
 					(double)blockPos.getZ() + 0.5,
 					SoundEvents.CAMPFIRE_CRACKLE,
 					SoundSource.BLOCKS,
-					0.5F + random.nextFloat(),
-					random.nextFloat() * 0.7F + 0.6F,
+					0.5F + randomSource.nextFloat(),
+					randomSource.nextFloat() * 0.7F + 0.6F,
 					false
 				);
 			}
 
-			if (this.spawnParticles && random.nextInt(5) == 0) {
-				for (int i = 0; i < random.nextInt(1) + 1; i++) {
+			if (this.spawnParticles && randomSource.nextInt(5) == 0) {
+				for (int i = 0; i < randomSource.nextInt(1) + 1; i++) {
 					level.addParticle(
 						ParticleTypes.LAVA,
 						(double)blockPos.getX() + 0.5,
 						(double)blockPos.getY() + 0.5,
 						(double)blockPos.getZ() + 0.5,
-						(double)(random.nextFloat() / 2.0F),
+						(double)(randomSource.nextFloat() / 2.0F),
 						5.0E-5,
-						(double)(random.nextFloat() / 2.0F)
+						(double)(randomSource.nextFloat() / 2.0F)
 					);
 				}
 			}
@@ -235,14 +235,14 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	public static void makeParticles(Level level, BlockPos blockPos, boolean bl, boolean bl2) {
-		Random random = level.getRandom();
+		RandomSource randomSource = level.getRandom();
 		SimpleParticleType simpleParticleType = bl ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
 		level.addAlwaysVisibleParticle(
 			simpleParticleType,
 			true,
-			(double)blockPos.getX() + 0.5 + random.nextDouble() / 3.0 * (double)(random.nextBoolean() ? 1 : -1),
-			(double)blockPos.getY() + random.nextDouble() + random.nextDouble(),
-			(double)blockPos.getZ() + 0.5 + random.nextDouble() / 3.0 * (double)(random.nextBoolean() ? 1 : -1),
+			(double)blockPos.getX() + 0.5 + randomSource.nextDouble() / 3.0 * (double)(randomSource.nextBoolean() ? 1 : -1),
+			(double)blockPos.getY() + randomSource.nextDouble() + randomSource.nextDouble(),
+			(double)blockPos.getZ() + 0.5 + randomSource.nextDouble() / 3.0 * (double)(randomSource.nextBoolean() ? 1 : -1),
 			0.0,
 			0.07,
 			0.0
@@ -250,9 +250,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		if (bl2) {
 			level.addParticle(
 				ParticleTypes.SMOKE,
-				(double)blockPos.getX() + 0.5 + random.nextDouble() / 4.0 * (double)(random.nextBoolean() ? 1 : -1),
+				(double)blockPos.getX() + 0.5 + randomSource.nextDouble() / 4.0 * (double)(randomSource.nextBoolean() ? 1 : -1),
 				(double)blockPos.getY() + 0.4,
-				(double)blockPos.getZ() + 0.5 + random.nextDouble() / 4.0 * (double)(random.nextBoolean() ? 1 : -1),
+				(double)blockPos.getZ() + 0.5 + randomSource.nextDouble() / 4.0 * (double)(randomSource.nextBoolean() ? 1 : -1),
 				0.0,
 				0.005,
 				0.0

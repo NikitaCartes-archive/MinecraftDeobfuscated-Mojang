@@ -1,12 +1,12 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -34,7 +34,7 @@ public class FallingBlock extends Block implements Fallable {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (isFree(serverLevel.getBlockState(blockPos.below())) && blockPos.getY() >= serverLevel.getMinBuildHeight()) {
 			FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, blockPos, blockState);
 			this.falling(fallingBlockEntity);
@@ -54,13 +54,13 @@ public class FallingBlock extends Block implements Fallable {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (random.nextInt(16) == 0) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+		if (randomSource.nextInt(16) == 0) {
 			BlockPos blockPos2 = blockPos.below();
 			if (isFree(level.getBlockState(blockPos2))) {
-				double d = (double)blockPos.getX() + random.nextDouble();
+				double d = (double)blockPos.getX() + randomSource.nextDouble();
 				double e = (double)blockPos.getY() - 0.05;
-				double f = (double)blockPos.getZ() + random.nextDouble();
+				double f = (double)blockPos.getZ() + randomSource.nextDouble();
 				level.addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, blockState), d, e, f, 0.0, 0.0, 0.0);
 			}
 		}

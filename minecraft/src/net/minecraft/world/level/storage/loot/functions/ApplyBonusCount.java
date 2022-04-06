@@ -7,11 +7,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -86,9 +86,9 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 		}
 
 		@Override
-		public int calculateNewCount(Random random, int i, int j) {
+		public int calculateNewCount(RandomSource randomSource, int i, int j) {
 			for (int k = 0; k < j + this.extraRounds; k++) {
-				if (random.nextFloat() < this.probability) {
+				if (randomSource.nextFloat() < this.probability) {
 					i++;
 				}
 			}
@@ -115,7 +115,7 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 	}
 
 	interface Formula {
-		int calculateNewCount(Random random, int i, int j);
+		int calculateNewCount(RandomSource randomSource, int i, int j);
 
 		void serializeParams(JsonObject jsonObject, JsonSerializationContext jsonSerializationContext);
 
@@ -130,9 +130,9 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 		public static final ResourceLocation TYPE = new ResourceLocation("ore_drops");
 
 		@Override
-		public int calculateNewCount(Random random, int i, int j) {
+		public int calculateNewCount(RandomSource randomSource, int i, int j) {
 			if (j > 0) {
-				int k = random.nextInt(j + 2) - 1;
+				int k = randomSource.nextInt(j + 2) - 1;
 				if (k < 0) {
 					k = 0;
 				}
@@ -200,8 +200,8 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 		}
 
 		@Override
-		public int calculateNewCount(Random random, int i, int j) {
-			return i + random.nextInt(this.bonusMultiplier * j + 1);
+		public int calculateNewCount(RandomSource randomSource, int i, int j) {
+			return i + randomSource.nextInt(this.bonusMultiplier * j + 1);
 		}
 
 		@Override

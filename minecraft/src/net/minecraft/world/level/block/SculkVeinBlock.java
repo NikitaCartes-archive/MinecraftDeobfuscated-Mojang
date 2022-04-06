@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Collection;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -9,6 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -68,7 +68,7 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 	}
 
 	@Override
-	public void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, Random random) {
+	public void onDischarged(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, RandomSource randomSource) {
 		if (blockState.is(this)) {
 			for (Direction direction : DIRECTIONS) {
 				BooleanProperty booleanProperty = getFaceProperty(direction);
@@ -83,26 +83,26 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 			}
 
 			levelAccessor.setBlock(blockPos, blockState, 3);
-			SculkBehaviour.super.onDischarged(levelAccessor, blockState, blockPos, random);
+			SculkBehaviour.super.onDischarged(levelAccessor, blockState, blockPos, randomSource);
 		}
 	}
 
 	@Override
 	public int attemptUseCharge(
-		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, Random random, SculkSpreader sculkSpreader, boolean bl
+		SculkSpreader.ChargeCursor chargeCursor, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, SculkSpreader sculkSpreader, boolean bl
 	) {
-		if (bl && this.attemptPlaceSculk(sculkSpreader, levelAccessor, chargeCursor.getPos(), random)) {
+		if (bl && this.attemptPlaceSculk(sculkSpreader, levelAccessor, chargeCursor.getPos(), randomSource)) {
 			return chargeCursor.getCharge() - 1;
 		} else {
-			return random.nextInt(sculkSpreader.chargeDecayRate()) == 0 ? Mth.floor((float)chargeCursor.getCharge() * 0.5F) : chargeCursor.getCharge();
+			return randomSource.nextInt(sculkSpreader.chargeDecayRate()) == 0 ? Mth.floor((float)chargeCursor.getCharge() * 0.5F) : chargeCursor.getCharge();
 		}
 	}
 
-	private boolean attemptPlaceSculk(SculkSpreader sculkSpreader, LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
+	private boolean attemptPlaceSculk(SculkSpreader sculkSpreader, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource) {
 		BlockState blockState = levelAccessor.getBlockState(blockPos);
 		TagKey<Block> tagKey = sculkSpreader.replaceableBlocks();
 
-		for (Direction direction : Direction.allShuffled(random)) {
+		for (Direction direction : Direction.allShuffled(randomSource)) {
 			if (hasFace(blockState, direction)) {
 				BlockPos blockPos2 = blockPos.relative(direction);
 				if (levelAccessor.getBlockState(blockPos2).is(tagKey)) {
@@ -117,7 +117,7 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 							BlockPos blockPos3 = blockPos2.relative(direction3);
 							BlockState blockState3 = levelAccessor.getBlockState(blockPos3);
 							if (blockState3.is(this)) {
-								this.onDischarged(levelAccessor, blockState3, blockPos3, random);
+								this.onDischarged(levelAccessor, blockState3, blockPos3, randomSource);
 							}
 						}
 					}

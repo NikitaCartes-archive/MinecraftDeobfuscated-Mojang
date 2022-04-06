@@ -3,9 +3,9 @@ package net.minecraft.util.valueproviders;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public class UniformInt extends IntProvider {
 	public static final Codec<UniformInt> CODEC = RecordCodecBuilder.create(
@@ -34,8 +34,8 @@ public class UniformInt extends IntProvider {
 	}
 
 	@Override
-	public int sample(Random random) {
-		return Mth.randomBetweenInclusive(random, this.minInclusive, this.maxInclusive);
+	public int sample(RandomSource randomSource) {
+		return Mth.randomBetweenInclusive(randomSource, this.minInclusive, this.maxInclusive);
 	}
 
 	@Override

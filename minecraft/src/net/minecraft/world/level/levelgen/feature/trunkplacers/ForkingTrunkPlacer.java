@@ -5,10 +5,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -32,16 +32,16 @@ public class ForkingTrunkPlacer extends TrunkPlacer {
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		int i,
 		BlockPos blockPos,
 		TreeConfiguration treeConfiguration
 	) {
-		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, randomSource, blockPos.below(), treeConfiguration);
 		List<FoliagePlacer.FoliageAttachment> list = Lists.<FoliagePlacer.FoliageAttachment>newArrayList();
-		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-		int j = i - random.nextInt(4) - 1;
-		int k = 3 - random.nextInt(3);
+		Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
+		int j = i - randomSource.nextInt(4) - 1;
+		int k = 3 - randomSource.nextInt(3);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		int l = blockPos.getX();
 		int m = blockPos.getZ();
@@ -55,7 +55,7 @@ public class ForkingTrunkPlacer extends TrunkPlacer {
 				k--;
 			}
 
-			if (placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l, o, m), treeConfiguration)) {
+			if (this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos.set(l, o, m), treeConfiguration)) {
 				optionalInt = OptionalInt.of(o + 1);
 			}
 		}
@@ -66,10 +66,10 @@ public class ForkingTrunkPlacer extends TrunkPlacer {
 
 		l = blockPos.getX();
 		m = blockPos.getZ();
-		Direction direction2 = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+		Direction direction2 = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
 		if (direction2 != direction) {
-			int ox = j - random.nextInt(2) - 1;
-			int p = 1 + random.nextInt(3);
+			int ox = j - randomSource.nextInt(2) - 1;
+			int p = 1 + randomSource.nextInt(3);
 			optionalInt = OptionalInt.empty();
 
 			for (int q = ox; q < i && p > 0; p--) {
@@ -77,7 +77,7 @@ public class ForkingTrunkPlacer extends TrunkPlacer {
 					int r = blockPos.getY() + q;
 					l += direction2.getStepX();
 					m += direction2.getStepZ();
-					if (placeLog(levelSimulatedReader, biConsumer, random, mutableBlockPos.set(l, r, m), treeConfiguration)) {
+					if (this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos.set(l, r, m), treeConfiguration)) {
 						optionalInt = OptionalInt.of(r + 1);
 					}
 				}

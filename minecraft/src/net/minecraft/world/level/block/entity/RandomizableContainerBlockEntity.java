@@ -1,6 +1,5 @@
 package net.minecraft.world.level.block.entity;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -9,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -33,10 +33,10 @@ public abstract class RandomizableContainerBlockEntity extends BaseContainerBloc
 		super(blockEntityType, blockPos, blockState);
 	}
 
-	public static void setLootTable(BlockGetter blockGetter, Random random, BlockPos blockPos, ResourceLocation resourceLocation) {
+	public static void setLootTable(BlockGetter blockGetter, RandomSource randomSource, BlockPos blockPos, ResourceLocation resourceLocation) {
 		BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
 		if (blockEntity instanceof RandomizableContainerBlockEntity) {
-			((RandomizableContainerBlockEntity)blockEntity).setLootTable(resourceLocation, random.nextLong());
+			((RandomizableContainerBlockEntity)blockEntity).setLootTable(resourceLocation, randomSource.nextLong());
 		}
 	}
 

@@ -27,7 +27,7 @@ public class SetRoarTarget<E extends Warden> extends Behavior<E> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E warden) {
-		return ((Optional)this.targetFinderFunction.apply(warden)).filter(Warden::canTargetEntity).isPresent();
+		return ((Optional)this.targetFinderFunction.apply(warden)).filter(warden::canTargetEntity).isPresent();
 	}
 
 	protected void start(ServerLevel serverLevel, E warden, long l) {

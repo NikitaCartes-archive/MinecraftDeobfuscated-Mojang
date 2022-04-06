@@ -5,12 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +30,7 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 		Map<ResourceLocation, JsonElement> map = Maps.<ResourceLocation, JsonElement>newHashMap();
 		int i = this.directory.length() + 1;
 
-		for (Entry<ResourceLocation, ResourceThunk> entry : resourceManager.listResources(
+		for (Entry<ResourceLocation, Resource> entry : resourceManager.listResources(
 				this.directory, resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
 			)
 			.entrySet()) {
@@ -43,67 +39,35 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 			ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string.substring(i, string.length() - PATH_SUFFIX_LENGTH));
 
 			try {
-				Resource resource = ((ResourceThunk)entry.getValue()).open();
+				Reader reader = ((Resource)entry.getValue()).openAsReader();
 
 				try {
-					InputStream inputStream = resource.getInputStream();
-
-					try {
-						Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
+					JsonElement jsonElement = GsonHelper.fromJson(this.gson, reader, JsonElement.class);
+					if (jsonElement != null) {
+						JsonElement jsonElement2 = (JsonElement)map.put(resourceLocation2, jsonElement);
+						if (jsonElement2 != null) {
+							throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
+						}
+					} else {
+						LOGGER.error("Couldn't load data file {} from {} as it's null or empty", resourceLocation2, resourceLocation);
+					}
+				} catch (Throwable var14) {
+					if (reader != null) {
 						try {
-							JsonElement jsonElement = GsonHelper.fromJson(this.gson, reader, JsonElement.class);
-							if (jsonElement != null) {
-								JsonElement jsonElement2 = (JsonElement)map.put(resourceLocation2, jsonElement);
-								if (jsonElement2 != null) {
-									throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
-								}
-							} else {
-								LOGGER.error("Couldn't load data file {} from {} as it's null or empty", resourceLocation2, resourceLocation);
-							}
-						} catch (Throwable var18) {
-							try {
-								reader.close();
-							} catch (Throwable var17) {
-								var18.addSuppressed(var17);
-							}
-
-							throw var18;
-						}
-
-						reader.close();
-					} catch (Throwable var19) {
-						if (inputStream != null) {
-							try {
-								inputStream.close();
-							} catch (Throwable var16) {
-								var19.addSuppressed(var16);
-							}
-						}
-
-						throw var19;
-					}
-
-					if (inputStream != null) {
-						inputStream.close();
-					}
-				} catch (Throwable var20) {
-					if (resource != null) {
-						try {
-							resource.close();
-						} catch (Throwable var15) {
-							var20.addSuppressed(var15);
+							reader.close();
+						} catch (Throwable var13) {
+							var14.addSuppressed(var13);
 						}
 					}
 
-					throw var20;
+					throw var14;
 				}
 
-				if (resource != null) {
-					resource.close();
+				if (reader != null) {
+					reader.close();
 				}
-			} catch (IllegalArgumentException | IOException | JsonParseException var21) {
-				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var21);
+			} catch (IllegalArgumentException | IOException | JsonParseException var15) {
+				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var15);
 			}
 		}
 

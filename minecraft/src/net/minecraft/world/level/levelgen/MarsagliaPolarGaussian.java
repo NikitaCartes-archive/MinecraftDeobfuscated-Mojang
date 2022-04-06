@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen;
 
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public class MarsagliaPolarGaussian {
 	public final RandomSource randomSource;

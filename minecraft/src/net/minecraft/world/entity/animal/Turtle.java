@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.animal;
 
-import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -17,6 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
@@ -182,7 +182,7 @@ public class Turtle extends Animal {
 	}
 
 	public static boolean checkTurtleSpawnRules(
-		EntityType<Turtle> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Turtle> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return blockPos.getY() < levelAccessor.getSeaLevel() + 4 && TurtleEggBlock.onSand(levelAccessor, blockPos) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}
@@ -369,9 +369,9 @@ public class Turtle extends Animal {
 			this.turtle.setHasEgg(true);
 			this.animal.resetLove();
 			this.partner.resetLove();
-			Random random = this.animal.getRandom();
+			RandomSource randomSource = this.animal.getRandom();
 			if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-				this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
+				this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), randomSource.nextInt(7) + 1));
 			}
 		}
 	}
@@ -654,10 +654,10 @@ public class Turtle extends Animal {
 		public void start() {
 			int i = 512;
 			int j = 4;
-			Random random = this.turtle.random;
-			int k = random.nextInt(1025) - 512;
-			int l = random.nextInt(9) - 4;
-			int m = random.nextInt(1025) - 512;
+			RandomSource randomSource = this.turtle.random;
+			int k = randomSource.nextInt(1025) - 512;
+			int l = randomSource.nextInt(9) - 4;
+			int m = randomSource.nextInt(1025) - 512;
 			if ((double)l + this.turtle.getY() > (double)(this.turtle.level.getSeaLevel() - 1)) {
 				l = 0;
 			}

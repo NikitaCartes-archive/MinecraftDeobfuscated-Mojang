@@ -10,16 +10,18 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnUtil {
-	public static <T extends Mob> Optional<T> trySpawnMob(EntityType<T> entityType, ServerLevel serverLevel, BlockPos blockPos, int i, int j, int k) {
+	public static <T extends Mob> Optional<T> trySpawnMob(
+		EntityType<T> entityType, MobSpawnType mobSpawnType, ServerLevel serverLevel, BlockPos blockPos, int i, int j, int k
+	) {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int l = 0; l < i; l++) {
 			int m = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
 			int n = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
 			if (moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos.setWithOffset(blockPos, m, k, n))) {
-				T mob = (T)entityType.create(serverLevel, null, null, null, mutableBlockPos, MobSpawnType.MOB_SUMMONED, false, false);
+				T mob = (T)entityType.create(serverLevel, null, null, null, mutableBlockPos, mobSpawnType, false, false);
 				if (mob != null) {
-					if (mob.checkSpawnRules(serverLevel, MobSpawnType.MOB_SUMMONED) && mob.checkSpawnObstruction(serverLevel)) {
+					if (mob.checkSpawnRules(serverLevel, mobSpawnType) && mob.checkSpawnObstruction(serverLevel)) {
 						serverLevel.addFreshEntityWithPassengers(mob);
 						return Optional.of(mob);
 					}

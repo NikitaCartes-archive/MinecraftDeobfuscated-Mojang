@@ -3,10 +3,15 @@ package net.minecraft.world.entity.ai.behavior;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.animal.allay.AllayAi;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -58,10 +63,23 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
 				ItemStack itemStack = livingEntity.getInventory().removeItem(0, 1);
 				if (!itemStack.isEmpty()) {
 					BehaviorUtils.throwItem(livingEntity, itemStack, getThrowPosition(positionTracker));
+					if (positionTracker instanceof EntityTracker entityTracker && entityTracker.getEntity() instanceof ServerPlayer serverPlayer) {
+						CriteriaTriggers.ITEM_DELIVERED_TO_PLAYER.trigger(serverPlayer);
+					}
+
+					if (livingEntity instanceof Allay allay) {
+						AllayAi.getLikedPlayer(allay).ifPresent(serverPlayerx -> this.triggerDropItemOnBlock(positionTracker, itemStack, serverPlayerx));
+					}
+
 					livingEntity.getBrain().setMemory(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, 100);
 				}
 			}
 		}
+	}
+
+	private void triggerDropItemOnBlock(PositionTracker positionTracker, ItemStack itemStack, ServerPlayer serverPlayer) {
+		BlockPos blockPos = positionTracker.currentBlockPosition().below();
+		CriteriaTriggers.ALLAY_DROP_ITEM_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack);
 	}
 
 	private boolean canThrowItemToTarget(E livingEntity) {

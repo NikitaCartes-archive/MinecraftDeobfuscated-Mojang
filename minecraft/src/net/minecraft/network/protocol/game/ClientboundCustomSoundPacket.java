@@ -15,8 +15,9 @@ public class ClientboundCustomSoundPacket implements Packet<ClientGamePacketList
 	private final int z;
 	private final float volume;
 	private final float pitch;
+	private final long seed;
 
-	public ClientboundCustomSoundPacket(ResourceLocation resourceLocation, SoundSource soundSource, Vec3 vec3, float f, float g) {
+	public ClientboundCustomSoundPacket(ResourceLocation resourceLocation, SoundSource soundSource, Vec3 vec3, float f, float g, long l) {
 		this.name = resourceLocation;
 		this.source = soundSource;
 		this.x = (int)(vec3.x * 8.0);
@@ -24,6 +25,7 @@ public class ClientboundCustomSoundPacket implements Packet<ClientGamePacketList
 		this.z = (int)(vec3.z * 8.0);
 		this.volume = f;
 		this.pitch = g;
+		this.seed = l;
 	}
 
 	public ClientboundCustomSoundPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -34,6 +36,7 @@ public class ClientboundCustomSoundPacket implements Packet<ClientGamePacketList
 		this.z = friendlyByteBuf.readInt();
 		this.volume = friendlyByteBuf.readFloat();
 		this.pitch = friendlyByteBuf.readFloat();
+		this.seed = friendlyByteBuf.readLong();
 	}
 
 	@Override
@@ -45,6 +48,7 @@ public class ClientboundCustomSoundPacket implements Packet<ClientGamePacketList
 		friendlyByteBuf.writeInt(this.z);
 		friendlyByteBuf.writeFloat(this.volume);
 		friendlyByteBuf.writeFloat(this.pitch);
+		friendlyByteBuf.writeLong(this.seed);
 	}
 
 	public ResourceLocation getName() {
@@ -73,6 +77,10 @@ public class ClientboundCustomSoundPacket implements Packet<ClientGamePacketList
 
 	public float getPitch() {
 		return this.pitch;
+	}
+
+	public long getSeed() {
+		return this.seed;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

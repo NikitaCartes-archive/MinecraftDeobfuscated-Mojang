@@ -1,12 +1,12 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
@@ -123,9 +123,9 @@ public class Silverfish extends Monster {
 	}
 
 	public static boolean checkSilverfishSpawnRules(
-		EntityType<Silverfish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Silverfish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)) {
+		if (checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource)) {
 			Player player = levelAccessor.getNearestPlayer((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0, true);
 			return player == null;
 		} else {
@@ -155,9 +155,9 @@ public class Silverfish extends Monster {
 			} else if (!this.mob.getNavigation().isDone()) {
 				return false;
 			} else {
-				Random random = this.mob.getRandom();
-				if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(reducedTickDelay(10)) == 0) {
-					this.selectedDirection = Direction.getRandom(random);
+				RandomSource randomSource = this.mob.getRandom();
+				if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && randomSource.nextInt(reducedTickDelay(10)) == 0) {
+					this.selectedDirection = Direction.getRandom(randomSource);
 					BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
 					BlockState blockState = this.mob.level.getBlockState(blockPos);
 					if (InfestedBlock.isCompatibleHostBlock(blockState)) {
@@ -217,7 +217,7 @@ public class Silverfish extends Monster {
 			this.lookForFriends--;
 			if (this.lookForFriends <= 0) {
 				Level level = this.silverfish.level;
-				Random random = this.silverfish.getRandom();
+				RandomSource randomSource = this.silverfish.getRandom();
 				BlockPos blockPos = this.silverfish.blockPosition();
 
 				for (int i = 0; i <= 5 && i >= -5; i = (i <= 0 ? 1 : 0) - i) {
@@ -233,7 +233,7 @@ public class Silverfish extends Monster {
 									level.setBlock(blockPos2, ((InfestedBlock)block).hostStateByInfested(level.getBlockState(blockPos2)), 3);
 								}
 
-								if (random.nextBoolean()) {
+								if (randomSource.nextBoolean()) {
 									return;
 								}
 							}

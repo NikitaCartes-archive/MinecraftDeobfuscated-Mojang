@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -62,7 +62,7 @@ public class SeagrassBlock extends BushBlock implements BonemealableBlock, Liqui
 	}
 
 	@Override
-	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public boolean isBonemealSuccess(Level level, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		return true;
 	}
 
@@ -72,7 +72,7 @@ public class SeagrassBlock extends BushBlock implements BonemealableBlock, Liqui
 	}
 
 	@Override
-	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		BlockState blockState2 = Blocks.TALL_SEAGRASS.defaultBlockState();
 		BlockState blockState3 = blockState2.setValue(TallSeagrassBlock.HALF, DoubleBlockHalf.UPPER);
 		BlockPos blockPos2 = blockPos.above();

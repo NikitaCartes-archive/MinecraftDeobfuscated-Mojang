@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -116,8 +116,8 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if ((Boolean)blockState.getValue(POWERED) && random.nextFloat() < 0.25F) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+		if ((Boolean)blockState.getValue(POWERED) && randomSource.nextFloat() < 0.25F) {
 			makeParticle(blockState, level, blockPos, 0.5F);
 		}
 	}

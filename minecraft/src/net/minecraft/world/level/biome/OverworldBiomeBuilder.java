@@ -430,13 +430,23 @@ public final class OverworldBiomeBuilder {
 		);
 		this.addSurfaceBiome(
 			consumer,
-			this.UNFROZEN_RANGE,
+			Climate.Parameter.span(this.temperatures[1], this.temperatures[2]),
 			this.FULL_RANGE,
 			Climate.Parameter.span(this.nearInlandContinentalness, this.farInlandContinentalness),
 			this.erosions[6],
 			parameter,
 			0.0F,
 			Biomes.SWAMP
+		);
+		this.addSurfaceBiome(
+			consumer,
+			Climate.Parameter.span(this.temperatures[3], this.temperatures[4]),
+			this.FULL_RANGE,
+			Climate.Parameter.span(this.nearInlandContinentalness, this.farInlandContinentalness),
+			this.erosions[6],
+			parameter,
+			0.0F,
+			Biomes.MANGROVE_SWAMP
 		);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
@@ -571,13 +581,23 @@ public final class OverworldBiomeBuilder {
 		);
 		this.addSurfaceBiome(
 			consumer,
-			this.UNFROZEN_RANGE,
+			Climate.Parameter.span(this.temperatures[1], this.temperatures[2]),
 			this.FULL_RANGE,
 			Climate.Parameter.span(this.nearInlandContinentalness, this.farInlandContinentalness),
 			this.erosions[6],
 			parameter,
 			0.0F,
 			Biomes.SWAMP
+		);
+		this.addSurfaceBiome(
+			consumer,
+			Climate.Parameter.span(this.temperatures[3], this.temperatures[4]),
+			this.FULL_RANGE,
+			Climate.Parameter.span(this.nearInlandContinentalness, this.farInlandContinentalness),
+			this.erosions[6],
+			parameter,
+			0.0F,
+			Biomes.MANGROVE_SWAMP
 		);
 
 		for (int i = 0; i < this.temperatures.length; i++) {
@@ -731,13 +751,23 @@ public final class OverworldBiomeBuilder {
 		this.addSurfaceBiome(consumer, this.UNFROZEN_RANGE, this.FULL_RANGE, this.coastContinentalness, this.erosions[6], parameter, 0.0F, Biomes.RIVER);
 		this.addSurfaceBiome(
 			consumer,
-			this.UNFROZEN_RANGE,
+			Climate.Parameter.span(this.temperatures[1], this.temperatures[2]),
 			this.FULL_RANGE,
 			Climate.Parameter.span(this.inlandContinentalness, this.farInlandContinentalness),
 			this.erosions[6],
 			parameter,
 			0.0F,
 			Biomes.SWAMP
+		);
+		this.addSurfaceBiome(
+			consumer,
+			Climate.Parameter.span(this.temperatures[3], this.temperatures[4]),
+			this.FULL_RANGE,
+			Climate.Parameter.span(this.inlandContinentalness, this.farInlandContinentalness),
+			this.erosions[6],
+			parameter,
+			0.0F,
+			Biomes.MANGROVE_SWAMP
 		);
 		this.addSurfaceBiome(
 			consumer,

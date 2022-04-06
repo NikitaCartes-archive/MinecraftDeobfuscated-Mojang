@@ -36,7 +36,7 @@ public class DropperBlock extends DispenserBlock {
 	protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
 		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
 		DispenserBlockEntity dispenserBlockEntity = blockSourceImpl.getEntity();
-		int i = dispenserBlockEntity.getRandomSlot();
+		int i = dispenserBlockEntity.getRandomSlot(serverLevel.random);
 		if (i < 0) {
 			serverLevel.levelEvent(1001, blockPos, 0);
 		} else {

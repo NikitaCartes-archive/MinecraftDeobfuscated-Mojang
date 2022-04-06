@@ -10,12 +10,12 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntry;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
@@ -56,7 +56,7 @@ public class LootPool {
 	}
 
 	private void addRandomItem(Consumer<ItemStack> consumer, LootContext lootContext) {
-		Random random = lootContext.getRandom();
+		RandomSource randomSource = lootContext.getRandom();
 		List<LootPoolEntry> list = Lists.<LootPoolEntry>newArrayList();
 		MutableInt mutableInt = new MutableInt();
 
@@ -75,7 +75,7 @@ public class LootPool {
 			if (i == 1) {
 				((LootPoolEntry)list.get(0)).createItemStack(consumer, lootContext);
 			} else {
-				int j = random.nextInt(mutableInt.intValue());
+				int j = randomSource.nextInt(mutableInt.intValue());
 
 				for (LootPoolEntry lootPoolEntry : list) {
 					j -= lootPoolEntry.getWeight(lootContext.getLuck());

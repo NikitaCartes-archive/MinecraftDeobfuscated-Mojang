@@ -3,7 +3,6 @@ package net.minecraft.server.level;
 import com.mojang.logging.LogUtils;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -16,10 +15,12 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -61,7 +62,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	private final ServerLevel level;
 	private final long seed;
 	private final LevelData levelData;
-	private final Random random;
+	private final RandomSource random;
 	private final DimensionType dimensionType;
 	private final WorldGenTickAccess<Block> blockTicks = new WorldGenTickAccess<>(blockPos -> this.getChunk(blockPos).getBlockTicks());
 	private final WorldGenTickAccess<Fluid> fluidTicks = new WorldGenTickAccess<>(blockPos -> this.getChunk(blockPos).getFluidTicks());
@@ -74,6 +75,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	@Nullable
 	private Supplier<String> currentlyGenerating;
 	private final AtomicLong subTickCount = new AtomicLong();
+	private static final ResourceLocation WORLDGEN_REGION_RANDOM = new ResourceLocation("worldgen_region_random");
 
 	public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i) {
 		this.generatingStatus = chunkStatus;
@@ -88,7 +90,7 @@ public class WorldGenRegion implements WorldGenLevel {
 			this.level = serverLevel;
 			this.seed = serverLevel.getSeed();
 			this.levelData = serverLevel.getLevelData();
-			this.random = serverLevel.getRandom();
+			this.random = serverLevel.getChunkSource().randomState().getOrCreateRandomFactory(WORLDGEN_REGION_RANDOM).at(this.center.getPos().getWorldPosition());
 			this.dimensionType = serverLevel.dimensionType();
 			this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed));
 			this.firstPos = ((ChunkAccess)list.get(0)).getPos();
@@ -396,7 +398,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public Random getRandom() {
+	public RandomSource getRandom() {
 		return this.random;
 	}
 

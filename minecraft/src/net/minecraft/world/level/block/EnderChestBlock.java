@@ -1,6 +1,5 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -109,16 +109,16 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		for (int i = 0; i < 3; i++) {
-			int j = random.nextInt(2) * 2 - 1;
-			int k = random.nextInt(2) * 2 - 1;
+			int j = randomSource.nextInt(2) * 2 - 1;
+			int k = randomSource.nextInt(2) * 2 - 1;
 			double d = (double)blockPos.getX() + 0.5 + 0.25 * (double)j;
-			double e = (double)((float)blockPos.getY() + random.nextFloat());
+			double e = (double)((float)blockPos.getY() + randomSource.nextFloat());
 			double f = (double)blockPos.getZ() + 0.5 + 0.25 * (double)k;
-			double g = (double)(random.nextFloat() * (float)j);
-			double h = ((double)random.nextFloat() - 0.5) * 0.125;
-			double l = (double)(random.nextFloat() * (float)k);
+			double g = (double)(randomSource.nextFloat() * (float)j);
+			double h = ((double)randomSource.nextFloat() - 0.5) * 0.125;
+			double l = (double)(randomSource.nextFloat() * (float)k);
 			level.addParticle(ParticleTypes.PORTAL, d, e, f, g, h, l);
 		}
 	}
@@ -160,7 +160,7 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 		if (blockEntity instanceof EnderChestBlockEntity) {
 			((EnderChestBlockEntity)blockEntity).recheckOpen();

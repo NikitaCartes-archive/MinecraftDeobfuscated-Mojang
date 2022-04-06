@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -56,19 +56,19 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		super.animateTick(blockState, level, blockPos, random);
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+		super.animateTick(blockState, level, blockPos, randomSource);
 
 		for (BlockPos blockPos2 : BOOKSHELF_OFFSETS) {
-			if (random.nextInt(16) == 0 && isValidBookShelf(level, blockPos, blockPos2)) {
+			if (randomSource.nextInt(16) == 0 && isValidBookShelf(level, blockPos, blockPos2)) {
 				level.addParticle(
 					ParticleTypes.ENCHANT,
 					(double)blockPos.getX() + 0.5,
 					(double)blockPos.getY() + 2.0,
 					(double)blockPos.getZ() + 0.5,
-					(double)((float)blockPos2.getX() + random.nextFloat()) - 0.5,
-					(double)((float)blockPos2.getY() - random.nextFloat() - 1.0F),
-					(double)((float)blockPos2.getZ() + random.nextFloat()) - 0.5
+					(double)((float)blockPos2.getX() + randomSource.nextFloat()) - 0.5,
+					(double)((float)blockPos2.getY() - randomSource.nextFloat() - 1.0F),
+					(double)((float)blockPos2.getZ() + randomSource.nextFloat()) - 0.5
 				);
 			}
 		}

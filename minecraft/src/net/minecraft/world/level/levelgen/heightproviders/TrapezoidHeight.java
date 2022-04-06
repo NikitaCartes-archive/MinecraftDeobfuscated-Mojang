@@ -3,8 +3,8 @@ package net.minecraft.world.level.levelgen.heightproviders;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class TrapezoidHeight extends HeightProvider {
 	}
 
 	@Override
-	public int sample(Random random, WorldGenerationContext worldGenerationContext) {
+	public int sample(RandomSource randomSource, WorldGenerationContext worldGenerationContext) {
 		int i = this.minInclusive.resolveY(worldGenerationContext);
 		int j = this.maxInclusive.resolveY(worldGenerationContext);
 		if (i > j) {
@@ -47,11 +47,11 @@ public class TrapezoidHeight extends HeightProvider {
 		} else {
 			int k = j - i;
 			if (this.plateau >= k) {
-				return Mth.randomBetweenInclusive(random, i, j);
+				return Mth.randomBetweenInclusive(randomSource, i, j);
 			} else {
 				int l = (k - this.plateau) / 2;
 				int m = k - l;
-				return i + Mth.randomBetweenInclusive(random, 0, m) + Mth.randomBetweenInclusive(random, 0, l);
+				return i + Mth.randomBetweenInclusive(randomSource, 0, m) + Mth.randomBetweenInclusive(randomSource, 0, l);
 			}
 		}
 	}

@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.GenerationStep;
 
@@ -23,7 +23,7 @@ public class CarvingMaskPlacement extends PlacementModifier {
 	}
 
 	@Override
-	public Stream<BlockPos> getPositions(PlacementContext placementContext, Random random, BlockPos blockPos) {
+	public Stream<BlockPos> getPositions(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
 		ChunkPos chunkPos = new ChunkPos(blockPos);
 		return placementContext.getCarvingMask(chunkPos, this.step).stream(chunkPos);
 	}

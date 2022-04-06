@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntLinkedOpenHashMap;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,6 +21,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -48,7 +48,7 @@ public class ModelBlockRenderer {
 		PoseStack poseStack,
 		VertexConsumer vertexConsumer,
 		boolean bl,
-		Random random,
+		RandomSource randomSource,
 		long l,
 		int i
 	) {
@@ -58,8 +58,8 @@ public class ModelBlockRenderer {
 
 		try {
 			return bl2
-				? this.tesselateWithAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l, i)
-				: this.tesselateWithoutAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l, i);
+				? this.tesselateWithAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i)
+				: this.tesselateWithoutAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i);
 		} catch (Throwable var17) {
 			CrashReport crashReport = CrashReport.forThrowable(var17, "Tesselating block model");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block model being tesselated");
@@ -77,7 +77,7 @@ public class ModelBlockRenderer {
 		PoseStack poseStack,
 		VertexConsumer vertexConsumer,
 		boolean bl,
-		Random random,
+		RandomSource randomSource,
 		long l,
 		int i
 	) {
@@ -88,8 +88,8 @@ public class ModelBlockRenderer {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (Direction direction : DIRECTIONS) {
-			random.setSeed(l);
-			List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
+			randomSource.setSeed(l);
+			List<BakedQuad> list = bakedModel.getQuads(blockState, direction, randomSource);
 			if (!list.isEmpty()) {
 				mutableBlockPos.setWithOffset(blockPos, direction);
 				if (!bl || Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) {
@@ -99,8 +99,8 @@ public class ModelBlockRenderer {
 			}
 		}
 
-		random.setSeed(l);
-		List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, random);
+		randomSource.setSeed(l);
+		List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, randomSource);
 		if (!list2.isEmpty()) {
 			this.renderModelFaceAO(blockAndTintGetter, blockState, blockPos, poseStack, vertexConsumer, list2, fs, bitSet, ambientOcclusionFace, i);
 			bl2 = true;
@@ -117,7 +117,7 @@ public class ModelBlockRenderer {
 		PoseStack poseStack,
 		VertexConsumer vertexConsumer,
 		boolean bl,
-		Random random,
+		RandomSource randomSource,
 		long l,
 		int i
 	) {
@@ -126,8 +126,8 @@ public class ModelBlockRenderer {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (Direction direction : DIRECTIONS) {
-			random.setSeed(l);
-			List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
+			randomSource.setSeed(l);
+			List<BakedQuad> list = bakedModel.getQuads(blockState, direction, randomSource);
 			if (!list.isEmpty()) {
 				mutableBlockPos.setWithOffset(blockPos, direction);
 				if (!bl || Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) {
@@ -138,8 +138,8 @@ public class ModelBlockRenderer {
 			}
 		}
 
-		random.setSeed(l);
-		List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, random);
+		randomSource.setSeed(l);
+		List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, randomSource);
 		if (!list2.isEmpty()) {
 			this.renderModelFaceFlat(blockAndTintGetter, blockState, blockPos, -1, i, true, poseStack, vertexConsumer, list2, bitSet);
 			bl2 = true;
@@ -311,16 +311,16 @@ public class ModelBlockRenderer {
 	public void renderModel(
 		PoseStack.Pose pose, VertexConsumer vertexConsumer, @Nullable BlockState blockState, BakedModel bakedModel, float f, float g, float h, int i, int j
 	) {
-		Random random = new Random();
+		RandomSource randomSource = RandomSource.create();
 		long l = 42L;
 
 		for (Direction direction : DIRECTIONS) {
-			random.setSeed(42L);
-			renderQuadList(pose, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, direction, random), i, j);
+			randomSource.setSeed(42L);
+			renderQuadList(pose, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, direction, randomSource), i, j);
 		}
 
-		random.setSeed(42L);
-		renderQuadList(pose, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, null, random), i, j);
+		randomSource.setSeed(42L);
+		renderQuadList(pose, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, null, randomSource), i, j);
 	}
 
 	private static void renderQuadList(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, List<BakedQuad> list, int i, int j) {

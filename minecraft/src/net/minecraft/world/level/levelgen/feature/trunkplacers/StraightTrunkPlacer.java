@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -30,15 +30,15 @@ public class StraightTrunkPlacer extends TrunkPlacer {
 	public List<FoliagePlacer.FoliageAttachment> placeTrunk(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		int i,
 		BlockPos blockPos,
 		TreeConfiguration treeConfiguration
 	) {
-		setDirtAt(levelSimulatedReader, biConsumer, random, blockPos.below(), treeConfiguration);
+		setDirtAt(levelSimulatedReader, biConsumer, randomSource, blockPos.below(), treeConfiguration);
 
 		for (int j = 0; j < i; j++) {
-			placeLog(levelSimulatedReader, biConsumer, random, blockPos.above(j), treeConfiguration);
+			this.placeLog(levelSimulatedReader, biConsumer, randomSource, blockPos.above(j), treeConfiguration);
 		}
 
 		return ImmutableList.of(new FoliagePlacer.FoliageAttachment(blockPos.above(i), 0, false));

@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen;
 
-import java.util.Random;
 import java.util.function.LongFunction;
+import net.minecraft.util.RandomSource;
 
-public class WorldgenRandom extends Random implements RandomSource {
+public class WorldgenRandom extends LegacyRandomSource {
 	private final RandomSource randomSource;
 	private int count;
 
@@ -26,6 +26,7 @@ public class WorldgenRandom extends Random implements RandomSource {
 		return this.randomSource.forkPositional();
 	}
 
+	@Override
 	public int next(int i) {
 		this.count++;
 		return this.randomSource instanceof LegacyRandomSource legacyRandomSource ? legacyRandomSource.next(i) : (int)(this.randomSource.nextLong() >>> 64 - i);
@@ -65,8 +66,8 @@ public class WorldgenRandom extends Random implements RandomSource {
 		this.setSeed(m);
 	}
 
-	public static Random seedSlimeChunk(int i, int j, long l, long m) {
-		return new Random(l + (long)(i * i * 4987142) + (long)(i * 5947611) + (long)(j * j) * 4392871L + (long)(j * 389711) ^ m);
+	public static RandomSource seedSlimeChunk(int i, int j, long l, long m) {
+		return RandomSource.create(l + (long)(i * i * 4987142) + (long)(i * 5947611) + (long)(j * j) * 4392871L + (long)(j * 389711) ^ m);
 	}
 
 	public static enum Algorithm {

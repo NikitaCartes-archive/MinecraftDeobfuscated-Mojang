@@ -3,7 +3,6 @@ package net.minecraft.world.entity.monster;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -19,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -494,8 +494,8 @@ public class Zombie extends Monster {
 		return spawnGroupData;
 	}
 
-	public static boolean getSpawnAsBabyOdds(Random random) {
-		return random.nextFloat() < 0.05F;
+	public static boolean getSpawnAsBabyOdds(RandomSource randomSource) {
+		return randomSource.nextFloat() < 0.05F;
 	}
 
 	protected void handleAttributes(float f) {

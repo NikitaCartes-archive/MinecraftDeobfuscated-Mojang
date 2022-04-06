@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -42,6 +41,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -291,7 +291,7 @@ public final class ItemStack {
 		return this.getItem().getMaxDamage();
 	}
 
-	public boolean hurt(int i, Random random, @Nullable ServerPlayer serverPlayer) {
+	public boolean hurt(int i, RandomSource randomSource, @Nullable ServerPlayer serverPlayer) {
 		if (!this.isDamageableItem()) {
 			return false;
 		} else {
@@ -300,7 +300,7 @@ public final class ItemStack {
 				int k = 0;
 
 				for (int l = 0; j > 0 && l < i; l++) {
-					if (DigDurabilityEnchantment.shouldIgnoreDurabilityDrop(this, j, random)) {
+					if (DigDurabilityEnchantment.shouldIgnoreDurabilityDrop(this, j, randomSource)) {
 						k++;
 					}
 				}

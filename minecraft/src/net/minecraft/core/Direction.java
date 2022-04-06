@@ -1,7 +1,6 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -12,17 +11,15 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 
@@ -108,10 +105,8 @@ public enum Direction implements StringRepresentable {
 		return getNearest(vector4f.x(), vector4f.y(), vector4f.z());
 	}
 
-	public static Collection<Direction> allShuffled(Random random) {
-		List<Direction> list = Lists.<Direction>newArrayList(values());
-		Collections.shuffle(list, random);
-		return list;
+	public static Collection<Direction> allShuffled(RandomSource randomSource) {
+		return Util.<Direction>shuffledCopy(Arrays.asList(values()), randomSource);
 	}
 
 	public static Stream<Direction> stream() {
@@ -303,8 +298,8 @@ public enum Direction implements StringRepresentable {
 		return (float)((this.data2d & 3) * 90);
 	}
 
-	public static Direction getRandom(Random random) {
-		return Util.getRandom(VALUES, random);
+	public static Direction getRandom(RandomSource randomSource) {
+		return Util.getRandom(VALUES, randomSource);
 	}
 
 	public static Direction getNearest(double d, double e, double f) {
@@ -424,8 +419,8 @@ public enum Direction implements StringRepresentable {
 			return this.name;
 		}
 
-		public static Direction.Axis getRandom(Random random) {
-			return Util.getRandom(VALUES, random);
+		public static Direction.Axis getRandom(RandomSource randomSource) {
+			return Util.getRandom(VALUES, randomSource);
 		}
 
 		public boolean test(@Nullable Direction direction) {
@@ -490,12 +485,12 @@ public enum Direction implements StringRepresentable {
 			this.axis = axiss;
 		}
 
-		public Direction getRandomDirection(Random random) {
-			return Util.getRandom(this.faces, random);
+		public Direction getRandomDirection(RandomSource randomSource) {
+			return Util.getRandom(this.faces, randomSource);
 		}
 
-		public Direction.Axis getRandomAxis(Random random) {
-			return Util.getRandom(this.axis, random);
+		public Direction.Axis getRandomAxis(RandomSource randomSource) {
+			return Util.getRandom(this.axis, randomSource);
 		}
 
 		public boolean test(@Nullable Direction direction) {

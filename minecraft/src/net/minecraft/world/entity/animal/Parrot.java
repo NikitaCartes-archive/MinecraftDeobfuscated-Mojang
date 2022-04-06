@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -22,6 +21,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -302,7 +302,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	}
 
 	public static boolean checkParrotSpawnRules(
-		EntityType<Parrot> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Parrot> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.PARROTS_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}
@@ -338,10 +338,10 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		return getAmbient(this.level, this.level.random);
 	}
 
-	public static SoundEvent getAmbient(Level level, Random random) {
-		if (level.getDifficulty() != Difficulty.PEACEFUL && random.nextInt(1000) == 0) {
+	public static SoundEvent getAmbient(Level level, RandomSource randomSource) {
+		if (level.getDifficulty() != Difficulty.PEACEFUL && randomSource.nextInt(1000) == 0) {
 			List<EntityType<?>> list = Lists.<EntityType<?>>newArrayList(MOB_SOUND_MAP.keySet());
-			return getImitatedSound((EntityType<?>)list.get(random.nextInt(list.size())));
+			return getImitatedSound((EntityType<?>)list.get(randomSource.nextInt(list.size())));
 		} else {
 			return SoundEvents.PARROT_AMBIENT;
 		}
@@ -382,8 +382,8 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		return getPitch(this.random);
 	}
 
-	public static float getPitch(Random random) {
-		return (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F;
+	public static float getPitch(RandomSource randomSource) {
+		return (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F;
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,8 +25,8 @@ public class WetSpongeBlock extends Block {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		Direction direction = Direction.getRandom(random);
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+		Direction direction = Direction.getRandom(randomSource);
 		if (direction != Direction.UP) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			BlockState blockState2 = level.getBlockState(blockPos2);
@@ -36,19 +36,19 @@ public class WetSpongeBlock extends Block {
 				double f = (double)blockPos.getZ();
 				if (direction == Direction.DOWN) {
 					e -= 0.05;
-					d += random.nextDouble();
-					f += random.nextDouble();
+					d += randomSource.nextDouble();
+					f += randomSource.nextDouble();
 				} else {
-					e += random.nextDouble() * 0.8;
+					e += randomSource.nextDouble() * 0.8;
 					if (direction.getAxis() == Direction.Axis.X) {
-						f += random.nextDouble();
+						f += randomSource.nextDouble();
 						if (direction == Direction.EAST) {
 							d++;
 						} else {
 							d += 0.05;
 						}
 					} else {
-						d += random.nextDouble();
+						d += randomSource.nextDouble();
 						if (direction == Direction.SOUTH) {
 							f++;
 						} else {

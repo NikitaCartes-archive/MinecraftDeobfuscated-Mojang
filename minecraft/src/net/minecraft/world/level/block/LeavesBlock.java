@@ -1,11 +1,11 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -46,7 +46,7 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (this.decaying(blockState)) {
 			dropResources(blockState, serverLevel, blockPos);
 			serverLevel.removeBlock(blockPos, false);
@@ -58,7 +58,7 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		serverLevel.setBlock(blockPos, updateDistance(blockState, serverLevel, blockPos), 3);
 	}
 
@@ -112,15 +112,15 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		if (level.isRainingAt(blockPos.above())) {
-			if (random.nextInt(15) == 1) {
+			if (randomSource.nextInt(15) == 1) {
 				BlockPos blockPos2 = blockPos.below();
 				BlockState blockState2 = level.getBlockState(blockPos2);
 				if (!blockState2.canOcclude() || !blockState2.isFaceSturdy(level, blockPos2, Direction.UP)) {
-					double d = (double)blockPos.getX() + random.nextDouble();
+					double d = (double)blockPos.getX() + randomSource.nextDouble();
 					double e = (double)blockPos.getY() - 0.05;
-					double f = (double)blockPos.getZ() + random.nextDouble();
+					double f = (double)blockPos.getZ() + randomSource.nextDouble();
 					level.addParticle(ParticleTypes.DRIPPING_WATER, d, e, f, 0.0, 0.0, 0.0);
 				}
 			}

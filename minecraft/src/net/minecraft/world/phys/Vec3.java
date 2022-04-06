@@ -231,6 +231,11 @@ public class Vec3 implements Position {
 		return new Vec3(e, f, g);
 	}
 
+	public Vec3 relative(Direction direction, double d) {
+		Vec3i vec3i = direction.getNormal();
+		return new Vec3(this.x + d * (double)vec3i.getX(), this.y + d * (double)vec3i.getY(), this.z + d * (double)vec3i.getZ());
+	}
+
 	@Override
 	public final double x() {
 		return this.x;

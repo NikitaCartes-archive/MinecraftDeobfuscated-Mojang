@@ -6,9 +6,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
@@ -31,7 +31,7 @@ public class NoiseProvider extends NoiseBasedStateProvider {
 	}
 
 	@Override
-	public BlockState getState(Random random, BlockPos blockPos) {
+	public BlockState getState(RandomSource randomSource, BlockPos blockPos) {
 		return this.getRandomState(this.states, blockPos, (double)this.scale);
 	}
 

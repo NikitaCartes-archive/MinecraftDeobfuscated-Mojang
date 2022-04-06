@@ -15,7 +15,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
@@ -30,63 +29,45 @@ public class SoundBufferLibrary {
 	public CompletableFuture<SoundBuffer> getCompleteBuffer(ResourceLocation resourceLocation) {
 		return (CompletableFuture<SoundBuffer>)this.cache.computeIfAbsent(resourceLocation, resourceLocationx -> CompletableFuture.supplyAsync(() -> {
 				try {
-					Resource resource = this.resourceManager.getResource(resourceLocationx);
+					InputStream inputStream = this.resourceManager.open(resourceLocationx);
 
-					SoundBuffer var6;
+					SoundBuffer var5;
 					try {
-						InputStream inputStream = resource.getInputStream();
+						OggAudioStream oggAudioStream = new OggAudioStream(inputStream);
 
 						try {
-							OggAudioStream oggAudioStream = new OggAudioStream(inputStream);
-
+							ByteBuffer byteBuffer = oggAudioStream.readAll();
+							var5 = new SoundBuffer(byteBuffer, oggAudioStream.getFormat());
+						} catch (Throwable var8) {
 							try {
-								ByteBuffer byteBuffer = oggAudioStream.readAll();
-								var6 = new SoundBuffer(byteBuffer, oggAudioStream.getFormat());
-							} catch (Throwable var10) {
-								try {
-									oggAudioStream.close();
-								} catch (Throwable var9) {
-									var10.addSuppressed(var9);
-								}
-
-								throw var10;
-							}
-
-							oggAudioStream.close();
-						} catch (Throwable var11) {
-							if (inputStream != null) {
-								try {
-									inputStream.close();
-								} catch (Throwable var8) {
-									var11.addSuppressed(var8);
-								}
-							}
-
-							throw var11;
-						}
-
-						if (inputStream != null) {
-							inputStream.close();
-						}
-					} catch (Throwable var12) {
-						if (resource != null) {
-							try {
-								resource.close();
+								oggAudioStream.close();
 							} catch (Throwable var7) {
-								var12.addSuppressed(var7);
+								var8.addSuppressed(var7);
+							}
+
+							throw var8;
+						}
+
+						oggAudioStream.close();
+					} catch (Throwable var9) {
+						if (inputStream != null) {
+							try {
+								inputStream.close();
+							} catch (Throwable var6) {
+								var9.addSuppressed(var6);
 							}
 						}
 
-						throw var12;
+						throw var9;
 					}
 
-					if (resource != null) {
-						resource.close();
+					if (inputStream != null) {
+						inputStream.close();
 					}
 
-					return var6;
-				} catch (IOException var13) {
-					throw new CompletionException(var13);
+					return var5;
+				} catch (IOException var10) {
+					throw new CompletionException(var10);
 				}
 			}, Util.backgroundExecutor()));
 	}
@@ -94,11 +75,10 @@ public class SoundBufferLibrary {
 	public CompletableFuture<AudioStream> getStream(ResourceLocation resourceLocation, boolean bl) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				Resource resource = this.resourceManager.getResource(resourceLocation);
-				InputStream inputStream = resource.getInputStream();
+				InputStream inputStream = this.resourceManager.open(resourceLocation);
 				return (AudioStream)(bl ? new LoopingAudioStream(OggAudioStream::new, inputStream) : new OggAudioStream(inputStream));
-			} catch (IOException var5) {
-				throw new CompletionException(var5);
+			} catch (IOException var4) {
+				throw new CompletionException(var4);
 			}
 		}, Util.backgroundExecutor());
 	}

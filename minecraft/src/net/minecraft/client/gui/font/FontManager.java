@@ -11,11 +11,7 @@ import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,7 +25,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -50,7 +45,7 @@ public class FontManager implements AutoCloseable {
 			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 			Map<ResourceLocation, List<GlyphProvider>> map = Maps.<ResourceLocation, List<GlyphProvider>>newHashMap();
 
-			for (Entry<ResourceLocation, List<ResourceThunk>> entry : resourceManager.listResourceStacks(
+			for (Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks(
 					"font", resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
 				)
 				.entrySet()) {
@@ -64,85 +59,53 @@ public class FontManager implements AutoCloseable {
 				);
 				profilerFiller.push(resourceLocation2::toString);
 
-				for (ResourceThunk resourceThunk : (List)entry.getValue()) {
-					profilerFiller.push(resourceThunk.sourcePackId());
+				for (Resource resource : (List)entry.getValue()) {
+					profilerFiller.push(resource.sourcePackId());
 
 					try {
-						Resource resource = resourceThunk.open();
+						Reader reader = resource.openAsReader();
 
 						try {
-							InputStream inputStream = resource.getInputStream();
-
 							try {
-								Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+								profilerFiller.push("reading");
+								JsonArray jsonArray = GsonHelper.getAsJsonArray(GsonHelper.fromJson(gson, reader, JsonObject.class), "providers");
+								profilerFiller.popPush("parsing");
 
-								try {
+								for (int i = jsonArray.size() - 1; i >= 0; i--) {
+									JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonArray.get(i), "providers[" + i + "]");
+									String string2 = GsonHelper.getAsString(jsonObject, "type");
+									GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string2);
+
 									try {
-										profilerFiller.push("reading");
-										JsonArray jsonArray = GsonHelper.getAsJsonArray(GsonHelper.fromJson(gson, reader, JsonObject.class), "providers");
-										profilerFiller.popPush("parsing");
-
-										for (int i = jsonArray.size() - 1; i >= 0; i--) {
-											JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonArray.get(i), "providers[" + i + "]");
-											String string2 = GsonHelper.getAsString(jsonObject, "type");
-											GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string2);
-
-											try {
-												profilerFiller.push(string2);
-												GlyphProvider glyphProvider = glyphProviderBuilderType.create(jsonObject).create(resourceManager);
-												if (glyphProvider != null) {
-													list.add(glyphProvider);
-												}
-											} finally {
-												profilerFiller.pop();
-											}
+										profilerFiller.push(string2);
+										GlyphProvider glyphProvider = glyphProviderBuilderType.create(jsonObject).create(resourceManager);
+										if (glyphProvider != null) {
+											list.add(glyphProvider);
 										}
 									} finally {
 										profilerFiller.pop();
 									}
-								} catch (Throwable var47) {
-									try {
-										reader.close();
-									} catch (Throwable var44) {
-										var47.addSuppressed(var44);
-									}
-
-									throw var47;
 								}
-
-								reader.close();
-							} catch (Throwable var48) {
-								if (inputStream != null) {
-									try {
-										inputStream.close();
-									} catch (Throwable var43) {
-										var48.addSuppressed(var43);
-									}
-								}
-
-								throw var48;
+							} finally {
+								profilerFiller.pop();
 							}
-
-							if (inputStream != null) {
-								inputStream.close();
-							}
-						} catch (Throwable var49) {
-							if (resource != null) {
+						} catch (Throwable var35) {
+							if (reader != null) {
 								try {
-									resource.close();
-								} catch (Throwable var42) {
-									var49.addSuppressed(var42);
+									reader.close();
+								} catch (Throwable var32) {
+									var35.addSuppressed(var32);
 								}
 							}
 
-							throw var49;
+							throw var35;
 						}
 
-						if (resource != null) {
-							resource.close();
+						if (reader != null) {
+							reader.close();
 						}
-					} catch (Exception var50) {
-						FontManager.LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation2, "fonts.json", resourceThunk.sourcePackId(), var50);
+					} catch (Exception var36) {
+						FontManager.LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation2, "fonts.json", resource.sourcePackId(), var36);
 					}
 
 					profilerFiller.pop();

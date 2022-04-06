@@ -1,6 +1,5 @@
 package net.minecraft.world.entity;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -10,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.level.Level;
@@ -96,7 +96,11 @@ public class GlowSquid extends Squid {
 	}
 
 	public static boolean checkGlowSquideSpawnRules(
-		EntityType<? extends LivingEntity> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<? extends LivingEntity> entityType,
+		ServerLevelAccessor serverLevelAccessor,
+		MobSpawnType mobSpawnType,
+		BlockPos blockPos,
+		RandomSource randomSource
 	) {
 		return blockPos.getY() <= serverLevelAccessor.getSeaLevel() - 33
 			&& serverLevelAccessor.getRawBrightness(blockPos, 0) == 0

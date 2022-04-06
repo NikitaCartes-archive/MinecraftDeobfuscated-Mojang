@@ -537,7 +537,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.window.updateRawMouseInput(this.options.rawMouseInput().get());
 		this.window.setDefaultErrorCallback();
 		this.resizeDisplay();
-		this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack());
+		this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
 		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);

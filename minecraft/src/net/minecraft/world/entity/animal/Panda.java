@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -18,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -736,8 +736,8 @@ public class Panda extends Animal {
 			return NORMAL;
 		}
 
-		public static Panda.Gene getRandom(Random random) {
-			int i = random.nextInt(16);
+		public static Panda.Gene getRandom(RandomSource randomSource) {
+			int i = randomSource.nextInt(16);
 			if (i == 0) {
 				return LAZY;
 			} else if (i == 1) {

@@ -2,9 +2,9 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,7 +39,7 @@ public class RandomSpreadFoliagePlacer extends FoliagePlacer {
 	protected void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
-		Random random,
+		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
 		FoliagePlacer.FoliageAttachment foliageAttachment,
@@ -51,18 +51,23 @@ public class RandomSpreadFoliagePlacer extends FoliagePlacer {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int m = 0; m < this.leafPlacementAttempts; m++) {
-			mutableBlockPos.setWithOffset(blockPos, random.nextInt(k) - random.nextInt(k), random.nextInt(j) - random.nextInt(j), random.nextInt(k) - random.nextInt(k));
-			tryPlaceLeaf(levelSimulatedReader, biConsumer, random, treeConfiguration, mutableBlockPos);
+			mutableBlockPos.setWithOffset(
+				blockPos,
+				randomSource.nextInt(k) - randomSource.nextInt(k),
+				randomSource.nextInt(j) - randomSource.nextInt(j),
+				randomSource.nextInt(k) - randomSource.nextInt(k)
+			);
+			tryPlaceLeaf(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, mutableBlockPos);
 		}
 	}
 
 	@Override
-	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-		return this.foliageHeight.sample(random);
+	public int foliageHeight(RandomSource randomSource, int i, TreeConfiguration treeConfiguration) {
+		return this.foliageHeight.sample(randomSource);
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+	protected boolean shouldSkipLocation(RandomSource randomSource, int i, int j, int k, int l, boolean bl) {
 		return false;
 	}
 }

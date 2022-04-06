@@ -3,7 +3,6 @@ package net.minecraft.world.entity.animal;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -18,6 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -314,8 +314,8 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
-	public static DyeColor getRandomSheepColor(Random random) {
-		int i = random.nextInt(100);
+	public static DyeColor getRandomSheepColor(RandomSource randomSource) {
+		int i = randomSource.nextInt(100);
 		if (i < 5) {
 			return DyeColor.BLACK;
 		} else if (i < 10) {
@@ -325,7 +325,7 @@ public class Sheep extends Animal implements Shearable {
 		} else if (i < 18) {
 			return DyeColor.BROWN;
 		} else {
-			return random.nextInt(500) == 0 ? DyeColor.PINK : DyeColor.WHITE;
+			return randomSource.nextInt(500) == 0 ? DyeColor.PINK : DyeColor.WHITE;
 		}
 	}
 

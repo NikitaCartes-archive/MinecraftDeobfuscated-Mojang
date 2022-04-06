@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
 
@@ -15,13 +15,13 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
 	public boolean place(FeaturePlaceContext<BlockColumnConfiguration> featurePlaceContext) {
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockColumnConfiguration blockColumnConfiguration = featurePlaceContext.config();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		int i = blockColumnConfiguration.layers().size();
 		int[] is = new int[i];
 		int j = 0;
 
 		for (int k = 0; k < i; k++) {
-			is[k] = ((BlockColumnConfiguration.Layer)blockColumnConfiguration.layers().get(k)).height().sample(random);
+			is[k] = ((BlockColumnConfiguration.Layer)blockColumnConfiguration.layers().get(k)).height().sample(randomSource);
 			j += is[k];
 		}
 
@@ -46,7 +46,7 @@ public class BlockColumnFeature extends Feature<BlockColumnConfiguration> {
 					BlockColumnConfiguration.Layer layer = (BlockColumnConfiguration.Layer)blockColumnConfiguration.layers().get(l);
 
 					for (int n = 0; n < m; n++) {
-						worldGenLevel.setBlock(mutableBlockPos, layer.state().getState(random, mutableBlockPos), 2);
+						worldGenLevel.setBlock(mutableBlockPos, layer.state().getState(randomSource, mutableBlockPos), 2);
 						mutableBlockPos.move(blockColumnConfiguration.direction());
 					}
 				}

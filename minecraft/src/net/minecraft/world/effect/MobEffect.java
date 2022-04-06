@@ -2,6 +2,7 @@ package net.minecraft.world.effect;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
@@ -41,8 +42,8 @@ public class MobEffect {
 		this.color = i;
 	}
 
-	public Supplier<MobEffectInstance.FactorData> createFactorData() {
-		return this.factorDataFactory;
+	public Optional<MobEffectInstance.FactorData> createFactorData() {
+		return Optional.ofNullable((MobEffectInstance.FactorData)this.factorDataFactory.get());
 	}
 
 	public void applyEffectTick(LivingEntity livingEntity, int i) {

@@ -11,7 +11,6 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
@@ -46,6 +45,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -81,7 +81,7 @@ public class TitleScreen extends Screen {
 	public TitleScreen(boolean bl) {
 		super(new TranslatableComponent("narrator.screen.title"));
 		this.fading = bl;
-		this.minceraftEasterEgg = (double)new Random().nextFloat() < 1.0E-4;
+		this.minceraftEasterEgg = (double)RandomSource.create().nextFloat() < 1.0E-4;
 		this.realmsClient = RealmsClient.create();
 	}
 

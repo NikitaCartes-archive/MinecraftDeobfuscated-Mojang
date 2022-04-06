@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 
@@ -26,8 +26,8 @@ public class CountPlacement extends RepeatingPlacement {
 	}
 
 	@Override
-	protected int count(Random random, BlockPos blockPos) {
-		return this.count.sample(random);
+	protected int count(RandomSource randomSource, BlockPos blockPos) {
+		return this.count.sample(randomSource);
 	}
 
 	@Override

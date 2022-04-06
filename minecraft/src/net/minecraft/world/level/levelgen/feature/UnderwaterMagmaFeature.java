@@ -3,11 +3,11 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -26,7 +26,7 @@ public class UnderwaterMagmaFeature extends Feature<UnderwaterMagmaConfiguration
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
 		UnderwaterMagmaConfiguration underwaterMagmaConfiguration = featurePlaceContext.config();
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		OptionalInt optionalInt = getFloorY(worldGenLevel, blockPos, underwaterMagmaConfiguration);
 		if (!optionalInt.isPresent()) {
 			return false;
@@ -39,7 +39,7 @@ public class UnderwaterMagmaFeature extends Feature<UnderwaterMagmaConfiguration
 			);
 			AABB aABB = new AABB(blockPos2.subtract(vec3i), blockPos2.offset(vec3i));
 			return BlockPos.betweenClosedStream(aABB)
-					.filter(blockPosx -> random.nextFloat() < underwaterMagmaConfiguration.placementProbabilityPerValidPosition)
+					.filter(blockPosx -> randomSource.nextFloat() < underwaterMagmaConfiguration.placementProbabilityPerValidPosition)
 					.filter(blockPosx -> this.isValidPlacement(worldGenLevel, blockPosx))
 					.mapToInt(blockPosx -> {
 						worldGenLevel.setBlock(blockPosx, Blocks.MAGMA_BLOCK.defaultBlockState(), 2);

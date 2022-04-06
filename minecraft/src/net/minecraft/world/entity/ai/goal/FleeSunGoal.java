@@ -1,9 +1,9 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
@@ -63,11 +63,11 @@ public class FleeSunGoal extends Goal {
 
 	@Nullable
 	protected Vec3 getHidePos() {
-		Random random = this.mob.getRandom();
+		RandomSource randomSource = this.mob.getRandom();
 		BlockPos blockPos = this.mob.blockPosition();
 
 		for (int i = 0; i < 10; i++) {
-			BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);
+			BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(20) - 10, randomSource.nextInt(6) - 3, randomSource.nextInt(20) - 10);
 			if (!this.level.canSeeSky(blockPos2) && this.mob.getWalkTargetValue(blockPos2) < 0.0F) {
 				return Vec3.atBottomCenterOf(blockPos2);
 			}

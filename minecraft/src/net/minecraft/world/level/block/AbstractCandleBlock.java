@@ -1,12 +1,12 @@
 package net.minecraft.world.level.block;
 
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -45,15 +45,15 @@ public abstract class AbstractCandleBlock extends Block {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(LIT)) {
 			this.getParticleOffsets(blockState)
-				.forEach(vec3 -> addParticlesAndSound(level, vec3.add((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ()), random));
+				.forEach(vec3 -> addParticlesAndSound(level, vec3.add((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ()), randomSource));
 		}
 	}
 
-	private static void addParticlesAndSound(Level level, Vec3 vec3, Random random) {
-		float f = random.nextFloat();
+	private static void addParticlesAndSound(Level level, Vec3 vec3, RandomSource randomSource) {
+		float f = randomSource.nextFloat();
 		if (f < 0.3F) {
 			level.addParticle(ParticleTypes.SMOKE, vec3.x, vec3.y, vec3.z, 0.0, 0.0, 0.0);
 			if (f < 0.17F) {
@@ -63,8 +63,8 @@ public abstract class AbstractCandleBlock extends Block {
 					vec3.z + 0.5,
 					SoundEvents.CANDLE_AMBIENT,
 					SoundSource.BLOCKS,
-					1.0F + random.nextFloat(),
-					random.nextFloat() * 0.7F + 0.3F,
+					1.0F + randomSource.nextFloat(),
+					randomSource.nextFloat() * 0.7F + 0.3F,
 					false
 				);
 			}

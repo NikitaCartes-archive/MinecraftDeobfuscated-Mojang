@@ -4,11 +4,11 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -51,7 +51,7 @@ public class DualNoiseProvider extends NoiseProvider {
 	}
 
 	@Override
-	public BlockState getState(Random random, BlockPos blockPos) {
+	public BlockState getState(RandomSource randomSource, BlockPos blockPos) {
 		double d = this.getSlowNoiseValue(blockPos);
 		int i = (int)Mth.clampedMap(d, -1.0, 1.0, (double)((Integer)this.variety.minInclusive()).intValue(), (double)((Integer)this.variety.maxInclusive() + 1));
 		List<BlockState> list = Lists.<BlockState>newArrayListWithCapacity(i);

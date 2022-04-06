@@ -72,6 +72,9 @@ public class MiscOverworldPlacements {
 	public static final Holder<PlacedFeature> DISK_SAND = PlacementUtils.register(
 		"disk_sand", MiscOverworldFeatures.DISK_SAND, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome()
 	);
+	public static final Holder<PlacedFeature> DISK_GRASS = PlacementUtils.register(
+		"disk_grass", MiscOverworldFeatures.DISK_GRASS, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome()
+	);
 	public static final Holder<PlacedFeature> FREEZE_TOP_LAYER = PlacementUtils.register(
 		"freeze_top_layer", MiscOverworldFeatures.FREEZE_TOP_LAYER, BiomeFilter.biome()
 	);

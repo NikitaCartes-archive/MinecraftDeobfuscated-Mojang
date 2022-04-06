@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -148,7 +148,7 @@ public class FireBlock extends BaseFireBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		serverLevel.scheduleTick(blockPos, this, getFireTickDelay(serverLevel.random));
 		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
 			if (!blockState.canSurvive(serverLevel, blockPos)) {
@@ -158,10 +158,10 @@ public class FireBlock extends BaseFireBlock {
 			BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
 			boolean bl = blockState2.is(serverLevel.dimensionType().infiniburn());
 			int i = (Integer)blockState.getValue(AGE);
-			if (!bl && serverLevel.isRaining() && this.isNearRain(serverLevel, blockPos) && random.nextFloat() < 0.2F + (float)i * 0.03F) {
+			if (!bl && serverLevel.isRaining() && this.isNearRain(serverLevel, blockPos) && randomSource.nextFloat() < 0.2F + (float)i * 0.03F) {
 				serverLevel.removeBlock(blockPos, false);
 			} else {
-				int j = Math.min(15, i + random.nextInt(3) / 2);
+				int j = Math.min(15, i + randomSource.nextInt(3) / 2);
 				if (i != j) {
 					blockState = blockState.setValue(AGE, Integer.valueOf(j));
 					serverLevel.setBlock(blockPos, blockState, 4);
@@ -177,7 +177,7 @@ public class FireBlock extends BaseFireBlock {
 						return;
 					}
 
-					if (i == 15 && random.nextInt(4) == 0 && !this.canBurn(serverLevel.getBlockState(blockPos.below()))) {
+					if (i == 15 && randomSource.nextInt(4) == 0 && !this.canBurn(serverLevel.getBlockState(blockPos.below()))) {
 						serverLevel.removeBlock(blockPos, false);
 						return;
 					}
@@ -185,12 +185,12 @@ public class FireBlock extends BaseFireBlock {
 
 				boolean bl2 = serverLevel.isHumidAt(blockPos);
 				int k = bl2 ? -50 : 0;
-				this.checkBurnOut(serverLevel, blockPos.east(), 300 + k, random, i);
-				this.checkBurnOut(serverLevel, blockPos.west(), 300 + k, random, i);
-				this.checkBurnOut(serverLevel, blockPos.below(), 250 + k, random, i);
-				this.checkBurnOut(serverLevel, blockPos.above(), 250 + k, random, i);
-				this.checkBurnOut(serverLevel, blockPos.north(), 300 + k, random, i);
-				this.checkBurnOut(serverLevel, blockPos.south(), 300 + k, random, i);
+				this.checkBurnOut(serverLevel, blockPos.east(), 300 + k, randomSource, i);
+				this.checkBurnOut(serverLevel, blockPos.west(), 300 + k, randomSource, i);
+				this.checkBurnOut(serverLevel, blockPos.below(), 250 + k, randomSource, i);
+				this.checkBurnOut(serverLevel, blockPos.above(), 250 + k, randomSource, i);
+				this.checkBurnOut(serverLevel, blockPos.north(), 300 + k, randomSource, i);
+				this.checkBurnOut(serverLevel, blockPos.south(), 300 + k, randomSource, i);
 				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 				for (int l = -1; l <= 1; l++) {
@@ -210,8 +210,8 @@ public class FireBlock extends BaseFireBlock {
 										q /= 2;
 									}
 
-									if (q > 0 && random.nextInt(o) <= q && (!serverLevel.isRaining() || !this.isNearRain(serverLevel, mutableBlockPos))) {
-										int r = Math.min(15, i + random.nextInt(5) / 4);
+									if (q > 0 && randomSource.nextInt(o) <= q && (!serverLevel.isRaining() || !this.isNearRain(serverLevel, mutableBlockPos))) {
+										int r = Math.min(15, i + randomSource.nextInt(5) / 4);
 										serverLevel.setBlock(mutableBlockPos, this.getStateWithAge(serverLevel, mutableBlockPos, r), 3);
 									}
 								}
@@ -243,12 +243,12 @@ public class FireBlock extends BaseFireBlock {
 			: this.igniteOdds.getInt(blockState.getBlock());
 	}
 
-	private void checkBurnOut(Level level, BlockPos blockPos, int i, Random random, int j) {
+	private void checkBurnOut(Level level, BlockPos blockPos, int i, RandomSource randomSource, int j) {
 		int k = this.getBurnOdds(level.getBlockState(blockPos));
-		if (random.nextInt(i) < k) {
+		if (randomSource.nextInt(i) < k) {
 			BlockState blockState = level.getBlockState(blockPos);
-			if (random.nextInt(j + 10) < 5 && !level.isRainingAt(blockPos)) {
-				int l = Math.min(j + random.nextInt(5) / 4, 15);
+			if (randomSource.nextInt(j + 10) < 5 && !level.isRainingAt(blockPos)) {
+				int l = Math.min(j + randomSource.nextInt(5) / 4, 15);
 				level.setBlock(blockPos, this.getStateWithAge(level, blockPos, l), 3);
 			} else {
 				level.removeBlock(blockPos, false);
@@ -302,8 +302,8 @@ public class FireBlock extends BaseFireBlock {
 		level.scheduleTick(blockPos, this, getFireTickDelay(level.random));
 	}
 
-	private static int getFireTickDelay(Random random) {
-		return 30 + random.nextInt(10);
+	private static int getFireTickDelay(RandomSource randomSource) {
+		return 30 + randomSource.nextInt(10);
 	}
 
 	@Override

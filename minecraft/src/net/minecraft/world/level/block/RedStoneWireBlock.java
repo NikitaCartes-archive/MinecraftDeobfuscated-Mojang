@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.math.Vector3f;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -13,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -435,11 +435,13 @@ public class RedStoneWireBlock extends Block {
 		return Mth.color((float)vec3.x(), (float)vec3.y(), (float)vec3.z());
 	}
 
-	private void spawnParticlesAlongLine(Level level, Random random, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g) {
+	private void spawnParticlesAlongLine(
+		Level level, RandomSource randomSource, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g
+	) {
 		float h = g - f;
-		if (!(random.nextFloat() >= 0.2F * h)) {
+		if (!(randomSource.nextFloat() >= 0.2F * h)) {
 			float i = 0.4375F;
-			float j = f + h * random.nextFloat();
+			float j = f + h * randomSource.nextFloat();
 			double d = 0.5 + (double)(0.4375F * (float)direction.getStepX()) + (double)(j * (float)direction2.getStepX());
 			double e = 0.5 + (double)(0.4375F * (float)direction.getStepY()) + (double)(j * (float)direction2.getStepY());
 			double k = 0.5 + (double)(0.4375F * (float)direction.getStepZ()) + (double)(j * (float)direction2.getStepZ());
@@ -450,20 +452,20 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		int i = (Integer)blockState.getValue(POWER);
 		if (i != 0) {
 			for (Direction direction : Direction.Plane.HORIZONTAL) {
 				RedstoneSide redstoneSide = blockState.getValue((Property<RedstoneSide>)PROPERTY_BY_DIRECTION.get(direction));
 				switch (redstoneSide) {
 					case UP:
-						this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], direction, Direction.UP, -0.5F, 0.5F);
+						this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], direction, Direction.UP, -0.5F, 0.5F);
 					case SIDE:
-						this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.5F);
+						this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.5F);
 						break;
 					case NONE:
 					default:
-						this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.3F);
+						this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.3F);
 				}
 			}
 		}

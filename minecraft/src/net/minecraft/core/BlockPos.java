@@ -4,7 +4,6 @@ import com.google.common.collect.AbstractIterator;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -12,6 +11,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
@@ -223,13 +223,13 @@ public class BlockPos extends Vec3i {
 		return new BlockPos.MutableBlockPos(this.getX(), this.getY(), this.getZ());
 	}
 
-	public static Iterable<BlockPos> randomInCube(Random random, int i, BlockPos blockPos, int j) {
+	public static Iterable<BlockPos> randomInCube(RandomSource randomSource, int i, BlockPos blockPos, int j) {
 		return randomBetweenClosed(
-			random, i, blockPos.getX() - j, blockPos.getY() - j, blockPos.getZ() - j, blockPos.getX() + j, blockPos.getY() + j, blockPos.getZ() + j
+			randomSource, i, blockPos.getX() - j, blockPos.getY() - j, blockPos.getZ() - j, blockPos.getX() + j, blockPos.getY() + j, blockPos.getZ() + j
 		);
 	}
 
-	public static Iterable<BlockPos> randomBetweenClosed(Random random, int i, int j, int k, int l, int m, int n, int o) {
+	public static Iterable<BlockPos> randomBetweenClosed(RandomSource randomSource, int i, int j, int k, int l, int m, int n, int o) {
 		int p = m - j + 1;
 		int q = n - k + 1;
 		int r = o - l + 1;
@@ -241,7 +241,7 @@ public class BlockPos extends Vec3i {
 					if (this.counter <= 0) {
 						return this.endOfData();
 					} else {
-						BlockPos blockPos = this.nextPos.set(j + random.nextInt(p), k + random.nextInt(q), l + random.nextInt(r));
+						BlockPos blockPos = this.nextPos.set(j + randomSource.nextInt(p), k + randomSource.nextInt(q), l + randomSource.nextInt(r));
 						this.counter--;
 						return blockPos;
 					}

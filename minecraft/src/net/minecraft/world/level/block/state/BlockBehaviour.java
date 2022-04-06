@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -22,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -307,12 +307,12 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		this.tick(blockState, serverLevel, blockPos, random);
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		this.tick(blockState, serverLevel, blockPos, randomSource);
 	}
 
 	@Deprecated
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 	}
 
 	@Deprecated
@@ -631,12 +631,12 @@ public abstract class BlockBehaviour {
 			this.getBlock().onRemove(this.asState(), level, blockPos, blockState, bl);
 		}
 
-		public void tick(ServerLevel serverLevel, BlockPos blockPos, Random random) {
-			this.getBlock().tick(this.asState(), serverLevel, blockPos, random);
+		public void tick(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+			this.getBlock().tick(this.asState(), serverLevel, blockPos, randomSource);
 		}
 
-		public void randomTick(ServerLevel serverLevel, BlockPos blockPos, Random random) {
-			this.getBlock().randomTick(this.asState(), serverLevel, blockPos, random);
+		public void randomTick(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+			this.getBlock().randomTick(this.asState(), serverLevel, blockPos, randomSource);
 		}
 
 		public void entityInside(Level level, BlockPos blockPos, Entity entity) {

@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,13 +23,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class ServerFunctionLibrary implements PreparableReloadListener {
@@ -84,14 +82,14 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 						CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null
 					);
 
-					for (Entry<ResourceLocation, ResourceThunk> entry : map.entrySet()) {
+					for (Entry<ResourceLocation, Resource> entry : map.entrySet()) {
 						ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
 						String string = resourceLocation.getPath();
 						ResourceLocation resourceLocation2 = new ResourceLocation(
 							resourceLocation.getNamespace(), string.substring(PATH_PREFIX_LENGTH, string.length() - PATH_SUFFIX_LENGTH)
 						);
 						map2.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
-							List<String> list = readLines((ResourceThunk)entry.getValue());
+							List<String> list = readLines((Resource)entry.getValue());
 							return CommandFunction.fromLines(resourceLocation2, this.dispatcher, commandSourceStack, list);
 						}, executor));
 					}
@@ -117,17 +115,17 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 		}, executor2);
 	}
 
-	private static List<String> readLines(ResourceThunk resourceThunk) {
+	private static List<String> readLines(Resource resource) {
 		try {
-			Resource resource = resourceThunk.open();
+			BufferedReader bufferedReader = resource.openAsReader();
 
 			List var2;
 			try {
-				var2 = IOUtils.readLines(resource.getInputStream(), StandardCharsets.UTF_8);
+				var2 = bufferedReader.lines().toList();
 			} catch (Throwable var5) {
-				if (resource != null) {
+				if (bufferedReader != null) {
 					try {
-						resource.close();
+						bufferedReader.close();
 					} catch (Throwable var4) {
 						var5.addSuppressed(var4);
 					}
@@ -136,8 +134,8 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 				throw var5;
 			}
 
-			if (resource != null) {
-				resource.close();
+			if (bufferedReader != null) {
+				bufferedReader.close();
 			}
 
 			return var2;

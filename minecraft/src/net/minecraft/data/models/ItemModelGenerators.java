@@ -30,6 +30,20 @@ public class ItemModelGenerators {
 		modelTemplate.create(ModelLocationUtils.getModelLocation(item), TextureMapping.layer0(item2), this.output);
 	}
 
+	private void generateCompassItem(Item item) {
+		for (int i = 0; i < 32; i++) {
+			if (i != 16) {
+				this.generateFlatItem(item, String.format("_%02d", i), ModelTemplates.FLAT_ITEM);
+			}
+		}
+	}
+
+	private void generateClockItem(Item item) {
+		for (int i = 1; i < 64; i++) {
+			this.generateFlatItem(item, String.format("_%02d", i), ModelTemplates.FLAT_ITEM);
+		}
+	}
+
 	public void run() {
 		this.generateFlatItem(Items.ACACIA_BOAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ACACIA_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
@@ -66,21 +80,12 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.CHICKEN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CHORUS_FRUIT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CLAY_BALL, ModelTemplates.FLAT_ITEM);
-
-		for (int i = 1; i < 64; i++) {
-			this.generateFlatItem(Items.CLOCK, String.format("_%02d", i), ModelTemplates.FLAT_ITEM);
-		}
-
+		this.generateClockItem(Items.CLOCK);
 		this.generateFlatItem(Items.COAL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COD_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COMMAND_BLOCK_MINECART, ModelTemplates.FLAT_ITEM);
-
-		for (int i = 0; i < 32; i++) {
-			if (i != 16) {
-				this.generateFlatItem(Items.COMPASS, String.format("_%02d", i), ModelTemplates.FLAT_ITEM);
-			}
-		}
-
+		this.generateCompassItem(Items.COMPASS);
+		this.generateCompassItem(Items.RECOVERY_COMPASS);
 		this.generateFlatItem(Items.COOKED_BEEF, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKED_CHICKEN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKED_COD, ModelTemplates.FLAT_ITEM);
@@ -251,6 +256,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SKULL_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SLIME_BALL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SNOWBALL, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ECHO_SHARD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SPECTRAL_ARROW, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SPIDER_EYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SPRUCE_BOAT, ModelTemplates.FLAT_ITEM);

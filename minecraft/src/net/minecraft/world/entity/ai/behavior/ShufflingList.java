@@ -8,12 +8,12 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
+import net.minecraft.util.RandomSource;
 
 public class ShufflingList<U> {
 	protected final List<ShufflingList.WeightedEntry<U>> entries;
-	private final Random random = new Random();
+	private final RandomSource random = RandomSource.create();
 
 	public ShufflingList() {
 		this.entries = Lists.<ShufflingList.WeightedEntry<U>>newArrayList();

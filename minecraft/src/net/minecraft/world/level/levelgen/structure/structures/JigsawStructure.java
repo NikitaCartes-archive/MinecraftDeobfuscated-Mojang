@@ -20,7 +20,7 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public final class JigsawStructure extends Structure {
 	public static final int MAX_TOTAL_STRUCTURE_RANGE = 128;
-	public static final Codec<JigsawStructure> CODEC = RecordCodecBuilder.create(
+	public static final Codec<JigsawStructure> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						settingsCodec(instance),
 						StructureTemplatePool.CODEC.fieldOf("start_pool").forGetter(jigsawStructure -> jigsawStructure.startPool),
@@ -32,7 +32,8 @@ public final class JigsawStructure extends Structure {
 					)
 					.apply(instance, JigsawStructure::new)
 		)
-		.flatXmap(verifyRange(), verifyRange());
+		.<JigsawStructure>flatXmap(verifyRange(), verifyRange())
+		.codec();
 	private final Holder<StructureTemplatePool> startPool;
 	private final int maxDepth;
 	private final HeightProvider startHeight;

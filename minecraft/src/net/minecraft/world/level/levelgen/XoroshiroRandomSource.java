@@ -6,6 +6,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public class XoroshiroRandomSource implements RandomSource {
 	private static final float FLOAT_UNIT = 5.9604645E-8F;

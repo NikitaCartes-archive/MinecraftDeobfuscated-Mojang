@@ -12,7 +12,6 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -31,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringDecomposer;
 
 @Environment(EnvType.CLIENT)
@@ -39,7 +39,7 @@ public class Font {
 	private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.03F);
 	public static final int ALPHA_CUTOFF = 8;
 	public final int lineHeight = 9;
-	public final Random random = new Random();
+	public final RandomSource random = RandomSource.create();
 	private final Function<ResourceLocation, FontSet> fonts;
 	private final StringSplitter splitter;
 

@@ -2,10 +2,10 @@ package net.minecraft.world.level.block;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,12 +32,12 @@ public class MultifaceSpreader {
 	}
 
 	public Optional<MultifaceSpreader.SpreadPos> spreadFromRandomFaceTowardRandomDirection(
-		BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Random random
+		BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource
 	) {
-		return (Optional<MultifaceSpreader.SpreadPos>)Direction.allShuffled(random)
+		return (Optional<MultifaceSpreader.SpreadPos>)Direction.allShuffled(randomSource)
 			.stream()
 			.filter(direction -> this.config.canSpreadFrom(blockState, direction))
-			.map(direction -> this.spreadFromFaceTowardRandomDirection(blockState, levelAccessor, blockPos, direction, random, false))
+			.map(direction -> this.spreadFromFaceTowardRandomDirection(blockState, levelAccessor, blockPos, direction, randomSource, false))
 			.filter(Optional::isPresent)
 			.findFirst()
 			.orElse(Optional.empty());
@@ -51,9 +51,9 @@ public class MultifaceSpreader {
 	}
 
 	public Optional<MultifaceSpreader.SpreadPos> spreadFromFaceTowardRandomDirection(
-		BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, Random random, boolean bl
+		BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, Direction direction, RandomSource randomSource, boolean bl
 	) {
-		return (Optional<MultifaceSpreader.SpreadPos>)Direction.allShuffled(random)
+		return (Optional<MultifaceSpreader.SpreadPos>)Direction.allShuffled(randomSource)
 			.stream()
 			.map(direction2 -> this.spreadFromFaceTowardDirection(blockState, levelAccessor, blockPos, direction, direction2, bl))
 			.filter(Optional::isPresent)

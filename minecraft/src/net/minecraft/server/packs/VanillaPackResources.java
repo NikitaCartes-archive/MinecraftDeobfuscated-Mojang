@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -37,7 +37,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.slf4j.Logger;
 
-public class VanillaPackResources implements PackResources, ResourceProvider {
+public class VanillaPackResources implements PackResources {
 	@Nullable
 	public static Path generatedDir;
 	private static final Logger LOGGER = LogUtils.getLogger();
@@ -301,49 +301,7 @@ public class VanillaPackResources implements PackResources, ResourceProvider {
 	public void close() {
 	}
 
-	@Override
-	public Resource getResource(ResourceLocation resourceLocation) throws IOException {
-		return new Resource() {
-			@Nullable
-			InputStream inputStream;
-
-			public void close() throws IOException {
-				if (this.inputStream != null) {
-					this.inputStream.close();
-				}
-			}
-
-			@Override
-			public ResourceLocation getLocation() {
-				return resourceLocation;
-			}
-
-			@Override
-			public InputStream getInputStream() {
-				try {
-					this.inputStream = VanillaPackResources.this.getResource(PackType.CLIENT_RESOURCES, resourceLocation);
-				} catch (IOException var2) {
-					throw new UncheckedIOException("Could not get client resource from vanilla pack", var2);
-				}
-
-				return this.inputStream;
-			}
-
-			@Override
-			public boolean hasMetadata() {
-				return false;
-			}
-
-			@Nullable
-			@Override
-			public <T> T getMetadata(MetadataSectionSerializer<T> metadataSectionSerializer) {
-				return null;
-			}
-
-			@Override
-			public String getSourceName() {
-				return VanillaPackResources.this.getName();
-			}
-		};
+	public ResourceProvider asProvider() {
+		return resourceLocation -> Optional.of(new Resource(this.getName(), () -> this.getResource(PackType.CLIENT_RESOURCES, resourceLocation)));
 	}
 }

@@ -2,8 +2,8 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -24,8 +24,8 @@ public class RandomBlockMatchTest extends RuleTest {
 	}
 
 	@Override
-	public boolean test(BlockState blockState, Random random) {
-		return blockState.is(this.block) && random.nextFloat() < this.probability;
+	public boolean test(BlockState blockState, RandomSource randomSource) {
+		return blockState.is(this.block) && randomSource.nextFloat() < this.probability;
 	}
 
 	@Override

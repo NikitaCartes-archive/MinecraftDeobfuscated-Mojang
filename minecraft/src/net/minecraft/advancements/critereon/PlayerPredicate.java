@@ -3,7 +3,6 @@ package net.minecraft.advancements.critereon;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
@@ -20,6 +19,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.stats.Stat;
@@ -34,8 +34,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class PlayerPredicate {
-	public static final PlayerPredicate ANY = new PlayerPredicate.Builder().build();
+public class PlayerPredicate implements EntitySubPredicate {
 	public static final int LOOKING_AT_RANGE = 100;
 	private final MinMaxBounds.Ints level;
 	@Nullable
@@ -76,10 +75,9 @@ public class PlayerPredicate {
 		this.lookingAt = entityPredicate;
 	}
 
-	public boolean matches(Entity entity) {
-		if (this == ANY) {
-			return true;
-		} else if (!(entity instanceof ServerPlayer serverPlayer)) {
+	@Override
+	public boolean matches(Entity entity, ServerLevel serverLevel, @Nullable Vec3 vec3) {
+		if (!(entity instanceof ServerPlayer serverPlayer)) {
 			return false;
 		} else if (!this.level.matches(serverPlayer.experienceLevel)) {
 			return false;
@@ -116,11 +114,11 @@ public class PlayerPredicate {
 			}
 
 			if (this.lookingAt != EntityPredicate.ANY) {
-				Vec3 vec3 = serverPlayer.getEyePosition();
-				Vec3 vec32 = serverPlayer.getViewVector(1.0F);
-				Vec3 vec33 = vec3.add(vec32.x * 100.0, vec32.y * 100.0, vec32.z * 100.0);
+				Vec3 vec32 = serverPlayer.getEyePosition();
+				Vec3 vec33 = serverPlayer.getViewVector(1.0F);
+				Vec3 vec34 = vec32.add(vec33.x * 100.0, vec33.y * 100.0, vec33.z * 100.0);
 				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(
-					serverPlayer.level, serverPlayer, vec3, vec33, new AABB(vec3, vec33).inflate(1.0), entityx -> !entityx.isSpectator(), 0.0F
+					serverPlayer.level, serverPlayer, vec32, vec34, new AABB(vec32, vec34).inflate(1.0), entityx -> !entityx.isSpectator(), 0.0F
 				);
 				if (entityHitResult == null || entityHitResult.getType() != HitResult.Type.ENTITY) {
 					return false;
@@ -136,53 +134,48 @@ public class PlayerPredicate {
 		}
 	}
 
-	public static PlayerPredicate fromJson(@Nullable JsonElement jsonElement) {
-		if (jsonElement != null && !jsonElement.isJsonNull()) {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "player");
-			MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("level"));
-			String string = GsonHelper.getAsString(jsonObject, "gamemode", "");
-			GameType gameType = GameType.byName(string, null);
-			Map<Stat<?>, MinMaxBounds.Ints> map = Maps.<Stat<?>, MinMaxBounds.Ints>newHashMap();
-			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "stats", null);
-			if (jsonArray != null) {
-				for (JsonElement jsonElement2 : jsonArray) {
-					JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement2, "stats entry");
-					ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject2, "type"));
-					StatType<?> statType = Registry.STAT_TYPE.get(resourceLocation);
-					if (statType == null) {
-						throw new JsonParseException("Invalid stat type: " + resourceLocation);
-					}
-
-					ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject2, "stat"));
-					Stat<?> stat = getStat(statType, resourceLocation2);
-					MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject2.get("value"));
-					map.put(stat, ints2);
+	public static PlayerPredicate fromJson(JsonObject jsonObject) {
+		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("level"));
+		String string = GsonHelper.getAsString(jsonObject, "gamemode", "");
+		GameType gameType = GameType.byName(string, null);
+		Map<Stat<?>, MinMaxBounds.Ints> map = Maps.<Stat<?>, MinMaxBounds.Ints>newHashMap();
+		JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "stats", null);
+		if (jsonArray != null) {
+			for (JsonElement jsonElement : jsonArray) {
+				JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement, "stats entry");
+				ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject2, "type"));
+				StatType<?> statType = Registry.STAT_TYPE.get(resourceLocation);
+				if (statType == null) {
+					throw new JsonParseException("Invalid stat type: " + resourceLocation);
 				}
+
+				ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject2, "stat"));
+				Stat<?> stat = getStat(statType, resourceLocation2);
+				MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject2.get("value"));
+				map.put(stat, ints2);
 			}
-
-			Object2BooleanMap<ResourceLocation> object2BooleanMap = new Object2BooleanOpenHashMap<>();
-			JsonObject jsonObject3 = GsonHelper.getAsJsonObject(jsonObject, "recipes", new JsonObject());
-
-			for (Entry<String, JsonElement> entry : jsonObject3.entrySet()) {
-				ResourceLocation resourceLocation3 = new ResourceLocation((String)entry.getKey());
-				boolean bl = GsonHelper.convertToBoolean((JsonElement)entry.getValue(), "recipe present");
-				object2BooleanMap.put(resourceLocation3, bl);
-			}
-
-			Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> map2 = Maps.<ResourceLocation, PlayerPredicate.AdvancementPredicate>newHashMap();
-			JsonObject jsonObject4 = GsonHelper.getAsJsonObject(jsonObject, "advancements", new JsonObject());
-
-			for (Entry<String, JsonElement> entry2 : jsonObject4.entrySet()) {
-				ResourceLocation resourceLocation4 = new ResourceLocation((String)entry2.getKey());
-				PlayerPredicate.AdvancementPredicate advancementPredicate = advancementPredicateFromJson((JsonElement)entry2.getValue());
-				map2.put(resourceLocation4, advancementPredicate);
-			}
-
-			EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("looking_at"));
-			return new PlayerPredicate(ints, gameType, map, object2BooleanMap, map2, entityPredicate);
-		} else {
-			return ANY;
 		}
+
+		Object2BooleanMap<ResourceLocation> object2BooleanMap = new Object2BooleanOpenHashMap<>();
+		JsonObject jsonObject3 = GsonHelper.getAsJsonObject(jsonObject, "recipes", new JsonObject());
+
+		for (Entry<String, JsonElement> entry : jsonObject3.entrySet()) {
+			ResourceLocation resourceLocation3 = new ResourceLocation((String)entry.getKey());
+			boolean bl = GsonHelper.convertToBoolean((JsonElement)entry.getValue(), "recipe present");
+			object2BooleanMap.put(resourceLocation3, bl);
+		}
+
+		Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> map2 = Maps.<ResourceLocation, PlayerPredicate.AdvancementPredicate>newHashMap();
+		JsonObject jsonObject4 = GsonHelper.getAsJsonObject(jsonObject, "advancements", new JsonObject());
+
+		for (Entry<String, JsonElement> entry2 : jsonObject4.entrySet()) {
+			ResourceLocation resourceLocation4 = new ResourceLocation((String)entry2.getKey());
+			PlayerPredicate.AdvancementPredicate advancementPredicate = advancementPredicateFromJson((JsonElement)entry2.getValue());
+			map2.put(resourceLocation4, advancementPredicate);
+		}
+
+		EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("looking_at"));
+		return new PlayerPredicate(ints, gameType, map, object2BooleanMap, map2, entityPredicate);
 	}
 
 	private static <T> Stat<T> getStat(StatType<T> statType, ResourceLocation resourceLocation) {
@@ -199,43 +192,45 @@ public class PlayerPredicate {
 		return stat.getType().getRegistry().getKey(stat.getValue());
 	}
 
-	public JsonElement serializeToJson() {
-		if (this == ANY) {
-			return JsonNull.INSTANCE;
-		} else {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("level", this.level.serializeToJson());
-			if (this.gameType != null) {
-				jsonObject.addProperty("gamemode", this.gameType.getName());
-			}
-
-			if (!this.stats.isEmpty()) {
-				JsonArray jsonArray = new JsonArray();
-				this.stats.forEach((stat, ints) -> {
-					JsonObject jsonObjectx = new JsonObject();
-					jsonObjectx.addProperty("type", Registry.STAT_TYPE.getKey(stat.getType()).toString());
-					jsonObjectx.addProperty("stat", getStatValueId(stat).toString());
-					jsonObjectx.add("value", ints.serializeToJson());
-					jsonArray.add(jsonObjectx);
-				});
-				jsonObject.add("stats", jsonArray);
-			}
-
-			if (!this.recipes.isEmpty()) {
-				JsonObject jsonObject2 = new JsonObject();
-				this.recipes.forEach((resourceLocation, boolean_) -> jsonObject2.addProperty(resourceLocation.toString(), boolean_));
-				jsonObject.add("recipes", jsonObject2);
-			}
-
-			if (!this.advancements.isEmpty()) {
-				JsonObject jsonObject2 = new JsonObject();
-				this.advancements.forEach((resourceLocation, advancementPredicate) -> jsonObject2.add(resourceLocation.toString(), advancementPredicate.toJson()));
-				jsonObject.add("advancements", jsonObject2);
-			}
-
-			jsonObject.add("looking_at", this.lookingAt.serializeToJson());
-			return jsonObject;
+	@Override
+	public JsonObject serializeCustomData() {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.add("level", this.level.serializeToJson());
+		if (this.gameType != null) {
+			jsonObject.addProperty("gamemode", this.gameType.getName());
 		}
+
+		if (!this.stats.isEmpty()) {
+			JsonArray jsonArray = new JsonArray();
+			this.stats.forEach((stat, ints) -> {
+				JsonObject jsonObjectx = new JsonObject();
+				jsonObjectx.addProperty("type", Registry.STAT_TYPE.getKey(stat.getType()).toString());
+				jsonObjectx.addProperty("stat", getStatValueId(stat).toString());
+				jsonObjectx.add("value", ints.serializeToJson());
+				jsonArray.add(jsonObjectx);
+			});
+			jsonObject.add("stats", jsonArray);
+		}
+
+		if (!this.recipes.isEmpty()) {
+			JsonObject jsonObject2 = new JsonObject();
+			this.recipes.forEach((resourceLocation, boolean_) -> jsonObject2.addProperty(resourceLocation.toString(), boolean_));
+			jsonObject.add("recipes", jsonObject2);
+		}
+
+		if (!this.advancements.isEmpty()) {
+			JsonObject jsonObject2 = new JsonObject();
+			this.advancements.forEach((resourceLocation, advancementPredicate) -> jsonObject2.add(resourceLocation.toString(), advancementPredicate.toJson()));
+			jsonObject.add("advancements", jsonObject2);
+		}
+
+		jsonObject.add("looking_at", this.lookingAt.serializeToJson());
+		return jsonObject;
+	}
+
+	@Override
+	public EntitySubPredicate.Type type() {
+		return EntitySubPredicate.Types.PLAYER;
 	}
 
 	static class AdvancementCriterionsPredicate implements PlayerPredicate.AdvancementPredicate {

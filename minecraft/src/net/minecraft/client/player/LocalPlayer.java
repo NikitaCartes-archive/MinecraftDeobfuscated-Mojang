@@ -1100,4 +1100,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 	public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
 		this.minecraft.getTutorial().onInventoryAction(itemStack, itemStack2, clickAction);
 	}
+
+	@Override
+	public float getVisualRotationYInDegrees() {
+		return this.getYRot();
+	}
 }

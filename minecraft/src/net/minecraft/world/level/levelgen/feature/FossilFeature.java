@@ -1,10 +1,10 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -25,12 +25,12 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 
 	@Override
 	public boolean place(FeaturePlaceContext<FossilFeatureConfiguration> featurePlaceContext) {
-		Random random = featurePlaceContext.random();
+		RandomSource randomSource = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
-		Rotation rotation = Rotation.getRandom(random);
+		Rotation rotation = Rotation.getRandom(randomSource);
 		FossilFeatureConfiguration fossilFeatureConfiguration = featurePlaceContext.config();
-		int i = random.nextInt(fossilFeatureConfiguration.fossilStructures.size());
+		int i = randomSource.nextInt(fossilFeatureConfiguration.fossilStructures.size());
 		StructureTemplateManager structureTemplateManager = worldGenLevel.getLevel().getServer().getStructureManager();
 		StructureTemplate structureTemplate = structureTemplateManager.getOrCreate((ResourceLocation)fossilFeatureConfiguration.fossilStructures.get(i));
 		StructureTemplate structureTemplate2 = structureTemplateManager.getOrCreate((ResourceLocation)fossilFeatureConfiguration.overlayStructures.get(i));
@@ -43,7 +43,7 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 			worldGenLevel.getMaxBuildHeight(),
 			chunkPos.getMaxBlockZ() + 16
 		);
-		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(random);
+		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(randomSource);
 		Vec3i vec3i = structureTemplate.getSize(rotation);
 		BlockPos blockPos2 = blockPos.offset(-vec3i.getX() / 2, 0, -vec3i.getZ() / 2);
 		int j = blockPos.getY();
@@ -54,7 +54,7 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 			}
 		}
 
-		int k = Math.max(j - 15 - random.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
+		int k = Math.max(j - 15 - randomSource.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
 		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos2.atY(k), Mirror.NONE, rotation);
 		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos3)) > fossilFeatureConfiguration.maxEmptyCornersAllowed
 			)
@@ -63,10 +63,10 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 		} else {
 			structurePlaceSettings.clearProcessors();
 			fossilFeatureConfiguration.fossilProcessors.value().list().forEach(structurePlaceSettings::addProcessor);
-			structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
+			structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, randomSource, 4);
 			structurePlaceSettings.clearProcessors();
 			fossilFeatureConfiguration.overlayProcessors.value().list().forEach(structurePlaceSettings::addProcessor);
-			structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
+			structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, randomSource, 4);
 			return true;
 		}
 	}

@@ -142,7 +142,7 @@ public abstract class Projectile extends Entity {
 		}
 
 		if (type != HitResult.Type.MISS) {
-			this.gameEvent(GameEvent.PROJECTILE_LAND, this);
+			this.level.gameEvent(this, GameEvent.PROJECTILE_LAND, hitResult.getLocation());
 		}
 	}
 

@@ -2,11 +2,11 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,13 +23,13 @@ public class WaterloggedVegetationPatchFeature extends VegetationPatchFeature {
 	protected Set<BlockPos> placeGroundPatch(
 		WorldGenLevel worldGenLevel,
 		VegetationPatchConfiguration vegetationPatchConfiguration,
-		Random random,
+		RandomSource randomSource,
 		BlockPos blockPos,
 		Predicate<BlockState> predicate,
 		int i,
 		int j
 	) {
-		Set<BlockPos> set = super.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, random, blockPos, predicate, i, j);
+		Set<BlockPos> set = super.placeGroundPatch(worldGenLevel, vegetationPatchConfiguration, randomSource, blockPos, predicate, i, j);
 		Set<BlockPos> set2 = new HashSet();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
@@ -61,9 +61,13 @@ public class WaterloggedVegetationPatchFeature extends VegetationPatchFeature {
 
 	@Override
 	protected boolean placeVegetation(
-		WorldGenLevel worldGenLevel, VegetationPatchConfiguration vegetationPatchConfiguration, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos
+		WorldGenLevel worldGenLevel,
+		VegetationPatchConfiguration vegetationPatchConfiguration,
+		ChunkGenerator chunkGenerator,
+		RandomSource randomSource,
+		BlockPos blockPos
 	) {
-		if (super.placeVegetation(worldGenLevel, vegetationPatchConfiguration, chunkGenerator, random, blockPos.below())) {
+		if (super.placeVegetation(worldGenLevel, vegetationPatchConfiguration, chunkGenerator, randomSource, blockPos.below())) {
 			BlockState blockState = worldGenLevel.getBlockState(blockPos);
 			if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && !(Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
 				worldGenLevel.setBlock(blockPos, blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true)), 2);

@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen.feature.stateproviders;
 
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SimpleStateProvider extends BlockStateProvider {
@@ -22,7 +22,7 @@ public class SimpleStateProvider extends BlockStateProvider {
 	}
 
 	@Override
-	public BlockState getState(Random random, BlockPos blockPos) {
+	public BlockState getState(RandomSource randomSource, BlockPos blockPos) {
 		return this.state;
 	}
 }

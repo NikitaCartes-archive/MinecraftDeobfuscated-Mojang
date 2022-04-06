@@ -2,10 +2,10 @@ package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,7 +17,12 @@ public abstract class TreeDecorator {
 	protected abstract TreeDecoratorType<?> type();
 
 	public abstract void place(
-		LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, Random random, List<BlockPos> list, List<BlockPos> list2
+		LevelSimulatedReader levelSimulatedReader,
+		BiConsumer<BlockPos, BlockState> biConsumer,
+		RandomSource randomSource,
+		List<BlockPos> list,
+		List<BlockPos> list2,
+		List<BlockPos> list3
 	);
 
 	protected static void placeVine(BiConsumer<BlockPos, BlockState> biConsumer, BlockPos blockPos, BooleanProperty booleanProperty) {

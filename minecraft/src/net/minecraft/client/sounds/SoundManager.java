@@ -6,10 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +29,18 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceThunk;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.valueproviders.ConstantFloat;
+import net.minecraft.util.valueproviders.MultipliedFloats;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SoundManager extends SimplePreparableReloadListener<SoundManager.Preparations> {
-	public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", 1.0F, 1.0F, 1, Sound.Type.FILE, false, false, 16);
+	public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String SOUNDS_PATH = "sounds.json";
 	private static final Gson GSON = new GsonBuilder()
@@ -65,76 +64,44 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 			profilerFiller.push(string);
 
 			try {
-				for (ResourceThunk resourceThunk : resourceManager.getResourceStack(new ResourceLocation(string, "sounds.json"))) {
-					profilerFiller.push(resourceThunk.sourcePackId());
+				for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(string, "sounds.json"))) {
+					profilerFiller.push(resource.sourcePackId());
 
 					try {
-						Resource resource = resourceThunk.open();
+						Reader reader = resource.openAsReader();
 
 						try {
-							InputStream inputStream = resource.getInputStream();
+							profilerFiller.push("parse");
+							Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, reader, SOUND_EVENT_REGISTRATION_TYPE);
+							profilerFiller.popPush("register");
 
-							try {
-								Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+							for (Entry<String, SoundEventRegistration> entry : map.entrySet()) {
+								preparations.handleRegistration(new ResourceLocation(string, (String)entry.getKey()), (SoundEventRegistration)entry.getValue(), resourceManager);
+							}
 
+							profilerFiller.pop();
+						} catch (Throwable var14) {
+							if (reader != null) {
 								try {
-									profilerFiller.push("parse");
-									Map<String, SoundEventRegistration> map = GsonHelper.fromJson(GSON, reader, SOUND_EVENT_REGISTRATION_TYPE);
-									profilerFiller.popPush("register");
-
-									for (Entry<String, SoundEventRegistration> entry : map.entrySet()) {
-										preparations.handleRegistration(new ResourceLocation(string, (String)entry.getKey()), (SoundEventRegistration)entry.getValue(), resourceManager);
-									}
-
-									profilerFiller.pop();
-								} catch (Throwable var18) {
-									try {
-										reader.close();
-									} catch (Throwable var17) {
-										var18.addSuppressed(var17);
-									}
-
-									throw var18;
-								}
-
-								reader.close();
-							} catch (Throwable var19) {
-								if (inputStream != null) {
-									try {
-										inputStream.close();
-									} catch (Throwable var16) {
-										var19.addSuppressed(var16);
-									}
-								}
-
-								throw var19;
-							}
-
-							if (inputStream != null) {
-								inputStream.close();
-							}
-						} catch (Throwable var20) {
-							if (resource != null) {
-								try {
-									resource.close();
-								} catch (Throwable var15) {
-									var20.addSuppressed(var15);
+									reader.close();
+								} catch (Throwable var13) {
+									var14.addSuppressed(var13);
 								}
 							}
 
-							throw var20;
+							throw var14;
 						}
 
-						if (resource != null) {
-							resource.close();
+						if (reader != null) {
+							reader.close();
 						}
-					} catch (RuntimeException var21) {
-						LOGGER.warn("Invalid {} in resourcepack: '{}'", "sounds.json", resourceThunk.sourcePackId(), var21);
+					} catch (RuntimeException var15) {
+						LOGGER.warn("Invalid {} in resourcepack: '{}'", "sounds.json", resource.sourcePackId(), var15);
 					}
 
 					profilerFiller.pop();
 				}
-			} catch (IOException var22) {
+			} catch (IOException var16) {
 			}
 
 			profilerFiller.pop();
@@ -175,7 +142,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 
 	static boolean validateSoundResource(Sound sound, ResourceLocation resourceLocation, ResourceManager resourceManager) {
 		ResourceLocation resourceLocation2 = sound.getPath();
-		if (!resourceManager.hasResource(resourceLocation2)) {
+		if (resourceManager.getResource(resourceLocation2).isEmpty()) {
 			LOGGER.warn("File {} does not exist, cannot add it to event {}", resourceLocation2, resourceLocation);
 			return false;
 		} else {
@@ -299,16 +266,16 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 								return weighedSoundEvents == null ? 0 : weighedSoundEvents.getWeight();
 							}
 
-							public Sound getSound() {
+							public Sound getSound(RandomSource randomSource) {
 								WeighedSoundEvents weighedSoundEvents = (WeighedSoundEvents)Preparations.this.registry.get(resourceLocation2);
 								if (weighedSoundEvents == null) {
 									return SoundManager.EMPTY_SOUND;
 								} else {
-									Sound sound = weighedSoundEvents.getSound();
+									Sound sound = weighedSoundEvents.getSound(randomSource);
 									return new Sound(
 										sound.getLocation().toString(),
-										sound.getVolume() * sound.getVolume(),
-										sound.getPitch() * sound.getPitch(),
+										new MultipliedFloats(sound.getVolume(), sound.getVolume()),
+										new MultipliedFloats(sound.getPitch(), sound.getPitch()),
 										sound.getWeight(),
 										Sound.Type.FILE,
 										sound.shouldStream() || sound.shouldStream(),

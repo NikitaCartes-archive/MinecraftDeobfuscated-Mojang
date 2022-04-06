@@ -6,19 +6,21 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 
 public enum AngerLevel {
-	CALM(0, SoundEvents.WARDEN_AMBIENT),
-	AGITATED(40, SoundEvents.WARDEN_AGITATED),
-	ANGRY(80, SoundEvents.WARDEN_ANGRY);
+	CALM(0, SoundEvents.WARDEN_AMBIENT, SoundEvents.WARDEN_LISTENING),
+	AGITATED(40, SoundEvents.WARDEN_AGITATED, SoundEvents.WARDEN_LISTENING_ANGRY),
+	ANGRY(80, SoundEvents.WARDEN_ANGRY, SoundEvents.WARDEN_LISTENING_ANGRY);
 
 	private static final AngerLevel[] SORTED_LEVELS = Util.make(
 		values(), angerLevels -> Arrays.sort(angerLevels, (angerLevel, angerLevel2) -> Integer.compare(angerLevel2.minimumAnger, angerLevel.minimumAnger))
 	);
 	private final int minimumAnger;
 	private final SoundEvent ambientSound;
+	private final SoundEvent listeningSound;
 
-	private AngerLevel(int j, SoundEvent soundEvent) {
+	private AngerLevel(int j, SoundEvent soundEvent, SoundEvent soundEvent2) {
 		this.minimumAnger = j;
 		this.ambientSound = soundEvent;
+		this.listeningSound = soundEvent2;
 	}
 
 	public int getMinimumAnger() {
@@ -27,6 +29,10 @@ public enum AngerLevel {
 
 	public SoundEvent getAmbientSound() {
 		return this.ambientSound;
+	}
+
+	public SoundEvent getListeningSound() {
+		return this.listeningSound;
 	}
 
 	public static AngerLevel byAnger(int i) {

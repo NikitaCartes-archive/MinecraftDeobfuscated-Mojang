@@ -3,11 +3,10 @@ package net.minecraft.util.valueproviders;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
 
-public abstract class FloatProvider {
+public abstract class FloatProvider implements SampledFloat {
 	private static final Codec<Either<Float, FloatProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(
 		Codec.FLOAT, Registry.FLOAT_PROVIDER_TYPES.byNameCodec().dispatch(FloatProvider::getType, FloatProviderType::codec)
 	);
@@ -28,8 +27,6 @@ public abstract class FloatProvider {
 		};
 		return CODEC.flatXmap(function, function);
 	}
-
-	public abstract float sample(Random random);
 
 	public abstract float getMinValue();
 

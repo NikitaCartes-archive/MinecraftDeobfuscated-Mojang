@@ -2,7 +2,6 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
@@ -10,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.WorldGenLevel;
@@ -91,7 +91,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	);
 	public static final Feature<RootSystemConfiguration> ROOT_SYSTEM = register("root_system", new RootSystemFeature(RootSystemConfiguration.CODEC));
 	public static final Feature<MultifaceGrowthConfiguration> MULTIFACE_GROWTH = register(
-		"glow_lichen", new MultifaceGrowthFeature(MultifaceGrowthConfiguration.CODEC)
+		"multiface_growth", new MultifaceGrowthFeature(MultifaceGrowthConfiguration.CODEC)
 	);
 	public static final Feature<UnderwaterMagmaConfiguration> UNDERWATER_MAGMA = register(
 		"underwater_magma", new UnderwaterMagmaFeature(UnderwaterMagmaConfiguration.CODEC)
@@ -101,6 +101,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<BlockStateConfiguration> ICEBERG = register("iceberg", new IcebergFeature(BlockStateConfiguration.CODEC));
 	public static final Feature<BlockStateConfiguration> FOREST_ROCK = register("forest_rock", new BlockBlobFeature(BlockStateConfiguration.CODEC));
 	public static final Feature<DiskConfiguration> DISK = register("disk", new DiskReplaceFeature(DiskConfiguration.CODEC));
+	public static final Feature<DiskConfiguration> SURFACE_DISK = register("surface_disk", new SurfaceDiskFeature(DiskConfiguration.CODEC));
 	public static final Feature<DiskConfiguration> ICE_PATCH = register("ice_patch", new IcePatchFeature(DiskConfiguration.CODEC));
 	public static final Feature<LakeFeature.Configuration> LAKE = register("lake", new LakeFeature(LakeFeature.Configuration.CODEC));
 	public static final Feature<OreConfiguration> ORE = register("ore", new OreFeature(OreConfiguration.CODEC));
@@ -182,9 +183,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 
 	public abstract boolean place(FeaturePlaceContext<FC> featurePlaceContext);
 
-	public boolean place(FC featureConfiguration, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
+	public boolean place(FC featureConfiguration, WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos) {
 		return worldGenLevel.ensureCanWrite(blockPos)
-			? this.place(new FeaturePlaceContext<>(Optional.empty(), worldGenLevel, chunkGenerator, random, blockPos, featureConfiguration))
+			? this.place(new FeaturePlaceContext<>(Optional.empty(), worldGenLevel, chunkGenerator, randomSource, blockPos, featureConfiguration))
 			: false;
 	}
 

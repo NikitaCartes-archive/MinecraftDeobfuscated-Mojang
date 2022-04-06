@@ -5,19 +5,19 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +45,7 @@ public class Explosion {
 	private static final int MAX_DROPS_PER_COMBINED_STACK = 16;
 	private final boolean fire;
 	private final Explosion.BlockInteraction blockInteraction;
-	private final Random random = new Random();
+	private final RandomSource random = RandomSource.create();
 	private final Level level;
 	private final double x;
 	private final double y;
@@ -256,7 +256,7 @@ public class Explosion {
 
 		if (bl2) {
 			ObjectArrayList<Pair<ItemStack, BlockPos>> objectArrayList = new ObjectArrayList<>();
-			Collections.shuffle(this.toBlow, this.level.random);
+			Util.shuffle(this.toBlow, this.level.random);
 
 			for (BlockPos blockPos : this.toBlow) {
 				BlockState blockState = this.level.getBlockState(blockPos);

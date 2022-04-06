@@ -3,10 +3,10 @@ package net.minecraft.world.level.levelgen.structure.pools;
 import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
@@ -30,7 +30,7 @@ public class EmptyPoolElement extends StructurePoolElement {
 
 	@Override
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
-		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, Random random
+		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource
 	) {
 		return Collections.emptyList();
 	}
@@ -50,7 +50,7 @@ public class EmptyPoolElement extends StructurePoolElement {
 		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
-		Random random,
+		RandomSource randomSource,
 		boolean bl
 	) {
 		return true;

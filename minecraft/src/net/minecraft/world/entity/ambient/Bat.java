@@ -2,7 +2,6 @@ package net.minecraft.world.entity.ambient;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +11,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -216,7 +216,9 @@ public class Bat extends AmbientCreature {
 		compoundTag.putByte("BatFlags", this.entityData.get(DATA_ID_FLAGS));
 	}
 
-	public static boolean checkBatSpawnRules(EntityType<Bat> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+	public static boolean checkBatSpawnRules(
+		EntityType<Bat> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+	) {
 		if (blockPos.getY() >= levelAccessor.getSeaLevel()) {
 			return false;
 		} else {
@@ -224,11 +226,11 @@ public class Bat extends AmbientCreature {
 			int j = 4;
 			if (isHalloween()) {
 				j = 7;
-			} else if (random.nextBoolean()) {
+			} else if (randomSource.nextBoolean()) {
 				return false;
 			}
 
-			return i > random.nextInt(j) ? false : checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+			return i > randomSource.nextInt(j) ? false : checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
 		}
 	}
 

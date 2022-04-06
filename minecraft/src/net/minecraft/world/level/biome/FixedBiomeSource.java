@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 
 public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseBiomeSource {
@@ -43,12 +43,12 @@ public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseB
 	@Nullable
 	@Override
 	public Pair<BlockPos, Holder<Biome>> findBiomeHorizontal(
-		int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, Random random, boolean bl, Climate.Sampler sampler
+		int i, int j, int k, int l, int m, Predicate<Holder<Biome>> predicate, RandomSource randomSource, boolean bl, Climate.Sampler sampler
 	) {
 		if (predicate.test(this.biome)) {
 			return bl
 				? Pair.of(new BlockPos(i, j, k), this.biome)
-				: Pair.of(new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1)), this.biome);
+				: Pair.of(new BlockPos(i - l + randomSource.nextInt(l * 2 + 1), j, k - l + randomSource.nextInt(l * 2 + 1)), this.biome);
 		} else {
 			return null;
 		}

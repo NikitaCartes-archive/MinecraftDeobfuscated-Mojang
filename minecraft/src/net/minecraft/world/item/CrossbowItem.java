@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -19,6 +18,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -280,14 +280,14 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 		onCrossbowShot(level, livingEntity, itemStack);
 	}
 
-	private static float[] getShotPitches(Random random) {
-		boolean bl = random.nextBoolean();
-		return new float[]{1.0F, getRandomShotPitch(bl, random), getRandomShotPitch(!bl, random)};
+	private static float[] getShotPitches(RandomSource randomSource) {
+		boolean bl = randomSource.nextBoolean();
+		return new float[]{1.0F, getRandomShotPitch(bl, randomSource), getRandomShotPitch(!bl, randomSource)};
 	}
 
-	private static float getRandomShotPitch(boolean bl, Random random) {
+	private static float getRandomShotPitch(boolean bl, RandomSource randomSource) {
 		float f = bl ? 0.63F : 0.43F;
-		return 1.0F / (random.nextFloat() * 0.5F + 1.8F) + f;
+		return 1.0F / (randomSource.nextFloat() * 0.5F + 1.8F) + f;
 	}
 
 	private static void onCrossbowShot(Level level, LivingEntity livingEntity, ItemStack itemStack) {

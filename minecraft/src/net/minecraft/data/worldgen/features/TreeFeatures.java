@@ -2,14 +2,20 @@ package net.minecraft.data.worldgen.features;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.MangrovePropaguleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -28,9 +34,12 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.MegaPineFoliage
 import net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.RandomSpreadFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.RandomizedIntStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator;
+import net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLeavesDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.CocoaDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator;
@@ -42,6 +51,7 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.ForkingTrunkPlace
 import net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.MegaJungleTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.UpwardsBranchingTrunkPlacer;
 
 public class TreeFeatures {
 	public static final Holder<ConfiguredFeature<HugeFungusConfiguration, ?>> CRIMSON_FUNGUS = FeatureUtils.register(
@@ -176,7 +186,7 @@ public class TreeFeatures {
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> JUNGLE_TREE = FeatureUtils.register(
 		"jungle_tree",
 		Feature.TREE,
-		createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE)).ignoreVines().build()
+		createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, new LeaveVineDecorator(0.25F))).ignoreVines().build()
 	);
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> FANCY_OAK = FeatureUtils.register("fancy_oak", Feature.TREE, createFancyOak().build());
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> JUNGLE_TREE_NO_VINE = FeatureUtils.register(
@@ -192,7 +202,7 @@ public class TreeFeatures {
 				new MegaJungleFoliagePlacer(ConstantInt.of(2), ConstantInt.of(0), 2),
 				new TwoLayersFeatureSize(1, 1, 2)
 			)
-			.decorators(ImmutableList.of(TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE))
+			.decorators(ImmutableList.of(TrunkVineDecorator.INSTANCE, new LeaveVineDecorator(0.25F)))
 			.build()
 	);
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> MEGA_SPRUCE = FeatureUtils.register(
@@ -230,7 +240,7 @@ public class TreeFeatures {
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> SWAMP_OAK = FeatureUtils.register(
 		"swamp_oak",
 		Feature.TREE,
-		createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(LeaveVineDecorator.INSTANCE)).build()
+		createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(new LeaveVineDecorator(0.25F))).build()
 	);
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> JUNGLE_BUSH = FeatureUtils.register(
 		"jungle_bush",
@@ -258,6 +268,96 @@ public class TreeFeatures {
 			)
 			.dirt(BlockStateProvider.simple(Blocks.ROOTED_DIRT))
 			.forceDirt()
+			.build()
+	);
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> MANGROVE = FeatureUtils.register(
+		"mangrove",
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.MANGROVE_LOG),
+				new UpwardsBranchingTrunkPlacer(
+					2, 1, 4, UniformInt.of(1, 4), 0.5F, UniformInt.of(0, 1), Registry.BLOCK.getOrCreateTag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)
+				),
+				BlockStateProvider.simple(Blocks.MANGROVE_LEAVES),
+				new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 70),
+				Optional.of(
+					new MangroveRootPlacer(
+						BlockStateProvider.simple(Blocks.MANGROVE_ROOTS),
+						Registry.BLOCK.getOrCreateTag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH),
+						HolderSet.direct(Block::builtInRegistryHolder, Blocks.MUD),
+						BlockStateProvider.simple(Blocks.MUDDY_MANGROVE_ROOTS),
+						8,
+						15,
+						UniformInt.of(1, 3),
+						0.2F
+					)
+				),
+				new TwoLayersFeatureSize(1, 0, 2)
+			)
+			.decorators(
+				List.of(
+					new LeaveVineDecorator(0.125F),
+					new AttachedToLeavesDecorator(
+						0.14F,
+						1,
+						0,
+						new RandomizedIntStateProvider(
+							BlockStateProvider.simple(Blocks.MANGROVE_PROPAGULE.defaultBlockState().setValue(MangrovePropaguleBlock.HANGING, Boolean.valueOf(true))),
+							MangrovePropaguleBlock.AGE,
+							UniformInt.of(0, 4)
+						),
+						2,
+						List.of(Direction.DOWN)
+					),
+					BEEHIVE_005
+				)
+			)
+			.ignoreVines()
+			.build()
+	);
+	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> TALL_MANGROVE = FeatureUtils.register(
+		"tall_mangrove",
+		Feature.TREE,
+		new TreeConfiguration.TreeConfigurationBuilder(
+				BlockStateProvider.simple(Blocks.MANGROVE_LOG),
+				new UpwardsBranchingTrunkPlacer(
+					4, 1, 9, UniformInt.of(1, 6), 0.5F, UniformInt.of(0, 1), Registry.BLOCK.getOrCreateTag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)
+				),
+				BlockStateProvider.simple(Blocks.MANGROVE_LEAVES),
+				new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 70),
+				Optional.of(
+					new MangroveRootPlacer(
+						BlockStateProvider.simple(Blocks.MANGROVE_ROOTS),
+						Registry.BLOCK.getOrCreateTag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH),
+						HolderSet.direct(Block::builtInRegistryHolder, Blocks.MUD),
+						BlockStateProvider.simple(Blocks.MUDDY_MANGROVE_ROOTS),
+						8,
+						15,
+						UniformInt.of(3, 7),
+						0.2F
+					)
+				),
+				new TwoLayersFeatureSize(1, 0, 3)
+			)
+			.decorators(
+				List.of(
+					new LeaveVineDecorator(0.125F),
+					new AttachedToLeavesDecorator(
+						0.14F,
+						1,
+						0,
+						new RandomizedIntStateProvider(
+							BlockStateProvider.simple(Blocks.MANGROVE_PROPAGULE.defaultBlockState().setValue(MangrovePropaguleBlock.HANGING, Boolean.valueOf(true))),
+							MangrovePropaguleBlock.AGE,
+							UniformInt.of(0, 4)
+						),
+						2,
+						List.of(Direction.DOWN)
+					),
+					BEEHIVE_005
+				)
+			)
+			.ignoreVines()
 			.build()
 	);
 	public static final Holder<ConfiguredFeature<TreeConfiguration, ?>> OAK_BEES_0002 = FeatureUtils.register(

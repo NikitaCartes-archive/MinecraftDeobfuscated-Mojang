@@ -556,7 +556,6 @@ public class ProcessorLists {
 	public static final Holder<StructureProcessorList> ANCIENT_CITY_START_DEGRADATION = register(
 		"ancient_city_start_degradation",
 		ImmutableList.of(
-			new BlockRotProcessor(BlockTags.ANCIENT_CITY_CENTER_REPLACEABLE, 0.98F),
 			new RuleProcessor(
 				ImmutableList.of(
 					new ProcessorRule(new RandomBlockMatchTest(Blocks.DEEPSLATE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState()),

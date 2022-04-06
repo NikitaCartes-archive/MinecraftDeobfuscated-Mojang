@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +48,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
@@ -151,19 +151,19 @@ public abstract class ChunkGenerator {
 						int j = concentricRingsStructurePlacement.count();
 						int k = concentricRingsStructurePlacement.spread();
 						HolderSet<Biome> holderSet = concentricRingsStructurePlacement.preferredBiomes();
-						Random random = new Random();
-						random.setSeed(this instanceof FlatLevelSource ? 0L : randomState.legacyLevelSeed());
-						double d = random.nextDouble() * Math.PI * 2.0;
+						RandomSource randomSource = RandomSource.create();
+						randomSource.setSeed(this instanceof FlatLevelSource ? 0L : randomState.legacyLevelSeed());
+						double d = randomSource.nextDouble() * Math.PI * 2.0;
 						int l = 0;
 						int m = 0;
 
 						for (int n = 0; n < j; n++) {
-							double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
+							double e = (double)(4 * i + i * m * 6) + (randomSource.nextDouble() - 0.5) * (double)i * 2.5;
 							int o = (int)Math.round(Math.cos(d) * e);
 							int p = (int)Math.round(Math.sin(d) * e);
 							Pair<BlockPos, Holder<Biome>> pair = this.biomeSource
 								.findBiomeHorizontal(
-									SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, holderSet::contains, random, randomState.sampler()
+									SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, holderSet::contains, randomSource, randomState.sampler()
 								);
 							if (pair != null) {
 								BlockPos blockPos = pair.getFirst();
@@ -178,7 +178,7 @@ public abstract class ChunkGenerator {
 								l = 0;
 								k += 2 * k / (m + 1);
 								k = Math.min(k, j - n);
-								d += random.nextDouble() * Math.PI * 2.0;
+								d += randomSource.nextDouble() * Math.PI * 2.0;
 							}
 						}
 

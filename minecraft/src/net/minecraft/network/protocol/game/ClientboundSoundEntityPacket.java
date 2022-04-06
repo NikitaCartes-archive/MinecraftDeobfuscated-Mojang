@@ -14,14 +14,16 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 	private final int id;
 	private final float volume;
 	private final float pitch;
+	private final long seed;
 
-	public ClientboundSoundEntityPacket(SoundEvent soundEvent, SoundSource soundSource, Entity entity, float f, float g) {
+	public ClientboundSoundEntityPacket(SoundEvent soundEvent, SoundSource soundSource, Entity entity, float f, float g, long l) {
 		Validate.notNull(soundEvent, "sound");
 		this.sound = soundEvent;
 		this.source = soundSource;
 		this.id = entity.getId();
 		this.volume = f;
 		this.pitch = g;
+		this.seed = l;
 	}
 
 	public ClientboundSoundEntityPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -30,6 +32,7 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 		this.id = friendlyByteBuf.readVarInt();
 		this.volume = friendlyByteBuf.readFloat();
 		this.pitch = friendlyByteBuf.readFloat();
+		this.seed = friendlyByteBuf.readLong();
 	}
 
 	@Override
@@ -39,6 +42,7 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeFloat(this.volume);
 		friendlyByteBuf.writeFloat(this.pitch);
+		friendlyByteBuf.writeLong(this.seed);
 	}
 
 	public SoundEvent getSound() {
@@ -59,6 +63,10 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 
 	public float getPitch() {
 		return this.pitch;
+	}
+
+	public long getSeed() {
+		return this.seed;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

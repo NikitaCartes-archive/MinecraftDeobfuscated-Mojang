@@ -14,17 +14,17 @@ import net.minecraft.advancements.critereon.DistancePredicate;
 import net.minecraft.advancements.critereon.DistanceTrigger;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LighthingBoltPredicate;
 import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
-import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.PlayerPredicate;
+import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
@@ -93,7 +93,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 		return LightningStrikeTrigger.TriggerInstance.lighthingStrike(
 			EntityPredicate.Builder.entity()
 				.distance(DistancePredicate.absolute(MinMaxBounds.Doubles.atMost(30.0)))
-				.lighthingBolt(LighthingBoltPredicate.blockSetOnFire(ints))
+				.subPredicate(LighthingBoltPredicate.blockSetOnFire(ints))
 				.build(),
 			entityPredicate
 		);
@@ -101,7 +101,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 
 	private static UsingItemTrigger.TriggerInstance lookAtThroughItem(EntityType<?> entityType, Item item) {
 		return UsingItemTrigger.TriggerInstance.lookingAt(
-			EntityPredicate.Builder.entity().player(PlayerPredicate.Builder.player().setLookingAt(EntityPredicate.Builder.entity().of(entityType).build()).build()),
+			EntityPredicate.Builder.entity()
+				.subPredicate(PlayerPredicate.Builder.player().setLookingAt(EntityPredicate.Builder.entity().of(entityType).build()).build()),
 			ItemPredicate.Builder.item().of(item)
 		);
 	}
@@ -134,7 +135,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("slept_in_bed", LocationTrigger.TriggerInstance.sleptInBed())
+			.addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
 		addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes().toList())
 			.parent(advancement2)
@@ -409,7 +410,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				true
 			)
 			.rewards(AdvancementRewards.Builder.experience(100))
-			.addCriterion("hero_of_the_village", LocationTrigger.TriggerInstance.raidWon())
+			.addCriterion("hero_of_the_village", PlayerTrigger.TriggerInstance.raidWon())
 			.save(consumer, "adventure/hero_of_the_village");
 		Advancement.Builder.advancement()
 			.parent(advancement)
@@ -458,7 +459,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("walk_on_powder_snow_with_leather_boots", LocationTrigger.TriggerInstance.walkOnBlockWithEquipment(Blocks.POWDER_SNOW, Items.LEATHER_BOOTS))
+			.addCriterion("walk_on_powder_snow_with_leather_boots", PlayerTrigger.TriggerInstance.walkOnBlockWithEquipment(Blocks.POWDER_SNOW, Items.LEATHER_BOOTS))
 			.save(consumer, "adventure/walk_on_powder_snow_with_leather_boots");
 		Advancement.Builder.advancement()
 			.parent(advancement)
@@ -519,7 +520,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion(
 				"play_jukebox_in_meadows",
-				ItemUsedOnBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBiome(Biomes.MEADOW).setBlock(BlockPredicate.Builder.block().of(Blocks.JUKEBOX).build()),
 					ItemPredicate.Builder.item().of(ItemTags.MUSIC_DISCS)
 				)
@@ -588,7 +589,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 
 	protected static Advancement.Builder addBiomes(Advancement.Builder builder, List<ResourceKey<Biome>> list) {
 		for (ResourceKey<Biome> resourceKey : list) {
-			builder.addCriterion(resourceKey.location().toString(), LocationTrigger.TriggerInstance.located(LocationPredicate.inBiome(resourceKey)));
+			builder.addCriterion(resourceKey.location().toString(), PlayerTrigger.TriggerInstance.located(LocationPredicate.inBiome(resourceKey)));
 		}
 
 		return builder;

@@ -2,7 +2,6 @@ package net.minecraft.world.level.block.entity;
 
 import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -14,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
@@ -204,7 +204,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		if (blockPos2 == null) {
 			blockPos2 = new BlockPos(vec3.x + 0.5, 75.0, vec3.z + 0.5);
 			LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", blockPos2);
-			EndFeatures.END_ISLAND.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(blockPos2.asLong()), blockPos2);
+			EndFeatures.END_ISLAND.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), RandomSource.create(blockPos2.asLong()), blockPos2);
 		} else {
 			LOGGER.debug("Found suitable block to teleport to: {}", blockPos2);
 		}
@@ -286,7 +286,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	}
 
 	private static void spawnGatewayPortal(ServerLevel serverLevel, BlockPos blockPos, EndGatewayConfiguration endGatewayConfiguration) {
-		Feature.END_GATEWAY.place(endGatewayConfiguration, serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
+		Feature.END_GATEWAY.place(endGatewayConfiguration, serverLevel, serverLevel.getChunkSource().getGenerator(), RandomSource.create(), blockPos);
 	}
 
 	@Override

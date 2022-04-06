@@ -28,13 +28,13 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -59,6 +59,7 @@ import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
@@ -444,20 +445,20 @@ public class Util {
 		}
 	}
 
-	public static <T> T getRandom(T[] objects, Random random) {
-		return objects[random.nextInt(objects.length)];
+	public static <T> T getRandom(T[] objects, RandomSource randomSource) {
+		return objects[randomSource.nextInt(objects.length)];
 	}
 
-	public static int getRandom(int[] is, Random random) {
-		return is[random.nextInt(is.length)];
+	public static int getRandom(int[] is, RandomSource randomSource) {
+		return is[randomSource.nextInt(is.length)];
 	}
 
-	public static <T> T getRandom(List<T> list, Random random) {
-		return (T)list.get(random.nextInt(list.size()));
+	public static <T> T getRandom(List<T> list, RandomSource randomSource) {
+		return (T)list.get(randomSource.nextInt(list.size()));
 	}
 
-	public static <T> Optional<T> getRandomSafe(List<T> list, Random random) {
-		return list.isEmpty() ? Optional.empty() : Optional.of(getRandom(list, random));
+	public static <T> Optional<T> getRandomSafe(List<T> list, RandomSource randomSource) {
+		return list.isEmpty() ? Optional.empty() : Optional.of(getRandom(list, randomSource));
 	}
 
 	private static BooleanSupplier createRenamer(Path path, Path path2) {
@@ -668,6 +669,21 @@ public class Util {
 				return "memoize/2[function=" + biFunction + ", size=" + this.cache.size() + "]";
 			}
 		};
+	}
+
+	public static <T> List<T> shuffledCopy(List<T> list, RandomSource randomSource) {
+		List<T> list2 = new ArrayList(list);
+		shuffle(list2, randomSource);
+		return list2;
+	}
+
+	public static <T> void shuffle(List<T> list, RandomSource randomSource) {
+		int i = list.size();
+
+		for (int j = i; j > 1; j--) {
+			int k = randomSource.nextInt(j);
+			list.set(j - 1, list.set(k, list.get(j - 1)));
+		}
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {

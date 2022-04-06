@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen;
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 
 public interface PositionalRandomFactory {
 	default RandomSource at(BlockPos blockPos) {

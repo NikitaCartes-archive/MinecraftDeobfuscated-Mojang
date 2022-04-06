@@ -33,7 +33,8 @@ public class MiscOverworldFeatures {
 				Blocks.MYCELIUM.defaultBlockState(),
 				Blocks.SNOW_BLOCK.defaultBlockState(),
 				Blocks.ICE.defaultBlockState()
-			)
+			),
+			HolderSet.direct(Block::builtInRegistryHolder, Blocks.SNOW_BLOCK)
 		)
 	);
 	public static final Holder<ConfiguredFeature<BlockStateConfiguration, ?>> FOREST_ROCK = FeatureUtils.register(
@@ -54,24 +55,49 @@ public class MiscOverworldFeatures {
 	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_CLAY = FeatureUtils.register(
 		"disk_clay",
 		Feature.DISK,
-		new DiskConfiguration(Blocks.CLAY.defaultBlockState(), UniformInt.of(2, 3), 1, List.of(Blocks.DIRT.defaultBlockState(), Blocks.CLAY.defaultBlockState()))
+		new DiskConfiguration(
+			Blocks.CLAY.defaultBlockState(),
+			UniformInt.of(2, 3),
+			1,
+			List.of(Blocks.DIRT.defaultBlockState(), Blocks.CLAY.defaultBlockState()),
+			HolderSet.direct(Block::builtInRegistryHolder, Blocks.WATER)
+		)
 	);
 	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_GRAVEL = FeatureUtils.register(
 		"disk_gravel",
 		Feature.DISK,
 		new DiskConfiguration(
-			Blocks.GRAVEL.defaultBlockState(), UniformInt.of(2, 5), 2, List.of(Blocks.DIRT.defaultBlockState(), Blocks.GRASS_BLOCK.defaultBlockState())
+			Blocks.GRAVEL.defaultBlockState(),
+			UniformInt.of(2, 5),
+			2,
+			List.of(Blocks.DIRT.defaultBlockState(), Blocks.GRASS_BLOCK.defaultBlockState()),
+			HolderSet.direct(Block::builtInRegistryHolder, Blocks.WATER)
 		)
 	);
 	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_SAND = FeatureUtils.register(
 		"disk_sand",
 		Feature.DISK,
 		new DiskConfiguration(
-			Blocks.SAND.defaultBlockState(), UniformInt.of(2, 6), 2, List.of(Blocks.DIRT.defaultBlockState(), Blocks.GRASS_BLOCK.defaultBlockState())
+			Blocks.SAND.defaultBlockState(),
+			UniformInt.of(2, 6),
+			2,
+			List.of(Blocks.DIRT.defaultBlockState(), Blocks.GRASS_BLOCK.defaultBlockState()),
+			HolderSet.direct(Block::builtInRegistryHolder, Blocks.WATER)
 		)
 	);
 	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> FREEZE_TOP_LAYER = FeatureUtils.register(
 		"freeze_top_layer", Feature.FREEZE_TOP_LAYER
+	);
+	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_GRASS = FeatureUtils.register(
+		"disk_grass",
+		Feature.SURFACE_DISK,
+		new DiskConfiguration(
+			Blocks.GRASS_BLOCK.defaultBlockState(),
+			UniformInt.of(2, 6),
+			2,
+			List.of(Blocks.DIRT.defaultBlockState(), Blocks.MUD.defaultBlockState()),
+			HolderSet.direct(Block::builtInRegistryHolder, Blocks.WATER, Blocks.MUD)
+		)
 	);
 	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> BONUS_CHEST = FeatureUtils.register("bonus_chest", Feature.BONUS_CHEST);
 	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> VOID_START_PLATFORM = FeatureUtils.register(

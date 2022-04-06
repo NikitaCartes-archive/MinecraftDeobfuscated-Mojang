@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -12,6 +11,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -32,25 +32,25 @@ public record PlacedFeature(Holder<ConfiguredFeature<?, ?>> feature, List<Placem
 		)
 		.listOf();
 
-	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-		return this.placeWithContext(new PlacementContext(worldGenLevel, chunkGenerator, Optional.empty()), random, blockPos);
+	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos) {
+		return this.placeWithContext(new PlacementContext(worldGenLevel, chunkGenerator, Optional.empty()), randomSource, blockPos);
 	}
 
-	public boolean placeWithBiomeCheck(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
-		return this.placeWithContext(new PlacementContext(worldGenLevel, chunkGenerator, Optional.of(this)), random, blockPos);
+	public boolean placeWithBiomeCheck(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos blockPos) {
+		return this.placeWithContext(new PlacementContext(worldGenLevel, chunkGenerator, Optional.of(this)), randomSource, blockPos);
 	}
 
-	private boolean placeWithContext(PlacementContext placementContext, Random random, BlockPos blockPos) {
+	private boolean placeWithContext(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
 		Stream<BlockPos> stream = Stream.of(blockPos);
 
 		for (PlacementModifier placementModifier : this.placement) {
-			stream = stream.flatMap(blockPosx -> placementModifier.getPositions(placementContext, random, blockPosx));
+			stream = stream.flatMap(blockPosx -> placementModifier.getPositions(placementContext, randomSource, blockPosx));
 		}
 
 		ConfiguredFeature<?, ?> configuredFeature = this.feature.value();
 		MutableBoolean mutableBoolean = new MutableBoolean();
 		stream.forEach(blockPosx -> {
-			if (configuredFeature.place(placementContext.getLevel(), placementContext.generator(), random, blockPosx)) {
+			if (configuredFeature.place(placementContext.getLevel(), placementContext.generator(), randomSource, blockPosx)) {
 				mutableBoolean.setTrue();
 			}
 		});

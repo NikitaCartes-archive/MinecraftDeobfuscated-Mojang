@@ -2,10 +2,10 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 public class AxisAlignedLinearPosTest extends PosRuleTest {
 	public static final Codec<AxisAlignedLinearPosTest> CODEC = RecordCodecBuilder.create(
@@ -37,13 +37,13 @@ public class AxisAlignedLinearPosTest extends PosRuleTest {
 	}
 
 	@Override
-	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
+	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, RandomSource randomSource) {
 		Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, this.axis);
 		float f = (float)Math.abs((blockPos2.getX() - blockPos3.getX()) * direction.getStepX());
 		float g = (float)Math.abs((blockPos2.getY() - blockPos3.getY()) * direction.getStepY());
 		float h = (float)Math.abs((blockPos2.getZ() - blockPos3.getZ()) * direction.getStepZ());
 		int i = (int)(f + g + h);
-		float j = random.nextFloat();
+		float j = randomSource.nextFloat();
 		return j <= Mth.clampedLerp(this.minChance, this.maxChance, Mth.inverseLerp((float)i, (float)this.minDist, (float)this.maxDist));
 	}
 

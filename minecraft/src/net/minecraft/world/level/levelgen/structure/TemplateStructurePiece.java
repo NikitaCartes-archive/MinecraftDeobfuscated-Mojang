@@ -2,7 +2,6 @@ package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
@@ -10,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
@@ -83,19 +83,19 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 		WorldGenLevel worldGenLevel,
 		StructureManager structureManager,
 		ChunkGenerator chunkGenerator,
-		Random random,
+		RandomSource randomSource,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
 		this.placeSettings.setBoundingBox(boundingBox);
 		this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-		if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, random, 2)) {
+		if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, randomSource, 2)) {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK)) {
 				if (structureBlockInfo.nbt != null) {
 					StructureMode structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"));
 					if (structureMode == StructureMode.DATA) {
-						this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, random, boundingBox);
+						this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, randomSource, boundingBox);
 					}
 				}
 			}
@@ -117,7 +117,9 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 		}
 	}
 
-	protected abstract void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox);
+	protected abstract void handleDataMarker(
+		String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox
+	);
 
 	@Deprecated
 	@Override
