@@ -23,6 +23,7 @@ public record SculkChargeParticleOptions(float roll) implements ParticleOptions
 
         @Override
         public SculkChargeParticleOptions fromCommand(ParticleType<SculkChargeParticleOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
+            stringReader.expect(' ');
             float f = stringReader.readFloat();
             return new SculkChargeParticleOptions(f);
         }

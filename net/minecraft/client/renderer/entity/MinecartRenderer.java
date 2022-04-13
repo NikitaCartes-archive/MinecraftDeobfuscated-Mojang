@@ -8,11 +8,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.MinecartModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -29,11 +29,13 @@ public class MinecartRenderer<T extends AbstractMinecart>
 extends EntityRenderer<T> {
     private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
     protected final EntityModel<T> model;
+    private final BlockRenderDispatcher blockRenderer;
 
     public MinecartRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation) {
         super(context);
         this.shadowRadius = 0.7f;
         this.model = new MinecartModel(context.bakeLayer(modelLayerLocation));
+        this.blockRenderer = context.getBlockRenderDispatcher();
     }
 
     @Override
@@ -104,7 +106,7 @@ extends EntityRenderer<T> {
     }
 
     protected void renderMinecartContents(T abstractMinecart, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
+        this.blockRenderer.renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
     }
 }
 

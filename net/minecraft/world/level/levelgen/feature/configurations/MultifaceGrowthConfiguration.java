@@ -3,19 +3,19 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.ArrayList;
-import java.util.Collections;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.MultifaceBlock;
@@ -31,7 +31,7 @@ implements FeatureConfiguration {
     public final boolean canPlaceOnWall;
     public final float chanceOfSpreading;
     public final HolderSet<Block> canBePlacedOn;
-    public final List<Direction> validDirections;
+    private final ObjectArrayList<Direction> validDirections;
 
     private static DataResult<MultifaceBlock> apply(Block block) {
         DataResult<MultifaceBlock> dataResult;
@@ -52,17 +52,24 @@ implements FeatureConfiguration {
         this.canPlaceOnWall = bl3;
         this.chanceOfSpreading = f;
         this.canBePlacedOn = holderSet;
-        ArrayList<Direction> list = Lists.newArrayList();
+        this.validDirections = new ObjectArrayList(6);
         if (bl2) {
-            list.add(Direction.UP);
+            this.validDirections.add(Direction.UP);
         }
         if (bl) {
-            list.add(Direction.DOWN);
+            this.validDirections.add(Direction.DOWN);
         }
         if (bl3) {
-            Direction.Plane.HORIZONTAL.forEach(list::add);
+            Direction.Plane.HORIZONTAL.forEach(this.validDirections::add);
         }
-        this.validDirections = Collections.unmodifiableList(list);
+    }
+
+    public List<Direction> getShuffledDirectionsExcept(RandomSource randomSource, Direction direction) {
+        return Util.toShuffledList(this.validDirections.stream().filter(direction2 -> direction2 != direction), randomSource);
+    }
+
+    public List<Direction> getShuffledDirections(RandomSource randomSource) {
+        return Util.shuffledCopy(this.validDirections, randomSource);
     }
 }
 

@@ -4,7 +4,6 @@
 package net.minecraft.data.worldgen.placement;
 
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.features.TreeFeatures;
@@ -27,8 +26,8 @@ public class TreePlacements {
     public static final Holder<PlacedFeature> ACACIA_CHECKED = PlacementUtils.register("acacia_checked", TreeFeatures.ACACIA, PlacementUtils.filteredByBlockSurvival(Blocks.ACACIA_SAPLING));
     public static final Holder<PlacedFeature> SPRUCE_CHECKED = PlacementUtils.register("spruce_checked", TreeFeatures.SPRUCE, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
     public static final Holder<PlacedFeature> MANGROVE_CHECKED = PlacementUtils.register("mangrove_checked", TreeFeatures.MANGROVE, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE));
-    public static final BlockPredicate SNOW_TREE_PREDICATE = BlockPredicate.matchesBlocks(List.of(Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW), new BlockPos(0, -1, 0));
-    public static final List<PlacementModifier> SNOW_TREE_FILTER_DECORATOR = List.of(EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.not(BlockPredicate.matchesBlock(Blocks.POWDER_SNOW, BlockPos.ZERO)), 8), BlockPredicateFilter.forPredicate(SNOW_TREE_PREDICATE));
+    public static final BlockPredicate SNOW_TREE_PREDICATE = BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
+    public static final List<PlacementModifier> SNOW_TREE_FILTER_DECORATOR = List.of(EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.not(BlockPredicate.matchesBlocks(Blocks.POWDER_SNOW)), 8), BlockPredicateFilter.forPredicate(SNOW_TREE_PREDICATE));
     public static final Holder<PlacedFeature> PINE_ON_SNOW = PlacementUtils.register("pine_on_snow", TreeFeatures.PINE, SNOW_TREE_FILTER_DECORATOR);
     public static final Holder<PlacedFeature> SPRUCE_ON_SNOW = PlacementUtils.register("spruce_on_snow", TreeFeatures.SPRUCE, SNOW_TREE_FILTER_DECORATOR);
     public static final Holder<PlacedFeature> PINE_CHECKED = PlacementUtils.register("pine_checked", TreeFeatures.PINE, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));

@@ -3,16 +3,19 @@
  */
 package net.minecraft.core;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
 import net.minecraft.Util;
 
-public final class SerializableUUID {
-    public static final Codec<UUID> CODEC = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 4).map(SerializableUUID::uuidFromIntArray), uUID -> Arrays.stream(SerializableUUID.uuidToIntArray(uUID)));
+public final class UUIDUtil {
+    public static final Codec<UUID> CODEC = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 4).map(UUIDUtil::uuidFromIntArray), uUID -> Arrays.stream(UUIDUtil.uuidToIntArray(uUID)));
+    private static final String UUID_PREFIX_OFFLINE_PLAYER = "OfflinePlayer:";
 
-    private SerializableUUID() {
+    private UUIDUtil() {
     }
 
     public static UUID uuidFromIntArray(int[] is) {
@@ -22,7 +25,7 @@ public final class SerializableUUID {
     public static int[] uuidToIntArray(UUID uUID) {
         long l = uUID.getMostSignificantBits();
         long m = uUID.getLeastSignificantBits();
-        return SerializableUUID.leastMostToIntArray(l, m);
+        return UUIDUtil.leastMostToIntArray(l, m);
     }
 
     private static int[] leastMostToIntArray(long l, long m) {
@@ -34,7 +37,19 @@ public final class SerializableUUID {
         if (is.length != 4) {
             throw new IllegalArgumentException("Could not read UUID. Expected int-array of length 4, got " + is.length + ".");
         }
-        return SerializableUUID.uuidFromIntArray(is);
+        return UUIDUtil.uuidFromIntArray(is);
+    }
+
+    public static UUID getOrCreatePlayerUUID(GameProfile gameProfile) {
+        UUID uUID = gameProfile.getId();
+        if (uUID == null) {
+            uUID = UUIDUtil.createOfflinePlayerUUID(gameProfile.getName());
+        }
+        return uUID;
+    }
+
+    public static UUID createOfflinePlayerUUID(String string) {
+        return UUID.nameUUIDFromBytes((UUID_PREFIX_OFFLINE_PLAYER + string).getBytes(StandardCharsets.UTF_8));
     }
 }
 

@@ -6,6 +6,9 @@ package net.minecraft.world.level.gameevent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class GameEvent {
     public static final GameEvent BLOCK_ACTIVATE = GameEvent.register("block_activate");
@@ -87,6 +90,30 @@ public class GameEvent {
 
     public boolean is(TagKey<GameEvent> tagKey) {
         return this.builtInRegistryHolder.is(tagKey);
+    }
+
+    public record Context(@Nullable Entity sourceEntity, @Nullable BlockState affectedState) {
+        public static Context of(@Nullable Entity entity) {
+            return new Context(entity, null);
+        }
+
+        public static Context of(@Nullable BlockState blockState) {
+            return new Context(null, blockState);
+        }
+
+        public static Context of(@Nullable Entity entity, @Nullable BlockState blockState) {
+            return new Context(entity, blockState);
+        }
+
+        @Nullable
+        public Entity sourceEntity() {
+            return this.sourceEntity;
+        }
+
+        @Nullable
+        public BlockState affectedState() {
+            return this.affectedState;
+        }
     }
 }
 

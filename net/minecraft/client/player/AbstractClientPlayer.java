@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
@@ -105,7 +106,7 @@ extends Player {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
         AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
         if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
-            abstractTexture = new HttpTexture(null, String.format(SKIN_URL_TEMPLATE, StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(AbstractClientPlayer.createPlayerUUID(string)), true, null);
+            abstractTexture = new HttpTexture(null, String.format(SKIN_URL_TEMPLATE, StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(UUIDUtil.createOfflinePlayerUUID(string)), true, null);
             textureManager.register(resourceLocation, abstractTexture);
         }
     }

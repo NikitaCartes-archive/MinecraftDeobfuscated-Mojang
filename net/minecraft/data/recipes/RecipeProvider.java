@@ -10,17 +10,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
@@ -34,9 +28,9 @@ import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -80,49 +74,35 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) {
+    public void run(CachedOutput cachedOutput) {
         Path path = this.generator.getOutputFolder();
         HashSet set = Sets.newHashSet();
         RecipeProvider.buildCraftingRecipes(finishedRecipe -> {
             if (!set.add(finishedRecipe.getId())) {
                 throw new IllegalStateException("Duplicate recipe " + finishedRecipe.getId());
             }
-            RecipeProvider.saveRecipe(hashCache, finishedRecipe.serializeRecipe(), path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/recipes/" + finishedRecipe.getId().getPath() + ".json"));
+            RecipeProvider.saveRecipe(cachedOutput, finishedRecipe.serializeRecipe(), path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/recipes/" + finishedRecipe.getId().getPath() + ".json"));
             JsonObject jsonObject = finishedRecipe.serializeAdvancement();
             if (jsonObject != null) {
-                RecipeProvider.saveAdvancement(hashCache, jsonObject, path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/advancements/" + finishedRecipe.getAdvancementId().getPath() + ".json"));
+                RecipeProvider.saveAdvancement(cachedOutput, jsonObject, path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/advancements/" + finishedRecipe.getAdvancementId().getPath() + ".json"));
             }
         });
-        RecipeProvider.saveAdvancement(hashCache, Advancement.Builder.advancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance()).serializeToJson(), path.resolve("data/minecraft/advancements/recipes/root.json"));
+        RecipeProvider.saveAdvancement(cachedOutput, Advancement.Builder.advancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance()).serializeToJson(), path.resolve("data/minecraft/advancements/recipes/root.json"));
     }
 
-    private static void saveRecipe(HashCache hashCache, JsonObject jsonObject, Path path) {
+    private static void saveRecipe(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {
         try {
             String string = GSON.toJson(jsonObject);
-            String string2 = SHA1.hashUnencodedChars(string).toString();
-            if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
-                Files.createDirectories(path.getParent(), new FileAttribute[0]);
-                try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, new OpenOption[0]);){
-                    bufferedWriter.write(string);
-                }
-            }
-            hashCache.putNew(path, string2);
+            cachedOutput.writeIfNeeded(path, string);
         } catch (IOException iOException) {
             LOGGER.error("Couldn't save recipe {}", (Object)path, (Object)iOException);
         }
     }
 
-    private static void saveAdvancement(HashCache hashCache, JsonObject jsonObject, Path path) {
+    private static void saveAdvancement(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {
         try {
             String string = GSON.toJson(jsonObject);
-            String string2 = SHA1.hashUnencodedChars(string).toString();
-            if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
-                Files.createDirectories(path.getParent(), new FileAttribute[0]);
-                try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, new OpenOption[0]);){
-                    bufferedWriter.write(string);
-                }
-            }
-            hashCache.putNew(path, string2);
+            cachedOutput.writeIfNeeded(path, string);
         } catch (IOException iOException) {
             LOGGER.error("Couldn't save recipe advancement {}", (Object)path, (Object)iOException);
         }

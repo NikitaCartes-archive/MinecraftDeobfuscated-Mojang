@@ -16,6 +16,7 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
@@ -31,22 +32,21 @@ import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.behavior.warden.Digging;
 import net.minecraft.world.entity.ai.behavior.warden.Emerging;
+import net.minecraft.world.entity.ai.behavior.warden.Roar;
+import net.minecraft.world.entity.ai.behavior.warden.SetRoarTarget;
+import net.minecraft.world.entity.ai.behavior.warden.SetWardenLookTarget;
 import net.minecraft.world.entity.ai.behavior.warden.Sniffing;
+import net.minecraft.world.entity.ai.behavior.warden.SonicBoom;
 import net.minecraft.world.entity.ai.behavior.warden.TryToSniff;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.warden.AngerLevel;
-import net.minecraft.world.entity.monster.warden.Roar;
-import net.minecraft.world.entity.monster.warden.SetRoarTarget;
-import net.minecraft.world.entity.monster.warden.SetWardenLookTarget;
-import net.minecraft.world.entity.monster.warden.StartAttackingAfterTimeOut;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.schedule.Activity;
 
 public class WardenAi {
-    private static final int MAX_LOOK_DIST = 8;
     private static final float SPEED_MULTIPLIER_WHEN_IDLING = 0.5f;
     private static final float SPEED_MULTIPLIER_WHEN_INVESTIGATING = 0.7f;
     private static final float SPEED_MULTIPLIER_WHEN_FIGHTING = 1.2f;
@@ -58,7 +58,7 @@ public class WardenAi {
     public static final int DIGGING_COOLDOWN = 1200;
     private static final int DISTURBANCE_LOCATION_EXPIRY_TIME = 100;
     private static final List<SensorType<? extends Sensor<? super Warden>>> SENSOR_TYPES = List.of(SensorType.NEAREST_PLAYERS, SensorType.WARDEN_ENTITY_SENSOR);
-    private static final List<MemoryModuleType<?>> MEMORY_TYPES = List.of(MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.ROAR_TARGET, MemoryModuleType.DISTURBANCE_LOCATION, MemoryModuleType.RECENT_PROJECTILE, MemoryModuleType.IS_SNIFFING, MemoryModuleType.IS_EMERGING, MemoryModuleType.ROAR_SOUND_DELAY, MemoryModuleType.DIG_COOLDOWN, MemoryModuleType.ROAR_SOUND_COOLDOWN, MemoryModuleType.SNIFF_COOLDOWN, MemoryModuleType.TOUCH_COOLDOWN, MemoryModuleType.VIBRATION_COOLDOWN);
+    private static final List<MemoryModuleType<?>> MEMORY_TYPES = List.of(MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.ROAR_TARGET, MemoryModuleType.DISTURBANCE_LOCATION, MemoryModuleType.RECENT_PROJECTILE, MemoryModuleType.IS_SNIFFING, MemoryModuleType.IS_EMERGING, MemoryModuleType.ROAR_SOUND_DELAY, MemoryModuleType.DIG_COOLDOWN, MemoryModuleType.ROAR_SOUND_COOLDOWN, MemoryModuleType.SNIFF_COOLDOWN, MemoryModuleType.TOUCH_COOLDOWN, MemoryModuleType.VIBRATION_COOLDOWN, MemoryModuleType.SONIC_BOOM_COOLDOWN, MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN, MemoryModuleType.SONIC_BOOM_SOUND_DELAY);
     private static final Behavior<Warden> DIG_COOLDOWN_SETTER = new Behavior<Warden>(ImmutableMap.of(MemoryModuleType.DIG_COOLDOWN, MemoryStatus.REGISTERED)){
 
         @Override
@@ -113,11 +113,11 @@ public class WardenAi {
     }
 
     private static void initRoarActivity(Brain<Warden> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.ROAR, 10, ImmutableList.of(new Roar(), new StartAttackingAfterTimeOut(warden -> true, Warden::getEntityAngryAt, ROAR_DURATION)), MemoryModuleType.ROAR_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.ROAR, 10, ImmutableList.of(new Roar()), MemoryModuleType.ROAR_TARGET);
     }
 
     private static void initFightActivity(Warden warden, Brain<Warden> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(DIG_COOLDOWN_SETTER, new StopAttackingIfTargetInvalid<Warden>(livingEntity -> warden.getAngerLevel() != AngerLevel.ANGRY || !warden.canTargetEntity((Entity)livingEntity), WardenAi::onTargetInvalid, false), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.2f), new SetEntityLookTarget(livingEntity -> WardenAi.isTarget(warden, livingEntity), 8.0f), new MeleeAttack(18)), MemoryModuleType.ATTACK_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(DIG_COOLDOWN_SETTER, new StopAttackingIfTargetInvalid<Warden>(livingEntity -> warden.getAngerLevel() != AngerLevel.ANGRY || !warden.canTargetEntity((Entity)livingEntity), WardenAi::onTargetInvalid, false), new SetEntityLookTarget(livingEntity -> WardenAi.isTarget(warden, livingEntity), (float)warden.getAttributeValue(Attributes.FOLLOW_RANGE)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.2f), new SonicBoom(), new MeleeAttack(18)), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static boolean isTarget(Warden warden, LivingEntity livingEntity) {
@@ -125,7 +125,9 @@ public class WardenAi {
     }
 
     private static void onTargetInvalid(Warden warden, LivingEntity livingEntity) {
-        warden.clearAnger(livingEntity);
+        if (!warden.canTargetEntity(livingEntity)) {
+            warden.clearAnger(livingEntity);
+        }
         WardenAi.setDigCooldown(warden);
     }
 

@@ -5,7 +5,7 @@ package net.minecraft.data.worldgen.features;
 
 import java.util.List;
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.features.AquaticFeatures;
@@ -36,7 +36,7 @@ public class FeatureUtils {
     }
 
     private static BlockPredicate simplePatchPredicate(List<Block> list) {
-        BlockPredicate blockPredicate = !list.isEmpty() ? BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.matchesBlocks(list, new BlockPos(0, -1, 0))) : BlockPredicate.ONLY_IN_AIR_PREDICATE;
+        BlockPredicate blockPredicate = !list.isEmpty() ? BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), list)) : BlockPredicate.ONLY_IN_AIR_PREDICATE;
         return blockPredicate;
     }
 

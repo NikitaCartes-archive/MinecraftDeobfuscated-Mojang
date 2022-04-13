@@ -359,7 +359,7 @@ extends Animal {
 
     private int getRandomRabbitType(LevelAccessor levelAccessor) {
         Holder<Biome> holder = levelAccessor.getBiome(this.blockPosition());
-        int i = this.random.nextInt(100);
+        int i = levelAccessor.getRandom().nextInt(100);
         if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
             return i < 80 ? 1 : 3;
         }

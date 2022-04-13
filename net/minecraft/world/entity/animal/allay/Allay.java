@@ -53,7 +53,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class Allay
 extends PathfinderMob
@@ -103,20 +102,22 @@ GameEventListener {
 
     @Override
     public void travel(Vec3 vec3) {
-        if (this.isInWater()) {
-            this.moveRelative(0.02f, vec3);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-            this.setDeltaMovement(this.getDeltaMovement().scale(0.8f));
-        } else if (this.isInLava()) {
-            this.moveRelative(0.02f, vec3);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-            this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
-        } else {
-            float f = this.onGround ? this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91f : 0.91f;
-            float g = Mth.cube(0.6f) * Mth.cube(0.91f) / Mth.cube(f);
-            this.moveRelative(this.onGround ? 0.1f * g : 0.02f, vec3);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-            this.setDeltaMovement(this.getDeltaMovement().scale(f));
+        if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+            if (this.isInWater()) {
+                this.moveRelative(0.02f, vec3);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.8f));
+            } else if (this.isInLava()) {
+                this.moveRelative(0.02f, vec3);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+            } else {
+                float f = this.onGround ? this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91f : 0.91f;
+                float g = Mth.cube(0.6f) * Mth.cube(0.91f) / Mth.cube(f);
+                this.moveRelative(this.onGround ? 0.1f * g : 0.02f, vec3);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale(f));
+            }
         }
         this.calculateEntityAnimation(this, false);
     }
@@ -186,6 +187,9 @@ GameEventListener {
     @Override
     public void aiStep() {
         super.aiStep();
+        if (!this.level.isClientSide && this.isAlive() && this.tickCount % 10 == 0) {
+            this.heal(1.0f);
+        }
     }
 
     @Override
@@ -293,7 +297,7 @@ GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
         if (gameEvent != GameEvent.NOTE_BLOCK_PLAY) {
             return false;
         }

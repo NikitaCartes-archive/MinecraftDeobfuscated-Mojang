@@ -67,8 +67,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(CriteriaTriggers.RAID_WIN.id, EntityPredicate.Composite.ANY);
         }
 
-        public static TriggerInstance itemDeliveredToPlayer() {
-            return new TriggerInstance(CriteriaTriggers.ITEM_DELIVERED_TO_PLAYER.id, EntityPredicate.Composite.ANY);
+        public static TriggerInstance avoidVibration() {
+            return new TriggerInstance(CriteriaTriggers.AVOID_VIBRATION.id, EntityPredicate.Composite.ANY);
         }
 
         public static TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {

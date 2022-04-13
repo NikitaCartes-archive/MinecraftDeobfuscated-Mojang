@@ -230,10 +230,10 @@ extends Animal {
     }
 
     @Override
-    protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-        if (this.random.nextFloat() < 0.2f) {
-            float f = this.random.nextFloat();
-            ItemStack itemStack = f < 0.05f ? new ItemStack(Items.EMERALD) : (f < 0.2f ? new ItemStack(Items.EGG) : (f < 0.4f ? (this.random.nextBoolean() ? new ItemStack(Items.RABBIT_FOOT) : new ItemStack(Items.RABBIT_HIDE)) : (f < 0.6f ? new ItemStack(Items.WHEAT) : (f < 0.8f ? new ItemStack(Items.LEATHER) : new ItemStack(Items.FEATHER)))));
+    protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
+        if (randomSource.nextFloat() < 0.2f) {
+            float f = randomSource.nextFloat();
+            ItemStack itemStack = f < 0.05f ? new ItemStack(Items.EMERALD) : (f < 0.2f ? new ItemStack(Items.EGG) : (f < 0.4f ? (randomSource.nextBoolean() ? new ItemStack(Items.RABBIT_FOOT) : new ItemStack(Items.RABBIT_HIDE)) : (f < 0.6f ? new ItemStack(Items.WHEAT) : (f < 0.8f ? new ItemStack(Items.LEATHER) : new ItemStack(Items.FEATHER)))));
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
         }
     }
@@ -275,8 +275,9 @@ extends Animal {
         Type type = Type.byBiome(holder);
         boolean bl = false;
         if (spawnGroupData instanceof FoxGroupData) {
-            type = ((FoxGroupData)spawnGroupData).type;
-            if (((FoxGroupData)spawnGroupData).getGroupSize() >= 2) {
+            FoxGroupData foxGroupData = (FoxGroupData)spawnGroupData;
+            type = foxGroupData.type;
+            if (foxGroupData.getGroupSize() >= 2) {
                 bl = true;
             }
         } else {
@@ -289,7 +290,7 @@ extends Animal {
         if (serverLevelAccessor instanceof ServerLevel) {
             this.setTargetGoals();
         }
-        this.populateDefaultEquipmentSlots(difficultyInstance);
+        this.populateDefaultEquipmentSlots(serverLevelAccessor.getRandom(), difficultyInstance);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

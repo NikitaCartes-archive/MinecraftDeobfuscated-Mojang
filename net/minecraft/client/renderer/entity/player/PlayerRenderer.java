@@ -50,11 +50,11 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
     public PlayerRenderer(EntityRendererProvider.Context context, boolean bl) {
         super(context, new PlayerModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), bl), 0.5f);
         this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)), new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))));
-        this.addLayer(new PlayerItemInHandLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this));
+        this.addLayer(new PlayerItemInHandLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this, context.getItemInHandRenderer()));
         this.addLayer(new ArrowLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(context, this));
         this.addLayer(new Deadmau5EarsLayer(this));
         this.addLayer(new CapeLayer(this));
-        this.addLayer(new CustomHeadLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this, context.getModelSet()));
+        this.addLayer(new CustomHeadLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this, context.getModelSet(), context.getItemInHandRenderer()));
         this.addLayer(new ElytraLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>>(this, context.getModelSet()));
         this.addLayer(new ParrotOnShoulderLayer<AbstractClientPlayer>(this, context.getModelSet()));
         this.addLayer(new SpinAttackEffectLayer<AbstractClientPlayer>(this, context.getModelSet()));

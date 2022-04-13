@@ -3,11 +3,9 @@
  */
 package net.minecraft.world.level.gameevent;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public interface GameEventDispatcher {
     public static final GameEventDispatcher NOOP = new GameEventDispatcher(){
@@ -26,7 +24,7 @@ public interface GameEventDispatcher {
         }
 
         @Override
-        public void post(GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+        public void post(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
         }
     };
 
@@ -36,6 +34,6 @@ public interface GameEventDispatcher {
 
     public void unregister(GameEventListener var1);
 
-    public void post(GameEvent var1, @Nullable Entity var2, Vec3 var3);
+    public void post(GameEvent var1, Vec3 var2, GameEvent.Context var3);
 }
 

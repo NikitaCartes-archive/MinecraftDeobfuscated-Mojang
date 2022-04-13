@@ -26,7 +26,7 @@ extends MobRenderer<Fox, FoxModel<Fox>> {
 
     public FoxRenderer(EntityRendererProvider.Context context) {
         super(context, new FoxModel(context.bakeLayer(ModelLayers.FOX)), 0.4f);
-        this.addLayer(new FoxHeldItemLayer(this));
+        this.addLayer(new FoxHeldItemLayer(this, context.getItemInHandRenderer()));
     }
 
     @Override

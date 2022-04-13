@@ -7,8 +7,10 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.FloatProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CarverDebugSettings;
@@ -20,14 +22,14 @@ extends CarverConfiguration {
     public final FloatProvider verticalRotation;
     public final CanyonShapeConfiguration shape;
 
-    public CanyonCarverConfiguration(float f, HeightProvider heightProvider, FloatProvider floatProvider, VerticalAnchor verticalAnchor, CarverDebugSettings carverDebugSettings, FloatProvider floatProvider2, CanyonShapeConfiguration canyonShapeConfiguration) {
-        super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
+    public CanyonCarverConfiguration(float f, HeightProvider heightProvider, FloatProvider floatProvider, VerticalAnchor verticalAnchor, CarverDebugSettings carverDebugSettings, HolderSet<Block> holderSet, FloatProvider floatProvider2, CanyonShapeConfiguration canyonShapeConfiguration) {
+        super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings, holderSet);
         this.verticalRotation = floatProvider2;
         this.shape = canyonShapeConfiguration;
     }
 
     public CanyonCarverConfiguration(CarverConfiguration carverConfiguration, FloatProvider floatProvider, CanyonShapeConfiguration canyonShapeConfiguration) {
-        this(carverConfiguration.probability, carverConfiguration.y, carverConfiguration.yScale, carverConfiguration.lavaLevel, carverConfiguration.debugSettings, floatProvider, canyonShapeConfiguration);
+        this(carverConfiguration.probability, carverConfiguration.y, carverConfiguration.yScale, carverConfiguration.lavaLevel, carverConfiguration.debugSettings, carverConfiguration.replaceable, floatProvider, canyonShapeConfiguration);
     }
 
     public static class CanyonShapeConfiguration {

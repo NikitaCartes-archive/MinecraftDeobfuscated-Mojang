@@ -278,7 +278,7 @@ implements EntityTypeTest<Entity, T> {
     public static final EntityType<Villager> VILLAGER = EntityType.register("villager", Builder.of(Villager::new, MobCategory.MISC).sized(0.6f, 1.95f).clientTrackingRange(10));
     public static final EntityType<Vindicator> VINDICATOR = EntityType.register("vindicator", Builder.of(Vindicator::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<WanderingTrader> WANDERING_TRADER = EntityType.register("wandering_trader", Builder.of(WanderingTrader::new, MobCategory.CREATURE).sized(0.6f, 1.95f).clientTrackingRange(10));
-    public static final EntityType<Warden> WARDEN = EntityType.register("warden", Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9f, 2.9f).clientTrackingRange(10).fireImmune());
+    public static final EntityType<Warden> WARDEN = EntityType.register("warden", Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9f, 2.9f).clientTrackingRange(16).fireImmune());
     public static final EntityType<Witch> WITCH = EntityType.register("witch", Builder.of(Witch::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<WitherBoss> WITHER = EntityType.register("wither", Builder.of(WitherBoss::new, MobCategory.MONSTER).fireImmune().immuneTo(Blocks.WITHER_ROSE).sized(0.9f, 3.5f).clientTrackingRange(10));
     public static final EntityType<WitherSkeleton> WITHER_SKELETON = EntityType.register("wither_skeleton", Builder.of(WitherSkeleton::new, MobCategory.MONSTER).fireImmune().immuneTo(Blocks.WITHER_ROSE).sized(0.7f, 2.4f).clientTrackingRange(8));

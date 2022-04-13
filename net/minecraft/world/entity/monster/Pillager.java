@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -168,21 +169,22 @@ InventoryCarrier {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.populateDefaultEquipmentSlots(difficultyInstance);
-        this.populateDefaultEquipmentEnchantments(difficultyInstance);
+        RandomSource randomSource = serverLevelAccessor.getRandom();
+        this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
+        this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
-    protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
+    protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
     }
 
     @Override
-    protected void enchantSpawnedWeapon(float f) {
+    protected void enchantSpawnedWeapon(RandomSource randomSource, float f) {
         ItemStack itemStack;
-        super.enchantSpawnedWeapon(f);
-        if (this.random.nextInt(300) == 0 && (itemStack = this.getMainHandItem()).is(Items.CROSSBOW)) {
+        super.enchantSpawnedWeapon(randomSource, f);
+        if (randomSource.nextInt(300) == 0 && (itemStack = this.getMainHandItem()).is(Items.CROSSBOW)) {
             Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
             map.putIfAbsent(Enchantments.PIERCING, 1);
             EnchantmentHelper.setEnchantments(map, itemStack);

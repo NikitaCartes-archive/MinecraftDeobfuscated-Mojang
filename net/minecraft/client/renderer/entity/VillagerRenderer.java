@@ -23,9 +23,9 @@ extends MobRenderer<Villager, VillagerModel<Villager>> {
 
     public VillagerRenderer(EntityRendererProvider.Context context) {
         super(context, new VillagerModel(context.bakeLayer(ModelLayers.VILLAGER)), 0.5f);
-        this.addLayer(new CustomHeadLayer<Villager, VillagerModel<Villager>>(this, context.getModelSet()));
+        this.addLayer(new CustomHeadLayer<Villager, VillagerModel<Villager>>(this, context.getModelSet(), context.getItemInHandRenderer()));
         this.addLayer(new VillagerProfessionLayer<Villager, VillagerModel<Villager>>(this, context.getResourceManager(), "villager"));
-        this.addLayer(new CrossedArmsItemLayer<Villager, VillagerModel<Villager>>(this));
+        this.addLayer(new CrossedArmsItemLayer<Villager, VillagerModel<Villager>>(this, context.getItemInHandRenderer()));
     }
 
     @Override

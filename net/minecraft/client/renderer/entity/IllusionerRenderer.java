@@ -26,7 +26,7 @@ extends IllagerRenderer<Illusioner> {
 
     public IllusionerRenderer(EntityRendererProvider.Context context) {
         super(context, new IllagerModel(context.bakeLayer(ModelLayers.ILLUSIONER)), 0.5f);
-        this.addLayer(new ItemInHandLayer<Illusioner, IllagerModel<Illusioner>>((RenderLayerParent)this){
+        this.addLayer(new ItemInHandLayer<Illusioner, IllagerModel<Illusioner>>((RenderLayerParent)this, context.getItemInHandRenderer()){
 
             @Override
             public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Illusioner illusioner, float f, float g, float h, float j, float k, float l) {

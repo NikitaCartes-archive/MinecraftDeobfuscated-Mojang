@@ -383,6 +383,13 @@ CommandSource {
         return this.position().closerThan(entity.position(), d);
     }
 
+    public boolean closerThan(Entity entity, double d, double e) {
+        double f = entity.getX() - this.getX();
+        double g = entity.getY() - this.getY();
+        double h = entity.getZ() - this.getZ();
+        return Mth.lengthSquared(f, h) < Mth.square(d) && Mth.square(g) < Mth.square(e);
+    }
+
     protected void setRot(float f, float g) {
         this.setYRot(f % 360.0f);
         this.setXRot(g % 360.0f);
@@ -589,7 +596,7 @@ CommandSource {
         this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
         this.minorHorizontalCollision = this.horizontalCollision ? this.isHorizontalCollisionMinor(vec32) : false;
         this.onGround = this.verticalCollision && vec3.y < 0.0;
-        BlockPos blockPos = this.getOnPos();
+        BlockPos blockPos = this.getOnPosLegacy();
         BlockState blockState2 = this.level.getBlockState(blockPos);
         this.checkFallDamage(vec32.y, this.onGround, blockState2, blockPos);
         if (this.isRemoved()) {
@@ -608,11 +615,13 @@ CommandSource {
             block.stepOn(this.level, blockPos, blockState2, this);
         }
         if ((movementEmission = this.getMovementEmission()).emitsAnything() && !this.isPassenger()) {
+            boolean bl3;
             double e = vec32.x;
             double f = vec32.y;
             double g = vec32.z;
             this.flyDist += (float)(vec32.length() * 0.6);
-            if (!blockState2.is(BlockTags.CLIMBABLE) && !blockState2.is(Blocks.POWDER_SNOW)) {
+            boolean bl4 = bl3 = blockState2.is(BlockTags.CLIMBABLE) || blockState2.is(Blocks.POWDER_SNOW);
+            if (!bl3) {
                 f = 0.0;
             }
             this.walkDist += (float)vec32.horizontalDistance() * 0.6f;
@@ -635,7 +644,7 @@ CommandSource {
                         this.playAmethystStepSound(blockState2);
                         this.playStepSound(blockPos, blockState2);
                     }
-                    if (movementEmission.emitsEvents()) {
+                    if (movementEmission.emitsEvents() && (this.onGround || vec3.y == 0.0 || this.isInPowderSnow || bl3)) {
                         this.gameEvent(GameEvent.STEP);
                     }
                 }
@@ -688,13 +697,22 @@ CommandSource {
         }
     }
 
+    @Deprecated
+    public BlockPos getOnPosLegacy() {
+        return this.getOnPos(0.2f);
+    }
+
     public BlockPos getOnPos() {
+        return this.getOnPos(1.0E-5f);
+    }
+
+    private BlockPos getOnPos(float f) {
         BlockPos blockPos2;
         BlockState blockState;
         int k;
         int j;
         int i = Mth.floor(this.position.x);
-        BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.position.y - (double)0.2f), k = Mth.floor(this.position.z));
+        BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.position.y - (double)f), k = Mth.floor(this.position.z));
         if (this.level.getBlockState(blockPos).isAir() && ((blockState = this.level.getBlockState(blockPos2 = blockPos.below())).is(BlockTags.FENCES) || blockState.is(BlockTags.WALLS) || blockState.getBlock() instanceof FenceGateBlock)) {
             return blockPos2;
         }
@@ -938,7 +956,7 @@ CommandSource {
         return MovementEmission.ALL;
     }
 
-    public boolean occludesVibrations() {
+    public boolean dampensVibrations() {
         return false;
     }
 
@@ -1074,7 +1092,12 @@ CommandSource {
         this.gameEvent(GameEvent.SPLASH);
     }
 
-    protected BlockState getBlockStateOn() {
+    @Deprecated
+    protected BlockState getBlockStateOnLegacy() {
+        return this.level.getBlockState(this.getOnPosLegacy());
+    }
+
+    public BlockState getBlockStateOn() {
         return this.level.getBlockState(this.getOnPos());
     }
 
@@ -1227,10 +1250,10 @@ CommandSource {
             e *= g;
             d *= (double)0.05f;
             e *= (double)0.05f;
-            if (!this.isVehicle()) {
+            if (!this.isVehicle() && this.isPushable()) {
                 this.push(-d, 0.0, -e);
             }
-            if (!entity.isVehicle()) {
+            if (!entity.isVehicle() && entity.isPushable()) {
                 entity.push(d, 0.0, e);
             }
         }

@@ -22,7 +22,7 @@ extends IllagerRenderer<T> {
 
     public EvokerRenderer(EntityRendererProvider.Context context) {
         super(context, new IllagerModel(context.bakeLayer(ModelLayers.EVOKER)), 0.5f);
-        this.addLayer(new ItemInHandLayer<T, IllagerModel<T>>(this){
+        this.addLayer(new ItemInHandLayer<T, IllagerModel<T>>(this, context.getItemInHandRenderer()){
 
             @Override
             public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T spellcasterIllager, float f, float g, float h, float j, float k, float l) {

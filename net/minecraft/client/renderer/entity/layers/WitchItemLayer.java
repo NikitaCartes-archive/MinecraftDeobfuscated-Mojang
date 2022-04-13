@@ -8,6 +8,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
@@ -18,8 +19,8 @@ import net.minecraft.world.item.Items;
 @Environment(value=EnvType.CLIENT)
 public class WitchItemLayer<T extends LivingEntity>
 extends CrossedArmsItemLayer<T, WitchModel<T>> {
-    public WitchItemLayer(RenderLayerParent<T, WitchModel<T>> renderLayerParent) {
-        super(renderLayerParent);
+    public WitchItemLayer(RenderLayerParent<T, WitchModel<T>> renderLayerParent, ItemInHandRenderer itemInHandRenderer) {
+        super(renderLayerParent, itemInHandRenderer);
     }
 
     @Override

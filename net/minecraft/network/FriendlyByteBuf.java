@@ -49,6 +49,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -316,7 +317,11 @@ extends ByteBuf {
     }
 
     public Component readComponent() {
-        return Component.Serializer.fromJson(this.readUtf(262144));
+        MutableComponent component = Component.Serializer.fromJson(this.readUtf(262144));
+        if (component == null) {
+            throw new DecoderException("Received unexpected null component");
+        }
+        return component;
     }
 
     public FriendlyByteBuf writeComponent(Component component) {

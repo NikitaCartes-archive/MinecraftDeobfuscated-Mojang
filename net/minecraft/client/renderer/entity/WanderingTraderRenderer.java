@@ -22,8 +22,8 @@ extends MobRenderer<WanderingTrader, VillagerModel<WanderingTrader>> {
 
     public WanderingTraderRenderer(EntityRendererProvider.Context context) {
         super(context, new VillagerModel(context.bakeLayer(ModelLayers.WANDERING_TRADER)), 0.5f);
-        this.addLayer(new CustomHeadLayer<WanderingTrader, VillagerModel<WanderingTrader>>(this, context.getModelSet()));
-        this.addLayer(new CrossedArmsItemLayer<WanderingTrader, VillagerModel<WanderingTrader>>(this));
+        this.addLayer(new CustomHeadLayer<WanderingTrader, VillagerModel<WanderingTrader>>(this, context.getModelSet(), context.getItemInHandRenderer()));
+        this.addLayer(new CrossedArmsItemLayer<WanderingTrader, VillagerModel<WanderingTrader>>(this, context.getItemInHandRenderer()));
     }
 
     @Override

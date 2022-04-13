@@ -456,7 +456,7 @@ extends Entity {
 
     protected void tryAddSoulSpeed() {
         int i;
-        if (!this.getBlockStateOn().isAir() && (i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this)) > 0 && this.onSoulSpeedBlock()) {
+        if (!this.getBlockStateOnLegacy().isAir() && (i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this)) > 0 && this.onSoulSpeedBlock()) {
             AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
             if (attributeInstance == null) {
                 return;
@@ -481,7 +481,7 @@ extends Entity {
 
     protected void tryAddFrost() {
         int i;
-        if (!this.getBlockStateOn().isAir() && (i = this.getTicksFrozen()) > 0) {
+        if (!this.getBlockStateOnLegacy().isAir() && (i = this.getTicksFrozen()) > 0) {
             AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
             if (attributeInstance == null) {
                 return;
@@ -496,7 +496,7 @@ extends Entity {
         if (i > 0) {
             FrostWalkerEnchantment.onEntityMoved(this, this.level, blockPos, i);
         }
-        if (this.shouldRemoveSoulSpeed(this.getBlockStateOn())) {
+        if (this.shouldRemoveSoulSpeed(this.getBlockStateOnLegacy())) {
             this.removeSoulSpeed();
         }
         this.tryAddSoulSpeed();
@@ -2419,7 +2419,7 @@ extends Entity {
         Player player;
         Player player2 = player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
         if (player instanceof ServerPlayer) {
-            CriteriaTriggers.ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)player, itemEntity.getItem(), this);
+            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)player, itemEntity.getItem(), this);
         }
     }
 

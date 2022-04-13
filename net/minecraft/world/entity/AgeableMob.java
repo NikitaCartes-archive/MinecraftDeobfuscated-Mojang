@@ -37,7 +37,7 @@ extends PathfinderMob {
         if (spawnGroupData == null) {
             spawnGroupData = new AgeableMobGroupData(true);
         }
-        if ((ageableMobGroupData = (AgeableMobGroupData)spawnGroupData).isShouldSpawnBaby() && ageableMobGroupData.getGroupSize() > 0 && this.random.nextFloat() <= ageableMobGroupData.getBabySpawnChance()) {
+        if ((ageableMobGroupData = (AgeableMobGroupData)spawnGroupData).isShouldSpawnBaby() && ageableMobGroupData.getGroupSize() > 0 && serverLevelAccessor.getRandom().nextFloat() <= ageableMobGroupData.getBabySpawnChance()) {
             this.setAge(-24000);
         }
         ageableMobGroupData.increaseGroupSizeByOne();

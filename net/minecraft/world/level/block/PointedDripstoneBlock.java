@@ -265,11 +265,6 @@ SimpleWaterloggedBlock {
     }
 
     @Override
-    public BlockBehaviour.OffsetType getOffsetType() {
-        return BlockBehaviour.OffsetType.XZ;
-    }
-
-    @Override
     public float getMaxHorizontalOffset() {
         return 0.125f;
     }

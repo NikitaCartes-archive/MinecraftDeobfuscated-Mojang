@@ -48,6 +48,7 @@ extends TagsProvider<Item> {
         this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
         this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
         this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
+        this.copy(BlockTags.WART_BLOCKS, ItemTags.WART_BLOCKS);
         this.copy(BlockTags.LOGS_THAT_BURN, ItemTags.LOGS_THAT_BURN);
         this.copy(BlockTags.LOGS, ItemTags.LOGS);
         this.copy(BlockTags.SAND, ItemTags.SAND);
@@ -66,7 +67,7 @@ extends TagsProvider<Item> {
         this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
         this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
         this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
-        this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
+        this.copy(BlockTags.DAMPENS_VIBRATIONS, ItemTags.DAMPENS_VIBRATIONS);
         this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
         this.copy(BlockTags.IRON_ORES, ItemTags.IRON_ORES);
         this.copy(BlockTags.DIAMOND_ORES, ItemTags.DIAMOND_ORES);
@@ -77,6 +78,7 @@ extends TagsProvider<Item> {
         this.copy(BlockTags.COPPER_ORES, ItemTags.COPPER_ORES);
         this.copy(BlockTags.DIRT, ItemTags.DIRT);
         this.copy(BlockTags.TERRACOTTA, ItemTags.TERRACOTTA);
+        this.copy(BlockTags.COMPLETES_FIND_TREE_TUTORIAL, ItemTags.COMPLETES_FIND_TREE_TUTORIAL);
         this.tag(ItemTags.BANNERS).add((Item[])new Item[]{Items.WHITE_BANNER, Items.ORANGE_BANNER, Items.MAGENTA_BANNER, Items.LIGHT_BLUE_BANNER, Items.YELLOW_BANNER, Items.LIME_BANNER, Items.PINK_BANNER, Items.GRAY_BANNER, Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER, Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER});
         this.tag(ItemTags.BOATS).add((Item[])new Item[]{Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT, Items.MANGROVE_BOAT}).addTag(ItemTags.CHEST_BOATS);
         this.tag(ItemTags.CHEST_BOATS).add((Item[])new Item[]{Items.OAK_CHEST_BOAT, Items.SPRUCE_CHEST_BOAT, Items.BIRCH_CHEST_BOAT, Items.JUNGLE_CHEST_BOAT, Items.ACACIA_CHEST_BOAT, Items.DARK_OAK_CHEST_BOAT, Items.MANGROVE_CHEST_BOAT});

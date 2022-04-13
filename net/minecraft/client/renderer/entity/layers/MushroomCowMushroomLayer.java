@@ -25,8 +25,11 @@ import net.minecraft.world.level.block.state.BlockState;
 @Environment(value=EnvType.CLIENT)
 public class MushroomCowMushroomLayer<T extends MushroomCow>
 extends RenderLayer<T, CowModel<T>> {
-    public MushroomCowMushroomLayer(RenderLayerParent<T, CowModel<T>> renderLayerParent) {
+    private final BlockRenderDispatcher blockRenderer;
+
+    public MushroomCowMushroomLayer(RenderLayerParent<T, CowModel<T>> renderLayerParent, BlockRenderDispatcher blockRenderDispatcher) {
         super(renderLayerParent);
+        this.blockRenderer = blockRenderDispatcher;
     }
 
     @Override
@@ -40,16 +43,15 @@ extends RenderLayer<T, CowModel<T>> {
         if (((Entity)mushroomCow).isInvisible() && !bl) {
             return;
         }
-        BlockRenderDispatcher blockRenderDispatcher = minecraft.getBlockRenderer();
         BlockState blockState = ((MushroomCow)mushroomCow).getMushroomType().getBlockState();
         int m = LivingEntityRenderer.getOverlayCoords(mushroomCow, 0.0f);
-        BakedModel bakedModel = blockRenderDispatcher.getBlockModel(blockState);
+        BakedModel bakedModel = this.blockRenderer.getBlockModel(blockState);
         poseStack.pushPose();
         poseStack.translate(0.2f, -0.35f, 0.5);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-48.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         poseStack.translate(-0.5, -0.5, -0.5);
-        this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockRenderDispatcher, blockState, m, bakedModel);
+        this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockState, m, bakedModel);
         poseStack.popPose();
         poseStack.pushPose();
         poseStack.translate(0.2f, -0.35f, 0.5);
@@ -58,7 +60,7 @@ extends RenderLayer<T, CowModel<T>> {
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-48.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         poseStack.translate(-0.5, -0.5, -0.5);
-        this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockRenderDispatcher, blockState, m, bakedModel);
+        this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockState, m, bakedModel);
         poseStack.popPose();
         poseStack.pushPose();
         ((CowModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
@@ -66,15 +68,15 @@ extends RenderLayer<T, CowModel<T>> {
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-78.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         poseStack.translate(-0.5, -0.5, -0.5);
-        this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockRenderDispatcher, blockState, m, bakedModel);
+        this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockState, m, bakedModel);
         poseStack.popPose();
     }
 
-    private void renderMushroomBlock(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl, BlockRenderDispatcher blockRenderDispatcher, BlockState blockState, int j, BakedModel bakedModel) {
+    private void renderMushroomBlock(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl, BlockState blockState, int j, BakedModel bakedModel) {
         if (bl) {
-            blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(RenderType.outline(TextureAtlas.LOCATION_BLOCKS)), blockState, bakedModel, 0.0f, 0.0f, 0.0f, i, j);
+            this.blockRenderer.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(RenderType.outline(TextureAtlas.LOCATION_BLOCKS)), blockState, bakedModel, 0.0f, 0.0f, 0.0f, i, j);
         } else {
-            blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, j);
+            this.blockRenderer.renderSingleBlock(blockState, poseStack, multiBufferSource, i, j);
         }
     }
 }

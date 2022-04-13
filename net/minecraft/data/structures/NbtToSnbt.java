@@ -11,9 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +29,7 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) throws IOException {
+    public void run(CachedOutput cachedOutput) throws IOException {
         Path path2 = this.generator.getOutputFolder();
         for (Path path22 : this.generator.getInputFolders()) {
             Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".nbt")).forEach(path3 -> NbtToSnbt.convertStructure(path3, this.getName(path22, (Path)path3), path2));

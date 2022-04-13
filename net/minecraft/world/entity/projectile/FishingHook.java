@@ -4,8 +4,8 @@
 package net.minecraft.world.entity.projectile;
 
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
-import java.util.List;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -403,7 +403,7 @@ extends Projectile {
         } else if (this.nibble > 0) {
             LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withParameter(LootContextParams.ORIGIN, this.position()).withParameter(LootContextParams.TOOL, itemStack).withParameter(LootContextParams.THIS_ENTITY, this).withRandom(this.random).withLuck((float)this.luck + player.getLuck());
             LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
-            List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.FISHING));
+            ObjectArrayList<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.FISHING));
             CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, itemStack, this, list);
             for (ItemStack itemStack2 : list) {
                 ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), itemStack2);

@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -48,10 +49,10 @@ extends AbstractHorse {
     }
 
     @Override
-    protected void randomizeAttributes() {
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.generateRandomMaxHealth());
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed());
-        this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
+    protected void randomizeAttributes(RandomSource randomSource) {
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.generateRandomMaxHealth(randomSource));
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed(randomSource));
+        this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength(randomSource));
     }
 
     @Override
@@ -259,13 +260,14 @@ extends AbstractHorse {
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         Variant variant;
+        RandomSource randomSource = serverLevelAccessor.getRandom();
         if (spawnGroupData instanceof HorseGroupData) {
             variant = ((HorseGroupData)spawnGroupData).variant;
         } else {
-            variant = Util.getRandom(Variant.values(), this.random);
+            variant = Util.getRandom(Variant.values(), randomSource);
             spawnGroupData = new HorseGroupData(variant);
         }
-        this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), this.random));
+        this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), randomSource));
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

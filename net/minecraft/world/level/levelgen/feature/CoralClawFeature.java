@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,7 +28,7 @@ extends CoralFeature {
         }
         Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
         int i = randomSource.nextInt(2) + 2;
-        List<Direction> list = Util.shuffledCopy(List.of(direction, direction.getClockWise(), direction.getCounterClockWise()), randomSource);
+        List<Direction> list = Util.toShuffledList(Stream.of(direction, direction.getClockWise(), direction.getCounterClockWise()), randomSource);
         List<Direction> list2 = list.subList(0, i);
         block0: for (Direction direction2 : list2) {
             int l;

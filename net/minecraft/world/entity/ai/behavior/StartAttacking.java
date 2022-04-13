@@ -47,12 +47,12 @@ extends Behavior<E> {
 
     @Override
     protected void start(ServerLevel serverLevel, E mob, long l) {
-        this.targetFinderFunction.apply(mob).ifPresent(livingEntity -> this.setAttackTarget(mob, (LivingEntity)livingEntity));
+        this.targetFinderFunction.apply(mob).ifPresent(livingEntity -> StartAttacking.setAttackTarget(mob, livingEntity));
     }
 
-    private void setAttackTarget(E mob, LivingEntity livingEntity) {
-        ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, livingEntity);
-        ((LivingEntity)mob).getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+    public static <E extends Mob> void setAttackTarget(E mob, LivingEntity livingEntity) {
+        mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, livingEntity);
+        mob.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
     }
 }
 

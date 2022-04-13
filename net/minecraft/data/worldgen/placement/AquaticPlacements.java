@@ -5,7 +5,9 @@ package net.minecraft.data.worldgen.placement;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.features.AquaticFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.world.level.block.Blocks;
@@ -30,7 +32,7 @@ public class AquaticPlacements {
     public static final Holder<PlacedFeature> SEAGRASS_DEEP_WARM = PlacementUtils.register("seagrass_deep_warm", AquaticFeatures.SEAGRASS_TALL, AquaticPlacements.seagrassPlacement(80));
     public static final Holder<PlacedFeature> SEAGRASS_DEEP = PlacementUtils.register("seagrass_deep", AquaticFeatures.SEAGRASS_TALL, AquaticPlacements.seagrassPlacement(48));
     public static final Holder<PlacedFeature> SEAGRASS_DEEP_COLD = PlacementUtils.register("seagrass_deep_cold", AquaticFeatures.SEAGRASS_TALL, AquaticPlacements.seagrassPlacement(40));
-    public static final Holder<PlacedFeature> SEAGRASS_SIMPLE = PlacementUtils.register("seagrass_simple", AquaticFeatures.SEAGRASS_SIMPLE, CarvingMaskPlacement.forStep(GenerationStep.Carving.LIQUID), RarityFilter.onAverageOnceEvery(10), BlockPredicateFilter.forPredicate(BlockPredicate.allOf(BlockPredicate.matchesBlock(Blocks.STONE, new BlockPos(0, -1, 0)), BlockPredicate.matchesBlock(Blocks.WATER, BlockPos.ZERO), BlockPredicate.matchesBlock(Blocks.WATER, new BlockPos(0, 1, 0)))), BiomeFilter.biome());
+    public static final Holder<PlacedFeature> SEAGRASS_SIMPLE = PlacementUtils.register("seagrass_simple", AquaticFeatures.SEAGRASS_SIMPLE, CarvingMaskPlacement.forStep(GenerationStep.Carving.LIQUID), RarityFilter.onAverageOnceEvery(10), BlockPredicateFilter.forPredicate(BlockPredicate.allOf(BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.STONE), BlockPredicate.matchesBlocks((Vec3i)BlockPos.ZERO, Blocks.WATER), BlockPredicate.matchesBlocks(Direction.UP.getNormal(), Blocks.WATER))), BiomeFilter.biome());
     public static final Holder<PlacedFeature> SEA_PICKLE = PlacementUtils.register("sea_pickle", AquaticFeatures.SEA_PICKLE, RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());
     public static final Holder<PlacedFeature> KELP_COLD = PlacementUtils.register("kelp_cold", AquaticFeatures.KELP, NoiseBasedCountPlacement.of(120, 80.0, 0.0), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());
     public static final Holder<PlacedFeature> KELP_WARM = PlacementUtils.register("kelp_warm", AquaticFeatures.KELP, NoiseBasedCountPlacement.of(80, 80.0, 0.0), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome());

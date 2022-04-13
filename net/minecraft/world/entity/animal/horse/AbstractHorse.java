@@ -22,6 +22,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerListener;
 import net.minecraft.world.DifficultyInstance;
@@ -770,11 +771,11 @@ Saddleable {
     }
 
     protected void setOffspringAttributes(AgeableMob ageableMob, AbstractHorse abstractHorse) {
-        double d = this.getAttributeBaseValue(Attributes.MAX_HEALTH) + ageableMob.getAttributeBaseValue(Attributes.MAX_HEALTH) + (double)this.generateRandomMaxHealth();
+        double d = this.getAttributeBaseValue(Attributes.MAX_HEALTH) + ageableMob.getAttributeBaseValue(Attributes.MAX_HEALTH) + (double)this.generateRandomMaxHealth(this.random);
         abstractHorse.getAttribute(Attributes.MAX_HEALTH).setBaseValue(d / 3.0);
-        double e = this.getAttributeBaseValue(Attributes.JUMP_STRENGTH) + ageableMob.getAttributeBaseValue(Attributes.JUMP_STRENGTH) + this.generateRandomJumpStrength();
+        double e = this.getAttributeBaseValue(Attributes.JUMP_STRENGTH) + ageableMob.getAttributeBaseValue(Attributes.JUMP_STRENGTH) + this.generateRandomJumpStrength(this.random);
         abstractHorse.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(e / 3.0);
-        double f = this.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) + ageableMob.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) + this.generateRandomSpeed();
+        double f = this.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) + ageableMob.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) + this.generateRandomSpeed(this.random);
         abstractHorse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(f / 3.0);
     }
 
@@ -860,16 +861,16 @@ Saddleable {
         }
     }
 
-    protected float generateRandomMaxHealth() {
-        return 15.0f + (float)this.random.nextInt(8) + (float)this.random.nextInt(9);
+    protected float generateRandomMaxHealth(RandomSource randomSource) {
+        return 15.0f + (float)randomSource.nextInt(8) + (float)randomSource.nextInt(9);
     }
 
-    protected double generateRandomJumpStrength() {
-        return (double)0.4f + this.random.nextDouble() * 0.2 + this.random.nextDouble() * 0.2 + this.random.nextDouble() * 0.2;
+    protected double generateRandomJumpStrength(RandomSource randomSource) {
+        return (double)0.4f + randomSource.nextDouble() * 0.2 + randomSource.nextDouble() * 0.2 + randomSource.nextDouble() * 0.2;
     }
 
-    protected double generateRandomSpeed() {
-        return ((double)0.45f + this.random.nextDouble() * 0.3 + this.random.nextDouble() * 0.3 + this.random.nextDouble() * 0.3) * 0.25;
+    protected double generateRandomSpeed(RandomSource randomSource) {
+        return ((double)0.45f + randomSource.nextDouble() * 0.3 + randomSource.nextDouble() * 0.3 + randomSource.nextDouble() * 0.3) * 0.25;
     }
 
     @Override
@@ -985,7 +986,7 @@ Saddleable {
         return this.position();
     }
 
-    protected void randomizeAttributes() {
+    protected void randomizeAttributes(RandomSource randomSource) {
     }
 
     @Override
@@ -994,7 +995,7 @@ Saddleable {
         if (spawnGroupData == null) {
             spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2f);
         }
-        this.randomizeAttributes();
+        this.randomizeAttributes(serverLevelAccessor.getRandom());
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

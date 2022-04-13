@@ -8,10 +8,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
@@ -25,7 +23,7 @@ public record BlockColumnConfiguration(List<Layer> layers, Direction direction, 
     }
 
     public static BlockColumnConfiguration simple(IntProvider intProvider, BlockStateProvider blockStateProvider) {
-        return new BlockColumnConfiguration(List.of(BlockColumnConfiguration.layer(intProvider, blockStateProvider)), Direction.UP, BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO), false);
+        return new BlockColumnConfiguration(List.of(BlockColumnConfiguration.layer(intProvider, blockStateProvider)), Direction.UP, BlockPredicate.ONLY_IN_AIR_PREDICATE, false);
     }
 
     public record Layer(IntProvider height, BlockStateProvider state) {

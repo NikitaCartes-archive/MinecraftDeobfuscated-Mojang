@@ -8,22 +8,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
@@ -52,7 +47,7 @@ implements DataProvider {
     protected abstract void addTags();
 
     @Override
-    public void run(HashCache hashCache) {
+    public void run(CachedOutput cachedOutput) {
         this.builders.clear();
         this.addTags();
         this.builders.forEach((resourceLocation, builder) -> {
@@ -64,14 +59,7 @@ implements DataProvider {
             Path path = this.getPath((ResourceLocation)resourceLocation);
             try {
                 String string = GSON.toJson(jsonObject);
-                String string2 = SHA1.hashUnencodedChars(string).toString();
-                if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
-                    Files.createDirectories(path.getParent(), new FileAttribute[0]);
-                    try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, new OpenOption[0]);){
-                        bufferedWriter.write(string);
-                    }
-                }
-                hashCache.putNew(path, string2);
+                cachedOutput.writeIfNeeded(path, string);
             } catch (IOException iOException) {
                 LOGGER.error("Couldn't save tags to {}", (Object)path, (Object)iOException);
             }

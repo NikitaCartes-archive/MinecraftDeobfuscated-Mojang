@@ -63,7 +63,7 @@ extends LivingEntityRenderer<T, M> {
         int v;
         poseStack.pushPose();
         Vec3 vec3 = entity.getRopeHoldPosition(f);
-        double d = (double)(Mth.lerp(f, ((Mob)mob).yBodyRot, ((Mob)mob).yBodyRotO) * ((float)Math.PI / 180)) + 1.5707963267948966;
+        double d = (double)(Mth.lerp(f, ((Mob)mob).yBodyRotO, ((Mob)mob).yBodyRot) * ((float)Math.PI / 180)) + 1.5707963267948966;
         Vec3 vec32 = ((Entity)mob).getLeashOffset();
         double e = Math.cos(d) * vec32.z + Math.sin(d) * vec32.x;
         double g = Math.sin(d) * vec32.z - Math.cos(d) * vec32.x;

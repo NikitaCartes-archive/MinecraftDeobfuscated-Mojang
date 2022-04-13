@@ -15,9 +15,9 @@ import java.nio.file.Path;
 import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -35,22 +35,22 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) {
+    public void run(CachedOutput cachedOutput) {
         Path path = this.generator.getOutputFolder();
         RegistryAccess.Frozen frozen = RegistryAccess.BUILTIN.get();
         RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, frozen);
         Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
         MultiNoiseBiomeSource.Preset.getPresets().forEach(pair -> {
             MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(registry, false);
-            BiomeParametersDumpReport.dumpValue(BiomeParametersDumpReport.createPath(path, (ResourceLocation)pair.getFirst()), hashCache, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
+            BiomeParametersDumpReport.dumpValue(BiomeParametersDumpReport.createPath(path, (ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
         });
     }
 
-    private static <E> void dumpValue(Path path, HashCache hashCache, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
+    private static <E> void dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
         try {
             Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object).resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", (Object)path, string));
             if (optional.isPresent()) {
-                DataProvider.save(GSON, hashCache, optional.get(), path);
+                DataProvider.save(GSON, cachedOutput, optional.get(), path);
             }
         } catch (IOException iOException) {
             LOGGER.error("Couldn't save element {}", (Object)path, (Object)iOException);

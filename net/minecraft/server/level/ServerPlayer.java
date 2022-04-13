@@ -891,7 +891,7 @@ extends Player {
         if (this.touchingUnloadedChunk()) {
             return;
         }
-        BlockPos blockPos = this.getOnPos();
+        BlockPos blockPos = this.getOnPosLegacy();
         super.checkFallDamage(d, bl, this.level.getBlockState(blockPos), blockPos);
     }
 
@@ -1495,6 +1495,16 @@ extends Player {
 
     public boolean allowsListing() {
         return this.allowsListing;
+    }
+
+    @Override
+    public void onItemPickup(ItemEntity itemEntity) {
+        Entity entity;
+        super.onItemPickup(itemEntity);
+        Entity entity2 = entity = itemEntity.getThrower() != null ? this.getLevel().getEntity(itemEntity.getThrower()) : null;
+        if (entity != null) {
+            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, itemEntity.getItem(), entity);
+        }
     }
 
     @Override

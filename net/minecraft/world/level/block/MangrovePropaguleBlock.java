@@ -38,10 +38,10 @@ implements SimpleWaterloggedBlock {
     private static final VoxelShape[] SHAPE_PER_AGE = new VoxelShape[]{Block.box(7.0, 13.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 10.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 7.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 3.0, 7.0, 9.0, 16.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)};
     private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
-    private static final float GROW_TALL_MANGROVE_PROBABILITY = 0.75f;
+    private static final float GROW_TALL_MANGROVE_PROBABILITY = 0.85f;
 
     public MangrovePropaguleBlock(BlockBehaviour.Properties properties) {
-        super(new MangroveTreeGrower(0.75f), properties);
+        super(new MangroveTreeGrower(0.85f), properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(STAGE, 0)).setValue(AGE, 0)).setValue(WATERLOGGED, false)).setValue(HANGING, false));
     }
 
@@ -68,11 +68,6 @@ implements SimpleWaterloggedBlock {
         Vec3 vec3 = blockState.getOffset(blockGetter, blockPos);
         VoxelShape voxelShape = blockState.getValue(HANGING) == false ? SHAPE_PER_AGE[4] : SHAPE_PER_AGE[blockState.getValue(AGE)];
         return voxelShape.move(vec3.x, vec3.y, vec3.z);
-    }
-
-    @Override
-    public BlockBehaviour.OffsetType getOffsetType() {
-        return BlockBehaviour.OffsetType.XZ;
     }
 
     @Override

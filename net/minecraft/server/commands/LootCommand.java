@@ -13,6 +13,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -230,7 +231,7 @@ public class LootCommand {
         builder.withParameter(LootContextParams.THIS_ENTITY, entity);
         builder.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
         LootTable lootTable = commandSourceStack.getServer().getLootTables().get(resourceLocation);
-        List<ItemStack> list2 = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
+        ObjectArrayList<ItemStack> list2 = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
         return dropConsumer.accept(commandContext, list2, list -> LootCommand.callback(commandSourceStack, list, resourceLocation));
     }
 
@@ -249,7 +250,7 @@ public class LootCommand {
     private static int drop(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, LootContext lootContext, DropConsumer dropConsumer) throws CommandSyntaxException {
         CommandSourceStack commandSourceStack = commandContext.getSource();
         LootTable lootTable = commandSourceStack.getServer().getLootTables().get(resourceLocation);
-        List<ItemStack> list2 = lootTable.getRandomItems(lootContext);
+        ObjectArrayList<ItemStack> list2 = lootTable.getRandomItems(lootContext);
         return dropConsumer.accept(commandContext, list2, list -> LootCommand.callback(commandSourceStack, list));
     }
 

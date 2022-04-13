@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.WorldVersion;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.server.Bootstrap;
@@ -20,11 +21,16 @@ public class DataGenerator {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Collection<Path> inputFolders;
     private final Path outputFolder;
-    private final List<DataProvider> providers = Lists.newArrayList();
+    private final List<DataProvider> allProviders = Lists.newArrayList();
+    private final List<DataProvider> providersToRun = Lists.newArrayList();
+    private final WorldVersion version;
+    private final boolean alwaysGenerate;
 
-    public DataGenerator(Path path, Collection<Path> collection) {
+    public DataGenerator(Path path, Collection<Path> collection, WorldVersion worldVersion, boolean bl) {
         this.outputFolder = path;
         this.inputFolders = collection;
+        this.version = worldVersion;
+        this.alwaysGenerate = bl;
     }
 
     public Collection<Path> getInputFolders() {
@@ -36,14 +42,17 @@ public class DataGenerator {
     }
 
     public void run() throws IOException {
-        HashCache hashCache = new HashCache(this.outputFolder, "cache");
-        hashCache.keep(this.getOutputFolder().resolve("version.json"));
+        HashCache hashCache = new HashCache(this.outputFolder, this.allProviders, this.version);
         Stopwatch stopwatch = Stopwatch.createStarted();
         Stopwatch stopwatch2 = Stopwatch.createUnstarted();
-        for (DataProvider dataProvider : this.providers) {
+        for (DataProvider dataProvider : this.providersToRun) {
+            if (!this.alwaysGenerate && !hashCache.shouldRunInThisVersion(dataProvider)) {
+                LOGGER.debug("Generator {} already run for version {}", (Object)dataProvider.getName(), (Object)this.version.getName());
+                continue;
+            }
             LOGGER.info("Starting provider: {}", (Object)dataProvider.getName());
             stopwatch2.start();
-            dataProvider.run(hashCache);
+            dataProvider.run(hashCache.getUpdater(dataProvider));
             stopwatch2.stop();
             LOGGER.info("{} finished after {} ms", (Object)dataProvider.getName(), (Object)stopwatch2.elapsed(TimeUnit.MILLISECONDS));
             stopwatch2.reset();
@@ -52,8 +61,11 @@ public class DataGenerator {
         hashCache.purgeStaleAndWrite();
     }
 
-    public void addProvider(DataProvider dataProvider) {
-        this.providers.add(dataProvider);
+    public void addProvider(boolean bl, DataProvider dataProvider) {
+        if (bl) {
+            this.providersToRun.add(dataProvider);
+        }
+        this.allProviders.add(dataProvider);
     }
 
     static {

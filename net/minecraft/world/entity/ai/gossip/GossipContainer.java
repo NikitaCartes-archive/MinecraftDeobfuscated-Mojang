@@ -24,7 +24,7 @@ import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.core.SerializableUUID;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.gossip.GossipType;
@@ -219,11 +219,11 @@ public class GossipContainer {
         }
 
         public <T> Dynamic<T> store(DynamicOps<T> dynamicOps) {
-            return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString(TAG_TARGET), SerializableUUID.CODEC.encodeStart(dynamicOps, this.target).result().orElseThrow(RuntimeException::new), dynamicOps.createString(TAG_TYPE), dynamicOps.createString(this.type.id), dynamicOps.createString(TAG_VALUE), dynamicOps.createInt(this.value))));
+            return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString(TAG_TARGET), UUIDUtil.CODEC.encodeStart(dynamicOps, this.target).result().orElseThrow(RuntimeException::new), dynamicOps.createString(TAG_TYPE), dynamicOps.createString(this.type.id), dynamicOps.createString(TAG_VALUE), dynamicOps.createInt(this.value))));
         }
 
         public static DataResult<GossipEntry> load(Dynamic<?> dynamic) {
-            return DataResult.unbox(DataResult.instance().group(dynamic.get(TAG_TARGET).read(SerializableUUID.CODEC), dynamic.get(TAG_TYPE).asString().map(GossipType::byId), dynamic.get(TAG_VALUE).asNumber().map(Number::intValue)).apply(DataResult.instance(), GossipEntry::new));
+            return DataResult.unbox(DataResult.instance().group(dynamic.get(TAG_TARGET).read(UUIDUtil.CODEC), dynamic.get(TAG_TYPE).asString().map(GossipType::byId), dynamic.get(TAG_VALUE).asNumber().map(Number::intValue)).apply(DataResult.instance(), GossipEntry::new));
         }
     }
 }

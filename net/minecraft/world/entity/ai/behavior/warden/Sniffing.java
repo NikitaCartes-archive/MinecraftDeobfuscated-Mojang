@@ -17,7 +17,8 @@ import net.minecraft.world.entity.monster.warden.WardenAi;
 
 public class Sniffing<E extends Warden>
 extends Behavior<E> {
-    private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE = 6.0;
+    private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_XZ = 6.0;
+    private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_Y = 20.0;
 
     public Sniffing(int i) {
         super(ImmutableMap.of(MemoryModuleType.IS_SNIFFING, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.NEAREST_ATTACKABLE, MemoryStatus.REGISTERED), i);
@@ -40,7 +41,7 @@ extends Behavior<E> {
         }
         ((Warden)warden).getBrain().eraseMemory(MemoryModuleType.IS_SNIFFING);
         ((Warden)warden).getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE).filter(arg_0 -> warden.canTargetEntity(arg_0)).ifPresent(livingEntity -> {
-            if (warden.closerThan((Entity)livingEntity, 6.0)) {
+            if (warden.closerThan((Entity)livingEntity, 6.0, 20.0)) {
                 warden.increaseAngerAt((Entity)livingEntity);
             }
             WardenAi.setDisturbanceLocation(warden, livingEntity.blockPosition());

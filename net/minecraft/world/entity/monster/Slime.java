@@ -311,8 +311,9 @@ implements Enemy {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        int i = this.random.nextInt(3);
-        if (i < 2 && this.random.nextFloat() < 0.5f * difficultyInstance.getSpecialMultiplier()) {
+        RandomSource randomSource = serverLevelAccessor.getRandom();
+        int i = randomSource.nextInt(3);
+        if (i < 2 && randomSource.nextFloat() < 0.5f * difficultyInstance.getSpecialMultiplier()) {
             ++i;
         }
         int j = 1 << i;

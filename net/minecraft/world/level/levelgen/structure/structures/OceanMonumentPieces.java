@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -1218,16 +1219,16 @@ public class OceanMonumentPieces {
             this.coreRoom.connections[Direction.EAST.get3DDataValue()].connections[Direction.UP.get3DDataValue()].claimed = true;
             this.coreRoom.connections[Direction.NORTH.get3DDataValue()].connections[Direction.UP.get3DDataValue()].claimed = true;
             this.coreRoom.connections[Direction.EAST.get3DDataValue()].connections[Direction.NORTH.get3DDataValue()].connections[Direction.UP.get3DDataValue()].claimed = true;
-            ArrayList<RoomDefinition> list = Lists.newArrayList();
+            ObjectArrayList<RoomDefinition> objectArrayList = new ObjectArrayList<RoomDefinition>();
             for (RoomDefinition roomDefinition4 : roomDefinitions) {
                 if (roomDefinition4 == null) continue;
                 roomDefinition4.updateOpenings();
-                list.add(roomDefinition4);
+                objectArrayList.add(roomDefinition4);
             }
             roomDefinition.updateOpenings();
-            Util.shuffle(list, randomSource);
+            Util.shuffle(objectArrayList, randomSource);
             int q = 1;
-            for (RoomDefinition roomDefinition5 : list) {
+            for (RoomDefinition roomDefinition5 : objectArrayList) {
                 int r = 0;
                 for (m = 0; r < 2 && m < 5; ++m) {
                     n = randomSource.nextInt(6);
@@ -1243,10 +1244,10 @@ public class OceanMonumentPieces {
                     roomDefinition5.connections[n].hasOpening[o] = true;
                 }
             }
-            list.add(roomDefinition);
-            list.add(roomDefinition2);
-            list.add(roomDefinition3);
-            return list;
+            objectArrayList.add(roomDefinition);
+            objectArrayList.add(roomDefinition2);
+            objectArrayList.add(roomDefinition3);
+            return objectArrayList;
         }
 
         @Override

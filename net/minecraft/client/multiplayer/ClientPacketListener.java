@@ -10,12 +10,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -216,7 +212,6 @@ import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
@@ -307,7 +302,7 @@ implements ClientGamePacketListener {
     private final DebugQueryHandler debugQueryHandler = new DebugQueryHandler(this);
     private int serverChunkRadius = 3;
     private int serverSimulationDistance = 3;
-    private final RandomSource random = RandomSource.create();
+    private final RandomSource random = RandomSource.createThreadSafe();
     private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher();
     private final RecipeManager recipeManager = new RecipeManager();
     private final UUID id = UUID.randomUUID();
@@ -1466,33 +1461,17 @@ implements ClientGamePacketListener {
 
     @Override
     public void handleResourcePack(ClientboundResourcePackPacket clientboundResourcePackPacket) {
-        String string = clientboundResourcePackPacket.getUrl();
-        String string2 = clientboundResourcePackPacket.getHash();
-        boolean bl = clientboundResourcePackPacket.isRequired();
-        if (!this.validateResourcePackUrl(string)) {
-            return;
-        }
-        if (string.startsWith("level://")) {
-            try {
-                String string3 = URLDecoder.decode(string.substring("level://".length()), StandardCharsets.UTF_8.toString());
-                File file = new File(this.minecraft.gameDirectory, "saves");
-                File file2 = new File(file, string3);
-                if (file2.isFile()) {
-                    this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-                    CompletableFuture<Void> completableFuture = this.minecraft.getClientPackSource().setServerPack(file2, PackSource.WORLD);
-                    this.downloadCallback(completableFuture);
-                    return;
-                }
-            } catch (UnsupportedEncodingException string3) {
-                // empty catch block
-            }
+        URL uRL = ClientPacketListener.parseResourcePackUrl(clientboundResourcePackPacket.getUrl());
+        if (uRL == null) {
             this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
             return;
         }
+        String string = clientboundResourcePackPacket.getHash();
+        boolean bl = clientboundResourcePackPacket.isRequired();
         ServerData serverData = this.minecraft.getCurrentServer();
         if (serverData != null && serverData.getResourcePackStatus() == ServerData.ServerPackStatus.ENABLED) {
             this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-            this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(string, string2, true));
+            this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(uRL, string, true));
         } else if (serverData == null || serverData.getResourcePackStatus() == ServerData.ServerPackStatus.PROMPT || bl && serverData.getResourcePackStatus() == ServerData.ServerPackStatus.DISABLED) {
             this.minecraft.execute(() -> this.minecraft.setScreen(new ConfirmScreen(bl2 -> {
                 this.minecraft.setScreen(null);
@@ -1502,7 +1481,7 @@ implements ClientGamePacketListener {
                         serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
                     }
                     this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-                    this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(string, string2, true));
+                    this.downloadCallback(this.minecraft.getClientPackSource().downloadAndSelectResourcePack(uRL, string, true));
                 } else {
                     this.send(ServerboundResourcePackPacket.Action.DECLINED);
                     if (bl) {
@@ -1530,22 +1509,18 @@ implements ClientGamePacketListener {
         return new TranslatableComponent("multiplayer.texturePrompt.serverPrompt", component, component2);
     }
 
-    private boolean validateResourcePackUrl(String string) {
+    @Nullable
+    private static URL parseResourcePackUrl(String string) {
         try {
-            URI uRI = new URI(string);
-            String string2 = uRI.getScheme();
-            boolean bl = "level".equals(string2);
-            if (!("http".equals(string2) || "https".equals(string2) || bl)) {
-                throw new URISyntaxException(string, "Wrong protocol");
+            URL uRL = new URL(string);
+            String string2 = uRL.getProtocol();
+            if ("http".equals(string2) || "https".equals(string2)) {
+                return uRL;
             }
-            if (bl && (string.contains("..") || !string.endsWith("/resources.zip"))) {
-                throw new URISyntaxException(string, "Invalid levelstorage resourcepack path");
-            }
-        } catch (URISyntaxException uRISyntaxException) {
-            this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
-            return false;
+        } catch (MalformedURLException malformedURLException) {
+            return null;
         }
-        return true;
+        return null;
     }
 
     private void downloadCallback(CompletableFuture<?> completableFuture) {

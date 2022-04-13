@@ -5,15 +5,10 @@ package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.List;
-import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 
@@ -32,29 +27,30 @@ extends TreeDecorator {
     }
 
     @Override
-    public void place(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, List<BlockPos> list, List<BlockPos> list2, List<BlockPos> list3) {
-        list2.forEach(blockPos -> {
+    public void place(TreeDecorator.Context context) {
+        RandomSource randomSource = context.random();
+        context.leaves().forEach(blockPos -> {
             BlockPos blockPos2;
-            if (randomSource.nextFloat() < this.probability && Feature.isAir(levelSimulatedReader, blockPos2 = blockPos.west())) {
-                LeaveVineDecorator.addHangingVine(levelSimulatedReader, blockPos2, VineBlock.EAST, biConsumer);
+            if (randomSource.nextFloat() < this.probability && context.isAir(blockPos2 = blockPos.west())) {
+                LeaveVineDecorator.addHangingVine(blockPos2, VineBlock.EAST, context);
             }
-            if (randomSource.nextFloat() < this.probability && Feature.isAir(levelSimulatedReader, blockPos2 = blockPos.east())) {
-                LeaveVineDecorator.addHangingVine(levelSimulatedReader, blockPos2, VineBlock.WEST, biConsumer);
+            if (randomSource.nextFloat() < this.probability && context.isAir(blockPos2 = blockPos.east())) {
+                LeaveVineDecorator.addHangingVine(blockPos2, VineBlock.WEST, context);
             }
-            if (randomSource.nextFloat() < this.probability && Feature.isAir(levelSimulatedReader, blockPos2 = blockPos.north())) {
-                LeaveVineDecorator.addHangingVine(levelSimulatedReader, blockPos2, VineBlock.SOUTH, biConsumer);
+            if (randomSource.nextFloat() < this.probability && context.isAir(blockPos2 = blockPos.north())) {
+                LeaveVineDecorator.addHangingVine(blockPos2, VineBlock.SOUTH, context);
             }
-            if (randomSource.nextFloat() < this.probability && Feature.isAir(levelSimulatedReader, blockPos2 = blockPos.south())) {
-                LeaveVineDecorator.addHangingVine(levelSimulatedReader, blockPos2, VineBlock.NORTH, biConsumer);
+            if (randomSource.nextFloat() < this.probability && context.isAir(blockPos2 = blockPos.south())) {
+                LeaveVineDecorator.addHangingVine(blockPos2, VineBlock.NORTH, context);
             }
         });
     }
 
-    private static void addHangingVine(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos, BooleanProperty booleanProperty, BiConsumer<BlockPos, BlockState> biConsumer) {
-        LeaveVineDecorator.placeVine(biConsumer, blockPos, booleanProperty);
+    private static void addHangingVine(BlockPos blockPos, BooleanProperty booleanProperty, TreeDecorator.Context context) {
+        context.placeVine(blockPos, booleanProperty);
         blockPos = blockPos.below();
-        for (int i = 4; Feature.isAir(levelSimulatedReader, blockPos) && i > 0; --i) {
-            LeaveVineDecorator.placeVine(biConsumer, blockPos, booleanProperty);
+        for (int i = 4; context.isAir(blockPos) && i > 0; --i) {
+            context.placeVine(blockPos, booleanProperty);
             blockPos = blockPos.below();
         }
     }

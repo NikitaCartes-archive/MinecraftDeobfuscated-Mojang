@@ -158,7 +158,8 @@ extends Monster {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         MobEffect mobEffect;
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-        if (serverLevelAccessor.getRandom().nextInt(100) == 0) {
+        RandomSource randomSource = serverLevelAccessor.getRandom();
+        if (randomSource.nextInt(100) == 0) {
             Skeleton skeleton = EntityType.SKELETON.create(this.level);
             skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
             skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
@@ -166,8 +167,8 @@ extends Monster {
         }
         if (spawnGroupData == null) {
             spawnGroupData = new SpiderEffectsGroupData();
-            if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && serverLevelAccessor.getRandom().nextFloat() < 0.1f * difficultyInstance.getSpecialMultiplier()) {
-                ((SpiderEffectsGroupData)spawnGroupData).setRandomEffect(serverLevelAccessor.getRandom());
+            if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && randomSource.nextFloat() < 0.1f * difficultyInstance.getSpecialMultiplier()) {
+                ((SpiderEffectsGroupData)spawnGroupData).setRandomEffect(randomSource);
             }
         }
         if (spawnGroupData instanceof SpiderEffectsGroupData && (mobEffect = ((SpiderEffectsGroupData)spawnGroupData).effect) != null) {

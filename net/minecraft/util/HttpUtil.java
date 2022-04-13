@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.ServerSocket;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -26,7 +27,7 @@ public class HttpUtil {
     private HttpUtil() {
     }
 
-    public static CompletableFuture<?> downloadTo(File file, String string, Map<String, String> map, int i, @Nullable ProgressListener progressListener, Proxy proxy) {
+    public static CompletableFuture<?> downloadTo(File file, URL uRL, Map<String, String> map, int i, @Nullable ProgressListener progressListener, Proxy proxy) {
         return CompletableFuture.supplyAsync(() -> {
             /*
              * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.

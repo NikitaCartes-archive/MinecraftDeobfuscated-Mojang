@@ -9,11 +9,11 @@ import com.mojang.math.Vector3f;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -40,17 +40,19 @@ extends RenderLayer<T, M> {
     private final float scaleY;
     private final float scaleZ;
     private final Map<SkullBlock.Type, SkullModelBase> skullModels;
+    private final ItemInHandRenderer itemInHandRenderer;
 
-    public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet) {
-        this(renderLayerParent, entityModelSet, 1.0f, 1.0f, 1.0f);
+    public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, ItemInHandRenderer itemInHandRenderer) {
+        this(renderLayerParent, entityModelSet, 1.0f, 1.0f, 1.0f, itemInHandRenderer);
     }
 
-    public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, float f, float g, float h) {
+    public CustomHeadLayer(RenderLayerParent<T, M> renderLayerParent, EntityModelSet entityModelSet, float f, float g, float h, ItemInHandRenderer itemInHandRenderer) {
         super(renderLayerParent);
         this.scaleX = f;
         this.scaleY = g;
         this.scaleZ = h;
         this.skullModels = SkullBlockRenderer.createSkullRenderers(entityModelSet);
+        this.itemInHandRenderer = itemInHandRenderer;
     }
 
     @Override
@@ -91,7 +93,7 @@ extends RenderLayer<T, M> {
             SkullBlockRenderer.renderSkull(null, 180.0f, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
         } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
             CustomHeadLayer.translateToHead(poseStack, bl);
-            Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
+            this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
         }
         poseStack.popPose();
     }

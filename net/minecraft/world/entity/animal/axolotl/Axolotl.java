@@ -144,14 +144,15 @@ Bucketable {
         if (mobSpawnType == MobSpawnType.BUCKET) {
             return spawnGroupData;
         }
+        RandomSource randomSource = serverLevelAccessor.getRandom();
         if (spawnGroupData instanceof AxolotlGroupData) {
             if (((AxolotlGroupData)spawnGroupData).getGroupSize() >= 2) {
                 bl = true;
             }
         } else {
-            spawnGroupData = new AxolotlGroupData(Variant.getCommonSpawnVariant(this.level.random), Variant.getCommonSpawnVariant(this.level.random));
+            spawnGroupData = new AxolotlGroupData(Variant.getCommonSpawnVariant(randomSource), Variant.getCommonSpawnVariant(randomSource));
         }
-        this.setVariant(((AxolotlGroupData)spawnGroupData).getVariant(this.level.random));
+        this.setVariant(((AxolotlGroupData)spawnGroupData).getVariant(randomSource));
         if (bl) {
             this.setAge(-24000);
         }

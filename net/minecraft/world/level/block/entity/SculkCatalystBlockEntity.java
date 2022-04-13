@@ -23,7 +23,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class SculkCatalystBlockEntity
 extends BlockEntity
@@ -48,8 +47,9 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
-        if (gameEvent == GameEvent.ENTITY_DIE && entity instanceof LivingEntity) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+        Entity entity;
+        if (gameEvent == GameEvent.ENTITY_DIE && (entity = context.sourceEntity()) instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity;
             if (!livingEntity.wasExperienceConsumed()) {
                 this.sculkSpreader.addCursors(new BlockPos(vec3), livingEntity.getExperienceReward());
@@ -58,7 +58,7 @@ implements GameEventListener {
                 if (livingEntity2 instanceof ServerPlayer) {
                     ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
                     DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
-                    CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, entity, damageSource);
+                    CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, context.sourceEntity(), damageSource);
                 }
                 SculkCatalystBlock.bloom(serverLevel, this.worldPosition, this.getBlockState(), serverLevel.getRandom());
             }

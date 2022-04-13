@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.Util;
@@ -235,16 +236,16 @@ public class WoodlandMansionPieces {
 
         private void identifyRooms(SimpleGrid simpleGrid, SimpleGrid simpleGrid2) {
             int i;
-            ArrayList<Tuple<Integer, Integer>> list = Lists.newArrayList();
+            ObjectArrayList<Tuple<Integer, Integer>> objectArrayList = new ObjectArrayList<Tuple<Integer, Integer>>();
             for (i = 0; i < simpleGrid.height; ++i) {
                 for (int j = 0; j < simpleGrid.width; ++j) {
                     if (simpleGrid.get(j, i) != 2) continue;
-                    list.add(new Tuple<Integer, Integer>(j, i));
+                    objectArrayList.add(new Tuple<Integer, Integer>(j, i));
                 }
             }
-            Util.shuffle(list, this.random);
+            Util.shuffle(objectArrayList, this.random);
             i = 10;
-            for (Tuple tuple : list) {
+            for (Tuple tuple : objectArrayList) {
                 int l;
                 int k = (Integer)tuple.getA();
                 if (simpleGrid2.get(k, l = ((Integer)tuple.getB()).intValue()) != 0) continue;

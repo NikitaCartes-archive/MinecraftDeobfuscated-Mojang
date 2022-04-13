@@ -8,6 +8,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.TntMinecartRenderer;
@@ -20,9 +21,12 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(value=EnvType.CLIENT)
 public class TntRenderer
 extends EntityRenderer<PrimedTnt> {
+    private final BlockRenderDispatcher blockRenderer;
+
     public TntRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.5f;
+        this.blockRenderer = context.getBlockRenderDispatcher();
     }
 
     @Override
@@ -41,7 +45,7 @@ extends EntityRenderer<PrimedTnt> {
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
         poseStack.translate(-0.5, -0.5, 0.5);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
-        TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, j / 5 % 2 == 0);
+        TntMinecartRenderer.renderWhiteSolidBlock(this.blockRenderer, Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, j / 5 % 2 == 0);
         poseStack.popPose();
         super.render(primedTnt, f, g, poseStack, multiBufferSource, i);
     }

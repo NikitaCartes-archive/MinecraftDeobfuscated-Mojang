@@ -416,7 +416,7 @@ implements ItemLike {
         if (blockState.is(BlockTags.GUARDED_BY_PIGLINS)) {
             PiglinAi.angerNearbyPiglins(player, false);
         }
-        level.gameEvent((Entity)player, GameEvent.BLOCK_DESTROY, blockPos);
+        level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(player, blockState));
     }
 
     public void handlePrecipitation(BlockState blockState, Level level, BlockPos blockPos, Biome.Precipitation precipitation) {

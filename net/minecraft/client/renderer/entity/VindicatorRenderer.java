@@ -23,7 +23,7 @@ extends IllagerRenderer<Vindicator> {
 
     public VindicatorRenderer(EntityRendererProvider.Context context) {
         super(context, new IllagerModel(context.bakeLayer(ModelLayers.VINDICATOR)), 0.5f);
-        this.addLayer(new ItemInHandLayer<Vindicator, IllagerModel<Vindicator>>((RenderLayerParent)this){
+        this.addLayer(new ItemInHandLayer<Vindicator, IllagerModel<Vindicator>>((RenderLayerParent)this, context.getItemInHandRenderer()){
 
             @Override
             public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Vindicator vindicator, float f, float g, float h, float j, float k, float l) {

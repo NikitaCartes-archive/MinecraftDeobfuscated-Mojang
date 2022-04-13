@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -35,7 +36,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -219,7 +219,7 @@ implements ServerLoginPacketListener {
     }
 
     protected GameProfile createFakeProfile(GameProfile gameProfile) {
-        UUID uUID = Player.createPlayerUUID(gameProfile.getName());
+        UUID uUID = UUIDUtil.createOfflinePlayerUUID(gameProfile.getName());
         return new GameProfile(uUID, gameProfile.getName());
     }
 

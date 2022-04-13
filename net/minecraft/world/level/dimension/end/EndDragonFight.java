@@ -9,7 +9,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -73,7 +76,7 @@ public class EndDragonFight {
     private static final Predicate<Entity> VALID_PLAYER = EntitySelector.ENTITY_STILL_ALIVE.and(EntitySelector.withinDistance(0.0, 128.0, 0.0, 192.0));
     private final ServerBossEvent dragonEvent = (ServerBossEvent)new ServerBossEvent(new TranslatableComponent("entity.minecraft.ender_dragon"), BossEvent.BossBarColor.PINK, BossEvent.BossBarOverlay.PROGRESS).setPlayBossMusic(true).setCreateWorldFog(true);
     private final ServerLevel level;
-    private final List<Integer> gateways = Lists.newArrayList();
+    private final ObjectArrayList<Integer> gateways = new ObjectArrayList();
     private final BlockPattern exitPortalPattern;
     private int ticksSinceDragonSeen;
     private int crystalsAlive;
@@ -119,7 +122,7 @@ public class EndDragonFight {
                 this.gateways.add(listTag.getInt(i));
             }
         } else {
-            this.gateways.addAll(ContiguousSet.create(Range.closedOpen(0, 20), DiscreteDomain.integers()));
+            this.gateways.addAll((Collection<Integer>)ContiguousSet.create(Range.closedOpen(0, 20), DiscreteDomain.integers()));
             Util.shuffle(this.gateways, RandomSource.create(l));
         }
         this.exitPortalPattern = BlockPatternBuilder.start().aisle("       ", "       ", "       ", "   #   ", "       ", "       ", "       ").aisle("       ", "       ", "       ", "   #   ", "       ", "       ", "       ").aisle("       ", "       ", "       ", "   #   ", "       ", "       ", "       ").aisle("  ###  ", " #   # ", "#     #", "#  #  #", "#     #", " #   # ", "  ###  ").aisle("       ", "  ###  ", " ##### ", " ##### ", " ##### ", "  ###  ", "       ").where('#', BlockInWorld.hasState(BlockPredicate.forBlock(Blocks.BEDROCK))).build();
@@ -137,7 +140,9 @@ public class EndDragonFight {
             compoundTag.put("ExitPortalLocation", NbtUtils.writeBlockPos(this.portalLocation));
         }
         ListTag listTag = new ListTag();
-        for (int i : this.gateways) {
+        ObjectIterator objectIterator = this.gateways.iterator();
+        while (objectIterator.hasNext()) {
+            int i = (Integer)objectIterator.next();
             listTag.add(IntTag.valueOf(i));
         }
         compoundTag.put("Gateways", listTag);

@@ -34,6 +34,7 @@ public final class ItemTags {
     public static final TagKey<Item> MANGROVE_LOGS = ItemTags.bind("mangrove_logs");
     public static final TagKey<Item> CRIMSON_STEMS = ItemTags.bind("crimson_stems");
     public static final TagKey<Item> WARPED_STEMS = ItemTags.bind("warped_stems");
+    public static final TagKey<Item> WART_BLOCKS = ItemTags.bind("wart_blocks");
     public static final TagKey<Item> BANNERS = ItemTags.bind("banners");
     public static final TagKey<Item> SAND = ItemTags.bind("sand");
     public static final TagKey<Item> STAIRS = ItemTags.bind("stairs");
@@ -66,6 +67,7 @@ public final class ItemTags {
     public static final TagKey<Item> CANDLES = ItemTags.bind("candles");
     public static final TagKey<Item> DIRT = ItemTags.bind("dirt");
     public static final TagKey<Item> TERRACOTTA = ItemTags.bind("terracotta");
+    public static final TagKey<Item> COMPLETES_FIND_TREE_TUTORIAL = ItemTags.bind("completes_find_tree_tutorial");
     public static final TagKey<Item> BOATS = ItemTags.bind("boats");
     public static final TagKey<Item> CHEST_BOATS = ItemTags.bind("chest_boats");
     public static final TagKey<Item> FISHES = ItemTags.bind("fishes");
@@ -80,7 +82,7 @@ public final class ItemTags {
     public static final TagKey<Item> STONE_CRAFTING_MATERIALS = ItemTags.bind("stone_crafting_materials");
     public static final TagKey<Item> FREEZE_IMMUNE_WEARABLES = ItemTags.bind("freeze_immune_wearables");
     public static final TagKey<Item> AXOLOTL_TEMPT_ITEMS = ItemTags.bind("axolotl_tempt_items");
-    public static final TagKey<Item> OCCLUDES_VIBRATION_SIGNALS = ItemTags.bind("occludes_vibration_signals");
+    public static final TagKey<Item> DAMPENS_VIBRATIONS = ItemTags.bind("dampens_vibrations");
     public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = ItemTags.bind("cluster_max_harvestables");
     public static final TagKey<Item> COMPASSES = ItemTags.bind("compasses");
 

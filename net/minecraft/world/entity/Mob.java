@@ -835,18 +835,18 @@ extends LivingEntity {
         };
     }
 
-    protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-        if (this.random.nextFloat() < 0.15f * difficultyInstance.getSpecialMultiplier()) {
+    protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
+        if (randomSource.nextFloat() < 0.15f * difficultyInstance.getSpecialMultiplier()) {
             float f;
-            int i = this.random.nextInt(2);
+            int i = randomSource.nextInt(2);
             float f2 = f = this.level.getDifficulty() == Difficulty.HARD ? 0.1f : 0.25f;
-            if (this.random.nextFloat() < 0.095f) {
+            if (randomSource.nextFloat() < 0.095f) {
                 ++i;
             }
-            if (this.random.nextFloat() < 0.095f) {
+            if (randomSource.nextFloat() < 0.095f) {
                 ++i;
             }
-            if (this.random.nextFloat() < 0.095f) {
+            if (randomSource.nextFloat() < 0.095f) {
                 ++i;
             }
             boolean bl = true;
@@ -854,7 +854,7 @@ extends LivingEntity {
                 Item item;
                 if (equipmentSlot.getType() != EquipmentSlot.Type.ARMOR) continue;
                 ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-                if (!bl && this.random.nextFloat() < f) break;
+                if (!bl && randomSource.nextFloat() < f) break;
                 bl = false;
                 if (!itemStack.isEmpty() || (item = Mob.getEquipmentForSlot(equipmentSlot, i)) == null) continue;
                 this.setItemSlot(equipmentSlot, new ItemStack(item));
@@ -936,32 +936,33 @@ extends LivingEntity {
         return null;
     }
 
-    protected void populateDefaultEquipmentEnchantments(DifficultyInstance difficultyInstance) {
+    protected void populateDefaultEquipmentEnchantments(RandomSource randomSource, DifficultyInstance difficultyInstance) {
         float f = difficultyInstance.getSpecialMultiplier();
-        this.enchantSpawnedWeapon(f);
+        this.enchantSpawnedWeapon(randomSource, f);
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             if (equipmentSlot.getType() != EquipmentSlot.Type.ARMOR) continue;
-            this.enchantSpawnedArmor(f, equipmentSlot);
+            this.enchantSpawnedArmor(randomSource, f, equipmentSlot);
         }
     }
 
-    protected void enchantSpawnedWeapon(float f) {
-        if (!this.getMainHandItem().isEmpty() && this.random.nextFloat() < 0.25f * f) {
-            this.setItemSlot(EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(this.random, this.getMainHandItem(), (int)(5.0f + f * (float)this.random.nextInt(18)), false));
+    protected void enchantSpawnedWeapon(RandomSource randomSource, float f) {
+        if (!this.getMainHandItem().isEmpty() && randomSource.nextFloat() < 0.25f * f) {
+            this.setItemSlot(EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(randomSource, this.getMainHandItem(), (int)(5.0f + f * (float)randomSource.nextInt(18)), false));
         }
     }
 
-    protected void enchantSpawnedArmor(float f, EquipmentSlot equipmentSlot) {
+    protected void enchantSpawnedArmor(RandomSource randomSource, float f, EquipmentSlot equipmentSlot) {
         ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-        if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5f * f) {
-            this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(this.random, itemStack, (int)(5.0f + f * (float)this.random.nextInt(18)), false));
+        if (!itemStack.isEmpty() && randomSource.nextFloat() < 0.5f * f) {
+            this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(randomSource, itemStack, (int)(5.0f + f * (float)randomSource.nextInt(18)), false));
         }
     }
 
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
-        if (this.random.nextFloat() < 0.05f) {
+        RandomSource randomSource = serverLevelAccessor.getRandom();
+        this.getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", randomSource.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+        if (randomSource.nextFloat() < 0.05f) {
             this.setLeftHanded(true);
         } else {
             this.setLeftHanded(false);

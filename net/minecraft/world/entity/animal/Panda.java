@@ -496,8 +496,9 @@ extends Animal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setMainGene(Gene.getRandom(this.random));
-        this.setHiddenGene(Gene.getRandom(this.random));
+        RandomSource randomSource = serverLevelAccessor.getRandom();
+        this.setMainGene(Gene.getRandom(randomSource));
+        this.setHiddenGene(Gene.getRandom(randomSource));
         this.setAttributes();
         if (spawnGroupData == null) {
             spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2f);

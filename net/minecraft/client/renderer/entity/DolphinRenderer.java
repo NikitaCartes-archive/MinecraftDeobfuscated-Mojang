@@ -20,7 +20,7 @@ extends MobRenderer<Dolphin, DolphinModel<Dolphin>> {
 
     public DolphinRenderer(EntityRendererProvider.Context context) {
         super(context, new DolphinModel(context.bakeLayer(ModelLayers.DOLPHIN)), 0.7f);
-        this.addLayer(new DolphinCarryingItemLayer(this));
+        this.addLayer(new DolphinCarryingItemLayer(this, context.getItemInHandRenderer()));
     }
 
     @Override

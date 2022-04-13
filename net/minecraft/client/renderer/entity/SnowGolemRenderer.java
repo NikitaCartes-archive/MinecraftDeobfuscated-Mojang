@@ -20,7 +20,7 @@ extends MobRenderer<SnowGolem, SnowGolemModel<SnowGolem>> {
 
     public SnowGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new SnowGolemModel(context.bakeLayer(ModelLayers.SNOW_GOLEM)), 0.5f);
-        this.addLayer(new SnowGolemHeadLayer(this));
+        this.addLayer(new SnowGolemHeadLayer(this, context.getBlockRenderDispatcher(), context.getItemRenderer()));
     }
 
     @Override

@@ -24,7 +24,7 @@ extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
     public IronGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new IronGolemModel(context.bakeLayer(ModelLayers.IRON_GOLEM)), 0.7f);
         this.addLayer(new IronGolemCrackinessLayer(this));
-        this.addLayer(new IronGolemFlowerLayer(this));
+        this.addLayer(new IronGolemFlowerLayer(this, context.getBlockRenderDispatcher()));
     }
 
     @Override

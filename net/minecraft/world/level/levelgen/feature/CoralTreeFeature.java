@@ -3,10 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.List;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -33,7 +31,7 @@ extends CoralFeature {
         }
         BlockPos blockPos2 = mutableBlockPos.immutable();
         int k = randomSource.nextInt(3) + 2;
-        List<Direction> list = Util.shuffledCopy(Lists.newArrayList(Direction.Plane.HORIZONTAL), randomSource);
+        List<Direction> list = Direction.Plane.HORIZONTAL.shuffledCopy(randomSource);
         List<Direction> list2 = list.subList(0, k);
         for (Direction direction : list2) {
             mutableBlockPos.set(blockPos2);

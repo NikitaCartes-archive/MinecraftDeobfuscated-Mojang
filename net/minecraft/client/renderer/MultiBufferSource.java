@@ -44,7 +44,7 @@ public interface MultiBufferSource {
         public VertexConsumer getBuffer(RenderType renderType) {
             Optional<RenderType> optional = renderType.asOptional();
             BufferBuilder bufferBuilder = this.getBuilderRaw(renderType);
-            if (!Objects.equals(this.lastState, optional)) {
+            if (!Objects.equals(this.lastState, optional) || !renderType.canConsolidateConsecutiveGeometry()) {
                 RenderType renderType2;
                 if (this.lastState.isPresent() && !this.fixedBuffers.containsKey(renderType2 = this.lastState.get())) {
                     this.endBatch(renderType2);

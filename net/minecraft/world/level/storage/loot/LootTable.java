@@ -12,9 +12,11 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -83,10 +85,10 @@ public class LootTable {
         this.getRandomItemsRaw(lootContext, LootTable.createStackSplitter(consumer));
     }
 
-    public List<ItemStack> getRandomItems(LootContext lootContext) {
-        ArrayList<ItemStack> list = Lists.newArrayList();
-        this.getRandomItems(lootContext, list::add);
-        return list;
+    public ObjectArrayList<ItemStack> getRandomItems(LootContext lootContext) {
+        ObjectArrayList<ItemStack> objectArrayList = new ObjectArrayList<ItemStack>();
+        this.getRandomItems(lootContext, objectArrayList::add);
+        return objectArrayList;
     }
 
     public LootContextParamSet getParamSet() {
@@ -104,63 +106,63 @@ public class LootTable {
     }
 
     public void fill(Container container, LootContext lootContext) {
-        List<ItemStack> list = this.getRandomItems(lootContext);
+        ObjectArrayList<ItemStack> objectArrayList = this.getRandomItems(lootContext);
         RandomSource randomSource = lootContext.getRandom();
-        List<Integer> list2 = this.getAvailableSlots(container, randomSource);
-        this.shuffleAndSplitItems(list, list2.size(), randomSource);
-        for (ItemStack itemStack : list) {
-            if (list2.isEmpty()) {
+        List<Integer> list = this.getAvailableSlots(container, randomSource);
+        this.shuffleAndSplitItems(objectArrayList, list.size(), randomSource);
+        for (ItemStack itemStack : objectArrayList) {
+            if (list.isEmpty()) {
                 LOGGER.warn("Tried to over-fill a container");
                 return;
             }
             if (itemStack.isEmpty()) {
-                container.setItem(list2.remove(list2.size() - 1), ItemStack.EMPTY);
+                container.setItem(list.remove(list.size() - 1), ItemStack.EMPTY);
                 continue;
             }
-            container.setItem(list2.remove(list2.size() - 1), itemStack);
+            container.setItem(list.remove(list.size() - 1), itemStack);
         }
     }
 
-    private void shuffleAndSplitItems(List<ItemStack> list, int i, RandomSource randomSource) {
-        ArrayList<ItemStack> list2 = Lists.newArrayList();
-        Iterator<ItemStack> iterator = list.iterator();
+    private void shuffleAndSplitItems(ObjectArrayList<ItemStack> objectArrayList, int i, RandomSource randomSource) {
+        ArrayList<ItemStack> list = Lists.newArrayList();
+        ObjectIterator iterator = objectArrayList.iterator();
         while (iterator.hasNext()) {
-            ItemStack itemStack = iterator.next();
+            ItemStack itemStack = (ItemStack)iterator.next();
             if (itemStack.isEmpty()) {
                 iterator.remove();
                 continue;
             }
             if (itemStack.getCount() <= 1) continue;
-            list2.add(itemStack);
+            list.add(itemStack);
             iterator.remove();
         }
-        while (i - list.size() - list2.size() > 0 && !list2.isEmpty()) {
-            ItemStack itemStack2 = (ItemStack)list2.remove(Mth.nextInt(randomSource, 0, list2.size() - 1));
+        while (i - objectArrayList.size() - list.size() > 0 && !list.isEmpty()) {
+            ItemStack itemStack2 = (ItemStack)list.remove(Mth.nextInt(randomSource, 0, list.size() - 1));
             int j = Mth.nextInt(randomSource, 1, itemStack2.getCount() / 2);
             ItemStack itemStack3 = itemStack2.split(j);
             if (itemStack2.getCount() > 1 && randomSource.nextBoolean()) {
-                list2.add(itemStack2);
-            } else {
                 list.add(itemStack2);
+            } else {
+                objectArrayList.add(itemStack2);
             }
             if (itemStack3.getCount() > 1 && randomSource.nextBoolean()) {
-                list2.add(itemStack3);
+                list.add(itemStack3);
                 continue;
             }
-            list.add(itemStack3);
+            objectArrayList.add(itemStack3);
         }
-        list.addAll(list2);
-        Util.shuffle(list, randomSource);
+        objectArrayList.addAll((Collection<ItemStack>)list);
+        Util.shuffle(objectArrayList, randomSource);
     }
 
     private List<Integer> getAvailableSlots(Container container, RandomSource randomSource) {
-        ArrayList<Integer> list = Lists.newArrayList();
+        ObjectArrayList<Integer> objectArrayList = new ObjectArrayList<Integer>();
         for (int i = 0; i < container.getContainerSize(); ++i) {
             if (!container.getItem(i).isEmpty()) continue;
-            list.add(i);
+            objectArrayList.add(i);
         }
-        Util.shuffle(list, randomSource);
-        return list;
+        Util.shuffle(objectArrayList, randomSource);
+        return objectArrayList;
     }
 
     public static Builder lootTable() {

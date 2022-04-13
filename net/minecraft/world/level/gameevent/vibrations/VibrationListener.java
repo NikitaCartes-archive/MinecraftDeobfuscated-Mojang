@@ -9,11 +9,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.tags.TagKey;
@@ -23,7 +25,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipBlockStateContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
@@ -79,11 +80,11 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
         if (this.receivingEvent != null) {
             return false;
         }
-        if (!this.config.isValidVibration(gameEvent, entity)) {
+        if (!this.config.isValidVibration(gameEvent, context)) {
             return false;
         }
         Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
@@ -91,19 +92,19 @@ implements GameEventListener {
             return false;
         }
         Vec3 vec32 = optional.get();
-        if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, entity)) {
+        if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
             return false;
         }
         if (VibrationListener.isOccluded(serverLevel, vec3, vec32)) {
             return false;
         }
-        this.scheduleSignal(serverLevel, gameEvent, entity, vec3, vec32);
+        this.scheduleSignal(serverLevel, gameEvent, context, vec3, vec32);
         return true;
     }
 
-    private void scheduleSignal(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3, Vec3 vec32) {
+    private void scheduleSignal(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
         this.receivingDistance = Mth.floor(vec3.distanceTo(vec32));
-        this.receivingEvent = new ReceivingEvent(gameEvent, this.receivingDistance, vec3, entity);
+        this.receivingEvent = new ReceivingEvent(gameEvent, this.receivingDistance, vec3, context.sourceEntity());
         this.travelTimeInTicks = this.receivingDistance;
         serverLevel.sendParticles(new VibrationParticleOption(this.listenerSource, this.travelTimeInTicks), vec3.x, vec3.y, vec3.z, 1, 0.0, 0.0, 0.0, 0.0);
         this.config.onSignalSchedule();
@@ -125,29 +126,36 @@ implements GameEventListener {
             return GameEventTags.VIBRATIONS;
         }
 
-        default public boolean isValidVibration(GameEvent gameEvent, @Nullable Entity entity) {
+        default public boolean isValidVibration(GameEvent gameEvent, GameEvent.Context context) {
             if (!gameEvent.is(this.getListenableEvents())) {
                 return false;
             }
+            Entity entity = context.sourceEntity();
             if (entity != null) {
                 if (entity.isSpectator()) {
                     return false;
                 }
                 if (entity.isSteppingCarefully() && gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
+                    if (entity instanceof ServerPlayer) {
+                        ServerPlayer serverPlayer = (ServerPlayer)entity;
+                        CriteriaTriggers.AVOID_VIBRATION.trigger(serverPlayer);
+                    }
                     return false;
                 }
-                if (entity.occludesVibrations()) {
+                if (entity.dampensVibrations()) {
                     return false;
                 }
-                if (gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK)) {
-                    BlockState blockState = entity.getLevel().getBlockState(entity.getOnPos());
-                    return !blockState.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS);
+                if (gameEvent.is(GameEventTags.DAMPENABLE_VIBRATIONS)) {
+                    return !entity.getBlockStateOn().is(BlockTags.DAMPENS_VIBRATIONS);
                 }
+            }
+            if (context.affectedState() != null) {
+                return !context.affectedState().is(BlockTags.DAMPENS_VIBRATIONS);
             }
             return true;
         }
 
-        public boolean shouldListen(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, @Nullable Entity var5);
+        public boolean shouldListen(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, GameEvent.Context var5);
 
         public void onSignalReceive(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, @Nullable Entity var5, @Nullable Entity var6, int var7);
 

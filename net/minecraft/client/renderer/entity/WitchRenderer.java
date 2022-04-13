@@ -22,7 +22,7 @@ extends MobRenderer<Witch, WitchModel<Witch>> {
 
     public WitchRenderer(EntityRendererProvider.Context context) {
         super(context, new WitchModel(context.bakeLayer(ModelLayers.WITCH)), 0.5f);
-        this.addLayer(new WitchItemLayer<Witch>(this));
+        this.addLayer(new WitchItemLayer<Witch>(this, context.getItemInHandRenderer()));
     }
 
     @Override

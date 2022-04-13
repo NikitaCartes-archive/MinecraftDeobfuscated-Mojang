@@ -21,9 +21,9 @@ extends DataFix {
     private final String name;
     private static final Set<String> STATUSES_TO_SKIP_BLENDING = Set.of("minecraft:empty", "minecraft:structure_starts", "minecraft:structure_references", "minecraft:biomes");
 
-    public BlendingDataFix(Schema schema, String string) {
+    public BlendingDataFix(Schema schema) {
         super(schema, false);
-        this.name = string;
+        this.name = "Blending Data Fix v" + schema.getVersionKey();
     }
 
     @Override

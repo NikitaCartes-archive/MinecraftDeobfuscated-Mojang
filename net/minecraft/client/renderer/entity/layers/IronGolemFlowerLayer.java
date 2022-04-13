@@ -7,10 +7,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.IronGolemModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -20,8 +20,11 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(value=EnvType.CLIENT)
 public class IronGolemFlowerLayer
 extends RenderLayer<IronGolem, IronGolemModel<IronGolem>> {
-    public IronGolemFlowerLayer(RenderLayerParent<IronGolem, IronGolemModel<IronGolem>> renderLayerParent) {
+    private final BlockRenderDispatcher blockRenderer;
+
+    public IronGolemFlowerLayer(RenderLayerParent<IronGolem, IronGolemModel<IronGolem>> renderLayerParent, BlockRenderDispatcher blockRenderDispatcher) {
         super(renderLayerParent);
+        this.blockRenderer = blockRenderDispatcher;
     }
 
     @Override
@@ -38,7 +41,7 @@ extends RenderLayer<IronGolem, IronGolemModel<IronGolem>> {
         poseStack.scale(0.5f, 0.5f, 0.5f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
         poseStack.translate(-0.5, -0.5, -0.5);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.POPPY.defaultBlockState(), poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
+        this.blockRenderer.renderSingleBlock(Blocks.POPPY.defaultBlockState(), poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

@@ -20,9 +20,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.blockstates.BlockStateGenerator;
@@ -44,7 +44,7 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) {
+    public void run(CachedOutput cachedOutput) {
         Path path = this.generator.getOutputFolder();
         HashMap map = Maps.newHashMap();
         Consumer<BlockStateGenerator> consumer = blockStateGenerator -> {
@@ -81,15 +81,15 @@ implements DataProvider {
                 }
             }
         });
-        this.saveCollection(hashCache, path, map, ModelProvider::createBlockStatePath);
-        this.saveCollection(hashCache, path, map2, ModelProvider::createModelPath);
+        this.saveCollection(cachedOutput, path, map, ModelProvider::createBlockStatePath);
+        this.saveCollection(cachedOutput, path, map2, ModelProvider::createModelPath);
     }
 
-    private <T> void saveCollection(HashCache hashCache, Path path, Map<T, ? extends Supplier<JsonElement>> map, BiFunction<Path, T, Path> biFunction) {
+    private <T> void saveCollection(CachedOutput cachedOutput, Path path, Map<T, ? extends Supplier<JsonElement>> map, BiFunction<Path, T, Path> biFunction) {
         map.forEach((object, supplier) -> {
             Path path2 = (Path)biFunction.apply(path, object);
             try {
-                DataProvider.save(GSON, hashCache, (JsonElement)supplier.get(), path2);
+                DataProvider.save(GSON, cachedOutput, (JsonElement)supplier.get(), path2);
             } catch (Exception exception) {
                 LOGGER.error("Couldn't save {}", (Object)path2, (Object)exception);
             }

@@ -1232,6 +1232,8 @@ public class SoundEvents {
     public static final SoundEvent WARDEN_NEARBY_CLOSEST = SoundEvents.register("entity.warden.nearby_closest");
     public static final SoundEvent WARDEN_ROAR = SoundEvents.register("entity.warden.roar");
     public static final SoundEvent WARDEN_SNIFF = SoundEvents.register("entity.warden.sniff");
+    public static final SoundEvent WARDEN_SONIC_BOOM = SoundEvents.register("entity.warden.sonic_boom");
+    public static final SoundEvent WARDEN_SONIC_CHARGE = SoundEvents.register("entity.warden.sonic_charge");
     public static final SoundEvent WARDEN_STEP = SoundEvents.register("entity.warden.step");
     public static final SoundEvent WARDEN_TENDRIL_CLICKS = SoundEvents.register("entity.warden.tendril_clicks");
     public static final SoundEvent WATER_AMBIENT = SoundEvents.register("block.water.ambient");

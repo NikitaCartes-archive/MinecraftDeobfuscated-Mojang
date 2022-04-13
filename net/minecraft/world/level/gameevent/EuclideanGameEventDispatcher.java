@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
@@ -58,7 +57,7 @@ implements GameEventDispatcher {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     @Override
-    public void post(GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+    public void post(GameEvent gameEvent, Vec3 vec3, @Nullable GameEvent.Context context) {
         boolean bl = false;
         this.processing = true;
         try {
@@ -69,7 +68,7 @@ implements GameEventDispatcher {
                     iterator.remove();
                     continue;
                 }
-                if (!EuclideanGameEventDispatcher.postToListener(this.level, gameEvent, entity, vec3, gameEventListener)) continue;
+                if (!EuclideanGameEventDispatcher.postToListener(this.level, gameEvent, context, vec3, gameEventListener)) continue;
                 bl = true;
             }
         } finally {
@@ -88,14 +87,14 @@ implements GameEventDispatcher {
         }
     }
 
-    private static boolean postToListener(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3, GameEventListener gameEventListener) {
+    private static boolean postToListener(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, GameEventListener gameEventListener) {
         int i;
         Optional<Vec3> optional = gameEventListener.getListenerSource().getPosition(serverLevel);
         if (optional.isEmpty()) {
             return false;
         }
         double d = optional.get().distanceToSqr(vec3);
-        return d <= (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius()) && gameEventListener.handleGameEvent(serverLevel, gameEvent, entity, vec3);
+        return d <= (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius()) && gameEventListener.handleGameEvent(serverLevel, gameEvent, context, vec3);
     }
 }
 

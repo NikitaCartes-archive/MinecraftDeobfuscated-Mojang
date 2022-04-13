@@ -174,34 +174,38 @@ public class ModelBlockRenderer {
         switch (direction) {
             case DOWN: {
                 bitSet.set(1, f >= 1.0E-4f || h >= 1.0E-4f || i <= 0.9999f || k <= 0.9999f);
-                bitSet.set(0, g == j && (g < 1.0E-4f || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+                bitSet.set(0, g == j && (g < 1.0E-4f || ModelBlockRenderer.isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
                 break;
             }
             case UP: {
                 bitSet.set(1, f >= 1.0E-4f || h >= 1.0E-4f || i <= 0.9999f || k <= 0.9999f);
-                bitSet.set(0, g == j && (j > 0.9999f || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+                bitSet.set(0, g == j && (j > 0.9999f || ModelBlockRenderer.isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
                 break;
             }
             case NORTH: {
                 bitSet.set(1, f >= 1.0E-4f || g >= 1.0E-4f || i <= 0.9999f || j <= 0.9999f);
-                bitSet.set(0, h == k && (h < 1.0E-4f || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+                bitSet.set(0, h == k && (h < 1.0E-4f || ModelBlockRenderer.isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
                 break;
             }
             case SOUTH: {
                 bitSet.set(1, f >= 1.0E-4f || g >= 1.0E-4f || i <= 0.9999f || j <= 0.9999f);
-                bitSet.set(0, h == k && (k > 0.9999f || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+                bitSet.set(0, h == k && (k > 0.9999f || ModelBlockRenderer.isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
                 break;
             }
             case WEST: {
                 bitSet.set(1, g >= 1.0E-4f || h >= 1.0E-4f || j <= 0.9999f || k <= 0.9999f);
-                bitSet.set(0, f == i && (f < 1.0E-4f || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+                bitSet.set(0, f == i && (f < 1.0E-4f || ModelBlockRenderer.isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
                 break;
             }
             case EAST: {
                 bitSet.set(1, g >= 1.0E-4f || h >= 1.0E-4f || j <= 0.9999f || k <= 0.9999f);
-                bitSet.set(0, f == i && (i > 0.9999f || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+                bitSet.set(0, f == i && (i > 0.9999f || ModelBlockRenderer.isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
             }
         }
+    }
+
+    private static boolean isInteriorOccluded(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos) {
+        return blockState.canOcclude() && blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos);
     }
 
     private void renderModelFaceFlat(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, int i, int j, boolean bl, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, BitSet bitSet) {

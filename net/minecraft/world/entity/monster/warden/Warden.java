@@ -48,6 +48,8 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.StartAttacking;
+import net.minecraft.world.entity.ai.behavior.warden.SonicBoom;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.AngerLevel;
@@ -75,6 +77,7 @@ implements VibrationListener.VibrationListenerConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int GAME_EVENT_LISTENER_RANGE = 16;
     private static final int VIBRATION_COOLDOWN_TICKS = 40;
+    private static final int TIME_TO_USE_MELEE_UNTIL_SONIC_BOOM = 200;
     private static final int MAX_HEALTH = 500;
     private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.3f;
     private static final float KNOCKBACK_RESISTANCE = 1.0f;
@@ -102,6 +105,7 @@ implements VibrationListener.VibrationListenerConfig {
     public AnimationState emergeAnimationState = new AnimationState();
     public AnimationState diggingAnimationState = new AnimationState();
     public AnimationState attackAnimationState = new AnimationState();
+    public AnimationState sonicBoomAnimationState = new AnimationState();
     private final DynamicGameEventListener<VibrationListener> dynamicGameEventListener;
     private AngerManagement angerManagement = new AngerManagement(Collections.emptyList());
 
@@ -170,7 +174,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public boolean occludesVibrations() {
+    public boolean dampensVibrations() {
         return true;
     }
 
@@ -207,6 +211,7 @@ implements VibrationListener.VibrationListenerConfig {
     public boolean doHurtTarget(Entity entity) {
         this.level.broadcastEntityEvent(this, (byte)4);
         this.playSound(SoundEvents.WARDEN_ATTACK_IMPACT, 10.0f, this.getVoicePitch());
+        SonicBoom.setCooldown(this, 100);
         return super.doHurtTarget(entity);
     }
 
@@ -285,6 +290,8 @@ implements VibrationListener.VibrationListenerConfig {
             this.attackAnimationState.start();
         } else if (b == 61) {
             this.tendrilAnimation = 10;
+        } else if (b == 62) {
+            this.sonicBoomAnimationState.start();
         } else {
             super.handleEntityEvent(b);
         }
@@ -460,6 +467,11 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
+    public boolean removeWhenFarAway(double d) {
+        return !this.isPersistenceRequired();
+    }
+
+    @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 1200L);
@@ -469,17 +481,6 @@ implements VibrationListener.VibrationListenerConfig {
             this.setPersistenceRequired();
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-    }
-
-    @Override
-    public double getMeleeAttackRangeSqr(LivingEntity livingEntity) {
-        return 8.0;
-    }
-
-    @Override
-    public boolean isWithinMeleeAttackRange(LivingEntity livingEntity) {
-        double d = this.distanceToSqr(livingEntity.getX(), livingEntity.getY() - (double)(this.getBbHeight() / 2.0f), livingEntity.getZ());
-        return d <= this.getMeleeAttackRangeSqr(livingEntity);
     }
 
     @Override
@@ -494,11 +495,16 @@ implements VibrationListener.VibrationListenerConfig {
             if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity)entity;
                 if (!(damageSource instanceof IndirectEntityDamageSource) || this.closerThan(livingEntity, 5.0)) {
-                    this.brain.setMemory(MemoryModuleType.ATTACK_TARGET, livingEntity);
+                    this.setAttackTarget(livingEntity);
                 }
             }
         }
         return bl;
+    }
+
+    public void setAttackTarget(LivingEntity livingEntity) {
+        StartAttacking.setAttackTarget(this, livingEntity);
+        SonicBoom.setCooldown(this, 200);
     }
 
     @Override
@@ -526,14 +532,14 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity) {
+    public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
         if (this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN)) {
             return false;
         }
         if (this.isDiggingOrEmerging()) {
             return false;
         }
-        return !(entity instanceof LivingEntity) || this.canTargetEntity(entity);
+        return !(context.sourceEntity() instanceof LivingEntity) || this.canTargetEntity(context.sourceEntity());
     }
 
     @Override

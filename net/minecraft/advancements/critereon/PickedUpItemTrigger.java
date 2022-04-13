@@ -4,6 +4,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
@@ -15,24 +16,29 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
+import org.jetbrains.annotations.Nullable;
 
-public class ItemPickedUpByEntityTrigger
+public class PickedUpItemTrigger
 extends SimpleCriterionTrigger<TriggerInstance> {
-    static final ResourceLocation ID = new ResourceLocation("thrown_item_picked_up_by_entity");
+    private final ResourceLocation id;
+
+    public PickedUpItemTrigger(ResourceLocation resourceLocation) {
+        this.id = resourceLocation;
+    }
 
     @Override
     public ResourceLocation getId() {
-        return ID;
+        return this.id;
     }
 
     @Override
     protected TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
         EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
-        return new TriggerInstance(composite, itemPredicate, composite2);
+        return new TriggerInstance(this.id, composite, itemPredicate, composite2);
     }
 
-    public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, Entity entity) {
+    public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, @Nullable Entity entity) {
         LootContext lootContext = EntityPredicate.createContext(serverPlayer, entity);
         this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer, itemStack, lootContext));
     }
@@ -47,14 +53,18 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         private final ItemPredicate item;
         private final EntityPredicate.Composite entity;
 
-        public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2) {
-            super(ID, composite);
+        public TriggerInstance(ResourceLocation resourceLocation, EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2) {
+            super(resourceLocation, composite);
             this.item = itemPredicate;
             this.entity = composite2;
         }
 
-        public static TriggerInstance itemPickedUpByEntity(EntityPredicate.Composite composite, ItemPredicate.Builder builder, EntityPredicate.Composite composite2) {
-            return new TriggerInstance(composite, builder.build(), composite2);
+        public static TriggerInstance thrownItemPickedUpByEntity(EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2) {
+            return new TriggerInstance(CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.getId(), composite, itemPredicate, composite2);
+        }
+
+        public static TriggerInstance thrownItemPickedUpByPlayer(EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2) {
+            return new TriggerInstance(CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.getId(), composite, itemPredicate, composite2);
         }
 
         public boolean matches(ServerPlayer serverPlayer, ItemStack itemStack, LootContext lootContext) {

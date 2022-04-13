@@ -94,6 +94,7 @@ extends HierarchicalModel<T> {
         this.animateIdlePose(h);
         this.animateTendrils(warden, h, k);
         this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK, l);
+        this.animate(((Warden)warden).sonicBoomAnimationState, WardenAnimation.WARDEN_SONIC_BOOM, l);
         this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG, l);
         this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE, l);
         this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR, l);

@@ -23,7 +23,6 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.WeightedListInt;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
@@ -72,7 +71,7 @@ public class PlacementUtils {
     }
 
     public static PlacementFilter isEmpty() {
-        return BlockPredicateFilter.forPredicate(BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO));
+        return BlockPredicateFilter.forPredicate(BlockPredicate.ONLY_IN_AIR_PREDICATE);
     }
 
     public static BlockPredicateFilter filteredByBlockSurvival(Block block) {
@@ -88,7 +87,7 @@ public class PlacementUtils {
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<PlacedFeature> onlyWhenEmpty(F feature, FC featureConfiguration) {
-        return PlacementUtils.filtered(feature, featureConfiguration, BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO));
+        return PlacementUtils.filtered(feature, featureConfiguration, BlockPredicate.ONLY_IN_AIR_PREDICATE);
     }
 
     public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<PlacedFeature> filtered(F feature, FC featureConfiguration, BlockPredicate blockPredicate) {

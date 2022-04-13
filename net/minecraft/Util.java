@@ -15,6 +15,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -679,17 +681,39 @@ public class Util {
         };
     }
 
-    public static <T> List<T> shuffledCopy(List<T> list, RandomSource randomSource) {
-        ArrayList<T> list2 = new ArrayList<T>(list);
-        Util.shuffle(list2, randomSource);
-        return list2;
+    public static <T> List<T> toShuffledList(Stream<T> stream, RandomSource randomSource) {
+        ObjectArrayList objectArrayList = stream.collect(ObjectArrayList.toList());
+        Util.shuffle(objectArrayList, randomSource);
+        return objectArrayList;
     }
 
-    public static <T> void shuffle(List<T> list, RandomSource randomSource) {
+    public static IntArrayList toShuffledList(IntStream intStream, RandomSource randomSource) {
         int i;
-        for (int j = i = list.size(); j > 1; --j) {
+        IntArrayList intArrayList = IntArrayList.wrap(intStream.toArray());
+        for (int j = i = intArrayList.size(); j > 1; --j) {
             int k = randomSource.nextInt(j);
-            list.set(j - 1, list.set(k, list.get(j - 1)));
+            intArrayList.set(j - 1, intArrayList.set(k, intArrayList.getInt(j - 1)));
+        }
+        return intArrayList;
+    }
+
+    public static <T> List<T> shuffledCopy(T[] objects, RandomSource randomSource) {
+        ObjectArrayList<T> objectArrayList = new ObjectArrayList<T>(objects);
+        Util.shuffle(objectArrayList, randomSource);
+        return objectArrayList;
+    }
+
+    public static <T> List<T> shuffledCopy(ObjectArrayList<T> objectArrayList, RandomSource randomSource) {
+        ObjectArrayList<T> objectArrayList2 = new ObjectArrayList<T>(objectArrayList);
+        Util.shuffle(objectArrayList2, randomSource);
+        return objectArrayList2;
+    }
+
+    public static <T> void shuffle(ObjectArrayList<T> objectArrayList, RandomSource randomSource) {
+        int i;
+        for (int j = i = objectArrayList.size(); j > 1; --j) {
+            int k = randomSource.nextInt(j);
+            objectArrayList.set(j - 1, objectArrayList.set(k, objectArrayList.get(j - 1)));
         }
     }
 

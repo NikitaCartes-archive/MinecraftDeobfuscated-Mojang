@@ -106,7 +106,7 @@ implements EntityBlock {
             return InteractionResult.SUCCESS;
         }
         player.startSleepInBed(blockPos).ifLeft(bedSleepingProblem -> {
-            if (bedSleepingProblem != null) {
+            if (bedSleepingProblem.getMessage() != null) {
                 player.displayClientMessage(bedSleepingProblem.getMessage(), true);
             }
         });

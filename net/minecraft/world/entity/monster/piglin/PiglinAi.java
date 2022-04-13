@@ -6,6 +6,7 @@ package net.minecraft.world.entity.monster.piglin;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -132,8 +133,8 @@ public class PiglinAi {
         return brain;
     }
 
-    protected static void initMemories(Piglin piglin) {
-        int i = TIME_BETWEEN_HUNTS.sample(piglin.level.random);
+    protected static void initMemories(Piglin piglin, RandomSource randomSource) {
+        int i = TIME_BETWEEN_HUNTS.sample(randomSource);
         piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, i);
     }
 
@@ -322,7 +323,7 @@ public class PiglinAi {
 
     private static List<ItemStack> getBarterResponseItems(Piglin piglin) {
         LootTable lootTable = piglin.level.getServer().getLootTables().get(BuiltInLootTables.PIGLIN_BARTERING);
-        List<ItemStack> list = lootTable.getRandomItems(new LootContext.Builder((ServerLevel)piglin.level).withParameter(LootContextParams.THIS_ENTITY, piglin).withRandom(piglin.level.random).create(LootContextParamSets.PIGLIN_BARTER));
+        ObjectArrayList<ItemStack> list = lootTable.getRandomItems(new LootContext.Builder((ServerLevel)piglin.level).withParameter(LootContextParams.THIS_ENTITY, piglin).withRandom(piglin.level.random).create(LootContextParamSets.PIGLIN_BARTER));
         return list;
     }
 

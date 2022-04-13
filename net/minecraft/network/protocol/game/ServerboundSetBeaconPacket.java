@@ -3,6 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
+import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -11,23 +12,23 @@ import net.minecraft.world.effect.MobEffect;
 
 public class ServerboundSetBeaconPacket
 implements Packet<ServerGamePacketListener> {
-    private final MobEffect primary;
-    private final MobEffect secondary;
+    private final Optional<MobEffect> primary;
+    private final Optional<MobEffect> secondary;
 
-    public ServerboundSetBeaconPacket(MobEffect mobEffect, MobEffect mobEffect2) {
-        this.primary = mobEffect;
-        this.secondary = mobEffect2;
+    public ServerboundSetBeaconPacket(Optional<MobEffect> optional, Optional<MobEffect> optional2) {
+        this.primary = optional;
+        this.secondary = optional2;
     }
 
-    public ServerboundSetBeaconPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.primary = friendlyByteBuf.readById(Registry.MOB_EFFECT);
-        this.secondary = friendlyByteBuf.readById(Registry.MOB_EFFECT);
+    public ServerboundSetBeaconPacket(FriendlyByteBuf friendlyByteBuf2) {
+        this.primary = friendlyByteBuf2.readOptional(friendlyByteBuf -> friendlyByteBuf.readById(Registry.MOB_EFFECT));
+        this.secondary = friendlyByteBuf2.readOptional(friendlyByteBuf -> friendlyByteBuf.readById(Registry.MOB_EFFECT));
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeId(Registry.MOB_EFFECT, this.primary);
-        friendlyByteBuf.writeId(Registry.MOB_EFFECT, this.secondary);
+    public void write(FriendlyByteBuf friendlyByteBuf2) {
+        friendlyByteBuf2.writeOptional(this.primary, (friendlyByteBuf, mobEffect) -> friendlyByteBuf.writeId(Registry.MOB_EFFECT, mobEffect));
+        friendlyByteBuf2.writeOptional(this.secondary, (friendlyByteBuf, mobEffect) -> friendlyByteBuf.writeId(Registry.MOB_EFFECT, mobEffect));
     }
 
     @Override
@@ -35,11 +36,11 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleSetBeaconPacket(this);
     }
 
-    public MobEffect getPrimary() {
+    public Optional<MobEffect> getPrimary() {
         return this.primary;
     }
 
-    public MobEffect getSecondary() {
+    public Optional<MobEffect> getSecondary() {
         return this.secondary;
     }
 }

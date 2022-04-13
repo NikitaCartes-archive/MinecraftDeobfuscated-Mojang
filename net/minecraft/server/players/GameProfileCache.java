@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.Util;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -99,7 +99,7 @@ public class GameProfileCache {
         gameProfileRepository.findProfilesByNames(new String[]{string}, Agent.MINECRAFT, profileLookupCallback);
         GameProfile gameProfile = (GameProfile)atomicReference.get();
         if (!GameProfileCache.usesAuthentication() && gameProfile == null) {
-            UUID uUID = Player.createPlayerUUID(new GameProfile(null, string));
+            UUID uUID = UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, string));
             return Optional.of(new GameProfile(uUID, string));
         }
         return Optional.ofNullable(gameProfile);

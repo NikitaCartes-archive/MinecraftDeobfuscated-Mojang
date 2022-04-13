@@ -38,5 +38,10 @@ extends NearestLivingEntitySensor<Warden> {
     protected int radiusXZ() {
         return 24;
     }
+
+    @Override
+    protected int radiusY() {
+        return 24;
+    }
 }
 

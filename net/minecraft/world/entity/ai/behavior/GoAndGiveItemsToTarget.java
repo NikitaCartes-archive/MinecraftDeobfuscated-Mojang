@@ -14,7 +14,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
-import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -62,13 +61,7 @@ extends Behavior<E> {
         PositionTracker positionTracker = optional.get();
         double d = positionTracker.currentPosition().distanceTo(((Entity)livingEntity).getEyePosition());
         if (d < 3.0 && !(itemStack = ((InventoryCarrier)livingEntity).getInventory().removeItem(0, 1)).isEmpty()) {
-            EntityTracker entityTracker;
-            Entity entity;
             BehaviorUtils.throwItem(livingEntity, itemStack, GoAndGiveItemsToTarget.getThrowPosition(positionTracker));
-            if (positionTracker instanceof EntityTracker && (entity = (entityTracker = (EntityTracker)positionTracker).getEntity()) instanceof ServerPlayer) {
-                ServerPlayer serverPlayer2 = (ServerPlayer)entity;
-                CriteriaTriggers.ITEM_DELIVERED_TO_PLAYER.trigger(serverPlayer2);
-            }
             if (livingEntity instanceof Allay) {
                 Allay allay = (Allay)livingEntity;
                 AllayAi.getLikedPlayer(allay).ifPresent(serverPlayer -> this.triggerDropItemOnBlock(positionTracker, itemStack, (ServerPlayer)serverPlayer));

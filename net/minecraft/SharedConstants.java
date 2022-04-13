@@ -9,6 +9,7 @@ import java.time.Duration;
 import net.minecraft.DetectedVersion;
 import net.minecraft.WorldVersion;
 import net.minecraft.commands.BrigadierExceptions;
+import net.minecraft.util.datafix.DataFixerOptimizationOption;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,17 +17,17 @@ public class SharedConstants {
     @Deprecated
     public static final boolean SNAPSHOT = true;
     @Deprecated
-    public static final int WORLD_VERSION = 3088;
+    public static final int WORLD_VERSION = 3089;
     @Deprecated
     public static final String SERIES = "main";
     @Deprecated
-    public static final String VERSION_STRING = "22w14a";
+    public static final String VERSION_STRING = "22w15a";
     @Deprecated
     public static final String RELEASE_TARGET = "1.19";
     @Deprecated
     public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 759;
     @Deprecated
-    public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 78;
+    public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 79;
     public static final int SNBT_NAG_VERSION = 3075;
     private static final int SNAPSHOT_PROTOCOL_BIT = 30;
     public static final boolean THROW_ON_TASK_FAILURE = true;
@@ -111,6 +112,7 @@ public class SharedConstants {
     public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
     public static boolean CHECK_DATA_FIXER_SCHEMA = true;
     public static boolean IS_RUNNING_IN_IDE;
+    public static DataFixerOptimizationOption DATAFIXER_OPTIMIZATION_OPTION;
     public static final int WORLD_RESOLUTION = 16;
     public static final int MAX_CHAT_LENGTH = 256;
     public static final int MAX_COMMAND_LENGTH = 32500;
@@ -160,7 +162,7 @@ public class SharedConstants {
     }
 
     public static int getProtocolVersion() {
-        return 0x4000004E;
+        return 0x4000004F;
     }
 
     public static boolean debugVoidTerrain(ChunkPos chunkPos) {
@@ -172,7 +174,16 @@ public class SharedConstants {
         return false;
     }
 
+    public static void enableDataFixerOptimizations() {
+        DATAFIXER_OPTIMIZATION_OPTION = switch (DATAFIXER_OPTIMIZATION_OPTION) {
+            case DataFixerOptimizationOption.INITIALIZED_UNOPTIMIZED -> throw new IllegalStateException("Tried to enable datafixer optimization after unoptimized initialization");
+            case DataFixerOptimizationOption.INITIALIZED_OPTIMIZED -> DataFixerOptimizationOption.INITIALIZED_OPTIMIZED;
+            default -> DataFixerOptimizationOption.UNINITIALIZED_OPTIMIZED;
+        };
+    }
+
     static {
+        DATAFIXER_OPTIMIZATION_OPTION = DataFixerOptimizationOption.UNINITIALIZED_UNOPTIMIZED;
         ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
         ResourceLeakDetector.setLevel(NETTY_LEAK_DETECTION);
         CommandSyntaxException.ENABLE_COMMAND_STACK_TRACES = false;

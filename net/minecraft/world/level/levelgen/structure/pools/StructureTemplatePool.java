@@ -11,6 +11,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import java.util.function.Function;
 import net.minecraft.Util;
@@ -37,14 +38,14 @@ public class StructureTemplatePool {
     public static final Codec<Holder<StructureTemplatePool>> CODEC = RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC);
     private final ResourceLocation name;
     private final List<Pair<StructurePoolElement, Integer>> rawTemplates;
-    private final List<StructurePoolElement> templates;
+    private final ObjectArrayList<StructurePoolElement> templates;
     private final ResourceLocation fallback;
     private int maxSize = Integer.MIN_VALUE;
 
     public StructureTemplatePool(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, List<Pair<StructurePoolElement, Integer>> list) {
         this.name = resourceLocation;
         this.rawTemplates = list;
-        this.templates = Lists.newArrayList();
+        this.templates = new ObjectArrayList();
         for (Pair<StructurePoolElement, Integer> pair : list) {
             StructurePoolElement structurePoolElement = pair.getFirst();
             for (int i = 0; i < pair.getSecond(); ++i) {
@@ -57,7 +58,7 @@ public class StructureTemplatePool {
     public StructureTemplatePool(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, List<Pair<Function<Projection, ? extends StructurePoolElement>, Integer>> list, Projection projection) {
         this.name = resourceLocation;
         this.rawTemplates = Lists.newArrayList();
-        this.templates = Lists.newArrayList();
+        this.templates = new ObjectArrayList();
         for (Pair<Function<Projection, ? extends StructurePoolElement>, Integer> pair : list) {
             StructurePoolElement structurePoolElement = pair.getFirst().apply(projection);
             this.rawTemplates.add(Pair.of(structurePoolElement, pair.getSecond()));

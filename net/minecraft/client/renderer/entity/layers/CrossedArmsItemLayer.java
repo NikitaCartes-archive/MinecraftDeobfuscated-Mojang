@@ -7,8 +7,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -20,8 +20,11 @@ import net.minecraft.world.item.ItemStack;
 @Environment(value=EnvType.CLIENT)
 public class CrossedArmsItemLayer<T extends LivingEntity, M extends EntityModel<T>>
 extends RenderLayer<T, M> {
-    public CrossedArmsItemLayer(RenderLayerParent<T, M> renderLayerParent) {
+    private final ItemInHandRenderer itemInHandRenderer;
+
+    public CrossedArmsItemLayer(RenderLayerParent<T, M> renderLayerParent, ItemInHandRenderer itemInHandRenderer) {
         super(renderLayerParent);
+        this.itemInHandRenderer = itemInHandRenderer;
     }
 
     @Override
@@ -30,7 +33,7 @@ extends RenderLayer<T, M> {
         poseStack.translate(0.0, 0.4f, -0.4f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.MAINHAND);
-        Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
+        this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

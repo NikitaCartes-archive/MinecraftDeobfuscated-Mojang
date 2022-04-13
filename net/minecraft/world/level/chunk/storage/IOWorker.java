@@ -22,7 +22,6 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StreamTagVisitor;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.visitors.CollectFields;
 import net.minecraft.nbt.visitors.FieldSelector;
@@ -101,7 +100,7 @@ AutoCloseable {
             ChunkPos chunkPos22 = ChunkPos.maxFromRegion(i, j);
             BitSet bitSet = new BitSet();
             ChunkPos.rangeClosed(chunkPos2, chunkPos22).forEach(chunkPos -> {
-                CollectFields collectFields = new CollectFields(new FieldSelector("Level", IntTag.TYPE, "DataVersion"), new FieldSelector(IntTag.TYPE, "DataVersion"), new FieldSelector("Level", "blending_data", StringTag.TYPE, "old_noise"), new FieldSelector(CompoundTag.TYPE, "blending_data"));
+                CollectFields collectFields = new CollectFields(new FieldSelector(IntTag.TYPE, "DataVersion"), new FieldSelector(CompoundTag.TYPE, "blending_data"));
                 this.scanChunk((ChunkPos)chunkPos, collectFields).join();
                 Tag tag = collectFields.getResult();
                 if (tag instanceof CompoundTag) {
@@ -115,21 +114,10 @@ AutoCloseable {
     }
 
     private boolean isOldChunk(CompoundTag compoundTag) {
-        CompoundTag compoundTag2;
-        if (compoundTag.contains("Level", 10) && ((compoundTag2 = compoundTag.getCompound("Level")).contains("blending_data", 10) || compoundTag2.contains("DataVersion", 99))) {
-            compoundTag = compoundTag2;
-        }
-        if (compoundTag.contains("blending_data", 10)) {
-            compoundTag2 = compoundTag.getCompound("blending_data");
-            if (compoundTag2.contains("old_noise", 99)) {
-                return compoundTag2.getBoolean("old_noise");
-            }
+        if (!compoundTag.contains("DataVersion", 99) || compoundTag.getInt("DataVersion") < 3088) {
             return true;
         }
-        if (compoundTag.contains("DataVersion", 99)) {
-            return compoundTag.getInt("DataVersion") < 2832;
-        }
-        return true;
+        return compoundTag.contains("blending_data", 10);
     }
 
     public CompletableFuture<Void> store(ChunkPos chunkPos, @Nullable CompoundTag compoundTag) {

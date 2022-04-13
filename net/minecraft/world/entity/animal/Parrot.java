@@ -149,7 +149,7 @@ implements FlyingAnimal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setVariant(this.random.nextInt(5));
+        this.setVariant(serverLevelAccessor.getRandom().nextInt(5));
         if (spawnGroupData == null) {
             spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
         }

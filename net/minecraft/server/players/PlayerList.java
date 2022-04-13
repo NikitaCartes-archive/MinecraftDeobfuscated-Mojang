@@ -27,6 +27,7 @@ import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -359,7 +360,7 @@ public abstract class PlayerList {
     }
 
     public ServerPlayer getPlayerForLogin(GameProfile gameProfile) {
-        UUID uUID = Player.createPlayerUUID(gameProfile);
+        UUID uUID = UUIDUtil.getOrCreatePlayerUUID(gameProfile);
         ArrayList<ServerPlayer> list = Lists.newArrayList();
         for (int i = 0; i < this.players.size(); ++i) {
             ServerPlayer serverPlayer = this.players.get(i);

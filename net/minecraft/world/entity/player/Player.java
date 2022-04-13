@@ -10,14 +10,12 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -26,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -127,7 +126,6 @@ import org.slf4j.Logger;
 public abstract class Player
 extends LivingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
-    public static final String UUID_PREFIX_OFFLINE_PLAYER = "OfflinePlayer:";
     public static final int MAX_NAME_LENGTH = 16;
     public static final int MAX_HEALTH = 20;
     public static final int SLEEP_DURATION = 100;
@@ -182,7 +180,7 @@ extends LivingEntity {
 
     public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super((EntityType<? extends LivingEntity>)EntityType.PLAYER, level);
-        this.setUUID(Player.createPlayerUUID(gameProfile));
+        this.setUUID(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
         this.gameProfile = gameProfile;
         this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
         this.containerMenu = this.inventoryMenu;
@@ -660,7 +658,7 @@ extends LivingEntity {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.setUUID(Player.createPlayerUUID(this.gameProfile));
+        this.setUUID(UUIDUtil.getOrCreatePlayerUUID(this.gameProfile));
         ListTag listTag = compoundTag.getList("Inventory", 10);
         this.inventory.load(listTag);
         this.inventory.selected = compoundTag.getInt("SelectedItemSlot");
@@ -1718,18 +1716,6 @@ extends LivingEntity {
     @Override
     public float getAbsorptionAmount() {
         return this.getEntityData().get(DATA_PLAYER_ABSORPTION_ID).floatValue();
-    }
-
-    public static UUID createPlayerUUID(GameProfile gameProfile) {
-        UUID uUID = gameProfile.getId();
-        if (uUID == null) {
-            uUID = Player.createPlayerUUID(gameProfile.getName());
-        }
-        return uUID;
-    }
-
-    public static UUID createPlayerUUID(String string) {
-        return UUID.nameUUIDFromBytes((UUID_PREFIX_OFFLINE_PLAYER + string).getBytes(StandardCharsets.UTF_8));
     }
 
     public boolean isModelPartShown(PlayerModelPart playerModelPart) {

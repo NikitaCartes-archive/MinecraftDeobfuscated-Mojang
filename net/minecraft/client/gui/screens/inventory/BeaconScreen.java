@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -168,7 +169,7 @@ extends AbstractContainerScreen<BeaconMenu> {
 
         @Override
         public void onPress() {
-            BeaconScreen.this.minecraft.getConnection().send(new ServerboundSetBeaconPacket(BeaconScreen.this.primary, BeaconScreen.this.secondary));
+            BeaconScreen.this.minecraft.getConnection().send(new ServerboundSetBeaconPacket(Optional.ofNullable(BeaconScreen.this.primary), Optional.ofNullable(BeaconScreen.this.secondary)));
             ((BeaconScreen)BeaconScreen.this).minecraft.player.closeContainer();
         }
 

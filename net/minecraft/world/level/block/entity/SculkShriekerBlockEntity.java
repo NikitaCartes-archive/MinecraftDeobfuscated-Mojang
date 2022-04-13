@@ -94,7 +94,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity) {
+    public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable GameEvent.Context context) {
         return this.canShriek(serverLevel);
     }
 

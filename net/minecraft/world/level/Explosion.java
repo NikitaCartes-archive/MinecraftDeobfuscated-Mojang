@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class Explosion {
     private final float radius;
     private final DamageSource damageSource;
     private final ExplosionDamageCalculator damageCalculator;
-    private final List<BlockPos> toBlow = Lists.newArrayList();
+    private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList();
     private final Map<Player, Vec3> hitPlayers = Maps.newHashMap();
 
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g) {
@@ -75,7 +75,7 @@ public class Explosion {
 
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, boolean bl, BlockInteraction blockInteraction, List<BlockPos> list) {
         this(level, entity, d, e, f, g, bl, blockInteraction);
-        this.toBlow.addAll(list);
+        this.toBlow.addAll((Collection<BlockPos>)list);
     }
 
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, boolean bl, BlockInteraction blockInteraction) {
@@ -168,7 +168,7 @@ public class Explosion {
                 }
             }
         }
-        this.toBlow.addAll(set);
+        this.toBlow.addAll((Collection<BlockPos>)set);
         float q = this.radius * 2.0f;
         k = Mth.floor(this.x - (double)q - 1.0);
         l = Mth.floor(this.x + (double)q + 1.0);

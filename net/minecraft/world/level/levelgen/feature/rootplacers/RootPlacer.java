@@ -13,31 +13,45 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.rootplacers.AboveRootPlacement;
 import net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacerType;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
 public abstract class RootPlacer {
     public static final Codec<RootPlacer> CODEC = Registry.ROOT_PLACER_TYPES.byNameCodec().dispatch(RootPlacer::type, RootPlacerType::codec);
+    protected final IntProvider trunkOffsetY;
     protected final BlockStateProvider rootProvider;
+    protected final Optional<AboveRootPlacement> aboveRootPlacement;
 
-    protected static <P extends RootPlacer> Products.P1<RecordCodecBuilder.Mu<P>, BlockStateProvider> rootPlacerParts(RecordCodecBuilder.Instance<P> instance) {
-        return instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("root_provider")).forGetter(rootPlacer -> rootPlacer.rootProvider));
+    protected static <P extends RootPlacer> Products.P3<RecordCodecBuilder.Mu<P>, IntProvider, BlockStateProvider, Optional<AboveRootPlacement>> rootPlacerParts(RecordCodecBuilder.Instance<P> instance) {
+        return instance.group(((MapCodec)IntProvider.CODEC.fieldOf("trunk_offset_y")).forGetter(rootPlacer -> rootPlacer.trunkOffsetY), ((MapCodec)BlockStateProvider.CODEC.fieldOf("root_provider")).forGetter(rootPlacer -> rootPlacer.rootProvider), AboveRootPlacement.CODEC.optionalFieldOf("above_root_placement").forGetter(rootPlacer -> rootPlacer.aboveRootPlacement));
     }
 
-    public RootPlacer(BlockStateProvider blockStateProvider) {
+    public RootPlacer(IntProvider intProvider, BlockStateProvider blockStateProvider, Optional<AboveRootPlacement> optional) {
+        this.trunkOffsetY = intProvider;
         this.rootProvider = blockStateProvider;
+        this.aboveRootPlacement = optional;
     }
 
     protected abstract RootPlacerType<?> type();
 
-    public abstract Optional<BlockPos> placeRoots(LevelSimulatedReader var1, BiConsumer<BlockPos, BlockState> var2, RandomSource var3, BlockPos var4, TreeConfiguration var5);
+    public abstract boolean placeRoots(LevelSimulatedReader var1, BiConsumer<BlockPos, BlockState> var2, RandomSource var3, BlockPos var4, BlockPos var5, TreeConfiguration var6);
 
     protected void placeRoot(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         biConsumer.accept(blockPos, this.getPotentiallyWaterloggedState(levelSimulatedReader, blockPos, this.rootProvider.getState(randomSource, blockPos)));
+        if (this.aboveRootPlacement.isPresent()) {
+            AboveRootPlacement aboveRootPlacement = this.aboveRootPlacement.get();
+            BlockPos blockPos2 = blockPos.above();
+            if (randomSource.nextFloat() < aboveRootPlacement.aboveRootPlacementChance() && levelSimulatedReader.isStateAtPosition(blockPos2, BlockBehaviour.BlockStateBase::isAir)) {
+                biConsumer.accept(blockPos2, this.getPotentiallyWaterloggedState(levelSimulatedReader, blockPos2, aboveRootPlacement.aboveRootProvider().getState(randomSource, blockPos2)));
+            }
+        }
     }
 
     protected BlockState getPotentiallyWaterloggedState(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos, BlockState blockState) {
@@ -46,6 +60,10 @@ public abstract class RootPlacer {
             return (BlockState)blockState.setValue(BlockStateProperties.WATERLOGGED, bl);
         }
         return blockState;
+    }
+
+    public BlockPos getTrunkOrigin(BlockPos blockPos, RandomSource randomSource) {
+        return blockPos.above(this.trunkOffsetY.sample(randomSource));
     }
 }
 

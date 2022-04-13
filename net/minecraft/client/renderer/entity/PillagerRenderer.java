@@ -20,7 +20,7 @@ extends IllagerRenderer<Pillager> {
 
     public PillagerRenderer(EntityRendererProvider.Context context) {
         super(context, new IllagerModel(context.bakeLayer(ModelLayers.PILLAGER)), 0.5f);
-        this.addLayer(new ItemInHandLayer<Pillager, IllagerModel<Pillager>>(this));
+        this.addLayer(new ItemInHandLayer<Pillager, IllagerModel<Pillager>>(this, context.getItemInHandRenderer()));
     }
 
     @Override

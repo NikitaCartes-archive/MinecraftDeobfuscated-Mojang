@@ -293,7 +293,7 @@ Saddleable {
         }
         if (!this.isNoAi()) {
             BlockState blockState = this.level.getBlockState(this.blockPosition());
-            BlockState blockState2 = this.getBlockStateOn();
+            BlockState blockState2 = this.getBlockStateOnLegacy();
             boolean bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS) || this.getFluidHeight(FluidTags.LAVA) > 0.0;
             this.setSuffocating(!bl);
         }
@@ -428,12 +428,13 @@ Saddleable {
         if (this.isBaby()) {
             return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         }
-        if (this.random.nextInt(30) == 0) {
+        RandomSource randomSource = serverLevelAccessor.getRandom();
+        if (randomSource.nextInt(30) == 0) {
             Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
-            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false));
+            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
             mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
             this.equipSaddle(null);
-        } else if (this.random.nextInt(10) == 0) {
+        } else if (randomSource.nextInt(10) == 0) {
             AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
             ageableMob.setAge(-24000);
             spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);

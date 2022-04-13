@@ -78,7 +78,7 @@ extends Monster {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        if (mobSpawnType != MobSpawnType.PATROL && mobSpawnType != MobSpawnType.EVENT && mobSpawnType != MobSpawnType.STRUCTURE && this.random.nextFloat() < 0.06f && this.canBeLeader()) {
+        if (mobSpawnType != MobSpawnType.PATROL && mobSpawnType != MobSpawnType.EVENT && mobSpawnType != MobSpawnType.STRUCTURE && serverLevelAccessor.getRandom().nextFloat() < 0.06f && this.canBeLeader()) {
             this.patrolLeader = true;
         }
         if (this.isPatrolLeader()) {

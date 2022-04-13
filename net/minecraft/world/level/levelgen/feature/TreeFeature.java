@@ -8,10 +8,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -31,6 +29,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.material.Material;
@@ -60,7 +59,7 @@ extends Feature<TreeConfiguration> {
     private static boolean isReplaceablePlant(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Material material = blockState.getMaterial();
-            return material == Material.REPLACEABLE_PLANT || material == Material.REPLACEABLE_WATER_PLANT;
+            return material == Material.REPLACEABLE_PLANT || material == Material.REPLACEABLE_WATER_PLANT || material == Material.REPLACEABLE_FIREPROOF_PLANT;
         });
     }
 
@@ -77,24 +76,22 @@ extends Feature<TreeConfiguration> {
         int j = treeConfiguration.foliagePlacer.foliageHeight(randomSource, i, treeConfiguration);
         int k = i - j;
         int l = treeConfiguration.foliagePlacer.foliageRadius(randomSource, k);
-        if (blockPos.getY() < worldGenLevel.getMinBuildHeight() + 1 || blockPos.getY() + i + 1 > worldGenLevel.getMaxBuildHeight()) {
+        BlockPos blockPos2 = treeConfiguration.rootPlacer.map(rootPlacer -> rootPlacer.getTrunkOrigin(blockPos, randomSource)).orElse(blockPos);
+        int m = Math.min(blockPos.getY(), blockPos2.getY());
+        int n = Math.max(blockPos.getY(), blockPos2.getY()) + i + 1;
+        if (m < worldGenLevel.getMinBuildHeight() + 1 || n > worldGenLevel.getMaxBuildHeight()) {
             return false;
         }
         OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
-        int m = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos, treeConfiguration);
-        if (!(m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt())) {
+        int o = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos2, treeConfiguration);
+        if (o < i && (optionalInt.isEmpty() || o < optionalInt.getAsInt())) {
             return false;
         }
-        BlockPos blockPos2 = blockPos;
-        if (treeConfiguration.rootPlacer.isPresent()) {
-            Optional<BlockPos> optional = treeConfiguration.rootPlacer.get().placeRoots(worldGenLevel, biConsumer, randomSource, blockPos, treeConfiguration);
-            if (optional.isEmpty()) {
-                return false;
-            }
-            blockPos2 = optional.get();
+        if (treeConfiguration.rootPlacer.isPresent() && !treeConfiguration.rootPlacer.get().placeRoots(worldGenLevel, biConsumer, randomSource, blockPos, blockPos2, treeConfiguration)) {
+            return false;
         }
-        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, biConsumer2, randomSource, m, blockPos2, treeConfiguration);
-        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, biConsumer3, randomSource, treeConfiguration, m, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l));
+        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(worldGenLevel, biConsumer2, randomSource, o, blockPos2, treeConfiguration);
+        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(worldGenLevel, biConsumer3, randomSource, treeConfiguration, o, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l));
         return true;
     }
 
@@ -124,9 +121,9 @@ extends Feature<TreeConfiguration> {
         RandomSource randomSource = featurePlaceContext.random();
         BlockPos blockPos2 = featurePlaceContext.origin();
         TreeConfiguration treeConfiguration = featurePlaceContext.config();
-        HashSet set = Sets.newHashSet();
-        HashSet set2 = Sets.newHashSet();
-        HashSet set3 = Sets.newHashSet();
+        HashSet<BlockPos> set = Sets.newHashSet();
+        HashSet<BlockPos> set2 = Sets.newHashSet();
+        HashSet<BlockPos> set3 = Sets.newHashSet();
         HashSet set4 = Sets.newHashSet();
         BiConsumer<BlockPos, BlockState> biConsumer = (blockPos, blockState) -> {
             set.add(blockPos.immutable());
@@ -149,13 +146,8 @@ extends Feature<TreeConfiguration> {
             return false;
         }
         if (!treeConfiguration.decorators.isEmpty()) {
-            ArrayList<BlockPos> list = Lists.newArrayList(set);
-            ArrayList<BlockPos> list2 = Lists.newArrayList(set2);
-            ArrayList<BlockPos> list3 = Lists.newArrayList(set3);
-            list2.sort(Comparator.comparingInt(Vec3i::getY));
-            list3.sort(Comparator.comparingInt(Vec3i::getY));
-            list.sort(Comparator.comparingInt(Vec3i::getY));
-            treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(worldGenLevel, biConsumer4, randomSource, list2, list3, list));
+            TreeDecorator.Context context = new TreeDecorator.Context(worldGenLevel, biConsumer4, randomSource, set2, set3, set);
+            treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(context));
         }
         return BoundingBox.encapsulatingPositions(Iterables.concat(set2, set3, set4)).map(boundingBox -> {
             DiscreteVoxelShape discreteVoxelShape = TreeFeature.updateLeaves(worldGenLevel, boundingBox, set2, set4);

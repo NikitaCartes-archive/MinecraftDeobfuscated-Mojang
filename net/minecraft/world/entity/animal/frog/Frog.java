@@ -233,7 +233,7 @@ extends Animal {
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Frog frog = EntityType.FROG.create(serverLevel);
         if (frog != null) {
-            FrogAi.initMemories(frog);
+            FrogAi.initMemories(frog, serverLevel.getRandom());
         }
         return frog;
     }
@@ -278,7 +278,7 @@ extends Animal {
         } else {
             this.setVariant(FrogVariant.TEMPERATE);
         }
-        FrogAi.initMemories(this);
+        FrogAi.initMemories(this, serverLevelAccessor.getRandom());
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

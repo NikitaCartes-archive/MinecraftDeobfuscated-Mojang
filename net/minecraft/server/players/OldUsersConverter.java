@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.players.BanListEntry;
@@ -37,7 +38,6 @@ import net.minecraft.server.players.UserBanListEntry;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class OldUsersConverter {
             minecraftServer.getProfileRepository().findProfilesByNames(strings, Agent.MINECRAFT, profileLookupCallback);
         } else {
             for (String string2 : strings) {
-                UUID uUID = Player.createPlayerUUID(new GameProfile(null, string2));
+                UUID uUID = UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, string2));
                 GameProfile gameProfile = new GameProfile(uUID, string2);
                 profileLookupCallback.onProfileLookupSucceeded(gameProfile);
             }
@@ -257,7 +257,7 @@ public class OldUsersConverter {
             return optional.get();
         }
         if (minecraftServer.isSingleplayer() || !minecraftServer.usesAuthentication()) {
-            return Player.createPlayerUUID(new GameProfile(null, string));
+            return UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, string));
         }
         final ArrayList list = Lists.newArrayList();
         ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback(){

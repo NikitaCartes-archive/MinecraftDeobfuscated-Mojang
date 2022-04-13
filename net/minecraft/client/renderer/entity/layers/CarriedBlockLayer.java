@@ -7,9 +7,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -19,8 +19,11 @@ import net.minecraft.world.level.block.state.BlockState;
 @Environment(value=EnvType.CLIENT)
 public class CarriedBlockLayer
 extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
-    public CarriedBlockLayer(RenderLayerParent<EnderMan, EndermanModel<EnderMan>> renderLayerParent) {
+    private final BlockRenderDispatcher blockRenderer;
+
+    public CarriedBlockLayer(RenderLayerParent<EnderMan, EndermanModel<EnderMan>> renderLayerParent, BlockRenderDispatcher blockRenderDispatcher) {
         super(renderLayerParent);
+        this.blockRenderer = blockRenderDispatcher;
     }
 
     @Override
@@ -37,7 +40,7 @@ extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
         float m = 0.5f;
         poseStack.scale(-0.5f, -0.5f, 0.5f);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
+        this.blockRenderer.renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

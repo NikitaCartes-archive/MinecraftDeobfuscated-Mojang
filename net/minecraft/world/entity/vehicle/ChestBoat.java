@@ -89,7 +89,7 @@ ContainerEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
-        if (player.isSecondaryUseActive()) {
+        if (!this.canAddPassenger(player) || player.isSecondaryUseActive()) {
             return this.interactWithChestVehicle(this::gameEvent, player);
         }
         return super.interact(player, interactionHand);

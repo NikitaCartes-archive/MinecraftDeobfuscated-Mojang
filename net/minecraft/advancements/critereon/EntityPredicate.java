@@ -106,7 +106,7 @@ public class EntityPredicate {
         if (!this.location.matches(serverLevel, entity2.getX(), entity2.getY(), entity2.getZ())) {
             return false;
         }
-        if (this.steppingOnLocation != LocationPredicate.ANY && !this.steppingOnLocation.matches(serverLevel, (vec32 = Vec3.atCenterOf(entity2.getOnPos())).x(), vec32.y(), vec32.z())) {
+        if (this.steppingOnLocation != LocationPredicate.ANY && !this.steppingOnLocation.matches(serverLevel, (vec32 = Vec3.atCenterOf(entity2.getOnPosLegacy())).x(), vec32.y(), vec32.z())) {
             return false;
         }
         if (!this.effects.matches(entity2)) {

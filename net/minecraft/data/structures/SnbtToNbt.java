@@ -8,21 +8,16 @@ import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.Util;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -57,7 +52,7 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) throws IOException {
+    public void run(CachedOutput cachedOutput) throws IOException {
         Path path3 = this.generator.getOutputFolder();
         ArrayList<CompletableFuture> list = Lists.newArrayList();
         for (Path path22 : this.generator.getInputFolders()) {
@@ -66,7 +61,7 @@ implements DataProvider {
         boolean bl = false;
         for (CompletableFuture completableFuture : list) {
             try {
-                this.storeStructureIfChanged(hashCache, (TaskResult)completableFuture.get(), path3);
+                this.storeStructureIfChanged(cachedOutput, (TaskResult)completableFuture.get(), path3);
             } catch (Exception exception) {
                 LOGGER.error("Failed to process structure", exception);
                 bl = true;
@@ -120,7 +115,7 @@ implements DataProvider {
         return taskResult;
     }
 
-    private void storeStructureIfChanged(HashCache hashCache, TaskResult taskResult, Path path) {
+    private void storeStructureIfChanged(CachedOutput cachedOutput, TaskResult taskResult, Path path) {
         Path path2;
         if (taskResult.snbtPayload != null) {
             path2 = DUMP_SNBT_TO.resolve(taskResult.name + ".snbt");
@@ -132,13 +127,7 @@ implements DataProvider {
         }
         path2 = path.resolve(taskResult.name + ".nbt");
         try {
-            if (!Objects.equals(hashCache.getHash(path2), taskResult.hash) || !Files.exists(path2, new LinkOption[0])) {
-                Files.createDirectories(path2.getParent(), new FileAttribute[0]);
-                try (OutputStream outputStream = Files.newOutputStream(path2, new OpenOption[0]);){
-                    outputStream.write(taskResult.payload);
-                }
-            }
-            hashCache.putNew(path2, taskResult.hash);
+            cachedOutput.writeIfNeeded(path2, taskResult.payload, taskResult.hash);
         } catch (IOException iOException) {
             LOGGER.error("Couldn't write structure {} at {}", taskResult.name, path2, iOException);
         }

@@ -435,7 +435,7 @@ implements WorldGenLevel {
     }
 
     private Optional<BlockPos> findLightningRod(BlockPos blockPos2) {
-        Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos -> blockPos.getY() == this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX(), blockPos.getZ()) - 1, blockPos2, 128, PoiManager.Occupancy.ANY);
+        Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos -> blockPos.getY() == this.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX(), blockPos.getZ()) - 1, blockPos2, 128, PoiManager.Occupancy.ANY);
         return optional.map(blockPos -> blockPos.above(1));
     }
 
@@ -772,7 +772,7 @@ implements WorldGenLevel {
     }
 
     @Override
-    public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
+    public void gameEvent(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
         int i = gameEvent.getNotificationRadius();
         BlockPos blockPos = new BlockPos(vec3);
         int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
@@ -786,7 +786,7 @@ implements WorldGenLevel {
                 LevelChunk chunkAccess = this.getChunkSource().getChunkNow(p, q);
                 if (chunkAccess == null) continue;
                 for (int r = k; r <= n; ++r) {
-                    ((ChunkAccess)chunkAccess).getEventDispatcher(r).post(gameEvent, entity, vec3);
+                    ((ChunkAccess)chunkAccess).getEventDispatcher(r).post(gameEvent, vec3, context);
                 }
             }
         }

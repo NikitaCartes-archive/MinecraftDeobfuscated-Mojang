@@ -25,7 +25,7 @@ extends MobRenderer<Giant, HumanoidModel<Giant>> {
     public GiantMobRenderer(EntityRendererProvider.Context context, float f) {
         super(context, new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT)), 0.5f * f);
         this.scale = f;
-        this.addLayer(new ItemInHandLayer<Giant, HumanoidModel<Giant>>(this));
+        this.addLayer(new ItemInHandLayer<Giant, HumanoidModel<Giant>>(this, context.getItemInHandRenderer()));
         this.addLayer(new HumanoidArmorLayer<Giant, HumanoidModel<Giant>, GiantZombieModel>(this, new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT_INNER_ARMOR)), new GiantZombieModel(context.bakeLayer(ModelLayers.GIANT_OUTER_ARMOR))));
     }
 

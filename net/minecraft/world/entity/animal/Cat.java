@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.animal;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -349,7 +350,7 @@ extends TamableAnimal {
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9f;
         TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
-        Registry.CAT_VARIANT.getTag(tagKey).flatMap(named -> named.getRandomElement(this.random)).ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
+        Registry.CAT_VARIANT.getTag(tagKey).flatMap(named -> named.getRandomElement(serverLevelAccessor.getRandom())).ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
         ServerLevel serverLevel = serverLevelAccessor.getLevel();
         if (serverLevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
             this.setCatVariant(CatVariant.ALL_BLACK);
@@ -571,7 +572,7 @@ extends TamableAnimal {
             mutableBlockPos.set(this.cat.blockPosition());
             LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);
             LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.ORIGIN, this.cat.position()).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(randomSource);
-            List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
+            ObjectArrayList<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
             for (ItemStack itemStack : list) {
                 this.cat.level.addFreshEntity(new ItemEntity(this.cat.level, (double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * ((float)Math.PI / 180)), mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * ((float)Math.PI / 180)), itemStack));
             }

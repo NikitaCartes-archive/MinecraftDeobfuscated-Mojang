@@ -25,9 +25,9 @@ extends MobRenderer<T, M> {
 
     public HumanoidMobRenderer(EntityRendererProvider.Context context, M humanoidModel, float f, float g, float h, float i) {
         super(context, humanoidModel, f);
-        this.addLayer(new CustomHeadLayer(this, context.getModelSet(), g, h, i));
+        this.addLayer(new CustomHeadLayer(this, context.getModelSet(), g, h, i, context.getItemInHandRenderer()));
         this.addLayer(new ElytraLayer(this, context.getModelSet()));
-        this.addLayer(new ItemInHandLayer(this));
+        this.addLayer(new ItemInHandLayer(this, context.getItemInHandRenderer()));
     }
 
     @Override

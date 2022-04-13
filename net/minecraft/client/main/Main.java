@@ -36,13 +36,13 @@ import net.minecraft.client.User;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.main.SilentInitException;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.profiling.jfr.Environment;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -58,6 +58,7 @@ public class Main {
         Thread thread2;
         Minecraft minecraft;
         SharedConstants.tryDetectVersion();
+        SharedConstants.enableDataFixerOptimizations();
         OptionParser optionParser = new OptionParser();
         optionParser.allowsUnrecognizedOptions();
         optionParser.accepts("demo");
@@ -132,7 +133,7 @@ public class Main {
         File file = Main.parseArgument(optionSet, optionSpec4);
         File file2 = optionSet.has(optionSpec5) ? Main.parseArgument(optionSet, optionSpec5) : new File(file, "assets/");
         File file3 = optionSet.has(optionSpec6) ? Main.parseArgument(optionSet, optionSpec6) : new File(file, "resourcepacks/");
-        String string6 = optionSet.has(optionSpec12) ? (String)optionSpec12.value(optionSet) : Player.createPlayerUUID((String)optionSpec11.value(optionSet)).toString();
+        String string6 = optionSet.has(optionSpec12) ? (String)optionSpec12.value(optionSet) : UUIDUtil.createOfflinePlayerUUID((String)optionSpec11.value(optionSet)).toString();
         String string7 = optionSet.has(optionSpec23) ? (String)optionSpec23.value(optionSet) : null;
         String string8 = optionSet.valueOf(optionSpec13);
         String string9 = optionSet.valueOf(optionSpec14);

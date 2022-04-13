@@ -11,6 +11,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +86,7 @@ extends StructurePoolElement {
 
     public List<StructureTemplate.StructureBlockInfo> getDataMarkers(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, boolean bl) {
         StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
-        List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.STRUCTURE_BLOCK, bl);
+        ObjectArrayList<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.STRUCTURE_BLOCK, bl);
         ArrayList<StructureTemplate.StructureBlockInfo> list2 = Lists.newArrayList();
         for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
             StructureMode structureMode;
@@ -98,7 +99,9 @@ extends StructurePoolElement {
     @Override
     public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource) {
         StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
-        return Util.shuffledCopy(structureTemplate.filterBlocks(blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true), randomSource);
+        ObjectArrayList<StructureTemplate.StructureBlockInfo> objectArrayList = structureTemplate.filterBlocks(blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true);
+        Util.shuffle(objectArrayList, randomSource);
+        return objectArrayList;
     }
 
     @Override

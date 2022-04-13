@@ -14,9 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.data.advancements.AdventureAdvancements;
 import net.minecraft.data.advancements.HusbandryAdvancements;
 import net.minecraft.data.advancements.NetherAdvancements;
@@ -36,7 +36,7 @@ implements DataProvider {
     }
 
     @Override
-    public void run(HashCache hashCache) {
+    public void run(CachedOutput cachedOutput) {
         Path path = this.generator.getOutputFolder();
         HashSet set = Sets.newHashSet();
         Consumer<Advancement> consumer = advancement -> {
@@ -45,7 +45,7 @@ implements DataProvider {
             }
             Path path2 = AdvancementProvider.createPath(path, advancement);
             try {
-                DataProvider.save(GSON, hashCache, advancement.deconstruct().serializeToJson(), path2);
+                DataProvider.save(GSON, cachedOutput, advancement.deconstruct().serializeToJson(), path2);
             } catch (IOException iOException) {
                 LOGGER.error("Couldn't save advancement {}", (Object)path2, (Object)iOException);
             }

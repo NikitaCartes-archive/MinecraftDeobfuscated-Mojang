@@ -37,7 +37,7 @@ import net.minecraft.world.level.levelgen.feature.CoralMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.CoralTreeFeature;
 import net.minecraft.world.level.levelgen.feature.DeltaFeature;
 import net.minecraft.world.level.levelgen.feature.DesertWellFeature;
-import net.minecraft.world.level.levelgen.feature.DiskReplaceFeature;
+import net.minecraft.world.level.levelgen.feature.DiskFeature;
 import net.minecraft.world.level.levelgen.feature.DripstoneClusterFeature;
 import net.minecraft.world.level.levelgen.feature.EndGatewayFeature;
 import net.minecraft.world.level.levelgen.feature.EndIslandFeature;
@@ -51,7 +51,6 @@ import net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.HugeFungusFeature;
 import net.minecraft.world.level.levelgen.feature.HugeRedMushroomFeature;
-import net.minecraft.world.level.levelgen.feature.IcePatchFeature;
 import net.minecraft.world.level.levelgen.feature.IceSpikeFeature;
 import net.minecraft.world.level.levelgen.feature.IcebergFeature;
 import net.minecraft.world.level.levelgen.feature.KelpFeature;
@@ -78,7 +77,6 @@ import net.minecraft.world.level.levelgen.feature.SimpleRandomSelectorFeature;
 import net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
 import net.minecraft.world.level.levelgen.feature.SpringFeature;
-import net.minecraft.world.level.levelgen.feature.SurfaceDiskFeature;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.TwistingVinesFeature;
 import net.minecraft.world.level.levelgen.feature.UnderwaterMagmaFeature;
@@ -152,9 +150,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<NoneFeatureConfiguration> BLUE_ICE = Feature.register("blue_ice", new BlueIceFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<BlockStateConfiguration> ICEBERG = Feature.register("iceberg", new IcebergFeature(BlockStateConfiguration.CODEC));
     public static final Feature<BlockStateConfiguration> FOREST_ROCK = Feature.register("forest_rock", new BlockBlobFeature(BlockStateConfiguration.CODEC));
-    public static final Feature<DiskConfiguration> DISK = Feature.register("disk", new DiskReplaceFeature(DiskConfiguration.CODEC));
-    public static final Feature<DiskConfiguration> SURFACE_DISK = Feature.register("surface_disk", new SurfaceDiskFeature(DiskConfiguration.CODEC));
-    public static final Feature<DiskConfiguration> ICE_PATCH = Feature.register("ice_patch", new IcePatchFeature(DiskConfiguration.CODEC));
+    public static final Feature<DiskConfiguration> DISK = Feature.register("disk", new DiskFeature(DiskConfiguration.CODEC));
     public static final Feature<LakeFeature.Configuration> LAKE = Feature.register("lake", new LakeFeature(LakeFeature.Configuration.CODEC));
     public static final Feature<OreConfiguration> ORE = Feature.register("ore", new OreFeature(OreConfiguration.CODEC));
     public static final Feature<SpikeConfiguration> END_SPIKE = Feature.register("end_spike", new SpikeFeature(SpikeConfiguration.CODEC));
@@ -234,10 +230,6 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 
     public static boolean isGrassOrDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, Feature::isDirt);
-    }
-
-    public static boolean isAir(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, BlockBehaviour.BlockStateBase::isAir);
     }
 
     public static boolean checkNeighbors(Function<BlockPos, BlockState> function, BlockPos blockPos, Predicate<BlockState> predicate) {
