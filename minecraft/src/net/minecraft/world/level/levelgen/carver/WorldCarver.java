@@ -13,7 +13,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -34,52 +33,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
 	protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
 	protected static final FluidState LAVA = Fluids.LAVA.defaultFluidState();
-	protected Set<Block> replaceableBlocks = ImmutableSet.of(
-		Blocks.WATER,
-		Blocks.STONE,
-		Blocks.GRANITE,
-		Blocks.DIORITE,
-		Blocks.ANDESITE,
-		Blocks.DIRT,
-		Blocks.COARSE_DIRT,
-		Blocks.PODZOL,
-		Blocks.GRASS_BLOCK,
-		Blocks.TERRACOTTA,
-		Blocks.WHITE_TERRACOTTA,
-		Blocks.ORANGE_TERRACOTTA,
-		Blocks.MAGENTA_TERRACOTTA,
-		Blocks.LIGHT_BLUE_TERRACOTTA,
-		Blocks.YELLOW_TERRACOTTA,
-		Blocks.LIME_TERRACOTTA,
-		Blocks.PINK_TERRACOTTA,
-		Blocks.GRAY_TERRACOTTA,
-		Blocks.LIGHT_GRAY_TERRACOTTA,
-		Blocks.CYAN_TERRACOTTA,
-		Blocks.PURPLE_TERRACOTTA,
-		Blocks.BLUE_TERRACOTTA,
-		Blocks.BROWN_TERRACOTTA,
-		Blocks.GREEN_TERRACOTTA,
-		Blocks.RED_TERRACOTTA,
-		Blocks.BLACK_TERRACOTTA,
-		Blocks.SANDSTONE,
-		Blocks.RED_SANDSTONE,
-		Blocks.MYCELIUM,
-		Blocks.SNOW,
-		Blocks.PACKED_ICE,
-		Blocks.DEEPSLATE,
-		Blocks.CALCITE,
-		Blocks.SAND,
-		Blocks.RED_SAND,
-		Blocks.GRAVEL,
-		Blocks.TUFF,
-		Blocks.GRANITE,
-		Blocks.IRON_ORE,
-		Blocks.DEEPSLATE_IRON_ORE,
-		Blocks.RAW_IRON_BLOCK,
-		Blocks.COPPER_ORE,
-		Blocks.DEEPSLATE_COPPER_ORE,
-		Blocks.RAW_COPPER_BLOCK
-	);
 	protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
 	private final Codec<ConfiguredWorldCarver<C>> configuredCodec;
 
@@ -181,7 +134,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			mutableBoolean.setTrue();
 		}
 
-		if (!this.canReplaceBlock(blockState) && !isDebugEnabled(carverConfiguration)) {
+		if (!this.canReplaceBlock(carverConfiguration, blockState) && !isDebugEnabled(carverConfiguration)) {
 			return false;
 		} else {
 			BlockState blockState2 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
@@ -250,8 +203,8 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
 	public abstract boolean isStartChunk(C carverConfiguration, RandomSource randomSource);
 
-	protected boolean canReplaceBlock(BlockState blockState) {
-		return this.replaceableBlocks.contains(blockState.getBlock());
+	protected boolean canReplaceBlock(C carverConfiguration, BlockState blockState) {
+		return blockState.is(carverConfiguration.replaceable);
 	}
 
 	protected static boolean canReach(ChunkPos chunkPos, double d, double e, int i, int j, float f) {

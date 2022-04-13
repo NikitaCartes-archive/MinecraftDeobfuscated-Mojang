@@ -11,11 +11,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 
 @Environment(EnvType.CLIENT)
 public class PlayerMenuItem implements SpectatorMenuItem {
@@ -30,7 +30,7 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 		if (map.containsKey(Type.SKIN)) {
 			this.location = minecraft.getSkinManager().registerTexture((MinecraftProfileTexture)map.get(Type.SKIN), Type.SKIN);
 		} else {
-			this.location = DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
+			this.location = DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
 		}
 
 		this.name = new TextComponent(gameProfile.getName());

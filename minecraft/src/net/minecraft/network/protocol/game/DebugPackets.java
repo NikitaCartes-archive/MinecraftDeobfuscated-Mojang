@@ -266,7 +266,7 @@ public class DebugPackets {
 	private static void sendPacketToAllPlayers(ServerLevel serverLevel, FriendlyByteBuf friendlyByteBuf, ResourceLocation resourceLocation) {
 		Packet<?> packet = new ClientboundCustomPayloadPacket(resourceLocation, friendlyByteBuf);
 
-		for (Player player : serverLevel.getLevel().players()) {
+		for (Player player : serverLevel.players()) {
 			((ServerPlayer)player).connection.send(packet);
 		}
 	}

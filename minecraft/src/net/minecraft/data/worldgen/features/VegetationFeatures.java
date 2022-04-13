@@ -2,6 +2,7 @@ package net.minecraft.data.worldgen.features;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
@@ -95,7 +96,7 @@ public class VegetationFeatures {
 				new SimpleBlockConfiguration(
 					new WeightedStateProvider(SimpleWeightedRandomList.<BlockState>builder().add(Blocks.GRASS.defaultBlockState(), 3).add(Blocks.FERN.defaultBlockState(), 1))
 				),
-				BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.not(BlockPredicate.matchesBlock(Blocks.PODZOL, new BlockPos(0, -1, 0))))
+				BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.not(BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.PODZOL)))
 			)
 		)
 	);
@@ -115,7 +116,7 @@ public class VegetationFeatures {
 			PlacementUtils.filtered(
 				Feature.SIMPLE_BLOCK,
 				new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.MELON)),
-				BlockPredicate.allOf(BlockPredicate.replaceable(), BlockPredicate.matchesBlock(Blocks.GRASS_BLOCK, new BlockPos(0, -1, 0)))
+				BlockPredicate.allOf(BlockPredicate.replaceable(), BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.GRASS_BLOCK))
 			)
 		)
 	);
@@ -162,13 +163,13 @@ public class VegetationFeatures {
 				BlockColumnConfiguration.simple(BiasedToBottomInt.of(2, 4), BlockStateProvider.simple(Blocks.SUGAR_CANE)),
 				BlockPredicateFilter.forPredicate(
 					BlockPredicate.allOf(
-						BlockPredicate.matchesBlock(Blocks.AIR, BlockPos.ZERO),
+						BlockPredicate.ONLY_IN_AIR_PREDICATE,
 						BlockPredicate.wouldSurvive(Blocks.SUGAR_CANE.defaultBlockState(), BlockPos.ZERO),
 						BlockPredicate.anyOf(
-							BlockPredicate.matchesFluids(List.of(Fluids.WATER, Fluids.FLOWING_WATER), new BlockPos(1, -1, 0)),
-							BlockPredicate.matchesFluids(List.of(Fluids.WATER, Fluids.FLOWING_WATER), new BlockPos(-1, -1, 0)),
-							BlockPredicate.matchesFluids(List.of(Fluids.WATER, Fluids.FLOWING_WATER), new BlockPos(0, -1, 1)),
-							BlockPredicate.matchesFluids(List.of(Fluids.WATER, Fluids.FLOWING_WATER), new BlockPos(0, -1, -1))
+							BlockPredicate.matchesFluids(new BlockPos(1, -1, 0), Fluids.WATER, Fluids.FLOWING_WATER),
+							BlockPredicate.matchesFluids(new BlockPos(-1, -1, 0), Fluids.WATER, Fluids.FLOWING_WATER),
+							BlockPredicate.matchesFluids(new BlockPos(0, -1, 1), Fluids.WATER, Fluids.FLOWING_WATER),
+							BlockPredicate.matchesFluids(new BlockPos(0, -1, -1), Fluids.WATER, Fluids.FLOWING_WATER)
 						)
 					)
 				)
@@ -447,7 +448,7 @@ public class VegetationFeatures {
 	public static final Holder<ConfiguredFeature<RandomFeatureConfiguration, ?>> MANGROVE_VEGETATION = FeatureUtils.register(
 		"mangrove_vegetation",
 		Feature.RANDOM_SELECTOR,
-		new RandomFeatureConfiguration(List.of(new WeightedPlacedFeature(TreePlacements.TALL_MANGROVE_CHECKED, 0.75F)), TreePlacements.MANGROVE_CHECKED)
+		new RandomFeatureConfiguration(List.of(new WeightedPlacedFeature(TreePlacements.TALL_MANGROVE_CHECKED, 0.85F)), TreePlacements.MANGROVE_CHECKED)
 	);
 
 	private static RandomPatchConfiguration grassPatch(BlockStateProvider blockStateProvider, int i) {

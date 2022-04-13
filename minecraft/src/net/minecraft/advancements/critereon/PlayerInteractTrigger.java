@@ -44,6 +44,10 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
 			return new PlayerInteractTrigger.TriggerInstance(composite, builder.build(), composite2);
 		}
 
+		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(ItemPredicate.Builder builder, EntityPredicate.Composite composite) {
+			return itemUsedOnEntity(EntityPredicate.Composite.ANY, builder, composite);
+		}
+
 		public boolean matches(ItemStack itemStack, LootContext lootContext) {
 			return !this.item.matches(itemStack) ? false : this.entity.matches(lootContext);
 		}

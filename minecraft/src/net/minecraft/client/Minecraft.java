@@ -115,7 +115,6 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.GpuWarnlistManager;
-import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.VirtualScreen;
@@ -259,7 +258,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public final LevelRenderer levelRenderer;
 	private final EntityRenderDispatcher entityRenderDispatcher;
 	private final ItemRenderer itemRenderer;
-	private final ItemInHandRenderer itemInHandRenderer;
 	public final ParticleEngine particleEngine;
 	private final SearchRegistry searchRegistry = new SearchRegistry();
 	private final User user;
@@ -483,22 +481,25 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.modelManager);
 		this.entityModels = new EntityModelSet();
 		this.resourceManager.registerReloadListener(this.entityModels);
-		this.blockEntityRenderDispatcher = new BlockEntityRenderDispatcher(this.font, this.entityModels, this::getBlockRenderer);
+		this.blockEntityRenderDispatcher = new BlockEntityRenderDispatcher(
+			this.font, this.entityModels, this::getBlockRenderer, this::getItemRenderer, this::getEntityRenderDispatcher
+		);
 		this.resourceManager.registerReloadListener(this.blockEntityRenderDispatcher);
 		BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer = new BlockEntityWithoutLevelRenderer(this.blockEntityRenderDispatcher, this.entityModels);
 		this.resourceManager.registerReloadListener(blockEntityWithoutLevelRenderer);
 		this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
-		this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.font, this.options, this.entityModels);
-		this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
-		this.itemInHandRenderer = new ItemInHandRenderer(this);
 		this.resourceManager.registerReloadListener(this.itemRenderer);
 		this.renderBuffers = new RenderBuffers();
-		this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
-		this.resourceManager.registerReloadListener(this.gameRenderer);
 		this.playerSocialManager = new PlayerSocialManager(this, this.userApiService);
 		this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), blockEntityWithoutLevelRenderer, this.blockColors);
 		this.resourceManager.registerReloadListener(this.blockRenderer);
-		this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
+		this.entityRenderDispatcher = new EntityRenderDispatcher(
+			this, this.textureManager, this.itemRenderer, this.blockRenderer, this.font, this.options, this.entityModels
+		);
+		this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
+		this.gameRenderer = new GameRenderer(this, this.entityRenderDispatcher.getItemInHandRenderer(), this.resourceManager, this.renderBuffers);
+		this.resourceManager.registerReloadListener(this.gameRenderer);
+		this.levelRenderer = new LevelRenderer(this, this.entityRenderDispatcher, this.blockEntityRenderDispatcher, this.renderBuffers);
 		this.resourceManager.registerReloadListener(this.levelRenderer);
 		this.createSearchTrees();
 		this.resourceManager.registerReloadListener(this.searchRegistry);
@@ -511,7 +512,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.gpuWarnlistManager = new GpuWarnlistManager();
 		this.resourceManager.registerReloadListener(this.gpuWarnlistManager);
 		this.resourceManager.registerReloadListener(this.regionalCompliancies);
-		this.gui = new Gui(this);
+		this.gui = new Gui(this, this.itemRenderer);
 		this.debugRenderer = new DebugRenderer(this);
 		RenderSystem.setErrorCallback(this::onFullscreenError);
 		if (this.mainRenderTarget.width != this.window.getWidth() || this.mainRenderTarget.height != this.window.getHeight()) {
@@ -2375,10 +2376,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public ItemRenderer getItemRenderer() {
 		return this.itemRenderer;
-	}
-
-	public ItemInHandRenderer getItemInHandRenderer() {
-		return this.itemInHandRenderer;
 	}
 
 	public <T> MutableSearchTree<T> getSearchTree(SearchRegistry.Key<T> key) {

@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -31,34 +31,34 @@ public class WorldgenRegistryDumpReport implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) {
+	public void run(CachedOutput cachedOutput) {
 		Path path = this.generator.getOutputFolder();
 		RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
 		DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-		RegistryAccess.knownRegistries().forEach(registryData -> dumpRegistryCap(hashCache, path, registryAccess, dynamicOps, registryData));
+		RegistryAccess.knownRegistries().forEach(registryData -> dumpRegistryCap(cachedOutput, path, registryAccess, dynamicOps, registryData));
 	}
 
 	private static <T> void dumpRegistryCap(
-		HashCache hashCache, Path path, RegistryAccess registryAccess, DynamicOps<JsonElement> dynamicOps, RegistryAccess.RegistryData<T> registryData
+		CachedOutput cachedOutput, Path path, RegistryAccess registryAccess, DynamicOps<JsonElement> dynamicOps, RegistryAccess.RegistryData<T> registryData
 	) {
-		dumpRegistry(path, hashCache, dynamicOps, registryData.key(), registryAccess.ownedRegistryOrThrow(registryData.key()), registryData.codec());
+		dumpRegistry(path, cachedOutput, dynamicOps, registryData.key(), registryAccess.ownedRegistryOrThrow(registryData.key()), registryData.codec());
 	}
 
 	private static <E, T extends Registry<E>> void dumpRegistry(
-		Path path, HashCache hashCache, DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends T> resourceKey, T registry, Encoder<E> encoder
+		Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends T> resourceKey, T registry, Encoder<E> encoder
 	) {
 		for (Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
 			Path path2 = createPath(path, resourceKey.location(), ((ResourceKey)entry.getKey()).location());
-			dumpValue(path2, hashCache, dynamicOps, encoder, (E)entry.getValue());
+			dumpValue(path2, cachedOutput, dynamicOps, encoder, (E)entry.getValue());
 		}
 	}
 
-	private static <E> void dumpValue(Path path, HashCache hashCache, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
+	private static <E> void dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
 		try {
 			Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object)
 				.resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", path, string));
 			if (optional.isPresent()) {
-				DataProvider.save(GSON, hashCache, (JsonElement)optional.get(), path);
+				DataProvider.save(GSON, cachedOutput, (JsonElement)optional.get(), path);
 			}
 		} catch (IOException var6) {
 			LOGGER.error("Couldn't save element {}", path, var6);

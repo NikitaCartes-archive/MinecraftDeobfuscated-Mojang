@@ -38,9 +38,7 @@ public class HttpUtil {
 	private HttpUtil() {
 	}
 
-	public static CompletableFuture<?> downloadTo(
-		File file, String string, Map<String, String> map, int i, @Nullable ProgressListener progressListener, Proxy proxy
-	) {
+	public static CompletableFuture<?> downloadTo(File file, URL uRL, Map<String, String> map, int i, @Nullable ProgressListener progressListener, Proxy proxy) {
 		return CompletableFuture.supplyAsync(() -> {
 			HttpURLConnection httpURLConnection = null;
 			InputStream inputStream = null;
@@ -52,7 +50,6 @@ public class HttpUtil {
 
 			try {
 				byte[] bs = new byte[4096];
-				URL uRL = new URL(string);
 				httpURLConnection = (HttpURLConnection)uRL.openConnection(proxy);
 				httpURLConnection.setInstanceFollowRedirects(true);
 				float f = 0.0F;
@@ -129,14 +126,14 @@ public class HttpUtil {
 
 					return null;
 				}
-			} catch (Throwable var22) {
-				LOGGER.error("Failed to download file", var22);
+			} catch (Throwable var21) {
+				LOGGER.error("Failed to download file", var21);
 				if (httpURLConnection != null) {
 					InputStream inputStream2 = httpURLConnection.getErrorStream();
 
 					try {
 						LOGGER.error("HTTP response error: {}", IOUtils.toString(inputStream2, StandardCharsets.UTF_8));
-					} catch (IOException var21) {
+					} catch (IOException var20) {
 						LOGGER.error("Failed to read response from server");
 					}
 				}

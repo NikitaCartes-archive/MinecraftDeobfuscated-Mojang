@@ -221,6 +221,7 @@ public class TropicalFish extends AbstractSchoolingFish {
 			this.setVariant(compoundTag.getInt("BucketVariantTag"));
 			return spawnGroupData;
 		} else {
+			RandomSource randomSource = serverLevelAccessor.getRandom();
 			int i;
 			int j;
 			int k;
@@ -230,8 +231,8 @@ public class TropicalFish extends AbstractSchoolingFish {
 				j = tropicalFishGroupData.pattern;
 				k = tropicalFishGroupData.baseColor;
 				l = tropicalFishGroupData.patternColor;
-			} else if ((double)this.random.nextFloat() < 0.9) {
-				int m = Util.getRandom(COMMON_VARIANTS, this.random);
+			} else if ((double)randomSource.nextFloat() < 0.9) {
+				int m = Util.getRandom(COMMON_VARIANTS, randomSource);
 				i = m & 0xFF;
 				j = (m & 0xFF00) >> 8;
 				k = (m & 0xFF0000) >> 16;
@@ -239,10 +240,10 @@ public class TropicalFish extends AbstractSchoolingFish {
 				spawnGroupData = new TropicalFish.TropicalFishGroupData(this, i, j, k, l);
 			} else {
 				this.isSchool = false;
-				i = this.random.nextInt(2);
-				j = this.random.nextInt(6);
-				k = this.random.nextInt(15);
-				l = this.random.nextInt(15);
+				i = randomSource.nextInt(2);
+				j = randomSource.nextInt(6);
+				k = randomSource.nextInt(15);
+				l = randomSource.nextInt(15);
 			}
 
 			this.setVariant(i | j << 8 | k << 16 | l << 24);

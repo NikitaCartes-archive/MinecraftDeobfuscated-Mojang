@@ -43,6 +43,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
 		this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
 		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
+		this.copy(BlockTags.WART_BLOCKS, ItemTags.WART_BLOCKS);
 		this.copy(BlockTags.LOGS_THAT_BURN, ItemTags.LOGS_THAT_BURN);
 		this.copy(BlockTags.LOGS, ItemTags.LOGS);
 		this.copy(BlockTags.SAND, ItemTags.SAND);
@@ -61,7 +62,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
 		this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
 		this.copy(BlockTags.CANDLES, ItemTags.CANDLES);
-		this.copy(BlockTags.OCCLUDES_VIBRATION_SIGNALS, ItemTags.OCCLUDES_VIBRATION_SIGNALS);
+		this.copy(BlockTags.DAMPENS_VIBRATIONS, ItemTags.DAMPENS_VIBRATIONS);
 		this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
 		this.copy(BlockTags.IRON_ORES, ItemTags.IRON_ORES);
 		this.copy(BlockTags.DIAMOND_ORES, ItemTags.DIAMOND_ORES);
@@ -72,6 +73,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.COPPER_ORES, ItemTags.COPPER_ORES);
 		this.copy(BlockTags.DIRT, ItemTags.DIRT);
 		this.copy(BlockTags.TERRACOTTA, ItemTags.TERRACOTTA);
+		this.copy(BlockTags.COMPLETES_FIND_TREE_TUTORIAL, ItemTags.COMPLETES_FIND_TREE_TUTORIAL);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,

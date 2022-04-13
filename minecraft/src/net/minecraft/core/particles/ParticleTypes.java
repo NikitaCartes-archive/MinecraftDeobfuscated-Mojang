@@ -35,6 +35,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType ENTITY_EFFECT = register("entity_effect", false);
 	public static final SimpleParticleType EXPLOSION_EMITTER = register("explosion_emitter", true);
 	public static final SimpleParticleType EXPLOSION = register("explosion", true);
+	public static final SimpleParticleType SONIC_BOOM = register("sonic_boom", true);
 	public static final ParticleType<BlockParticleOption> FALLING_DUST = register(
 		"falling_dust", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec
 	);

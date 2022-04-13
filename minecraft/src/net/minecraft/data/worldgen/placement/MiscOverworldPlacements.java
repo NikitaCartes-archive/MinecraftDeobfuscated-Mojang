@@ -4,27 +4,39 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 import net.minecraft.world.level.levelgen.heightproviders.VeryBiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
 import net.minecraft.world.level.levelgen.placement.CountPlacement;
 import net.minecraft.world.level.levelgen.placement.EnvironmentScanPlacement;
 import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
 import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.RandomOffsetPlacement;
 import net.minecraft.world.level.levelgen.placement.RarityFilter;
 import net.minecraft.world.level.levelgen.placement.SurfaceRelativeThresholdFilter;
+import net.minecraft.world.level.material.Fluids;
 
 public class MiscOverworldPlacements {
 	public static final Holder<PlacedFeature> ICE_SPIKE = PlacementUtils.register(
 		"ice_spike", MiscOverworldFeatures.ICE_SPIKE, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> ICE_PATCH = PlacementUtils.register(
-		"ice_patch", MiscOverworldFeatures.ICE_PATCH, CountPlacement.of(2), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+		"ice_patch",
+		MiscOverworldFeatures.ICE_PATCH,
+		CountPlacement.of(2),
+		InSquarePlacement.spread(),
+		PlacementUtils.HEIGHTMAP,
+		RandomOffsetPlacement.vertical(ConstantInt.of(-1)),
+		BlockPredicateFilter.forPredicate(BlockPredicate.matchesBlocks(Blocks.SNOW_BLOCK)),
+		BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> FOREST_ROCK = PlacementUtils.register(
 		"forest_rock", MiscOverworldFeatures.FOREST_ROCK, CountPlacement.of(2), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
@@ -64,16 +76,39 @@ public class MiscOverworldPlacements {
 		BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> DISK_CLAY = PlacementUtils.register(
-		"disk_clay", MiscOverworldFeatures.DISK_CLAY, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome()
+		"disk_clay",
+		MiscOverworldFeatures.DISK_CLAY,
+		InSquarePlacement.spread(),
+		PlacementUtils.HEIGHTMAP_TOP_SOLID,
+		BlockPredicateFilter.forPredicate(BlockPredicate.matchesFluids(Fluids.WATER)),
+		BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> DISK_GRAVEL = PlacementUtils.register(
-		"disk_gravel", MiscOverworldFeatures.DISK_GRAVEL, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome()
+		"disk_gravel",
+		MiscOverworldFeatures.DISK_GRAVEL,
+		InSquarePlacement.spread(),
+		PlacementUtils.HEIGHTMAP_TOP_SOLID,
+		BlockPredicateFilter.forPredicate(BlockPredicate.matchesFluids(Fluids.WATER)),
+		BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> DISK_SAND = PlacementUtils.register(
-		"disk_sand", MiscOverworldFeatures.DISK_SAND, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome()
+		"disk_sand",
+		MiscOverworldFeatures.DISK_SAND,
+		CountPlacement.of(3),
+		InSquarePlacement.spread(),
+		PlacementUtils.HEIGHTMAP_TOP_SOLID,
+		BlockPredicateFilter.forPredicate(BlockPredicate.matchesFluids(Fluids.WATER)),
+		BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> DISK_GRASS = PlacementUtils.register(
-		"disk_grass", MiscOverworldFeatures.DISK_GRASS, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_TOP_SOLID, BiomeFilter.biome()
+		"disk_grass",
+		MiscOverworldFeatures.DISK_GRASS,
+		CountPlacement.of(1),
+		InSquarePlacement.spread(),
+		PlacementUtils.HEIGHTMAP_TOP_SOLID,
+		RandomOffsetPlacement.vertical(ConstantInt.of(-1)),
+		BlockPredicateFilter.forPredicate(BlockPredicate.matchesBlocks(Blocks.MUD)),
+		BiomeFilter.biome()
 	);
 	public static final Holder<PlacedFeature> FREEZE_TOP_LAYER = PlacementUtils.register(
 		"freeze_top_layer", MiscOverworldFeatures.FREEZE_TOP_LAYER, BiomeFilter.biome()

@@ -120,6 +120,7 @@ public class SurfaceRuleData {
 					ruleSource3
 				)
 			),
+			SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.MANGROVE_SWAMP), MUD),
 			DIRT
 		);
 		SurfaceRules.RuleSource ruleSource8 = SurfaceRules.sequence(

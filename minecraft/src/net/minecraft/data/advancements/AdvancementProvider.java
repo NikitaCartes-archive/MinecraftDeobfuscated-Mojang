@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -30,7 +30,7 @@ public class AdvancementProvider implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) {
+	public void run(CachedOutput cachedOutput) {
 		Path path = this.generator.getOutputFolder();
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		Consumer<Advancement> consumer = advancement -> {
@@ -40,7 +40,7 @@ public class AdvancementProvider implements DataProvider {
 				Path path2 = createPath(path, advancement);
 
 				try {
-					DataProvider.save(GSON, hashCache, advancement.deconstruct().serializeToJson(), path2);
+					DataProvider.save(GSON, cachedOutput, advancement.deconstruct().serializeToJson(), path2);
 				} catch (IOException var6x) {
 					LOGGER.error("Couldn't save advancement {}", path2, var6x);
 				}

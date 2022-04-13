@@ -20,7 +20,7 @@ public class FoxRenderer extends MobRenderer<Fox, FoxModel<Fox>> {
 
 	public FoxRenderer(EntityRendererProvider.Context context) {
 		super(context, new FoxModel<>(context.bakeLayer(ModelLayers.FOX)), 0.4F);
-		this.addLayer(new FoxHeldItemLayer(this));
+		this.addLayer(new FoxHeldItemLayer(this, context.getItemInHandRenderer()));
 	}
 
 	protected void setupRotations(Fox fox, PoseStack poseStack, float f, float g, float h) {

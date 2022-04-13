@@ -942,6 +942,10 @@ public abstract class RenderType extends RenderStateShard {
 		return this.affectsCrumbling;
 	}
 
+	public boolean canConsolidateConsecutiveGeometry() {
+		return !this.mode.connectedPrimitives;
+	}
+
 	public Optional<RenderType> asOptional() {
 		return this.asOptional;
 	}

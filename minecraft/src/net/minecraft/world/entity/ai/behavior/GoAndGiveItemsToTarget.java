@@ -63,12 +63,8 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
 				ItemStack itemStack = livingEntity.getInventory().removeItem(0, 1);
 				if (!itemStack.isEmpty()) {
 					BehaviorUtils.throwItem(livingEntity, itemStack, getThrowPosition(positionTracker));
-					if (positionTracker instanceof EntityTracker entityTracker && entityTracker.getEntity() instanceof ServerPlayer serverPlayer) {
-						CriteriaTriggers.ITEM_DELIVERED_TO_PLAYER.trigger(serverPlayer);
-					}
-
 					if (livingEntity instanceof Allay allay) {
-						AllayAi.getLikedPlayer(allay).ifPresent(serverPlayerx -> this.triggerDropItemOnBlock(positionTracker, itemStack, serverPlayerx));
+						AllayAi.getLikedPlayer(allay).ifPresent(serverPlayer -> this.triggerDropItemOnBlock(positionTracker, itemStack, serverPlayer));
 					}
 
 					livingEntity.getBrain().setMemory(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, 100);

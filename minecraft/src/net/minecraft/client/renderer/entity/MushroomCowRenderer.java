@@ -22,7 +22,7 @@ public class MushroomCowRenderer extends MobRenderer<MushroomCow, CowModel<Mushr
 
 	public MushroomCowRenderer(EntityRendererProvider.Context context) {
 		super(context, new CowModel<>(context.bakeLayer(ModelLayers.MOOSHROOM)), 0.7F);
-		this.addLayer(new MushroomCowMushroomLayer<>(this));
+		this.addLayer(new MushroomCowMushroomLayer<>(this, context.getBlockRenderDispatcher()));
 	}
 
 	public ResourceLocation getTextureLocation(MushroomCow mushroomCow) {

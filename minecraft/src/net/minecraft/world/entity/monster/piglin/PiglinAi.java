@@ -122,8 +122,8 @@ public class PiglinAi {
 		return brain;
 	}
 
-	protected static void initMemories(Piglin piglin) {
-		int i = TIME_BETWEEN_HUNTS.sample(piglin.level.random);
+	protected static void initMemories(Piglin piglin, RandomSource randomSource) {
+		int i = TIME_BETWEEN_HUNTS.sample(randomSource);
 		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)i);
 	}
 
@@ -419,12 +419,13 @@ public class PiglinAi {
 
 	private static List<ItemStack> getBarterResponseItems(Piglin piglin) {
 		LootTable lootTable = piglin.level.getServer().getLootTables().get(BuiltInLootTables.PIGLIN_BARTERING);
-		return lootTable.getRandomItems(
+		List<ItemStack> list = lootTable.getRandomItems(
 			new LootContext.Builder((ServerLevel)piglin.level)
 				.withParameter(LootContextParams.THIS_ENTITY, piglin)
 				.withRandom(piglin.level.random)
 				.create(LootContextParamSets.PIGLIN_BARTER)
 		);
+		return list;
 	}
 
 	private static boolean wantsToDance(LivingEntity livingEntity, LivingEntity livingEntity2) {

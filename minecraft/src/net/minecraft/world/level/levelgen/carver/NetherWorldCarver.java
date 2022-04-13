@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -18,25 +17,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 public class NetherWorldCarver extends CaveWorldCarver {
 	public NetherWorldCarver(Codec<CaveCarverConfiguration> codec) {
 		super(codec);
-		this.replaceableBlocks = ImmutableSet.of(
-			Blocks.STONE,
-			Blocks.GRANITE,
-			Blocks.DIORITE,
-			Blocks.ANDESITE,
-			Blocks.DIRT,
-			Blocks.COARSE_DIRT,
-			Blocks.PODZOL,
-			Blocks.GRASS_BLOCK,
-			Blocks.NETHERRACK,
-			Blocks.SOUL_SAND,
-			Blocks.SOUL_SOIL,
-			Blocks.CRIMSON_NYLIUM,
-			Blocks.WARPED_NYLIUM,
-			Blocks.NETHER_WART_BLOCK,
-			Blocks.WARPED_WART_BLOCK,
-			Blocks.BASALT,
-			Blocks.BLACKSTONE
-		);
 		this.liquids = ImmutableSet.of(Fluids.LAVA, Fluids.WATER);
 	}
 
@@ -66,7 +46,7 @@ public class NetherWorldCarver extends CaveWorldCarver {
 		Aquifer aquifer,
 		MutableBoolean mutableBoolean
 	) {
-		if (this.canReplaceBlock(chunkAccess.getBlockState(mutableBlockPos))) {
+		if (this.canReplaceBlock(caveCarverConfiguration, chunkAccess.getBlockState(mutableBlockPos))) {
 			BlockState blockState;
 			if (mutableBlockPos.getY() <= carvingContext.getMinGenY() + 31) {
 				blockState = LAVA.createLegacyBlock();

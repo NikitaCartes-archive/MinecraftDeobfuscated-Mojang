@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import java.util.Collections;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -175,22 +175,24 @@ public class StructureTemplate {
 		return this.filterBlocks(blockPos, structurePlaceSettings, block, true);
 	}
 
-	public List<StructureTemplate.StructureBlockInfo> filterBlocks(BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Block block, boolean bl) {
-		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
+	public ObjectArrayList<StructureTemplate.StructureBlockInfo> filterBlocks(
+		BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Block block, boolean bl
+	) {
+		ObjectArrayList<StructureTemplate.StructureBlockInfo> objectArrayList = new ObjectArrayList<>();
 		BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
 		if (this.palettes.isEmpty()) {
-			return Collections.emptyList();
+			return objectArrayList;
 		} else {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos).blocks(block)) {
 				BlockPos blockPos2 = bl ? calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos) : structureBlockInfo.pos;
 				if (boundingBox == null || boundingBox.isInside(blockPos2)) {
-					list.add(
+					objectArrayList.add(
 						new StructureTemplate.StructureBlockInfo(blockPos2, structureBlockInfo.state.rotate(structurePlaceSettings.getRotation()), structureBlockInfo.nbt)
 					);
 				}
 			}
 
-			return list;
+			return objectArrayList;
 		}
 	}
 

@@ -10,9 +10,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.synchronization.ArgumentUtils;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 
 public class CommandsReport implements DataProvider {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -23,13 +23,13 @@ public class CommandsReport implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) throws IOException {
+	public void run(CachedOutput cachedOutput) throws IOException {
 		Path path = this.generator.getOutputFolder().resolve("reports/commands.json");
 		CommandDispatcher<CommandSourceStack> commandDispatcher = new Commands(
 				Commands.CommandSelection.ALL, new CommandBuildContext((RegistryAccess)RegistryAccess.BUILTIN.get())
 			)
 			.getDispatcher();
-		DataProvider.save(GSON, hashCache, ArgumentUtils.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
+		DataProvider.save(GSON, cachedOutput, ArgumentUtils.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
 	}
 
 	@Override

@@ -323,8 +323,9 @@ public class Slime extends Mob implements Enemy {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		int i = this.random.nextInt(3);
-		if (i < 2 && this.random.nextFloat() < 0.5F * difficultyInstance.getSpecialMultiplier()) {
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		int i = randomSource.nextInt(3);
+		if (i < 2 && randomSource.nextFloat() < 0.5F * difficultyInstance.getSpecialMultiplier()) {
 			i++;
 		}
 

@@ -39,7 +39,6 @@ public abstract class BaseSpawner {
 	private int maxNearbyEntities = 6;
 	private int requiredPlayerRange = 16;
 	private int spawnRange = 4;
-	private final RandomSource random = RandomSource.create();
 
 	public void setEntityId(EntityType<?> entityType) {
 		this.nextSpawnData.getEntityToSpawn().putString("id", Registry.ENTITY_TYPE.getKey(entityType).toString());
@@ -55,9 +54,10 @@ public abstract class BaseSpawner {
 		if (!this.isNearPlayer(level, blockPos)) {
 			this.oSpin = this.spin;
 		} else {
-			double d = (double)blockPos.getX() + level.random.nextDouble();
-			double e = (double)blockPos.getY() + level.random.nextDouble();
-			double f = (double)blockPos.getZ() + level.random.nextDouble();
+			RandomSource randomSource = level.getRandom();
+			double d = (double)blockPos.getX() + randomSource.nextDouble();
+			double e = (double)blockPos.getY() + randomSource.nextDouble();
+			double f = (double)blockPos.getZ() + randomSource.nextDouble();
 			level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
 			level.addParticle(ParticleTypes.FLAME, d, e, f, 0.0, 0.0, 0.0);
 			if (this.spawnDelay > 0) {
@@ -90,13 +90,14 @@ public abstract class BaseSpawner {
 
 					ListTag listTag = compoundTag.getList("Pos", 6);
 					int j = listTag.size();
+					RandomSource randomSource = serverLevel.getRandom();
 					double d = j >= 1
 						? listTag.getDouble(0)
-						: (double)blockPos.getX() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * (double)this.spawnRange + 0.5;
-					double e = j >= 2 ? listTag.getDouble(1) : (double)(blockPos.getY() + serverLevel.random.nextInt(3) - 1);
+						: (double)blockPos.getX() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.spawnRange + 0.5;
+					double e = j >= 2 ? listTag.getDouble(1) : (double)(blockPos.getY() + randomSource.nextInt(3) - 1);
 					double f = j >= 3
 						? listTag.getDouble(2)
-						: (double)blockPos.getZ() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * (double)this.spawnRange + 0.5;
+						: (double)blockPos.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.spawnRange + 0.5;
 					if (serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))) {
 						BlockPos blockPos2 = new BlockPos(d, e, f);
 						if (this.nextSpawnData.getCustomSpawnRules().isPresent()) {
@@ -140,7 +141,7 @@ public abstract class BaseSpawner {
 							return;
 						}
 
-						entity.moveTo(entity.getX(), entity.getY(), entity.getZ(), serverLevel.random.nextFloat() * 360.0F, 0.0F);
+						entity.moveTo(entity.getX(), entity.getY(), entity.getZ(), randomSource.nextFloat() * 360.0F, 0.0F);
 						if (entity instanceof Mob mob) {
 							if (this.nextSpawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(serverLevel, MobSpawnType.SPAWNER)
 								|| !mob.checkSpawnObstruction(serverLevel)) {
@@ -174,13 +175,14 @@ public abstract class BaseSpawner {
 	}
 
 	private void delay(Level level, BlockPos blockPos) {
+		RandomSource randomSource = level.random;
 		if (this.maxSpawnDelay <= this.minSpawnDelay) {
 			this.spawnDelay = this.minSpawnDelay;
 		} else {
-			this.spawnDelay = this.minSpawnDelay + this.random.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
+			this.spawnDelay = this.minSpawnDelay + randomSource.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
 		}
 
-		this.spawnPotentials.getRandom(this.random).ifPresent(wrapper -> this.setNextSpawnData(level, blockPos, (SpawnData)wrapper.getData()));
+		this.spawnPotentials.getRandom(randomSource).ifPresent(wrapper -> this.setNextSpawnData(level, blockPos, (SpawnData)wrapper.getData()));
 		this.broadcastEvent(level, blockPos, 1);
 	}
 
@@ -214,7 +216,7 @@ public abstract class BaseSpawner {
 					.orElseGet(SpawnData::new);
 				this.setNextSpawnData(level, blockPos, spawnData2);
 			} else {
-				this.spawnPotentials.getRandom(this.random).ifPresent(wrapper -> this.setNextSpawnData(level, blockPos, (SpawnData)wrapper.getData()));
+				this.spawnPotentials.getRandom(level.getRandom()).ifPresent(wrapper -> this.setNextSpawnData(level, blockPos, (SpawnData)wrapper.getData()));
 			}
 		}
 

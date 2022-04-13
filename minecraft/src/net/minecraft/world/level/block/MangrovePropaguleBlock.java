@@ -35,10 +35,10 @@ public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterl
 	};
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
-	private static final float GROW_TALL_MANGROVE_PROBABILITY = 0.75F;
+	private static final float GROW_TALL_MANGROVE_PROBABILITY = 0.85F;
 
 	public MangrovePropaguleBlock(BlockBehaviour.Properties properties) {
-		super(new MangroveTreeGrower(0.75F), properties);
+		super(new MangroveTreeGrower(0.85F), properties);
 		this.registerDefaultState(
 			this.stateDefinition
 				.any()
@@ -78,11 +78,6 @@ public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterl
 		}
 
 		return voxelShape.move(vec3.x, vec3.y, vec3.z);
-	}
-
-	@Override
-	public BlockBehaviour.OffsetType getOffsetType() {
-		return BlockBehaviour.OffsetType.XZ;
 	}
 
 	@Override

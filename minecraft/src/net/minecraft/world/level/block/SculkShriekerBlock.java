@@ -9,6 +9,7 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -63,11 +64,12 @@ public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		super.onRemove(blockState, level, blockPos, blockState2, bl);
 		if (level instanceof ServerLevel serverLevel && (Boolean)blockState.getValue(SHRIEKING) && !blockState.is(blockState2.getBlock())) {
 			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER)
 				.ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.replyOrSummon(serverLevel));
 		}
+
+		super.onRemove(blockState, level, blockPos, blockState2, bl);
 	}
 
 	@Override
@@ -114,6 +116,13 @@ public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterlo
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	@Nullable
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+		return this.defaultBlockState()
+			.setValue(WATERLOGGED, Boolean.valueOf(blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos()).getType() == Fluids.WATER));
 	}
 
 	@Override

@@ -177,7 +177,7 @@ public class CaveFeatures {
 					BlockPredicate.matchesTag(BlockTags.LEAVES),
 					BlockPredicate.matchesTag(BlockTags.REPLACEABLE_PLANTS)
 				),
-				BlockPredicate.matchesTag(BlockTags.AZALEA_GROWS_ON, Direction.DOWN.getNormal())
+				BlockPredicate.matchesTag(Direction.DOWN.getNormal(), BlockTags.AZALEA_GROWS_ON)
 			)
 		)
 	);

@@ -49,7 +49,7 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 	private <E extends Entity> void renderLeash(T mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, E entity) {
 		poseStack.pushPose();
 		Vec3 vec3 = entity.getRopeHoldPosition(f);
-		double d = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * (float) (Math.PI / 180.0)) + (Math.PI / 2);
+		double d = (double)(Mth.lerp(f, mob.yBodyRotO, mob.yBodyRot) * (float) (Math.PI / 180.0)) + (Math.PI / 2);
 		Vec3 vec32 = mob.getLeashOffset();
 		double e = Math.cos(d) * vec32.z + Math.sin(d) * vec32.x;
 		double g = Math.sin(d) * vec32.z - Math.cos(d) * vec32.x;

@@ -1,16 +1,19 @@
 package net.minecraft.core;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
 import net.minecraft.Util;
 
-public final class SerializableUUID {
+public final class UUIDUtil {
 	public static final Codec<UUID> CODEC = Codec.INT_STREAM
-		.comapFlatMap(intStream -> Util.fixedSize(intStream, 4).map(SerializableUUID::uuidFromIntArray), uUID -> Arrays.stream(uuidToIntArray(uUID)));
+		.comapFlatMap(intStream -> Util.fixedSize(intStream, 4).map(UUIDUtil::uuidFromIntArray), uUID -> Arrays.stream(uuidToIntArray(uUID)));
+	private static final String UUID_PREFIX_OFFLINE_PLAYER = "OfflinePlayer:";
 
-	private SerializableUUID() {
+	private UUIDUtil() {
 	}
 
 	public static UUID uuidFromIntArray(int[] is) {
@@ -34,5 +37,18 @@ public final class SerializableUUID {
 		} else {
 			return uuidFromIntArray(is);
 		}
+	}
+
+	public static UUID getOrCreatePlayerUUID(GameProfile gameProfile) {
+		UUID uUID = gameProfile.getId();
+		if (uUID == null) {
+			uUID = createOfflinePlayerUUID(gameProfile.getName());
+		}
+
+		return uUID;
+	}
+
+	public static UUID createOfflinePlayerUUID(String string) {
+		return UUID.nameUUIDFromBytes(("OfflinePlayer:" + string).getBytes(StandardCharsets.UTF_8));
 	}
 }

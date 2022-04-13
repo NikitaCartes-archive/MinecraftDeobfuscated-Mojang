@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -21,14 +22,20 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<SnowGolem>> {
-	public SnowGolemHeadLayer(RenderLayerParent<SnowGolem, SnowGolemModel<SnowGolem>> renderLayerParent) {
+	private final BlockRenderDispatcher blockRenderer;
+	private final ItemRenderer itemRenderer;
+
+	public SnowGolemHeadLayer(
+		RenderLayerParent<SnowGolem, SnowGolemModel<SnowGolem>> renderLayerParent, BlockRenderDispatcher blockRenderDispatcher, ItemRenderer itemRenderer
+	) {
 		super(renderLayerParent);
+		this.blockRenderer = blockRenderDispatcher;
+		this.itemRenderer = itemRenderer;
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, SnowGolem snowGolem, float f, float g, float h, float j, float k, float l) {
 		if (snowGolem.hasPumpkin()) {
-			Minecraft minecraft = Minecraft.getInstance();
-			boolean bl = minecraft.shouldEntityAppearGlowing(snowGolem) && snowGolem.isInvisible();
+			boolean bl = Minecraft.getInstance().shouldEntityAppearGlowing(snowGolem) && snowGolem.isInvisible();
 			if (!snowGolem.isInvisible() || bl) {
 				poseStack.pushPose();
 				this.getParentModel().getHead().translateAndRotate(poseStack);
@@ -39,16 +46,16 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 				ItemStack itemStack = new ItemStack(Blocks.CARVED_PUMPKIN);
 				if (bl) {
 					BlockState blockState = Blocks.CARVED_PUMPKIN.defaultBlockState();
-					BlockRenderDispatcher blockRenderDispatcher = minecraft.getBlockRenderer();
-					BakedModel bakedModel = blockRenderDispatcher.getBlockModel(blockState);
+					BakedModel bakedModel = this.blockRenderer.getBlockModel(blockState);
 					int n = LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0F);
 					poseStack.translate(-0.5, -0.5, -0.5);
-					blockRenderDispatcher.getModelRenderer()
+					this.blockRenderer
+						.getModelRenderer()
 						.renderModel(
 							poseStack.last(), multiBufferSource.getBuffer(RenderType.outline(TextureAtlas.LOCATION_BLOCKS)), blockState, bakedModel, 0.0F, 0.0F, 0.0F, i, n
 						);
 				} else {
-					minecraft.getItemRenderer()
+					this.itemRenderer
 						.renderStatic(
 							snowGolem,
 							itemStack,

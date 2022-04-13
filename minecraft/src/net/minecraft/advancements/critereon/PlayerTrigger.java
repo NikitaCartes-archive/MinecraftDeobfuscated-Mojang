@@ -50,8 +50,8 @@ public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerI
 			return new PlayerTrigger.TriggerInstance(CriteriaTriggers.RAID_WIN.id, EntityPredicate.Composite.ANY);
 		}
 
-		public static PlayerTrigger.TriggerInstance itemDeliveredToPlayer() {
-			return new PlayerTrigger.TriggerInstance(CriteriaTriggers.ITEM_DELIVERED_TO_PLAYER.id, EntityPredicate.Composite.ANY);
+		public static PlayerTrigger.TriggerInstance avoidVibration() {
+			return new PlayerTrigger.TriggerInstance(CriteriaTriggers.AVOID_VIBRATION.id, EntityPredicate.Composite.ANY);
 		}
 
 		public static PlayerTrigger.TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {

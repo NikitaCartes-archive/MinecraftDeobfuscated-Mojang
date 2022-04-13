@@ -2,6 +2,7 @@ package net.minecraft.data.worldgen.placement;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.features.AquaticFeatures;
 import net.minecraft.world.level.block.Blocks;
@@ -39,9 +40,9 @@ public class AquaticPlacements {
 		RarityFilter.onAverageOnceEvery(10),
 		BlockPredicateFilter.forPredicate(
 			BlockPredicate.allOf(
-				BlockPredicate.matchesBlock(Blocks.STONE, new BlockPos(0, -1, 0)),
-				BlockPredicate.matchesBlock(Blocks.WATER, BlockPos.ZERO),
-				BlockPredicate.matchesBlock(Blocks.WATER, new BlockPos(0, 1, 0))
+				BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.STONE),
+				BlockPredicate.matchesBlocks(BlockPos.ZERO, Blocks.WATER),
+				BlockPredicate.matchesBlocks(Direction.UP.getNormal(), Blocks.WATER)
 			)
 		),
 		BiomeFilter.biome()

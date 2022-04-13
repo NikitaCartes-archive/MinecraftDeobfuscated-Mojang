@@ -16,7 +16,7 @@ public class WitchRenderer extends MobRenderer<Witch, WitchModel<Witch>> {
 
 	public WitchRenderer(EntityRendererProvider.Context context) {
 		super(context, new WitchModel<>(context.bakeLayer(ModelLayers.WITCH)), 0.5F);
-		this.addLayer(new WitchItemLayer<>(this));
+		this.addLayer(new WitchItemLayer<>(this, context.getItemInHandRenderer()));
 	}
 
 	public void render(Witch witch, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

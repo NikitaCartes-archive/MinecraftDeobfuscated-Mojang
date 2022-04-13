@@ -11,7 +11,8 @@ import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.monster.warden.WardenAi;
 
 public class Sniffing<E extends Warden> extends Behavior<E> {
-	private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE = 6.0;
+	private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_XZ = 6.0;
+	private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_Y = 20.0;
 
 	public Sniffing(int i) {
 		super(
@@ -46,7 +47,7 @@ public class Sniffing<E extends Warden> extends Behavior<E> {
 
 		warden.getBrain().eraseMemory(MemoryModuleType.IS_SNIFFING);
 		warden.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE).filter(warden::canTargetEntity).ifPresent(livingEntity -> {
-			if (warden.closerThan(livingEntity, 6.0)) {
+			if (warden.closerThan(livingEntity, 6.0, 20.0)) {
 				warden.increaseAngerAt(livingEntity);
 			}
 

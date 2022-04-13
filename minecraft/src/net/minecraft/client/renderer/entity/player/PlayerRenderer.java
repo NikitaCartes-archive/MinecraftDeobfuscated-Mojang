@@ -51,11 +51,11 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 				new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))
 			)
 		);
-		this.addLayer(new PlayerItemInHandLayer<>(this));
+		this.addLayer(new PlayerItemInHandLayer<>(this, context.getItemInHandRenderer()));
 		this.addLayer(new ArrowLayer<>(context, this));
 		this.addLayer(new Deadmau5EarsLayer(this));
 		this.addLayer(new CapeLayer(this));
-		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
 		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
 		this.addLayer(new ParrotOnShoulderLayer<>(this, context.getModelSet()));
 		this.addLayer(new SpinAttackEffectLayer<>(this, context.getModelSet()));

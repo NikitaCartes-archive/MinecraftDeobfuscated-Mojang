@@ -30,6 +30,7 @@ public final class ItemTags {
 	public static final TagKey<Item> MANGROVE_LOGS = bind("mangrove_logs");
 	public static final TagKey<Item> CRIMSON_STEMS = bind("crimson_stems");
 	public static final TagKey<Item> WARPED_STEMS = bind("warped_stems");
+	public static final TagKey<Item> WART_BLOCKS = bind("wart_blocks");
 	public static final TagKey<Item> BANNERS = bind("banners");
 	public static final TagKey<Item> SAND = bind("sand");
 	public static final TagKey<Item> STAIRS = bind("stairs");
@@ -62,6 +63,7 @@ public final class ItemTags {
 	public static final TagKey<Item> CANDLES = bind("candles");
 	public static final TagKey<Item> DIRT = bind("dirt");
 	public static final TagKey<Item> TERRACOTTA = bind("terracotta");
+	public static final TagKey<Item> COMPLETES_FIND_TREE_TUTORIAL = bind("completes_find_tree_tutorial");
 	public static final TagKey<Item> BOATS = bind("boats");
 	public static final TagKey<Item> CHEST_BOATS = bind("chest_boats");
 	public static final TagKey<Item> FISHES = bind("fishes");
@@ -76,7 +78,7 @@ public final class ItemTags {
 	public static final TagKey<Item> STONE_CRAFTING_MATERIALS = bind("stone_crafting_materials");
 	public static final TagKey<Item> FREEZE_IMMUNE_WEARABLES = bind("freeze_immune_wearables");
 	public static final TagKey<Item> AXOLOTL_TEMPT_ITEMS = bind("axolotl_tempt_items");
-	public static final TagKey<Item> OCCLUDES_VIBRATION_SIGNALS = bind("occludes_vibration_signals");
+	public static final TagKey<Item> DAMPENS_VIBRATIONS = bind("dampens_vibrations");
 	public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = bind("cluster_max_harvestables");
 	public static final TagKey<Item> COMPASSES = bind("compasses");
 

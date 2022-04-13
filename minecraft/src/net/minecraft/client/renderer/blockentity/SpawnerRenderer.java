@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BaseSpawner;
@@ -13,7 +13,10 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class SpawnerRenderer implements BlockEntityRenderer<SpawnerBlockEntity> {
+	private final EntityRenderDispatcher entityRenderer;
+
 	public SpawnerRenderer(BlockEntityRendererProvider.Context context) {
+		this.entityRenderer = context.getEntityRenderer();
 	}
 
 	public void render(SpawnerBlockEntity spawnerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
@@ -33,7 +36,7 @@ public class SpawnerRenderer implements BlockEntityRenderer<SpawnerBlockEntity> 
 			poseStack.translate(0.0, -0.2F, 0.0);
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(-30.0F));
 			poseStack.scale(g, g, g);
-			Minecraft.getInstance().getEntityRenderDispatcher().render(entity, 0.0, 0.0, 0.0, 0.0F, f, poseStack, multiBufferSource, i);
+			this.entityRenderer.render(entity, 0.0, 0.0, 0.0, 0.0F, f, poseStack, multiBufferSource, i);
 		}
 
 		poseStack.popPose();

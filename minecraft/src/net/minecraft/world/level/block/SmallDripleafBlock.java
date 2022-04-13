@@ -136,11 +136,6 @@ public class SmallDripleafBlock extends DoublePlantBlock implements Bonemealable
 	}
 
 	@Override
-	public BlockBehaviour.OffsetType getOffsetType() {
-		return BlockBehaviour.OffsetType.XYZ;
-	}
-
-	@Override
 	public float getMaxVerticalOffset() {
 		return 0.1F;
 	}

@@ -402,7 +402,7 @@ public class VegetationPlacements {
 	public static final Holder<PlacedFeature> TREES_MANGROVE = PlacementUtils.register(
 		"trees_mangrove",
 		VegetationFeatures.MANGROVE_VEGETATION,
-		PlacementUtils.countExtra(30, 0.1F, 1),
+		CountPlacement.of(30),
 		InSquarePlacement.spread(),
 		SurfaceWaterDepthFilter.forMaxDepth(5),
 		PlacementUtils.HEIGHTMAP_OCEAN_FLOOR,

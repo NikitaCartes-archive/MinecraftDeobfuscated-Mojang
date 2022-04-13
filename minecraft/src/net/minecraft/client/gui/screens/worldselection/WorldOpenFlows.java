@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -21,6 +22,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryOps;
@@ -163,13 +165,42 @@ public class WorldOpenFlows {
 			boolean bl3 = worldData.worldGenSettings().isOldCustomizedWorld();
 			boolean bl4 = worldData.worldGenSettingsLifecycle() != Lifecycle.stable();
 			if (!bl2 || !bl3 && !bl4) {
-				this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
+				this.minecraft.getClientPackSource().loadBundledResourcePack(levelStorageAccess).thenApply(void_ -> true).exceptionallyComposeAsync(throwable -> {
+					LOGGER.warn("Failed to load pack: ", throwable);
+					return this.promptBundledPackLoadFailure();
+				}, this.minecraft).thenAcceptAsync(boolean_ -> {
+					if (boolean_) {
+						this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
+					} else {
+						worldStem.close();
+						safeCloseAccess(levelStorageAccess, string);
+						this.minecraft.getClientPackSource().clearServerPack().thenRunAsync(() -> this.minecraft.setScreen(screen), this.minecraft);
+					}
+				}, this.minecraft).exceptionally(throwable -> {
+					this.minecraft.delayCrash(() -> CrashReport.forThrowable(throwable, "Load world"));
+					return null;
+				});
 			} else {
 				this.askForBackup(screen, string, bl3, () -> this.doLoadLevel(screen, string, bl, false));
 				worldStem.close();
 				safeCloseAccess(levelStorageAccess, string);
 			}
 		}
+	}
+
+	private CompletableFuture<Boolean> promptBundledPackLoadFailure() {
+		CompletableFuture<Boolean> completableFuture = new CompletableFuture();
+		this.minecraft
+			.setScreen(
+				new ConfirmScreen(
+					completableFuture::complete,
+					new TranslatableComponent("multiplayer.texturePrompt.failure.line1"),
+					new TranslatableComponent("multiplayer.texturePrompt.failure.line2"),
+					CommonComponents.GUI_PROCEED,
+					CommonComponents.GUI_CANCEL
+				)
+			);
+		return completableFuture;
 	}
 
 	private static void safeCloseAccess(LevelStorageSource.LevelStorageAccess levelStorageAccess, String string) {

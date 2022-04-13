@@ -22,12 +22,12 @@ import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
 import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
-import net.minecraft.advancements.critereon.ItemPickedUpByEntityTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LootTableTrigger;
+import net.minecraft.advancements.critereon.PickedUpItemTrigger;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
@@ -87,7 +87,12 @@ public class CriteriaTriggers {
 	public static final TargetBlockTrigger TARGET_BLOCK_HIT = register(new TargetBlockTrigger());
 	public static final ItemInteractWithBlockTrigger ITEM_USED_ON_BLOCK = register(new ItemInteractWithBlockTrigger(new ResourceLocation("item_used_on_block")));
 	public static final LootTableTrigger GENERATE_LOOT = register(new LootTableTrigger());
-	public static final ItemPickedUpByEntityTrigger ITEM_PICKED_UP_BY_ENTITY = register(new ItemPickedUpByEntityTrigger());
+	public static final PickedUpItemTrigger THROWN_ITEM_PICKED_UP_BY_ENTITY = register(
+		new PickedUpItemTrigger(new ResourceLocation("thrown_item_picked_up_by_entity"))
+	);
+	public static final PickedUpItemTrigger THROWN_ITEM_PICKED_UP_BY_PLAYER = register(
+		new PickedUpItemTrigger(new ResourceLocation("thrown_item_picked_up_by_player"))
+	);
 	public static final PlayerInteractTrigger PLAYER_INTERACTED_WITH_ENTITY = register(new PlayerInteractTrigger());
 	public static final StartRidingTrigger START_RIDING_TRIGGER = register(new StartRidingTrigger());
 	public static final LightningStrikeTrigger LIGHTNING_STRIKE = register(new LightningStrikeTrigger());
@@ -95,10 +100,10 @@ public class CriteriaTriggers {
 	public static final DistanceTrigger FALL_FROM_HEIGHT = register(new DistanceTrigger(new ResourceLocation("fall_from_height")));
 	public static final DistanceTrigger RIDE_ENTITY_IN_LAVA_TRIGGER = register(new DistanceTrigger(new ResourceLocation("ride_entity_in_lava")));
 	public static final KilledTrigger KILL_MOB_NEAR_SCULK_CATALYST = register(new KilledTrigger(new ResourceLocation("kill_mob_near_sculk_catalyst")));
-	public static final PlayerTrigger ITEM_DELIVERED_TO_PLAYER = register(new PlayerTrigger(new ResourceLocation("item_delivered_to_player")));
 	public static final ItemInteractWithBlockTrigger ALLAY_DROP_ITEM_ON_BLOCK = register(
 		new ItemInteractWithBlockTrigger(new ResourceLocation("allay_drop_item_on_block"))
 	);
+	public static final PlayerTrigger AVOID_VIBRATION = register(new PlayerTrigger(new ResourceLocation("avoid_vibration")));
 
 	private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
 		if (CRITERIA.containsKey(criterionTrigger.getId())) {

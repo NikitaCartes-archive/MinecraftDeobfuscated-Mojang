@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 
 public class RegistryDumpReport implements DataProvider {
@@ -22,11 +22,11 @@ public class RegistryDumpReport implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) throws IOException {
+	public void run(CachedOutput cachedOutput) throws IOException {
 		JsonObject jsonObject = new JsonObject();
 		Registry.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), dumpRegistry((Registry)reference.value())));
 		Path path = this.generator.getOutputFolder().resolve("reports/registries.json");
-		DataProvider.save(GSON, hashCache, jsonObject, path);
+		DataProvider.save(GSON, cachedOutput, jsonObject, path);
 	}
 
 	private static <T> JsonElement dumpRegistry(Registry<T> registry) {

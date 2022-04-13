@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.math.OctahedralGroup;
-import java.util.Arrays;
 import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
@@ -98,6 +97,6 @@ public enum Rotation {
 	}
 
 	public static List<Rotation> getShuffled(RandomSource randomSource) {
-		return Util.shuffledCopy(Arrays.asList(values()), randomSource);
+		return Util.shuffledCopy(values(), randomSource);
 	}
 }

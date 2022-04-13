@@ -465,7 +465,7 @@ public class EnderMan extends Monster implements NeutralMob {
 				blockState3 = Block.updateFromNeighbourShapes(blockState3, this.enderman.level, blockPos);
 				if (this.canPlaceBlock(level, blockPos, blockState3, blockState, blockState2, blockPos2)) {
 					level.setBlock(blockPos, blockState3, 3);
-					level.gameEvent(this.enderman, GameEvent.BLOCK_PLACE, blockPos);
+					level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(this.enderman, blockState3));
 					this.enderman.setCarriedBlock(null);
 				}
 			}
@@ -594,7 +594,7 @@ public class EnderMan extends Monster implements NeutralMob {
 			boolean bl = blockHitResult.getBlockPos().equals(blockPos);
 			if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
 				level.removeBlock(blockPos, false);
-				level.gameEvent(this.enderman, GameEvent.BLOCK_DESTROY, blockPos);
+				level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(this.enderman, blockState));
 				this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());
 			}
 		}

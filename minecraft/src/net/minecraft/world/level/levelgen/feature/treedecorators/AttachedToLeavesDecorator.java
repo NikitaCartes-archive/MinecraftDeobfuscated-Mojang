@@ -2,19 +2,14 @@ package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelSimulatedReader;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
 public class AttachedToLeavesDecorator extends TreeDecorator {
@@ -46,22 +41,14 @@ public class AttachedToLeavesDecorator extends TreeDecorator {
 	}
 
 	@Override
-	public void place(
-		LevelSimulatedReader levelSimulatedReader,
-		BiConsumer<BlockPos, BlockState> biConsumer,
-		RandomSource randomSource,
-		List<BlockPos> list,
-		List<BlockPos> list2,
-		List<BlockPos> list3
-	) {
+	public void place(TreeDecorator.Context context) {
 		Set<BlockPos> set = new HashSet();
-		List<BlockPos> list4 = new ArrayList(list2);
-		Util.shuffle(list4, randomSource);
+		RandomSource randomSource = context.random();
 
-		for (BlockPos blockPos : list4) {
+		for (BlockPos blockPos : Util.shuffledCopy(context.leaves(), randomSource)) {
 			Direction direction = Util.getRandom(this.directions, randomSource);
 			BlockPos blockPos2 = blockPos.relative(direction);
-			if (!set.contains(blockPos2) && randomSource.nextFloat() < this.probability && this.hasRequiredEmptyBlocks(levelSimulatedReader, blockPos, direction)) {
+			if (!set.contains(blockPos2) && randomSource.nextFloat() < this.probability && this.hasRequiredEmptyBlocks(context, blockPos, direction)) {
 				BlockPos blockPos3 = blockPos2.offset(-this.exclusionRadiusXZ, -this.exclusionRadiusY, -this.exclusionRadiusXZ);
 				BlockPos blockPos4 = blockPos2.offset(this.exclusionRadiusXZ, this.exclusionRadiusY, this.exclusionRadiusXZ);
 
@@ -69,15 +56,15 @@ public class AttachedToLeavesDecorator extends TreeDecorator {
 					set.add(blockPos5.immutable());
 				}
 
-				biConsumer.accept(blockPos2, this.blockProvider.getState(randomSource, blockPos2));
+				context.setBlock(blockPos2, this.blockProvider.getState(randomSource, blockPos2));
 			}
 		}
 	}
 
-	private boolean hasRequiredEmptyBlocks(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos, Direction direction) {
+	private boolean hasRequiredEmptyBlocks(TreeDecorator.Context context, BlockPos blockPos, Direction direction) {
 		for (int i = 1; i <= this.requiredEmptyBlocks; i++) {
 			BlockPos blockPos2 = blockPos.relative(direction, i);
-			if (!Feature.isAir(levelSimulatedReader, blockPos2)) {
+			if (!context.isAir(blockPos2)) {
 				return false;
 			}
 		}

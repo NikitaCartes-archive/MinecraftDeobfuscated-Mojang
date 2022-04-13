@@ -13,6 +13,7 @@ import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import java.net.URL;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
@@ -143,7 +144,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 		try {
 			return Minecraft.getInstance()
 				.getClientPackSource()
-				.downloadAndSelectResourcePack(realmsServerAddress.resourcePackUrl, realmsServerAddress.resourcePackHash, false);
+				.downloadAndSelectResourcePack(new URL(realmsServerAddress.resourcePackUrl), realmsServerAddress.resourcePackHash, false);
 		} catch (Exception var4) {
 			CompletableFuture<Void> completableFuture = new CompletableFuture();
 			completableFuture.completeExceptionally(var4);

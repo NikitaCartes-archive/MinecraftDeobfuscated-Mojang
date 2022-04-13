@@ -6,6 +6,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 
@@ -18,15 +20,25 @@ public interface EntityRendererProvider<T extends Entity> {
 	public static class Context {
 		private final EntityRenderDispatcher entityRenderDispatcher;
 		private final ItemRenderer itemRenderer;
+		private final BlockRenderDispatcher blockRenderDispatcher;
+		private final ItemInHandRenderer itemInHandRenderer;
 		private final ResourceManager resourceManager;
 		private final EntityModelSet modelSet;
 		private final Font font;
 
 		public Context(
-			EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer, ResourceManager resourceManager, EntityModelSet entityModelSet, Font font
+			EntityRenderDispatcher entityRenderDispatcher,
+			ItemRenderer itemRenderer,
+			BlockRenderDispatcher blockRenderDispatcher,
+			ItemInHandRenderer itemInHandRenderer,
+			ResourceManager resourceManager,
+			EntityModelSet entityModelSet,
+			Font font
 		) {
 			this.entityRenderDispatcher = entityRenderDispatcher;
 			this.itemRenderer = itemRenderer;
+			this.blockRenderDispatcher = blockRenderDispatcher;
+			this.itemInHandRenderer = itemInHandRenderer;
 			this.resourceManager = resourceManager;
 			this.modelSet = entityModelSet;
 			this.font = font;
@@ -38,6 +50,14 @@ public interface EntityRendererProvider<T extends Entity> {
 
 		public ItemRenderer getItemRenderer() {
 			return this.itemRenderer;
+		}
+
+		public BlockRenderDispatcher getBlockRenderDispatcher() {
+			return this.blockRenderDispatcher;
+		}
+
+		public ItemInHandRenderer getItemInHandRenderer() {
+			return this.itemInHandRenderer;
 		}
 
 		public ResourceManager getResourceManager() {

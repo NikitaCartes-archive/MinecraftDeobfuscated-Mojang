@@ -23,7 +23,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
@@ -192,7 +191,7 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 		}
 
 		@Override
-		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable GameEvent.Context context, Vec3 vec3) {
 			return false;
 		}
 	}

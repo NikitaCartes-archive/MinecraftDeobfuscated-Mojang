@@ -32,6 +32,7 @@ public final class BlockTags {
 	public static final TagKey<Block> MANGROVE_LOGS = create("mangrove_logs");
 	public static final TagKey<Block> CRIMSON_STEMS = create("crimson_stems");
 	public static final TagKey<Block> WARPED_STEMS = create("warped_stems");
+	public static final TagKey<Block> WART_BLOCKS = create("wart_blocks");
 	public static final TagKey<Block> BANNERS = create("banners");
 	public static final TagKey<Block> SAND = create("sand");
 	public static final TagKey<Block> STAIRS = create("stairs");
@@ -59,6 +60,7 @@ public final class BlockTags {
 	public static final TagKey<Block> CANDLES = create("candles");
 	public static final TagKey<Block> DIRT = create("dirt");
 	public static final TagKey<Block> TERRACOTTA = create("terracotta");
+	public static final TagKey<Block> COMPLETES_FIND_TREE_TUTORIAL = create("completes_find_tree_tutorial");
 	public static final TagKey<Block> FLOWER_POTS = create("flower_pots");
 	public static final TagKey<Block> ENDERMAN_HOLDABLE = create("enderman_holdable");
 	public static final TagKey<Block> ICE = create("ice");
@@ -83,7 +85,6 @@ public final class BlockTags {
 	public static final TagKey<Block> PORTALS = create("portals");
 	public static final TagKey<Block> FIRE = create("fire");
 	public static final TagKey<Block> NYLIUM = create("nylium");
-	public static final TagKey<Block> WART_BLOCKS = create("wart_blocks");
 	public static final TagKey<Block> BEACON_BASE_BLOCKS = create("beacon_base_blocks");
 	public static final TagKey<Block> SOUL_SPEED_BLOCKS = create("soul_speed_blocks");
 	public static final TagKey<Block> WALL_POST_OVERRIDE = create("wall_post_override");
@@ -106,11 +107,14 @@ public final class BlockTags {
 	public static final TagKey<Block> STONE_ORE_REPLACEABLES = create("stone_ore_replaceables");
 	public static final TagKey<Block> DEEPSLATE_ORE_REPLACEABLES = create("deepslate_ore_replaceables");
 	public static final TagKey<Block> BASE_STONE_NETHER = create("base_stone_nether");
+	public static final TagKey<Block> OVERWORLD_CARVER_REPLACEABLES = create("overworld_carver_replaceables");
+	public static final TagKey<Block> NETHER_CARVER_REPLACEABLES = create("nether_carver_replaceables");
 	public static final TagKey<Block> CANDLE_CAKES = create("candle_cakes");
 	public static final TagKey<Block> CAULDRONS = create("cauldrons");
 	public static final TagKey<Block> CRYSTAL_SOUND_BLOCKS = create("crystal_sound_blocks");
 	public static final TagKey<Block> INSIDE_STEP_SOUND_BLOCKS = create("inside_step_sound_blocks");
 	public static final TagKey<Block> OCCLUDES_VIBRATION_SIGNALS = create("occludes_vibration_signals");
+	public static final TagKey<Block> DAMPENS_VIBRATIONS = create("dampens_vibrations");
 	public static final TagKey<Block> DRIPSTONE_REPLACEABLE = create("dripstone_replaceable_blocks");
 	public static final TagKey<Block> CAVE_VINES = create("cave_vines");
 	public static final TagKey<Block> MOSS_REPLACEABLE = create("moss_replaceable");

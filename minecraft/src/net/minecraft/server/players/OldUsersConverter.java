@@ -20,10 +20,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 import org.slf4j.Logger;
 
@@ -54,7 +54,7 @@ public class OldUsersConverter {
 			minecraftServer.getProfileRepository().findProfilesByNames(strings, Agent.MINECRAFT, profileLookupCallback);
 		} else {
 			for (String string : strings) {
-				UUID uUID = Player.createPlayerUUID(new GameProfile(null, string));
+				UUID uUID = UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, string));
 				GameProfile gameProfile = new GameProfile(uUID, string);
 				profileLookupCallback.onProfileLookupSucceeded(gameProfile);
 			}
@@ -263,7 +263,7 @@ public class OldUsersConverter {
 				lookupPlayers(minecraftServer, Lists.<String>newArrayList(string), profileLookupCallback);
 				return !list.isEmpty() && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId() : null;
 			} else {
-				return Player.createPlayerUUID(new GameProfile(null, string));
+				return UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, string));
 			}
 		} else {
 			try {

@@ -350,7 +350,10 @@ public class Cat extends TamableAnimal {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9F;
 		TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
-		Registry.CAT_VARIANT.getTag(tagKey).flatMap(named -> named.getRandomElement(this.random)).ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
+		Registry.CAT_VARIANT
+			.getTag(tagKey)
+			.flatMap(named -> named.getRandomElement(serverLevelAccessor.getRandom()))
+			.ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
 		ServerLevel serverLevel = serverLevelAccessor.getLevel();
 		if (serverLevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
 			this.setCatVariant(CatVariant.ALL_BLACK);

@@ -2,8 +2,10 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.FloatProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 
@@ -25,10 +27,11 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
 		FloatProvider floatProvider,
 		VerticalAnchor verticalAnchor,
 		CarverDebugSettings carverDebugSettings,
+		HolderSet<Block> holderSet,
 		FloatProvider floatProvider2,
 		CanyonCarverConfiguration.CanyonShapeConfiguration canyonShapeConfiguration
 	) {
-		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
+		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings, holderSet);
 		this.verticalRotation = floatProvider2;
 		this.shape = canyonShapeConfiguration;
 	}
@@ -42,6 +45,7 @@ public class CanyonCarverConfiguration extends CarverConfiguration {
 			carverConfiguration.yScale,
 			carverConfiguration.lavaLevel,
 			carverConfiguration.debugSettings,
+			carverConfiguration.replaceable,
 			floatProvider,
 			canyonShapeConfiguration
 		);

@@ -233,16 +233,16 @@ public class Fox extends Animal {
 	}
 
 	@Override
-	protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-		if (this.random.nextFloat() < 0.2F) {
-			float f = this.random.nextFloat();
+	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
+		if (randomSource.nextFloat() < 0.2F) {
+			float f = randomSource.nextFloat();
 			ItemStack itemStack;
 			if (f < 0.05F) {
 				itemStack = new ItemStack(Items.EMERALD);
 			} else if (f < 0.2F) {
 				itemStack = new ItemStack(Items.EGG);
 			} else if (f < 0.4F) {
-				itemStack = this.random.nextBoolean() ? new ItemStack(Items.RABBIT_FOOT) : new ItemStack(Items.RABBIT_HIDE);
+				itemStack = randomSource.nextBoolean() ? new ItemStack(Items.RABBIT_FOOT) : new ItemStack(Items.RABBIT_HIDE);
 			} else if (f < 0.6F) {
 				itemStack = new ItemStack(Items.WHEAT);
 			} else if (f < 0.8F) {
@@ -313,9 +313,9 @@ public class Fox extends Animal {
 		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
 		Fox.Type type = Fox.Type.byBiome(holder);
 		boolean bl = false;
-		if (spawnGroupData instanceof Fox.FoxGroupData) {
-			type = ((Fox.FoxGroupData)spawnGroupData).type;
-			if (((Fox.FoxGroupData)spawnGroupData).getGroupSize() >= 2) {
+		if (spawnGroupData instanceof Fox.FoxGroupData foxGroupData) {
+			type = foxGroupData.type;
+			if (foxGroupData.getGroupSize() >= 2) {
 				bl = true;
 			}
 		} else {
@@ -331,7 +331,7 @@ public class Fox extends Animal {
 			this.setTargetGoals();
 		}
 
-		this.populateDefaultEquipmentSlots(difficultyInstance);
+		this.populateDefaultEquipmentSlots(serverLevelAccessor.getRandom(), difficultyInstance);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 

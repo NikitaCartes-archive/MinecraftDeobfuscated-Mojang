@@ -141,7 +141,7 @@ public class Goat extends Animal {
 	public Goat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Goat goat = EntityType.GOAT.create(serverLevel);
 		if (goat != null) {
-			GoatAi.initMemories(goat);
+			GoatAi.initMemories(goat, serverLevel.getRandom());
 			boolean bl = ageableMob instanceof Goat && ((Goat)ageableMob).isScreamingGoat();
 			goat.setScreamingGoat(bl || serverLevel.getRandom().nextDouble() < 0.02);
 		}
@@ -209,8 +209,9 @@ public class Goat extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		GoatAi.initMemories(this);
-		this.setScreamingGoat(serverLevelAccessor.getRandom().nextDouble() < 0.02);
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		GoatAi.initMemories(this, randomSource);
+		this.setScreamingGoat(randomSource.nextDouble() < 0.02);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 

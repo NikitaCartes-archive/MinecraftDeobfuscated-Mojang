@@ -961,7 +961,7 @@ public class ServerPlayer extends Player {
 
 	public void doCheckFallDamage(double d, boolean bl) {
 		if (!this.touchingUnloadedChunk()) {
-			BlockPos blockPos = this.getOnPos();
+			BlockPos blockPos = this.getOnPosLegacy();
 			super.checkFallDamage(d, bl, this.level.getBlockState(blockPos), blockPos);
 		}
 	}
@@ -1602,5 +1602,14 @@ public class ServerPlayer extends Player {
 
 	public boolean allowsListing() {
 		return this.allowsListing;
+	}
+
+	@Override
+	public void onItemPickup(ItemEntity itemEntity) {
+		super.onItemPickup(itemEntity);
+		Entity entity = itemEntity.getThrower() != null ? this.getLevel().getEntity(itemEntity.getThrower()) : null;
+		if (entity != null) {
+			CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, itemEntity.getItem(), entity);
+		}
 	}
 }

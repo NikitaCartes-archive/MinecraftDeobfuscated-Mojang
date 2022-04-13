@@ -18,7 +18,7 @@ public class IronGolemRenderer extends MobRenderer<IronGolem, IronGolemModel<Iro
 	public IronGolemRenderer(EntityRendererProvider.Context context) {
 		super(context, new IronGolemModel<>(context.bakeLayer(ModelLayers.IRON_GOLEM)), 0.7F);
 		this.addLayer(new IronGolemCrackinessLayer(this));
-		this.addLayer(new IronGolemFlowerLayer(this));
+		this.addLayer(new IronGolemFlowerLayer(this, context.getBlockRenderDispatcher()));
 	}
 
 	public ResourceLocation getTextureLocation(IronGolem ironGolem) {

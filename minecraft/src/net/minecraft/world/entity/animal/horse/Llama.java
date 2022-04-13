@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -78,9 +79,9 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		this.entityData.set(DATA_STRENGTH_ID, Math.max(1, Math.min(5, i)));
 	}
 
-	private void setRandomStrength() {
-		int i = this.random.nextFloat() < 0.04F ? 5 : 3;
-		this.setStrength(1 + this.random.nextInt(i));
+	private void setRandomStrength(RandomSource randomSource) {
+		int i = randomSource.nextFloat() < 0.04F ? 5 : 3;
+		this.setStrength(1 + randomSource.nextInt(i));
 	}
 
 	public int getStrength() {
@@ -254,12 +255,13 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setRandomStrength();
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		this.setRandomStrength(randomSource);
 		int i;
 		if (spawnGroupData instanceof Llama.LlamaGroupData) {
 			i = ((Llama.LlamaGroupData)spawnGroupData).variant;
 		} else {
-			i = this.random.nextInt(4);
+			i = randomSource.nextInt(4);
 			spawnGroupData = new Llama.LlamaGroupData(i);
 		}
 

@@ -158,7 +158,8 @@ public class Spider extends Monster {
 		@Nullable CompoundTag compoundTag
 	) {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		if (serverLevelAccessor.getRandom().nextInt(100) == 0) {
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		if (randomSource.nextInt(100) == 0) {
 			Skeleton skeleton = EntityType.SKELETON.create(this.level);
 			skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
 			skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
@@ -167,10 +168,8 @@ public class Spider extends Monster {
 
 		if (spawnGroupData == null) {
 			spawnGroupData = new Spider.SpiderEffectsGroupData();
-			if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && serverLevelAccessor.getRandom().nextFloat() < 0.1F * difficultyInstance.getSpecialMultiplier()
-				)
-			 {
-				((Spider.SpiderEffectsGroupData)spawnGroupData).setRandomEffect(serverLevelAccessor.getRandom());
+			if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && randomSource.nextFloat() < 0.1F * difficultyInstance.getSpecialMultiplier()) {
+				((Spider.SpiderEffectsGroupData)spawnGroupData).setRandomEffect(randomSource);
 			}
 		}
 

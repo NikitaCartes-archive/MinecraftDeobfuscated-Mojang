@@ -15,13 +15,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -165,11 +163,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	public static final int MS_PER_TICK = 50;
 	private static final int OVERLOADED_THRESHOLD = 2000;
 	private static final int OVERLOADED_WARNING_INTERVAL = 15000;
-	public static final String LEVEL_STORAGE_PROTOCOL = "level";
-	public static final String LEVEL_STORAGE_SCHEMA = "level://";
 	private static final long STATUS_EXPIRE_TIME_NS = 5000000000L;
 	private static final int MAX_STATUS_PLAYER_SAMPLE = 12;
-	public static final String MAP_RESOURCE_FILE = "resources.zip";
 	public static final File USERID_CACHE_FILE = new File("usercache.json");
 	public static final int START_CHUNK_RADIUS = 11;
 	private static final int START_TICKING_CHUNK_COUNT = 441;
@@ -317,7 +312,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 		boolean bl = false;
 		ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
-		this.detectBundledResources();
 		this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
 		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
 		this.createLevels(chunkProgressListener);
@@ -507,19 +501,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		chunkProgressListener.stop();
 		serverChunkCache.getLightEngine().setTaskPerBatch(5);
 		this.updateMobSpawningFlags();
-	}
-
-	protected void detectBundledResources() {
-		File file = this.storageSource.getLevelPath(LevelResource.MAP_RESOURCE_FILE).toFile();
-		if (file.isFile()) {
-			String string = this.storageSource.getLevelId();
-
-			try {
-				this.setResourcePack("level://" + URLEncoder.encode(string, StandardCharsets.UTF_8.toString()) + "/resources.zip", "");
-			} catch (UnsupportedEncodingException var4) {
-				LOGGER.warn("Something went wrong url encoding {}", string);
-			}
-		}
 	}
 
 	public GameType getDefaultGameType() {

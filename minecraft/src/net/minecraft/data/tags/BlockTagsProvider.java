@@ -173,7 +173,18 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.LILY_OF_THE_VALLEY,
 				Blocks.WITHER_ROSE
 			);
-		this.tag(BlockTags.DIRT).add(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK);
+		this.tag(BlockTags.DIRT)
+			.add(
+				Blocks.DIRT,
+				Blocks.GRASS_BLOCK,
+				Blocks.PODZOL,
+				Blocks.COARSE_DIRT,
+				Blocks.MYCELIUM,
+				Blocks.ROOTED_DIRT,
+				Blocks.MOSS_BLOCK,
+				Blocks.MUD,
+				Blocks.MUDDY_MANGROVE_ROOTS
+			);
 		this.tag(BlockTags.ENDERMAN_HOLDABLE)
 			.addTag(BlockTags.SMALL_FLOWERS)
 			.addTag(BlockTags.DIRT)
@@ -194,8 +205,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.CRIMSON_ROOTS,
 				Blocks.WARPED_FUNGUS,
 				Blocks.WARPED_NYLIUM,
-				Blocks.WARPED_ROOTS,
-				Blocks.MUD
+				Blocks.WARPED_ROOTS
 			);
 		this.tag(BlockTags.FLOWER_POTS)
 			.add(
@@ -682,6 +692,31 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.TUFF)
 			.add(Blocks.DEEPSLATE);
 		this.tag(BlockTags.BASE_STONE_NETHER).add(Blocks.NETHERRACK).add(Blocks.BASALT).add(Blocks.BLACKSTONE);
+		this.tag(BlockTags.OVERWORLD_CARVER_REPLACEABLES)
+			.addTag(BlockTags.BASE_STONE_OVERWORLD)
+			.addTag(BlockTags.DIRT)
+			.addTag(BlockTags.SAND)
+			.addTag(BlockTags.TERRACOTTA)
+			.addTag(BlockTags.IRON_ORES)
+			.addTag(BlockTags.COPPER_ORES)
+			.add(
+				Blocks.WATER,
+				Blocks.GRAVEL,
+				Blocks.SANDSTONE,
+				Blocks.RED_SANDSTONE,
+				Blocks.CALCITE,
+				Blocks.SNOW,
+				Blocks.PACKED_ICE,
+				Blocks.RAW_IRON_BLOCK,
+				Blocks.RAW_COPPER_BLOCK
+			);
+		this.tag(BlockTags.NETHER_CARVER_REPLACEABLES)
+			.addTag(BlockTags.BASE_STONE_OVERWORLD)
+			.addTag(BlockTags.BASE_STONE_NETHER)
+			.addTag(BlockTags.DIRT)
+			.addTag(BlockTags.NYLIUM)
+			.addTag(BlockTags.WART_BLOCKS)
+			.add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.CANDLES)
 			.add(
 				Blocks.CANDLE,
@@ -742,6 +777,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.SMALL_DRIPLEAF_PLACEABLE).add(Blocks.CLAY).add(Blocks.MOSS_BLOCK);
 		this.tag(BlockTags.BIG_DRIPLEAF_PLACEABLE).addTag(BlockTags.SMALL_DRIPLEAF_PLACEABLE).addTag(BlockTags.DIRT).add(Blocks.FARMLAND);
 		this.tag(BlockTags.OCCLUDES_VIBRATION_SIGNALS).addTag(BlockTags.WOOL);
+		this.tag(BlockTags.DAMPENS_VIBRATIONS).addTag(BlockTags.WOOL).addTag(BlockTags.WOOL_CARPETS);
 		this.tag(BlockTags.SNOW).add(Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
 		this.tag(BlockTags.MINEABLE_WITH_AXE)
 			.add(
@@ -1372,8 +1408,19 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.CRACKED_DEEPSLATE_TILES)
 			.add(Blocks.GRAY_WOOL);
 		this.tag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)
-			.add(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MANGROVE_LEAVES, Blocks.MANGROVE_LOG, Blocks.MANGROVE_PROPAGULE);
-		this.tag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH).add(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS);
-		this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT).add(Blocks.MUD);
+			.add(
+				Blocks.MUD,
+				Blocks.MUDDY_MANGROVE_ROOTS,
+				Blocks.MANGROVE_ROOTS,
+				Blocks.MANGROVE_LEAVES,
+				Blocks.MANGROVE_LOG,
+				Blocks.MANGROVE_PROPAGULE,
+				Blocks.MOSS_CARPET,
+				Blocks.VINE
+			);
+		this.tag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH)
+			.add(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MOSS_CARPET, Blocks.VINE, Blocks.MANGROVE_PROPAGULE, Blocks.SNOW);
+		this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT);
+		this.tag(BlockTags.COMPLETES_FIND_TREE_TUTORIAL).addTag(BlockTags.LOGS).addTag(BlockTags.LEAVES).addTag(BlockTags.WART_BLOCKS);
 	}
 }

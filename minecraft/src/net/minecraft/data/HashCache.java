@@ -1,104 +1,317 @@
 package net.minecraft.data;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
 import com.mojang.logging.LogUtils;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import org.apache.commons.io.IOUtils;
+import net.minecraft.WorldVersion;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 
 public class HashCache {
-	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Path path;
-	private final Path cachePath;
-	private int hits;
-	private final Map<Path, String> oldCache = Maps.<Path, String>newHashMap();
-	private final Map<Path, String> newCache = Maps.<Path, String>newHashMap();
-	private final Set<Path> keep = Sets.<Path>newHashSet();
+	static final Logger LOGGER = LogUtils.getLogger();
+	private static final String HEADER_MARKER = "// ";
+	private final Path rootDir;
+	private final Path cacheDir;
+	private final String versionId;
+	private final Map<DataProvider, HashCache.ProviderCache> existingCaches;
+	private final Map<DataProvider, HashCache.CacheUpdater> cachesToWrite = new HashMap();
+	private final Set<Path> cachePaths = new HashSet();
+	private final int initialCount;
 
-	public HashCache(Path path, String string) throws IOException {
-		this.path = path;
-		Path path2 = path.resolve(".cache");
-		Files.createDirectories(path2);
-		this.cachePath = path2.resolve(string);
-		this.walkOutputFiles().forEach(pathx -> this.oldCache.put(pathx, ""));
-		if (Files.isReadable(this.cachePath)) {
-			IOUtils.readLines(Files.newInputStream(this.cachePath), Charsets.UTF_8).forEach(stringx -> {
-				int i = stringx.indexOf(32);
-				this.oldCache.put(path.resolve(stringx.substring(i + 1)), stringx.substring(0, i));
-			});
-		}
+	private Path getProviderCachePath(DataProvider dataProvider) {
+		return this.cacheDir.resolve(Hashing.sha1().hashString(dataProvider.getName(), StandardCharsets.UTF_8).toString());
 	}
 
-	public void purgeStaleAndWrite() throws IOException {
-		this.removeStale();
+	public HashCache(Path path, List<DataProvider> list, WorldVersion worldVersion) throws IOException {
+		this.versionId = worldVersion.getName();
+		this.rootDir = path;
+		this.cacheDir = path.resolve(".cache");
+		Files.createDirectories(this.cacheDir);
+		Map<DataProvider, HashCache.ProviderCache> map = new HashMap();
+		int i = 0;
 
-		Writer writer;
-		try {
-			writer = Files.newBufferedWriter(this.cachePath);
-		} catch (IOException var3) {
-			LOGGER.warn("Unable write cachefile {}: {}", this.cachePath, var3.toString());
-			return;
+		for (DataProvider dataProvider : list) {
+			Path path2 = this.getProviderCachePath(dataProvider);
+			this.cachePaths.add(path2);
+			HashCache.ProviderCache providerCache = readCache(path, path2);
+			map.put(dataProvider, providerCache);
+			i += providerCache.count();
 		}
 
-		IOUtils.writeLines(
-			(Collection<?>)this.newCache
-				.entrySet()
-				.stream()
-				.map(entry -> (String)entry.getValue() + " " + this.path.relativize((Path)entry.getKey()))
-				.collect(Collectors.toList()),
-			System.lineSeparator(),
-			writer
-		);
-		writer.close();
-		LOGGER.debug("Caching: cache hits: {}, created: {} removed: {}", this.hits, this.newCache.size() - this.hits, this.oldCache.size());
+		this.existingCaches = map;
+		this.initialCount = i;
 	}
 
-	@Nullable
-	public String getHash(Path path) {
-		return (String)this.oldCache.get(path);
-	}
-
-	public void putNew(Path path, String string) {
-		this.newCache.put(path, string);
-		if (Objects.equals(this.oldCache.remove(path), string)) {
-			this.hits++;
+	private static HashCache.ProviderCache readCache(Path path, Path path2) {
+		if (Files.isReadable(path2)) {
+			try {
+				return HashCache.ProviderCache.load(path, path2);
+			} catch (Exception var3) {
+				LOGGER.warn("Failed to parse cache {}, discarding", path2, var3);
+			}
 		}
+
+		return new HashCache.ProviderCache("unknown");
 	}
 
-	public boolean had(Path path) {
-		return this.oldCache.containsKey(path);
+	public boolean shouldRunInThisVersion(DataProvider dataProvider) {
+		HashCache.ProviderCache providerCache = (HashCache.ProviderCache)this.existingCaches.get(dataProvider);
+		return providerCache == null || !providerCache.version.equals(this.versionId);
 	}
 
-	public void keep(Path path) {
-		this.keep.add(path);
-	}
-
-	private void removeStale() throws IOException {
-		this.walkOutputFiles().forEach(path -> {
-			if (this.had(path) && !this.keep.contains(path)) {
-				try {
-					Files.delete(path);
-				} catch (IOException var3) {
-					LOGGER.debug("Unable to delete: {} ({})", path, var3.toString());
-				}
+	public CachedOutput getUpdater(DataProvider dataProvider) {
+		return (CachedOutput)this.cachesToWrite.computeIfAbsent(dataProvider, dataProviderx -> {
+			HashCache.ProviderCache providerCache = (HashCache.ProviderCache)this.existingCaches.get(dataProviderx);
+			if (providerCache == null) {
+				throw new IllegalStateException("Provider not registered: " + dataProviderx.getName());
+			} else {
+				HashCache.CacheUpdater cacheUpdater = new HashCache.CacheUpdater(this.versionId, providerCache);
+				this.existingCaches.put(dataProviderx, cacheUpdater.newCache);
+				return cacheUpdater;
 			}
 		});
 	}
 
-	private Stream<Path> walkOutputFiles() throws IOException {
-		return Files.walk(this.path).filter(path -> !Objects.equals(this.cachePath, path) && !Files.isDirectory(path, new LinkOption[0]));
+	public void purgeStaleAndWrite() throws IOException {
+		MutableInt mutableInt = new MutableInt();
+		this.cachesToWrite.forEach((dataProvider, cacheUpdater) -> {
+			Path path = this.getProviderCachePath(dataProvider);
+			cacheUpdater.newCache.save(this.rootDir, path, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) + "\t" + dataProvider.getName());
+			mutableInt.add(cacheUpdater.writes);
+		});
+		Set<Path> set = new HashSet();
+		this.existingCaches.values().forEach(providerCache -> set.addAll(providerCache.data().keySet()));
+		set.add(this.rootDir.resolve("version.json"));
+		MutableInt mutableInt2 = new MutableInt();
+		MutableInt mutableInt3 = new MutableInt();
+		Stream<Path> stream = Files.walk(this.rootDir);
+
+		try {
+			stream.forEach(path -> {
+				if (!Files.isDirectory(path, new LinkOption[0])) {
+					if (!this.cachePaths.contains(path)) {
+						mutableInt2.increment();
+						if (!set.contains(path)) {
+							try {
+								Files.delete(path);
+							} catch (IOException var6) {
+								LOGGER.warn("Failed to delete file {}", path, var6);
+							}
+
+							mutableInt3.increment();
+						}
+					}
+				}
+			});
+		} catch (Throwable var9) {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (Throwable var8) {
+					var9.addSuppressed(var8);
+				}
+			}
+
+			throw var9;
+		}
+
+		if (stream != null) {
+			stream.close();
+		}
+
+		LOGGER.info(
+			"Caching: total files: {}, old count: {}, new count: {}, removed stale: {}, written: {}",
+			mutableInt2,
+			this.initialCount,
+			set.size(),
+			mutableInt3,
+			mutableInt
+		);
+	}
+
+	static class CacheUpdater implements CachedOutput {
+		private final HashCache.ProviderCache oldCache;
+		final HashCache.ProviderCache newCache;
+		int writes;
+
+		CacheUpdater(String string, HashCache.ProviderCache providerCache) {
+			this.oldCache = providerCache;
+			this.newCache = new HashCache.ProviderCache(string);
+		}
+
+		private boolean shouldWrite(Path path, String string) {
+			return !Objects.equals(this.oldCache.get(path), string) || !Files.exists(path, new LinkOption[0]);
+		}
+
+		@Override
+		public void writeIfNeeded(Path path, String string) throws IOException {
+			String string2 = Hashing.sha1().hashUnencodedChars(string).toString();
+			if (this.shouldWrite(path, string2)) {
+				this.writes++;
+				Files.createDirectories(path.getParent());
+				BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
+
+				try {
+					bufferedWriter.write(string);
+				} catch (Throwable var8) {
+					if (bufferedWriter != null) {
+						try {
+							bufferedWriter.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
+						}
+					}
+
+					throw var8;
+				}
+
+				if (bufferedWriter != null) {
+					bufferedWriter.close();
+				}
+			}
+
+			this.newCache.put(path, string2);
+		}
+
+		@Override
+		public void writeIfNeeded(Path path, byte[] bs, String string) throws IOException {
+			if (this.shouldWrite(path, string)) {
+				this.writes++;
+				Files.createDirectories(path.getParent());
+				OutputStream outputStream = Files.newOutputStream(path);
+
+				try {
+					outputStream.write(bs);
+				} catch (Throwable var8) {
+					if (outputStream != null) {
+						try {
+							outputStream.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
+						}
+					}
+
+					throw var8;
+				}
+
+				if (outputStream != null) {
+					outputStream.close();
+				}
+			}
+
+			this.newCache.put(path, string);
+		}
+	}
+
+	static record ProviderCache(String version, Map<Path, String> data) {
+
+		ProviderCache(String string) {
+			this(string, new HashMap());
+		}
+
+		@Nullable
+		public String get(Path path) {
+			return (String)this.data.get(path);
+		}
+
+		public void put(Path path, String string) {
+			this.data.put(path, string);
+		}
+
+		public int count() {
+			return this.data.size();
+		}
+
+		public static HashCache.ProviderCache load(Path path, Path path2) throws IOException {
+			BufferedReader bufferedReader = Files.newBufferedReader(path2, StandardCharsets.UTF_8);
+
+			HashCache.ProviderCache var7;
+			try {
+				String string = bufferedReader.readLine();
+				if (!string.startsWith("// ")) {
+					throw new IllegalStateException("Missing cache file header");
+				}
+
+				String[] strings = string.substring("// ".length()).split("\t", 2);
+				String string2 = strings[0];
+				Map<Path, String> map = new HashMap();
+				bufferedReader.lines().forEach(stringx -> {
+					int i = stringx.indexOf(32);
+					map.put(path.resolve(stringx.substring(i + 1)), stringx.substring(0, i));
+				});
+				var7 = new HashCache.ProviderCache(string2, Map.copyOf(map));
+			} catch (Throwable var9) {
+				if (bufferedReader != null) {
+					try {
+						bufferedReader.close();
+					} catch (Throwable var8) {
+						var9.addSuppressed(var8);
+					}
+				}
+
+				throw var9;
+			}
+
+			if (bufferedReader != null) {
+				bufferedReader.close();
+			}
+
+			return var7;
+		}
+
+		public void save(Path path, Path path2, String string) {
+			try {
+				BufferedWriter bufferedWriter = Files.newBufferedWriter(path2, StandardCharsets.UTF_8);
+
+				try {
+					bufferedWriter.write("// ");
+					bufferedWriter.write(this.version);
+					bufferedWriter.write(9);
+					bufferedWriter.write(string);
+					bufferedWriter.newLine();
+
+					for (Entry<Path, String> entry : this.data.entrySet()) {
+						bufferedWriter.write((String)entry.getValue());
+						bufferedWriter.write(32);
+						bufferedWriter.write(path.relativize((Path)entry.getKey()).toString());
+						bufferedWriter.newLine();
+					}
+				} catch (Throwable var8) {
+					if (bufferedWriter != null) {
+						try {
+							bufferedWriter.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
+						}
+					}
+
+					throw var8;
+				}
+
+				if (bufferedWriter != null) {
+					bufferedWriter.close();
+				}
+			} catch (IOException var9) {
+				HashCache.LOGGER.warn("Unable write cachefile {}: {}", path2, var9);
+			}
+		}
 	}
 }

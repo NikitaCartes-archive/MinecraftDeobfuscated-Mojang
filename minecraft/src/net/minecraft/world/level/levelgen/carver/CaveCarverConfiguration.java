@@ -2,7 +2,9 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.util.valueproviders.FloatProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 
@@ -26,11 +28,12 @@ public class CaveCarverConfiguration extends CarverConfiguration {
 		FloatProvider floatProvider,
 		VerticalAnchor verticalAnchor,
 		CarverDebugSettings carverDebugSettings,
+		HolderSet<Block> holderSet,
 		FloatProvider floatProvider2,
 		FloatProvider floatProvider3,
 		FloatProvider floatProvider4
 	) {
-		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings);
+		super(f, heightProvider, floatProvider, verticalAnchor, carverDebugSettings, holderSet);
 		this.horizontalRadiusMultiplier = floatProvider2;
 		this.verticalRadiusMultiplier = floatProvider3;
 		this.floorLevel = floatProvider4;
@@ -41,12 +44,12 @@ public class CaveCarverConfiguration extends CarverConfiguration {
 		HeightProvider heightProvider,
 		FloatProvider floatProvider,
 		VerticalAnchor verticalAnchor,
-		boolean bl,
+		HolderSet<Block> holderSet,
 		FloatProvider floatProvider2,
 		FloatProvider floatProvider3,
 		FloatProvider floatProvider4
 	) {
-		this(f, heightProvider, floatProvider, verticalAnchor, CarverDebugSettings.DEFAULT, floatProvider2, floatProvider3, floatProvider4);
+		this(f, heightProvider, floatProvider, verticalAnchor, CarverDebugSettings.DEFAULT, holderSet, floatProvider2, floatProvider3, floatProvider4);
 	}
 
 	public CaveCarverConfiguration(
@@ -58,6 +61,7 @@ public class CaveCarverConfiguration extends CarverConfiguration {
 			carverConfiguration.yScale,
 			carverConfiguration.lavaLevel,
 			carverConfiguration.debugSettings,
+			carverConfiguration.replaceable,
 			floatProvider,
 			floatProvider2,
 			floatProvider3

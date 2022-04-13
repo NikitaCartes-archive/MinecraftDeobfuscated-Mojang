@@ -11,7 +11,7 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 public abstract class IllagerRenderer<T extends AbstractIllager> extends MobRenderer<T, IllagerModel<T>> {
 	protected IllagerRenderer(EntityRendererProvider.Context context, IllagerModel<T> illagerModel, float f) {
 		super(context, illagerModel, f);
-		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
 	}
 
 	protected void scale(T abstractIllager, PoseStack poseStack, float f) {

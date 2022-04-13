@@ -254,10 +254,10 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 	@Nullable
 	private static ShaderInstance rendertypeCrumblingShader;
 
-	public GameRenderer(Minecraft minecraft, ResourceManager resourceManager, RenderBuffers renderBuffers) {
+	public GameRenderer(Minecraft minecraft, ItemInHandRenderer itemInHandRenderer, ResourceManager resourceManager, RenderBuffers renderBuffers) {
 		this.minecraft = minecraft;
 		this.resourceManager = resourceManager;
-		this.itemInHandRenderer = minecraft.getItemInHandRenderer();
+		this.itemInHandRenderer = itemInHandRenderer;
 		this.mapRenderer = new MapRenderer(minecraft.getTextureManager());
 		this.lightTexture = new LightTexture(this, minecraft);
 		this.renderBuffers = renderBuffers;

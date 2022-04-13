@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -22,8 +21,13 @@ public abstract class AbstractTreeGrower {
 			return false;
 		} else {
 			ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)holder.value();
-			serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
+			BlockState blockState2 = serverLevel.getFluidState(blockPos).createLegacyBlock();
+			serverLevel.setBlock(blockPos, blockState2, 4);
 			if (configuredFeature.place(serverLevel, chunkGenerator, randomSource, blockPos)) {
+				if (serverLevel.getBlockState(blockPos) == blockState2) {
+					serverLevel.sendBlockUpdated(blockPos, blockState, blockState2, 2);
+				}
+
 				return true;
 			} else {
 				serverLevel.setBlock(blockPos, blockState, 4);

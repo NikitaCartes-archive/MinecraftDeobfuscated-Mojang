@@ -137,9 +137,9 @@ public class Gui extends GuiComponent {
 	private final Map<ChatType, List<ChatListener>> chatListeners = Maps.<ChatType, List<ChatListener>>newHashMap();
 	private float scopeScale;
 
-	public Gui(Minecraft minecraft) {
+	public Gui(Minecraft minecraft, ItemRenderer itemRenderer) {
 		this.minecraft = minecraft;
-		this.itemRenderer = minecraft.getItemRenderer();
+		this.itemRenderer = itemRenderer;
 		this.debugScreen = new DebugScreenOverlay(minecraft);
 		this.spectatorGui = new SpectatorGui(minecraft);
 		this.chat = new ChatComponent(minecraft);

@@ -40,9 +40,4 @@ public class TallGrassBlock extends BushBlock implements BonemealableBlock {
 			DoublePlantBlock.placeAt(serverLevel, doublePlantBlock.defaultBlockState(), blockPos, 2);
 		}
 	}
-
-	@Override
-	public BlockBehaviour.OffsetType getOffsetType() {
-		return BlockBehaviour.OffsetType.XYZ;
-	}
 }

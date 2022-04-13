@@ -21,8 +21,9 @@ import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.PickedUpItemTrigger;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
-import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
 import net.minecraft.core.Registry;
@@ -32,6 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.CatVariant;
+import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -366,8 +368,21 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 				false
 			)
 			.save(consumer, "husbandry/tadpole_in_a_bucket");
-		Advancement.Builder.advancement()
+		Advancement advancement11 = this.addLeashedFrogVariants(Advancement.Builder.advancement())
 			.parent(advancement10)
+			.display(
+				Items.LEAD,
+				new TranslatableComponent("advancements.husbandry.leash_all_frog_variants.title"),
+				new TranslatableComponent("advancements.husbandry.leash_all_frog_variants.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.save(consumer, "husbandry/leash_all_frog_variants");
+		Advancement.Builder.advancement()
+			.parent(advancement11)
 			.display(
 				Items.VERDANT_FROGLIGHT,
 				new TranslatableComponent("advancements.husbandry.froglights.title"),
@@ -441,7 +456,7 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "husbandry/make_a_sign_glow");
-		Advancement advancement11 = Advancement.Builder.advancement()
+		Advancement advancement12 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
 				Items.COOKIE,
@@ -453,14 +468,19 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				true
 			)
-			.addCriterion("allay_deliver_item_to_player", PlayerTrigger.TriggerInstance.itemDeliveredToPlayer())
+			.addCriterion(
+				"allay_deliver_item_to_player",
+				PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByPlayer(
+					EntityPredicate.Composite.ANY, ItemPredicate.ANY, EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().of(EntityType.ALLAY).build())
+				)
+			)
 			.save(consumer, "husbandry/allay_deliver_item_to_player");
 		Advancement.Builder.advancement()
-			.parent(advancement11)
+			.parent(advancement12)
 			.display(
 				Items.NOTE_BLOCK,
-				new TranslatableComponent("advancements.husbandry.allay_deliver_cake_to_noteblock.title"),
-				new TranslatableComponent("advancements.husbandry.allay_deliver_cake_to_noteblock.description"),
+				new TranslatableComponent("advancements.husbandry.allay_deliver_cake_to_note_block.title"),
+				new TranslatableComponent("advancements.husbandry.allay_deliver_cake_to_note_block.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -468,12 +488,29 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 				true
 			)
 			.addCriterion(
-				"allay_deliver_cake_to_noteblock",
+				"allay_deliver_cake_to_note_block",
 				ItemInteractWithBlockTrigger.TriggerInstance.allayDropItemOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.NOTE_BLOCK).build()), ItemPredicate.Builder.item().of(Items.CAKE)
 				)
 			)
-			.save(consumer, "husbandry/allay_deliver_cake_to_noteblock");
+			.save(consumer, "husbandry/allay_deliver_cake_to_note_block");
+	}
+
+	private Advancement.Builder addLeashedFrogVariants(Advancement.Builder builder) {
+		Registry.FROG_VARIANT
+			.holders()
+			.forEach(
+				reference -> builder.addCriterion(
+						reference.key().location().toString(),
+						PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+							ItemPredicate.Builder.item().of(Items.LEAD),
+							EntityPredicate.Composite.wrap(
+								EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicate.variant((FrogVariant)reference.value())).build()
+							)
+						)
+					)
+			);
+		return builder;
 	}
 
 	private Advancement.Builder addFood(Advancement.Builder builder) {

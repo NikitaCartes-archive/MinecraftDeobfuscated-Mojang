@@ -62,16 +62,12 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 	private final ContainerData dataAccess = new ContainerData() {
 		@Override
 		public int get(int i) {
-			switch (i) {
-				case 0:
-					return BeaconBlockEntity.this.levels;
-				case 1:
-					return MobEffect.getId(BeaconBlockEntity.this.primaryPower);
-				case 2:
-					return MobEffect.getId(BeaconBlockEntity.this.secondaryPower);
-				default:
-					return 0;
-			}
+			return switch (i) {
+				case 0 -> BeaconBlockEntity.this.levels;
+				case 1 -> MobEffect.getIdFromNullable(BeaconBlockEntity.this.primaryPower);
+				case 2 -> MobEffect.getIdFromNullable(BeaconBlockEntity.this.secondaryPower);
+				default -> 0;
+			};
 		}
 
 		@Override
@@ -281,8 +277,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		super.saveAdditional(compoundTag);
-		compoundTag.putInt("Primary", MobEffect.getId(this.primaryPower));
-		compoundTag.putInt("Secondary", MobEffect.getId(this.secondaryPower));
+		compoundTag.putInt("Primary", MobEffect.getIdFromNullable(this.primaryPower));
+		compoundTag.putInt("Secondary", MobEffect.getIdFromNullable(this.secondaryPower));
 		compoundTag.putInt("Levels", this.levels);
 		if (this.name != null) {
 			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));

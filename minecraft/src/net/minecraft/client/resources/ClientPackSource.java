@@ -6,8 +6,11 @@ import com.google.common.hash.Hashing;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +44,8 @@ import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -107,16 +112,16 @@ public class ClientPackSource implements RepositorySource {
 		return map;
 	}
 
-	public CompletableFuture<?> downloadAndSelectResourcePack(String string, String string2, boolean bl) {
-		String string3 = Hashing.sha1().hashString(string, StandardCharsets.UTF_8).toString();
-		String string4 = SHA1.matcher(string2).matches() ? string2 : "";
+	public CompletableFuture<?> downloadAndSelectResourcePack(URL uRL, String string, boolean bl) {
+		String string2 = Hashing.sha1().hashString(uRL.toString(), StandardCharsets.UTF_8).toString();
+		String string3 = SHA1.matcher(string).matches() ? string : "";
 		this.downloadLock.lock();
 
 		CompletableFuture var14;
 		try {
 			this.clearServerPack();
 			this.clearOldDownloads();
-			File file = new File(this.serverPackDir, string3);
+			File file = new File(this.serverPackDir, string2);
 			CompletableFuture<?> completableFuture;
 			if (file.exists()) {
 				completableFuture = CompletableFuture.completedFuture("");
@@ -125,11 +130,11 @@ public class ClientPackSource implements RepositorySource {
 				Map<String, String> map = getDownloadHeaders();
 				Minecraft minecraft = Minecraft.getInstance();
 				minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
-				completableFuture = HttpUtil.downloadTo(file, string, map, 262144000, progressScreen, minecraft.getProxy());
+				completableFuture = HttpUtil.downloadTo(file, uRL, map, 262144000, progressScreen, minecraft.getProxy());
 			}
 
 			this.currentDownload = completableFuture.thenCompose(object -> {
-					if (!this.checkHash(string4, file)) {
+					if (!this.checkHash(string3, file)) {
 						return Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"));
 					} else {
 						Minecraft minecraftx = Minecraft.getInstance();
@@ -186,7 +191,7 @@ public class ClientPackSource implements RepositorySource {
 		}
 	}
 
-	public void clearServerPack() {
+	public CompletableFuture<?> clearServerPack() {
 		this.downloadLock.lock();
 
 		try {
@@ -197,11 +202,13 @@ public class ClientPackSource implements RepositorySource {
 			this.currentDownload = null;
 			if (this.serverPack != null) {
 				this.serverPack = null;
-				Minecraft.getInstance().delayTextureReload();
+				return Minecraft.getInstance().delayTextureReload();
 			}
 		} finally {
 			this.downloadLock.unlock();
 		}
+
+		return CompletableFuture.completedFuture(null);
 	}
 
 	private boolean checkHash(String string, File file) {
@@ -242,6 +249,13 @@ public class ClientPackSource implements RepositorySource {
 				LOGGER.error("Error while deleting old server resource pack : {}", var5.getMessage());
 			}
 		}
+	}
+
+	public CompletableFuture<Void> loadBundledResourcePack(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
+		Path path = levelStorageAccess.getLevelPath(LevelResource.MAP_RESOURCE_FILE);
+		return Files.exists(path, new LinkOption[0]) && !Files.isDirectory(path, new LinkOption[0])
+			? this.setServerPack(path.toFile(), PackSource.WORLD)
+			: CompletableFuture.completedFuture(null);
 	}
 
 	public CompletableFuture<Void> setServerPack(File file, PackSource packSource) {

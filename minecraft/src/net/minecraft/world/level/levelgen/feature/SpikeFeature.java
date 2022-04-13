@@ -6,9 +6,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -177,20 +177,20 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 
 	static class SpikeCacheLoader extends CacheLoader<Long, List<SpikeFeature.EndSpike>> {
 		public List<SpikeFeature.EndSpike> load(Long long_) {
-			List<Integer> list = Util.shuffledCopy((List<Integer>)IntStream.range(0, 10).boxed().collect(Collectors.toList()), RandomSource.create(long_));
-			List<SpikeFeature.EndSpike> list2 = Lists.<SpikeFeature.EndSpike>newArrayList();
+			IntArrayList intArrayList = Util.toShuffledList(IntStream.range(0, 10), RandomSource.create(long_));
+			List<SpikeFeature.EndSpike> list = Lists.<SpikeFeature.EndSpike>newArrayList();
 
 			for (int i = 0; i < 10; i++) {
 				int j = Mth.floor(42.0 * Math.cos(2.0 * (-Math.PI + (Math.PI / 10) * (double)i)));
 				int k = Mth.floor(42.0 * Math.sin(2.0 * (-Math.PI + (Math.PI / 10) * (double)i)));
-				int l = (Integer)list.get(i);
+				int l = intArrayList.get(i);
 				int m = 2 + l / 3;
 				int n = 76 + l * 3;
 				boolean bl = l == 1 || l == 2;
-				list2.add(new SpikeFeature.EndSpike(j, k, m, n, bl));
+				list.add(new SpikeFeature.EndSpike(j, k, m, n, bl));
 			}
 
-			return list2;
+			return list;
 		}
 	}
 }

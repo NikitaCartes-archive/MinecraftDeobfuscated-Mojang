@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.Util;
@@ -282,20 +283,20 @@ public class OceanMonumentPieces {
 			this.coreRoom.connections[Direction.EAST.get3DDataValue()].connections[Direction.UP.get3DDataValue()].claimed = true;
 			this.coreRoom.connections[Direction.NORTH.get3DDataValue()].connections[Direction.UP.get3DDataValue()].claimed = true;
 			this.coreRoom.connections[Direction.EAST.get3DDataValue()].connections[Direction.NORTH.get3DDataValue()].connections[Direction.UP.get3DDataValue()].claimed = true;
-			List<OceanMonumentPieces.RoomDefinition> list = Lists.<OceanMonumentPieces.RoomDefinition>newArrayList();
+			ObjectArrayList<OceanMonumentPieces.RoomDefinition> objectArrayList = new ObjectArrayList<>();
 
 			for (OceanMonumentPieces.RoomDefinition roomDefinition4 : roomDefinitions) {
 				if (roomDefinition4 != null) {
 					roomDefinition4.updateOpenings();
-					list.add(roomDefinition4);
+					objectArrayList.add(roomDefinition4);
 				}
 			}
 
 			roomDefinition.updateOpenings();
-			Util.shuffle(list, randomSource);
+			Util.shuffle(objectArrayList, randomSource);
 			int q = 1;
 
-			for (OceanMonumentPieces.RoomDefinition roomDefinition5 : list) {
+			for (OceanMonumentPieces.RoomDefinition roomDefinition5 : objectArrayList) {
 				int r = 0;
 				int m = 0;
 
@@ -316,10 +317,10 @@ public class OceanMonumentPieces {
 				}
 			}
 
-			list.add(roomDefinition);
-			list.add(roomDefinition2);
-			list.add(roomDefinition3);
-			return list;
+			objectArrayList.add(roomDefinition);
+			objectArrayList.add(roomDefinition2);
+			objectArrayList.add(roomDefinition3);
+			return objectArrayList;
 		}
 
 		@Override

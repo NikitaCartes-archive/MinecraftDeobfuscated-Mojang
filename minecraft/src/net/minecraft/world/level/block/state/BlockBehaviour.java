@@ -186,10 +186,6 @@ public abstract class BlockBehaviour {
 		return false;
 	}
 
-	public BlockBehaviour.OffsetType getOffsetType() {
-		return BlockBehaviour.OffsetType.NONE;
-	}
-
 	public float getMaxHorizontalOffset() {
 		return 0.25F;
 	}
@@ -387,6 +383,7 @@ public abstract class BlockBehaviour {
 		private final BlockBehaviour.StatePredicate isViewBlocking;
 		private final BlockBehaviour.StatePredicate hasPostProcess;
 		private final BlockBehaviour.StatePredicate emissiveRendering;
+		private final BlockBehaviour.OffsetType offsetType;
 		@Nullable
 		protected BlockBehaviour.BlockStateBase.Cache cache;
 
@@ -406,6 +403,7 @@ public abstract class BlockBehaviour {
 			this.isViewBlocking = properties.isViewBlocking;
 			this.hasPostProcess = properties.hasPostProcess;
 			this.emissiveRendering = properties.emissiveRendering;
+			this.offsetType = (BlockBehaviour.OffsetType)properties.offsetType.apply(this.asState());
 		}
 
 		public void initCache() {
@@ -578,15 +576,14 @@ public abstract class BlockBehaviour {
 		}
 
 		public Vec3 getOffset(BlockGetter blockGetter, BlockPos blockPos) {
-			Block block = this.getBlock();
-			BlockBehaviour.OffsetType offsetType = block.getOffsetType();
-			if (offsetType == BlockBehaviour.OffsetType.NONE) {
+			if (this.offsetType == BlockBehaviour.OffsetType.NONE) {
 				return Vec3.ZERO;
 			} else {
+				Block block = this.getBlock();
 				long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
 				float f = block.getMaxHorizontalOffset();
 				double d = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-				double e = offsetType == BlockBehaviour.OffsetType.XYZ ? ((double)((float)(l >> 4 & 15L) / 15.0F) - 1.0) * (double)block.getMaxVerticalOffset() : 0.0;
+				double e = this.offsetType == BlockBehaviour.OffsetType.XYZ ? ((double)((float)(l >> 4 & 15L) / 15.0F) - 1.0) * (double)block.getMaxVerticalOffset() : 0.0;
 				double g = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
 				return new Vec3(d, e, g);
 			}
@@ -763,6 +760,10 @@ public abstract class BlockBehaviour {
 			return this.requiresCorrectToolForDrops;
 		}
 
+		public BlockBehaviour.OffsetType getOffsetType() {
+			return this.offsetType;
+		}
+
 		static final class Cache {
 			private static final Direction[] DIRECTIONS = Direction.values();
 			private static final int SUPPORT_TYPE_COUNT = SupportType.values().length;
@@ -793,7 +794,7 @@ public abstract class BlockBehaviour {
 				}
 
 				this.collisionShape = block.getCollisionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
-				if (!this.collisionShape.isEmpty() && block.getOffsetType() != BlockBehaviour.OffsetType.NONE) {
+				if (!this.collisionShape.isEmpty() && blockState.getOffsetType() != BlockBehaviour.OffsetType.NONE) {
 					throw new IllegalStateException(
 						String.format("%s has a collision shape and an offset type, but is not marked as dynamicShape in its properties.", Registry.BLOCK.getKey(block))
 					);
@@ -858,6 +859,7 @@ public abstract class BlockBehaviour {
 		BlockBehaviour.StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
 		BlockBehaviour.StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
 		boolean dynamicShape;
+		Function<BlockState, BlockBehaviour.OffsetType> offsetType = blockState -> BlockBehaviour.OffsetType.NONE;
 
 		private Properties(Material material, MaterialColor materialColor) {
 			this(material, blockState -> materialColor);
@@ -900,6 +902,7 @@ public abstract class BlockBehaviour {
 			properties.canOcclude = blockBehaviour.properties.canOcclude;
 			properties.isAir = blockBehaviour.properties.isAir;
 			properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
+			properties.offsetType = blockBehaviour.properties.offsetType;
 			return properties;
 		}
 
@@ -1024,6 +1027,15 @@ public abstract class BlockBehaviour {
 
 		public BlockBehaviour.Properties explosionResistance(float f) {
 			this.explosionResistance = Math.max(0.0F, f);
+			return this;
+		}
+
+		public BlockBehaviour.Properties offsetType(BlockBehaviour.OffsetType offsetType) {
+			return this.offsetType(blockState -> offsetType);
+		}
+
+		public BlockBehaviour.Properties offsetType(Function<BlockState, BlockBehaviour.OffsetType> function) {
+			this.offsetType = function;
 			return this;
 		}
 	}

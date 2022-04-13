@@ -377,7 +377,7 @@ public class Rabbit extends Animal {
 
 	private int getRandomRabbitType(LevelAccessor levelAccessor) {
 		Holder<Biome> holder = levelAccessor.getBiome(this.blockPosition());
-		int i = this.random.nextInt(100);
+		int i = levelAccessor.getRandom().nextInt(100);
 		if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
 			return i < 80 ? 1 : 3;
 		} else if (holder.is(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS)) {

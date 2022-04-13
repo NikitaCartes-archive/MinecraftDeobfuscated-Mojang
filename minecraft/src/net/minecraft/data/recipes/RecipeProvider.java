@@ -9,14 +9,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -32,9 +28,9 @@ import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -84,7 +80,7 @@ public class RecipeProvider implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) {
+	public void run(CachedOutput cachedOutput) {
 		Path path = this.generator.getOutputFolder();
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		buildCraftingRecipes(
@@ -93,14 +89,14 @@ public class RecipeProvider implements DataProvider {
 					throw new IllegalStateException("Duplicate recipe " + finishedRecipe.getId());
 				} else {
 					saveRecipe(
-						hashCache,
+						cachedOutput,
 						finishedRecipe.serializeRecipe(),
 						path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/recipes/" + finishedRecipe.getId().getPath() + ".json")
 					);
 					JsonObject jsonObject = finishedRecipe.serializeAdvancement();
 					if (jsonObject != null) {
 						saveAdvancement(
-							hashCache,
+							cachedOutput,
 							jsonObject,
 							path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/advancements/" + finishedRecipe.getAdvancementId().getPath() + ".json")
 						);
@@ -109,75 +105,27 @@ public class RecipeProvider implements DataProvider {
 			}
 		);
 		saveAdvancement(
-			hashCache,
+			cachedOutput,
 			Advancement.Builder.advancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance()).serializeToJson(),
 			path.resolve("data/minecraft/advancements/recipes/root.json")
 		);
 	}
 
-	private static void saveRecipe(HashCache hashCache, JsonObject jsonObject, Path path) {
+	private static void saveRecipe(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {
 		try {
 			String string = GSON.toJson((JsonElement)jsonObject);
-			String string2 = SHA1.hashUnencodedChars(string).toString();
-			if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
-				Files.createDirectories(path.getParent());
-				BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-
-				try {
-					bufferedWriter.write(string);
-				} catch (Throwable var9) {
-					if (bufferedWriter != null) {
-						try {
-							bufferedWriter.close();
-						} catch (Throwable var8) {
-							var9.addSuppressed(var8);
-						}
-					}
-
-					throw var9;
-				}
-
-				if (bufferedWriter != null) {
-					bufferedWriter.close();
-				}
-			}
-
-			hashCache.putNew(path, string2);
-		} catch (IOException var10) {
-			LOGGER.error("Couldn't save recipe {}", path, var10);
+			cachedOutput.writeIfNeeded(path, string);
+		} catch (IOException var4) {
+			LOGGER.error("Couldn't save recipe {}", path, var4);
 		}
 	}
 
-	private static void saveAdvancement(HashCache hashCache, JsonObject jsonObject, Path path) {
+	private static void saveAdvancement(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {
 		try {
 			String string = GSON.toJson((JsonElement)jsonObject);
-			String string2 = SHA1.hashUnencodedChars(string).toString();
-			if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
-				Files.createDirectories(path.getParent());
-				BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-
-				try {
-					bufferedWriter.write(string);
-				} catch (Throwable var9) {
-					if (bufferedWriter != null) {
-						try {
-							bufferedWriter.close();
-						} catch (Throwable var8) {
-							var9.addSuppressed(var8);
-						}
-					}
-
-					throw var9;
-				}
-
-				if (bufferedWriter != null) {
-					bufferedWriter.close();
-				}
-			}
-
-			hashCache.putNew(path, string2);
-		} catch (IOException var10) {
-			LOGGER.error("Couldn't save recipe advancement {}", path, var10);
+			cachedOutput.writeIfNeeded(path, string);
+		} catch (IOException var4) {
+			LOGGER.error("Couldn't save recipe advancement {}", path, var4);
 		}
 	}
 

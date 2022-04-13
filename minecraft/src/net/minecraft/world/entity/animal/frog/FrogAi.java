@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -52,8 +53,8 @@ public class FrogAi {
 	private static final float MAX_JUMP_VELOCITY = 1.5F;
 	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
 
-	protected static void initMemories(Frog frog) {
-		frog.getBrain().setMemory(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, TIME_BETWEEN_LONG_JUMPS.sample(frog.level.random));
+	protected static void initMemories(Frog frog, RandomSource randomSource) {
+		frog.getBrain().setMemory(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, TIME_BETWEEN_LONG_JUMPS.sample(randomSource));
 	}
 
 	protected static Brain<?> makeBrain(Brain<Frog> brain) {

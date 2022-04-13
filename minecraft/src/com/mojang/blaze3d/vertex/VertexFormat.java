@@ -155,23 +155,25 @@ public class VertexFormat {
 
 	@Environment(EnvType.CLIENT)
 	public static enum Mode {
-		LINES(4, 2, 2),
-		LINE_STRIP(5, 2, 1),
-		DEBUG_LINES(1, 2, 2),
-		DEBUG_LINE_STRIP(3, 2, 1),
-		TRIANGLES(4, 3, 3),
-		TRIANGLE_STRIP(5, 3, 1),
-		TRIANGLE_FAN(6, 3, 1),
-		QUADS(4, 4, 4);
+		LINES(4, 2, 2, false),
+		LINE_STRIP(5, 2, 1, true),
+		DEBUG_LINES(1, 2, 2, false),
+		DEBUG_LINE_STRIP(3, 2, 1, true),
+		TRIANGLES(4, 3, 3, false),
+		TRIANGLE_STRIP(5, 3, 1, true),
+		TRIANGLE_FAN(6, 3, 1, true),
+		QUADS(4, 4, 4, false);
 
 		public final int asGLMode;
 		public final int primitiveLength;
 		public final int primitiveStride;
+		public final boolean connectedPrimitives;
 
-		private Mode(int j, int k, int l) {
+		private Mode(int j, int k, int l, boolean bl) {
 			this.asGLMode = j;
 			this.primitiveLength = k;
 			this.primitiveStride = l;
+			this.connectedPrimitives = bl;
 		}
 
 		public int indexCount(int i) {

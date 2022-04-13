@@ -260,28 +260,32 @@ public class ModelBlockRenderer {
 		switch (direction) {
 			case DOWN:
 				bitSet.set(1, f >= 1.0E-4F || h >= 1.0E-4F || i <= 0.9999F || k <= 0.9999F);
-				bitSet.set(0, g == j && (g < 1.0E-4F || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+				bitSet.set(0, g == j && (g < 1.0E-4F || isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
 				break;
 			case UP:
 				bitSet.set(1, f >= 1.0E-4F || h >= 1.0E-4F || i <= 0.9999F || k <= 0.9999F);
-				bitSet.set(0, g == j && (j > 0.9999F || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+				bitSet.set(0, g == j && (j > 0.9999F || isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
 				break;
 			case NORTH:
 				bitSet.set(1, f >= 1.0E-4F || g >= 1.0E-4F || i <= 0.9999F || j <= 0.9999F);
-				bitSet.set(0, h == k && (h < 1.0E-4F || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+				bitSet.set(0, h == k && (h < 1.0E-4F || isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
 				break;
 			case SOUTH:
 				bitSet.set(1, f >= 1.0E-4F || g >= 1.0E-4F || i <= 0.9999F || j <= 0.9999F);
-				bitSet.set(0, h == k && (k > 0.9999F || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+				bitSet.set(0, h == k && (k > 0.9999F || isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
 				break;
 			case WEST:
 				bitSet.set(1, g >= 1.0E-4F || h >= 1.0E-4F || j <= 0.9999F || k <= 0.9999F);
-				bitSet.set(0, f == i && (f < 1.0E-4F || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+				bitSet.set(0, f == i && (f < 1.0E-4F || isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
 				break;
 			case EAST:
 				bitSet.set(1, g >= 1.0E-4F || h >= 1.0E-4F || j <= 0.9999F || k <= 0.9999F);
-				bitSet.set(0, f == i && (i > 0.9999F || blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos)));
+				bitSet.set(0, f == i && (i > 0.9999F || isInteriorOccluded(blockAndTintGetter, blockState, blockPos)));
 		}
+	}
+
+	private static boolean isInteriorOccluded(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos) {
+		return blockState.canOcclude() && blockState.isCollisionShapeFullBlock(blockAndTintGetter, blockPos);
 	}
 
 	private void renderModelFaceFlat(

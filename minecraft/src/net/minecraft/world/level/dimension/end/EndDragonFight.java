@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -72,7 +73,7 @@ public class EndDragonFight {
 		.setPlayBossMusic(true)
 		.setCreateWorldFog(true);
 	private final ServerLevel level;
-	private final List<Integer> gateways = Lists.<Integer>newArrayList();
+	private final ObjectArrayList<Integer> gateways = new ObjectArrayList<>();
 	private final BlockPattern exitPortalPattern;
 	private int ticksSinceDragonSeen;
 	private int crystalsAlive;
@@ -384,7 +385,7 @@ public class EndDragonFight {
 
 	private void spawnNewGateway() {
 		if (!this.gateways.isEmpty()) {
-			int i = (Integer)this.gateways.remove(this.gateways.size() - 1);
+			int i = this.gateways.remove(this.gateways.size() - 1);
 			int j = Mth.floor(96.0 * Math.cos(2.0 * (-Math.PI + (Math.PI / 20) * (double)i)));
 			int k = Mth.floor(96.0 * Math.sin(2.0 * (-Math.PI + (Math.PI / 20) * (double)i)));
 			this.spawnNewGateway(new BlockPos(j, 75, k));

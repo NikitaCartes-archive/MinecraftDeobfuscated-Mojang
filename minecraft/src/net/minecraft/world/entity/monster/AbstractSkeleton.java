@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityDimensions;
@@ -130,8 +131,8 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	}
 
 	@Override
-	protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-		super.populateDefaultEquipmentSlots(difficultyInstance);
+	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
+		super.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
 		this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
 	}
 
@@ -145,16 +146,17 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		@Nullable CompoundTag compoundTag
 	) {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		this.populateDefaultEquipmentSlots(difficultyInstance);
-		this.populateDefaultEquipmentEnchantments(difficultyInstance);
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
+		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
 		this.reassessWeaponGoal();
-		this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * difficultyInstance.getSpecialMultiplier());
+		this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * difficultyInstance.getSpecialMultiplier());
 		if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
 			LocalDate localDate = LocalDate.now();
 			int i = localDate.get(ChronoField.DAY_OF_MONTH);
 			int j = localDate.get(ChronoField.MONTH_OF_YEAR);
-			if (j == 10 && i == 31 && this.random.nextFloat() < 0.25F) {
-				this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+			if (j == 10 && i == 31 && randomSource.nextFloat() < 0.25F) {
+				this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(randomSource.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
 				this.armorDropChances[EquipmentSlot.HEAD.getIndex()] = 0.0F;
 			}
 		}

@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import java.util.OptionalInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -33,12 +34,13 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 	private static final ModelResourceLocation GLOW_MAP_FRAME_LOCATION = new ModelResourceLocation("glow_item_frame", "map=true");
 	public static final int GLOW_FRAME_BRIGHTNESS = 5;
 	public static final int BRIGHT_MAP_LIGHT_ADJUSTMENT = 30;
-	private final Minecraft minecraft = Minecraft.getInstance();
 	private final ItemRenderer itemRenderer;
+	private final BlockRenderDispatcher blockRenderer;
 
 	public ItemFrameRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		this.itemRenderer = context.getItemRenderer();
+		this.blockRenderer = context.getBlockRenderDispatcher();
 	}
 
 	protected int getBlockLightLevel(T itemFrame, BlockPos blockPos) {
@@ -60,12 +62,12 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		boolean bl = itemFrame.isInvisible();
 		ItemStack itemStack = itemFrame.getItem();
 		if (!bl) {
-			BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
-			ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
+			ModelManager modelManager = this.blockRenderer.getBlockModelShaper().getModelManager();
 			ModelResourceLocation modelResourceLocation = this.getFrameModelResourceLoc(itemFrame, itemStack);
 			poseStack.pushPose();
 			poseStack.translate(-0.5, -0.5, -0.5);
-			blockRenderDispatcher.getModelRenderer()
+			this.blockRenderer
+				.getModelRenderer()
 				.renderModel(
 					poseStack.last(),
 					multiBufferSource.getBuffer(Sheets.solidBlockSheet()),
@@ -81,26 +83,25 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		}
 
 		if (!itemStack.isEmpty()) {
-			boolean bl2 = itemStack.is(Items.FILLED_MAP);
+			OptionalInt optionalInt = itemFrame.getFramedMapId();
 			if (bl) {
 				poseStack.translate(0.0, 0.0, 0.5);
 			} else {
 				poseStack.translate(0.0, 0.0, 0.4375);
 			}
 
-			int j = bl2 ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
+			int j = optionalInt.isPresent() ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
 			poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
-			if (bl2) {
+			if (optionalInt.isPresent()) {
 				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
 				float h = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
 				poseStack.translate(-64.0, -64.0, 0.0);
-				Integer integer = MapItem.getMapId(itemStack);
-				MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, itemFrame.level);
+				MapItemSavedData mapItemSavedData = MapItem.getSavedData(optionalInt.getAsInt(), itemFrame.level);
 				poseStack.translate(0.0, 0.0, -1.0);
 				if (mapItemSavedData != null) {
 					int k = this.getLightVal(itemFrame, 15728850, i);
-					this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, integer, mapItemSavedData, true, k);
+					Minecraft.getInstance().gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, optionalInt.getAsInt(), mapItemSavedData, true, k);
 				}
 			} else {
 				int l = this.getLightVal(itemFrame, 15728880, i);

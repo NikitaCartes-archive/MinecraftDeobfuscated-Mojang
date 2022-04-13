@@ -871,19 +871,19 @@ public abstract class Mob extends LivingEntity {
 		};
 	}
 
-	protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-		if (this.random.nextFloat() < 0.15F * difficultyInstance.getSpecialMultiplier()) {
-			int i = this.random.nextInt(2);
+	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
+		if (randomSource.nextFloat() < 0.15F * difficultyInstance.getSpecialMultiplier()) {
+			int i = randomSource.nextInt(2);
 			float f = this.level.getDifficulty() == Difficulty.HARD ? 0.1F : 0.25F;
-			if (this.random.nextFloat() < 0.095F) {
+			if (randomSource.nextFloat() < 0.095F) {
 				i++;
 			}
 
-			if (this.random.nextFloat() < 0.095F) {
+			if (randomSource.nextFloat() < 0.095F) {
 				i++;
 			}
 
-			if (this.random.nextFloat() < 0.095F) {
+			if (randomSource.nextFloat() < 0.095F) {
 				i++;
 			}
 
@@ -892,7 +892,7 @@ public abstract class Mob extends LivingEntity {
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 				if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
 					ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-					if (!bl && this.random.nextFloat() < f) {
+					if (!bl && randomSource.nextFloat() < f) {
 						break;
 					}
 
@@ -964,29 +964,29 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
-	protected void populateDefaultEquipmentEnchantments(DifficultyInstance difficultyInstance) {
+	protected void populateDefaultEquipmentEnchantments(RandomSource randomSource, DifficultyInstance difficultyInstance) {
 		float f = difficultyInstance.getSpecialMultiplier();
-		this.enchantSpawnedWeapon(f);
+		this.enchantSpawnedWeapon(randomSource, f);
 
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 			if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
-				this.enchantSpawnedArmor(f, equipmentSlot);
+				this.enchantSpawnedArmor(randomSource, f, equipmentSlot);
 			}
 		}
 	}
 
-	protected void enchantSpawnedWeapon(float f) {
-		if (!this.getMainHandItem().isEmpty() && this.random.nextFloat() < 0.25F * f) {
+	protected void enchantSpawnedWeapon(RandomSource randomSource, float f) {
+		if (!this.getMainHandItem().isEmpty() && randomSource.nextFloat() < 0.25F * f) {
 			this.setItemSlot(
-				EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(this.random, this.getMainHandItem(), (int)(5.0F + f * (float)this.random.nextInt(18)), false)
+				EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(randomSource, this.getMainHandItem(), (int)(5.0F + f * (float)randomSource.nextInt(18)), false)
 			);
 		}
 	}
 
-	protected void enchantSpawnedArmor(float f, EquipmentSlot equipmentSlot) {
+	protected void enchantSpawnedArmor(RandomSource randomSource, float f, EquipmentSlot equipmentSlot) {
 		ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-		if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5F * f) {
-			this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(this.random, itemStack, (int)(5.0F + f * (float)this.random.nextInt(18)), false));
+		if (!itemStack.isEmpty() && randomSource.nextFloat() < 0.5F * f) {
+			this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(randomSource, itemStack, (int)(5.0F + f * (float)randomSource.nextInt(18)), false));
 		}
 	}
 
@@ -998,9 +998,10 @@ public abstract class Mob extends LivingEntity {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
+		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.getAttribute(Attributes.FOLLOW_RANGE)
-			.addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
-		if (this.random.nextFloat() < 0.05F) {
+			.addPermanentModifier(new AttributeModifier("Random spawn bonus", randomSource.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+		if (randomSource.nextFloat() < 0.05F) {
 			this.setLeftHanded(true);
 		} else {
 			this.setLeftHanded(false);

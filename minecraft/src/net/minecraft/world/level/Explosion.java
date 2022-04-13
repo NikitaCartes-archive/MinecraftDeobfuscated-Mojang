@@ -1,6 +1,5 @@
 package net.minecraft.world.level;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
@@ -55,7 +54,7 @@ public class Explosion {
 	private final float radius;
 	private final DamageSource damageSource;
 	private final ExplosionDamageCalculator damageCalculator;
-	private final List<BlockPos> toBlow = Lists.<BlockPos>newArrayList();
+	private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
 	private final Map<Player, Vec3> hitPlayers = Maps.<Player, Vec3>newHashMap();
 
 	public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g) {

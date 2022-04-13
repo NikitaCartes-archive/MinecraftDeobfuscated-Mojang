@@ -9,6 +9,7 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -182,12 +183,12 @@ public class SculkSpreader {
 	}
 
 	public static class ChargeCursor {
-		private static final List<Vec3i> NON_CORNER_NEIGHBOURS = Util.make(
-			new ArrayList(18),
-			arrayList -> BlockPos.betweenClosedStream(new BlockPos(-1, -1, -1), new BlockPos(1, 1, 1))
+		private static final ObjectArrayList<Vec3i> NON_CORNER_NEIGHBOURS = Util.make(
+			new ObjectArrayList<>(18),
+			objectArrayList -> BlockPos.betweenClosedStream(new BlockPos(-1, -1, -1), new BlockPos(1, 1, 1))
 					.filter(blockPos -> (blockPos.getX() == 0 || blockPos.getY() == 0 || blockPos.getZ() == 0) && !blockPos.equals(BlockPos.ZERO))
 					.map(BlockPos::immutable)
-					.forEach(arrayList::add)
+					.forEach(objectArrayList::add)
 		);
 		public static final int MAX_CURSOR_DECAY_DELAY = 1;
 		private BlockPos pos;

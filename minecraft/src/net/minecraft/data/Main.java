@@ -9,6 +9,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
 import net.minecraft.data.advancements.AdvancementProvider;
 import net.minecraft.data.info.BiomeParametersDumpReport;
 import net.minecraft.data.info.BlockListReport;
@@ -57,7 +58,15 @@ public class Main {
 			boolean bl5 = bl || optionSet.has(optionSpec5);
 			boolean bl6 = bl || optionSet.has(optionSpec6);
 			DataGenerator dataGenerator = createStandardGenerator(
-				path, (Collection<Path>)optionSet.valuesOf(optionSpec9).stream().map(string -> Paths.get(string)).collect(Collectors.toList()), bl2, bl3, bl4, bl5, bl6
+				path,
+				(Collection<Path>)optionSet.valuesOf(optionSpec9).stream().map(string -> Paths.get(string)).collect(Collectors.toList()),
+				bl2,
+				bl3,
+				bl4,
+				bl5,
+				bl6,
+				SharedConstants.getCurrentVersion(),
+				true
 			);
 			dataGenerator.run();
 		} else {
@@ -65,45 +74,32 @@ public class Main {
 		}
 	}
 
-	public static DataGenerator createStandardGenerator(Path path, Collection<Path> collection, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
-		DataGenerator dataGenerator = new DataGenerator(path, collection);
-		if (bl || bl2) {
-			dataGenerator.addProvider(new SnbtToNbt(dataGenerator).addFilter(new StructureUpdater()));
-		}
-
-		if (bl) {
-			dataGenerator.addProvider(new ModelProvider(dataGenerator));
-		}
-
-		if (bl2) {
-			dataGenerator.addProvider(new FluidTagsProvider(dataGenerator));
-			BlockTagsProvider blockTagsProvider = new BlockTagsProvider(dataGenerator);
-			dataGenerator.addProvider(blockTagsProvider);
-			dataGenerator.addProvider(new ItemTagsProvider(dataGenerator, blockTagsProvider));
-			dataGenerator.addProvider(new EntityTypeTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new RecipeProvider(dataGenerator));
-			dataGenerator.addProvider(new AdvancementProvider(dataGenerator));
-			dataGenerator.addProvider(new LootTableProvider(dataGenerator));
-			dataGenerator.addProvider(new GameEventTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new BiomeTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new StructureTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new WorldPresetTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new FlatLevelGeneratorPresetTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new CatVariantTagsProvider(dataGenerator));
-		}
-
-		if (bl3) {
-			dataGenerator.addProvider(new NbtToSnbt(dataGenerator));
-		}
-
-		if (bl4) {
-			dataGenerator.addProvider(new BlockListReport(dataGenerator));
-			dataGenerator.addProvider(new RegistryDumpReport(dataGenerator));
-			dataGenerator.addProvider(new CommandsReport(dataGenerator));
-			dataGenerator.addProvider(new WorldgenRegistryDumpReport(dataGenerator));
-			dataGenerator.addProvider(new BiomeParametersDumpReport(dataGenerator));
-		}
-
+	public static DataGenerator createStandardGenerator(
+		Path path, Collection<Path> collection, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, WorldVersion worldVersion, boolean bl6
+	) {
+		DataGenerator dataGenerator = new DataGenerator(path, collection, worldVersion, bl6);
+		dataGenerator.addProvider(bl || bl2, new SnbtToNbt(dataGenerator).addFilter(new StructureUpdater()));
+		dataGenerator.addProvider(bl, new ModelProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new FluidTagsProvider(dataGenerator));
+		BlockTagsProvider blockTagsProvider = new BlockTagsProvider(dataGenerator);
+		dataGenerator.addProvider(bl2, blockTagsProvider);
+		dataGenerator.addProvider(bl2, new ItemTagsProvider(dataGenerator, blockTagsProvider));
+		dataGenerator.addProvider(bl2, new EntityTypeTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new RecipeProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new AdvancementProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new LootTableProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new GameEventTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new BiomeTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new StructureTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new WorldPresetTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new FlatLevelGeneratorPresetTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl2, new CatVariantTagsProvider(dataGenerator));
+		dataGenerator.addProvider(bl3, new NbtToSnbt(dataGenerator));
+		dataGenerator.addProvider(bl4, new BlockListReport(dataGenerator));
+		dataGenerator.addProvider(bl4, new RegistryDumpReport(dataGenerator));
+		dataGenerator.addProvider(bl4, new CommandsReport(dataGenerator));
+		dataGenerator.addProvider(bl4, new WorldgenRegistryDumpReport(dataGenerator));
+		dataGenerator.addProvider(bl4, new BiomeParametersDumpReport(dataGenerator));
 		return dataGenerator;
 	}
 }

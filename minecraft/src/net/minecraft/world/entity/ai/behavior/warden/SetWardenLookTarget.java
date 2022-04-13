@@ -1,4 +1,4 @@
-package net.minecraft.world.entity.monster.warden;
+package net.minecraft.world.entity.ai.behavior.warden;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.monster.warden.Warden;
 
 public class SetWardenLookTarget extends Behavior<Warden> {
 	public SetWardenLookTarget() {

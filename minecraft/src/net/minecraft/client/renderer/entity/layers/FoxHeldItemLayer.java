@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.FoxModel;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -15,8 +15,11 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
-	public FoxHeldItemLayer(RenderLayerParent<Fox, FoxModel<Fox>> renderLayerParent) {
+	private final ItemInHandRenderer itemInHandRenderer;
+
+	public FoxHeldItemLayer(RenderLayerParent<Fox, FoxModel<Fox>> renderLayerParent, ItemInHandRenderer itemInHandRenderer) {
 		super(renderLayerParent);
+		this.itemInHandRenderer = itemInHandRenderer;
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Fox fox, float f, float g, float h, float j, float k, float l) {
@@ -54,7 +57,7 @@ public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
 		}
 
 		ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
-		Minecraft.getInstance().getItemInHandRenderer().renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
+		this.itemInHandRenderer.renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 }

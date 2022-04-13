@@ -131,7 +131,7 @@ public class EntityPredicate {
 				return false;
 			} else {
 				if (this.steppingOnLocation != LocationPredicate.ANY) {
-					Vec3 vec32 = Vec3.atCenterOf(entity.getOnPos());
+					Vec3 vec32 = Vec3.atCenterOf(entity.getOnPosLegacy());
 					if (!this.steppingOnLocation.matches(serverLevel, vec32.x(), vec32.y(), vec32.z())) {
 						return false;
 					}

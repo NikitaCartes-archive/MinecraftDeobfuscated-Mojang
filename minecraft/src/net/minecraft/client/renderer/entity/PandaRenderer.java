@@ -28,7 +28,7 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 
 	public PandaRenderer(EntityRendererProvider.Context context) {
 		super(context, new PandaModel<>(context.bakeLayer(ModelLayers.PANDA)), 0.9F);
-		this.addLayer(new PandaHoldsItemLayer(this));
+		this.addLayer(new PandaHoldsItemLayer(this, context.getItemInHandRenderer()));
 	}
 
 	public ResourceLocation getTextureLocation(Panda panda) {

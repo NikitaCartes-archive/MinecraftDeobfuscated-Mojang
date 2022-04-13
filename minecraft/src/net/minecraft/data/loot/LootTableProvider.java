@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -45,7 +45,7 @@ public class LootTableProvider implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) {
+	public void run(CachedOutput cachedOutput) {
 		Path path = this.generator.getOutputFolder();
 		Map<ResourceLocation, LootTable> map = Maps.<ResourceLocation, LootTable>newHashMap();
 		this.subProviders.forEach(pair -> ((Consumer)((Supplier)pair.getFirst()).get()).accept((BiConsumer)(resourceLocationx, builder) -> {
@@ -69,7 +69,7 @@ public class LootTableProvider implements DataProvider {
 				Path path2 = createPath(path, resourceLocationx);
 
 				try {
-					DataProvider.save(GSON, hashCache, LootTables.serialize(lootTable), path2);
+					DataProvider.save(GSON, cachedOutput, LootTables.serialize(lootTable), path2);
 				} catch (IOException var6) {
 					LOGGER.error("Couldn't save loot table {}", path2, var6);
 				}

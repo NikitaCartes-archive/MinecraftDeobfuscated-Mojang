@@ -59,6 +59,6 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
 		this.tag(GameEventTags.WARDEN_CAN_LISTEN).add(MOST_VIBRATIONS).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM);
-		this.tag(GameEventTags.IGNORE_VIBRATIONS_ON_OCCLUDING_BLOCK).add(GameEvent.HIT_GROUND, GameEvent.STEP);
+		this.tag(GameEventTags.DAMPENABLE_VIBRATIONS).add(GameEvent.HIT_GROUND, GameEvent.STEP);
 	}
 }

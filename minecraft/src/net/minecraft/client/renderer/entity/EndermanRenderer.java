@@ -22,7 +22,7 @@ public class EndermanRenderer extends MobRenderer<EnderMan, EndermanModel<EnderM
 	public EndermanRenderer(EntityRendererProvider.Context context) {
 		super(context, new EndermanModel<>(context.bakeLayer(ModelLayers.ENDERMAN)), 0.5F);
 		this.addLayer(new EnderEyesLayer<>(this));
-		this.addLayer(new CarriedBlockLayer(this));
+		this.addLayer(new CarriedBlockLayer(this, context.getBlockRenderDispatcher()));
 	}
 
 	public void render(EnderMan enderMan, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

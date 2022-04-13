@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import java.util.List;
-import java.util.stream.Collectors;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.stream.IntStream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -27,16 +26,12 @@ public class BonusChestFeature extends Feature<NoneFeatureConfiguration> {
 		RandomSource randomSource = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		ChunkPos chunkPos = new ChunkPos(featurePlaceContext.origin());
-		List<Integer> list = Util.shuffledCopy(
-			(List<Integer>)IntStream.rangeClosed(chunkPos.getMinBlockX(), chunkPos.getMaxBlockX()).boxed().collect(Collectors.toList()), randomSource
-		);
-		List<Integer> list2 = Util.shuffledCopy(
-			(List<Integer>)IntStream.rangeClosed(chunkPos.getMinBlockZ(), chunkPos.getMaxBlockZ()).boxed().collect(Collectors.toList()), randomSource
-		);
+		IntArrayList intArrayList = Util.toShuffledList(IntStream.rangeClosed(chunkPos.getMinBlockX(), chunkPos.getMaxBlockX()), randomSource);
+		IntArrayList intArrayList2 = Util.toShuffledList(IntStream.rangeClosed(chunkPos.getMinBlockZ(), chunkPos.getMaxBlockZ()), randomSource);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (Integer integer : list) {
-			for (Integer integer2 : list2) {
+		for (Integer integer : intArrayList) {
+			for (Integer integer2 : intArrayList2) {
 				mutableBlockPos.set(integer, 0, integer2);
 				BlockPos blockPos = worldGenLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos);
 				if (worldGenLevel.isEmptyBlock(blockPos) || worldGenLevel.getBlockState(blockPos).getCollisionShape(worldGenLevel, blockPos).isEmpty()) {

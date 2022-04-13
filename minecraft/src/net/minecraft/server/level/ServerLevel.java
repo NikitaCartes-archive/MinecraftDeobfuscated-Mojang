@@ -486,7 +486,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		Optional<BlockPos> optional = this.getPoiManager()
 			.findClosest(
 				poiType -> poiType == PoiType.LIGHTNING_ROD,
-				blockPosx -> blockPosx.getY() == this.getLevel().getHeight(Heightmap.Types.WORLD_SURFACE, blockPosx.getX(), blockPosx.getZ()) - 1,
+				blockPosx -> blockPosx.getY() == this.getHeight(Heightmap.Types.WORLD_SURFACE, blockPosx.getX(), blockPosx.getZ()) - 1,
 				blockPos,
 				128,
 				PoiManager.Occupancy.ANY
@@ -887,7 +887,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
+	public void gameEvent(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
 		int i = gameEvent.getNotificationRadius();
 		BlockPos blockPos = new BlockPos(vec3);
 		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
@@ -902,7 +902,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
 				if (chunkAccess != null) {
 					for (int r = k; r <= n; r++) {
-						chunkAccess.getEventDispatcher(r).post(gameEvent, entity, vec3);
+						chunkAccess.getEventDispatcher(r).post(gameEvent, vec3, context);
 					}
 				}
 			}

@@ -81,7 +81,7 @@ public abstract class PatrollingMonster extends Monster {
 		if (mobSpawnType != MobSpawnType.PATROL
 			&& mobSpawnType != MobSpawnType.EVENT
 			&& mobSpawnType != MobSpawnType.STRUCTURE
-			&& this.random.nextFloat() < 0.06F
+			&& serverLevelAccessor.getRandom().nextFloat() < 0.06F
 			&& this.canBeLeader()) {
 			this.patrolLeader = true;
 		}

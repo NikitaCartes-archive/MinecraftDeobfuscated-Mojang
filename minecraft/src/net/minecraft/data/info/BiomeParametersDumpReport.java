@@ -12,9 +12,9 @@ import java.nio.file.Path;
 import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -31,23 +31,23 @@ public class BiomeParametersDumpReport implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache hashCache) {
+	public void run(CachedOutput cachedOutput) {
 		Path path = this.generator.getOutputFolder();
 		RegistryAccess.Frozen frozen = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
 		DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, frozen);
 		Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
 		MultiNoiseBiomeSource.Preset.getPresets().forEach(pair -> {
 			MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(registry, false);
-			dumpValue(createPath(path, (ResourceLocation)pair.getFirst()), hashCache, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
+			dumpValue(createPath(path, (ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
 		});
 	}
 
-	private static <E> void dumpValue(Path path, HashCache hashCache, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
+	private static <E> void dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
 		try {
 			Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object)
 				.resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", path, string));
 			if (optional.isPresent()) {
-				DataProvider.save(GSON, hashCache, (JsonElement)optional.get(), path);
+				DataProvider.save(GSON, cachedOutput, (JsonElement)optional.get(), path);
 			}
 		} catch (IOException var6) {
 			LOGGER.error("Couldn't save element {}", path, var6);

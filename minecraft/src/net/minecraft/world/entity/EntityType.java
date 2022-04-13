@@ -471,7 +471,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		"wandering_trader", EntityType.Builder.of(WanderingTrader::new, MobCategory.CREATURE).sized(0.6F, 1.95F).clientTrackingRange(10)
 	);
 	public static final EntityType<Warden> WARDEN = register(
-		"warden", EntityType.Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9F, 2.9F).clientTrackingRange(10).fireImmune()
+		"warden", EntityType.Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9F, 2.9F).clientTrackingRange(16).fireImmune()
 	);
 	public static final EntityType<Witch> WITCH = register(
 		"witch", EntityType.Builder.of(Witch::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8)

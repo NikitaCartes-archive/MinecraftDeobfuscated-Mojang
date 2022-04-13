@@ -16,8 +16,8 @@ public class WanderingTraderRenderer extends MobRenderer<WanderingTrader, Villag
 
 	public WanderingTraderRenderer(EntityRendererProvider.Context context) {
 		super(context, new VillagerModel<>(context.bakeLayer(ModelLayers.WANDERING_TRADER)), 0.5F);
-		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet()));
-		this.addLayer(new CrossedArmsItemLayer<>(this));
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
+		this.addLayer(new CrossedArmsItemLayer<>(this, context.getItemInHandRenderer()));
 	}
 
 	public ResourceLocation getTextureLocation(WanderingTrader wanderingTrader) {

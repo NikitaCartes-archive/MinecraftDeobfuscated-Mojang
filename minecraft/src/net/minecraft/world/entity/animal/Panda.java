@@ -538,8 +538,9 @@ public class Panda extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setMainGene(Panda.Gene.getRandom(this.random));
-		this.setHiddenGene(Panda.Gene.getRandom(this.random));
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		this.setMainGene(Panda.Gene.getRandom(randomSource));
+		this.setHiddenGene(Panda.Gene.getRandom(randomSource));
 		this.setAttributes();
 		if (spawnGroupData == null) {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2F);

@@ -21,13 +21,13 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
 import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
-import net.minecraft.advancements.critereon.ItemPickedUpByEntityTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.MobEffectsPredicate;
+import net.minecraft.advancements.critereon.PickedUpItemTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
@@ -328,6 +328,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 						.and(MobEffects.BLINDNESS)
 						.and(MobEffects.BAD_OMEN)
 						.and(MobEffects.HERO_OF_THE_VILLAGE)
+						.and(MobEffects.DARKNESS)
 				)
 			)
 			.save(consumer, "nether/all_effects");
@@ -526,9 +527,9 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion(
 				"distract_piglin",
-				ItemPickedUpByEntityTrigger.TriggerInstance.itemPickedUpByEntity(
+				PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(
 					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
-					ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED),
+					ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED).build(),
 					EntityPredicate.Composite.wrap(
 						EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()
 					)

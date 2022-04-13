@@ -20,11 +20,13 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -61,6 +63,8 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	private Quaternion cameraOrientation;
 	public Entity crosshairPickEntity;
 	private final ItemRenderer itemRenderer;
+	private final BlockRenderDispatcher blockRenderDispatcher;
+	private final ItemInHandRenderer itemInHandRenderer;
 	private final Font font;
 	public final Options options;
 	private final EntityModelSet entityModels;
@@ -71,9 +75,19 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		return this.getRenderer(entity).getPackedLightCoords(entity, f);
 	}
 
-	public EntityRenderDispatcher(TextureManager textureManager, ItemRenderer itemRenderer, Font font, Options options, EntityModelSet entityModelSet) {
+	public EntityRenderDispatcher(
+		Minecraft minecraft,
+		TextureManager textureManager,
+		ItemRenderer itemRenderer,
+		BlockRenderDispatcher blockRenderDispatcher,
+		Font font,
+		Options options,
+		EntityModelSet entityModelSet
+	) {
 		this.textureManager = textureManager;
 		this.itemRenderer = itemRenderer;
+		this.itemInHandRenderer = new ItemInHandRenderer(minecraft, this, itemRenderer);
+		this.blockRenderDispatcher = blockRenderDispatcher;
 		this.font = font;
 		this.options = options;
 		this.entityModels = entityModelSet;
@@ -363,9 +377,15 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		return this.cameraOrientation;
 	}
 
+	public ItemInHandRenderer getItemInHandRenderer() {
+		return this.itemInHandRenderer;
+	}
+
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
-		EntityRendererProvider.Context context = new EntityRendererProvider.Context(this, this.itemRenderer, resourceManager, this.entityModels, this.font);
+		EntityRendererProvider.Context context = new EntityRendererProvider.Context(
+			this, this.itemRenderer, this.blockRenderDispatcher, this.itemInHandRenderer, resourceManager, this.entityModels, this.font
+		);
 		this.renderers = EntityRenderers.createEntityRenderers(context);
 		this.playerRenderers = EntityRenderers.createPlayerRenderers(context);
 	}

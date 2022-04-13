@@ -2,8 +2,6 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.stream.Collectors;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -26,7 +24,7 @@ public class MultifaceGrowthFeature extends Feature<MultifaceGrowthConfiguration
 		if (!isAirOrWater(worldGenLevel.getBlockState(blockPos))) {
 			return false;
 		} else {
-			List<Direction> list = getShuffledDirections(multifaceGrowthConfiguration, randomSource);
+			List<Direction> list = multifaceGrowthConfiguration.getShuffledDirections(randomSource);
 			if (placeGrowthIfPossible(worldGenLevel, blockPos, worldGenLevel.getBlockState(blockPos), multifaceGrowthConfiguration, randomSource, list)) {
 				return true;
 			} else {
@@ -34,7 +32,7 @@ public class MultifaceGrowthFeature extends Feature<MultifaceGrowthConfiguration
 
 				for (Direction direction : list) {
 					mutableBlockPos.set(blockPos);
-					List<Direction> list2 = getShuffledDirectionsExcept(multifaceGrowthConfiguration, randomSource, direction.getOpposite());
+					List<Direction> list2 = multifaceGrowthConfiguration.getShuffledDirectionsExcept(randomSource, direction.getOpposite());
 
 					for (int i = 0; i < multifaceGrowthConfiguration.searchRange; i++) {
 						mutableBlockPos.setWithOffset(blockPos, direction);
@@ -85,19 +83,6 @@ public class MultifaceGrowthFeature extends Feature<MultifaceGrowthConfiguration
 		}
 
 		return false;
-	}
-
-	public static List<Direction> getShuffledDirections(MultifaceGrowthConfiguration multifaceGrowthConfiguration, RandomSource randomSource) {
-		return Util.shuffledCopy(multifaceGrowthConfiguration.validDirections, randomSource);
-	}
-
-	public static List<Direction> getShuffledDirectionsExcept(
-		MultifaceGrowthConfiguration multifaceGrowthConfiguration, RandomSource randomSource, Direction direction
-	) {
-		return Util.shuffledCopy(
-			(List<Direction>)multifaceGrowthConfiguration.validDirections.stream().filter(direction2 -> direction2 != direction).collect(Collectors.toList()),
-			randomSource
-		);
 	}
 
 	private static boolean isAirOrWater(BlockState blockState) {

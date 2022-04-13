@@ -1,7 +1,5 @@
 package net.minecraft.world.level.gameevent;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public interface GameEventDispatcher {
@@ -20,7 +18,7 @@ public interface GameEventDispatcher {
 		}
 
 		@Override
-		public void post(GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+		public void post(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
 		}
 	};
 
@@ -30,5 +28,5 @@ public interface GameEventDispatcher {
 
 	void unregister(GameEventListener gameEventListener);
 
-	void post(GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3);
+	void post(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context);
 }

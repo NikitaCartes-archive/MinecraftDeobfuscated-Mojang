@@ -6,6 +6,7 @@ import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -230,20 +231,34 @@ import net.minecraft.util.datafix.schemas.V704;
 import net.minecraft.util.datafix.schemas.V705;
 import net.minecraft.util.datafix.schemas.V808;
 import net.minecraft.util.datafix.schemas.V99;
+import org.slf4j.Logger;
 
 public class DataFixers {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final BiFunction<Integer, Schema, Schema> SAME = Schema::new;
 	private static final BiFunction<Integer, Schema, Schema> SAME_NAMESPACED = NamespacedSchema::new;
-	private static final DataFixer DATA_FIXER = createFixerUpper();
+	private static final DataFixer dataFixer = createFixerUpper();
+	public static final int BLENDING_VERSION = 3088;
 
-	private static DataFixer createFixerUpper() {
-		DataFixerBuilder dataFixerBuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getWorldVersion());
-		addFixers(dataFixerBuilder);
-		return dataFixerBuilder.build(Util.bootstrapExecutor());
+	private DataFixers() {
 	}
 
 	public static DataFixer getDataFixer() {
-		return DATA_FIXER;
+		return dataFixer;
+	}
+
+	private static synchronized DataFixer createFixerUpper() {
+		DataFixerBuilder dataFixerBuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getWorldVersion());
+		addFixers(dataFixerBuilder);
+
+		boolean bl = switch (SharedConstants.DATAFIXER_OPTIMIZATION_OPTION) {
+			case UNINITIALIZED_OPTIMIZED -> true;
+			case UNINITIALIZED_UNOPTIMIZED -> false;
+			default -> throw new IllegalStateException("Already loaded");
+		};
+		SharedConstants.DATAFIXER_OPTIMIZATION_OPTION = bl ? DataFixerOptimizationOption.INITIALIZED_OPTIMIZED : DataFixerOptimizationOption.INITIALIZED_UNOPTIMIZED;
+		LOGGER.info("Building {} datafixer", bl ? "optimized" : "unoptimized");
+		return bl ? dataFixerBuilder.buildOptimized(Util.bootstrapExecutor()) : dataFixerBuilder.buildUnoptimized();
 	}
 
 	private static void addFixers(DataFixerBuilder dataFixerBuilder) {
@@ -859,18 +874,16 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema158, "Added Frog", References.ENTITY));
 		dataFixerBuilder.addFixer(new AddNewChoices(schema158, "Added Tadpole", References.ENTITY));
 		dataFixerBuilder.addFixer(new AddNewChoices(schema158, "Added Sculk Shrieker", References.BLOCK_ENTITY));
-		Schema schema159 = dataFixerBuilder.addSchema(3079, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new BlendingDataFix(schema159, "Blending Data Fix v3079"));
-		Schema schema160 = dataFixerBuilder.addSchema(3081, V3081::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema160, "Added Warden", References.ENTITY));
-		Schema schema161 = dataFixerBuilder.addSchema(3082, V3082::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema161, "Added Chest Boat", References.ENTITY));
-		Schema schema162 = dataFixerBuilder.addSchema(3083, V3083::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema162, "Added Allay", References.ENTITY));
-		Schema schema163 = dataFixerBuilder.addSchema(3084, SAME_NAMESPACED);
+		Schema schema159 = dataFixerBuilder.addSchema(3081, V3081::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema159, "Added Warden", References.ENTITY));
+		Schema schema160 = dataFixerBuilder.addSchema(3082, V3082::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema160, "Added Chest Boat", References.ENTITY));
+		Schema schema161 = dataFixerBuilder.addSchema(3083, V3083::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema161, "Added Allay", References.ENTITY));
+		Schema schema162 = dataFixerBuilder.addSchema(3084, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
 			new SimpleRenameFix(
-				schema163,
+				schema162,
 				References.GAME_EVENT_NAME,
 				ImmutableMap.<String, String>builder()
 					.put("minecraft:block_press", "minecraft:block_activate")
@@ -891,12 +904,10 @@ public class DataFixers {
 					.build()
 			)
 		);
-		Schema schema164 = dataFixerBuilder.addSchema(3085, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new BlendingDataFix(schema164, "Blending Data Fix v3085"));
-		Schema schema165 = dataFixerBuilder.addSchema(3086, SAME_NAMESPACED);
+		Schema schema163 = dataFixerBuilder.addSchema(3086, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
 			new EntityVariantFix(
-				schema165, "Change cat variant type", References.ENTITY, "minecraft:cat", "CatType", Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
+				schema163, "Change cat variant type", References.ENTITY, "minecraft:cat", "CatType", Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
 					int2ObjectOpenHashMap.defaultReturnValue("minecraft:tabby");
 					int2ObjectOpenHashMap.put(0, "minecraft:tabby");
 					int2ObjectOpenHashMap.put(1, "minecraft:black");
@@ -927,21 +938,21 @@ public class DataFixers {
 			.build();
 		dataFixerBuilder.addFixer(
 			new CriteriaRenameFix(
-				schema165, "Migrate cat variant advancement", "minecraft:husbandry/complete_catalogue", string -> immutableMap4.getOrDefault(string, string)
+				schema163, "Migrate cat variant advancement", "minecraft:husbandry/complete_catalogue", string -> immutableMap4.getOrDefault(string, string)
 			)
 		);
-		Schema schema166 = dataFixerBuilder.addSchema(3087, SAME_NAMESPACED);
+		Schema schema164 = dataFixerBuilder.addSchema(3087, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
 			new EntityVariantFix(
-				schema166, "Change frog variant type", References.ENTITY, "minecraft:frog", "Variant", Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
+				schema164, "Change frog variant type", References.ENTITY, "minecraft:frog", "Variant", Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
 					int2ObjectOpenHashMap.put(0, "minecraft:temperate");
 					int2ObjectOpenHashMap.put(1, "minecraft:warm");
 					int2ObjectOpenHashMap.put(2, "minecraft:cold");
 				})::get
 			)
 		);
-		Schema schema167 = dataFixerBuilder.addSchema(3088, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new BlendingDataFix(schema167, "Blending Data Fix v3088"));
+		Schema schema165 = dataFixerBuilder.addSchema(3088, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new BlendingDataFix(schema165));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

@@ -30,11 +30,11 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.SerializableUUID;
+import net.minecraft.core.UUIDUtil;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
-	public static final Codec<UUID> UUID = SerializableUUID.CODEC;
+	public static final Codec<UUID> UUID = UUIDUtil.CODEC;
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
 	public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
 	public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);

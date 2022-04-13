@@ -22,29 +22,31 @@ public abstract class FlyingMob extends Mob {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isInWater()) {
-			this.moveRelative(0.02F, vec3);
-			this.move(MoverType.SELF, this.getDeltaMovement());
-			this.setDeltaMovement(this.getDeltaMovement().scale(0.8F));
-		} else if (this.isInLava()) {
-			this.moveRelative(0.02F, vec3);
-			this.move(MoverType.SELF, this.getDeltaMovement());
-			this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
-		} else {
-			float f = 0.91F;
-			if (this.onGround) {
-				f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
-			}
+		if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+			if (this.isInWater()) {
+				this.moveRelative(0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.8F));
+			} else if (this.isInLava()) {
+				this.moveRelative(0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+			} else {
+				float f = 0.91F;
+				if (this.onGround) {
+					f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
+				}
 
-			float g = 0.16277137F / (f * f * f);
-			f = 0.91F;
-			if (this.onGround) {
-				f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
-			}
+				float g = 0.16277137F / (f * f * f);
+				f = 0.91F;
+				if (this.onGround) {
+					f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
+				}
 
-			this.moveRelative(this.onGround ? 0.1F * g : 0.02F, vec3);
-			this.move(MoverType.SELF, this.getDeltaMovement());
-			this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
+				this.moveRelative(this.onGround ? 0.1F * g : 0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
+			}
 		}
 
 		this.calculateEntityAnimation(this, false);

@@ -1,7 +1,9 @@
 package net.minecraft.data.worldgen;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.TrapezoidFloat;
 import net.minecraft.util.valueproviders.UniformFloat;
@@ -26,6 +28,7 @@ public class Carvers {
 					UniformFloat.of(0.1F, 0.9F),
 					VerticalAnchor.aboveBottom(8),
 					CarverDebugSettings.of(false, Blocks.CRIMSON_BUTTON.defaultBlockState()),
+					Registry.BLOCK.getOrCreateTag(BlockTags.OVERWORLD_CARVER_REPLACEABLES),
 					UniformFloat.of(0.7F, 1.4F),
 					UniformFloat.of(0.8F, 1.3F),
 					UniformFloat.of(-1.0F, -0.4F)
@@ -42,6 +45,7 @@ public class Carvers {
 					UniformFloat.of(0.1F, 0.9F),
 					VerticalAnchor.aboveBottom(8),
 					CarverDebugSettings.of(false, Blocks.OAK_BUTTON.defaultBlockState()),
+					Registry.BLOCK.getOrCreateTag(BlockTags.OVERWORLD_CARVER_REPLACEABLES),
 					UniformFloat.of(0.7F, 1.4F),
 					UniformFloat.of(0.8F, 1.3F),
 					UniformFloat.of(-1.0F, -0.4F)
@@ -58,6 +62,7 @@ public class Carvers {
 					ConstantFloat.of(3.0F),
 					VerticalAnchor.aboveBottom(8),
 					CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
+					Registry.BLOCK.getOrCreateTag(BlockTags.OVERWORLD_CARVER_REPLACEABLES),
 					UniformFloat.of(-0.125F, 0.125F),
 					new CanyonCarverConfiguration.CanyonShapeConfiguration(
 						UniformFloat.of(0.75F, 1.0F), TrapezoidFloat.of(0.0F, 6.0F, 2.0F), 3, UniformFloat.of(0.75F, 1.0F), 1.0F, 0.0F
@@ -74,7 +79,7 @@ public class Carvers {
 					UniformHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.belowTop(1)),
 					ConstantFloat.of(0.5F),
 					VerticalAnchor.aboveBottom(10),
-					false,
+					Registry.BLOCK.getOrCreateTag(BlockTags.NETHER_CARVER_REPLACEABLES),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(1.0F),
 					ConstantFloat.of(-0.7F)

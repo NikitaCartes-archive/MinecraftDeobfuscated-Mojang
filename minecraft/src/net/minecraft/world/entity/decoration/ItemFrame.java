@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.decoration;
 
 import com.mojang.logging.LogUtils;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -179,12 +180,12 @@ public class ItemFrame extends HangingEntity {
 
 	@Override
 	public int getWidth() {
-		return 12;
+		return this.hasFramedMap() ? 16 : 12;
 	}
 
 	@Override
 	public int getHeight() {
-		return 12;
+		return this.hasFramedMap() ? 16 : 12;
 	}
 
 	@Override
@@ -243,19 +244,34 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	private void removeFramedMap(ItemStack itemStack) {
-		if (itemStack.is(Items.FILLED_MAP)) {
-			MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, this.level);
+		this.getFramedMapId().ifPresent(i -> {
+			MapItemSavedData mapItemSavedData = MapItem.getSavedData(i, this.level);
 			if (mapItemSavedData != null) {
 				mapItemSavedData.removedFromFrame(this.pos, this.getId());
 				mapItemSavedData.setDirty(true);
 			}
-		}
-
+		});
 		itemStack.setEntityRepresentation(null);
 	}
 
 	public ItemStack getItem() {
 		return this.getEntityData().get(DATA_ITEM);
+	}
+
+	public OptionalInt getFramedMapId() {
+		ItemStack itemStack = this.getItem();
+		if (itemStack.is(Items.FILLED_MAP)) {
+			Integer integer = MapItem.getMapId(itemStack);
+			if (integer != null) {
+				return OptionalInt.of(integer);
+			}
+		}
+
+		return OptionalInt.empty();
+	}
+
+	public boolean hasFramedMap() {
+		return this.getFramedMapId().isPresent();
 	}
 
 	public void setItem(ItemStack itemStack) {
@@ -266,9 +282,9 @@ public class ItemFrame extends HangingEntity {
 		if (!itemStack.isEmpty()) {
 			itemStack = itemStack.copy();
 			itemStack.setCount(1);
-			itemStack.setEntityRepresentation(this);
 		}
 
+		this.onItemChanged(itemStack);
 		this.getEntityData().set(DATA_ITEM, itemStack);
 		if (!itemStack.isEmpty()) {
 			this.playSound(this.getAddItemSound(), 1.0F, 1.0F);
@@ -302,11 +318,16 @@ public class ItemFrame extends HangingEntity {
 	@Override
 	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
 		if (entityDataAccessor.equals(DATA_ITEM)) {
-			ItemStack itemStack = this.getItem();
-			if (!itemStack.isEmpty() && itemStack.getFrame() != this) {
-				itemStack.setEntityRepresentation(this);
-			}
+			this.onItemChanged(this.getItem());
 		}
+	}
+
+	private void onItemChanged(ItemStack itemStack) {
+		if (!itemStack.isEmpty() && itemStack.getFrame() != this) {
+			itemStack.setEntityRepresentation(this);
+		}
+
+		this.recalculateBoundingBox();
 	}
 
 	public int getRotation() {

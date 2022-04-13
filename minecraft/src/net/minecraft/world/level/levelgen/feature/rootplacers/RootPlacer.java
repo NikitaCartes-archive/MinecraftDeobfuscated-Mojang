@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.feature.rootplacers;
 
-import com.mojang.datafixers.Products.P1;
+import com.mojang.datafixers.Products.P3;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
@@ -10,7 +10,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -18,23 +20,32 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 
 public abstract class RootPlacer {
 	public static final Codec<RootPlacer> CODEC = Registry.ROOT_PLACER_TYPES.byNameCodec().dispatch(RootPlacer::type, RootPlacerType::codec);
+	protected final IntProvider trunkOffsetY;
 	protected final BlockStateProvider rootProvider;
+	protected final Optional<AboveRootPlacement> aboveRootPlacement;
 
-	protected static <P extends RootPlacer> P1<Mu<P>, BlockStateProvider> rootPlacerParts(Instance<P> instance) {
-		return instance.group(BlockStateProvider.CODEC.fieldOf("root_provider").forGetter(rootPlacer -> rootPlacer.rootProvider));
+	protected static <P extends RootPlacer> P3<Mu<P>, IntProvider, BlockStateProvider, Optional<AboveRootPlacement>> rootPlacerParts(Instance<P> instance) {
+		return instance.group(
+			IntProvider.CODEC.fieldOf("trunk_offset_y").forGetter(rootPlacer -> rootPlacer.trunkOffsetY),
+			BlockStateProvider.CODEC.fieldOf("root_provider").forGetter(rootPlacer -> rootPlacer.rootProvider),
+			AboveRootPlacement.CODEC.optionalFieldOf("above_root_placement").forGetter(rootPlacer -> rootPlacer.aboveRootPlacement)
+		);
 	}
 
-	public RootPlacer(BlockStateProvider blockStateProvider) {
+	public RootPlacer(IntProvider intProvider, BlockStateProvider blockStateProvider, Optional<AboveRootPlacement> optional) {
+		this.trunkOffsetY = intProvider;
 		this.rootProvider = blockStateProvider;
+		this.aboveRootPlacement = optional;
 	}
 
 	protected abstract RootPlacerType<?> type();
 
-	public abstract Optional<BlockPos> placeRoots(
+	public abstract boolean placeRoots(
 		LevelSimulatedReader levelSimulatedReader,
 		BiConsumer<BlockPos, BlockState> biConsumer,
 		RandomSource randomSource,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		TreeConfiguration treeConfiguration
 	);
 
@@ -46,6 +57,16 @@ public abstract class RootPlacer {
 		TreeConfiguration treeConfiguration
 	) {
 		biConsumer.accept(blockPos, this.getPotentiallyWaterloggedState(levelSimulatedReader, blockPos, this.rootProvider.getState(randomSource, blockPos)));
+		if (this.aboveRootPlacement.isPresent()) {
+			AboveRootPlacement aboveRootPlacement = (AboveRootPlacement)this.aboveRootPlacement.get();
+			BlockPos blockPos2 = blockPos.above();
+			if (randomSource.nextFloat() < aboveRootPlacement.aboveRootPlacementChance()
+				&& levelSimulatedReader.isStateAtPosition(blockPos2, BlockBehaviour.BlockStateBase::isAir)) {
+				biConsumer.accept(
+					blockPos2, this.getPotentiallyWaterloggedState(levelSimulatedReader, blockPos2, aboveRootPlacement.aboveRootProvider().getState(randomSource, blockPos2))
+				);
+			}
+		}
 	}
 
 	protected BlockState getPotentiallyWaterloggedState(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos, BlockState blockState) {
@@ -55,5 +76,9 @@ public abstract class RootPlacer {
 		} else {
 			return blockState;
 		}
+	}
+
+	public BlockPos getTrunkOrigin(BlockPos blockPos, RandomSource randomSource) {
+		return blockPos.above(this.trunkOffsetY.sample(randomSource));
 	}
 }

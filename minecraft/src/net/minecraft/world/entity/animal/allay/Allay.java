@@ -17,7 +17,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -48,7 +47,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class Allay extends PathfinderMob implements InventoryCarrier, GameEventListener {
 	private static final boolean USE_V2_MOVE_PARTICLES = false;
@@ -115,26 +113,28 @@ public class Allay extends PathfinderMob implements InventoryCarrier, GameEventL
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isInWater()) {
-			this.moveRelative(0.02F, vec3);
-			this.move(MoverType.SELF, this.getDeltaMovement());
-			this.setDeltaMovement(this.getDeltaMovement().scale(0.8F));
-		} else if (this.isInLava()) {
-			this.moveRelative(0.02F, vec3);
-			this.move(MoverType.SELF, this.getDeltaMovement());
-			this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
-		} else {
-			float f;
-			if (this.onGround) {
-				f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
+		if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+			if (this.isInWater()) {
+				this.moveRelative(0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.8F));
+			} else if (this.isInLava()) {
+				this.moveRelative(0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
 			} else {
-				f = 0.91F;
-			}
+				float f;
+				if (this.onGround) {
+					f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
+				} else {
+					f = 0.91F;
+				}
 
-			float g = Mth.cube(0.6F) * Mth.cube(0.91F) / Mth.cube(f);
-			this.moveRelative(this.onGround ? 0.1F * g : 0.02F, vec3);
-			this.move(MoverType.SELF, this.getDeltaMovement());
-			this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
+				float g = Mth.cube(0.6F) * Mth.cube(0.91F) / Mth.cube(f);
+				this.moveRelative(this.onGround ? 0.1F * g : 0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
+			}
 		}
 
 		this.calculateEntityAnimation(this, false);
@@ -204,6 +204,9 @@ public class Allay extends PathfinderMob implements InventoryCarrier, GameEventL
 	@Override
 	public void aiStep() {
 		super.aiStep();
+		if (!this.level.isClientSide && this.isAlive() && this.tickCount % 10 == 0) {
+			this.heal(1.0F);
+		}
 	}
 
 	@Override
@@ -312,7 +315,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, GameEventL
 	}
 
 	@Override
-	public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable Entity entity, Vec3 vec3) {
+	public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
 		if (gameEvent != GameEvent.NOTE_BLOCK_PLAY) {
 			return false;
 		} else {

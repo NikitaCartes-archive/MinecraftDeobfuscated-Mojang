@@ -16,6 +16,8 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -33,8 +35,18 @@ public class BlockEntityRenderDispatcher implements ResourceManagerReloadListene
 	public Camera camera;
 	public HitResult cameraHitResult;
 	private final Supplier<BlockRenderDispatcher> blockRenderDispatcher;
+	private final Supplier<ItemRenderer> itemRenderer;
+	private final Supplier<EntityRenderDispatcher> entityRenderer;
 
-	public BlockEntityRenderDispatcher(Font font, EntityModelSet entityModelSet, Supplier<BlockRenderDispatcher> supplier) {
+	public BlockEntityRenderDispatcher(
+		Font font,
+		EntityModelSet entityModelSet,
+		Supplier<BlockRenderDispatcher> supplier,
+		Supplier<ItemRenderer> supplier2,
+		Supplier<EntityRenderDispatcher> supplier3
+	) {
+		this.itemRenderer = supplier2;
+		this.entityRenderer = supplier3;
 		this.font = font;
 		this.entityModelSet = entityModelSet;
 		this.blockRenderDispatcher = supplier;
@@ -110,7 +122,12 @@ public class BlockEntityRenderDispatcher implements ResourceManagerReloadListene
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		BlockEntityRendererProvider.Context context = new BlockEntityRendererProvider.Context(
-			this, (BlockRenderDispatcher)this.blockRenderDispatcher.get(), this.entityModelSet, this.font
+			this,
+			(BlockRenderDispatcher)this.blockRenderDispatcher.get(),
+			(ItemRenderer)this.itemRenderer.get(),
+			(EntityRenderDispatcher)this.entityRenderer.get(),
+			this.entityModelSet,
+			this.font
 		);
 		this.renderers = BlockEntityRenderers.createEntityRenderers(context);
 	}

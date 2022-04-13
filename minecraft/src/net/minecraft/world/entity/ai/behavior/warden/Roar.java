@@ -1,4 +1,4 @@
-package net.minecraft.world.entity.monster.warden;
+package net.minecraft.world.entity.ai.behavior.warden;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
@@ -9,8 +9,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.monster.warden.WardenAi;
 
 public class Roar extends Behavior<Warden> {
 	private static final int TICKS_BEFORE_PLAYING_ROAR_SOUND = 25;
@@ -35,6 +38,7 @@ public class Roar extends Behavior<Warden> {
 		Brain<Warden> brain = warden.getBrain();
 		brain.setMemoryWithExpiry(MemoryModuleType.ROAR_SOUND_DELAY, Unit.INSTANCE, 25L);
 		brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+		BehaviorUtils.lookAtEntity(warden, (LivingEntity)warden.getBrain().getMemory(MemoryModuleType.ROAR_TARGET).get());
 		warden.setPose(Pose.ROARING);
 	}
 
@@ -64,5 +68,8 @@ public class Roar extends Behavior<Warden> {
 		if (warden.hasPose(Pose.ROARING)) {
 			warden.setPose(Pose.STANDING);
 		}
+
+		warden.getBrain().getMemory(MemoryModuleType.ROAR_TARGET).ifPresent(warden::setAttackTarget);
+		warden.getBrain().eraseMemory(MemoryModuleType.ROAR_TARGET);
 	}
 }

@@ -365,10 +365,10 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-		super.populateDefaultEquipmentSlots(difficultyInstance);
-		if (this.random.nextFloat() < (this.level.getDifficulty() == Difficulty.HARD ? 0.05F : 0.01F)) {
-			int i = this.random.nextInt(3);
+	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
+		super.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
+		if (randomSource.nextFloat() < (this.level.getDifficulty() == Difficulty.HARD ? 0.05F : 0.01F)) {
+			int i = randomSource.nextInt(3);
 			if (i == 0) {
 				this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
 			} else {
@@ -444,18 +444,19 @@ public class Zombie extends Monster {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
+		RandomSource randomSource = serverLevelAccessor.getRandom();
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		float f = difficultyInstance.getSpecialMultiplier();
-		this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * f);
+		this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * f);
 		if (spawnGroupData == null) {
-			spawnGroupData = new Zombie.ZombieGroupData(getSpawnAsBabyOdds(serverLevelAccessor.getRandom()), true);
+			spawnGroupData = new Zombie.ZombieGroupData(getSpawnAsBabyOdds(randomSource), true);
 		}
 
 		if (spawnGroupData instanceof Zombie.ZombieGroupData zombieGroupData) {
 			if (zombieGroupData.isBaby) {
 				this.setBaby(true);
 				if (zombieGroupData.canSpawnJockey) {
-					if ((double)serverLevelAccessor.getRandom().nextFloat() < 0.05) {
+					if ((double)randomSource.nextFloat() < 0.05) {
 						List<Chicken> list = serverLevelAccessor.getEntitiesOfClass(
 							Chicken.class, this.getBoundingBox().inflate(5.0, 3.0, 5.0), EntitySelector.ENTITY_NOT_BEING_RIDDEN
 						);
@@ -464,7 +465,7 @@ public class Zombie extends Monster {
 							chicken.setChickenJockey(true);
 							this.startRiding(chicken);
 						}
-					} else if ((double)serverLevelAccessor.getRandom().nextFloat() < 0.05) {
+					} else if ((double)randomSource.nextFloat() < 0.05) {
 						Chicken chicken2 = EntityType.CHICKEN.create(this.level);
 						chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
 						chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
@@ -475,17 +476,17 @@ public class Zombie extends Monster {
 				}
 			}
 
-			this.setCanBreakDoors(this.supportsBreakDoorGoal() && this.random.nextFloat() < f * 0.1F);
-			this.populateDefaultEquipmentSlots(difficultyInstance);
-			this.populateDefaultEquipmentEnchantments(difficultyInstance);
+			this.setCanBreakDoors(this.supportsBreakDoorGoal() && randomSource.nextFloat() < f * 0.1F);
+			this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
+			this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
 		}
 
 		if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
 			LocalDate localDate = LocalDate.now();
 			int i = localDate.get(ChronoField.DAY_OF_MONTH);
 			int j = localDate.get(ChronoField.MONTH_OF_YEAR);
-			if (j == 10 && i == 31 && this.random.nextFloat() < 0.25F) {
-				this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+			if (j == 10 && i == 31 && randomSource.nextFloat() < 0.25F) {
+				this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(randomSource.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
 				this.armorDropChances[EquipmentSlot.HEAD.getIndex()] = 0.0F;
 			}
 		}

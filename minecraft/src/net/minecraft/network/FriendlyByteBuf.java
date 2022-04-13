@@ -334,7 +334,12 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public Component readComponent() {
-		return Component.Serializer.fromJson(this.readUtf(262144));
+		Component component = Component.Serializer.fromJson(this.readUtf(262144));
+		if (component == null) {
+			throw new DecoderException("Received unexpected null component");
+		} else {
+			return component;
+		}
 	}
 
 	public FriendlyByteBuf writeComponent(Component component) {

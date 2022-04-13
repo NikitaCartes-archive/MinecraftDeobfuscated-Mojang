@@ -3,8 +3,8 @@ package net.minecraft.client.renderer.entity.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.DolphinModel;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -15,8 +15,11 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class DolphinCarryingItemLayer extends RenderLayer<Dolphin, DolphinModel<Dolphin>> {
-	public DolphinCarryingItemLayer(RenderLayerParent<Dolphin, DolphinModel<Dolphin>> renderLayerParent) {
+	private final ItemInHandRenderer itemInHandRenderer;
+
+	public DolphinCarryingItemLayer(RenderLayerParent<Dolphin, DolphinModel<Dolphin>> renderLayerParent, ItemInHandRenderer itemInHandRenderer) {
 		super(renderLayerParent);
+		this.itemInHandRenderer = itemInHandRenderer;
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Dolphin dolphin, float f, float g, float h, float j, float k, float l) {
@@ -32,7 +35,7 @@ public class DolphinCarryingItemLayer extends RenderLayer<Dolphin, DolphinModel<
 		}
 
 		ItemStack itemStack = bl ? dolphin.getMainHandItem() : dolphin.getOffhandItem();
-		Minecraft.getInstance().getItemInHandRenderer().renderItem(dolphin, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
+		this.itemInHandRenderer.renderItem(dolphin, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 }

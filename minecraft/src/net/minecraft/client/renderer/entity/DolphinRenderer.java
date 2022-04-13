@@ -14,7 +14,7 @@ public class DolphinRenderer extends MobRenderer<Dolphin, DolphinModel<Dolphin>>
 
 	public DolphinRenderer(EntityRendererProvider.Context context) {
 		super(context, new DolphinModel<>(context.bakeLayer(ModelLayers.DOLPHIN)), 0.7F);
-		this.addLayer(new DolphinCarryingItemLayer(this));
+		this.addLayer(new DolphinCarryingItemLayer(this, context.getItemInHandRenderer()));
 	}
 
 	public ResourceLocation getTextureLocation(Dolphin dolphin) {
