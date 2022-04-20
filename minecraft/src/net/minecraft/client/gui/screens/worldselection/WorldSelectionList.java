@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -143,8 +144,9 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			return CompletableFuture.completedFuture(List.of());
 		} else {
 			return this.minecraft.getLevelSource().loadLevelSummaries(levelCandidates).thenApply(list -> {
-				Collections.sort(list);
-				return list;
+				List var1x = new ArrayList(list);
+				Collections.sort(var1x);
+				return var1x;
 			}).exceptionally(throwable -> {
 				this.minecraft.delayCrash(() -> CrashReport.forThrowable(throwable, "Couldn't load level list"));
 				return List.of();
