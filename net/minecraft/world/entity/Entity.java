@@ -48,6 +48,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -220,7 +221,7 @@ CommandSource {
     protected static final EntityDataAccessor<Pose> DATA_POSE = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.POSE);
     private static final EntityDataAccessor<Integer> DATA_TICKS_FROZEN = SynchedEntityData.defineId(Entity.class, EntityDataSerializers.INT);
     private EntityInLevelCallback levelCallback = EntityInLevelCallback.NULL;
-    private Vec3 packetCoordinates;
+    private final VecDeltaCodec packetPositionCodec = new VecDeltaCodec();
     public boolean noCulling;
     public boolean hasImpulse;
     private int portalCooldown;
@@ -252,7 +253,6 @@ CommandSource {
         this.position = Vec3.ZERO;
         this.blockPosition = BlockPos.ZERO;
         this.chunkPosition = ChunkPos.ZERO;
-        this.packetCoordinates = Vec3.ZERO;
         this.entityData = new SynchedEntityData(this);
         this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
         this.entityData.define(DATA_AIR_SUPPLY_ID, this.getMaxAirSupply());
@@ -294,16 +294,12 @@ CommandSource {
         }
     }
 
-    public void setPacketCoordinates(double d, double e, double f) {
-        this.setPacketCoordinates(new Vec3(d, e, f));
+    public void syncPacketPositionCodec(double d, double e, double f) {
+        this.packetPositionCodec.setBase(new Vec3(d, e, f));
     }
 
-    public void setPacketCoordinates(Vec3 vec3) {
-        this.packetCoordinates = vec3;
-    }
-
-    public Vec3 getPacketCoordinates() {
-        return this.packetCoordinates;
+    public VecDeltaCodec getPositionCodec() {
+        return this.packetPositionCodec;
     }
 
     public EntityType<?> getType() {
@@ -2733,6 +2729,10 @@ CommandSource {
         return this.position;
     }
 
+    public Vec3 trackingPosition() {
+        return this.position();
+    }
+
     @Override
     public BlockPos blockPosition() {
         return this.blockPosition;
@@ -2842,7 +2842,7 @@ CommandSource {
         double d = clientboundAddEntityPacket.getX();
         double e = clientboundAddEntityPacket.getY();
         double f = clientboundAddEntityPacket.getZ();
-        this.setPacketCoordinates(d, e, f);
+        this.syncPacketPositionCodec(d, e, f);
         this.moveTo(d, e, f);
         this.setXRot(clientboundAddEntityPacket.getXRot());
         this.setYRot(clientboundAddEntityPacket.getYRot());

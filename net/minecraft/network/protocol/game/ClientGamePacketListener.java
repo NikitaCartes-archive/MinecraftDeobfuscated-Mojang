@@ -6,7 +6,6 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
@@ -112,8 +111,6 @@ extends PacketListener {
     public void handleAddExperienceOrb(ClientboundAddExperienceOrbPacket var1);
 
     public void handleAddObjective(ClientboundSetObjectivePacket var1);
-
-    public void handleAddPainting(ClientboundAddPaintingPacket var1);
 
     public void handleAddPlayer(ClientboundAddPlayerPacket var1);
 

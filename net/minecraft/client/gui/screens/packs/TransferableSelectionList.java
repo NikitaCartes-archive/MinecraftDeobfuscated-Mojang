@@ -22,8 +22,6 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.util.FormattedCharSequence;
@@ -32,8 +30,8 @@ import net.minecraft.util.FormattedCharSequence;
 public class TransferableSelectionList
 extends ObjectSelectionList<PackEntry> {
     static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
-    static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("pack.incompatible");
-    static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("pack.incompatible.confirm.title");
+    static final Component INCOMPATIBLE_TITLE = Component.translatable("pack.incompatible");
+    static final Component INCOMPATIBLE_CONFIRM_TITLE = Component.translatable("pack.incompatible.confirm.title");
     private final Component title;
 
     public TransferableSelectionList(Minecraft minecraft, int i, int j, Component component) {
@@ -46,7 +44,7 @@ extends ObjectSelectionList<PackEntry> {
 
     @Override
     protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
-        MutableComponent component = new TextComponent("").append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
+        MutableComponent component = Component.empty().append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
         this.minecraft.font.draw(poseStack, component, (float)(i + this.width / 2 - this.minecraft.font.width(component) / 2), (float)Math.min(this.y0 + 3, j), 0xFFFFFF);
     }
 
@@ -107,7 +105,7 @@ extends ObjectSelectionList<PackEntry> {
 
         @Override
         public Component getNarration() {
-            return new TranslatableComponent("narrator.select", this.pack.getTitle());
+            return Component.translatable("narrator.select", this.pack.getTitle());
         }
 
         @Override

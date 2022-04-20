@@ -11,7 +11,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -28,7 +28,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(new TranslatableComponent("mco.configure.world.closing"));
+        this.setTitle(Component.translatable("mco.configure.world.closing"));
         RealmsClient realmsClient = RealmsClient.create();
         for (int i = 0; i < 25; ++i) {
             if (this.aborted()) {

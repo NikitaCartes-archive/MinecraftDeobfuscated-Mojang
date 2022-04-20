@@ -20,8 +20,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSetBeaconPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -38,8 +36,8 @@ import org.jetbrains.annotations.Nullable;
 public class BeaconScreen
 extends AbstractContainerScreen<BeaconMenu> {
     static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
-    private static final Component PRIMARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.primary");
-    private static final Component SECONDARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.secondary");
+    private static final Component PRIMARY_EFFECT_LABEL = Component.translatable("block.minecraft.beacon.primary");
+    private static final Component SECONDARY_EFFECT_LABEL = Component.translatable("block.minecraft.beacon.secondary");
     private final List<BeaconButton> beaconButtons = Lists.newArrayList();
     @Nullable
     MobEffect primary;
@@ -219,7 +217,7 @@ extends AbstractContainerScreen<BeaconMenu> {
         }
 
         protected MutableComponent createEffectDescription(MobEffect mobEffect) {
-            return new TranslatableComponent(mobEffect.getDescriptionId());
+            return Component.translatable(mobEffect.getDescriptionId());
         }
 
         @Override
@@ -267,7 +265,7 @@ extends AbstractContainerScreen<BeaconMenu> {
 
         @Override
         protected MutableComponent createEffectDescription(MobEffect mobEffect) {
-            return new TranslatableComponent(mobEffect.getDescriptionId()).append(" II");
+            return Component.translatable(mobEffect.getDescriptionId()).append(" II");
         }
 
         @Override
@@ -312,7 +310,7 @@ extends AbstractContainerScreen<BeaconMenu> {
         private boolean selected;
 
         protected BeaconScreenButton(int i, int j) {
-            super(i, j, 22, 22, TextComponent.EMPTY);
+            super(i, j, 22, 22, CommonComponents.EMPTY);
         }
 
         protected BeaconScreenButton(int i, int j, Component component) {

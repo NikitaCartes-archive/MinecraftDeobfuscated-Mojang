@@ -18,13 +18,13 @@ import java.util.function.ToIntFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 public class ExperienceCommand {
-    private static final SimpleCommandExceptionType ERROR_SET_POINTS_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("commands.experience.set.points.invalid"));
+    private static final SimpleCommandExceptionType ERROR_SET_POINTS_INVALID = new SimpleCommandExceptionType(Component.translatable("commands.experience.set.points.invalid"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("experience").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.literal("add").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.players()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("amount", IntegerArgumentType.integer()).executes(commandContext -> ExperienceCommand.addExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), IntegerArgumentType.getInteger(commandContext, "amount"), Type.POINTS))).then(Commands.literal("points").executes(commandContext -> ExperienceCommand.addExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), IntegerArgumentType.getInteger(commandContext, "amount"), Type.POINTS)))).then(Commands.literal("levels").executes(commandContext -> ExperienceCommand.addExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), IntegerArgumentType.getInteger(commandContext, "amount"), Type.LEVELS))))))).then(Commands.literal("set").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.players()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("amount", IntegerArgumentType.integer(0)).executes(commandContext -> ExperienceCommand.setExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), IntegerArgumentType.getInteger(commandContext, "amount"), Type.POINTS))).then(Commands.literal("points").executes(commandContext -> ExperienceCommand.setExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), IntegerArgumentType.getInteger(commandContext, "amount"), Type.POINTS)))).then(Commands.literal("levels").executes(commandContext -> ExperienceCommand.setExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), IntegerArgumentType.getInteger(commandContext, "amount"), Type.LEVELS))))))).then(Commands.literal("query").then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("targets", EntityArgument.player()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.literal("points").executes(commandContext -> ExperienceCommand.queryExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayer(commandContext, "targets"), Type.POINTS)))).then(Commands.literal("levels").executes(commandContext -> ExperienceCommand.queryExperience((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayer(commandContext, "targets"), Type.LEVELS))))));
@@ -33,7 +33,7 @@ public class ExperienceCommand {
 
     private static int queryExperience(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, Type type) {
         int i = type.query.applyAsInt(serverPlayer);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.query." + type.name, serverPlayer.getDisplayName(), i), false);
+        commandSourceStack.sendSuccess(Component.translatable("commands.experience.query." + type.name, serverPlayer.getDisplayName(), i), false);
         return i;
     }
 
@@ -42,9 +42,9 @@ public class ExperienceCommand {
             type.add.accept(serverPlayer, i);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.add." + type.name + ".success.single", i, collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.experience.add." + type.name + ".success.single", i, collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.add." + type.name + ".success.multiple", i, collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.experience.add." + type.name + ".success.multiple", i, collection.size()), true);
         }
         return collection.size();
     }
@@ -59,9 +59,9 @@ public class ExperienceCommand {
             throw ERROR_SET_POINTS_INVALID.create();
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.set." + type.name + ".success.single", i, collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.experience.set." + type.name + ".success.single", i, collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.set." + type.name + ".success.multiple", i, collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.experience.set." + type.name + ".success.multiple", i, collection.size()), true);
         }
         return collection.size();
     }

@@ -6,7 +6,7 @@ package net.minecraft.world.inventory;
 import com.mojang.logging.LogUtils;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -216,7 +216,7 @@ extends ItemCombinerMenu {
         } else if (!this.itemName.equals(itemStack.getHoverName().getString())) {
             k = 1;
             i += k;
-            itemStack2.setHoverName(new TextComponent(this.itemName));
+            itemStack2.setHoverName(Component.literal(this.itemName));
         }
         this.cost.set(j + i);
         if (i <= 0) {
@@ -254,7 +254,7 @@ extends ItemCombinerMenu {
             if (StringUtils.isBlank(string)) {
                 itemStack.resetHoverName();
             } else {
-                itemStack.setHoverName(new TextComponent(this.itemName));
+                itemStack.setHoverName(Component.literal(this.itemName));
             }
         }
         this.createResult();

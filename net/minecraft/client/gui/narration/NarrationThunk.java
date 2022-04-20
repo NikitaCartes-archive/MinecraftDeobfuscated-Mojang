@@ -27,7 +27,7 @@ public class NarrationThunk<T> {
     }
 
     public static NarrationThunk<?> from(Component component2) {
-        return new NarrationThunk<Component>(component2, (consumer, component) -> consumer.accept(component.getContents()));
+        return new NarrationThunk<Component>(component2, (consumer, component) -> consumer.accept(component.getString()));
     }
 
     public static NarrationThunk<?> from(List<Component> list) {

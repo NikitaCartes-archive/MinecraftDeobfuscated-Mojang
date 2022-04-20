@@ -14,7 +14,7 @@ import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -33,7 +33,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(new TranslatableComponent("mco.backup.restoring"));
+        this.setTitle(Component.translatable("mco.backup.restoring"));
         RealmsClient realmsClient = RealmsClient.create();
         for (int i = 0; i < 25; ++i) {
             try {

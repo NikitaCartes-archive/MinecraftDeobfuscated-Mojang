@@ -153,6 +153,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.RABBITS_SPAWNABLE_ON).add((Block[])new Block[]{Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.SAND});
         this.tag(BlockTags.FOXES_SPAWNABLE_ON).add((Block[])new Block[]{Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT});
         this.tag(BlockTags.WOLVES_SPAWNABLE_ON).add((Block[])new Block[]{Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK});
+        this.tag(BlockTags.FROGS_SPAWNABLE_ON).add((Block[])new Block[]{Blocks.GRASS_BLOCK, Blocks.MUD, Blocks.MANGROVE_ROOTS, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MOSS_CARPET});
         this.tag(BlockTags.TERRACOTTA).add((Block[])new Block[]{Blocks.TERRACOTTA, Blocks.WHITE_TERRACOTTA, Blocks.ORANGE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.GRAY_TERRACOTTA, Blocks.LIGHT_GRAY_TERRACOTTA, Blocks.CYAN_TERRACOTTA, Blocks.PURPLE_TERRACOTTA, Blocks.BLUE_TERRACOTTA, Blocks.BROWN_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.RED_TERRACOTTA, Blocks.BLACK_TERRACOTTA});
         this.tag(BlockTags.AZALEA_GROWS_ON).addTag(BlockTags.DIRT).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).add(Blocks.SNOW_BLOCK).add(Blocks.POWDER_SNOW);
         this.tag(BlockTags.REPLACEABLE_PLANTS).add((Block[])new Block[]{Blocks.GRASS, Blocks.FERN, Blocks.DEAD_BUSH, Blocks.VINE, Blocks.GLOW_LICHEN, Blocks.SUNFLOWER, Blocks.LILAC, Blocks.ROSE_BUSH, Blocks.PEONY, Blocks.TALL_GRASS, Blocks.LARGE_FERN, Blocks.HANGING_ROOTS});

@@ -34,8 +34,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.GameRules;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +50,7 @@ extends Screen {
     private final GameRules gameRules;
 
     public EditGameRulesScreen(GameRules gameRules, Consumer<Optional<GameRules>> consumer) {
-        super(new TranslatableComponent("editGamerule.title"));
+        super(Component.translatable("editGamerule.title"));
         this.gameRules = gameRules;
         this.exitCallback = consumer;
     }
@@ -127,15 +125,15 @@ extends Screen {
                 private <T extends GameRules.Value<T>> void addEntry(GameRules.Key<T> key, EntryFactory<T> entryFactory) {
                     Object string3;
                     ImmutableCollection list;
-                    TranslatableComponent component = new TranslatableComponent(key.getDescriptionId());
-                    MutableComponent component2 = new TextComponent(key.getId()).withStyle(ChatFormatting.YELLOW);
+                    MutableComponent component = Component.translatable(key.getDescriptionId());
+                    MutableComponent component2 = Component.literal(key.getId()).withStyle(ChatFormatting.YELLOW);
                     T value = gameRules.getRule(key);
                     String string = ((GameRules.Value)value).serialize();
-                    MutableComponent component3 = new TranslatableComponent("editGamerule.default", new TextComponent(string)).withStyle(ChatFormatting.GRAY);
+                    MutableComponent component3 = Component.translatable("editGamerule.default", Component.literal(string)).withStyle(ChatFormatting.GRAY);
                     String string2 = key.getDescriptionId() + ".description";
                     if (I18n.exists(string2)) {
                         ImmutableCollection.Builder builder = ImmutableList.builder().add(component2.getVisualOrderText());
-                        TranslatableComponent component4 = new TranslatableComponent(string2);
+                        MutableComponent component4 = Component.translatable(string2);
                         EditGameRulesScreen.this.font.split(component4, 150).forEach(((ImmutableList.Builder)builder)::add);
                         list = ((ImmutableList.Builder)((ImmutableList.Builder)builder).add(component3.getVisualOrderText())).build();
                         string3 = component4.getString() + "\n" + component3.getString();
@@ -147,7 +145,7 @@ extends Screen {
                 }
             });
             map.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry2 -> {
-                this.addEntry(new CategoryRuleEntry(new TranslatableComponent(((GameRules.Category)((Object)((Object)entry2.getKey()))).getDescriptionId()).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW)));
+                this.addEntry(new CategoryRuleEntry(Component.translatable(((GameRules.Category)((Object)((Object)entry2.getKey()))).getDescriptionId()).withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW)));
                 ((Map)entry2.getValue()).entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(GameRules.Key::getId))).forEach(entry -> this.addEntry((RuleEntry)entry.getValue()));
             });
         }

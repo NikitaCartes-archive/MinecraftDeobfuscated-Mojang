@@ -11,7 +11,6 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -38,7 +37,7 @@ extends PlayerList {
     @Override
     public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
         if (gameProfile.getName().equalsIgnoreCase(this.getServer().getSingleplayerName()) && this.getPlayerByName(gameProfile.getName()) != null) {
-            return new TranslatableComponent("multiplayer.disconnect.name_taken");
+            return Component.translatable("multiplayer.disconnect.name_taken");
         }
         return super.canPlayerLogin(socketAddress, gameProfile);
     }

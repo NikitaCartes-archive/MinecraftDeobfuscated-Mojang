@@ -366,21 +366,35 @@ public class Util {
     }
 
     public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> list) {
+        CompletableFuture completableFuture = new CompletableFuture();
+        return Util.fallibleSequence(list, completableFuture::completeExceptionally).applyToEither((CompletionStage)completableFuture, Function.identity());
+    }
+
+    public static <V> CompletableFuture<List<V>> sequenceFailFastAndCancel(List<? extends CompletableFuture<? extends V>> list) {
+        CompletableFuture completableFuture = new CompletableFuture();
+        return Util.fallibleSequence(list, throwable -> {
+            for (CompletableFuture completableFuture2 : list) {
+                completableFuture2.cancel(true);
+            }
+            completableFuture.completeExceptionally((Throwable)throwable);
+        }).applyToEither((CompletionStage)completableFuture, Function.identity());
+    }
+
+    private static <V> CompletableFuture<List<V>> fallibleSequence(List<? extends CompletableFuture<? extends V>> list, Consumer<Throwable> consumer) {
         ArrayList list2 = Lists.newArrayListWithCapacity(list.size());
         CompletableFuture[] completableFutures = new CompletableFuture[list.size()];
-        CompletableFuture completableFuture = new CompletableFuture();
-        list.forEach(completableFuture2 -> {
+        list.forEach(completableFuture -> {
             int i = list2.size();
             list2.add(null);
-            completableFutures[i] = completableFuture2.whenComplete((object, throwable) -> {
+            completableFutures[i] = completableFuture.whenComplete((object, throwable) -> {
                 if (throwable != null) {
-                    completableFuture.completeExceptionally((Throwable)throwable);
+                    consumer.accept((Throwable)throwable);
                 } else {
                     list2.set(i, object);
                 }
             });
         });
-        return CompletableFuture.allOf(completableFutures).applyToEither((CompletionStage)completableFuture, void_ -> list2);
+        return CompletableFuture.allOf(completableFutures).thenApply(void_ -> list2);
     }
 
     public static <T> Optional<T> ifElse(Optional<T> optional, Consumer<T> consumer, Runnable runnable) {

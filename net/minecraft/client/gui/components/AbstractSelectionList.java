@@ -28,7 +28,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -528,7 +527,7 @@ NarratableEntry {
         int i;
         List<E> list = this.children();
         if (list.size() > 1 && (i = list.indexOf(entry)) != -1) {
-            narrationElementOutput.add(NarratedElementType.POSITION, (Component)new TranslatableComponent("narrator.position.list", i + 1, list.size()));
+            narrationElementOutput.add(NarratedElementType.POSITION, (Component)Component.translatable("narrator.position.list", i + 1, list.size()));
         }
     }
 

@@ -15,10 +15,9 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -31,7 +30,7 @@ extends Screen {
     private final List<Button> exitButtons = Lists.newArrayList();
 
     public DeathScreen(@Nullable Component component, boolean bl) {
-        super(new TranslatableComponent(bl ? "deathScreen.title.hardcore" : "deathScreen.title"));
+        super(Component.translatable(bl ? "deathScreen.title.hardcore" : "deathScreen.title"));
         this.causeOfDeath = component;
         this.hardcore = bl;
     }
@@ -40,23 +39,23 @@ extends Screen {
     protected void init() {
         this.delayTicker = 0;
         this.exitButtons.clear();
-        this.exitButtons.add(this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, this.hardcore ? new TranslatableComponent("deathScreen.spectate") : new TranslatableComponent("deathScreen.respawn"), button -> {
+        this.exitButtons.add(this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, this.hardcore ? Component.translatable("deathScreen.spectate") : Component.translatable("deathScreen.respawn"), button -> {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);
         })));
-        this.exitButtons.add(this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, new TranslatableComponent("deathScreen.titleScreen"), button -> {
+        this.exitButtons.add(this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, Component.translatable("deathScreen.titleScreen"), button -> {
             if (this.hardcore) {
                 this.exitToTitleScreen();
                 return;
             }
-            ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, new TranslatableComponent("deathScreen.quit.confirm"), TextComponent.EMPTY, new TranslatableComponent("deathScreen.titleScreen"), new TranslatableComponent("deathScreen.respawn"));
+            ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, Component.translatable("deathScreen.quit.confirm"), CommonComponents.EMPTY, Component.translatable("deathScreen.titleScreen"), Component.translatable("deathScreen.respawn"));
             this.minecraft.setScreen(confirmScreen);
             confirmScreen.setDelay(20);
         })));
         for (Button button2 : this.exitButtons) {
             button2.active = false;
         }
-        this.deathScore = new TranslatableComponent("deathScreen.score").append(": ").append(new TextComponent(Integer.toString(this.minecraft.player.getScore())).withStyle(ChatFormatting.YELLOW));
+        this.deathScore = Component.translatable("deathScreen.score").append(": ").append(Component.literal(Integer.toString(this.minecraft.player.getScore())).withStyle(ChatFormatting.YELLOW));
     }
 
     @Override
@@ -77,7 +76,7 @@ extends Screen {
         if (this.minecraft.level != null) {
             this.minecraft.level.disconnect();
         }
-        this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
+        this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
         this.minecraft.setScreen(new TitleScreen());
     }
 

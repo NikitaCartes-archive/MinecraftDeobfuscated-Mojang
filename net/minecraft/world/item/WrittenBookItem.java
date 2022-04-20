@@ -13,8 +13,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
@@ -81,7 +79,7 @@ extends Item {
         String string;
         CompoundTag compoundTag = itemStack.getTag();
         if (compoundTag != null && !StringUtil.isNullOrEmpty(string = compoundTag.getString(TAG_TITLE))) {
-            return new TextComponent(string);
+            return Component.literal(string);
         }
         return super.getName(itemStack);
     }
@@ -92,9 +90,9 @@ extends Item {
             CompoundTag compoundTag = itemStack.getTag();
             String string = compoundTag.getString(TAG_AUTHOR);
             if (!StringUtil.isNullOrEmpty(string)) {
-                list.add(new TranslatableComponent("book.byAuthor", string).withStyle(ChatFormatting.GRAY));
+                list.add(Component.translatable("book.byAuthor", string).withStyle(ChatFormatting.GRAY));
             }
-            list.add(new TranslatableComponent("book.generation." + compoundTag.getInt(TAG_GENERATION)).withStyle(ChatFormatting.GRAY));
+            list.add(Component.translatable("book.generation." + compoundTag.getInt(TAG_GENERATION)).withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -145,7 +143,7 @@ extends Item {
             component = Component.Serializer.fromJsonLenient(string);
             component = ComponentUtils.updateForEntity(commandSourceStack, component, (Entity)player, 0);
         } catch (Exception exception) {
-            component = new TextComponent(string);
+            component = Component.literal(string);
         }
         return Component.Serializer.toJson(component);
     }

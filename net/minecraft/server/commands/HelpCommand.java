@@ -13,17 +13,16 @@ import com.mojang.brigadier.tree.CommandNode;
 import java.util.Map;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class HelpCommand {
-    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.help.failed"));
+    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.help.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("help").executes(commandContext -> {
             Map<CommandNode<CommandSourceStack>, String> map = commandDispatcher.getSmartUsage(commandDispatcher.getRoot(), (CommandSourceStack)commandContext.getSource());
             for (String string : map.values()) {
-                ((CommandSourceStack)commandContext.getSource()).sendSuccess(new TextComponent("/" + string), false);
+                ((CommandSourceStack)commandContext.getSource()).sendSuccess(Component.literal("/" + string), false);
             }
             return map.size();
         })).then(Commands.argument("command", StringArgumentType.greedyString()).executes(commandContext -> {
@@ -33,7 +32,7 @@ public class HelpCommand {
             }
             Map<CommandNode<CommandSourceStack>, String> map = commandDispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), (CommandSourceStack)commandContext.getSource());
             for (String string : map.values()) {
-                ((CommandSourceStack)commandContext.getSource()).sendSuccess(new TextComponent("/" + parseResults.getReader().getString() + " " + string), false);
+                ((CommandSourceStack)commandContext.getSource()).sendSuccess(Component.literal("/" + parseResults.getReader().getString() + " " + string), false);
             }
             return map.size();
         })));

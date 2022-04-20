@@ -17,7 +17,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
@@ -34,13 +33,13 @@ public class MsgCommand {
         Entity entity = commandSourceStack.getEntity();
         if (entity instanceof ServerPlayer) {
             ServerPlayer serverPlayer = (ServerPlayer)entity;
-            consumer = component2 -> serverPlayer.sendMessage(new TranslatableComponent("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), serverPlayer.getUUID());
+            consumer = component2 -> serverPlayer.sendMessage(Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), serverPlayer.getUUID());
         } else {
-            consumer = component2 -> commandSourceStack.sendSuccess(new TranslatableComponent("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false);
+            consumer = component2 -> commandSourceStack.sendSuccess(Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false);
         }
         for (ServerPlayer serverPlayer2 : collection) {
             consumer.accept(serverPlayer2.getDisplayName());
-            serverPlayer2.sendMessage(new TranslatableComponent("commands.message.display.incoming", commandSourceStack.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), uUID);
+            serverPlayer2.sendMessage(Component.translatable("commands.message.display.incoming", commandSourceStack.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), uUID);
         }
         return collection.size();
     }

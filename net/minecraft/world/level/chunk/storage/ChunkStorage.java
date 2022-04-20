@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
@@ -29,7 +30,7 @@ implements AutoCloseable {
     private final IOWorker worker;
     protected final DataFixer fixerUpper;
     @Nullable
-    private LegacyStructureDataHandler legacyStructureHandler;
+    private volatile LegacyStructureDataHandler legacyStructureHandler;
 
     public ChunkStorage(Path path, DataFixer dataFixer, boolean bl) {
         this.fixerUpper = dataFixer;
@@ -43,10 +44,8 @@ implements AutoCloseable {
     public CompoundTag upgradeChunkTag(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional) {
         int i = ChunkStorage.getVersion(compoundTag);
         if (i < 1493 && (compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, i, 1493)).getCompound("Level").getBoolean("hasLegacyStructureData")) {
-            if (this.legacyStructureHandler == null) {
-                this.legacyStructureHandler = LegacyStructureDataHandler.getLegacyStructureHandler(resourceKey, supplier.get());
-            }
-            compoundTag = this.legacyStructureHandler.updateFromLegacy(compoundTag);
+            LegacyStructureDataHandler legacyStructureDataHandler = this.getLegacyStructureHandler(resourceKey, supplier);
+            compoundTag = legacyStructureDataHandler.updateFromLegacy(compoundTag);
         }
         ChunkStorage.injectDatafixingContext(compoundTag, resourceKey, optional);
         compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, Math.max(1493, i));
@@ -55,6 +54,23 @@ implements AutoCloseable {
         }
         compoundTag.remove("__context");
         return compoundTag;
+    }
+
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    private LegacyStructureDataHandler getLegacyStructureHandler(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier) {
+        LegacyStructureDataHandler legacyStructureDataHandler = this.legacyStructureHandler;
+        if (legacyStructureDataHandler == null) {
+            ChunkStorage chunkStorage = this;
+            synchronized (chunkStorage) {
+                legacyStructureDataHandler = this.legacyStructureHandler;
+                if (legacyStructureDataHandler == null) {
+                    this.legacyStructureHandler = legacyStructureDataHandler = LegacyStructureDataHandler.getLegacyStructureHandler(resourceKey, supplier.get());
+                }
+            }
+        }
+        return legacyStructureDataHandler;
     }
 
     public static void injectDatafixingContext(CompoundTag compoundTag, ResourceKey<Level> resourceKey2, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional) {
@@ -68,9 +84,8 @@ implements AutoCloseable {
         return compoundTag.contains("DataVersion", 99) ? compoundTag.getInt("DataVersion") : -1;
     }
 
-    @Nullable
-    public CompoundTag read(ChunkPos chunkPos) throws IOException {
-        return this.worker.load(chunkPos);
+    public CompletableFuture<Optional<CompoundTag>> read(ChunkPos chunkPos) {
+        return this.worker.loadAsync(chunkPos);
     }
 
     public void write(ChunkPos chunkPos, CompoundTag compoundTag) {

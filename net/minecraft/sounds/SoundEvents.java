@@ -11,10 +11,10 @@ public class SoundEvents {
     public static final SoundEvent ALLAY_AMBIENT_WITH_ITEM = SoundEvents.register("entity.allay.ambient_with_item");
     public static final SoundEvent ALLAY_AMBIENT_WITHOUT_ITEM = SoundEvents.register("entity.allay.ambient_without_item");
     public static final SoundEvent ALLAY_DEATH = SoundEvents.register("entity.allay.death");
-    public static final SoundEvent ALLAY_FLAP = SoundEvents.register("entity.allay.flap");
     public static final SoundEvent ALLAY_HURT = SoundEvents.register("entity.allay.hurt");
     public static final SoundEvent ALLAY_ITEM_GIVEN = SoundEvents.register("entity.allay.item_given");
     public static final SoundEvent ALLAY_ITEM_TAKEN = SoundEvents.register("entity.allay.item_taken");
+    public static final SoundEvent ALLAY_THROW = SoundEvents.register("entity.allay.item_thrown");
     public static final SoundEvent AMBIENT_CAVE = SoundEvents.register("ambient.cave");
     public static final SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = SoundEvents.register("ambient.basalt_deltas.additions");
     public static final SoundEvent AMBIENT_BASALT_DELTAS_LOOP = SoundEvents.register("ambient.basalt_deltas.loop");
@@ -676,6 +676,7 @@ public class SoundEvents {
     public static final SoundEvent MULE_HURT = SoundEvents.register("entity.mule.hurt");
     public static final SoundEvent MUSIC_CREATIVE = SoundEvents.register("music.creative");
     public static final SoundEvent MUSIC_CREDITS = SoundEvents.register("music.credits");
+    public static final SoundEvent MUSIC_DISC_5 = SoundEvents.register("music_disc.5");
     public static final SoundEvent MUSIC_DISC_11 = SoundEvents.register("music_disc.11");
     public static final SoundEvent MUSIC_DISC_13 = SoundEvents.register("music_disc.13");
     public static final SoundEvent MUSIC_DISC_BLOCKS = SoundEvents.register("music_disc.blocks");
@@ -701,6 +702,9 @@ public class SoundEvents {
     public static final SoundEvent MUSIC_BIOME_GROVE = SoundEvents.register("music.overworld.grove");
     public static final SoundEvent MUSIC_BIOME_JAGGED_PEAKS = SoundEvents.register("music.overworld.jagged_peaks");
     public static final SoundEvent MUSIC_BIOME_LUSH_CAVES = SoundEvents.register("music.overworld.lush_caves");
+    public static final SoundEvent MUSIC_BIOME_SWAMP = SoundEvents.register("music.overworld.swamp");
+    public static final SoundEvent MUSIC_BIOME_JUNGLE_AND_FOREST = SoundEvents.register("music.overworld.jungle_and_forest");
+    public static final SoundEvent MUSIC_BIOME_OLD_GROWTH_TAIGA = SoundEvents.register("music.overworld.old_growth_taiga");
     public static final SoundEvent MUSIC_BIOME_MEADOW = SoundEvents.register("music.overworld.meadow");
     public static final SoundEvent MUSIC_BIOME_NETHER_WASTES = SoundEvents.register("music.nether.nether_wastes");
     public static final SoundEvent MUSIC_BIOME_FROZEN_PEAKS = SoundEvents.register("music.overworld.frozen_peaks");
@@ -1122,11 +1126,9 @@ public class SoundEvents {
     public static final SoundEvent SWEET_BERRY_BUSH_PLACE = SoundEvents.register("block.sweet_berry_bush.place");
     public static final SoundEvent SWEET_BERRY_BUSH_PICK_BERRIES = SoundEvents.register("block.sweet_berry_bush.pick_berries");
     public static final SoundEvent TADPOLE_DEATH = SoundEvents.register("entity.tadpole.death");
-    public static final SoundEvent TADPOLE_EAT = SoundEvents.register("entity.tadpole.eat");
     public static final SoundEvent TADPOLE_FLOP = SoundEvents.register("entity.tadpole.flop");
     public static final SoundEvent TADPOLE_GROW_UP = SoundEvents.register("entity.tadpole.grow_up");
     public static final SoundEvent TADPOLE_HURT = SoundEvents.register("entity.tadpole.hurt");
-    public static final SoundEvent TADPOLE_STEP = SoundEvents.register("entity.tadpole.step");
     public static final SoundEvent THORNS_HIT = SoundEvents.register("enchant.thorns.hit");
     public static final SoundEvent TNT_PRIMED = SoundEvents.register("entity.tnt.primed");
     public static final SoundEvent TOTEM_USE = SoundEvents.register("item.totem.use");

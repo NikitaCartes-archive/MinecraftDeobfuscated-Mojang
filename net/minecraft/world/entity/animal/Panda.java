@@ -479,7 +479,7 @@ extends Animal {
             this.onItemPickup(itemEntity);
             ItemStack itemStack = itemEntity.getItem();
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
-            this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0f;
+            this.setGuaranteedDrop(EquipmentSlot.MAINHAND);
             this.take(itemEntity, itemStack.getCount());
             itemEntity.discard();
         }

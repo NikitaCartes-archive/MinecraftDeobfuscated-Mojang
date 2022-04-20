@@ -37,7 +37,7 @@ implements DispenseItemBehavior {
         e = direction.getAxis() == Direction.Axis.Y ? (e -= 0.125) : (e -= 0.15625);
         ItemEntity itemEntity = new ItemEntity(level, d, e, f, itemStack);
         double g = level.random.nextDouble() * 0.1 + 0.2;
-        itemEntity.setDeltaMovement(level.random.nextGaussian() * (double)0.0075f * (double)i + (double)direction.getStepX() * g, level.random.nextGaussian() * (double)0.0075f * (double)i + (double)0.2f, level.random.nextGaussian() * (double)0.0075f * (double)i + (double)direction.getStepZ() * g);
+        itemEntity.setDeltaMovement(level.random.triangle((double)direction.getStepX() * g, 0.0172275 * (double)i), level.random.triangle(0.2, 0.0172275 * (double)i), level.random.triangle((double)direction.getStepZ() * g, 0.0172275 * (double)i));
         level.addFreshEntity(itemEntity);
     }
 

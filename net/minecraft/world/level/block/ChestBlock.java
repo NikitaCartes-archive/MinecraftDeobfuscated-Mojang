@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stat;
@@ -127,7 +126,7 @@ implements SimpleWaterloggedBlock {
                     if (chestBlockEntity2.hasCustomName()) {
                         return chestBlockEntity2.getDisplayName();
                     }
-                    return new TranslatableComponent("container.chestDouble");
+                    return Component.translatable("container.chestDouble");
                 }
             });
         }

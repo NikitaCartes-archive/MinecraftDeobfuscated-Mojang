@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.network.chat;
+package net.minecraft.network.chat.contents;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -13,20 +13,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.ContextAwareComponent;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableFormatException;
+import net.minecraft.network.chat.contents.TranslatableFormatException;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
-public class TranslatableComponent
-extends BaseComponent
-implements ContextAwareComponent {
+public class TranslatableContents
+implements ComponentContents {
     private static final Object[] NO_ARGS = new Object[0];
     private static final FormattedText TEXT_PERCENT = FormattedText.of("%");
     private static final FormattedText TEXT_NULL = FormattedText.of("null");
@@ -37,12 +35,12 @@ implements ContextAwareComponent {
     private List<FormattedText> decomposedParts = ImmutableList.of();
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-    public TranslatableComponent(String string) {
+    public TranslatableContents(String string) {
         this.key = string;
         this.args = NO_ARGS;
     }
 
-    public TranslatableComponent(String string, Object ... objects) {
+    public TranslatableContents(String string, Object ... objects) {
         this.key = string;
         this.args = objects;
     }
@@ -119,12 +117,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public TranslatableComponent plainCopy() {
-        return new TranslatableComponent(this.key, this.args);
-    }
-
-    @Override
-    public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
+    public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         this.decompose();
         for (FormattedText formattedText : this.decomposedParts) {
             Optional<T> optional = formattedText.visit(styledContentConsumer, style);
@@ -135,7 +128,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
+    public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
         this.decompose();
         for (FormattedText formattedText : this.decomposedParts) {
             Optional<T> optional = formattedText.visit(contentConsumer);
@@ -152,22 +145,24 @@ implements ContextAwareComponent {
             Object object = this.args[j];
             objects[j] = object instanceof Component ? ComponentUtils.updateForEntity(commandSourceStack, (Component)object, entity, i) : object;
         }
-        return new TranslatableComponent(this.key, objects);
+        return MutableComponent.create(new TranslatableContents(this.key, objects));
     }
 
-    @Override
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
     public boolean equals(Object object) {
         if (this == object) {
             return true;
         }
-        if (object instanceof TranslatableComponent) {
-            TranslatableComponent translatableComponent = (TranslatableComponent)object;
-            return Arrays.equals(this.args, translatableComponent.args) && this.key.equals(translatableComponent.key) && super.equals(object);
-        }
-        return false;
+        if (!(object instanceof TranslatableContents)) return false;
+        TranslatableContents translatableContents = (TranslatableContents)object;
+        if (!this.key.equals(translatableContents.key)) return false;
+        if (!Arrays.equals(this.args, translatableContents.args)) return false;
+        return true;
     }
 
-    @Override
     public int hashCode() {
         int i = super.hashCode();
         i = 31 * i + this.key.hashCode();
@@ -175,9 +170,8 @@ implements ContextAwareComponent {
         return i;
     }
 
-    @Override
     public String toString() {
-        return "TranslatableComponent{key='" + this.key + "', args=" + Arrays.toString(this.args) + ", siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
+        return "translation{key='" + this.key + "', args=" + Arrays.toString(this.args) + "}";
     }
 
     public String getKey() {
@@ -186,16 +180,6 @@ implements ContextAwareComponent {
 
     public Object[] getArgs() {
         return this.args;
-    }
-
-    @Override
-    public /* synthetic */ BaseComponent plainCopy() {
-        return this.plainCopy();
-    }
-
-    @Override
-    public /* synthetic */ MutableComponent plainCopy() {
-        return this.plainCopy();
     }
 }
 

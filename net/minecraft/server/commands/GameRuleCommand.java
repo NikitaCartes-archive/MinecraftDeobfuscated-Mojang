@@ -8,7 +8,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleCommand {
@@ -28,13 +28,13 @@ public class GameRuleCommand {
         CommandSourceStack commandSourceStack = commandContext.getSource();
         T value = commandSourceStack.getServer().getGameRules().getRule(key);
         ((GameRules.Value)value).setFromArgument(commandContext, "value");
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.gamerule.set", key.getId(), ((GameRules.Value)value).toString()), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.gamerule.set", key.getId(), ((GameRules.Value)value).toString()), true);
         return ((GameRules.Value)value).getCommandResult();
     }
 
     static <T extends GameRules.Value<T>> int queryRule(CommandSourceStack commandSourceStack, GameRules.Key<T> key) {
         T value = commandSourceStack.getServer().getGameRules().getRule(key);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.gamerule.query", key.getId(), ((GameRules.Value)value).toString()), false);
+        commandSourceStack.sendSuccess(Component.translatable("commands.gamerule.query", key.getId(), ((GameRules.Value)value).toString()), false);
         return ((GameRules.Value)value).getCommandResult();
     }
 }

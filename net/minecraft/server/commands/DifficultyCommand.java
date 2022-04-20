@@ -10,12 +10,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
 
 public class DifficultyCommand {
-    private static final DynamicCommandExceptionType ERROR_ALREADY_DIFFICULT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.difficulty.failure", object));
+    private static final DynamicCommandExceptionType ERROR_ALREADY_DIFFICULT = new DynamicCommandExceptionType(object -> Component.translatable("commands.difficulty.failure", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal("difficulty");
@@ -24,7 +24,7 @@ public class DifficultyCommand {
         }
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)literalArgumentBuilder.requires(commandSourceStack -> commandSourceStack.hasPermission(2))).executes(commandContext -> {
             Difficulty difficulty = ((CommandSourceStack)commandContext.getSource()).getLevel().getDifficulty();
-            ((CommandSourceStack)commandContext.getSource()).sendSuccess(new TranslatableComponent("commands.difficulty.query", difficulty.getDisplayName()), false);
+            ((CommandSourceStack)commandContext.getSource()).sendSuccess(Component.translatable("commands.difficulty.query", difficulty.getDisplayName()), false);
             return difficulty.getId();
         }));
     }
@@ -35,7 +35,7 @@ public class DifficultyCommand {
             throw ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         }
         minecraftServer.setDifficulty(difficulty, true);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.difficulty.success", difficulty.getDisplayName()), true);
         return 0;
     }
 }

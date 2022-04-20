@@ -8,7 +8,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.tutorial.Tutorial;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,8 +31,8 @@ public class BundleTutorial {
         if (this.toast != null) {
             this.tutorial.removeTimedToast(this.toast);
         }
-        TranslatableComponent component = new TranslatableComponent("tutorial.bundleInsert.title");
-        TranslatableComponent component2 = new TranslatableComponent("tutorial.bundleInsert.description");
+        MutableComponent component = Component.translatable("tutorial.bundleInsert.title");
+        MutableComponent component2 = Component.translatable("tutorial.bundleInsert.description");
         this.toast = new TutorialToast(TutorialToast.Icons.RIGHT_CLICK, component, component2, true);
         this.tutorial.addTimedToast(this.toast, 160);
     }

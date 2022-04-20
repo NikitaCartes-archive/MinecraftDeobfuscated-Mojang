@@ -13,7 +13,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -44,7 +43,7 @@ public class Pack {
         try (PackResources packResources = supplier.get();){
             PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
             if (packMetadataSection != null) {
-                Pack pack = packConstructor.create(string, new TextComponent(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
+                Pack pack = packConstructor.create(string, Component.literal(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
                 return pack;
             }
             LOGGER.warn("Couldn't find pack meta for pack {}", (Object)string);
@@ -80,7 +79,7 @@ public class Pack {
     }
 
     public Component getChatLink(boolean bl) {
-        return ComponentUtils.wrapInSquareBrackets(this.packSource.decorate(new TextComponent(this.id))).withStyle(style -> style.withColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED).withInsertion(StringArgumentType.escapeIfRequired(this.id)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("").append(this.title).append("\n").append(this.description))));
+        return ComponentUtils.wrapInSquareBrackets(this.packSource.decorate(Component.literal(this.id))).withStyle(style -> style.withColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED).withInsertion(StringArgumentType.escapeIfRequired(this.id)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.empty().append(this.title).append("\n").append(this.description))));
     }
 
     public PackCompatibility getCompatibility() {

@@ -15,8 +15,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
@@ -46,14 +44,14 @@ extends RealmsScreen {
 
     private static Pair<Component, Component> errorMessage(RealmsServiceException realmsServiceException) {
         if (realmsServiceException.realmsError == null) {
-            return Pair.of(new TextComponent("An error occurred (" + realmsServiceException.httpResultCode + "):"), new TextComponent(realmsServiceException.rawResponse));
+            return Pair.of(Component.literal("An error occurred (" + realmsServiceException.httpResultCode + "):"), Component.literal(realmsServiceException.rawResponse));
         }
         String string = "mco.errorMessage." + realmsServiceException.realmsError.getErrorCode();
-        return Pair.of(new TextComponent("Realms (" + realmsServiceException.realmsError + "):"), I18n.exists(string) ? new TranslatableComponent(string) : Component.nullToEmpty(realmsServiceException.realmsError.getErrorMessage()));
+        return Pair.of(Component.literal("Realms (" + realmsServiceException.realmsError + "):"), I18n.exists(string) ? Component.translatable(string) : Component.nullToEmpty(realmsServiceException.realmsError.getErrorMessage()));
     }
 
     private static Pair<Component, Component> errorMessage(Component component) {
-        return Pair.of(new TextComponent("An error occurred: "), component);
+        return Pair.of(Component.literal("An error occurred: "), component);
     }
 
     private static Pair<Component, Component> errorMessage(Component component, Component component2) {
@@ -62,13 +60,13 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 52, 200, 20, new TextComponent("Ok"), button -> this.minecraft.setScreen(this.nextScreen)));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 52, 200, 20, Component.literal("Ok"), button -> this.minecraft.setScreen(this.nextScreen)));
         this.line2Split = MultiLineLabel.create(this.font, (FormattedText)this.lines.getSecond(), this.width * 3 / 4);
     }
 
     @Override
     public Component getNarrationMessage() {
-        return new TextComponent("").append(this.lines.getFirst()).append(": ").append(this.lines.getSecond());
+        return Component.empty().append(this.lines.getFirst()).append(": ").append(this.lines.getSecond());
     }
 
     @Override

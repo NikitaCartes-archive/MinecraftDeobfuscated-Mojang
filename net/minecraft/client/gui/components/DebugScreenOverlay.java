@@ -18,6 +18,8 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -88,6 +91,7 @@ extends GuiComponent {
         enumMap.put(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, "ML");
     });
     private final Minecraft minecraft;
+    private final AllocationRateCalculator allocationRateCalculator;
     private final Font font;
     private HitResult block;
     private HitResult liquid;
@@ -103,6 +107,7 @@ extends GuiComponent {
 
     public DebugScreenOverlay(Minecraft minecraft) {
         this.minecraft = minecraft;
+        this.allocationRateCalculator = new AllocationRateCalculator();
         this.font = minecraft.font;
     }
 
@@ -320,7 +325,7 @@ extends GuiComponent {
         long m = Runtime.getRuntime().totalMemory();
         long n = Runtime.getRuntime().freeMemory();
         long o = m - n;
-        ArrayList<String> list = Lists.newArrayList(String.format("Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32), String.format("Mem: % 2d%% %03d/%03dMB", o * 100L / l, DebugScreenOverlay.bytesToMegabytes(o), DebugScreenOverlay.bytesToMegabytes(l)), String.format("Allocated: % 2d%% %03dMB", m * 100L / l, DebugScreenOverlay.bytesToMegabytes(m)), "", String.format("CPU: %s", GlUtil.getCpuInfo()), "", String.format("Display: %dx%d (%s)", Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight(), GlUtil.getVendor()), GlUtil.getRenderer(), GlUtil.getOpenGLVersion());
+        ArrayList<String> list = Lists.newArrayList(String.format("Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32), String.format("Mem: % 2d%% %03d/%03dMB", o * 100L / l, DebugScreenOverlay.bytesToMegabytes(o), DebugScreenOverlay.bytesToMegabytes(l)), String.format("Allocation rate: %03dMB /s", DebugScreenOverlay.bytesToMegabytes(this.allocationRateCalculator.bytesAllocatedPerSecond(o))), String.format("Allocated: % 2d%% %03dMB", m * 100L / l, DebugScreenOverlay.bytesToMegabytes(m)), "", String.format("CPU: %s", GlUtil.getCpuInfo()), "", String.format("Display: %dx%d (%s)", Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight(), GlUtil.getVendor()), GlUtil.getRenderer(), GlUtil.getOpenGLVersion());
         if (this.minecraft.showOnlyReducedInfo()) {
             return list;
         }
@@ -412,7 +417,7 @@ extends GuiComponent {
             m = frameTimer.wrapIndex(m + 1);
         }
         bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         if (bl) {
@@ -468,6 +473,44 @@ extends GuiComponent {
 
     private static long bytesToMegabytes(long l) {
         return l / 1024L / 1024L;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class AllocationRateCalculator {
+        private static final int UPDATE_INTERVAL_MS = 500;
+        private static final List<GarbageCollectorMXBean> GC_MBEANS = ManagementFactory.getGarbageCollectorMXBeans();
+        private long lastTime = 0L;
+        private long lastHeapUsage = -1L;
+        private long lastGcCounts = -1L;
+        private long lastRate = 0L;
+
+        AllocationRateCalculator() {
+        }
+
+        long bytesAllocatedPerSecond(long l) {
+            long m = System.currentTimeMillis();
+            if (m - this.lastTime < 500L) {
+                return this.lastRate;
+            }
+            long n = AllocationRateCalculator.gcCounts();
+            if (this.lastTime != 0L && n == this.lastGcCounts) {
+                double d = (double)TimeUnit.SECONDS.toMillis(1L) / (double)(m - this.lastTime);
+                long o = l - this.lastHeapUsage;
+                this.lastRate = Math.round((double)o * d);
+            }
+            this.lastTime = m;
+            this.lastHeapUsage = l;
+            this.lastGcCounts = n;
+            return this.lastRate;
+        }
+
+        private static long gcCounts() {
+            long l = 0L;
+            for (GarbageCollectorMXBean garbageCollectorMXBean : GC_MBEANS) {
+                l += garbageCollectorMXBean.getCollectionCount();
+            }
+            return l;
+        }
     }
 }
 

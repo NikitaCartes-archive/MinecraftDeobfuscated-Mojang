@@ -97,6 +97,7 @@ extends LivingEntity {
     public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25f;
     public static final String LEASH_TAG = "Leash";
     public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085f;
+    public static final int PRESERVE_ITEM_DROP_CHANCE = 2;
     public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
     public int ambientSoundTime;
     protected int xpReward;
@@ -961,7 +962,7 @@ extends LivingEntity {
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         RandomSource randomSource = serverLevelAccessor.getRandom();
-        this.getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", randomSource.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+        this.getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", randomSource.triangle(0.0, 0.11485000000000001), AttributeModifier.Operation.MULTIPLY_BASE));
         if (randomSource.nextFloat() < 0.05f) {
             this.setLeftHanded(true);
         } else {

@@ -19,7 +19,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ObjectiveArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -29,8 +29,8 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class TriggerCommand {
-    private static final SimpleCommandExceptionType ERROR_NOT_PRIMED = new SimpleCommandExceptionType(new TranslatableComponent("commands.trigger.failed.unprimed"));
-    private static final SimpleCommandExceptionType ERROR_INVALID_OBJECTIVE = new SimpleCommandExceptionType(new TranslatableComponent("commands.trigger.failed.invalid"));
+    private static final SimpleCommandExceptionType ERROR_NOT_PRIMED = new SimpleCommandExceptionType(Component.translatable("commands.trigger.failed.unprimed"));
+    private static final SimpleCommandExceptionType ERROR_INVALID_OBJECTIVE = new SimpleCommandExceptionType(Component.translatable("commands.trigger.failed.invalid"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("trigger").then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("objective", ObjectiveArgument.objective()).suggests((commandContext, suggestionsBuilder) -> TriggerCommand.suggestObjectives((CommandSourceStack)commandContext.getSource(), suggestionsBuilder)).executes(commandContext -> TriggerCommand.simpleTrigger((CommandSourceStack)commandContext.getSource(), TriggerCommand.getScore(((CommandSourceStack)commandContext.getSource()).getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective"))))).then(Commands.literal("add").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("value", IntegerArgumentType.integer()).executes(commandContext -> TriggerCommand.addValue((CommandSourceStack)commandContext.getSource(), TriggerCommand.getScore(((CommandSourceStack)commandContext.getSource()).getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective")), IntegerArgumentType.getInteger(commandContext, "value")))))).then(Commands.literal("set").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("value", IntegerArgumentType.integer()).executes(commandContext -> TriggerCommand.setValue((CommandSourceStack)commandContext.getSource(), TriggerCommand.getScore(((CommandSourceStack)commandContext.getSource()).getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective")), IntegerArgumentType.getInteger(commandContext, "value")))))));
@@ -53,19 +53,19 @@ public class TriggerCommand {
 
     private static int addValue(CommandSourceStack commandSourceStack, Score score, int i) {
         score.add(i);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.trigger.add.success", score.getObjective().getFormattedDisplayName(), i), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.trigger.add.success", score.getObjective().getFormattedDisplayName(), i), true);
         return score.getScore();
     }
 
     private static int setValue(CommandSourceStack commandSourceStack, Score score, int i) {
         score.setScore(i);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.trigger.set.success", score.getObjective().getFormattedDisplayName(), i), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.trigger.set.success", score.getObjective().getFormattedDisplayName(), i), true);
         return i;
     }
 
     private static int simpleTrigger(CommandSourceStack commandSourceStack, Score score) {
         score.add(1);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.trigger.simple.success", score.getObjective().getFormattedDisplayName()), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.trigger.simple.success", score.getObjective().getFormattedDisplayName()), true);
         return score.getScore();
     }
 

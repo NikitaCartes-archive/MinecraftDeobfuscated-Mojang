@@ -11,11 +11,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -34,8 +34,8 @@ extends BlockEntity {
     public static final int LINES = 4;
     private static final String[] RAW_TEXT_FIELD_NAMES = new String[]{"Text1", "Text2", "Text3", "Text4"};
     private static final String[] FILTERED_TEXT_FIELD_NAMES = new String[]{"FilteredText1", "FilteredText2", "FilteredText3", "FilteredText4"};
-    private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
-    private final Component[] filteredMessages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
+    private final Component[] messages = new Component[]{CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY};
+    private final Component[] filteredMessages = new Component[]{CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY};
     private boolean isEditable = true;
     @Nullable
     private UUID playerWhoMayEdit;
@@ -101,7 +101,7 @@ extends BlockEntity {
         } catch (Exception exception) {
             // empty catch block
         }
-        return TextComponent.EMPTY;
+        return CommonComponents.EMPTY;
     }
 
     public Component getMessage(int i, boolean bl) {
@@ -179,7 +179,7 @@ extends BlockEntity {
 
     public CommandSourceStack createCommandSourceStack(@Nullable ServerPlayer serverPlayer) {
         String string = serverPlayer == null ? "Sign" : serverPlayer.getName().getString();
-        Component component = serverPlayer == null ? new TextComponent("Sign") : serverPlayer.getDisplayName();
+        Component component = serverPlayer == null ? Component.literal("Sign") : serverPlayer.getDisplayName();
         return new CommandSourceStack(CommandSource.NULL, Vec3.atCenterOf(this.worldPosition), Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), serverPlayer);
     }
 

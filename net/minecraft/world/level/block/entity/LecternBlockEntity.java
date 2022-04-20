@@ -8,8 +8,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Clearable;
@@ -195,7 +193,7 @@ MenuProvider {
         String string;
         if (player == null) {
             string = "Lectern";
-            component = new TextComponent("Lectern");
+            component = Component.literal("Lectern");
         } else {
             string = player.getName().getString();
             component = player.getDisplayName();
@@ -238,7 +236,7 @@ MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return new TranslatableComponent("container.lectern");
+        return Component.translatable("container.lectern");
     }
 }
 

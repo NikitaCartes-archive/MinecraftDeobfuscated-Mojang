@@ -56,32 +56,6 @@ extends TextureSheetParticle {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class AllayDustProvider
-    implements ParticleProvider<SimpleParticleType> {
-        private static final double SPEED_FACTOR = 0.01;
-        private final SpriteSet sprite;
-
-        public AllayDustProvider(SpriteSet spriteSet) {
-            this.sprite = spriteSet;
-        }
-
-        @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            GlowParticle glowParticle = new GlowParticle(clientLevel, d, e, f, 0.0, 0.0, 0.0, this.sprite);
-            if (clientLevel.random.nextBoolean()) {
-                glowParticle.setColor(0.39f, 0.98f, 1.0f);
-            } else {
-                glowParticle.setColor(0.13f, 0.81f, 1.0f);
-            }
-            glowParticle.setParticleSpeed(g * 0.01, h * 0.01, i * 0.01);
-            int j = 20;
-            int k = 40;
-            glowParticle.setLifetime(clientLevel.random.nextInt(20, 40));
-            return glowParticle;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static class ScrapeProvider
     implements ParticleProvider<SimpleParticleType> {
         private final double SPEED_FACTOR = 0.01;

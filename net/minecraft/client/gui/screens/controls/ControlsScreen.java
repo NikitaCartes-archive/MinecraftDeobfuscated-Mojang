@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public class ControlsScreen
@@ -21,7 +21,7 @@ extends OptionsSubScreen {
     private static final int ROW_SPACING = 24;
 
     public ControlsScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("controls.title"));
+        super(screen, options, Component.translatable("controls.title"));
     }
 
     @Override
@@ -30,8 +30,8 @@ extends OptionsSubScreen {
         int i = this.width / 2 - 155;
         int j = i + 160;
         int k = this.height / 6 - 12;
-        this.addRenderableWidget(new Button(i, k, 150, 20, new TranslatableComponent("options.mouse_settings"), button -> this.minecraft.setScreen(new MouseSettingsScreen(this, this.options))));
-        this.addRenderableWidget(new Button(j, k, 150, 20, new TranslatableComponent("controls.keybinds"), button -> this.minecraft.setScreen(new KeyBindsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(i, k, 150, 20, Component.translatable("options.mouse_settings"), button -> this.minecraft.setScreen(new MouseSettingsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(j, k, 150, 20, Component.translatable("controls.keybinds"), button -> this.minecraft.setScreen(new KeyBindsScreen(this, this.options))));
         this.addRenderableWidget(this.options.toggleCrouch().createButton(this.options, i, k += 24, 150));
         this.addRenderableWidget(this.options.toggleSprint().createButton(this.options, j, k, 150));
         this.addRenderableWidget(this.options.autoJump().createButton(this.options, i, k += 24, 150));

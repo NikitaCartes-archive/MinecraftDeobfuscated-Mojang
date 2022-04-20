@@ -6,14 +6,15 @@ package com.mojang.blaze3d.vertex;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class VertexFormat {
@@ -21,9 +22,8 @@ public class VertexFormat {
     private final ImmutableMap<String, VertexFormatElement> elementMapping;
     private final IntList offsets = new IntArrayList();
     private final int vertexSize;
-    private int vertexArrayObject;
-    private int vertexBufferObject;
-    private int indexBufferObject;
+    @Nullable
+    private VertexBuffer immediateDrawVertexBuffer;
 
     public VertexFormat(ImmutableMap<String, VertexFormatElement> immutableMap) {
         this.elementMapping = immutableMap;
@@ -106,25 +106,12 @@ public class VertexFormat {
         }
     }
 
-    public int getOrCreateVertexArrayObject() {
-        if (this.vertexArrayObject == 0) {
-            this.vertexArrayObject = GlStateManager._glGenVertexArrays();
+    public VertexBuffer getImmediateDrawVertexBuffer() {
+        VertexBuffer vertexBuffer = this.immediateDrawVertexBuffer;
+        if (vertexBuffer == null) {
+            this.immediateDrawVertexBuffer = vertexBuffer = new VertexBuffer();
         }
-        return this.vertexArrayObject;
-    }
-
-    public int getOrCreateVertexBufferObject() {
-        if (this.vertexBufferObject == 0) {
-            this.vertexBufferObject = GlStateManager._glGenBuffers();
-        }
-        return this.vertexBufferObject;
-    }
-
-    public int getOrCreateIndexBufferObject() {
-        if (this.indexBufferObject == 0) {
-            this.indexBufferObject = GlStateManager._glGenBuffers();
-        }
-        return this.indexBufferObject;
+        return vertexBuffer;
     }
 
     @Environment(value=EnvType.CLIENT)

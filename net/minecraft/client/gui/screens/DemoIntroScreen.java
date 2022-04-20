@@ -12,8 +12,8 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,23 +24,23 @@ extends Screen {
     private MultiLineLabel durationMessage = MultiLineLabel.EMPTY;
 
     public DemoIntroScreen() {
-        super(new TranslatableComponent("demo.help.title"));
+        super(Component.translatable("demo.help.title"));
     }
 
     @Override
     protected void init() {
         int i = -16;
-        this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20, new TranslatableComponent("demo.help.buy"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20, Component.translatable("demo.help.buy"), button -> {
             button.active = false;
             Util.getPlatform().openUri("http://www.minecraft.net/store?source=demo");
         }));
-        this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, new TranslatableComponent("demo.help.later"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, Component.translatable("demo.help.later"), button -> {
             this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
         }));
         Options options = this.minecraft.options;
-        this.movementMessage = MultiLineLabel.create(this.font, new TranslatableComponent("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), new TranslatableComponent("demo.help.movementMouse"), new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()));
-        this.durationMessage = MultiLineLabel.create(this.font, (FormattedText)new TranslatableComponent("demo.help.fullWrapped"), 218);
+        this.movementMessage = MultiLineLabel.create(this.font, Component.translatable("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), Component.translatable("demo.help.movementMouse"), Component.translatable("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), Component.translatable("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()));
+        this.durationMessage = MultiLineLabel.create(this.font, (FormattedText)Component.translatable("demo.help.fullWrapped"), 218);
     }
 
     @Override

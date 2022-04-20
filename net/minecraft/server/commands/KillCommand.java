@@ -10,7 +10,7 @@ import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 
 public class KillCommand {
@@ -23,9 +23,9 @@ public class KillCommand {
             entity.kill();
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.kill.success.single", collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.kill.success.single", collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.kill.success.multiple", collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.kill.success.multiple", collection.size()), true);
         }
         return collection.size();
     }

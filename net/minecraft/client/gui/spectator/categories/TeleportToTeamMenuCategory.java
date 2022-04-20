@@ -20,7 +20,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -30,8 +29,8 @@ import net.minecraft.world.scores.PlayerTeam;
 public class TeleportToTeamMenuCategory
 implements SpectatorMenuCategory,
 SpectatorMenuItem {
-    private static final Component TELEPORT_TEXT = new TranslatableComponent("spectatorMenu.team_teleport");
-    private static final Component TELEPORT_PROMPT = new TranslatableComponent("spectatorMenu.team_teleport.prompt");
+    private static final Component TELEPORT_TEXT = Component.translatable("spectatorMenu.team_teleport");
+    private static final Component TELEPORT_PROMPT = Component.translatable("spectatorMenu.team_teleport.prompt");
     private final List<SpectatorMenuItem> items = Lists.newArrayList();
 
     public TeleportToTeamMenuCategory() {

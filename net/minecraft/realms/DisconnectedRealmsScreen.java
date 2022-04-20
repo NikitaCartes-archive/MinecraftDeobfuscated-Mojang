@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
@@ -42,7 +41,7 @@ extends RealmsScreen {
 
     @Override
     public Component getNarrationMessage() {
-        return new TextComponent("").append(this.title).append(": ").append(this.reason);
+        return Component.empty().append(this.title).append(": ").append(this.reason);
     }
 
     @Override

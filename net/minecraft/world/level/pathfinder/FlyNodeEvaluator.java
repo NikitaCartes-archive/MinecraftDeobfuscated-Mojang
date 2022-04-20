@@ -59,10 +59,10 @@ extends WalkNodeEvaluator {
             for (BlockPos blockPos2 : set) {
                 BlockPathTypes blockPathTypes2 = this.getCachedBlockPathType(blockPos.getX(), i, blockPos.getZ());
                 if (!(this.mob.getPathfindingMalus(blockPathTypes2) >= 0.0f)) continue;
-                return super.getNode(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
+                return super.getStartNode(blockPos2);
             }
         }
-        return super.getNode(blockPos.getX(), i, blockPos.getZ());
+        return super.getStartNode(new BlockPos(blockPos.getX(), i, blockPos.getZ()));
     }
 
     @Override

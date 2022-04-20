@@ -28,8 +28,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -51,7 +50,7 @@ extends LongRunningTask {
     @Override
     public void run() {
         RealmsServerAddress realmsServerAddress;
-        this.setTitle(new TranslatableComponent("mco.connect.connecting"));
+        this.setTitle(Component.translatable("mco.connect.connecting"));
         try {
             realmsServerAddress = this.fetchServerAddress();
         } catch (CancellationException cancellationException) {
@@ -65,7 +64,7 @@ extends LongRunningTask {
                 }
                 case 6006: {
                     boolean bl = this.server.ownerUUID.equals(Minecraft.getInstance().getUser().getUuid());
-                    GetServerDetailsTask.setScreen(bl ? new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id, this.server.worldType == RealmsServer.WorldType.MINIGAME) : new RealmsGenericErrorScreen(new TranslatableComponent("mco.brokenworld.nonowner.title"), new TranslatableComponent("mco.brokenworld.nonowner.error"), this.lastScreen));
+                    GetServerDetailsTask.setScreen(bl ? new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id, this.server.worldType == RealmsServer.WorldType.MINIGAME) : new RealmsGenericErrorScreen(Component.translatable("mco.brokenworld.nonowner.title"), Component.translatable("mco.brokenworld.nonowner.error"), this.lastScreen));
                     return;
                 }
             }
@@ -73,7 +72,7 @@ extends LongRunningTask {
             LOGGER.error("Couldn't connect to world", realmsServiceException);
             return;
         } catch (TimeoutException timeoutException) {
-            this.error(new TranslatableComponent("mco.errorMessage.connectionFailure"));
+            this.error(Component.translatable("mco.errorMessage.connectionFailure"));
             return;
         } catch (Exception exception) {
             LOGGER.error("Couldn't connect to world", exception);
@@ -115,7 +114,7 @@ extends LongRunningTask {
                 ((CompletableFuture)this.scheduleResourcePackDownload(realmsServerAddress).thenRun(() -> GetServerDetailsTask.setScreen((Screen)function.apply(realmsServerAddress)))).exceptionally(throwable -> {
                     Minecraft.getInstance().getClientPackSource().clearServerPack();
                     LOGGER.error("Failed to download resource pack from {}", (Object)realmsServerAddress, throwable);
-                    GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen(new TextComponent("Failed to download resource pack!"), this.lastScreen));
+                    GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen(Component.literal("Failed to download resource pack!"), this.lastScreen));
                     return null;
                 });
             } finally {
@@ -124,7 +123,7 @@ extends LongRunningTask {
                 }
             }
         };
-        return new RealmsLongConfirmationScreen(booleanConsumer, RealmsLongConfirmationScreen.Type.Info, new TranslatableComponent("mco.configure.world.resourcepack.question.line1"), new TranslatableComponent("mco.configure.world.resourcepack.question.line2"), true);
+        return new RealmsLongConfirmationScreen(booleanConsumer, RealmsLongConfirmationScreen.Type.Info, Component.translatable("mco.configure.world.resourcepack.question.line1"), Component.translatable("mco.configure.world.resourcepack.question.line2"), true);
     }
 
     private CompletableFuture<?> scheduleResourcePackDownload(RealmsServerAddress realmsServerAddress) {

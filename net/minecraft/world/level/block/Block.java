@@ -23,7 +23,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
@@ -369,7 +368,7 @@ implements ItemLike {
     }
 
     public MutableComponent getName() {
-        return new TranslatableComponent(this.getDescriptionId());
+        return Component.translatable(this.getDescriptionId());
     }
 
     public String getDescriptionId() {

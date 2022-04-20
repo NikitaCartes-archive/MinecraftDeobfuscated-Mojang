@@ -8,7 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -81,7 +80,7 @@ implements LidBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container.chest");
+        return Component.translatable("container.chest");
     }
 
     @Override

@@ -35,7 +35,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -182,7 +182,7 @@ public abstract class PlayerList {
         serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
         this.updateEntireScoreboard(serverLevel2.getScoreboard(), serverPlayer);
         this.server.invalidateStatus();
-        TranslatableComponent mutableComponent = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? new TranslatableComponent("multiplayer.player.joined", serverPlayer.getDisplayName()) : new TranslatableComponent("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
+        MutableComponent mutableComponent = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? Component.translatable("multiplayer.player.joined", serverPlayer.getDisplayName()) : Component.translatable("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
         this.broadcastMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
         serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
         this.players.add(serverPlayer);
@@ -336,25 +336,25 @@ public abstract class PlayerList {
     public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
         if (this.bans.isBanned(gameProfile)) {
             UserBanListEntry userBanListEntry = (UserBanListEntry)this.bans.get(gameProfile);
-            TranslatableComponent mutableComponent = new TranslatableComponent("multiplayer.disconnect.banned.reason", userBanListEntry.getReason());
+            MutableComponent mutableComponent = Component.translatable("multiplayer.disconnect.banned.reason", userBanListEntry.getReason());
             if (userBanListEntry.getExpires() != null) {
-                mutableComponent.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(userBanListEntry.getExpires())));
+                mutableComponent.append(Component.translatable("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(userBanListEntry.getExpires())));
             }
             return mutableComponent;
         }
         if (!this.isWhiteListed(gameProfile)) {
-            return new TranslatableComponent("multiplayer.disconnect.not_whitelisted");
+            return Component.translatable("multiplayer.disconnect.not_whitelisted");
         }
         if (this.ipBans.isBanned(socketAddress)) {
             IpBanListEntry ipBanListEntry = this.ipBans.get(socketAddress);
-            TranslatableComponent mutableComponent = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", ipBanListEntry.getReason());
+            MutableComponent mutableComponent = Component.translatable("multiplayer.disconnect.banned_ip.reason", ipBanListEntry.getReason());
             if (ipBanListEntry.getExpires() != null) {
-                mutableComponent.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(ipBanListEntry.getExpires())));
+                mutableComponent.append(Component.translatable("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(ipBanListEntry.getExpires())));
             }
             return mutableComponent;
         }
         if (this.players.size() >= this.maxPlayers && !this.canBypassPlayerLimit(gameProfile)) {
-            return new TranslatableComponent("multiplayer.disconnect.server_full");
+            return Component.translatable("multiplayer.disconnect.server_full");
         }
         return null;
     }
@@ -372,7 +372,7 @@ public abstract class PlayerList {
             list.add(serverPlayer2);
         }
         for (ServerPlayer serverPlayer3 : list) {
-            serverPlayer3.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login"));
+            serverPlayer3.connection.disconnect(Component.translatable("multiplayer.disconnect.duplicate_login"));
         }
         return new ServerPlayer(this.server, this.server.overworld(), gameProfile);
     }
@@ -645,7 +645,7 @@ public abstract class PlayerList {
 
     public void removeAll() {
         for (int i = 0; i < this.players.size(); ++i) {
-            this.players.get((int)i).connection.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown"));
+            this.players.get((int)i).connection.disconnect(Component.translatable("multiplayer.disconnect.server_shutdown"));
         }
     }
 

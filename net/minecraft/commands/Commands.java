@@ -33,11 +33,10 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.gametest.framework.TestCommand;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.commands.AttributeCommand;
@@ -231,22 +230,22 @@ public class Commands {
             commandSourceStack.sendFailure(ComponentUtils.fromMessage(commandSyntaxException.getRawMessage()));
             if (commandSyntaxException.getInput() != null && commandSyntaxException.getCursor() >= 0) {
                 i = Math.min(commandSyntaxException.getInput().length(), commandSyntaxException.getCursor());
-                MutableComponent mutableComponent = new TextComponent("").withStyle(ChatFormatting.GRAY).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
+                MutableComponent mutableComponent = Component.empty().withStyle(ChatFormatting.GRAY).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
                 if (i > 10) {
                     mutableComponent.append("...");
                 }
                 mutableComponent.append(commandSyntaxException.getInput().substring(Math.max(0, i - 10), i));
                 if (i < commandSyntaxException.getInput().length()) {
-                    MutableComponent component = new TextComponent(commandSyntaxException.getInput().substring(i)).withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE);
+                    MutableComponent component = Component.literal(commandSyntaxException.getInput().substring(i)).withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE);
                     mutableComponent.append(component);
                 }
-                mutableComponent.append(new TranslatableComponent("command.context.here").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
+                mutableComponent.append(Component.translatable("command.context.here").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
                 commandSourceStack.sendFailure(mutableComponent);
             }
             i = 0;
             return i;
         } catch (Exception exception) {
-            TextComponent mutableComponent2 = new TextComponent(exception.getMessage() == null ? exception.getClass().getName() : exception.getMessage());
+            MutableComponent mutableComponent2 = Component.literal(exception.getMessage() == null ? exception.getClass().getName() : exception.getMessage());
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.error("Command exception: {}", (Object)string, (Object)exception);
                 StackTraceElement[] stackTraceElements = exception.getStackTrace();
@@ -254,9 +253,9 @@ public class Commands {
                     mutableComponent2.append("\n\n").append(stackTraceElements[j].getMethodName()).append("\n ").append(stackTraceElements[j].getFileName()).append(":").append(String.valueOf(stackTraceElements[j].getLineNumber()));
                 }
             }
-            commandSourceStack.sendFailure(new TranslatableComponent("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2))));
+            commandSourceStack.sendFailure(Component.translatable("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2))));
             if (SharedConstants.IS_RUNNING_IN_IDE) {
-                commandSourceStack.sendFailure(new TextComponent(Util.describeError(exception)));
+                commandSourceStack.sendFailure(Component.literal(Util.describeError(exception)));
                 LOGGER.error("'{}' threw an exception", (Object)string, (Object)exception);
             }
             int n = 0;

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
@@ -17,7 +18,7 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.DataPackConfig;
@@ -44,7 +45,7 @@ extends Screen {
     private WorldSelectionList list;
 
     public SelectWorldScreen(Screen screen) {
-        super(new TranslatableComponent("selectWorld.title"));
+        super(Component.translatable("selectWorld.title"));
         this.lastScreen = screen;
     }
 
@@ -61,16 +62,16 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.searchBox = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, this.searchBox, new TranslatableComponent("selectWorld.search"));
-        this.searchBox.setResponder(string -> this.list.refreshList(() -> string, false));
-        this.list = new WorldSelectionList(this, this.minecraft, this.width, this.height, 48, this.height - 64, 36, () -> this.searchBox.getValue(), this.list);
+        this.searchBox = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, this.searchBox, Component.translatable("selectWorld.search"));
+        this.searchBox.setResponder(string -> this.list.refreshList((String)string));
+        this.list = new WorldSelectionList(this, this.minecraft, this.width, this.height, 48, this.height - 64, 36, this.getFilterSupplier(), this.list);
         this.addWidget(this.searchBox);
         this.addWidget(this.list);
-        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.select"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld)));
-        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 52, 150, 20, new TranslatableComponent("selectWorld.create"), button -> CreateWorldScreen.openFresh(this.minecraft, this)));
-        this.renameButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.edit"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::editWorld)));
-        this.deleteButton = this.addRenderableWidget(new Button(this.width / 2 - 76, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.delete"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::deleteWorld)));
-        this.copyButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 72, 20, new TranslatableComponent("selectWorld.recreate"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::recreateWorld)));
+        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 52, 150, 20, Component.translatable("selectWorld.select"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld)));
+        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 52, 150, 20, Component.translatable("selectWorld.create"), button -> CreateWorldScreen.openFresh(this.minecraft, this)));
+        this.renameButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 72, 20, Component.translatable("selectWorld.edit"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::editWorld)));
+        this.deleteButton = this.addRenderableWidget(new Button(this.width / 2 - 76, this.height - 28, 72, 20, Component.translatable("selectWorld.delete"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::deleteWorld)));
+        this.copyButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 72, 20, Component.translatable("selectWorld.recreate"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::recreateWorld)));
         this.addRenderableWidget(new Button(this.width / 2 + 82, this.height - 28, 72, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
         this.updateButtonStatus(false);
         this.setInitialFocus(this.searchBox);
@@ -120,15 +121,20 @@ extends Screen {
     @Override
     public void removed() {
         if (this.list != null) {
-            this.list.children().forEach(WorldSelectionList.WorldListEntry::close);
+            this.list.children().forEach(WorldSelectionList.Entry::close);
         }
+    }
+
+    public Supplier<String> getFilterSupplier() {
+        return () -> this.searchBox.getValue();
     }
 
     private /* synthetic */ void method_35739(Button button) {
         try {
             WorldSelectionList.WorldListEntry worldListEntry;
+            WorldSelectionList.Entry entry;
             String string = "DEBUG world";
-            if (!this.list.children().isEmpty() && (worldListEntry = (WorldSelectionList.WorldListEntry)this.list.children().get(0)).getLevelName().equals("DEBUG world")) {
+            if (!this.list.children().isEmpty() && (entry = (WorldSelectionList.Entry)this.list.children().get(0)) instanceof WorldSelectionList.WorldListEntry && (worldListEntry = (WorldSelectionList.WorldListEntry)entry).getLevelName().equals("DEBUG world")) {
                 worldListEntry.doDeleteWorld();
             }
             RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();

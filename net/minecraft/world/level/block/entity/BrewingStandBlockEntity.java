@@ -9,7 +9,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.WorldlyContainer;
@@ -86,7 +85,7 @@ implements WorldlyContainer {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container.brewing");
+        return Component.translatable("container.brewing");
     }
 
     @Override

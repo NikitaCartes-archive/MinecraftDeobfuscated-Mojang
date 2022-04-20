@@ -43,8 +43,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -229,7 +227,7 @@ ServerGamePacketListener {
         if (this.clientIsFloating && !this.player.isSleeping() && !this.player.isPassenger()) {
             if (++this.aboveGroundTickCount > 80) {
                 LOGGER.warn("{} was kicked for floating too long!", (Object)this.player.getName().getString());
-                this.disconnect(new TranslatableComponent("multiplayer.disconnect.flying"));
+                this.disconnect(Component.translatable("multiplayer.disconnect.flying"));
                 return;
             }
         } else {
@@ -251,7 +249,7 @@ ServerGamePacketListener {
             if (this.clientVehicleIsFloating && this.player.getRootVehicle().getControllingPassenger() == this.player) {
                 if (++this.aboveGroundVehicleTickCount > 80) {
                     LOGGER.warn("{} was kicked for floating a vehicle too long!", (Object)this.player.getName().getString());
-                    this.disconnect(new TranslatableComponent("multiplayer.disconnect.flying"));
+                    this.disconnect(Component.translatable("multiplayer.disconnect.flying"));
                     return;
                 }
             } else {
@@ -263,7 +261,7 @@ ServerGamePacketListener {
         long l = Util.getMillis();
         if (l - this.keepAliveTime >= 15000L) {
             if (this.keepAlivePending) {
-                this.disconnect(new TranslatableComponent("disconnect.timeout"));
+                this.disconnect(Component.translatable("disconnect.timeout"));
             } else {
                 this.keepAlivePending = true;
                 this.keepAliveTime = l;
@@ -279,7 +277,7 @@ ServerGamePacketListener {
             --this.dropSpamTickCount;
         }
         if (this.player.getLastActionTime() > 0L && this.server.getPlayerIdleTimeout() > 0 && Util.getMillis() - this.player.getLastActionTime() > (long)(this.server.getPlayerIdleTimeout() * 1000 * 60)) {
-            this.disconnect(new TranslatableComponent("multiplayer.disconnect.idling"));
+            this.disconnect(Component.translatable("multiplayer.disconnect.idling"));
         }
     }
 
@@ -353,7 +351,7 @@ ServerGamePacketListener {
     public void handleMoveVehicle(ServerboundMoveVehiclePacket serverboundMoveVehiclePacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundMoveVehiclePacket, this, this.player.getLevel());
         if (ServerGamePacketListenerImpl.containsInvalidValues(serverboundMoveVehiclePacket.getX(), serverboundMoveVehiclePacket.getY(), serverboundMoveVehiclePacket.getZ(), serverboundMoveVehiclePacket.getYRot(), serverboundMoveVehiclePacket.getXRot())) {
-            this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_vehicle_movement"));
+            this.disconnect(Component.translatable("multiplayer.disconnect.invalid_vehicle_movement"));
             return;
         }
         Entity entity = this.player.getRootVehicle();
@@ -470,11 +468,11 @@ ServerGamePacketListener {
     public void handleSetCommandBlock(ServerboundSetCommandBlockPacket serverboundSetCommandBlockPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundSetCommandBlockPacket, this, this.player.getLevel());
         if (!this.server.isCommandBlockEnabled()) {
-            this.player.sendMessage(new TranslatableComponent("advMode.notEnabled"), Util.NIL_UUID);
+            this.player.sendMessage(Component.translatable("advMode.notEnabled"), Util.NIL_UUID);
             return;
         }
         if (!this.player.canUseGameMasterBlocks()) {
-            this.player.sendMessage(new TranslatableComponent("advMode.notAllowed"), Util.NIL_UUID);
+            this.player.sendMessage(Component.translatable("advMode.notAllowed"), Util.NIL_UUID);
             return;
         }
         BaseCommandBlock baseCommandBlock = null;
@@ -512,7 +510,7 @@ ServerGamePacketListener {
             }
             baseCommandBlock.onUpdated();
             if (!StringUtil.isNullOrEmpty(string)) {
-                this.player.sendMessage(new TranslatableComponent("advMode.setCommand.success", string), Util.NIL_UUID);
+                this.player.sendMessage(Component.translatable("advMode.setCommand.success", string), Util.NIL_UUID);
             }
         }
     }
@@ -521,11 +519,11 @@ ServerGamePacketListener {
     public void handleSetCommandMinecart(ServerboundSetCommandMinecartPacket serverboundSetCommandMinecartPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundSetCommandMinecartPacket, this, this.player.getLevel());
         if (!this.server.isCommandBlockEnabled()) {
-            this.player.sendMessage(new TranslatableComponent("advMode.notEnabled"), Util.NIL_UUID);
+            this.player.sendMessage(Component.translatable("advMode.notEnabled"), Util.NIL_UUID);
             return;
         }
         if (!this.player.canUseGameMasterBlocks()) {
-            this.player.sendMessage(new TranslatableComponent("advMode.notAllowed"), Util.NIL_UUID);
+            this.player.sendMessage(Component.translatable("advMode.notAllowed"), Util.NIL_UUID);
             return;
         }
         BaseCommandBlock baseCommandBlock = serverboundSetCommandMinecartPacket.getCommandBlock(this.player.level);
@@ -536,7 +534,7 @@ ServerGamePacketListener {
                 baseCommandBlock.setLastOutput(null);
             }
             baseCommandBlock.onUpdated();
-            this.player.sendMessage(new TranslatableComponent("advMode.setCommand.success", serverboundSetCommandMinecartPacket.getCommand()), Util.NIL_UUID);
+            this.player.sendMessage(Component.translatable("advMode.setCommand.success", serverboundSetCommandMinecartPacket.getCommand()), Util.NIL_UUID);
         }
     }
 
@@ -596,27 +594,27 @@ ServerGamePacketListener {
                 String string = structureBlockEntity.getStructureName();
                 if (serverboundSetStructureBlockPacket.getUpdateType() == StructureBlockEntity.UpdateType.SAVE_AREA) {
                     if (structureBlockEntity.saveStructure()) {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.save_success", string), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.save_success", string), false);
                     } else {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.save_failure", string), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.save_failure", string), false);
                     }
                 } else if (serverboundSetStructureBlockPacket.getUpdateType() == StructureBlockEntity.UpdateType.LOAD_AREA) {
                     if (!structureBlockEntity.isStructureLoadable()) {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.load_not_found", string), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.load_not_found", string), false);
                     } else if (structureBlockEntity.loadStructure(this.player.getLevel())) {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.load_success", string), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.load_success", string), false);
                     } else {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.load_prepare", string), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.load_prepare", string), false);
                     }
                 } else if (serverboundSetStructureBlockPacket.getUpdateType() == StructureBlockEntity.UpdateType.SCAN_AREA) {
                     if (structureBlockEntity.detectSize()) {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.size_success", string), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.size_success", string), false);
                     } else {
-                        this.player.displayClientMessage(new TranslatableComponent("structure_block.size_failure"), false);
+                        this.player.displayClientMessage(Component.translatable("structure_block.size_failure"), false);
                     }
                 }
             } else {
-                this.player.displayClientMessage(new TranslatableComponent("structure_block.invalid_structure_name", serverboundSetStructureBlockPacket.getName()), false);
+                this.player.displayClientMessage(Component.translatable("structure_block.invalid_structure_name", serverboundSetStructureBlockPacket.getName()), false);
             }
             structureBlockEntity.setChanged();
             this.player.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
@@ -708,7 +706,7 @@ ServerGamePacketListener {
             itemStack2.addTagElement("filtered_title", StringTag.valueOf(filteredText.getFiltered()));
             itemStack2.addTagElement("title", StringTag.valueOf(filteredText.getRaw()));
         }
-        this.updateBookPages(list, string -> Component.Serializer.toJson(new TextComponent((String)string)), itemStack2);
+        this.updateBookPages(list, string -> Component.Serializer.toJson(Component.literal(string)), itemStack2);
         this.player.getInventory().setItem(i, itemStack2);
     }
 
@@ -763,7 +761,7 @@ ServerGamePacketListener {
         boolean bl;
         PacketUtils.ensureRunningOnSameThread(serverboundMovePlayerPacket, this, this.player.getLevel());
         if (ServerGamePacketListenerImpl.containsInvalidValues(serverboundMovePlayerPacket.getX(0.0), serverboundMovePlayerPacket.getY(0.0), serverboundMovePlayerPacket.getZ(0.0), serverboundMovePlayerPacket.getYRot(0.0f), serverboundMovePlayerPacket.getXRot(0.0f))) {
-            this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_player_movement"));
+            this.disconnect(Component.translatable("multiplayer.disconnect.invalid_player_movement"));
             return;
         }
         ServerLevel serverLevel = this.player.getLevel();
@@ -977,14 +975,14 @@ ServerGamePacketListener {
             if (this.awaitingPositionFromClient == null && this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0 && serverLevel.mayInteract(this.player, blockPos)) {
                 InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
                 if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
-                    MutableComponent component = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
+                    MutableComponent component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
                     this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
                 } else if (interactionResult.shouldSwing()) {
                     this.player.swing(interactionHand, true);
                 }
             }
         } else {
-            MutableComponent component2 = new TranslatableComponent("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
+            MutableComponent component2 = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
             this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
         }
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
@@ -1026,7 +1024,7 @@ ServerGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(serverboundResourcePackPacket, this, this.player.getLevel());
         if (serverboundResourcePackPacket.getAction() == ServerboundResourcePackPacket.Action.DECLINED && this.server.isResourcePackRequired()) {
             LOGGER.info("Disconnecting {} due to resource pack rejection", (Object)this.player.getName());
-            this.disconnect(new TranslatableComponent("multiplayer.requiredTexturePrompt.disconnect"));
+            this.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
         }
     }
 
@@ -1047,7 +1045,7 @@ ServerGamePacketListener {
     public void onDisconnect(Component component) {
         LOGGER.info("{} lost connection: {}", (Object)this.player.getName().getString(), (Object)component.getString());
         this.server.invalidateStatus();
-        this.server.getPlayerList().broadcastMessage(new TranslatableComponent("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
+        this.server.getPlayerList().broadcastMessage(Component.translatable("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
         this.player.disconnect();
         this.server.getPlayerList().remove(this.player);
         this.player.getTextFilter().leave();
@@ -1099,7 +1097,7 @@ ServerGamePacketListener {
         String string = StringUtils.normalizeSpace(serverboundChatPacket.getMessage());
         for (int i = 0; i < string.length(); ++i) {
             if (SharedConstants.isAllowedChatCharacter(string.charAt(i))) continue;
-            this.disconnect(new TranslatableComponent("multiplayer.disconnect.illegal_characters"));
+            this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
             return;
         }
         if (string.startsWith("/")) {
@@ -1112,7 +1110,7 @@ ServerGamePacketListener {
 
     private void handleChat(TextFilter.FilteredText filteredText) {
         if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-            this.send(new ClientboundChatPacket(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
+            this.send(new ClientboundChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
             return;
         }
         this.player.resetLastActionTime();
@@ -1121,13 +1119,13 @@ ServerGamePacketListener {
             this.handleCommand(string);
         } else {
             String string2 = filteredText.getFiltered();
-            TranslatableComponent component = string2.isEmpty() ? null : new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string2);
-            TranslatableComponent component2 = new TranslatableComponent("chat.type.text", this.player.getDisplayName(), string);
+            MutableComponent component = string2.isEmpty() ? null : Component.translatable("chat.type.text", this.player.getDisplayName(), string2);
+            MutableComponent component2 = Component.translatable("chat.type.text", this.player.getDisplayName(), string);
             this.server.getPlayerList().broadcastMessage(component2, serverPlayer -> this.player.shouldFilterMessageTo((ServerPlayer)serverPlayer) ? component : component2, ChatType.CHAT, this.player.getUUID());
         }
         this.chatSpamTickCount += 20;
         if (this.chatSpamTickCount > 200 && !this.server.getPlayerList().isOp(this.player.getGameProfile())) {
-            this.disconnect(new TranslatableComponent("disconnect.spam"));
+            this.disconnect(Component.translatable("disconnect.spam"));
         }
     }
 
@@ -1239,7 +1237,7 @@ ServerGamePacketListener {
                     @Override
                     public void onAttack() {
                         if (entity instanceof ItemEntity || entity instanceof ExperienceOrb || entity instanceof AbstractArrow || entity == ServerGamePacketListenerImpl.this.player) {
-                            ServerGamePacketListenerImpl.this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_entity_attacked"));
+                            ServerGamePacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.invalid_entity_attacked"));
                             LOGGER.warn("Player {} tried to attack an invalid entity", (Object)ServerGamePacketListenerImpl.this.player.getName().getString());
                             return;
                         }
@@ -1384,10 +1382,10 @@ ServerGamePacketListener {
             for (int i = 0; i < list.size(); ++i) {
                 TextFilter.FilteredText filteredText = list.get(i);
                 if (this.player.isTextFilteringEnabled()) {
-                    signBlockEntity.setMessage(i, new TextComponent(filteredText.getFiltered()));
+                    signBlockEntity.setMessage(i, Component.literal(filteredText.getFiltered()));
                     continue;
                 }
-                signBlockEntity.setMessage(i, new TextComponent(filteredText.getRaw()), new TextComponent(filteredText.getFiltered()));
+                signBlockEntity.setMessage(i, Component.literal(filteredText.getRaw()), Component.literal(filteredText.getFiltered()));
             }
             signBlockEntity.setChanged();
             serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
@@ -1401,7 +1399,7 @@ ServerGamePacketListener {
             this.player.latency = (this.player.latency * 3 + i) / 4;
             this.keepAlivePending = false;
         } else if (!this.isSingleplayerOwner()) {
-            this.disconnect(new TranslatableComponent("disconnect.timeout"));
+            this.disconnect(Component.translatable("disconnect.timeout"));
         }
     }
 

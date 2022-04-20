@@ -8,7 +8,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class SetPlayerIdleTimeoutCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -17,7 +17,7 @@ public class SetPlayerIdleTimeoutCommand {
 
     private static int setIdleTimeout(CommandSourceStack commandSourceStack, int i) {
         commandSourceStack.getServer().setPlayerIdleTimeout(i);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.setidletimeout.success", i), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.setidletimeout.success", i), true);
         return i;
     }
 }

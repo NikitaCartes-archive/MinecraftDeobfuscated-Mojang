@@ -105,7 +105,6 @@ import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.server.level.ChunkMap;
@@ -123,7 +122,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -493,7 +491,7 @@ AutoCloseable {
             String string2 = "Failed to " + string + " shader: " + resourceLocation;
             TransparencyShaderException transparencyShaderException = new TransparencyShaderException(string2, exception);
             if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1) {
-                Component component = this.minecraft.getResourceManager().listPacks().findFirst().map(packResources -> new TextComponent(packResources.getName())).orElse(null);
+                Component component = this.minecraft.getResourceManager().listPacks().findFirst().map(packResources -> Component.literal(packResources.getName())).orElse(null);
                 this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
                 this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
             }
@@ -544,7 +542,9 @@ AutoCloseable {
         }
         this.darkBuffer = new VertexBuffer();
         LevelRenderer.buildSkyDisc(bufferBuilder, -16.0f);
+        this.darkBuffer.bind();
         this.darkBuffer.upload(bufferBuilder);
+        VertexBuffer.unbind();
     }
 
     private void createLightSky() {
@@ -555,7 +555,9 @@ AutoCloseable {
         }
         this.skyBuffer = new VertexBuffer();
         LevelRenderer.buildSkyDisc(bufferBuilder, 16.0f);
+        this.skyBuffer.bind();
         this.skyBuffer.upload(bufferBuilder);
+        VertexBuffer.unbind();
     }
 
     private static void buildSkyDisc(BufferBuilder bufferBuilder, float f) {
@@ -580,7 +582,9 @@ AutoCloseable {
         this.starBuffer = new VertexBuffer();
         this.drawStars(bufferBuilder);
         bufferBuilder.end();
+        this.starBuffer.bind();
         this.starBuffer.upload(bufferBuilder);
+        VertexBuffer.unbind();
     }
 
     private void drawStars(BufferBuilder bufferBuilder) {
@@ -1288,9 +1292,7 @@ AutoCloseable {
         this.minecraft.getProfiler().popPush(() -> "render_" + renderType);
         boolean bl = renderType != RenderType.translucent();
         ListIterator objectListIterator = this.renderChunksInFrustum.listIterator(bl ? 0 : this.renderChunksInFrustum.size());
-        VertexFormat vertexFormat = renderType.format();
         ShaderInstance shaderInstance = RenderSystem.getShader();
-        BufferUploader.reset();
         for (int k = 0; k < 12; ++k) {
             int l = RenderSystem.getShaderTexture(k);
             shaderInstance.setSampler("Sampler" + k, l);
@@ -1325,7 +1327,6 @@ AutoCloseable {
         RenderSystem.setupShaderLights(shaderInstance);
         shaderInstance.apply();
         Uniform uniform = shaderInstance.CHUNK_OFFSET;
-        boolean bl2 = false;
         while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
             RenderChunkInfo renderChunkInfo2 = bl ? (RenderChunkInfo)objectListIterator.next() : (RenderChunkInfo)objectListIterator.previous();
             ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo2.chunk;
@@ -1336,18 +1337,14 @@ AutoCloseable {
                 uniform.set((float)((double)blockPos.getX() - d), (float)((double)blockPos.getY() - e), (float)((double)blockPos.getZ() - f));
                 uniform.upload();
             }
-            vertexBuffer.drawChunkLayer();
-            bl2 = true;
+            vertexBuffer.bind();
+            vertexBuffer.draw();
         }
         if (uniform != null) {
             uniform.set(Vector3f.ZERO);
         }
         shaderInstance.clear();
-        if (bl2) {
-            vertexFormat.clearBufferState();
-        }
         VertexBuffer.unbind();
-        VertexBuffer.unbindVertexArray();
         this.minecraft.getProfiler().pop();
         renderType.clearRenderState();
     }
@@ -1622,7 +1619,9 @@ AutoCloseable {
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(g, h, i, 1.0f);
         ShaderInstance shaderInstance = RenderSystem.getShader();
+        this.skyBuffer.bind();
         this.skyBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
+        VertexBuffer.unbind();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
@@ -1649,7 +1648,7 @@ AutoCloseable {
                 bufferBuilder.vertex(matrix4f2, q * 120.0f, r * 120.0f, -r * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).endVertex();
             }
             bufferBuilder.end();
-            BufferUploader.end(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder);
             poseStack.popPose();
         }
         RenderSystem.enableTexture();
@@ -1669,7 +1668,7 @@ AutoCloseable {
         bufferBuilder.vertex(matrix4f3, l, 100.0f, l).uv(1.0f, 1.0f).endVertex();
         bufferBuilder.vertex(matrix4f3, -l, 100.0f, l).uv(0.0f, 1.0f).endVertex();
         bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder);
         l = 20.0f;
         RenderSystem.setShaderTexture(0, MOON_LOCATION);
         int s = this.level.getMoonPhase();
@@ -1685,13 +1684,15 @@ AutoCloseable {
         bufferBuilder.vertex(matrix4f3, l, -100.0f, -l).uv(u, p).endVertex();
         bufferBuilder.vertex(matrix4f3, -l, -100.0f, -l).uv(q, p).endVertex();
         bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder);
         RenderSystem.disableTexture();
         float v = this.level.getStarBrightness(f) * j;
         if (v > 0.0f) {
             RenderSystem.setShaderColor(v, v, v, v);
             FogRenderer.setupNoFog();
+            this.starBuffer.bind();
             this.starBuffer.drawWithShader(poseStack.last().pose(), matrix4f, GameRenderer.getPositionShader());
+            VertexBuffer.unbind();
             runnable.run();
         }
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1703,7 +1704,9 @@ AutoCloseable {
         if (d < 0.0) {
             poseStack.pushPose();
             poseStack.translate(0.0, 12.0, 0.0);
+            this.darkBuffer.bind();
             this.darkBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
+            VertexBuffer.unbind();
             poseStack.popPose();
         }
         if (this.level.effects().hasGround()) {
@@ -1758,7 +1761,9 @@ AutoCloseable {
             this.cloudBuffer = new VertexBuffer();
             this.buildClouds(bufferBuilder, m, n, o, vec3);
             bufferBuilder.end();
+            this.cloudBuffer.bind();
             this.cloudBuffer.upload(bufferBuilder);
+            VertexBuffer.unbind();
         }
         RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
         RenderSystem.setShaderTexture(0, CLOUDS_LOCATION);
@@ -1768,6 +1773,7 @@ AutoCloseable {
         poseStack.translate(-p, q, -r);
         if (this.cloudBuffer != null) {
             int v;
+            this.cloudBuffer.bind();
             for (int w = v = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; w < 2; ++w) {
                 if (w == 0) {
                     RenderSystem.colorMask(false, false, false, false);
@@ -1777,6 +1783,7 @@ AutoCloseable {
                 ShaderInstance shaderInstance = RenderSystem.getShader();
                 this.cloudBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
             }
+            VertexBuffer.unbind();
         }
         poseStack.popPose();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -2007,7 +2014,7 @@ AutoCloseable {
             }
         }
         bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder);
         RenderSystem.enableCull();
         RenderSystem.polygonOffset(0.0f, 0.0f);
         RenderSystem.disablePolygonOffset();
@@ -2291,7 +2298,7 @@ AutoCloseable {
         }
     }
 
-    public void levelEvent(Player player, int i, BlockPos blockPos, int j) {
+    public void levelEvent(int i, BlockPos blockPos, int j) {
         RandomSource randomSource = this.level.random;
         switch (i) {
             case 1035: {
@@ -2432,18 +2439,18 @@ AutoCloseable {
                         float y = 0.4f + 0.3f * (float)k * randomSource.nextFloat();
                         this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, x, y, false);
                     }
-                    int l = j & 0x3F;
+                    byte b = (byte)(j & 0x3F);
                     UniformInt intProvider = UniformInt.of(0, k);
                     float ae = 0.005f;
                     Supplier<Vec3> supplier = () -> new Vec3(Mth.nextDouble(randomSource, -0.005f, 0.005f), Mth.nextDouble(randomSource, -0.005f, 0.005f), Mth.nextDouble(randomSource, -0.005f, 0.005f));
-                    if (l == 0) {
+                    if (b == 0) {
                         for (Direction direction2 : Direction.values()) {
                             float af = direction2 == Direction.DOWN ? (float)Math.PI : 0.0f;
                             double g = direction2.getAxis() == Direction.Axis.Y ? 0.65 : 0.57;
                             ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(af), intProvider, direction2, supplier, g);
                         }
                     } else {
-                        for (Direction direction3 : MultifaceBlock.unpack((byte)j)) {
+                        for (Direction direction3 : MultifaceBlock.unpack(b)) {
                             float ag = direction3 == Direction.UP ? (float)Math.PI : 0.0f;
                             double ah = 0.35;
                             ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(ag), intProvider, direction3, supplier, 0.35);
@@ -2482,10 +2489,6 @@ AutoCloseable {
             }
             case 3005: {
                 ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, UniformInt.of(3, 5));
-                break;
-            }
-            case 3008: {
-                ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.ALLAY_DUST, UniformInt.of(3, 5));
                 break;
             }
             case 2008: {

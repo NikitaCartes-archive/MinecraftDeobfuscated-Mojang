@@ -11,22 +11,22 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.HttpUtil;
 import net.minecraft.world.level.GameType;
 
 @Environment(value=EnvType.CLIENT)
 public class ShareToLanScreen
 extends Screen {
-    private static final Component ALLOW_COMMANDS_LABEL = new TranslatableComponent("selectWorld.allowCommands");
-    private static final Component GAME_MODE_LABEL = new TranslatableComponent("selectWorld.gameMode");
-    private static final Component INFO_TEXT = new TranslatableComponent("lanServer.otherPlayers");
+    private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands");
+    private static final Component GAME_MODE_LABEL = Component.translatable("selectWorld.gameMode");
+    private static final Component INFO_TEXT = Component.translatable("lanServer.otherPlayers");
     private final Screen lastScreen;
     private GameType gameMode = GameType.SURVIVAL;
     private boolean commands;
 
     public ShareToLanScreen(Screen screen) {
-        super(new TranslatableComponent("lanServer.title"));
+        super(Component.translatable("lanServer.title"));
         this.lastScreen = screen;
     }
 
@@ -38,10 +38,10 @@ extends Screen {
         this.addRenderableWidget(CycleButton.onOffBuilder(this.commands).create(this.width / 2 + 5, 100, 150, 20, ALLOW_COMMANDS_LABEL, (cycleButton, boolean_) -> {
             this.commands = boolean_;
         }));
-        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("lanServer.start"), button -> {
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, Component.translatable("lanServer.start"), button -> {
             this.minecraft.setScreen(null);
             int i = HttpUtil.getAvailablePort();
-            TranslatableComponent component = this.minecraft.getSingleplayerServer().publishServer(this.gameMode, this.commands, i) ? new TranslatableComponent("commands.publish.started", i) : new TranslatableComponent("commands.publish.failed");
+            MutableComponent component = this.minecraft.getSingleplayerServer().publishServer(this.gameMode, this.commands, i) ? Component.translatable("commands.publish.started", i) : Component.translatable("commands.publish.failed");
             this.minecraft.gui.getChat().addMessage(component);
             this.minecraft.updateTitle();
         }));

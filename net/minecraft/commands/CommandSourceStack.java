@@ -25,8 +25,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -43,8 +41,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class CommandSourceStack
 implements SharedSuggestionProvider {
-    public static final SimpleCommandExceptionType ERROR_NOT_PLAYER = new SimpleCommandExceptionType(new TranslatableComponent("permissions.requires.player"));
-    public static final SimpleCommandExceptionType ERROR_NOT_ENTITY = new SimpleCommandExceptionType(new TranslatableComponent("permissions.requires.entity"));
+    public static final SimpleCommandExceptionType ERROR_NOT_PLAYER = new SimpleCommandExceptionType(Component.translatable("permissions.requires.player"));
+    public static final SimpleCommandExceptionType ERROR_NOT_ENTITY = new SimpleCommandExceptionType(Component.translatable("permissions.requires.entity"));
     private final CommandSource source;
     private final Vec3 worldPosition;
     private final ServerLevel level;
@@ -233,7 +231,7 @@ implements SharedSuggestionProvider {
     }
 
     private void broadcastToAdmins(Component component) {
-        MutableComponent component2 = new TranslatableComponent("chat.type.admin", this.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+        MutableComponent component2 = Component.translatable("chat.type.admin", this.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
         if (this.server.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
             for (ServerPlayer serverPlayer : this.server.getPlayerList().getPlayers()) {
                 if (serverPlayer == this.source || !this.server.getPlayerList().isOp(serverPlayer.getGameProfile())) continue;
@@ -247,7 +245,7 @@ implements SharedSuggestionProvider {
 
     public void sendFailure(Component component) {
         if (this.source.acceptsFailure() && !this.silent) {
-            this.source.sendMessage(new TextComponent("").append(component).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+            this.source.sendMessage(Component.empty().append(component).withStyle(ChatFormatting.RED), Util.NIL_UUID);
         }
     }
 

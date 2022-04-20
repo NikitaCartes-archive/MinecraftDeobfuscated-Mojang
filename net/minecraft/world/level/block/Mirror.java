@@ -6,13 +6,12 @@ package net.minecraft.world.level.block;
 import com.mojang.math.OctahedralGroup;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Rotation;
 
 public enum Mirror {
-    NONE(new TranslatableComponent("mirror.none"), OctahedralGroup.IDENTITY),
-    LEFT_RIGHT(new TranslatableComponent("mirror.left_right"), OctahedralGroup.INVERT_Z),
-    FRONT_BACK(new TranslatableComponent("mirror.front_back"), OctahedralGroup.INVERT_X);
+    NONE(Component.translatable("mirror.none"), OctahedralGroup.IDENTITY),
+    LEFT_RIGHT(Component.translatable("mirror.left_right"), OctahedralGroup.INVERT_Z),
+    FRONT_BACK(Component.translatable("mirror.front_back"), OctahedralGroup.INVERT_X);
 
     private final Component symbol;
     private final OctahedralGroup rotation;

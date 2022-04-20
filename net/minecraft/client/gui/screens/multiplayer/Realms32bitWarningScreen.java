@@ -11,14 +11,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.WarningScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class Realms32bitWarningScreen
 extends WarningScreen {
-    private static final Component TITLE = new TranslatableComponent("title.32bit.deprecation.realms.header").withStyle(ChatFormatting.BOLD);
-    private static final Component CONTENT = new TranslatableComponent("title.32bit.deprecation.realms");
-    private static final Component CHECK = new TranslatableComponent("title.32bit.deprecation.realms.check");
+    private static final Component TITLE = Component.translatable("title.32bit.deprecation.realms.header").withStyle(ChatFormatting.BOLD);
+    private static final Component CONTENT = Component.translatable("title.32bit.deprecation.realms");
+    private static final Component CHECK = Component.translatable("title.32bit.deprecation.realms.check");
     private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
 
     public Realms32bitWarningScreen(Screen screen) {

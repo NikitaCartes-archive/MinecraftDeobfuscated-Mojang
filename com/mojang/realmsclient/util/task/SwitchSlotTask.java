@@ -9,7 +9,7 @@ import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,7 +29,7 @@ extends LongRunningTask {
     @Override
     public void run() {
         RealmsClient realmsClient = RealmsClient.create();
-        this.setTitle(new TranslatableComponent("mco.minigame.world.slot.screen.title"));
+        this.setTitle(Component.translatable("mco.minigame.world.slot.screen.title"));
         for (int i = 0; i < 25; ++i) {
             try {
                 if (this.aborted()) {

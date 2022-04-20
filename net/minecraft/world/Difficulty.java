@@ -6,7 +6,6 @@ package net.minecraft.world;
 import java.util.Arrays;
 import java.util.Comparator;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 public enum Difficulty {
@@ -29,7 +28,7 @@ public enum Difficulty {
     }
 
     public Component getDisplayName() {
-        return new TranslatableComponent("options.difficulty." + this.key);
+        return Component.translatable("options.difficulty." + this.key);
     }
 
     public static Difficulty byId(int i) {

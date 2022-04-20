@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.players.BanListEntry;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +39,7 @@ extends BanListEntry<GameProfile> {
     @Override
     public Component getDisplayName() {
         GameProfile gameProfile = (GameProfile)this.getUser();
-        return new TextComponent(gameProfile.getName() != null ? gameProfile.getName() : Objects.toString(gameProfile.getId(), "(Unknown)"));
+        return Component.literal(gameProfile.getName() != null ? gameProfile.getName() : Objects.toString(gameProfile.getId(), "(Unknown)"));
     }
 
     private static GameProfile createGameProfile(JsonObject jsonObject) {

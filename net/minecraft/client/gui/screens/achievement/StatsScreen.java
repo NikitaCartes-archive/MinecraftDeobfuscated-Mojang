@@ -27,8 +27,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -48,7 +46,7 @@ import org.jetbrains.annotations.Nullable;
 public class StatsScreen
 extends Screen
 implements StatsUpdateListener {
-    private static final Component PENDING_TEXT = new TranslatableComponent("multiplayer.downloadingStats");
+    private static final Component PENDING_TEXT = Component.translatable("multiplayer.downloadingStats");
     protected final Screen lastScreen;
     private GeneralStatisticsList statsList;
     ItemStatisticsList itemStatsList;
@@ -71,7 +69,7 @@ implements StatsUpdateListener {
     private static final int SORT_UP = 1;
 
     public StatsScreen(Screen screen, StatsCounter statsCounter) {
-        super(new TranslatableComponent("gui.stats"));
+        super(Component.translatable("gui.stats"));
         this.lastScreen = screen;
         this.stats = statsCounter;
     }
@@ -89,9 +87,9 @@ implements StatsUpdateListener {
     }
 
     public void initButtons() {
-        this.addRenderableWidget(new Button(this.width / 2 - 120, this.height - 52, 80, 20, new TranslatableComponent("stat.generalButton"), button -> this.setActiveList(this.statsList)));
-        Button button2 = this.addRenderableWidget(new Button(this.width / 2 - 40, this.height - 52, 80, 20, new TranslatableComponent("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)));
-        Button button22 = this.addRenderableWidget(new Button(this.width / 2 + 40, this.height - 52, 80, 20, new TranslatableComponent("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)));
+        this.addRenderableWidget(new Button(this.width / 2 - 120, this.height - 52, 80, 20, Component.translatable("stat.generalButton"), button -> this.setActiveList(this.statsList)));
+        Button button2 = this.addRenderableWidget(new Button(this.width / 2 - 40, this.height - 52, 80, 20, Component.translatable("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)));
+        Button button22 = this.addRenderableWidget(new Button(this.width / 2 + 40, this.height - 52, 80, 20, Component.translatable("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)));
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
         if (this.itemStatsList.children().isEmpty()) {
             button2.active = false;
@@ -189,7 +187,7 @@ implements StatsUpdateListener {
 
             Entry(Stat<ResourceLocation> stat) {
                 this.stat = stat;
-                this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
+                this.statDisplay = Component.translatable(StatsScreen.getTranslationKey(stat));
             }
 
             private String getValueText() {
@@ -205,7 +203,7 @@ implements StatsUpdateListener {
 
             @Override
             public Component getNarration() {
-                return new TranslatableComponent("narrator.select", new TextComponent("").append(this.statDisplay).append(" ").append(this.getValueText()));
+                return Component.translatable("narrator.select", Component.empty().append(this.statDisplay).append(" ").append(this.getValueText()));
             }
         }
     }
@@ -450,7 +448,7 @@ implements StatsUpdateListener {
 
             @Override
             public Component getNarration() {
-                return new TranslatableComponent("narrator.select", this.item.getDescription());
+                return Component.translatable("narrator.select", this.item.getDescription());
             }
         }
     }
@@ -484,18 +482,18 @@ implements StatsUpdateListener {
                 this.mobName = entityType.getDescription();
                 int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
                 if (i == 0) {
-                    this.kills = new TranslatableComponent("stat_type.minecraft.killed.none", this.mobName);
+                    this.kills = Component.translatable("stat_type.minecraft.killed.none", this.mobName);
                     this.hasKills = false;
                 } else {
-                    this.kills = new TranslatableComponent("stat_type.minecraft.killed", i, this.mobName);
+                    this.kills = Component.translatable("stat_type.minecraft.killed", i, this.mobName);
                     this.hasKills = true;
                 }
                 int j = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType));
                 if (j == 0) {
-                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by.none", this.mobName);
+                    this.killedBy = Component.translatable("stat_type.minecraft.killed_by.none", this.mobName);
                     this.wasKilledBy = false;
                 } else {
-                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by", this.mobName, j);
+                    this.killedBy = Component.translatable("stat_type.minecraft.killed_by", this.mobName, j);
                     this.wasKilledBy = true;
                 }
             }
@@ -509,7 +507,7 @@ implements StatsUpdateListener {
 
             @Override
             public Component getNarration() {
-                return new TranslatableComponent("narrator.select", CommonComponents.joinForNarration(this.kills, this.killedBy));
+                return Component.translatable("narrator.select", CommonComponents.joinForNarration(this.kills, this.killedBy));
             }
         }
     }

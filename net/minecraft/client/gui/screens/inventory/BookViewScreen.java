@@ -27,8 +27,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -64,7 +62,7 @@ extends Screen {
     private int currentPage;
     private List<FormattedCharSequence> cachedPageComponents = Collections.emptyList();
     private int cachedPage = -1;
-    private Component pageMsg = TextComponent.EMPTY;
+    private Component pageMsg = CommonComponents.EMPTY;
     private PageButton forwardButton;
     private PageButton backButton;
     private final boolean playTurnSound;
@@ -176,7 +174,7 @@ extends Screen {
         if (this.cachedPage != this.currentPage) {
             FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
             this.cachedPageComponents = this.font.split(formattedText, 114);
-            this.pageMsg = new TranslatableComponent("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
+            this.pageMsg = Component.translatable("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
         }
         this.cachedPage = this.currentPage;
         int m = this.font.width(this.pageMsg);
@@ -336,7 +334,7 @@ extends Screen {
             if (compoundTag != null && WrittenBookItem.makeSureTagIsValid(compoundTag)) {
                 return BookViewScreen.loadPages(compoundTag);
             }
-            return ImmutableList.of(Component.Serializer.toJson(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED)));
+            return ImmutableList.of(Component.Serializer.toJson(Component.translatable("book.invalid.tag").withStyle(ChatFormatting.DARK_RED)));
         }
 
         @Override

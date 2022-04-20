@@ -30,11 +30,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -540,8 +539,8 @@ extends Player {
                 if (!future.isSuccess()) {
                     int i = 256;
                     String string = component.getString(256);
-                    TranslatableComponent component2 = new TranslatableComponent("death.attack.message_too_long", new TextComponent(string).withStyle(ChatFormatting.YELLOW));
-                    MutableComponent component3 = new TranslatableComponent("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
+                    MutableComponent component2 = Component.translatable("death.attack.message_too_long", Component.literal(string).withStyle(ChatFormatting.YELLOW));
+                    MutableComponent component3 = Component.translatable("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
                     this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3));
                 }
             });
@@ -554,7 +553,7 @@ extends Player {
                 this.server.getPlayerList().broadcastToAllExceptTeam(this, component);
             }
         } else {
-            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), TextComponent.EMPTY));
+            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), CommonComponents.EMPTY));
         }
         this.removeEntitiesOnShoulder();
         if (this.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
@@ -803,7 +802,7 @@ extends Player {
             CriteriaTriggers.SLEPT_IN_BED.trigger(this);
         });
         if (!this.getLevel().canSleepThroughNights()) {
-            this.displayClientMessage(new TranslatableComponent("sleep.not_possible"), true);
+            this.displayClientMessage(Component.translatable("sleep.not_possible"), true);
         }
         ((ServerLevel)this.level).updateSleepingPlayerList();
         return either;
@@ -918,7 +917,7 @@ extends Player {
         AbstractContainerMenu abstractContainerMenu = menuProvider.createMenu(this.containerCounter, this.getInventory(), this);
         if (abstractContainerMenu == null) {
             if (this.isSpectator()) {
-                this.displayClientMessage(new TranslatableComponent("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
+                this.displayClientMessage(Component.translatable("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
             }
             return OptionalInt.empty();
         }
@@ -1197,8 +1196,8 @@ extends Player {
             if (!future.isSuccess() && (chatType == ChatType.GAME_INFO || chatType == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
                 int i = 256;
                 String string = component.getString(256);
-                MutableComponent component2 = new TextComponent(string).withStyle(ChatFormatting.YELLOW);
-                this.connection.send(new ClientboundChatPacket(new TranslatableComponent("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), ChatType.SYSTEM, uUID));
+                MutableComponent component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
+                this.connection.send(new ClientboundChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), ChatType.SYSTEM, uUID));
             }
         });
     }
@@ -1371,7 +1370,7 @@ extends Player {
             boolean bl3;
             boolean bl4 = bl3 = blockPos.equals(this.respawnPosition) && resourceKey.equals(this.respawnDimension);
             if (bl2 && !bl3) {
-                this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"), Util.NIL_UUID);
+                this.sendMessage(Component.translatable("block.minecraft.set_spawn"), Util.NIL_UUID);
             }
             this.respawnPosition = blockPos;
             this.respawnDimension = resourceKey;

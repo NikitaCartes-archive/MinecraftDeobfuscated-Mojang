@@ -16,12 +16,12 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class ColorArgument
 implements ArgumentType<ChatFormatting> {
     private static final Collection<String> EXAMPLES = Arrays.asList("red", "green");
-    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.color.invalid", object));
+    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(object -> Component.translatable("argument.color.invalid", object));
 
     private ColorArgument() {
     }

@@ -14,8 +14,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -348,13 +346,13 @@ implements Vanishable {
             return;
         }
         ItemStack itemStack2 = list2.get(0);
-        list.add(new TranslatableComponent("item.minecraft.crossbow.projectile").append(" ").append(itemStack2.getDisplayName()));
+        list.add(Component.translatable("item.minecraft.crossbow.projectile").append(" ").append(itemStack2.getDisplayName()));
         if (tooltipFlag.isAdvanced() && itemStack2.is(Items.FIREWORK_ROCKET)) {
             ArrayList<Component> list3 = Lists.newArrayList();
             Items.FIREWORK_ROCKET.appendHoverText(itemStack2, level, list3, tooltipFlag);
             if (!list3.isEmpty()) {
                 for (int i = 0; i < list3.size(); ++i) {
-                    list3.set(i, new TextComponent("  ").append((Component)list3.get(i)).withStyle(ChatFormatting.GRAY));
+                    list3.set(i, Component.literal("  ").append((Component)list3.get(i)).withStyle(ChatFormatting.GRAY));
                 }
                 list.addAll(list3);
             }

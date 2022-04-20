@@ -17,7 +17,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ItemEnchantmentArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -25,11 +25,11 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class EnchantCommand {
-    private static final DynamicCommandExceptionType ERROR_NOT_LIVING_ENTITY = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.enchant.failed.entity", object));
-    private static final DynamicCommandExceptionType ERROR_NO_ITEM = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.enchant.failed.itemless", object));
-    private static final DynamicCommandExceptionType ERROR_INCOMPATIBLE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.enchant.failed.incompatible", object));
-    private static final Dynamic2CommandExceptionType ERROR_LEVEL_TOO_HIGH = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.enchant.failed.level", object, object2));
-    private static final SimpleCommandExceptionType ERROR_NOTHING_HAPPENED = new SimpleCommandExceptionType(new TranslatableComponent("commands.enchant.failed"));
+    private static final DynamicCommandExceptionType ERROR_NOT_LIVING_ENTITY = new DynamicCommandExceptionType(object -> Component.translatable("commands.enchant.failed.entity", object));
+    private static final DynamicCommandExceptionType ERROR_NO_ITEM = new DynamicCommandExceptionType(object -> Component.translatable("commands.enchant.failed.itemless", object));
+    private static final DynamicCommandExceptionType ERROR_INCOMPATIBLE = new DynamicCommandExceptionType(object -> Component.translatable("commands.enchant.failed.incompatible", object));
+    private static final Dynamic2CommandExceptionType ERROR_LEVEL_TOO_HIGH = new Dynamic2CommandExceptionType((object, object2) -> Component.translatable("commands.enchant.failed.level", object, object2));
+    private static final SimpleCommandExceptionType ERROR_NOTHING_HAPPENED = new SimpleCommandExceptionType(Component.translatable("commands.enchant.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("enchant").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("targets", EntityArgument.entities()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("enchantment", ItemEnchantmentArgument.enchantment()).executes(commandContext -> EnchantCommand.enchant((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ItemEnchantmentArgument.getEnchantment(commandContext, "enchantment"), 1))).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes(commandContext -> EnchantCommand.enchant((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ItemEnchantmentArgument.getEnchantment(commandContext, "enchantment"), IntegerArgumentType.getInteger(commandContext, "level")))))));
@@ -63,9 +63,9 @@ public class EnchantCommand {
             throw ERROR_NOTHING_HAPPENED.create();
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.enchant.success.single", enchantment.getFullname(i), collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.enchant.success.single", enchantment.getFullname(i), collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.enchant.success.multiple", enchantment.getFullname(i), collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.enchant.success.multiple", enchantment.getFullname(i), collection.size()), true);
         }
         return j;
     }

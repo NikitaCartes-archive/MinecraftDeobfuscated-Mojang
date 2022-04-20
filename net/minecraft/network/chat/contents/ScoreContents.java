@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.network.chat;
+package net.minecraft.network.chat.contents;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -10,10 +10,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.ContextAwareComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.entity.Entity;
@@ -21,9 +20,8 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import org.jetbrains.annotations.Nullable;
 
-public class ScoreComponent
-extends BaseComponent
-implements ContextAwareComponent {
+public class ScoreContents
+implements ComponentContents {
     private static final String SCORER_PLACEHOLDER = "*";
     private final String name;
     @Nullable
@@ -39,13 +37,9 @@ implements ContextAwareComponent {
         }
     }
 
-    public ScoreComponent(String string, String string2) {
-        this(string, ScoreComponent.parseSelector(string), string2);
-    }
-
-    private ScoreComponent(String string, @Nullable EntitySelector entitySelector, String string2) {
+    public ScoreContents(String string, String string2) {
         this.name = string;
-        this.selector = entitySelector;
+        this.selector = ScoreContents.parseSelector(string);
         this.objective = string2;
     }
 
@@ -85,45 +79,38 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public ScoreComponent plainCopy() {
-        return new ScoreComponent(this.name, this.selector, this.objective);
-    }
-
-    @Override
     public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (commandSourceStack == null) {
-            return new TextComponent("");
+            return Component.empty();
         }
         String string = this.findTargetName(commandSourceStack);
         String string2 = entity != null && string.equals(SCORER_PLACEHOLDER) ? entity.getScoreboardName() : string;
-        return new TextComponent(this.getScore(string2, commandSourceStack));
+        return Component.literal(this.getScore(string2, commandSourceStack));
     }
 
-    @Override
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
     public boolean equals(Object object) {
         if (this == object) {
             return true;
         }
-        if (object instanceof ScoreComponent) {
-            ScoreComponent scoreComponent = (ScoreComponent)object;
-            return this.name.equals(scoreComponent.name) && this.objective.equals(scoreComponent.objective) && super.equals(object);
-        }
-        return false;
+        if (!(object instanceof ScoreContents)) return false;
+        ScoreContents scoreContents = (ScoreContents)object;
+        if (!this.name.equals(scoreContents.name)) return false;
+        if (!this.objective.equals(scoreContents.objective)) return false;
+        return true;
     }
 
-    @Override
+    public int hashCode() {
+        int i = this.name.hashCode();
+        i = 31 * i + this.objective.hashCode();
+        return i;
+    }
+
     public String toString() {
-        return "ScoreComponent{name='" + this.name + "'objective='" + this.objective + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
-    }
-
-    @Override
-    public /* synthetic */ BaseComponent plainCopy() {
-        return this.plainCopy();
-    }
-
-    @Override
-    public /* synthetic */ MutableComponent plainCopy() {
-        return this.plainCopy();
+        return "score{name='" + this.name + "', objective='" + this.objective + "'}";
     }
 }
 

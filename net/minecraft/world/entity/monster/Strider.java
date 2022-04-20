@@ -500,6 +500,7 @@ Saddleable {
         @Override
         protected PathFinder createPathFinder(int i) {
             this.nodeEvaluator = new WalkNodeEvaluator();
+            this.nodeEvaluator.setCanPassDoors(true);
             return new PathFinder(this.nodeEvaluator, i);
         }
 

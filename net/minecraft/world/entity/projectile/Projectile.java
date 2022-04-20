@@ -108,7 +108,7 @@ extends Entity {
     }
 
     public void shoot(double d, double e, double f, float g, float h) {
-        Vec3 vec3 = new Vec3(d, e, f).normalize().add(this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h).scale(g);
+        Vec3 vec3 = new Vec3(d, e, f).normalize().add(this.random.triangle(0.0, 0.0172275 * (double)h), this.random.triangle(0.0, 0.0172275 * (double)h), this.random.triangle(0.0, 0.0172275 * (double)h)).scale(g);
         this.setDeltaMovement(vec3);
         double i = vec3.horizontalDistance();
         this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));

@@ -82,11 +82,7 @@ extends Block {
         return set;
     }
 
-    @Nullable
     public static Set<Direction> unpack(byte b) {
-        if (b == -1) {
-            return null;
-        }
         EnumSet<Direction> set = EnumSet.noneOf(Direction.class);
         for (Direction direction : Direction.values()) {
             if ((b & (byte)(1 << direction.ordinal())) <= 0) continue;
@@ -95,10 +91,7 @@ extends Block {
         return set;
     }
 
-    public static byte pack(@Nullable Collection<Direction> collection) {
-        if (collection == null) {
-            return -1;
-        }
+    public static byte pack(Collection<Direction> collection) {
         byte b = 0;
         for (Direction direction : collection) {
             b = (byte)(b | 1 << direction.ordinal());

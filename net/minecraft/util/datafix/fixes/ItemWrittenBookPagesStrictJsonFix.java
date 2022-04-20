@@ -11,8 +11,8 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.datafix.fixes.BlockEntitySignTextStrictJsonFix;
 import net.minecraft.util.datafix.fixes.References;
@@ -32,12 +32,12 @@ extends DataFix {
             String string = dynamic.asString("");
             Component component = null;
             if ("null".equals(string) || StringUtils.isEmpty(string)) {
-                component = TextComponent.EMPTY;
+                component = CommonComponents.EMPTY;
             } else if (string.charAt(0) == '\"' && string.charAt(string.length() - 1) == '\"' || string.charAt(0) == '{' && string.charAt(string.length() - 1) == '}') {
                 try {
                     component = GsonHelper.fromJson(BlockEntitySignTextStrictJsonFix.GSON, string, Component.class, true);
                     if (component == null) {
-                        component = TextComponent.EMPTY;
+                        component = CommonComponents.EMPTY;
                     }
                 } catch (Exception exception) {
                     // empty catch block
@@ -57,10 +57,10 @@ extends DataFix {
                     }
                 }
                 if (component == null) {
-                    component = new TextComponent(string);
+                    component = Component.literal(string);
                 }
             } else {
-                component = new TextComponent(string);
+                component = Component.literal(string);
             }
             return dynamic.createString(Component.Serializer.toJson(component));
         })).map(dynamic::createList).result(), dynamic.emptyList()));

@@ -48,7 +48,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
@@ -472,7 +472,7 @@ implements WorldGenLevel {
             return;
         }
         int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
-        TranslatableComponent component = this.sleepStatus.areEnoughSleeping(i) ? new TranslatableComponent("sleep.skipping_night") : new TranslatableComponent("sleep.players_sleeping", this.sleepStatus.amountSleeping(), this.sleepStatus.sleepersNeeded(i));
+        MutableComponent component = this.sleepStatus.areEnoughSleeping(i) ? Component.translatable("sleep.skipping_night") : Component.translatable("sleep.players_sleeping", this.sleepStatus.amountSleeping(), this.sleepStatus.sleepersNeeded(i));
         for (ServerPlayer serverPlayer : this.players) {
             serverPlayer.displayClientMessage(component, true);
         }
@@ -619,11 +619,11 @@ implements WorldGenLevel {
             return;
         }
         if (progressListener != null) {
-            progressListener.progressStartNoAbort(new TranslatableComponent("menu.savingLevel"));
+            progressListener.progressStartNoAbort(Component.translatable("menu.savingLevel"));
         }
         this.saveLevelData();
         if (progressListener != null) {
-            progressListener.progressStage(new TranslatableComponent("menu.savingChunks"));
+            progressListener.progressStage(Component.translatable("menu.savingChunks"));
         }
         serverChunkCache.save(bl);
         if (bl) {

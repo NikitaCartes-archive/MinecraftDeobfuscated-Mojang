@@ -9,22 +9,30 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.CrashReport;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -32,11 +40,13 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
@@ -49,8 +59,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.WorldStem;
 import net.minecraft.sounds.SoundEvents;
@@ -66,52 +74,118 @@ import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldSelectionList
-extends ObjectSelectionList<WorldListEntry> {
+extends ObjectSelectionList<Entry> {
     static final Logger LOGGER = LogUtils.getLogger();
     static final DateFormat DATE_FORMAT = new SimpleDateFormat();
     static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
     static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/world_selection.png");
-    static final Component FROM_NEWER_TOOLTIP_1 = new TranslatableComponent("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED);
-    static final Component FROM_NEWER_TOOLTIP_2 = new TranslatableComponent("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED);
-    static final Component SNAPSHOT_TOOLTIP_1 = new TranslatableComponent("selectWorld.tooltip.snapshot1").withStyle(ChatFormatting.GOLD);
-    static final Component SNAPSHOT_TOOLTIP_2 = new TranslatableComponent("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD);
-    static final Component WORLD_LOCKED_TOOLTIP = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
-    static final Component WORLD_REQUIRES_CONVERSION = new TranslatableComponent("selectWorld.conversion.tooltip").withStyle(ChatFormatting.RED);
+    static final Component FROM_NEWER_TOOLTIP_1 = Component.translatable("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED);
+    static final Component FROM_NEWER_TOOLTIP_2 = Component.translatable("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED);
+    static final Component SNAPSHOT_TOOLTIP_1 = Component.translatable("selectWorld.tooltip.snapshot1").withStyle(ChatFormatting.GOLD);
+    static final Component SNAPSHOT_TOOLTIP_2 = Component.translatable("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD);
+    static final Component WORLD_LOCKED_TOOLTIP = Component.translatable("selectWorld.locked").withStyle(ChatFormatting.RED);
+    static final Component WORLD_REQUIRES_CONVERSION = Component.translatable("selectWorld.conversion.tooltip").withStyle(ChatFormatting.RED);
+    private static final Duration MAX_LOAD_BLOCK_TIME = Duration.ofMillis(100L);
     private final SelectWorldScreen screen;
     @Nullable
-    private List<LevelSummary> cachedList;
+    private CompletableFuture<List<LevelSummary>> levelsFuture;
+    private final LoadingHeader loadingHeader;
 
     public WorldSelectionList(SelectWorldScreen selectWorldScreen, Minecraft minecraft, int i, int j, int k, int l, int m, Supplier<String> supplier, @Nullable WorldSelectionList worldSelectionList) {
         super(minecraft, i, j, k, l, m);
         this.screen = selectWorldScreen;
+        this.loadingHeader = new LoadingHeader(minecraft);
         if (worldSelectionList != null) {
-            this.cachedList = worldSelectionList.cachedList;
+            this.levelsFuture = worldSelectionList.levelsFuture;
+            this.refreshList(supplier.get());
+        } else {
+            this.reloadLevels(supplier);
         }
-        this.refreshList(supplier, false);
     }
 
-    public void refreshList(Supplier<String> supplier, boolean bl) {
-        this.clearEntries();
-        LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
-        if (this.cachedList == null || bl) {
-            try {
-                this.cachedList = levelStorageSource.getLevelList();
-            } catch (LevelStorageException levelStorageException) {
-                LOGGER.error("Couldn't load level list", levelStorageException);
-                this.minecraft.setScreen(new ErrorScreen(new TranslatableComponent("selectWorld.unable_to_load"), new TextComponent(levelStorageException.getMessage())));
-                return;
-            }
-            Collections.sort(this.cachedList);
+    public void reloadLevels(Supplier<String> supplier) {
+        this.levelsFuture = this.loadLevels();
+        List<LevelSummary> list2 = this.pollReadyLevels(this.levelsFuture, MAX_LOAD_BLOCK_TIME);
+        if (list2 != null) {
+            this.fillLevels(supplier.get(), list2);
+        } else {
+            this.fillLoadingLevels();
+            this.levelsFuture.thenAcceptAsync(list -> this.fillLevels((String)supplier.get(), (List<LevelSummary>)list), (Executor)this.minecraft);
         }
-        if (this.cachedList.isEmpty()) {
-            CreateWorldScreen.openFresh(this.minecraft, null);
+    }
+
+    public void refreshList(String string) {
+        if (this.levelsFuture == null) {
+            this.clearEntries();
             return;
         }
-        String string = supplier.get().toLowerCase(Locale.ROOT);
-        for (LevelSummary levelSummary : this.cachedList) {
-            if (!levelSummary.getLevelName().toLowerCase(Locale.ROOT).contains(string) && !levelSummary.getLevelId().toLowerCase(Locale.ROOT).contains(string)) continue;
+        List<LevelSummary> list = this.pollReadyLevels(this.levelsFuture, Duration.ZERO);
+        if (list != null) {
+            this.fillLevels(string, list);
+        } else {
+            this.fillLoadingLevels();
+        }
+    }
+
+    private CompletableFuture<List<LevelSummary>> loadLevels() {
+        LevelStorageSource.LevelCandidates levelCandidates;
+        try {
+            levelCandidates = this.minecraft.getLevelSource().findLevelCandidates();
+        } catch (LevelStorageException levelStorageException) {
+            LOGGER.error("Couldn't load level list", levelStorageException);
+            this.handleLevelLoadFailure(levelStorageException.getMessageComponent());
+            return CompletableFuture.completedFuture(List.of());
+        }
+        if (levelCandidates.isEmpty()) {
+            CreateWorldScreen.openFresh(this.minecraft, null);
+            return CompletableFuture.completedFuture(List.of());
+        }
+        return ((CompletableFuture)this.minecraft.getLevelSource().loadLevelSummaries(levelCandidates).thenApply(list -> {
+            Collections.sort(list);
+            return list;
+        })).exceptionally(throwable -> {
+            this.minecraft.delayCrash(() -> CrashReport.forThrowable(throwable, "Couldn't load level list"));
+            return List.of();
+        });
+    }
+
+    @Nullable
+    private List<LevelSummary> pollReadyLevels(CompletableFuture<List<LevelSummary>> completableFuture, Duration duration) {
+        List<LevelSummary> list = null;
+        try {
+            list = completableFuture.get(duration.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException exception) {
+            // empty catch block
+        }
+        return list;
+    }
+
+    private void fillLevels(String string, List<LevelSummary> list) {
+        this.clearEntries();
+        string = string.toLowerCase(Locale.ROOT);
+        for (LevelSummary levelSummary : list) {
+            if (!this.filterAccepts(string, levelSummary)) continue;
             this.addEntry(new WorldListEntry(this, levelSummary));
         }
+        this.notifyListUpdated();
+    }
+
+    private boolean filterAccepts(String string, LevelSummary levelSummary) {
+        return levelSummary.getLevelName().toLowerCase(Locale.ROOT).contains(string) || levelSummary.getLevelId().toLowerCase(Locale.ROOT).contains(string);
+    }
+
+    private void fillLoadingLevels() {
+        this.clearEntries();
+        this.addEntry(this.loadingHeader);
+        this.notifyListUpdated();
+    }
+
+    private void notifyListUpdated() {
+        this.screen.triggerImmediateNarration(true);
+    }
+
+    private void handleLevelLoadFailure(Component component) {
+        this.minecraft.setScreen(new ErrorScreen(Component.translatable("selectWorld.unable_to_load"), component));
     }
 
     @Override
@@ -130,27 +204,73 @@ extends ObjectSelectionList<WorldListEntry> {
     }
 
     @Override
-    public void setSelected(@Nullable WorldListEntry worldListEntry) {
-        super.setSelected(worldListEntry);
-        this.screen.updateButtonStatus(worldListEntry != null && !worldListEntry.summary.isDisabled());
+    public void setSelected(@Nullable Entry entry) {
+        super.setSelected(entry);
+        this.screen.updateButtonStatus(entry != null && entry.isSelectable());
     }
 
     @Override
     protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-        this.moveSelection(selectionDirection, worldListEntry -> !worldListEntry.summary.isDisabled());
+        this.moveSelection(selectionDirection, Entry::isSelectable);
     }
 
     public Optional<WorldListEntry> getSelectedOpt() {
-        return Optional.ofNullable((WorldListEntry)this.getSelected());
+        Entry entry = (Entry)this.getSelected();
+        if (entry instanceof WorldListEntry) {
+            WorldListEntry worldListEntry = (WorldListEntry)entry;
+            return Optional.of(worldListEntry);
+        }
+        return Optional.empty();
     }
 
     public SelectWorldScreen getScreen() {
         return this.screen;
     }
 
+    @Override
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+        if (this.children().contains(this.loadingHeader)) {
+            this.loadingHeader.updateNarration(narrationElementOutput);
+            return;
+        }
+        super.updateNarration(narrationElementOutput);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class LoadingHeader
+    extends Entry {
+        private static final Component LOADING_LABEL = Component.translatable("selectWorld.loading_list");
+        private final Minecraft minecraft;
+
+        public LoadingHeader(Minecraft minecraft) {
+            this.minecraft = minecraft;
+        }
+
+        @Override
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            int p = (this.minecraft.screen.width - this.minecraft.font.width(LOADING_LABEL)) / 2;
+            int q = j + (m - this.minecraft.font.lineHeight) / 2;
+            this.minecraft.font.draw(poseStack, LOADING_LABEL, (float)p, (float)q, 0xFFFFFF);
+            String string = LoadingDotsText.get(Util.getMillis());
+            int r = (this.minecraft.screen.width - this.minecraft.font.width(string)) / 2;
+            int s = q + this.minecraft.font.lineHeight;
+            this.minecraft.font.draw(poseStack, string, (float)r, (float)s, 0x808080);
+        }
+
+        @Override
+        public Component getNarration() {
+            return LOADING_LABEL;
+        }
+
+        @Override
+        public boolean isSelectable() {
+            return false;
+        }
+    }
+
     @Environment(value=EnvType.CLIENT)
     public final class WorldListEntry
-    extends ObjectSelectionList.Entry<WorldListEntry>
+    extends Entry
     implements AutoCloseable {
         private static final int ICON_WIDTH = 32;
         private static final int ICON_HEIGHT = 32;
@@ -162,22 +282,22 @@ extends ObjectSelectionList<WorldListEntry> {
         private static final int ICON_OVERLAY_Y_SELECTED = 32;
         private final Minecraft minecraft;
         private final SelectWorldScreen screen;
-        final LevelSummary summary;
+        private final LevelSummary summary;
         private final ResourceLocation iconLocation;
         @Nullable
-        private File iconFile;
+        private Path iconFile;
         @Nullable
         private final DynamicTexture icon;
         private long lastClickTime;
 
         public WorldListEntry(WorldSelectionList worldSelectionList2, LevelSummary levelSummary) {
+            this.minecraft = worldSelectionList2.minecraft;
             this.screen = worldSelectionList2.getScreen();
             this.summary = levelSummary;
-            this.minecraft = Minecraft.getInstance();
             String string = levelSummary.getLevelId();
             this.iconLocation = new ResourceLocation("minecraft", "worlds/" + Util.sanitizeName(string, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon");
             this.iconFile = levelSummary.getIcon();
-            if (!this.iconFile.isFile()) {
+            if (!Files.isRegularFile(this.iconFile, new LinkOption[0])) {
                 this.iconFile = null;
             }
             this.icon = this.loadServerIcon();
@@ -185,9 +305,9 @@ extends ObjectSelectionList<WorldListEntry> {
 
         @Override
         public Component getNarration() {
-            TranslatableComponent translatableComponent = new TranslatableComponent("narrator.select.world", this.summary.getLevelName(), new Date(this.summary.getLastPlayed()), this.summary.isHardcore() ? new TranslatableComponent("gameMode.hardcore") : new TranslatableComponent("gameMode." + this.summary.getGameMode().getName()), this.summary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY, this.summary.getWorldVersionName());
-            MutableComponent component = this.summary.isLocked() ? CommonComponents.joinForNarration(translatableComponent, WORLD_LOCKED_TOOLTIP) : translatableComponent;
-            return new TranslatableComponent("narrator.select", component);
+            MutableComponent component = Component.translatable("narrator.select.world", this.summary.getLevelName(), new Date(this.summary.getLastPlayed()), this.summary.isHardcore() ? Component.translatable("gameMode.hardcore") : Component.translatable("gameMode." + this.summary.getGameMode().getName()), this.summary.hasCheats() ? Component.translatable("selectWorld.cheats") : CommonComponents.EMPTY, this.summary.getWorldVersionName());
+            MutableComponent component2 = this.summary.isLocked() ? CommonComponents.joinForNarration(component, WORLD_LOCKED_TOOLTIP) : component;
+            return Component.translatable("narrator.select", component2);
         }
 
         @Override
@@ -272,11 +392,11 @@ extends ObjectSelectionList<WorldListEntry> {
             if (backupStatus.shouldBackup()) {
                 String string = "selectWorld.backupQuestion." + backupStatus.getTranslationKey();
                 String string2 = "selectWorld.backupWarning." + backupStatus.getTranslationKey();
-                TranslatableComponent mutableComponent = new TranslatableComponent(string);
+                MutableComponent mutableComponent = Component.translatable(string);
                 if (backupStatus.isSevere()) {
                     mutableComponent.withStyle(ChatFormatting.BOLD, ChatFormatting.RED);
                 }
-                TranslatableComponent component = new TranslatableComponent(string2, this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
+                MutableComponent component = Component.translatable(string2, this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
                 this.minecraft.setScreen(new BackupConfirmScreen(this.screen, (bl, bl2) -> {
                     if (bl) {
                         String string = this.summary.getLevelId();
@@ -296,12 +416,12 @@ extends ObjectSelectionList<WorldListEntry> {
                             this.loadWorld();
                         } catch (Exception exception) {
                             LOGGER.error("Failure to open 'future world'", exception);
-                            this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.futureworld.error.title"), new TranslatableComponent("selectWorld.futureworld.error.text")));
+                            this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), Component.translatable("selectWorld.futureworld.error.title"), Component.translatable("selectWorld.futureworld.error.text")));
                         }
                     } else {
                         this.minecraft.setScreen(this.screen);
                     }
-                }, new TranslatableComponent("selectWorld.versionQuestion"), new TranslatableComponent("selectWorld.versionWarning", this.summary.getWorldVersionName()), new TranslatableComponent("selectWorld.versionJoinButton"), CommonComponents.GUI_CANCEL));
+                }, Component.translatable("selectWorld.versionQuestion"), Component.translatable("selectWorld.versionWarning", this.summary.getWorldVersionName()), Component.translatable("selectWorld.versionJoinButton"), CommonComponents.GUI_CANCEL));
             } else {
                 this.loadWorld();
             }
@@ -314,7 +434,7 @@ extends ObjectSelectionList<WorldListEntry> {
                     this.doDeleteWorld();
                 }
                 this.minecraft.setScreen(this.screen);
-            }, new TranslatableComponent("selectWorld.deleteQuestion"), new TranslatableComponent("selectWorld.deleteWarning", this.summary.getLevelName()), new TranslatableComponent("selectWorld.deleteButton"), CommonComponents.GUI_CANCEL));
+            }, Component.translatable("selectWorld.deleteQuestion"), Component.translatable("selectWorld.deleteWarning", this.summary.getLevelName()), Component.translatable("selectWorld.deleteButton"), CommonComponents.GUI_CANCEL));
         }
 
         public void doDeleteWorld() {
@@ -326,7 +446,7 @@ extends ObjectSelectionList<WorldListEntry> {
                 SystemToast.onWorldDeleteFailure(this.minecraft, string);
                 LOGGER.error("Failed to delete world {}", (Object)string, (Object)iOException);
             }
-            WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
+            WorldSelectionList.this.reloadLevels(this.screen.getFilterSupplier());
         }
 
         public void editWorld() {
@@ -341,14 +461,14 @@ extends ObjectSelectionList<WorldListEntry> {
                         LOGGER.error("Failed to unlock level {}", (Object)string, (Object)iOException);
                     }
                     if (bl) {
-                        WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
+                        WorldSelectionList.this.reloadLevels(this.screen.getFilterSupplier());
                     }
                     this.minecraft.setScreen(this.screen);
                 }, levelStorageAccess));
             } catch (IOException iOException) {
                 SystemToast.onWorldAccessFailure(this.minecraft, string);
                 LOGGER.error("Failed to access level {}", (Object)string, (Object)iOException);
-                WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
+                WorldSelectionList.this.reloadLevels(this.screen.getFilterSupplier());
             }
         }
 
@@ -359,13 +479,13 @@ extends ObjectSelectionList<WorldListEntry> {
                 WorldGenSettings worldGenSettings = worldStem.worldData().worldGenSettings();
                 Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
                 if (worldGenSettings.isOldCustomizedWorld()) {
-                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? CreateWorldScreen.createFromExisting(this.screen, worldStem, path) : this.screen), new TranslatableComponent("selectWorld.recreate.customized.title"), new TranslatableComponent("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? CreateWorldScreen.createFromExisting(this.screen, worldStem, path) : this.screen), Component.translatable("selectWorld.recreate.customized.title"), Component.translatable("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
                 } else {
                     this.minecraft.setScreen(CreateWorldScreen.createFromExisting(this.screen, worldStem, path));
                 }
             } catch (Exception exception) {
                 LOGGER.error("Unable to recreate world", exception);
-                this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.recreate.error.title"), new TranslatableComponent("selectWorld.recreate.error.text")));
+                this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), Component.translatable("selectWorld.recreate.error.title"), Component.translatable("selectWorld.recreate.error.text")));
             }
         }
 
@@ -378,38 +498,43 @@ extends ObjectSelectionList<WorldListEntry> {
         }
 
         private void queueLoadScreen() {
-            this.minecraft.forceSetScreen(new GenericDirtMessageScreen(new TranslatableComponent("selectWorld.data_read")));
+            this.minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("selectWorld.data_read")));
         }
 
         @Nullable
         private DynamicTexture loadServerIcon() {
             boolean bl;
-            boolean bl2 = bl = this.iconFile != null && this.iconFile.isFile();
+            boolean bl2 = bl = this.iconFile != null && Files.isRegularFile(this.iconFile, new LinkOption[0]);
             if (bl) {
                 DynamicTexture dynamicTexture;
-                FileInputStream inputStream = new FileInputStream(this.iconFile);
-                try {
-                    NativeImage nativeImage = NativeImage.read(inputStream);
-                    Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide", new Object[0]);
-                    Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high", new Object[0]);
-                    DynamicTexture dynamicTexture2 = new DynamicTexture(nativeImage);
-                    this.minecraft.getTextureManager().register(this.iconLocation, (AbstractTexture)dynamicTexture2);
-                    dynamicTexture = dynamicTexture2;
-                } catch (Throwable throwable) {
+                block9: {
+                    InputStream inputStream = Files.newInputStream(this.iconFile, new OpenOption[0]);
                     try {
+                        NativeImage nativeImage = NativeImage.read(inputStream);
+                        Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide", new Object[0]);
+                        Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high", new Object[0]);
+                        DynamicTexture dynamicTexture2 = new DynamicTexture(nativeImage);
+                        this.minecraft.getTextureManager().register(this.iconLocation, (AbstractTexture)dynamicTexture2);
+                        dynamicTexture = dynamicTexture2;
+                        if (inputStream == null) break block9;
+                    } catch (Throwable throwable) {
                         try {
-                            ((InputStream)inputStream).close();
-                        } catch (Throwable throwable2) {
-                            throwable.addSuppressed(throwable2);
+                            if (inputStream != null) {
+                                try {
+                                    inputStream.close();
+                                } catch (Throwable throwable2) {
+                                    throwable.addSuppressed(throwable2);
+                                }
+                            }
+                            throw throwable;
+                        } catch (Throwable throwable3) {
+                            LOGGER.error("Invalid icon for world {}", (Object)this.summary.getLevelId(), (Object)throwable3);
+                            this.iconFile = null;
+                            return null;
                         }
-                        throw throwable;
-                    } catch (Throwable throwable3) {
-                        LOGGER.error("Invalid icon for world {}", (Object)this.summary.getLevelId(), (Object)throwable3);
-                        this.iconFile = null;
-                        return null;
                     }
+                    inputStream.close();
                 }
-                ((InputStream)inputStream).close();
                 return dynamicTexture;
             }
             this.minecraft.getTextureManager().release(this.iconLocation);
@@ -425,6 +550,22 @@ extends ObjectSelectionList<WorldListEntry> {
 
         public String getLevelName() {
             return this.summary.getLevelName();
+        }
+
+        @Override
+        public boolean isSelectable() {
+            return !this.summary.isDisabled();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static abstract class Entry
+    extends ObjectSelectionList.Entry<Entry>
+    implements AutoCloseable {
+        public abstract boolean isSelectable();
+
+        @Override
+        public void close() {
         }
     }
 }

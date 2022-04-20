@@ -149,14 +149,14 @@ extends Feature<TreeConfiguration> {
             TreeDecorator.Context context = new TreeDecorator.Context(worldGenLevel, biConsumer4, randomSource, set2, set3, set);
             treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(context));
         }
-        return BoundingBox.encapsulatingPositions(Iterables.concat(set2, set3, set4)).map(boundingBox -> {
-            DiscreteVoxelShape discreteVoxelShape = TreeFeature.updateLeaves(worldGenLevel, boundingBox, set2, set4);
+        return BoundingBox.encapsulatingPositions(Iterables.concat(set, set2, set3, set4)).map(boundingBox -> {
+            DiscreteVoxelShape discreteVoxelShape = TreeFeature.updateLeaves(worldGenLevel, boundingBox, set2, set4, set);
             StructureTemplate.updateShapeAtEdge(worldGenLevel, 3, discreteVoxelShape, boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
             return true;
         }).orElse(false);
     }
 
-    private static DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2) {
+    private static DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2, Set<BlockPos> set3) {
         ArrayList list = Lists.newArrayList();
         BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
         int i = 6;
@@ -164,7 +164,7 @@ extends Feature<TreeConfiguration> {
             list.add(Sets.newHashSet());
         }
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (BlockPos blockPos : Lists.newArrayList(set2)) {
+        for (BlockPos blockPos : Lists.newArrayList(Sets.union(set2, set3))) {
             if (!boundingBox.isInside(blockPos)) continue;
             ((DiscreteVoxelShape)discreteVoxelShape).fill(blockPos.getX() - boundingBox.minX(), blockPos.getY() - boundingBox.minY(), blockPos.getZ() - boundingBox.minZ());
         }
@@ -183,9 +183,9 @@ extends Feature<TreeConfiguration> {
             }
         }
         for (int k = 1; k < 6; ++k) {
-            Set set3 = (Set)list.get(k - 1);
-            Set set4 = (Set)list.get(k);
-            for (BlockPos blockPos2 : set3) {
+            Set set4 = (Set)list.get(k - 1);
+            Set set5 = (Set)list.get(k);
+            for (BlockPos blockPos2 : set4) {
                 if (boundingBox.isInside(blockPos2)) {
                     ((DiscreteVoxelShape)discreteVoxelShape).fill(blockPos2.getX() - boundingBox.minX(), blockPos2.getY() - boundingBox.minY(), blockPos2.getZ() - boundingBox.minZ());
                 }
@@ -193,13 +193,13 @@ extends Feature<TreeConfiguration> {
                     int l;
                     BlockState blockState2;
                     mutableBlockPos.setWithOffset((Vec3i)blockPos2, direction2);
-                    if (set3.contains(mutableBlockPos) || set4.contains(mutableBlockPos) || !(blockState2 = levelAccessor.getBlockState(mutableBlockPos)).hasProperty(BlockStateProperties.DISTANCE) || (l = blockState2.getValue(BlockStateProperties.DISTANCE).intValue()) <= k + 1) continue;
+                    if (set4.contains(mutableBlockPos) || set5.contains(mutableBlockPos) || !(blockState2 = levelAccessor.getBlockState(mutableBlockPos)).hasProperty(BlockStateProperties.DISTANCE) || (l = blockState2.getValue(BlockStateProperties.DISTANCE).intValue()) <= k + 1) continue;
                     BlockState blockState3 = (BlockState)blockState2.setValue(BlockStateProperties.DISTANCE, k + 1);
                     TreeFeature.setBlockKnownShape(levelAccessor, mutableBlockPos, blockState3);
                     if (boundingBox.isInside(mutableBlockPos)) {
                         ((DiscreteVoxelShape)discreteVoxelShape).fill(mutableBlockPos.getX() - boundingBox.minX(), mutableBlockPos.getY() - boundingBox.minY(), mutableBlockPos.getZ() - boundingBox.minZ());
                     }
-                    set4.add(mutableBlockPos.immutable());
+                    set5.add(mutableBlockPos.immutable());
                 }
             }
         }

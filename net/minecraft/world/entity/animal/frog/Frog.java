@@ -27,6 +27,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -47,8 +48,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
@@ -61,6 +62,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
@@ -354,6 +356,10 @@ extends Animal {
         return TEMPTATION_ITEM.test(itemStack);
     }
 
+    public static boolean checkFrogSpawnRules(EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
+        return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.FROGS_SPAWNABLE_ON) && Frog.isBrightEnoughToSpawn(levelAccessor, blockPos);
+    }
+
     class FrogLookControl
     extends LookControl {
         FrogLookControl(Mob mob) {
@@ -367,7 +373,7 @@ extends Animal {
     }
 
     static class FrogPathNavigation
-    extends WaterBoundPathNavigation {
+    extends AmphibiousPathNavigation {
         FrogPathNavigation(Frog frog, Level level) {
             super(frog, level);
         }
@@ -375,17 +381,8 @@ extends Animal {
         @Override
         protected PathFinder createPathFinder(int i) {
             this.nodeEvaluator = new FrogNodeEvaluator(true);
+            this.nodeEvaluator.setCanPassDoors(true);
             return new PathFinder(this.nodeEvaluator, i);
-        }
-
-        @Override
-        protected boolean canUpdatePath() {
-            return true;
-        }
-
-        @Override
-        public boolean isStableDestination(BlockPos blockPos) {
-            return !this.level.getBlockState(blockPos.below()).isAir();
         }
     }
 

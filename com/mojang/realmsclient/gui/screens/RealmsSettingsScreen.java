@@ -13,15 +13,15 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsSettingsScreen
 extends RealmsScreen {
     private static final int COMPONENT_WIDTH = 212;
-    private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.name");
-    private static final Component DESCRIPTION_LABEL = new TranslatableComponent("mco.configure.world.description");
+    private static final Component NAME_LABEL = Component.translatable("mco.configure.world.name");
+    private static final Component DESCRIPTION_LABEL = Component.translatable("mco.configure.world.description");
     private final RealmsConfigureWorldScreen configureWorldScreen;
     private final RealmsServer serverData;
     private Button doneButton;
@@ -29,7 +29,7 @@ extends RealmsScreen {
     private EditBox nameEdit;
 
     public RealmsSettingsScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer) {
-        super(new TranslatableComponent("mco.configure.world.settings.title"));
+        super(Component.translatable("mco.configure.world.settings.title"));
         this.configureWorldScreen = realmsConfigureWorldScreen;
         this.serverData = realmsServer;
     }
@@ -45,13 +45,13 @@ extends RealmsScreen {
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         int i = this.width / 2 - 106;
-        this.doneButton = this.addRenderableWidget(new Button(i - 2, RealmsSettingsScreen.row(12), 106, 20, new TranslatableComponent("mco.configure.world.buttons.done"), button -> this.save()));
+        this.doneButton = this.addRenderableWidget(new Button(i - 2, RealmsSettingsScreen.row(12), 106, 20, Component.translatable("mco.configure.world.buttons.done"), button -> this.save()));
         this.addRenderableWidget(new Button(this.width / 2 + 2, RealmsSettingsScreen.row(12), 106, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.configureWorldScreen)));
         String string = this.serverData.state == RealmsServer.State.OPEN ? "mco.configure.world.buttons.close" : "mco.configure.world.buttons.open";
-        Button button2 = new Button(this.width / 2 - 53, RealmsSettingsScreen.row(0), 106, 20, new TranslatableComponent(string), button -> {
+        Button button2 = new Button(this.width / 2 - 53, RealmsSettingsScreen.row(0), 106, 20, Component.translatable(string), button -> {
             if (this.serverData.state == RealmsServer.State.OPEN) {
-                TranslatableComponent component = new TranslatableComponent("mco.configure.world.close.question.line1");
-                TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.close.question.line2");
+                MutableComponent component = Component.translatable("mco.configure.world.close.question.line1");
+                MutableComponent component2 = Component.translatable("mco.configure.world.close.question.line2");
                 this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
                     if (bl) {
                         this.configureWorldScreen.closeTheWorld(this);
@@ -64,12 +64,12 @@ extends RealmsScreen {
             }
         });
         this.addRenderableWidget(button2);
-        this.nameEdit = new EditBox(this.minecraft.font, i, RealmsSettingsScreen.row(4), 212, 20, null, new TranslatableComponent("mco.configure.world.name"));
+        this.nameEdit = new EditBox(this.minecraft.font, i, RealmsSettingsScreen.row(4), 212, 20, null, Component.translatable("mco.configure.world.name"));
         this.nameEdit.setMaxLength(32);
         this.nameEdit.setValue(this.serverData.getName());
         this.addWidget(this.nameEdit);
         this.magicalSpecialHackyFocus(this.nameEdit);
-        this.descEdit = new EditBox(this.minecraft.font, i, RealmsSettingsScreen.row(8), 212, 20, null, new TranslatableComponent("mco.configure.world.description"));
+        this.descEdit = new EditBox(this.minecraft.font, i, RealmsSettingsScreen.row(8), 212, 20, null, Component.translatable("mco.configure.world.description"));
         this.descEdit.setMaxLength(32);
         this.descEdit.setValue(this.serverData.getDescription());
         this.addWidget(this.descEdit);

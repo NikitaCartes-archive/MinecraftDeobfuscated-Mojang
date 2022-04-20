@@ -11,7 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsConnect;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,7 +29,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(new TranslatableComponent("mco.connect.connecting"));
+        this.setTitle(Component.translatable("mco.connect.connecting"));
         this.realmsConnect.connect(this.server, ServerAddress.parseString(this.address.address));
     }
 

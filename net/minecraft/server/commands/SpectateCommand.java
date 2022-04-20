@@ -12,15 +12,15 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
 public class SpectateCommand {
-    private static final SimpleCommandExceptionType ERROR_SELF = new SimpleCommandExceptionType(new TranslatableComponent("commands.spectate.self"));
-    private static final DynamicCommandExceptionType ERROR_NOT_SPECTATOR = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.spectate.not_spectator", object));
+    private static final SimpleCommandExceptionType ERROR_SELF = new SimpleCommandExceptionType(Component.translatable("commands.spectate.self"));
+    private static final DynamicCommandExceptionType ERROR_NOT_SPECTATOR = new DynamicCommandExceptionType(object -> Component.translatable("commands.spectate.not_spectator", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("spectate").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).executes(commandContext -> SpectateCommand.spectate((CommandSourceStack)commandContext.getSource(), null, ((CommandSourceStack)commandContext.getSource()).getPlayerOrException()))).then(((RequiredArgumentBuilder)Commands.argument("target", EntityArgument.entity()).executes(commandContext -> SpectateCommand.spectate((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntity(commandContext, "target"), ((CommandSourceStack)commandContext.getSource()).getPlayerOrException()))).then(Commands.argument("player", EntityArgument.player()).executes(commandContext -> SpectateCommand.spectate((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntity(commandContext, "target"), EntityArgument.getPlayer(commandContext, "player"))))));
@@ -35,9 +35,9 @@ public class SpectateCommand {
         }
         serverPlayer.setCamera(entity);
         if (entity != null) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.spectate.success.started", entity.getDisplayName()), false);
+            commandSourceStack.sendSuccess(Component.translatable("commands.spectate.success.started", entity.getDisplayName()), false);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.spectate.success.stopped"), false);
+            commandSourceStack.sendSuccess(Component.translatable("commands.spectate.success.stopped"), false);
         }
         return 1;
     }

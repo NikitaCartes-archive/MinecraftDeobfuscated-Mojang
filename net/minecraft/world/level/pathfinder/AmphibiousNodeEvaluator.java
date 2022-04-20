@@ -13,6 +13,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Target;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import org.jetbrains.annotations.Nullable;
 
 public class AmphibiousNodeEvaluator
 extends WalkNodeEvaluator {
@@ -43,7 +44,7 @@ extends WalkNodeEvaluator {
 
     @Override
     public Node getStart() {
-        return this.getNode(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5), Mth.floor(this.mob.getBoundingBox().minZ));
+        return this.getStartNode(new BlockPos(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5), Mth.floor(this.mob.getBoundingBox().minZ)));
     }
 
     @Override
@@ -60,10 +61,10 @@ extends WalkNodeEvaluator {
         double d = this.getFloorLevel(new BlockPos(node.x, node.y, node.z));
         Node node2 = this.findAcceptedNode(node.x, node.y + 1, node.z, Math.max(0, j - 1), d, Direction.UP, blockPathTypes2);
         Node node3 = this.findAcceptedNode(node.x, node.y - 1, node.z, j, d, Direction.DOWN, blockPathTypes2);
-        if (this.isNeighborValid(node2, node)) {
+        if (this.isVerticalNeighborValid(node2, node)) {
             nodes[i++] = node2;
         }
-        if (this.isNeighborValid(node3, node) && blockPathTypes2 != BlockPathTypes.TRAPDOOR) {
+        if (this.isVerticalNeighborValid(node3, node) && blockPathTypes2 != BlockPathTypes.TRAPDOOR) {
             nodes[i++] = node3;
         }
         for (int k = 0; k < i; ++k) {
@@ -72,6 +73,10 @@ extends WalkNodeEvaluator {
             node4.costMalus += 1.0f;
         }
         return i;
+    }
+
+    private boolean isVerticalNeighborValid(@Nullable Node node, Node node2) {
+        return this.isNeighborValid(node, node2) && node.type == BlockPathTypes.WATER;
     }
 
     @Override

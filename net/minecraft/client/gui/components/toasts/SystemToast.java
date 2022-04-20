@@ -14,8 +14,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
@@ -126,15 +124,15 @@ implements Toast {
     }
 
     public static void onWorldAccessFailure(Minecraft minecraft, String string) {
-        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.access_failure"), new TextComponent(string));
+        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, Component.translatable("selectWorld.access_failure"), Component.literal(string));
     }
 
     public static void onWorldDeleteFailure(Minecraft minecraft, String string) {
-        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.delete_failure"), new TextComponent(string));
+        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, Component.translatable("selectWorld.delete_failure"), Component.literal(string));
     }
 
     public static void onPackCopyFailure(Minecraft minecraft, String string) {
-        SystemToast.add(minecraft.getToasts(), SystemToastIds.PACK_COPY_FAILURE, new TranslatableComponent("pack.copyFailure"), new TextComponent(string));
+        SystemToast.add(minecraft.getToasts(), SystemToastIds.PACK_COPY_FAILURE, Component.translatable("pack.copyFailure"), Component.literal(string));
     }
 
     @Override

@@ -15,7 +15,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -62,7 +61,7 @@ extends AbstractSelectionList<E> {
                 this.narrateListElementPosition(narrationElementOutput, entry2);
             }
         }
-        narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.component_list.usage"));
+        narrationElementOutput.add(NarratedElementType.USAGE, (Component)Component.translatable("narration.component_list.usage"));
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -106,9 +105,9 @@ extends AbstractSelectionList<E> {
                     this.lastNarratable = narratableSearchResult.entry;
                 }
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, (Component)new TranslatableComponent("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
+                    narrationElementOutput.add(NarratedElementType.POSITION, (Component)Component.translatable("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
                     if (narratableSearchResult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
-                        narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.component_list.usage"));
+                        narrationElementOutput.add(NarratedElementType.USAGE, (Component)Component.translatable("narration.component_list.usage"));
                     }
                 }
                 narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());

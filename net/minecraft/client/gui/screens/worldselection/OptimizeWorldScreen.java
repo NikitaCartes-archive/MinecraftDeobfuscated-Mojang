@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.WorldStem;
 import net.minecraft.util.Mth;
@@ -71,7 +71,7 @@ extends Screen {
     }
 
     private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelSettings levelSettings, boolean bl, WorldGenSettings worldGenSettings) {
-        super(new TranslatableComponent("optimizeWorld.title", levelSettings.levelName()));
+        super(Component.translatable("optimizeWorld.title", levelSettings.levelName()));
         this.callback = booleanConsumer;
         this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldGenSettings, bl);
     }
@@ -113,9 +113,9 @@ extends Screen {
         OptimizeWorldScreen.drawCenteredString(poseStack, this.font, this.upgrader.getStatus(), this.width / 2, m - this.font.lineHeight - 2, 0xA0A0A0);
         if (this.upgrader.getTotalChunks() > 0) {
             OptimizeWorldScreen.fill(poseStack, k - 1, m - 1, l + 1, n + 1, -16777216);
-            OptimizeWorldScreen.drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 0xA0A0A0);
-            OptimizeWorldScreen.drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
-            OptimizeWorldScreen.drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
+            OptimizeWorldScreen.drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 0xA0A0A0);
+            OptimizeWorldScreen.drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
+            OptimizeWorldScreen.drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
             int o = 0;
             for (ResourceKey resourceKey : this.upgrader.levels()) {
                 int p = Mth.floor(this.upgrader.dimensionProgress(resourceKey) * (float)(l - k));

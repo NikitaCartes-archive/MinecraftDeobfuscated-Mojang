@@ -18,9 +18,8 @@ import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.gui.spectator.SpectatorMenuListener;
 import net.minecraft.client.gui.spectator.categories.SpectatorPage;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class SpectatorMenu {
@@ -29,9 +28,9 @@ public class SpectatorMenu {
     private static final SpectatorMenuItem SCROLL_RIGHT_ENABLED = new ScrollMenuItem(1, true);
     private static final SpectatorMenuItem SCROLL_RIGHT_DISABLED = new ScrollMenuItem(1, false);
     private static final int MAX_PER_PAGE = 8;
-    static final Component CLOSE_MENU_TEXT = new TranslatableComponent("spectatorMenu.close");
-    static final Component PREVIOUS_PAGE_TEXT = new TranslatableComponent("spectatorMenu.previous_page");
-    static final Component NEXT_PAGE_TEXT = new TranslatableComponent("spectatorMenu.next_page");
+    static final Component CLOSE_MENU_TEXT = Component.translatable("spectatorMenu.close");
+    static final Component PREVIOUS_PAGE_TEXT = Component.translatable("spectatorMenu.previous_page");
+    static final Component NEXT_PAGE_TEXT = Component.translatable("spectatorMenu.next_page");
     public static final SpectatorMenuItem EMPTY_SLOT = new SpectatorMenuItem(){
 
         @Override
@@ -40,7 +39,7 @@ public class SpectatorMenu {
 
         @Override
         public Component getName() {
-            return TextComponent.EMPTY;
+            return CommonComponents.EMPTY;
         }
 
         @Override

@@ -10,7 +10,6 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.datafix.fixes.References;
 
 public class ObjectiveDisplayNameFix
@@ -22,7 +21,7 @@ extends DataFix {
     @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(References.OBJECTIVE);
-        return this.fixTypeEverywhereTyped("ObjectiveDisplayNameFix", type, typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.update("DisplayName", dynamic2 -> DataFixUtils.orElse(dynamic2.asString().map(string -> Component.Serializer.toJson(new TextComponent((String)string))).map(dynamic::createString).result(), dynamic2))));
+        return this.fixTypeEverywhereTyped("ObjectiveDisplayNameFix", type, typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.update("DisplayName", dynamic2 -> DataFixUtils.orElse(dynamic2.asString().map(string -> Component.Serializer.toJson(Component.literal(string))).map(dynamic::createString).result(), dynamic2))));
     }
 }
 

@@ -20,7 +20,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Options;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundEventRegistration;
 import net.minecraft.client.resources.sounds.SoundEventRegistrationSerializer;
@@ -32,7 +31,7 @@ import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.client.sounds.Weighted;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -98,10 +97,9 @@ extends SimplePreparableReloadListener<Preparations> {
         preparations.apply(this.registry, this.soundEngine);
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             for (ResourceLocation resourceLocation : this.registry.keySet()) {
-                String string;
                 WeighedSoundEvents weighedSoundEvents = this.registry.get(resourceLocation);
-                if (!(weighedSoundEvents.getSubtitle() instanceof TranslatableComponent) || I18n.exists(string = ((TranslatableComponent)weighedSoundEvents.getSubtitle()).getKey()) || !Registry.SOUND_EVENT.containsKey(resourceLocation)) continue;
-                LOGGER.error("Missing subtitle {} for sound event: {}", (Object)string, (Object)resourceLocation);
+                if (ComponentUtils.isTranslationResolvable(weighedSoundEvents.getSubtitle()) || !Registry.SOUND_EVENT.containsKey(resourceLocation)) continue;
+                LOGGER.error("Missing subtitle {} for sound event: {}", (Object)weighedSoundEvents.getSubtitle(), (Object)resourceLocation);
             }
         }
         if (LOGGER.isDebugEnabled()) {

@@ -31,8 +31,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -46,8 +44,8 @@ extends RealmsScreen {
     static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
     static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
     static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
-    static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
-    static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
+    static final Component PUBLISHER_LINK_TOOLTIP = Component.translatable("mco.template.info.tooltip");
+    static final Component TRAILER_LINK_TOOLTIP = Component.translatable("mco.template.trailer.tooltip");
     private final Consumer<WorldTemplate> callback;
     WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
     int selectedTemplate = -1;
@@ -103,12 +101,12 @@ extends RealmsScreen {
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.worldTemplateObjectSelectionList = new WorldTemplateObjectSelectionList(this.worldTemplateObjectSelectionList.getTemplates());
-        this.trailerButton = this.addRenderableWidget(new Button(this.width / 2 - 206, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.trailer"), button -> this.onTrailer()));
-        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.select"), button -> this.selectTemplate()));
+        this.trailerButton = this.addRenderableWidget(new Button(this.width / 2 - 206, this.height - 32, 100, 20, Component.translatable("mco.template.button.trailer"), button -> this.onTrailer()));
+        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 32, 100, 20, Component.translatable("mco.template.button.select"), button -> this.selectTemplate()));
         Component component = this.worldType == RealmsServer.WorldType.MINIGAME ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_BACK;
         Button button2 = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, button -> this.onClose());
         this.addRenderableWidget(button2);
-        this.publisherButton = this.addRenderableWidget(new Button(this.width / 2 + 112, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.publisher"), button -> this.onPublish()));
+        this.publisherButton = this.addRenderableWidget(new Button(this.width / 2 + 112, this.height - 32, 100, 20, Component.translatable("mco.template.button.publisher"), button -> this.onPublish()));
         this.selectButton.active = false;
         this.trailerButton.visible = false;
         this.publisherButton.visible = false;
@@ -286,7 +284,7 @@ extends RealmsScreen {
                 int o = lineSegment2.isLink() ? 0x3366BB : 0xFFFFFF;
                 int p = this.font.drawShadow(poseStack, lineSegment2.renderedText(), (float)n, (float)l, o);
                 if (lineSegment2.isLink() && i > n && i < p && j > l - 3 && j < l + 8) {
-                    this.toolTip = new TextComponent(lineSegment2.getLinkUrl());
+                    this.toolTip = Component.literal(lineSegment2.getLinkUrl());
                     this.currentLink = lineSegment2.getLinkUrl();
                 }
                 n = p;
@@ -463,8 +461,8 @@ extends RealmsScreen {
 
         @Override
         public Component getNarration() {
-            Component component = CommonComponents.joinLines(new TextComponent(this.template.name), new TranslatableComponent("mco.template.select.narrate.authors", this.template.author), new TextComponent(this.template.recommendedPlayers), new TranslatableComponent("mco.template.select.narrate.version", this.template.version));
-            return new TranslatableComponent("narrator.select", component);
+            Component component = CommonComponents.joinLines(Component.literal(this.template.name), Component.translatable("mco.template.select.narrate.authors", this.template.author), Component.literal(this.template.recommendedPlayers), Component.translatable("mco.template.select.narrate.version", this.template.version));
+            return Component.translatable("narrator.select", component);
         }
     }
 }

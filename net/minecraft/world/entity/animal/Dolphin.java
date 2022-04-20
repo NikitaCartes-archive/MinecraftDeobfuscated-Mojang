@@ -233,7 +233,7 @@ extends WaterAnimal {
         if (this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && this.canHoldItem(itemStack = itemEntity.getItem())) {
             this.onItemPickup(itemEntity);
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
-            this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0f;
+            this.setGuaranteedDrop(EquipmentSlot.MAINHAND);
             this.take(itemEntity, itemStack.getCount());
             itemEntity.discard();
         }

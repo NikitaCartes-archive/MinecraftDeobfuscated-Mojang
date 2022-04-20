@@ -10,12 +10,11 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class ReceivingLevelScreen
 extends Screen {
-    private static final Component DOWNLOADING_TERRAIN_TEXT = new TranslatableComponent("multiplayer.downloadingTerrain");
+    private static final Component DOWNLOADING_TERRAIN_TEXT = Component.translatable("multiplayer.downloadingTerrain");
     private static final long CHUNK_LOADING_START_WAIT_LIMIT_MS = 2000L;
     private boolean loadingPacketsReceived = false;
     private boolean oneTickSkipped = false;

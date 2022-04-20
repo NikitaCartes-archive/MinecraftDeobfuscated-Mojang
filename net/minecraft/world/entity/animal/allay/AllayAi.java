@@ -40,13 +40,15 @@ import net.minecraft.world.level.block.Blocks;
 
 public class AllayAi {
     private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0f;
-    private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_DEPOSIT_TARGET = 1.25f;
-    private static final float SPEED_MULTIPLIER_WHEN_RETRIEVING_ITEM = 2.0f;
-    private static final int MAX_DISTANCE_FOLLOW_TARGET = 16;
+    private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_DEPOSIT_TARGET = 2.25f;
+    private static final float SPEED_MULTIPLIER_WHEN_RETRIEVING_ITEM = 1.75f;
+    private static final int CLOSE_ENOUGH_TO_TARGET = 4;
+    private static final int TOO_FAR_FROM_TARGET = 16;
     private static final int MAX_LOOK_DISTANCE = 6;
     private static final int MIN_WAIT_DURATION = 30;
     private static final int MAX_WAIT_DURATION = 60;
     private static final int TIME_TO_FORGET_NOTEBLOCK = 600;
+    private static final int DISTANCE_TO_WANDER_ITEM = 32;
 
     protected static Brain<?> makeBrain(Brain<Allay> brain) {
         AllayAi.initCoreActivity(brain);
@@ -62,7 +64,7 @@ public class AllayAi {
     }
 
     private static void initIdleActivity(Brain<Allay> brain) {
-        brain.addActivityWithConditions(Activity.IDLE, ImmutableList.of(Pair.of(0, new GoToWantedItem<Allay>(allay -> true, 2.0f, true, 9)), Pair.of(1, new GoAndGiveItemsToTarget(AllayAi::getItemDepositPosition, 1.25f)), Pair.of(2, new StayCloseToTarget(AllayAi::getItemDepositPosition, 16, 1.25f)), Pair.of(3, new RunSometimes<LivingEntity>(new SetEntityLookTarget(livingEntity -> true, 6.0f), UniformInt.of(30, 60))), Pair.of(4, new RunOne(ImmutableList.of(Pair.of(new FlyingRandomStroll(1.0f), 2), Pair.of(new SetWalkTargetFromLookTarget(1.0f, 3), 2), Pair.of(new DoNothing(30, 60), 1))))), ImmutableSet.of());
+        brain.addActivityWithConditions(Activity.IDLE, ImmutableList.of(Pair.of(0, new GoToWantedItem<Allay>(allay -> true, 1.75f, true, 32)), Pair.of(1, new GoAndGiveItemsToTarget(AllayAi::getItemDepositPosition, 2.25f)), Pair.of(2, new StayCloseToTarget(AllayAi::getItemDepositPosition, 4, 16, 2.25f)), Pair.of(3, new RunSometimes<LivingEntity>(new SetEntityLookTarget(livingEntity -> true, 6.0f), UniformInt.of(30, 60))), Pair.of(4, new RunOne(ImmutableList.of(Pair.of(new FlyingRandomStroll(1.0f), 2), Pair.of(new SetWalkTargetFromLookTarget(1.0f, 3), 2), Pair.of(new DoNothing(30, 60), 1))))), ImmutableSet.of());
     }
 
     public static void updateActivity(Allay allay) {

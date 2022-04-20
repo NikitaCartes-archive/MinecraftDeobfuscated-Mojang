@@ -7,11 +7,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.SwimNodeEvaluator;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class WaterBoundPathNavigation
@@ -46,8 +44,7 @@ extends PathNavigation {
 
     @Override
     protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32) {
-        Vec3 vec33 = new Vec3(vec32.x, vec32.y + (double)this.mob.getBbHeight() * 0.5, vec32.z);
-        return this.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.mob)).getType() == HitResult.Type.MISS;
+        return WaterBoundPathNavigation.isClearForMovementBetween(this.mob, vec3, vec32);
     }
 
     @Override

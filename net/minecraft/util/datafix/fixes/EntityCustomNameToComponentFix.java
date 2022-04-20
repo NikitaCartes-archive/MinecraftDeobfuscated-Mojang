@@ -12,7 +12,6 @@ import com.mojang.serialization.Dynamic;
 import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
@@ -39,7 +38,7 @@ extends DataFix {
         if (string.isEmpty()) {
             return dynamic.remove("CustomName");
         }
-        return dynamic.set("CustomName", dynamic.createString(Component.Serializer.toJson(new TextComponent(string))));
+        return dynamic.set("CustomName", dynamic.createString(Component.Serializer.toJson(Component.literal(string))));
     }
 }
 

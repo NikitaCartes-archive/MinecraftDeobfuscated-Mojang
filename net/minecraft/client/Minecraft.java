@@ -176,11 +176,10 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.KeybindComponent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.KeybindResolver;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
@@ -420,7 +419,7 @@ implements WindowEventHandler {
             string = null;
             i = 0;
         }
-        KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
+        KeybindResolver.setKeyResolver(KeyMapping::createNameSupplier);
         this.fixerUpper = DataFixers.getDataFixer();
         this.toast = new ToastComponent(this);
         this.gameThread = Thread.currentThread();
@@ -611,7 +610,7 @@ implements WindowEventHandler {
         this.options.save();
         this.reloadResourcePacks(true).thenRun(() -> {
             ToastComponent toastComponent = this.getToasts();
-            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
+            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
         });
     }
 
@@ -786,7 +785,7 @@ implements WindowEventHandler {
             item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
             for (ItemStack itemStack : nonNullList) {
                 String string = itemStack.getDescriptionId();
-                String string2 = new TranslatableComponent(string).getString();
+                String string2 = Component.translatable(string).getString();
                 if (!string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) continue;
                 LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
             }
@@ -1092,14 +1091,14 @@ implements WindowEventHandler {
             if (this.isLocalServer && this.singleplayerServer != null) {
                 this.singleplayerServer.halt(true);
             }
-            this.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
+            this.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
         } catch (Throwable throwable) {
             // empty catch block
         }
         System.gc();
     }
 
-    public boolean debugClientMetricsStart(Consumer<TranslatableComponent> consumer) {
+    public boolean debugClientMetricsStart(Consumer<Component> consumer) {
         Consumer<Path> consumer5;
         if (this.metricsRecorder.isRecording()) {
             this.debugClientMetricsStop();
@@ -1111,11 +1110,11 @@ implements WindowEventHandler {
             }
             int i = profileResults.getTickDuration();
             double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
-            this.execute(() -> consumer.accept(new TranslatableComponent("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d))));
+            this.execute(() -> consumer.accept(Component.translatable("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d))));
         };
         Consumer<Path> consumer3 = path -> {
-            MutableComponent component = new TextComponent(path.toString()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toFile().getParent())));
-            this.execute(() -> consumer.accept(new TranslatableComponent("debug.profiling.stop", component)));
+            MutableComponent component = Component.literal(path.toString()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toFile().getParent())));
+            this.execute(() -> consumer.accept(Component.translatable("debug.profiling.stop", component)));
         };
         SystemReport systemReport = Minecraft.fillSystemReport(new SystemReport(), this, this.languageManager, this.launchedVersion, this.options);
         Consumer<List> consumer4 = list -> {
@@ -1513,8 +1512,8 @@ implements WindowEventHandler {
         if (this.level != null) {
             if (!this.pause) {
                 if (!this.options.joinedFirstServer && this.isMultiplayerServer()) {
-                    TranslatableComponent component = new TranslatableComponent("tutorial.socialInteractions.title");
-                    TranslatableComponent component2 = new TranslatableComponent("tutorial.socialInteractions.description", Tutorial.key("socialInteractions"));
+                    MutableComponent component = Component.translatable("tutorial.socialInteractions.title");
+                    MutableComponent component2 = Component.translatable("tutorial.socialInteractions.description", Tutorial.key("socialInteractions"));
                     this.socialInteractionsToast = new TutorialToast(TutorialToast.Icons.SOCIAL_INTERACTIONS, component, component2, true);
                     this.tutorial.addTimedToast(this.socialInteractionsToast, 160);
                     this.options.joinedFirstServer = true;
@@ -1712,7 +1711,7 @@ implements WindowEventHandler {
 
     public void setLevel(ClientLevel clientLevel) {
         ProgressScreen progressScreen = new ProgressScreen(true);
-        progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining"));
+        progressScreen.progressStartNoAbort(Component.translatable("connect.joining"));
         this.updateScreenAndTick(progressScreen);
         this.level = clientLevel;
         this.updateLevelInEngines(clientLevel);
@@ -2267,13 +2266,13 @@ implements WindowEventHandler {
                 }
                 Screenshot.grab(file, "panorama_" + n + ".png", renderTarget, component -> {});
             }
-            MutableComponent component2 = new TextComponent(file.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
-            TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.success", component2);
-            return translatableComponent;
+            MutableComponent component2 = Component.literal(file.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
+            MutableComponent mutableComponent = Component.translatable("screenshot.success", component2);
+            return mutableComponent;
         } catch (Exception exception) {
             LOGGER.error("Couldn't save image", exception);
-            TranslatableComponent translatableComponent = new TranslatableComponent("screenshot.failure", exception.getMessage());
-            return translatableComponent;
+            MutableComponent mutableComponent = Component.translatable("screenshot.failure", exception.getMessage());
+            return mutableComponent;
         } finally {
             this.player.setXRot(f);
             this.player.setYRot(g);
@@ -2312,11 +2311,11 @@ implements WindowEventHandler {
             }
             File file2 = screenshot.close();
             GlUtil.freeMemory(byteBuffer);
-            MutableComponent component = new TextComponent(file2.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file2.getAbsolutePath())));
-            return new TranslatableComponent("screenshot.success", component);
+            MutableComponent component = Component.literal(file2.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file2.getAbsolutePath())));
+            return Component.translatable("screenshot.success", component);
         } catch (Exception exception) {
             LOGGER.warn("Couldn't save screenshot", exception);
-            return new TranslatableComponent("screenshot.failure", exception.getMessage());
+            return Component.translatable("screenshot.failure", exception.getMessage());
         }
     }
 
@@ -2402,7 +2401,7 @@ implements WindowEventHandler {
         ALT_FONT = new ResourceLocation("alt");
         REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
         RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
-        SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
+        SOCIAL_INTERACTIONS_NOT_AVAILABLE = Component.translatable("multiplayer.socialInteractions.not_available");
     }
 
     /*
@@ -2410,7 +2409,7 @@ implements WindowEventHandler {
      */
     @Environment(value=EnvType.CLIENT)
     public static enum ChatStatus {
-        ENABLED(TextComponent.EMPTY){
+        ENABLED(CommonComponents.EMPTY){
 
             @Override
             public boolean isChatAllowed(boolean bl) {
@@ -2418,7 +2417,7 @@ implements WindowEventHandler {
             }
         }
         ,
-        DISABLED_BY_OPTIONS(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED)){
+        DISABLED_BY_OPTIONS(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED)){
 
             @Override
             public boolean isChatAllowed(boolean bl) {
@@ -2426,7 +2425,7 @@ implements WindowEventHandler {
             }
         }
         ,
-        DISABLED_BY_LAUNCHER(new TranslatableComponent("chat.disabled.launcher").withStyle(ChatFormatting.RED)){
+        DISABLED_BY_LAUNCHER(Component.translatable("chat.disabled.launcher").withStyle(ChatFormatting.RED)){
 
             @Override
             public boolean isChatAllowed(boolean bl) {
@@ -2434,7 +2433,7 @@ implements WindowEventHandler {
             }
         }
         ,
-        DISABLED_BY_PROFILE(new TranslatableComponent("chat.disabled.profile").withStyle(ChatFormatting.RED)){
+        DISABLED_BY_PROFILE(Component.translatable("chat.disabled.profile").withStyle(ChatFormatting.RED)){
 
             @Override
             public boolean isChatAllowed(boolean bl) {

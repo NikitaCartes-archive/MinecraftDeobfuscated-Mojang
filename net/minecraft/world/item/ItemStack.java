@@ -34,13 +34,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -600,13 +599,13 @@ public final class ItemStack {
         int i;
         Integer integer;
         ArrayList<Component> list = Lists.newArrayList();
-        MutableComponent mutableComponent = new TextComponent("").append(this.getHoverName()).withStyle(this.getRarity().color);
+        MutableComponent mutableComponent = Component.empty().append(this.getHoverName()).withStyle(this.getRarity().color);
         if (this.hasCustomHoverName()) {
             mutableComponent.withStyle(ChatFormatting.ITALIC);
         }
         list.add(mutableComponent);
         if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.is(Items.FILLED_MAP) && (integer = MapItem.getMapId(this)) != null) {
-            list.add(new TextComponent("#" + integer).withStyle(ChatFormatting.GRAY));
+            list.add(Component.literal("#" + integer).withStyle(ChatFormatting.GRAY));
         }
         if (ItemStack.shouldShowInTooltip(i = this.getHideFlags(), TooltipPart.ADDITIONAL)) {
             this.getItem().appendHoverText(this, player == null ? null : player.level, list, tooltipFlag);
@@ -619,9 +618,9 @@ public final class ItemStack {
                 CompoundTag compoundTag = this.tag.getCompound(TAG_DISPLAY);
                 if (ItemStack.shouldShowInTooltip(i, TooltipPart.DYE) && compoundTag.contains(TAG_COLOR, 99)) {
                     if (tooltipFlag.isAdvanced()) {
-                        list.add(new TranslatableComponent("item.color", String.format("#%06X", compoundTag.getInt(TAG_COLOR))).withStyle(ChatFormatting.GRAY));
+                        list.add(Component.translatable("item.color", String.format("#%06X", compoundTag.getInt(TAG_COLOR))).withStyle(ChatFormatting.GRAY));
                     } else {
-                        list.add(new TranslatableComponent("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+                        list.add(Component.translatable("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                     }
                 }
                 if (compoundTag.getTagType(TAG_LORE) == 9) {
@@ -644,8 +643,8 @@ public final class ItemStack {
             for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
                 Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
                 if (multimap.isEmpty()) continue;
-                list.add(TextComponent.EMPTY);
-                list.add(new TranslatableComponent("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
+                list.add(CommonComponents.EMPTY);
+                list.add(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
                 for (Map.Entry<Attribute, AttributeModifier> entry : multimap.entries()) {
                     AttributeModifier attributeModifier = entry.getValue();
                     double d = attributeModifier.getAmount();
@@ -662,33 +661,33 @@ public final class ItemStack {
                     }
                     double e = attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? d * 100.0 : (entry.getKey().equals(Attributes.KNOCKBACK_RESISTANCE) ? d * 10.0 : d);
                     if (bl) {
-                        list.add(new TextComponent(" ").append(new TranslatableComponent("attribute.modifier.equals." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.DARK_GREEN));
+                        list.add(Component.literal(" ").append(Component.translatable("attribute.modifier.equals." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.DARK_GREEN));
                         continue;
                     }
                     if (d > 0.0) {
-                        list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.BLUE));
+                        list.add(Component.translatable("attribute.modifier.plus." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.BLUE));
                         continue;
                     }
                     if (!(d < 0.0)) continue;
-                    list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.RED));
+                    list.add(Component.translatable("attribute.modifier.take." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), Component.translatable(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.RED));
                 }
             }
         }
         if (this.hasTag()) {
             ListTag listTag2;
             if (ItemStack.shouldShowInTooltip(i, TooltipPart.UNBREAKABLE) && this.tag.getBoolean(TAG_UNBREAKABLE)) {
-                list.add(new TranslatableComponent("item.unbreakable").withStyle(ChatFormatting.BLUE));
+                list.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
             }
             if (ItemStack.shouldShowInTooltip(i, TooltipPart.CAN_DESTROY) && this.tag.contains(TAG_CAN_DESTROY_BLOCK_LIST, 9) && !(listTag2 = this.tag.getList(TAG_CAN_DESTROY_BLOCK_LIST, 8)).isEmpty()) {
-                list.add(TextComponent.EMPTY);
-                list.add(new TranslatableComponent("item.canBreak").withStyle(ChatFormatting.GRAY));
+                list.add(CommonComponents.EMPTY);
+                list.add(Component.translatable("item.canBreak").withStyle(ChatFormatting.GRAY));
                 for (int k = 0; k < listTag2.size(); ++k) {
                     list.addAll(ItemStack.expandBlockState(listTag2.getString(k)));
                 }
             }
             if (ItemStack.shouldShowInTooltip(i, TooltipPart.CAN_PLACE) && this.tag.contains(TAG_CAN_PLACE_ON_BLOCK_LIST, 9) && !(listTag2 = this.tag.getList(TAG_CAN_PLACE_ON_BLOCK_LIST, 8)).isEmpty()) {
-                list.add(TextComponent.EMPTY);
-                list.add(new TranslatableComponent("item.canPlace").withStyle(ChatFormatting.GRAY));
+                list.add(CommonComponents.EMPTY);
+                list.add(Component.translatable("item.canPlace").withStyle(ChatFormatting.GRAY));
                 for (int k = 0; k < listTag2.size(); ++k) {
                     list.addAll(ItemStack.expandBlockState(listTag2.getString(k)));
                 }
@@ -696,11 +695,11 @@ public final class ItemStack {
         }
         if (tooltipFlag.isAdvanced()) {
             if (this.isDamaged()) {
-                list.add(new TranslatableComponent("item.durability", this.getMaxDamage() - this.getDamageValue(), this.getMaxDamage()));
+                list.add(Component.translatable("item.durability", this.getMaxDamage() - this.getDamageValue(), this.getMaxDamage()));
             }
-            list.add(new TextComponent(Registry.ITEM.getKey(this.getItem()).toString()).withStyle(ChatFormatting.DARK_GRAY));
+            list.add(Component.literal(Registry.ITEM.getKey(this.getItem()).toString()).withStyle(ChatFormatting.DARK_GRAY));
             if (this.hasTag()) {
-                list.add(new TranslatableComponent("item.nbt_tags", this.tag.getAllKeys().size()).withStyle(ChatFormatting.DARK_GRAY));
+                list.add(Component.translatable("item.nbt_tags", this.tag.getAllKeys().size()).withStyle(ChatFormatting.DARK_GRAY));
             }
         }
         return list;
@@ -733,7 +732,7 @@ public final class ItemStack {
         try {
             return BlockStateParser.parseForTesting(Registry.BLOCK, string, true).map(blockResult -> Lists.newArrayList(blockResult.blockState().getBlock().getName().withStyle(ChatFormatting.DARK_GRAY)), tagResult -> tagResult.tag().stream().map(holder -> ((Block)holder.value()).getName().withStyle(ChatFormatting.DARK_GRAY)).collect(Collectors.toList()));
         } catch (CommandSyntaxException commandSyntaxException) {
-            return Lists.newArrayList(new TextComponent("missingno").withStyle(ChatFormatting.DARK_GRAY));
+            return Lists.newArrayList(Component.literal("missingno").withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 
@@ -834,7 +833,7 @@ public final class ItemStack {
     }
 
     public Component getDisplayName() {
-        MutableComponent mutableComponent = new TextComponent("").append(this.getHoverName());
+        MutableComponent mutableComponent = Component.empty().append(this.getHoverName());
         if (this.hasCustomHoverName()) {
             mutableComponent.withStyle(ChatFormatting.ITALIC);
         }

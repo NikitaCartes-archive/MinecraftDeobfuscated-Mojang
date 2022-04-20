@@ -96,7 +96,7 @@ extends Projectile {
         this.moveTo(d, e, n, g, f);
         Vec3 vec3 = new Vec3(-k, Mth.clamp(-(m / l), -5.0f, 5.0f), -h);
         double o = vec3.length();
-        vec3 = vec3.multiply(0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045, 0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045, 0.6 / o + 0.5 + this.random.nextGaussian() * 0.0045);
+        vec3 = vec3.multiply(0.6 / o + this.random.triangle(0.5, 0.0103365), 0.6 / o + this.random.triangle(0.5, 0.0103365), 0.6 / o + this.random.triangle(0.5, 0.0103365));
         this.setDeltaMovement(vec3);
         this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
         this.setXRot((float)(Mth.atan2(vec3.y, vec3.horizontalDistance()) * 57.2957763671875));
@@ -285,7 +285,7 @@ extends Projectile {
             if (this.timeUntilHooked > 0) {
                 double j;
                 double e;
-                this.fishAngle += (float)(this.random.nextGaussian() * 4.0);
+                this.fishAngle += (float)this.random.triangle(0.0, 9.188);
                 float f = this.fishAngle * ((float)Math.PI / 180);
                 float g = Mth.sin(f);
                 float h = Mth.cos(f);

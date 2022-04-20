@@ -12,7 +12,6 @@ import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.client.sounds.Weighted;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +27,7 @@ implements Weighted<Sound> {
 
     public WeighedSoundEvents(ResourceLocation resourceLocation, @Nullable String string) {
         this.location = resourceLocation;
-        this.subtitle = string == null ? null : new TranslatableComponent(string);
+        this.subtitle = string == null ? null : Component.translatable(string);
     }
 
     @Override

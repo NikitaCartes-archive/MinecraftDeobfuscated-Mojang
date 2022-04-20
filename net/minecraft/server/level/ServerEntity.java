@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,9 +53,6 @@ public class ServerEntity {
     private final int updateInterval;
     private final boolean trackDelta;
     private final Consumer<Packet<?>> broadcast;
-    private long xp;
-    private long yp;
-    private long zp;
     private int yRotp;
     private int xRotp;
     private int yHeadRotp;
@@ -71,7 +69,7 @@ public class ServerEntity {
         this.entity = entity;
         this.updateInterval = i;
         this.trackDelta = bl;
-        this.updateSentPos();
+        entity.getPositionCodec().setBase(entity.trackingPosition());
         this.yRotp = Mth.floor(entity.getYRot() * 256.0f / 360.0f);
         this.xRotp = Mth.floor(entity.getXRot() * 256.0f / 360.0f);
         this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0f / 360.0f);
@@ -79,28 +77,32 @@ public class ServerEntity {
     }
 
     public void sendChanges() {
+        Entity entity;
         List<Entity> list = this.entity.getPassengers();
         if (!list.equals(this.lastPassengers)) {
             this.lastPassengers = list;
             this.broadcast.accept(new ClientboundSetPassengersPacket(this.entity));
         }
-        if (this.entity instanceof ItemFrame && this.tickCount % 10 == 0) {
-            Integer integer;
-            MapItemSavedData mapItemSavedData;
-            ItemFrame itemFrame = (ItemFrame)this.entity;
-            ItemStack itemStack = itemFrame.getItem();
-            if (itemStack.getItem() instanceof MapItem && (mapItemSavedData = MapItem.getSavedData(integer = MapItem.getMapId(itemStack), (Level)this.level)) != null) {
-                for (ServerPlayer serverPlayer : this.level.players()) {
-                    mapItemSavedData.tickCarriedBy(serverPlayer, itemStack);
-                    Packet<?> packet = mapItemSavedData.getUpdatePacket(integer, serverPlayer);
-                    if (packet == null) continue;
-                    serverPlayer.connection.send(packet);
+        if ((entity = this.entity) instanceof ItemFrame) {
+            ItemFrame itemFrame = (ItemFrame)entity;
+            if (this.tickCount % 10 == 0) {
+                Integer integer;
+                MapItemSavedData mapItemSavedData;
+                ItemStack itemStack = itemFrame.getItem();
+                if (itemStack.getItem() instanceof MapItem && (mapItemSavedData = MapItem.getSavedData(integer = MapItem.getMapId(itemStack), (Level)this.level)) != null) {
+                    for (ServerPlayer serverPlayer : this.level.players()) {
+                        mapItemSavedData.tickCarriedBy(serverPlayer, itemStack);
+                        Packet<?> packet = mapItemSavedData.getUpdatePacket(integer, serverPlayer);
+                        if (packet == null) continue;
+                        serverPlayer.connection.send(packet);
+                    }
                 }
+                this.sendDirtyEntityData();
             }
-            this.sendDirtyEntityData();
         }
         if (this.tickCount % this.updateInterval == 0 || this.entity.hasImpulse || this.entity.getEntityData().isDirty()) {
             int i;
+            VecDeltaCodec vecDeltaCodec = this.entity.getPositionCodec();
             if (this.entity.isPassenger()) {
                 boolean bl;
                 i = Mth.floor(this.entity.getYRot() * 256.0f / 360.0f);
@@ -111,7 +113,7 @@ public class ServerEntity {
                     this.yRotp = i;
                     this.xRotp = j;
                 }
-                this.updateSentPos();
+                vecDeltaCodec.setBase(this.entity.trackingPosition());
                 this.sendDirtyEntityData();
                 this.wasRiding = true;
             } else {
@@ -121,16 +123,16 @@ public class ServerEntity {
                 ++this.teleportDelay;
                 i = Mth.floor(this.entity.getYRot() * 256.0f / 360.0f);
                 int j = Mth.floor(this.entity.getXRot() * 256.0f / 360.0f);
-                Vec3 vec3 = this.entity.position().subtract(this.sentPos());
-                boolean bl2 = vec3.lengthSqr() >= 7.62939453125E-6;
+                Vec3 vec3 = this.entity.trackingPosition();
+                boolean bl2 = vecDeltaCodec.delta(vec3).lengthSqr() >= 7.62939453125E-6;
                 Packet<ClientGamePacketListener> packet2 = null;
                 boolean bl3 = bl2 || this.tickCount % 60 == 0;
                 boolean bl = bl4 = Math.abs(i - this.yRotp) >= 1 || Math.abs(j - this.xRotp) >= 1;
                 if (this.tickCount > 0 || this.entity instanceof AbstractArrow) {
                     boolean bl5;
-                    long l = ClientboundMoveEntityPacket.entityToPacket(vec3.x);
-                    long m = ClientboundMoveEntityPacket.entityToPacket(vec3.y);
-                    long n = ClientboundMoveEntityPacket.entityToPacket(vec3.z);
+                    long l = vecDeltaCodec.encodeX(vec3);
+                    long m = vecDeltaCodec.encodeY(vec3);
+                    long n = vecDeltaCodec.encodeZ(vec3);
                     boolean bl6 = bl5 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
                     if (bl5 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.isOnGround()) {
                         this.wasOnGround = this.entity.isOnGround();
@@ -153,7 +155,7 @@ public class ServerEntity {
                 }
                 this.sendDirtyEntityData();
                 if (bl3) {
-                    this.updateSentPos();
+                    vecDeltaCodec.setBase(vec3);
                 }
                 if (bl4) {
                     this.yRotp = i;
@@ -250,16 +252,6 @@ public class ServerEntity {
             }
             set.clear();
         }
-    }
-
-    private void updateSentPos() {
-        this.xp = ClientboundMoveEntityPacket.entityToPacket(this.entity.getX());
-        this.yp = ClientboundMoveEntityPacket.entityToPacket(this.entity.getY());
-        this.zp = ClientboundMoveEntityPacket.entityToPacket(this.entity.getZ());
-    }
-
-    private Vec3 sentPos() {
-        return ClientboundMoveEntityPacket.packetToEntity(this.xp, this.yp, this.zp);
     }
 
     private void broadcastAndSend(Packet<?> packet) {

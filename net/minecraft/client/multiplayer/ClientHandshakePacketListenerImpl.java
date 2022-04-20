@@ -25,7 +25,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
@@ -76,7 +75,7 @@ implements ClientLoginPacketListener {
         } catch (CryptException cryptException) {
             throw new IllegalStateException("Protocol error", cryptException);
         }
-        this.updateStatus.accept(new TranslatableComponent("connect.authorizing"));
+        this.updateStatus.accept(Component.translatable("connect.authorizing"));
         HttpUtil.DOWNLOAD_EXECUTOR.submit(() -> {
             Component component = this.authenticateServer(string);
             if (component != null) {
@@ -87,7 +86,7 @@ implements ClientLoginPacketListener {
                     return;
                 }
             }
-            this.updateStatus.accept(new TranslatableComponent("connect.encrypting"));
+            this.updateStatus.accept(Component.translatable("connect.encrypting"));
             this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(cipher, cipher2));
         });
     }
@@ -97,13 +96,13 @@ implements ClientLoginPacketListener {
         try {
             this.getMinecraftSessionService().joinServer(this.minecraft.getUser().getGameProfile(), this.minecraft.getUser().getAccessToken(), string);
         } catch (AuthenticationUnavailableException authenticationUnavailableException) {
-            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.serversUnavailable"));
+            return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.serversUnavailable"));
         } catch (InvalidCredentialsException invalidCredentialsException) {
-            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.invalidSession"));
+            return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.invalidSession"));
         } catch (InsufficientPrivilegesException insufficientPrivilegesException) {
-            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.insufficientPrivileges"));
+            return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.insufficientPrivileges"));
         } catch (AuthenticationException authenticationException) {
-            return new TranslatableComponent("disconnect.loginFailedInfo", authenticationException.getMessage());
+            return Component.translatable("disconnect.loginFailedInfo", authenticationException.getMessage());
         }
         return null;
     }
@@ -114,7 +113,7 @@ implements ClientLoginPacketListener {
 
     @Override
     public void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket) {
-        this.updateStatus.accept(new TranslatableComponent("connect.joining"));
+        this.updateStatus.accept(Component.translatable("connect.joining"));
         this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
         this.connection.setProtocol(ConnectionProtocol.PLAY);
         this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.localGameProfile, this.minecraft.createTelemetryManager()));
@@ -148,7 +147,7 @@ implements ClientLoginPacketListener {
 
     @Override
     public void handleCustomQuery(ClientboundCustomQueryPacket clientboundCustomQueryPacket) {
-        this.updateStatus.accept(new TranslatableComponent("connect.negotiating"));
+        this.updateStatus.accept(Component.translatable("connect.negotiating"));
         this.connection.send(new ServerboundCustomQueryPacket(clientboundCustomQueryPacket.getTransactionId(), null));
     }
 }

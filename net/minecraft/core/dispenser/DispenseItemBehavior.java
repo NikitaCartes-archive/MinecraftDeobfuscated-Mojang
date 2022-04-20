@@ -328,9 +328,9 @@ public interface DispenseItemBehavior {
                 double f = position.z() + (double)((float)direction.getStepZ() * 0.3f);
                 ServerLevel level = blockSource.getLevel();
                 RandomSource randomSource = level.random;
-                double g = randomSource.nextGaussian() * 0.05 + (double)direction.getStepX();
-                double h = randomSource.nextGaussian() * 0.05 + (double)direction.getStepY();
-                double i = randomSource.nextGaussian() * 0.05 + (double)direction.getStepZ();
+                double g = randomSource.triangle(direction.getStepX(), 0.11485000000000001);
+                double h = randomSource.triangle(direction.getStepY(), 0.11485000000000001);
+                double i = randomSource.triangle(direction.getStepZ(), 0.11485000000000001);
                 SmallFireball smallFireball2 = new SmallFireball(level, d, e, f, g, h, i);
                 level.addFreshEntity(Util.make(smallFireball2, smallFireball -> smallFireball.setItem(itemStack)));
                 itemStack.shrink(1);

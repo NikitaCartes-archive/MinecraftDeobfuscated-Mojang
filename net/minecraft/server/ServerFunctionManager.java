@@ -15,7 +15,6 @@ import java.util.Optional;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionLibrary;
@@ -24,7 +23,7 @@ import net.minecraft.world.level.GameRules;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerFunctionManager {
-    private static final Component NO_RECURSIVE_TRACES = new TranslatableComponent("commands.debug.function.noRecursion");
+    private static final Component NO_RECURSIVE_TRACES = Component.translatable("commands.debug.function.noRecursion");
     private static final ResourceLocation TICK_FUNCTION_TAG = new ResourceLocation("tick");
     private static final ResourceLocation LOAD_FUNCTION_TAG = new ResourceLocation("load");
     final MinecraftServer server;

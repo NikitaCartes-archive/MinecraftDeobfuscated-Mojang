@@ -17,7 +17,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.lang.reflect.Type;
 import net.minecraft.ResourceLocationException;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 public class ResourceLocation
 implements Comparable<ResourceLocation> {
     public static final Codec<ResourceLocation> CODEC = Codec.STRING.comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
-    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid"));
+    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("argument.id.invalid"));
     public static final char NAMESPACE_SEPARATOR = ':';
     public static final String DEFAULT_NAMESPACE = "minecraft";
     public static final String REALMS_NAMESPACE = "realms";

@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.Map;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatFormatter;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +50,7 @@ implements Iterable<Stat<T>> {
 
     public Component getDisplayName() {
         if (this.displayName == null) {
-            this.displayName = new TranslatableComponent(this.getTranslationKey());
+            this.displayName = Component.translatable(this.getTranslationKey());
         }
         return this.displayName;
     }

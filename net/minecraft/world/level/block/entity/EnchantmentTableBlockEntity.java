@@ -6,7 +6,6 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Nameable;
@@ -106,7 +105,7 @@ implements Nameable {
         if (this.name != null) {
             return this.name;
         }
-        return new TranslatableComponent("container.enchant");
+        return Component.translatable("container.enchant");
     }
 
     public void setCustomName(@Nullable Component component) {

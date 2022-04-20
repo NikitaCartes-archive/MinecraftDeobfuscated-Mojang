@@ -11,7 +11,6 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.client.tutorial.TutorialStepInstance;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class MovementTutorialStepInstance
@@ -21,10 +20,10 @@ implements TutorialStepInstance {
     private static final int MOVE_HINT_DELAY = 100;
     private static final int LOOK_HINT_DELAY = 20;
     private static final int INCOMPLETE = -1;
-    private static final Component MOVE_TITLE = new TranslatableComponent("tutorial.move.title", Tutorial.key("forward"), Tutorial.key("left"), Tutorial.key("back"), Tutorial.key("right"));
-    private static final Component MOVE_DESCRIPTION = new TranslatableComponent("tutorial.move.description", Tutorial.key("jump"));
-    private static final Component LOOK_TITLE = new TranslatableComponent("tutorial.look.title");
-    private static final Component LOOK_DESCRIPTION = new TranslatableComponent("tutorial.look.description");
+    private static final Component MOVE_TITLE = Component.translatable("tutorial.move.title", Tutorial.key("forward"), Tutorial.key("left"), Tutorial.key("back"), Tutorial.key("right"));
+    private static final Component MOVE_DESCRIPTION = Component.translatable("tutorial.move.description", Tutorial.key("jump"));
+    private static final Component LOOK_TITLE = Component.translatable("tutorial.look.title");
+    private static final Component LOOK_DESCRIPTION = Component.translatable("tutorial.look.description");
     private final Tutorial tutorial;
     private TutorialToast moveToast;
     private TutorialToast lookToast;

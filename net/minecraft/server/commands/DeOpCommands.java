@@ -13,11 +13,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.PlayerList;
 
 public class DeOpCommands {
-    private static final SimpleCommandExceptionType ERROR_NOT_OP = new SimpleCommandExceptionType(new TranslatableComponent("commands.deop.failed"));
+    private static final SimpleCommandExceptionType ERROR_NOT_OP = new SimpleCommandExceptionType(Component.translatable("commands.deop.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("deop").requires(commandSourceStack -> commandSourceStack.hasPermission(3))).then(Commands.argument("targets", GameProfileArgument.gameProfile()).suggests((commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().getOpNames(), suggestionsBuilder)).executes(commandContext -> DeOpCommands.deopPlayers((CommandSourceStack)commandContext.getSource(), GameProfileArgument.getGameProfiles(commandContext, "targets")))));
@@ -30,7 +30,7 @@ public class DeOpCommands {
             if (!playerList.isOp(gameProfile)) continue;
             playerList.deop(gameProfile);
             ++i;
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.deop.success", collection.iterator().next().getName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.deop.success", collection.iterator().next().getName()), true);
         }
         if (i == 0) {
             throw ERROR_NOT_OP.create();

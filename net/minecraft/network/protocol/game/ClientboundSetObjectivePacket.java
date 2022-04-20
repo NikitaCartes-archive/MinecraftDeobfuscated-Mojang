@@ -4,8 +4,8 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.scores.Objective;
@@ -35,7 +35,7 @@ implements Packet<ClientGamePacketListener> {
             this.displayName = friendlyByteBuf.readComponent();
             this.renderType = friendlyByteBuf.readEnum(ObjectiveCriteria.RenderType.class);
         } else {
-            this.displayName = TextComponent.EMPTY;
+            this.displayName = CommonComponents.EMPTY;
             this.renderType = ObjectiveCriteria.RenderType.INTEGER;
         }
     }

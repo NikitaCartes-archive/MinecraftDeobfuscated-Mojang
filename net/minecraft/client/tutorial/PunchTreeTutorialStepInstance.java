@@ -14,7 +14,6 @@ import net.minecraft.client.tutorial.TutorialStepInstance;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
@@ -24,8 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class PunchTreeTutorialStepInstance
 implements TutorialStepInstance {
     private static final int HINT_DELAY = 600;
-    private static final Component TITLE = new TranslatableComponent("tutorial.punch_tree.title");
-    private static final Component DESCRIPTION = new TranslatableComponent("tutorial.punch_tree.description", Tutorial.key("attack"));
+    private static final Component TITLE = Component.translatable("tutorial.punch_tree.title");
+    private static final Component DESCRIPTION = Component.translatable("tutorial.punch_tree.description", Tutorial.key("attack"));
     private final Tutorial tutorial;
     private TutorialToast toast;
     private int timeWaiting;

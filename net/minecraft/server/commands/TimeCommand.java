@@ -10,7 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.TimeArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class TimeCommand {
@@ -23,7 +23,7 @@ public class TimeCommand {
     }
 
     private static int queryTime(CommandSourceStack commandSourceStack, int i) {
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.time.query", i), false);
+        commandSourceStack.sendSuccess(Component.translatable("commands.time.query", i), false);
         return i;
     }
 
@@ -31,7 +31,7 @@ public class TimeCommand {
         for (ServerLevel serverLevel : commandSourceStack.getServer().getAllLevels()) {
             serverLevel.setDayTime(i);
         }
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.time.set", i), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.time.set", i), true);
         return TimeCommand.getDayTime(commandSourceStack.getLevel());
     }
 
@@ -40,7 +40,7 @@ public class TimeCommand {
             serverLevel.setDayTime(serverLevel.getDayTime() + (long)i);
         }
         int j = TimeCommand.getDayTime(commandSourceStack.getLevel());
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.time.set", j), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.time.set", j), true);
         return j;
     }
 }

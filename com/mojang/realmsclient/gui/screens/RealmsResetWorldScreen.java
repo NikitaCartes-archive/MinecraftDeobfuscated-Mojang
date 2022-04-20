@@ -27,7 +27,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +39,7 @@ extends RealmsScreen {
     static final Logger LOGGER = LogUtils.getLogger();
     private final Screen lastScreen;
     private final RealmsServer serverData;
-    private Component subtitle = new TranslatableComponent("mco.reset.world.warning");
+    private Component subtitle = Component.translatable("mco.reset.world.warning");
     private Component buttonTitle = CommonComponents.GUI_CANCEL;
     private int subtitleColor = 0xFF0000;
     private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
@@ -55,7 +54,7 @@ extends RealmsScreen {
     WorldTemplatePaginatedList experiences;
     WorldTemplatePaginatedList inspirations;
     public int slot = -1;
-    private Component resetTitle = new TranslatableComponent("mco.reset.world.resetting.screen.title");
+    private Component resetTitle = Component.translatable("mco.reset.world.resetting.screen.title");
     private final Runnable resetWorldRunnable;
     private final Runnable callback;
 
@@ -68,7 +67,7 @@ extends RealmsScreen {
     }
 
     public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Runnable runnable, Runnable runnable2) {
-        this(screen, realmsServer, new TranslatableComponent("mco.reset.world.title"), runnable, runnable2);
+        this(screen, realmsServer, Component.translatable("mco.reset.world.title"), runnable, runnable2);
     }
 
     public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Component component, Component component2, int i, Component component3, Runnable runnable, Runnable runnable2) {
@@ -111,12 +110,12 @@ extends RealmsScreen {
             }
         }.start();
         this.addLabel(new RealmsLabel(this.subtitle, this.width / 2, 22, this.subtitleColor));
-        this.addRenderableWidget(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.generate"), NEW_WORLD_LOCATION, button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))));
-        this.addRenderableWidget(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.upload"), UPLOAD_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this, this.callback))));
-        this.addRenderableWidget(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(0) + 10, new TranslatableComponent("mco.reset.world.template"), SURVIVAL_SPAWN_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.template"), this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates))));
-        this.addRenderableWidget(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.adventure"), ADVENTURE_MAP_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.adventure"), this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps))));
-        this.addRenderableWidget(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.experience"), EXPERIENCE_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.experience"), this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences))));
-        this.addRenderableWidget(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(6) + 20, new TranslatableComponent("mco.reset.world.inspiration"), INSPIRATION_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(new TranslatableComponent("mco.reset.world.inspiration"), this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations))));
+        this.addRenderableWidget(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(0) + 10, Component.translatable("mco.reset.world.generate"), NEW_WORLD_LOCATION, button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))));
+        this.addRenderableWidget(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(0) + 10, Component.translatable("mco.reset.world.upload"), UPLOAD_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this, this.callback))));
+        this.addRenderableWidget(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(0) + 10, Component.translatable("mco.reset.world.template"), SURVIVAL_SPAWN_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(Component.translatable("mco.reset.world.template"), this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates))));
+        this.addRenderableWidget(new FrameButton(this.frame(1), RealmsResetWorldScreen.row(6) + 20, Component.translatable("mco.reset.world.adventure"), ADVENTURE_MAP_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(Component.translatable("mco.reset.world.adventure"), this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps))));
+        this.addRenderableWidget(new FrameButton(this.frame(2), RealmsResetWorldScreen.row(6) + 20, Component.translatable("mco.reset.world.experience"), EXPERIENCE_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(Component.translatable("mco.reset.world.experience"), this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences))));
+        this.addRenderableWidget(new FrameButton(this.frame(3), RealmsResetWorldScreen.row(6) + 20, Component.translatable("mco.reset.world.inspiration"), INSPIRATION_LOCATION, button -> this.minecraft.setScreen(new RealmsSelectWorldTemplateScreen(Component.translatable("mco.reset.world.inspiration"), this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations))));
     }
 
     @Override

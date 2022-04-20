@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ItemInput
 implements Predicate<ItemStack> {
-    private static final Dynamic2CommandExceptionType ERROR_STACK_TOO_BIG = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("arguments.item.overstacked", object, object2));
+    private static final Dynamic2CommandExceptionType ERROR_STACK_TOO_BIG = new Dynamic2CommandExceptionType((object, object2) -> Component.translatable("arguments.item.overstacked", object, object2));
     private final Holder<Item> item;
     @Nullable
     private final CompoundTag tag;

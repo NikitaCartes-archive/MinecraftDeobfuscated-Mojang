@@ -24,7 +24,7 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class TeleportCommand {
-    private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(new TranslatableComponent("commands.teleport.invalidPosition"));
+    private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(Component.translatable("commands.teleport.invalidPosition"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("teleport").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("location", Vec3Argument.vec3()).executes(commandContext -> TeleportCommand.teleportToPos((CommandSourceStack)commandContext.getSource(), Collections.singleton(((CommandSourceStack)commandContext.getSource()).getEntityOrException()), ((CommandSourceStack)commandContext.getSource()).getLevel(), Vec3Argument.getCoordinates(commandContext, "location"), WorldCoordinates.current(), null)))).then(Commands.argument("destination", EntityArgument.entity()).executes(commandContext -> TeleportCommand.teleportToEntity((CommandSourceStack)commandContext.getSource(), Collections.singleton(((CommandSourceStack)commandContext.getSource()).getEntityOrException()), EntityArgument.getEntity(commandContext, "destination"))))).then(((RequiredArgumentBuilder)Commands.argument("targets", EntityArgument.entities()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("location", Vec3Argument.vec3()).executes(commandContext -> TeleportCommand.teleportToPos((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ((CommandSourceStack)commandContext.getSource()).getLevel(), Vec3Argument.getCoordinates(commandContext, "location"), null, null))).then(Commands.argument("rotation", RotationArgument.rotation()).executes(commandContext -> TeleportCommand.teleportToPos((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ((CommandSourceStack)commandContext.getSource()).getLevel(), Vec3Argument.getCoordinates(commandContext, "location"), RotationArgument.getRotation(commandContext, "rotation"), null)))).then(((LiteralArgumentBuilder)Commands.literal("facing").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.literal("entity").then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("facingEntity", EntityArgument.entity()).executes(commandContext -> TeleportCommand.teleportToPos((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ((CommandSourceStack)commandContext.getSource()).getLevel(), Vec3Argument.getCoordinates(commandContext, "location"), null, new LookAt(EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.Anchor.FEET)))).then(Commands.argument("facingAnchor", EntityAnchorArgument.anchor()).executes(commandContext -> TeleportCommand.teleportToPos((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ((CommandSourceStack)commandContext.getSource()).getLevel(), Vec3Argument.getCoordinates(commandContext, "location"), null, new LookAt(EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.getAnchor(commandContext, "facingAnchor")))))))).then(Commands.argument("facingLocation", Vec3Argument.vec3()).executes(commandContext -> TeleportCommand.teleportToPos((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ((CommandSourceStack)commandContext.getSource()).getLevel(), Vec3Argument.getCoordinates(commandContext, "location"), null, new LookAt(Vec3Argument.getVec3(commandContext, "facingLocation")))))))).then(Commands.argument("destination", EntityArgument.entity()).executes(commandContext -> TeleportCommand.teleportToEntity((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), EntityArgument.getEntity(commandContext, "destination"))))));
@@ -52,9 +52,9 @@ public class TeleportCommand {
             TeleportCommand.performTeleport(commandSourceStack, entity2, (ServerLevel)entity.level, entity.getX(), entity.getY(), entity.getZ(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class), entity.getYRot(), entity.getXRot(), null);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.single", collection.iterator().next().getDisplayName(), entity.getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.teleport.success.entity.single", collection.iterator().next().getDisplayName(), entity.getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.multiple", collection.size(), entity.getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.teleport.success.entity.multiple", collection.size(), entity.getDisplayName()), true);
         }
         return collection.size();
     }
@@ -91,9 +91,9 @@ public class TeleportCommand {
             TeleportCommand.performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.location.single", collection.iterator().next().getDisplayName(), TeleportCommand.formatDouble(vec3.x), TeleportCommand.formatDouble(vec3.y), TeleportCommand.formatDouble(vec3.z)), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.teleport.success.location.single", collection.iterator().next().getDisplayName(), TeleportCommand.formatDouble(vec3.x), TeleportCommand.formatDouble(vec3.y), TeleportCommand.formatDouble(vec3.z)), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.location.multiple", collection.size(), TeleportCommand.formatDouble(vec3.x), TeleportCommand.formatDouble(vec3.y), TeleportCommand.formatDouble(vec3.z)), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.teleport.success.location.multiple", collection.size(), TeleportCommand.formatDouble(vec3.x), TeleportCommand.formatDouble(vec3.y), TeleportCommand.formatDouble(vec3.z)), true);
         }
         return collection.size();
     }

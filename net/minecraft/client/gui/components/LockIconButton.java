@@ -10,8 +10,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class LockIconButton
@@ -19,12 +19,12 @@ extends Button {
     private boolean locked;
 
     public LockIconButton(int i, int j, Button.OnPress onPress) {
-        super(i, j, 20, 20, new TranslatableComponent("narrator.button.difficulty_lock"), onPress);
+        super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress);
     }
 
     @Override
     protected MutableComponent createNarrationMessage() {
-        return CommonComponents.joinForNarration(super.createNarrationMessage(), this.isLocked() ? new TranslatableComponent("narrator.button.difficulty_lock.locked") : new TranslatableComponent("narrator.button.difficulty_lock.unlocked"));
+        return CommonComponents.joinForNarration(super.createNarrationMessage(), this.isLocked() ? Component.translatable("narrator.button.difficulty_lock.locked") : Component.translatable("narrator.button.difficulty_lock.unlocked"));
     }
 
     public boolean isLocked() {

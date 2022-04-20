@@ -7,8 +7,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
@@ -18,7 +17,7 @@ import net.minecraft.server.network.ServerStatusPacketListenerImpl;
 
 public class ServerHandshakePacketListenerImpl
 implements ServerHandshakePacketListener {
-    private static final Component IGNORE_STATUS_REASON = new TextComponent("Ignoring status request");
+    private static final Component IGNORE_STATUS_REASON = Component.literal("Ignoring status request");
     private final MinecraftServer server;
     private final Connection connection;
 
@@ -33,7 +32,7 @@ implements ServerHandshakePacketListener {
             case LOGIN: {
                 this.connection.setProtocol(ConnectionProtocol.LOGIN);
                 if (clientIntentionPacket.getProtocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
-                    TranslatableComponent component = clientIntentionPacket.getProtocolVersion() < 754 ? new TranslatableComponent("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName()) : new TranslatableComponent("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
+                    MutableComponent component = clientIntentionPacket.getProtocolVersion() < 754 ? Component.translatable("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName()) : Component.translatable("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
                     this.connection.send(new ClientboundLoginDisconnectPacket(component));
                     this.connection.disconnect(component);
                     break;

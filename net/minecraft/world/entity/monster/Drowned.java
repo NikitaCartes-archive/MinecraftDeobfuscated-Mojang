@@ -97,7 +97,7 @@ implements RangedAttackMob {
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         if (this.getItemBySlot(EquipmentSlot.OFFHAND).isEmpty() && serverLevelAccessor.getRandom().nextFloat() < 0.03f) {
             this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
-            this.handDropChances[EquipmentSlot.OFFHAND.getIndex()] = 2.0f;
+            this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
         }
         return spawnGroupData;
     }

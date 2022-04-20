@@ -29,7 +29,7 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.ItemCommands;
 import net.minecraft.server.level.ServerLevel;
@@ -57,8 +57,8 @@ public class LootCommand {
         LootTables lootTables = ((CommandSourceStack)commandContext.getSource()).getServer().getLootTables();
         return SharedSuggestionProvider.suggestResource(lootTables.getIds(), suggestionsBuilder);
     };
-    private static final DynamicCommandExceptionType ERROR_NO_HELD_ITEMS = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.drop.no_held_items", object));
-    private static final DynamicCommandExceptionType ERROR_NO_LOOT_TABLE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.drop.no_loot_table", object));
+    private static final DynamicCommandExceptionType ERROR_NO_HELD_ITEMS = new DynamicCommandExceptionType(object -> Component.translatable("commands.drop.no_held_items", object));
+    private static final DynamicCommandExceptionType ERROR_NO_LOOT_TABLE = new DynamicCommandExceptionType(object -> Component.translatable("commands.drop.no_loot_table", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
         commandDispatcher.register(LootCommand.addTargets((LiteralArgumentBuilder)Commands.literal("loot").requires(commandSourceStack -> commandSourceStack.hasPermission(2)), (argumentBuilder, dropConsumer) -> ((ArgumentBuilder)((ArgumentBuilder)((ArgumentBuilder)argumentBuilder.then(Commands.literal("fish").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(SUGGEST_LOOT_TABLE).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("pos", BlockPosArgument.blockPos()).executes(commandContext -> LootCommand.dropFishingLoot(commandContext, ResourceLocationArgument.getId(commandContext, "loot_table"), BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), ItemStack.EMPTY, dropConsumer))).then(Commands.argument("tool", ItemArgument.item(commandBuildContext)).executes(commandContext -> LootCommand.dropFishingLoot(commandContext, ResourceLocationArgument.getId(commandContext, "loot_table"), BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), ItemArgument.getItem(commandContext, "tool").createItemStack(1, false), dropConsumer)))).then(Commands.literal("mainhand").executes(commandContext -> LootCommand.dropFishingLoot(commandContext, ResourceLocationArgument.getId(commandContext, "loot_table"), BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), LootCommand.getSourceHandItem((CommandSourceStack)commandContext.getSource(), EquipmentSlot.MAINHAND), dropConsumer)))).then(Commands.literal("offhand").executes(commandContext -> LootCommand.dropFishingLoot(commandContext, ResourceLocationArgument.getId(commandContext, "loot_table"), BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), LootCommand.getSourceHandItem((CommandSourceStack)commandContext.getSource(), EquipmentSlot.OFFHAND), dropConsumer))))))).then(Commands.literal("loot").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(SUGGEST_LOOT_TABLE).executes(commandContext -> LootCommand.dropChestLoot(commandContext, ResourceLocationArgument.getId(commandContext, "loot_table"), dropConsumer))))).then(Commands.literal("kill").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("target", EntityArgument.entity()).executes(commandContext -> LootCommand.dropKillLoot(commandContext, EntityArgument.getEntity(commandContext, "target"), dropConsumer))))).then(Commands.literal("mine").then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("pos", BlockPosArgument.blockPos()).executes(commandContext -> LootCommand.dropBlockLoot(commandContext, BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), ItemStack.EMPTY, dropConsumer))).then(Commands.argument("tool", ItemArgument.item(commandBuildContext)).executes(commandContext -> LootCommand.dropBlockLoot(commandContext, BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), ItemArgument.getItem(commandContext, "tool").createItemStack(1, false), dropConsumer)))).then(Commands.literal("mainhand").executes(commandContext -> LootCommand.dropBlockLoot(commandContext, BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), LootCommand.getSourceHandItem((CommandSourceStack)commandContext.getSource(), EquipmentSlot.MAINHAND), dropConsumer)))).then(Commands.literal("offhand").executes(commandContext -> LootCommand.dropBlockLoot(commandContext, BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), LootCommand.getSourceHandItem((CommandSourceStack)commandContext.getSource(), EquipmentSlot.OFFHAND), dropConsumer)))))));
@@ -181,18 +181,18 @@ public class LootCommand {
     private static void callback(CommandSourceStack commandSourceStack, List<ItemStack> list) {
         if (list.size() == 1) {
             ItemStack itemStack = list.get(0);
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.drop.success.single", itemStack.getCount(), itemStack.getDisplayName()), false);
+            commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.single", itemStack.getCount(), itemStack.getDisplayName()), false);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.drop.success.multiple", list.size()), false);
+            commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.multiple", list.size()), false);
         }
     }
 
     private static void callback(CommandSourceStack commandSourceStack, List<ItemStack> list, ResourceLocation resourceLocation) {
         if (list.size() == 1) {
             ItemStack itemStack = list.get(0);
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.drop.success.single_with_table", itemStack.getCount(), itemStack.getDisplayName(), resourceLocation), false);
+            commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.single_with_table", itemStack.getCount(), itemStack.getDisplayName(), resourceLocation), false);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.drop.success.multiple_with_table", list.size(), resourceLocation), false);
+            commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.multiple_with_table", list.size(), resourceLocation), false);
         }
     }
 

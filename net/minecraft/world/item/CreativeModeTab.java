@@ -6,7 +6,6 @@ package net.minecraft.world.item;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -126,7 +125,7 @@ public abstract class CreativeModeTab {
     public CreativeModeTab(int i, String string) {
         this.id = i;
         this.langId = string;
-        this.displayName = new TranslatableComponent("itemGroup." + string);
+        this.displayName = Component.translatable("itemGroup." + string);
         this.iconItemStack = ItemStack.EMPTY;
         CreativeModeTab.TABS[i] = this;
     }

@@ -10,7 +10,7 @@ import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -31,7 +31,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(new TranslatableComponent("mco.create.world.wait"));
+        this.setTitle(Component.translatable("mco.create.world.wait"));
         RealmsClient realmsClient = RealmsClient.create();
         try {
             realmsClient.initializeWorld(this.worldId, this.name, this.motd);

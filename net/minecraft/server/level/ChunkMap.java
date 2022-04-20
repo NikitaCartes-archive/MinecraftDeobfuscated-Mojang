@@ -510,32 +510,49 @@ implements ChunkHolder.PlayerProvider {
     }
 
     private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkLoad(ChunkPos chunkPos) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                this.level.getProfiler().incrementCounter("chunkLoad");
-                CompoundTag compoundTag = this.readChunk(chunkPos);
-                if (compoundTag != null) {
-                    boolean bl = compoundTag.contains("Status", 8);
-                    if (bl) {
-                        ProtoChunk chunkAccess = ChunkSerializer.read(this.level, this.poiManager, chunkPos, compoundTag);
-                        this.markPosition(chunkPos, ((ChunkAccess)chunkAccess).getStatus().getChunkType());
-                        return Either.left(chunkAccess);
-                    }
-                    LOGGER.error("Chunk file at {} is missing level data, skipping", (Object)chunkPos);
-                }
-            } catch (ReportedException reportedException) {
-                Throwable throwable = reportedException.getCause();
-                if (throwable instanceof IOException) {
-                    LOGGER.error("Couldn't load chunk {}", (Object)chunkPos, (Object)throwable);
-                }
-                this.markPositionReplaceable(chunkPos);
-                throw reportedException;
-            } catch (Exception exception) {
-                LOGGER.error("Couldn't load chunk {}", (Object)chunkPos, (Object)exception);
+        return ((CompletableFuture)((CompletableFuture)this.readChunk(chunkPos).thenApply(optional -> optional.filter(compoundTag -> {
+            boolean bl = ChunkMap.isChunkDataValid(compoundTag);
+            if (!bl) {
+                LOGGER.error("Chunk file at {} is missing level data, skipping", (Object)chunkPos);
             }
-            this.markPositionReplaceable(chunkPos);
-            return Either.left(new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null));
-        }, this.mainThreadExecutor);
+            return bl;
+        }))).thenApplyAsync(optional -> {
+            this.level.getProfiler().incrementCounter("chunkLoad");
+            if (optional.isPresent()) {
+                ProtoChunk chunkAccess = ChunkSerializer.read(this.level, this.poiManager, chunkPos, (CompoundTag)optional.get());
+                this.markPosition(chunkPos, ((ChunkAccess)chunkAccess).getStatus().getChunkType());
+                return Either.left(chunkAccess);
+            }
+            return Either.left(this.createEmptyChunk(chunkPos));
+        }, (Executor)this.mainThreadExecutor)).exceptionallyAsync(throwable -> this.handleChunkLoadFailure((Throwable)throwable, chunkPos), (Executor)this.mainThreadExecutor);
+    }
+
+    private static boolean isChunkDataValid(CompoundTag compoundTag) {
+        return compoundTag.contains("Status", 8);
+    }
+
+    /*
+     * Enabled aggressive block sorting
+     */
+    private Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> handleChunkLoadFailure(Throwable throwable, ChunkPos chunkPos) {
+        if (!(throwable instanceof ReportedException)) {
+            if (!(throwable instanceof IOException)) return Either.left(this.createEmptyChunk(chunkPos));
+            LOGGER.error("Couldn't load chunk {}", (Object)chunkPos, (Object)throwable);
+            return Either.left(this.createEmptyChunk(chunkPos));
+        }
+        ReportedException reportedException = (ReportedException)throwable;
+        Throwable throwable2 = reportedException.getCause();
+        if (throwable2 instanceof IOException) {
+            LOGGER.error("Couldn't load chunk {}", (Object)chunkPos, (Object)throwable2);
+            return Either.left(this.createEmptyChunk(chunkPos));
+        }
+        this.markPositionReplaceable(chunkPos);
+        throw reportedException;
+    }
+
+    private ChunkAccess createEmptyChunk(ChunkPos chunkPos) {
+        this.markPositionReplaceable(chunkPos);
+        return new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
     }
 
     private void markPositionReplaceable(ChunkPos chunkPos) {
@@ -701,7 +718,7 @@ implements ChunkHolder.PlayerProvider {
             return b == 1;
         }
         try {
-            compoundTag = this.readChunk(chunkPos);
+            compoundTag = this.readChunk(chunkPos).join().orElse(null);
             if (compoundTag == null) {
                 this.markPositionReplaceable(chunkPos);
                 return false;
@@ -790,12 +807,11 @@ implements ChunkHolder.PlayerProvider {
         }
     }
 
-    @Nullable
-    private CompoundTag readChunk(ChunkPos chunkPos) throws IOException {
-        CompoundTag compoundTag = this.read(chunkPos);
-        if (compoundTag == null) {
-            return null;
-        }
+    private CompletableFuture<Optional<CompoundTag>> readChunk(ChunkPos chunkPos) {
+        return this.read(chunkPos).thenApplyAsync(optional -> optional.map(this::upgradeChunkTag), (Executor)Util.backgroundExecutor());
+    }
+
+    private CompoundTag upgradeChunkTag(CompoundTag compoundTag) {
         return this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag, this.generator.getTypeNameForDataFixer());
     }
 

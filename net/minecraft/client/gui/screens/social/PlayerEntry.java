@@ -24,10 +24,9 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
@@ -53,11 +52,11 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     final List<FormattedCharSequence> hideTooltip;
     final List<FormattedCharSequence> showTooltip;
     float tooltipHoverTime;
-    private static final Component HIDDEN = new TranslatableComponent("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
-    private static final Component BLOCKED = new TranslatableComponent("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
-    private static final Component OFFLINE = new TranslatableComponent("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
-    private static final Component HIDDEN_OFFLINE = new TranslatableComponent("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
-    private static final Component BLOCKED_OFFLINE = new TranslatableComponent("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
+    private static final Component HIDDEN = Component.translatable("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
+    private static final Component BLOCKED = Component.translatable("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
+    private static final Component OFFLINE = Component.translatable("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
+    private static final Component HIDDEN_OFFLINE = Component.translatable("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
+    private static final Component BLOCKED_OFFLINE = Component.translatable("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
     private static final int SKIN_SIZE = 24;
     private static final int PADDING = 4;
     private static final int CHAT_TOGGLE_ICON_SIZE = 20;
@@ -74,15 +73,15 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         this.id = uUID;
         this.playerName = string;
         this.skinGetter = supplier;
-        this.hideText = new TranslatableComponent("gui.socialInteractions.tooltip.hide", string);
-        this.showText = new TranslatableComponent("gui.socialInteractions.tooltip.show", string);
+        this.hideText = Component.translatable("gui.socialInteractions.tooltip.hide", string);
+        this.showText = Component.translatable("gui.socialInteractions.tooltip.show", string);
         this.hideTooltip = minecraft.font.split(this.hideText, 150);
         this.showTooltip = minecraft.font.split(this.showText, 150);
         PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
         if (!minecraft.player.getGameProfile().getId().equals(uUID) && !playerSocialManager.isBlocked(uUID)) {
             this.hideButton = new ImageButton(0, 0, 20, 20, 0, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
                 playerSocialManager.hidePlayer(uUID);
-                this.onHiddenOrShown(true, new TranslatableComponent("gui.socialInteractions.hidden_in_chat", string));
+                this.onHiddenOrShown(true, Component.translatable("gui.socialInteractions.hidden_in_chat", string));
             }, new Button.OnTooltip(){
 
                 @Override
@@ -97,7 +96,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
                 public void narrateTooltip(Consumer<Component> consumer) {
                     consumer.accept(PlayerEntry.this.hideText);
                 }
-            }, new TranslatableComponent("gui.socialInteractions.hide")){
+            }, Component.translatable("gui.socialInteractions.hide")){
 
                 @Override
                 protected MutableComponent createNarrationMessage() {
@@ -106,7 +105,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
             };
             this.showButton = new ImageButton(0, 0, 20, 20, 20, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
                 playerSocialManager.showPlayer(uUID);
-                this.onHiddenOrShown(false, new TranslatableComponent("gui.socialInteractions.shown_in_chat", string));
+                this.onHiddenOrShown(false, Component.translatable("gui.socialInteractions.shown_in_chat", string));
             }, new Button.OnTooltip(){
 
                 @Override
@@ -121,7 +120,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
                 public void narrateTooltip(Consumer<Component> consumer) {
                     consumer.accept(PlayerEntry.this.showText);
                 }
-            }, new TranslatableComponent("gui.socialInteractions.show")){
+            }, Component.translatable("gui.socialInteractions.show")){
 
                 @Override
                 protected MutableComponent createNarrationMessage() {
@@ -143,7 +142,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         int q = j + (m - 24) / 2;
         int r = p + 24 + 4;
         Component component = this.getStatusComponent();
-        if (component == TextComponent.EMPTY) {
+        if (component == CommonComponents.EMPTY) {
             GuiComponent.fill(poseStack, k, j, k + l, j + m, BG_FILL);
             s = j + (m - this.minecraft.font.lineHeight) / 2;
         } else {
@@ -205,10 +204,10 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
 
     MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
         Component component = this.getStatusComponent();
-        if (component == TextComponent.EMPTY) {
-            return new TextComponent(this.playerName).append(", ").append(mutableComponent);
+        if (component == CommonComponents.EMPTY) {
+            return Component.literal(this.playerName).append(", ").append(mutableComponent);
         }
-        return new TextComponent(this.playerName).append(", ").append(component).append(", ").append(mutableComponent);
+        return Component.literal(this.playerName).append(", ").append(component).append(", ").append(mutableComponent);
     }
 
     private Component getStatusComponent() {
@@ -229,7 +228,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         if (this.isRemoved) {
             return OFFLINE;
         }
-        return TextComponent.EMPTY;
+        return CommonComponents.EMPTY;
     }
 
     static void postRenderTooltip(SocialInteractionsScreen socialInteractionsScreen, PoseStack poseStack, List<FormattedCharSequence> list, int i, int j) {

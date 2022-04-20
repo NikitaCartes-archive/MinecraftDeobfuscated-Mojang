@@ -5,7 +5,6 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CartographyTableBlock
 extends Block {
-    private static final Component CONTAINER_TITLE = new TranslatableComponent("container.cartography_table");
+    private static final Component CONTAINER_TITLE = Component.translatable("container.cartography_table");
 
     protected CartographyTableBlock(BlockBehaviour.Properties properties) {
         super(properties);

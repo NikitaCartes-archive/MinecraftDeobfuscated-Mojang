@@ -17,7 +17,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MobEffectArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -25,9 +25,9 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class EffectCommands {
-    private static final SimpleCommandExceptionType ERROR_GIVE_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.effect.give.failed"));
-    private static final SimpleCommandExceptionType ERROR_CLEAR_EVERYTHING_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.effect.clear.everything.failed"));
-    private static final SimpleCommandExceptionType ERROR_CLEAR_SPECIFIC_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.effect.clear.specific.failed"));
+    private static final SimpleCommandExceptionType ERROR_GIVE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.effect.give.failed"));
+    private static final SimpleCommandExceptionType ERROR_CLEAR_EVERYTHING_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.effect.clear.everything.failed"));
+    private static final SimpleCommandExceptionType ERROR_CLEAR_SPECIFIC_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.effect.clear.specific.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("effect").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(((LiteralArgumentBuilder)Commands.literal("clear").executes(commandContext -> EffectCommands.clearEffects((CommandSourceStack)commandContext.getSource(), ImmutableList.of(((CommandSourceStack)commandContext.getSource()).getEntityOrException())))).then(((RequiredArgumentBuilder)Commands.argument("targets", EntityArgument.entities()).executes(commandContext -> EffectCommands.clearEffects((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets")))).then(Commands.argument("effect", MobEffectArgument.effect()).executes(commandContext -> EffectCommands.clearEffect((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), MobEffectArgument.getEffect(commandContext, "effect"))))))).then(Commands.literal("give").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("effect", MobEffectArgument.effect()).executes(commandContext -> EffectCommands.giveEffect((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), MobEffectArgument.getEffect(commandContext, "effect"), null, 0, true))).then(((RequiredArgumentBuilder)Commands.argument("seconds", IntegerArgumentType.integer(1, 1000000)).executes(commandContext -> EffectCommands.giveEffect((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), MobEffectArgument.getEffect(commandContext, "effect"), IntegerArgumentType.getInteger(commandContext, "seconds"), 0, true))).then(((RequiredArgumentBuilder)Commands.argument("amplifier", IntegerArgumentType.integer(0, 255)).executes(commandContext -> EffectCommands.giveEffect((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), MobEffectArgument.getEffect(commandContext, "effect"), IntegerArgumentType.getInteger(commandContext, "seconds"), IntegerArgumentType.getInteger(commandContext, "amplifier"), true))).then(Commands.argument("hideParticles", BoolArgumentType.bool()).executes(commandContext -> EffectCommands.giveEffect((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), MobEffectArgument.getEffect(commandContext, "effect"), IntegerArgumentType.getInteger(commandContext, "seconds"), IntegerArgumentType.getInteger(commandContext, "amplifier"), !BoolArgumentType.getBool(commandContext, "hideParticles"))))))))));
@@ -45,9 +45,9 @@ public class EffectCommands {
             throw ERROR_GIVE_FAILED.create();
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.effect.give.success.single", mobEffect.getDisplayName(), collection.iterator().next().getDisplayName(), k / 20), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.effect.give.success.single", mobEffect.getDisplayName(), collection.iterator().next().getDisplayName(), k / 20), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.effect.give.success.multiple", mobEffect.getDisplayName(), collection.size(), k / 20), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.effect.give.success.multiple", mobEffect.getDisplayName(), collection.size(), k / 20), true);
         }
         return j;
     }
@@ -62,9 +62,9 @@ public class EffectCommands {
             throw ERROR_CLEAR_EVERYTHING_FAILED.create();
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.effect.clear.everything.success.single", collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.effect.clear.everything.success.single", collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.effect.clear.everything.success.multiple", collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.effect.clear.everything.success.multiple", collection.size()), true);
         }
         return i;
     }
@@ -79,9 +79,9 @@ public class EffectCommands {
             throw ERROR_CLEAR_SPECIFIC_FAILED.create();
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.effect.clear.specific.success.single", mobEffect.getDisplayName(), collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.effect.clear.specific.success.single", mobEffect.getDisplayName(), collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.effect.clear.specific.success.multiple", mobEffect.getDisplayName(), collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.effect.clear.specific.success.multiple", mobEffect.getDisplayName(), collection.size()), true);
         }
         return i;
     }

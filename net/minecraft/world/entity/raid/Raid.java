@@ -25,7 +25,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -80,9 +79,9 @@ public class Raid {
     public static final int TICKS_PER_DAY = 24000;
     public static final int DEFAULT_MAX_BAD_OMEN_LEVEL = 5;
     private static final int LOW_MOB_THRESHOLD = 2;
-    private static final Component RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid");
-    private static final Component VICTORY = new TranslatableComponent("event.minecraft.raid.victory");
-    private static final Component DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat");
+    private static final Component RAID_NAME_COMPONENT = Component.translatable("event.minecraft.raid");
+    private static final Component VICTORY = Component.translatable("event.minecraft.raid.victory");
+    private static final Component DEFEAT = Component.translatable("event.minecraft.raid.defeat");
     private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(VICTORY);
     private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(DEFEAT);
     private static final int HERO_OF_THE_VILLAGE_DURATION = 48000;
@@ -304,7 +303,7 @@ public class Raid {
                 this.updateRaiders();
                 if (i > 0) {
                     if (i <= 2) {
-                        this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(new TranslatableComponent(RAIDERS_REMAINING, i)));
+                        this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(Component.translatable(RAIDERS_REMAINING, i)));
                     } else {
                         this.raidEvent.setName(RAID_NAME_COMPONENT);
                     }
@@ -548,7 +547,7 @@ public class Raid {
         compoundTag.put("Patterns", listTag);
         BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
         itemStack.hideTooltipPart(ItemStack.TooltipPart.ADDITIONAL);
-        itemStack.setHoverName(new TranslatableComponent(OMINOUS_BANNER_PATTERN_NAME).withStyle(ChatFormatting.GOLD));
+        itemStack.setHoverName(Component.translatable(OMINOUS_BANNER_PATTERN_NAME).withStyle(ChatFormatting.GOLD));
         return itemStack;
     }
 

@@ -14,20 +14,20 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ContextAwareComponent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 public class ComponentUtils {
     public static final String DEFAULT_SEPARATOR_TEXT = ", ";
-    public static final Component DEFAULT_SEPARATOR = new TextComponent(", ").withStyle(ChatFormatting.GRAY);
-    public static final Component DEFAULT_NO_STYLE_SEPARATOR = new TextComponent(", ");
+    public static final Component DEFAULT_SEPARATOR = Component.literal(", ").withStyle(ChatFormatting.GRAY);
+    public static final Component DEFAULT_NO_STYLE_SEPARATOR = Component.literal(", ");
 
     public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
         if (style.isEmpty()) {
@@ -51,7 +51,7 @@ public class ComponentUtils {
         if (i > 100) {
             return component.copy();
         }
-        MutableComponent mutableComponent = component instanceof ContextAwareComponent ? ((ContextAwareComponent)((Object)component)).resolve(commandSourceStack, entity, i + 1) : component.plainCopy();
+        MutableComponent mutableComponent = component.getContents().resolve(commandSourceStack, entity, i + 1);
         for (Component component2 : component.getSiblings()) {
             mutableComponent.append(ComponentUtils.updateForEntity(commandSourceStack, component2, entity, i + 1));
         }
@@ -70,21 +70,21 @@ public class ComponentUtils {
 
     public static Component getDisplayName(GameProfile gameProfile) {
         if (gameProfile.getName() != null) {
-            return new TextComponent(gameProfile.getName());
+            return Component.literal(gameProfile.getName());
         }
         if (gameProfile.getId() != null) {
-            return new TextComponent(gameProfile.getId().toString());
+            return Component.literal(gameProfile.getId().toString());
         }
-        return new TextComponent("(unknown)");
+        return Component.literal("(unknown)");
     }
 
     public static Component formatList(Collection<String> collection) {
-        return ComponentUtils.formatAndSortList(collection, string -> new TextComponent((String)string).withStyle(ChatFormatting.GREEN));
+        return ComponentUtils.formatAndSortList(collection, string -> Component.literal(string).withStyle(ChatFormatting.GREEN));
     }
 
     public static <T extends Comparable<T>> Component formatAndSortList(Collection<T> collection, Function<T, Component> function) {
         if (collection.isEmpty()) {
-            return TextComponent.EMPTY;
+            return CommonComponents.EMPTY;
         }
         if (collection.size() == 1) {
             return function.apply((Comparable)collection.iterator().next());
@@ -108,12 +108,12 @@ public class ComponentUtils {
 
     public static <T> MutableComponent formatList(Collection<? extends T> collection, Component component, Function<T, Component> function) {
         if (collection.isEmpty()) {
-            return new TextComponent("");
+            return Component.empty();
         }
         if (collection.size() == 1) {
             return function.apply(collection.iterator().next()).copy();
         }
-        TextComponent mutableComponent = new TextComponent("");
+        MutableComponent mutableComponent = Component.empty();
         boolean bl = true;
         for (T object : collection) {
             if (!bl) {
@@ -126,14 +126,33 @@ public class ComponentUtils {
     }
 
     public static MutableComponent wrapInSquareBrackets(Component component) {
-        return new TranslatableComponent("chat.square_brackets", component);
+        return Component.translatable("chat.square_brackets", component);
     }
 
     public static Component fromMessage(Message message) {
         if (message instanceof Component) {
-            return (Component)message;
+            Component component = (Component)message;
+            return component;
         }
-        return new TextComponent(message.getString());
+        return Component.literal(message.getString());
+    }
+
+    public static boolean isTranslationResolvable(@Nullable Component component) {
+        if (component instanceof TranslatableContents) {
+            TranslatableContents translatableContents = (TranslatableContents)((Object)component);
+            String string = translatableContents.getKey();
+            return Language.getInstance().has(string);
+        }
+        return true;
+    }
+
+    @Deprecated(forRemoval=true)
+    public static Component replaceTranslatableKey(Component component, String string, String string2) {
+        TranslatableContents translatableContents;
+        if (component instanceof TranslatableContents && string.equals((translatableContents = (TranslatableContents)((Object)component)).getKey())) {
+            return Component.translatable(string2, translatableContents.getArgs());
+        }
+        return component;
     }
 }
 

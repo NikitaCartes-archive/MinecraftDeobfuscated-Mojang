@@ -25,7 +25,7 @@ import net.minecraft.client.gui.screens.VideoSettingsScreen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.server.packs.repository.Pack;
@@ -41,7 +41,7 @@ extends Screen {
     private LockIconButton lockButton;
 
     public OptionsScreen(Screen screen, Options options) {
-        super(new TranslatableComponent("options.title"));
+        super(Component.translatable("options.title"));
         this.lastScreen = screen;
         this.options = options;
     }
@@ -59,7 +59,7 @@ extends Screen {
             this.difficultyButton = this.addRenderableWidget(OptionsScreen.createDifficultyButton(i, this.width, this.height, "options.difficulty", this.minecraft));
             if (!this.minecraft.level.getLevelData().isHardcore()) {
                 this.difficultyButton.setWidth(this.difficultyButton.getWidth() - 20);
-                this.lockButton = this.addRenderableWidget(new LockIconButton(this.difficultyButton.x + this.difficultyButton.getWidth(), this.difficultyButton.y, button -> this.minecraft.setScreen(new ConfirmScreen(this::lockCallback, new TranslatableComponent("difficulty.lock.title"), new TranslatableComponent("difficulty.lock.question", this.minecraft.level.getLevelData().getDifficulty().getDisplayName())))));
+                this.lockButton = this.addRenderableWidget(new LockIconButton(this.difficultyButton.x + this.difficultyButton.getWidth(), this.difficultyButton.y, button -> this.minecraft.setScreen(new ConfirmScreen(this::lockCallback, Component.translatable("difficulty.lock.title"), Component.translatable("difficulty.lock.question", this.minecraft.level.getLevelData().getDifficulty().getDisplayName())))));
                 this.lockButton.setLocked(this.minecraft.level.getLevelData().isDifficultyLocked());
                 this.lockButton.active = !this.lockButton.isLocked();
                 this.difficultyButton.active = !this.lockButton.isLocked();
@@ -67,21 +67,21 @@ extends Screen {
                 this.difficultyButton.active = false;
             }
         } else {
-            this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, new TranslatableComponent("options.online"), button -> this.minecraft.setScreen(new OnlineOptionsScreen(this, this.options))));
+            this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 - 12 + 24 * (i >> 1), 150, 20, Component.translatable("options.online"), button -> this.minecraft.setScreen(new OnlineOptionsScreen(this, this.options))));
         }
-        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, new TranslatableComponent("options.skinCustomisation"), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20, new TranslatableComponent("options.sounds"), button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))));
-        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.video"), button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.controls"), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))));
-        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.language"), button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager()))));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.chat.title"), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))));
-        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.resourcepack"), button -> this.minecraft.setScreen(new PackSelectionScreen(this, this.minecraft.getResourcePackRepository(), this::updatePackList, this.minecraft.getResourcePackDirectory(), new TranslatableComponent("resourcePack.title")))));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.accessibility.title"), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, Component.translatable("options.skinCustomisation"), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20, Component.translatable("options.sounds"), button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 72 - 6, 150, 20, Component.translatable("options.video"), button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, Component.translatable("options.controls"), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, Component.translatable("options.language"), button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager()))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, Component.translatable("options.chat.title"), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, Component.translatable("options.resourcepack"), button -> this.minecraft.setScreen(new PackSelectionScreen(this, this.minecraft.getResourcePackRepository(), this::updatePackList, this.minecraft.getResourcePackDirectory(), Component.translatable("resourcePack.title")))));
+        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, Component.translatable("options.accessibility.title"), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))));
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     public static CycleButton<Difficulty> createDifficultyButton(int i, int j, int k, String string, Minecraft minecraft) {
-        return CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(minecraft.level.getDifficulty()).create(j / 2 - 155 + i % 2 * 160, k / 6 - 12 + 24 * (i >> 1), 150, 20, new TranslatableComponent(string), (cycleButton, difficulty) -> minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)((Object)difficulty))));
+        return CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(minecraft.level.getDifficulty()).create(j / 2 - 155 + i % 2 * 160, k / 6 - 12 + 24 * (i >> 1), 150, 20, Component.translatable(string), (cycleButton, difficulty) -> minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)((Object)difficulty))));
     }
 
     private void updatePackList(PackRepository packRepository) {

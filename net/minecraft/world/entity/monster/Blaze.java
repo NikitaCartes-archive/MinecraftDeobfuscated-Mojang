@@ -114,7 +114,7 @@ extends Monster {
         --this.nextHeightOffsetChangeTick;
         if (this.nextHeightOffsetChangeTick <= 0) {
             this.nextHeightOffsetChangeTick = 100;
-            this.allowedHeightOffset = 0.5f + (float)this.random.nextGaussian() * 3.0f;
+            this.allowedHeightOffset = (float)this.random.triangle(0.5, 6.891);
         }
         if ((livingEntity = this.getTarget()) != null && livingEntity.getEyeY() > this.getEyeY() + (double)this.allowedHeightOffset && this.canAttack(livingEntity)) {
             Vec3 vec3 = this.getDeltaMovement();
@@ -219,7 +219,7 @@ extends Monster {
                             this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
                         }
                         for (int i = 0; i < 1; ++i) {
-                            SmallFireball smallFireball = new SmallFireball(this.blaze.level, this.blaze, e + this.blaze.getRandom().nextGaussian() * h, f, g + this.blaze.getRandom().nextGaussian() * h);
+                            SmallFireball smallFireball = new SmallFireball(this.blaze.level, this.blaze, this.blaze.getRandom().triangle(e, 2.297 * h), f, this.blaze.getRandom().triangle(g, 2.297 * h));
                             smallFireball.setPos(smallFireball.getX(), this.blaze.getY(0.5) + 0.5, smallFireball.getZ());
                             this.blaze.level.addFreshEntity(smallFireball);
                         }

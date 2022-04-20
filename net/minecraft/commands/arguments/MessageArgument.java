@@ -15,7 +15,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 public class MessageArgument
@@ -64,9 +64,9 @@ implements ArgumentType<Message> {
 
         public Component toComponent(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {
             if (this.parts.length == 0 || !bl) {
-                return new TextComponent(this.text);
+                return Component.literal(this.text);
             }
-            TextComponent mutableComponent = new TextComponent(this.text.substring(0, this.parts[0].getStart()));
+            MutableComponent mutableComponent = Component.literal(this.text.substring(0, this.parts[0].getStart()));
             int i = this.parts[0].getStart();
             for (Part part : this.parts) {
                 Component component = part.toComponent(commandSourceStack);

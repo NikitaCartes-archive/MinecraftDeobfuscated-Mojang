@@ -57,8 +57,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.FastColor;
@@ -98,8 +96,8 @@ extends GuiComponent {
     private static final ResourceLocation PUMPKIN_BLUR_LOCATION = new ResourceLocation("textures/misc/pumpkinblur.png");
     private static final ResourceLocation SPYGLASS_SCOPE_LOCATION = new ResourceLocation("textures/misc/spyglass_scope.png");
     private static final ResourceLocation POWDER_SNOW_OUTLINE_LOCATION = new ResourceLocation("textures/misc/powder_snow_outline.png");
-    private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
-    private static final Component SAVING_TEXT = new TranslatableComponent("menu.savingLevel");
+    private static final Component DEMO_EXPIRED_TEXT = Component.translatable("demo.demoExpired");
+    private static final Component SAVING_TEXT = Component.translatable("menu.savingLevel");
     private static final int COLOR_WHITE = 0xFFFFFF;
     private static final float MIN_CROSSHAIR_ATTACK_SPEED = 5.0f;
     private static final int NUM_HEARTS_PER_ROW = 10;
@@ -584,7 +582,7 @@ extends GuiComponent {
         this.minecraft.getProfiler().push("selectedItemName");
         if (this.toolHighlightTimer > 0 && !this.lastToolHighlight.isEmpty()) {
             int l;
-            MutableComponent mutableComponent = new TextComponent("").append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color);
+            MutableComponent mutableComponent = Component.empty().append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color);
             if (this.lastToolHighlight.hasCustomHoverName()) {
                 mutableComponent.withStyle(ChatFormatting.ITALIC);
             }
@@ -610,7 +608,7 @@ extends GuiComponent {
 
     public void renderDemoOverlay(PoseStack poseStack) {
         this.minecraft.getProfiler().push("demo");
-        Component component = this.minecraft.level.getGameTime() >= 120500L ? DEMO_EXPIRED_TEXT : new TranslatableComponent("demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime())));
+        Component component = this.minecraft.level.getGameTime() >= 120500L ? DEMO_EXPIRED_TEXT : Component.translatable("demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime())));
         int i = this.getFont().width(component);
         this.getFont().drawShadow(poseStack, component, (float)(this.screenWidth - i - 10), 5.0f, 0xFFFFFF);
         this.minecraft.getProfiler().pop();
@@ -628,7 +626,7 @@ extends GuiComponent {
         int k = this.getFont().width(SPACER);
         for (Score score2 : collection) {
             PlayerTeam playerTeam = scoreboard.getPlayersTeam(score2.getOwner());
-            MutableComponent component2 = PlayerTeam.formatNameForTeam(playerTeam, new TextComponent(score2.getOwner()));
+            MutableComponent component2 = PlayerTeam.formatNameForTeam(playerTeam, Component.literal(score2.getOwner()));
             list2.add(Pair.of(score2, component2));
             j = Math.max(j, this.getFont().width(component2) + k + this.getFont().width(Integer.toString(score2.getScore())));
         }
@@ -1082,7 +1080,7 @@ extends GuiComponent {
     }
 
     public void setNowPlaying(Component component) {
-        this.setOverlayMessage(new TranslatableComponent("record.nowPlaying", component), true);
+        this.setOverlayMessage(Component.translatable("record.nowPlaying", component), true);
     }
 
     public void setOverlayMessage(Component component, boolean bl) {

@@ -19,7 +19,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.gametest.framework.GameTestRegistry;
 import net.minecraft.gametest.framework.TestFunction;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class TestFunctionArgument
 implements ArgumentType<TestFunction> {
@@ -32,7 +33,7 @@ implements ArgumentType<TestFunction> {
         if (optional.isPresent()) {
             return optional.get();
         }
-        TextComponent message = new TextComponent("No such test: " + string);
+        MutableComponent message = Component.literal("No such test: " + string);
         throw new CommandSyntaxException(new SimpleCommandExceptionType(message), message);
     }
 

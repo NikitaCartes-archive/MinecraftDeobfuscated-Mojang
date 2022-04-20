@@ -9,8 +9,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.ProgressListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +42,7 @@ implements ProgressListener {
     @Override
     public void progressStart(Component component) {
         this.header = component;
-        this.progressStage(new TranslatableComponent("progress.working"));
+        this.progressStage(Component.translatable("progress.working"));
     }
 
     @Override
@@ -76,7 +74,7 @@ implements ProgressListener {
             ProgressScreen.drawCenteredString(poseStack, this.font, this.header, this.width / 2, 70, 0xFFFFFF);
         }
         if (this.stage != null && this.progress != 0) {
-            ProgressScreen.drawCenteredString(poseStack, this.font, new TextComponent("").append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 0xFFFFFF);
+            ProgressScreen.drawCenteredString(poseStack, this.font, Component.empty().append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 0xFFFFFF);
         }
         super.render(poseStack, i, j, f);
     }

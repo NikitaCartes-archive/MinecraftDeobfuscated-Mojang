@@ -25,7 +25,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -39,9 +39,9 @@ import net.minecraft.world.scores.Team;
 
 public class SpreadPlayersCommand {
     private static final int MAX_ITERATION_COUNT = 10000;
-    private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_TEAMS = new Dynamic4CommandExceptionType((object, object2, object3, object4) -> new TranslatableComponent("commands.spreadplayers.failed.teams", object, object2, object3, object4));
-    private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_ENTITIES = new Dynamic4CommandExceptionType((object, object2, object3, object4) -> new TranslatableComponent("commands.spreadplayers.failed.entities", object, object2, object3, object4));
-    private static final Dynamic2CommandExceptionType ERROR_INVALID_MAX_HEIGHT = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.spreadplayers.failed.invalid.height", object, object2));
+    private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_TEAMS = new Dynamic4CommandExceptionType((object, object2, object3, object4) -> Component.translatable("commands.spreadplayers.failed.teams", object, object2, object3, object4));
+    private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_ENTITIES = new Dynamic4CommandExceptionType((object, object2, object3, object4) -> Component.translatable("commands.spreadplayers.failed.entities", object, object2, object3, object4));
+    private static final Dynamic2CommandExceptionType ERROR_INVALID_MAX_HEIGHT = new Dynamic2CommandExceptionType((object, object2) -> Component.translatable("commands.spreadplayers.failed.invalid.height", object, object2));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("spreadplayers").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("center", Vec2Argument.vec2()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("spreadDistance", FloatArgumentType.floatArg(0.0f)).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("maxRange", FloatArgumentType.floatArg(1.0f)).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("respectTeams", BoolArgumentType.bool()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).executes(commandContext -> SpreadPlayersCommand.spreadPlayers((CommandSourceStack)commandContext.getSource(), Vec2Argument.getVec2(commandContext, "center"), FloatArgumentType.getFloat(commandContext, "spreadDistance"), FloatArgumentType.getFloat(commandContext, "maxRange"), ((CommandSourceStack)commandContext.getSource()).getLevel().getMaxBuildHeight(), BoolArgumentType.getBool(commandContext, "respectTeams"), EntityArgument.getEntities(commandContext, "targets")))))).then(Commands.literal("under").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("maxHeight", IntegerArgumentType.integer()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("respectTeams", BoolArgumentType.bool()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).executes(commandContext -> SpreadPlayersCommand.spreadPlayers((CommandSourceStack)commandContext.getSource(), Vec2Argument.getVec2(commandContext, "center"), FloatArgumentType.getFloat(commandContext, "spreadDistance"), FloatArgumentType.getFloat(commandContext, "maxRange"), IntegerArgumentType.getInteger(commandContext, "maxHeight"), BoolArgumentType.getBool(commandContext, "respectTeams"), EntityArgument.getEntities(commandContext, "targets")))))))))));
@@ -61,7 +61,7 @@ public class SpreadPlayersCommand {
         Position[] positions = SpreadPlayersCommand.createInitialPositions(randomSource, bl ? SpreadPlayersCommand.getNumberOfTeams(collection) : collection.size(), d, e, h, k);
         SpreadPlayersCommand.spreadPositions(vec2, f, serverLevel, randomSource, d, e, h, k, i, positions, bl);
         double l = SpreadPlayersCommand.setPlayerPositions(collection, serverLevel, positions, i, bl);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, Float.valueOf(vec2.x), Float.valueOf(vec2.y), String.format(Locale.ROOT, "%.2f", l)), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, Float.valueOf(vec2.x), Float.valueOf(vec2.y), String.format(Locale.ROOT, "%.2f", l)), true);
         return positions.length;
     }
 

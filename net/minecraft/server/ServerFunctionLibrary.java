@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -71,7 +71,7 @@ implements PreparableReloadListener {
         CompletableFuture<Map> completableFuture = CompletableFuture.supplyAsync(() -> this.tagsLoader.load(resourceManager), executor);
         CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", resourceLocation -> resourceLocation.getPath().endsWith(FILE_EXTENSION)), executor).thenCompose(map -> {
             HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map2 = Maps.newHashMap();
-            CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null);
+            CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", CommonComponents.EMPTY, null, null);
             for (Map.Entry entry : map.entrySet()) {
                 ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
                 String string = resourceLocation.getPath();

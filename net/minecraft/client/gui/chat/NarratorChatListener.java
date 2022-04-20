@@ -15,15 +15,15 @@ import net.minecraft.client.gui.chat.ChatListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.ComponentUtils;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class NarratorChatListener
 implements ChatListener {
-    public static final Component NO_TITLE = TextComponent.EMPTY;
+    public static final Component NO_TITLE = CommonComponents.EMPTY;
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final NarratorChatListener INSTANCE = new NarratorChatListener();
     private final Narrator narrator = Narrator.getNarrator();
@@ -39,7 +39,7 @@ implements ChatListener {
             return;
         }
         if (narratorStatus == NarratorStatus.ALL || narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT || narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
-            Component component2 = component instanceof TranslatableComponent && "chat.type.text".equals(((TranslatableComponent)component).getKey()) ? new TranslatableComponent("chat.type.text.narrate", ((TranslatableComponent)component).getArgs()) : component;
+            Component component2 = ComponentUtils.replaceTranslatableKey(component, "chat.type.text", "chat.type.text.narrate");
             String string = component2.getString();
             this.logNarratedMessage(string);
             this.narrator.say(string, chatType.shouldInterrupt());
@@ -73,16 +73,16 @@ implements ChatListener {
 
     public void updateNarratorStatus(NarratorStatus narratorStatus) {
         this.clear();
-        this.narrator.say(new TranslatableComponent("options.narrator").append(" : ").append(narratorStatus.getName()).getString(), true);
+        this.narrator.say(Component.translatable("options.narrator").append(" : ").append(narratorStatus.getName()).getString(), true);
         ToastComponent toastComponent = Minecraft.getInstance().getToasts();
         if (this.narrator.active()) {
             if (narratorStatus == NarratorStatus.OFF) {
-                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled"), null);
+                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, Component.translatable("narrator.toast.disabled"), null);
             } else {
-                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.enabled"), narratorStatus.getName());
+                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, Component.translatable("narrator.toast.enabled"), narratorStatus.getName());
             }
         } else {
-            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled"), new TranslatableComponent("options.narrator.notavailable"));
+            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, Component.translatable("narrator.toast.disabled"), Component.translatable("options.narrator.notavailable"));
         }
     }
 

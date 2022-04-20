@@ -14,13 +14,12 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsResetNormalWorldScreen
 extends RealmsScreen {
-    private static final Component SEED_LABEL = new TranslatableComponent("mco.reset.world.seed");
+    private static final Component SEED_LABEL = Component.translatable("mco.reset.world.seed");
     private final Consumer<WorldGenerationInfo> callback;
     private EditBox seedEdit;
     private LevelType levelType = LevelType.DEFAULT;
@@ -28,7 +27,7 @@ extends RealmsScreen {
     private final Component buttonTitle;
 
     public RealmsResetNormalWorldScreen(Consumer<WorldGenerationInfo> consumer, Component component) {
-        super(new TranslatableComponent("mco.reset.world.generate"));
+        super(Component.translatable("mco.reset.world.generate"));
         this.callback = consumer;
         this.buttonTitle = component;
     }
@@ -42,14 +41,14 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.seedEdit = new EditBox(this.minecraft.font, this.width / 2 - 100, RealmsResetNormalWorldScreen.row(2), 200, 20, null, new TranslatableComponent("mco.reset.world.seed"));
+        this.seedEdit = new EditBox(this.minecraft.font, this.width / 2 - 100, RealmsResetNormalWorldScreen.row(2), 200, 20, null, Component.translatable("mco.reset.world.seed"));
         this.seedEdit.setMaxLength(32);
         this.addWidget(this.seedEdit);
         this.setInitialFocus(this.seedEdit);
-        this.addRenderableWidget(CycleButton.builder(LevelType::getName).withValues((LevelType[])LevelType.values()).withInitialValue(this.levelType).create(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(4), 205, 20, new TranslatableComponent("selectWorld.mapType"), (cycleButton, levelType) -> {
+        this.addRenderableWidget(CycleButton.builder(LevelType::getName).withValues((LevelType[])LevelType.values()).withInitialValue(this.levelType).create(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(4), 205, 20, Component.translatable("selectWorld.mapType"), (cycleButton, levelType) -> {
             this.levelType = levelType;
         }));
-        this.addRenderableWidget(CycleButton.onOffBuilder(this.generateStructures).create(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(6) - 2, 205, 20, new TranslatableComponent("selectWorld.mapFeatures"), (cycleButton, boolean_) -> {
+        this.addRenderableWidget(CycleButton.onOffBuilder(this.generateStructures).create(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(6) - 2, 205, 20, Component.translatable("selectWorld.mapFeatures"), (cycleButton, boolean_) -> {
             this.generateStructures = boolean_;
         }));
         this.addRenderableWidget(new Button(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(12), 97, 20, this.buttonTitle, button -> this.callback.accept(new WorldGenerationInfo(this.seedEdit.getValue(), this.levelType, this.generateStructures))));

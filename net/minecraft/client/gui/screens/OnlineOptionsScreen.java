@@ -11,14 +11,14 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
 
 @Environment(value=EnvType.CLIENT)
 public class OnlineOptionsScreen
 extends SimpleOptionsSubScreen {
     public OnlineOptionsScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("options.online.title"), new OptionInstance[]{options.realmsNotifications(), options.allowServerListing()});
+        super(screen, options, Component.translatable("options.online.title"), new OptionInstance[]{options.realmsNotifications(), options.allowServerListing()});
     }
 
     @Override

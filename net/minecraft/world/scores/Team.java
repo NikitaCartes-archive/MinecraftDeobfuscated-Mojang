@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Team {
@@ -60,7 +59,7 @@ public abstract class Team {
         }
 
         public Component getDisplayName() {
-            return new TranslatableComponent("team.collision." + this.name);
+            return Component.translatable("team.collision." + this.name);
         }
 
         static {
@@ -93,7 +92,7 @@ public abstract class Team {
         }
 
         public Component getDisplayName() {
-            return new TranslatableComponent("team.visibility." + this.name);
+            return Component.translatable("team.visibility." + this.name);
         }
 
         static {

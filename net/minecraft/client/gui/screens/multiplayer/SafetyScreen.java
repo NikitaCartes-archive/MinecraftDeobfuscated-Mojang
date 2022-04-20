@@ -12,14 +12,13 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.WarningScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class SafetyScreen
 extends WarningScreen {
-    private static final Component TITLE = new TranslatableComponent("multiplayerWarning.header").withStyle(ChatFormatting.BOLD);
-    private static final Component CONTENT = new TranslatableComponent("multiplayerWarning.message");
-    private static final Component CHECK = new TranslatableComponent("multiplayerWarning.check");
+    private static final Component TITLE = Component.translatable("multiplayerWarning.header").withStyle(ChatFormatting.BOLD);
+    private static final Component CONTENT = Component.translatable("multiplayerWarning.message");
+    private static final Component CHECK = Component.translatable("multiplayerWarning.check");
     private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
 
     public SafetyScreen(Screen screen) {

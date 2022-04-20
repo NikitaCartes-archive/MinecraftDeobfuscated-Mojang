@@ -15,7 +15,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class KeyMapping
@@ -137,7 +136,7 @@ implements Comparable<KeyMapping> {
     public static Supplier<Component> createNameSupplier(String string) {
         KeyMapping keyMapping = ALL.get(string);
         if (keyMapping == null) {
-            return () -> new TranslatableComponent(string);
+            return () -> Component.translatable(string);
         }
         return keyMapping::getTranslatedKeyMessage;
     }

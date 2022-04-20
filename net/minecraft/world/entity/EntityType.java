@@ -22,7 +22,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -431,7 +430,7 @@ implements EntityTypeTest<Entity, T> {
 
     public Component getDescription() {
         if (this.description == null) {
-            this.description = new TranslatableComponent(this.getDescriptionId());
+            this.description = Component.translatable(this.getDescriptionId());
         }
         return this.description;
     }

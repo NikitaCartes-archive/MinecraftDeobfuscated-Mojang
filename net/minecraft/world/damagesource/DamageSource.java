@@ -4,7 +4,6 @@
 package net.minecraft.world.damagesource;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.BadRespawnPointDamage;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
@@ -217,9 +216,9 @@ public class DamageSource {
         String string = "death.attack." + this.msgId;
         String string2 = string + ".player";
         if (livingEntity2 != null) {
-            return new TranslatableComponent(string2, livingEntity.getDisplayName(), livingEntity2.getDisplayName());
+            return Component.translatable(string2, livingEntity.getDisplayName(), livingEntity2.getDisplayName());
         }
-        return new TranslatableComponent(string, livingEntity.getDisplayName());
+        return Component.translatable(string, livingEntity.getDisplayName());
     }
 
     public boolean isFire() {

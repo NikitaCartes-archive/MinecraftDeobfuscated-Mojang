@@ -29,8 +29,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -49,7 +47,7 @@ extends Screen {
     private final String[] messages = (String[])IntStream.range(0, 4).mapToObj(i -> signBlockEntity.getMessage(i, bl)).map(Component::getString).toArray(String[]::new);
 
     public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
-        super(new TranslatableComponent("sign.edit"));
+        super(Component.translatable("sign.edit"));
         this.sign = signBlockEntity;
     }
 
@@ -60,7 +58,7 @@ extends Screen {
         this.sign.setEditable(false);
         this.signField = new TextFieldHelper(() -> this.messages[this.line], string -> {
             this.messages[this.line] = string;
-            this.sign.setMessage(this.line, new TextComponent((String)string));
+            this.sign.setMessage(this.line, Component.literal(string));
         }, TextFieldHelper.createClipboardGetter(this.minecraft), TextFieldHelper.createClipboardSetter(this.minecraft), string -> this.minecraft.font.width((String)string) <= 90);
         BlockState blockState = this.sign.getBlockState();
         this.woodType = SignRenderer.getWoodType(blockState.getBlock());
@@ -198,7 +196,7 @@ extends Screen {
             bufferBuilder.vertex(matrix4f, y, o, 0.0f).color(0, 0, 255, 255).endVertex();
             bufferBuilder.vertex(matrix4f, x, o, 0.0f).color(0, 0, 255, 255).endVertex();
             bufferBuilder.end();
-            BufferUploader.end(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder);
             RenderSystem.disableColorLogicOp();
             RenderSystem.enableTexture();
         }

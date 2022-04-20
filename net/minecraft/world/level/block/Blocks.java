@@ -1190,9 +1190,9 @@ public class Blocks {
     public static final Block RAW_GOLD_BLOCK = Blocks.register("raw_gold_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.GOLD).requiresCorrectToolForDrops().strength(5.0f, 6.0f)));
     public static final Block POTTED_AZALEA = Blocks.register("potted_azalea_bush", new FlowerPotBlock(AZALEA, BlockBehaviour.Properties.of(Material.DECORATION).instabreak().noOcclusion()));
     public static final Block POTTED_FLOWERING_AZALEA = Blocks.register("potted_flowering_azalea_bush", new FlowerPotBlock(FLOWERING_AZALEA, BlockBehaviour.Properties.of(Material.DECORATION).instabreak().noOcclusion()));
-    public static final Block OCHRE_FROGLIGHT = Blocks.register("ochre_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
-    public static final Block VERDANT_FROGLIGHT = Blocks.register("verdant_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
-    public static final Block PEARLESCENT_FROGLIGHT = Blocks.register("pearlescent_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
+    public static final Block OCHRE_FROGLIGHT = Blocks.register("ochre_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.FROGLIGHT, MaterialColor.SAND).strength(0.3f).lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
+    public static final Block VERDANT_FROGLIGHT = Blocks.register("verdant_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.FROGLIGHT, MaterialColor.GLOW_LICHEN).strength(0.3f).lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
+    public static final Block PEARLESCENT_FROGLIGHT = Blocks.register("pearlescent_froglight", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.FROGLIGHT, MaterialColor.COLOR_PINK).strength(0.3f).lightLevel(blockState -> 15).sound(SoundType.FROGLIGHT)));
     public static final Block FROGSPAWN = Blocks.register("frogspawn", new FrogspawnBlock(BlockBehaviour.Properties.of(Material.FROGSPAWN).instabreak().noOcclusion().noCollission().sound(SoundType.FROGSPAWN)));
     public static final Block REINFORCED_DEEPSLATE = Blocks.register("reinforced_deepslate", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DEEPSLATE).sound(SoundType.DEEPSLATE).strength(55.0f, 1200.0f)));
 

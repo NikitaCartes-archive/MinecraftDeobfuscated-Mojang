@@ -20,7 +20,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -79,7 +78,7 @@ NarratableEntry {
     }
 
     public static MutableComponent wrapDefaultNarrationMessage(Component component) {
-        return new TranslatableComponent("gui.narrate.button", component);
+        return Component.translatable("gui.narrate.button", component);
     }
 
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
@@ -228,9 +227,9 @@ NarratableEntry {
         narrationElementOutput.add(NarratedElementType.TITLE, (Component)this.createNarrationMessage());
         if (this.active) {
             if (this.isFocused()) {
-                narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.button.usage.focused"));
+                narrationElementOutput.add(NarratedElementType.USAGE, (Component)Component.translatable("narration.button.usage.focused"));
             } else {
-                narrationElementOutput.add(NarratedElementType.USAGE, (Component)new TranslatableComponent("narration.button.usage.hovered"));
+                narrationElementOutput.add(NarratedElementType.USAGE, (Component)Component.translatable("narration.button.usage.hovered"));
             }
         }
     }

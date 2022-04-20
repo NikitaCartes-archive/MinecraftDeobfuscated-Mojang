@@ -45,10 +45,10 @@ import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -107,15 +107,15 @@ public class TestCommand {
             optional = StructureUtils.findStructureBlockContainingPos(blockPos, 200, serverLevel);
         }
         if (!optional.isPresent()) {
-            commandSourceStack.sendFailure(new TextComponent("Can't find a structure block that contains the targeted pos " + blockPos));
+            commandSourceStack.sendFailure(Component.literal("Can't find a structure block that contains the targeted pos " + blockPos));
             return 0;
         }
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(optional.get());
         BlockPos blockPos2 = blockPos.subtract(optional.get());
         String string2 = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
         String string3 = structureBlockEntity.getStructurePath();
-        MutableComponent component = new TextComponent(string2).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");")));
-        commandSourceStack.sendSuccess(new TextComponent("Position relative to " + string3 + ": ").append(component), false);
+        MutableComponent component = Component.literal(string2).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to copy to clipboard"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");")));
+        commandSourceStack.sendSuccess(Component.literal("Position relative to " + string3 + ": ").append(component), false);
         DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string2, -2147418368, 10000);
         return 1;
     }
@@ -247,7 +247,7 @@ public class TestCommand {
     }
 
     private static void say(CommandSourceStack commandSourceStack, String string) {
-        commandSourceStack.sendSuccess(new TextComponent(string), false);
+        commandSourceStack.sendSuccess(Component.literal(string), false);
     }
 
     private static int exportNearestTestStructure(CommandSourceStack commandSourceStack) {
@@ -304,7 +304,7 @@ public class TestCommand {
     }
 
     private static void say(ServerLevel serverLevel, String string, ChatFormatting chatFormatting) {
-        serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(chatFormatting + string), Util.NIL_UUID));
+        serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(Component.literal(chatFormatting + string), Util.NIL_UUID));
     }
 
     static class TestSummaryDisplayer

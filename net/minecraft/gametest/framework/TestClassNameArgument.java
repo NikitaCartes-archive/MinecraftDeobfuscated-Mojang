@@ -16,7 +16,8 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.gametest.framework.GameTestRegistry;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class TestClassNameArgument
 implements ArgumentType<String> {
@@ -28,7 +29,7 @@ implements ArgumentType<String> {
         if (GameTestRegistry.isTestClass(string)) {
             return string;
         }
-        TextComponent message = new TextComponent("No such test class: " + string);
+        MutableComponent message = Component.literal("No such test class: " + string);
         throw new CommandSyntaxException(new SimpleCommandExceptionType(message), message);
     }
 

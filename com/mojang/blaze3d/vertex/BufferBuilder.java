@@ -206,17 +206,18 @@ implements BufferVertexConsumer {
             throw new IllegalStateException("Not building!");
         }
         int i = this.mode.indexCount(this.vertices);
+        int j = !this.indexOnly ? this.vertices * this.format.getVertexSize() : 0;
         VertexFormat.IndexType indexType = VertexFormat.IndexType.least(i);
         if (this.sortingPoints != null) {
-            int j = Mth.roundToward(i * indexType.bytes, 4);
-            this.ensureCapacity(j);
+            int k = Mth.roundToward(i * indexType.bytes, 4);
+            this.ensureCapacity(k);
             this.putSortedQuadIndices(indexType);
             bl = false;
-            this.nextElementByte += j;
-            this.totalRenderedBytes += this.vertices * this.format.getVertexSize() + j;
+            this.nextElementByte += k;
+            this.totalRenderedBytes += j + k;
         } else {
             bl = true;
-            this.totalRenderedBytes += this.vertices * this.format.getVertexSize();
+            this.totalRenderedBytes += j;
         }
         this.building = false;
         this.drawStates.add(new DrawState(this.format, this.vertices, i, this.mode, indexType, this.indexOnly, bl));
@@ -426,12 +427,28 @@ implements BufferVertexConsumer {
             return this.vertexCount * this.format.getVertexSize();
         }
 
+        public int vertexBufferStart() {
+            return 0;
+        }
+
+        public int vertexBufferEnd() {
+            return this.vertexBufferSize();
+        }
+
+        public int indexBufferStart() {
+            return this.indexOnly ? 0 : this.vertexBufferEnd();
+        }
+
+        public int indexBufferEnd() {
+            return this.indexBufferStart() + this.indexBufferSize();
+        }
+
         private int indexBufferSize() {
             return this.sequentialIndex ? 0 : this.indexCount * this.indexType.bytes;
         }
 
         public int bufferSize() {
-            return this.vertexBufferSize() + this.indexBufferSize();
+            return this.indexBufferEnd();
         }
 
         public boolean indexOnly() {

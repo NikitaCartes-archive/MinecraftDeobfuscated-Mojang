@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.inventory.AbstractCommandBlockEditScreen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCommandBlockPacket;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
@@ -45,20 +45,20 @@ extends AbstractCommandBlockEditScreen {
         this.modeButton = this.addRenderableWidget(CycleButton.builder(mode -> {
             switch (mode) {
                 case SEQUENCE: {
-                    return new TranslatableComponent("advMode.mode.sequence");
+                    return Component.translatable("advMode.mode.sequence");
                 }
                 case AUTO: {
-                    return new TranslatableComponent("advMode.mode.auto");
+                    return Component.translatable("advMode.mode.auto");
                 }
             }
-            return new TranslatableComponent("advMode.mode.redstone");
-        }).withValues((CommandBlockEntity.Mode[])CommandBlockEntity.Mode.values()).displayOnlyValue().withInitialValue(this.mode).create(this.width / 2 - 50 - 100 - 4, 165, 100, 20, new TranslatableComponent("advMode.mode"), (cycleButton, mode) -> {
+            return Component.translatable("advMode.mode.redstone");
+        }).withValues((CommandBlockEntity.Mode[])CommandBlockEntity.Mode.values()).displayOnlyValue().withInitialValue(this.mode).create(this.width / 2 - 50 - 100 - 4, 165, 100, 20, Component.translatable("advMode.mode"), (cycleButton, mode) -> {
             this.mode = mode;
         }));
-        this.conditionalButton = this.addRenderableWidget(CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.conditional"), new TranslatableComponent("advMode.mode.unconditional")).displayOnlyValue().withInitialValue(this.conditional).create(this.width / 2 - 50, 165, 100, 20, new TranslatableComponent("advMode.type"), (cycleButton, boolean_) -> {
+        this.conditionalButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("advMode.mode.conditional"), Component.translatable("advMode.mode.unconditional")).displayOnlyValue().withInitialValue(this.conditional).create(this.width / 2 - 50, 165, 100, 20, Component.translatable("advMode.type"), (cycleButton, boolean_) -> {
             this.conditional = boolean_;
         }));
-        this.autoexecButton = this.addRenderableWidget(CycleButton.booleanBuilder(new TranslatableComponent("advMode.mode.autoexec.bat"), new TranslatableComponent("advMode.mode.redstoneTriggered")).displayOnlyValue().withInitialValue(this.autoexec).create(this.width / 2 + 50 + 4, 165, 100, 20, new TranslatableComponent("advMode.triggering"), (cycleButton, boolean_) -> {
+        this.autoexecButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("advMode.mode.autoexec.bat"), Component.translatable("advMode.mode.redstoneTriggered")).displayOnlyValue().withInitialValue(this.autoexec).create(this.width / 2 + 50 + 4, 165, 100, 20, Component.translatable("advMode.triggering"), (cycleButton, boolean_) -> {
             this.autoexec = boolean_;
         }));
         this.enableControls(false);

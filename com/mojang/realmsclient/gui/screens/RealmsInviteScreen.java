@@ -17,7 +17,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -26,8 +25,8 @@ import org.slf4j.Logger;
 public class RealmsInviteScreen
 extends RealmsScreen {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.invite.profile.name");
-    private static final Component NO_SUCH_PLAYER_ERROR_TEXT = new TranslatableComponent("mco.configure.world.players.error");
+    private static final Component NAME_LABEL = Component.translatable("mco.configure.world.invite.profile.name");
+    private static final Component NO_SUCH_PLAYER_ERROR_TEXT = Component.translatable("mco.configure.world.players.error");
     private EditBox profileName;
     private final RealmsServer serverData;
     private final RealmsConfigureWorldScreen configureScreen;
@@ -50,10 +49,10 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.profileName = new EditBox(this.minecraft.font, this.width / 2 - 100, RealmsInviteScreen.row(2), 200, 20, null, new TranslatableComponent("mco.configure.world.invite.profile.name"));
+        this.profileName = new EditBox(this.minecraft.font, this.width / 2 - 100, RealmsInviteScreen.row(2), 200, 20, null, Component.translatable("mco.configure.world.invite.profile.name"));
         this.addWidget(this.profileName);
         this.setInitialFocus(this.profileName);
-        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(10), 200, 20, new TranslatableComponent("mco.configure.world.buttons.invite"), button -> this.onInvite()));
+        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(10), 200, 20, Component.translatable("mco.configure.world.buttons.invite"), button -> this.onInvite()));
         this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(12), 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 

@@ -18,7 +18,6 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.animal.allay.Allay;
 
@@ -32,6 +31,9 @@ implements ArmedModel {
     private final ModelPart left_arm;
     private final ModelPart right_wing;
     private final ModelPart left_wing;
+    private static final float FLYING_ANIMATION_X_ROT = 0.6981317f;
+    private static final float MAX_HAND_HOLDING_ITEM_X_ROT_RAD = -0.7853982f;
+    private static final float MIN_HAND_HOLDING_ITEM_X_ROT_RAD = -1.0471976f;
 
     public AllayModel(ModelPart modelPart) {
         this.root = modelPart.getChild("root");
@@ -62,29 +64,30 @@ implements ArmedModel {
 
     @Override
     public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
+        float r;
+        this.root().getAllParts().forEach(ModelPart::resetPose);
         float k = h * 20.0f * ((float)Math.PI / 180) + g;
+        float l = Mth.cos(k) * (float)Math.PI * 0.15f;
+        float m = h - (float)allay.tickCount;
+        float n = h * 9.0f * ((float)Math.PI / 180);
+        float o = Math.min(g / 0.3f, 1.0f);
+        float p = 1.0f - o;
+        float q = allay.getHoldingItemAnimationProgress(m);
         this.right_wing.xRot = 0.43633232f;
-        this.right_wing.yRot = -0.61086524f + Mth.cos(k) * (float)Math.PI * 0.15f;
+        this.right_wing.yRot = -0.61086524f + l;
         this.left_wing.xRot = 0.43633232f;
-        this.left_wing.yRot = 0.61086524f - Mth.cos(k) * (float)Math.PI * 0.15f;
-        if (this.isIdle(g)) {
-            float l = h * 9.0f * ((float)Math.PI / 180);
-            this.root.y = 23.5f + Mth.cos(l) * 0.25f;
-            this.right_arm.zRot = 0.43633232f - Mth.cos(l + 4.712389f) * (float)Math.PI * 0.075f;
-            this.left_arm.zRot = -0.43633232f + Mth.cos(l + 4.712389f) * (float)Math.PI * 0.075f;
-        } else {
-            this.root.y = 23.5f;
-            this.right_arm.zRot = 0.43633232f;
-            this.left_arm.zRot = -0.43633232f;
-        }
-        if (!allay.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
-            this.right_arm.xRot = -1.134464f;
-            this.right_arm.yRot = 0.27925268f;
-            this.right_arm.zRot = (float)(-Math.PI) / 180;
-            this.left_arm.xRot = -1.134464f;
-            this.left_arm.yRot = -0.20943952f;
-            this.left_arm.zRot = (float)Math.PI / 180;
-        }
+        this.left_wing.yRot = 0.61086524f - l;
+        this.body.xRot = r = o * 0.6981317f;
+        float s = Mth.lerp(q, r, Mth.lerp(o, -1.0471976f, -0.7853982f));
+        this.root.y += (float)Math.cos(n) * 0.25f * p;
+        this.right_arm.xRot = s;
+        this.left_arm.xRot = s;
+        float t = p * (1.0f - q);
+        float u = 0.43633232f - Mth.cos(n + 4.712389f) * (float)Math.PI * 0.075f * t;
+        this.left_arm.zRot = -u;
+        this.right_arm.zRot = u;
+        this.right_arm.yRot = 0.27925268f * q;
+        this.left_arm.yRot = -0.27925268f * q;
     }
 
     @Override
@@ -93,25 +96,15 @@ implements ArmedModel {
     }
 
     @Override
-    public void prepareMobModel(Allay allay, float f, float g, float h) {
-        this.right_arm.xRot = 0.0f;
-        this.right_arm.yRot = 0.0f;
-        this.right_arm.zRot = 0.3927f;
-        this.left_arm.xRot = 0.0f;
-        this.left_arm.yRot = 0.0f;
-        this.left_arm.zRot = -0.3927f;
-    }
-
-    @Override
     public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+        float f = -1.5f;
+        float g = 1.5f;
+        this.root.translateAndRotate(poseStack);
+        this.body.translateAndRotate(poseStack);
+        poseStack.translate(0.0, -0.09375, 0.09375);
+        poseStack.mulPose(Vector3f.XP.rotation(this.right_arm.xRot + 0.43633232f));
         poseStack.scale(0.7f, 0.7f, 0.7f);
-        float f = 1.8f + (this.root.y - 23.5f) / 11.2f;
-        poseStack.translate(0.05f, f, 0.2f);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(-65.0f));
-    }
-
-    private boolean isIdle(float f) {
-        return f == 0.0f;
+        poseStack.translate(0.0625, 0.0, 0.0);
     }
 }
 

@@ -20,8 +20,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
@@ -308,8 +306,8 @@ public class HoverEvent {
                 if (this.name != null) {
                     this.linesCache.add(this.name);
                 }
-                this.linesCache.add(new TranslatableComponent("gui.entity_tooltip.type", this.type.getDescription()));
-                this.linesCache.add(new TextComponent(this.id.toString()));
+                this.linesCache.add(Component.translatable("gui.entity_tooltip.type", this.type.getDescription()));
+                this.linesCache.add(Component.literal(this.id.toString()));
             }
             return this.linesCache;
         }

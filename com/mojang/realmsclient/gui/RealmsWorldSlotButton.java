@@ -15,10 +15,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -31,9 +30,9 @@ extends Button {
     public static final ResourceLocation DEFAULT_WORLD_SLOT_1 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_0.png");
     public static final ResourceLocation DEFAULT_WORLD_SLOT_2 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_2.png");
     public static final ResourceLocation DEFAULT_WORLD_SLOT_3 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_3.png");
-    private static final Component SLOT_ACTIVE_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip.active");
-    private static final Component SWITCH_TO_MINIGAME_SLOT_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip.minigame");
-    private static final Component SWITCH_TO_WORLD_SLOT_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip");
+    private static final Component SLOT_ACTIVE_TOOLTIP = Component.translatable("mco.configure.world.slot.tooltip.active");
+    private static final Component SWITCH_TO_MINIGAME_SLOT_TOOLTIP = Component.translatable("mco.configure.world.slot.tooltip.minigame");
+    private static final Component SWITCH_TO_WORLD_SLOT_TOOLTIP = Component.translatable("mco.configure.world.slot.tooltip");
     private final Supplier<RealmsServer> serverDataProvider;
     private final Consumer<Component> toolTipSetter;
     private final int slotIndex;
@@ -42,7 +41,7 @@ extends Button {
     private State state;
 
     public RealmsWorldSlotButton(int i, int j, int k, int l, Supplier<RealmsServer> supplier, Consumer<Component> consumer, int m, Button.OnPress onPress) {
-        super(i, j, k, l, TextComponent.EMPTY, onPress);
+        super(i, j, k, l, CommonComponents.EMPTY, onPress);
         this.serverDataProvider = supplier;
         this.slotIndex = m;
         this.toolTipSetter = consumer;
@@ -103,9 +102,9 @@ extends Button {
 
     private Pair<Component, Component> getTooltipAndNarration(RealmsServer realmsServer, String string, boolean bl, boolean bl2, Action action) {
         if (action == Action.NOTHING) {
-            return Pair.of(null, new TextComponent(string));
+            return Pair.of(null, Component.literal(string));
         }
-        Component component = bl2 ? (bl ? TextComponent.EMPTY : new TextComponent(" ").append(string).append(" ").append(realmsServer.minigameName)) : new TextComponent(" ").append(string);
+        Component component = bl2 ? (bl ? CommonComponents.EMPTY : Component.literal(" ").append(string).append(" ").append(realmsServer.minigameName)) : Component.literal(" ").append(string);
         Component component2 = action == Action.JOIN ? SLOT_ACTIVE_TOOLTIP : (bl2 ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP);
         MutableComponent component3 = component2.copy().append(component);
         return Pair.of(component2, component3);

@@ -13,9 +13,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -32,7 +32,7 @@ public class PotionUtils {
     public static final String TAG_CUSTOM_POTION_COLOR = "CustomPotionColor";
     public static final String TAG_POTION = "Potion";
     private static final int EMPTY_COLOR = 0xF800F8;
-    private static final Component NO_EFFECT = new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY);
+    private static final Component NO_EFFECT = Component.translatable("effect.none").withStyle(ChatFormatting.GRAY);
 
     public static List<MobEffectInstance> getMobEffects(ItemStack itemStack) {
         return PotionUtils.getAllEffects(itemStack.getTag());
@@ -154,7 +154,7 @@ public class PotionUtils {
             list.add(NO_EFFECT);
         } else {
             for (MobEffectInstance mobEffectInstance : list2) {
-                TranslatableComponent mutableComponent = new TranslatableComponent(mobEffectInstance.getDescriptionId());
+                MutableComponent mutableComponent = Component.translatable(mobEffectInstance.getDescriptionId());
                 MobEffect mobEffect = mobEffectInstance.getEffect();
                 Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
                 if (!map.isEmpty()) {
@@ -165,27 +165,27 @@ public class PotionUtils {
                     }
                 }
                 if (mobEffectInstance.getAmplifier() > 0) {
-                    mutableComponent = new TranslatableComponent("potion.withAmplifier", mutableComponent, new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
+                    mutableComponent = Component.translatable("potion.withAmplifier", mutableComponent, Component.translatable("potion.potency." + mobEffectInstance.getAmplifier()));
                 }
                 if (mobEffectInstance.getDuration() > 20) {
-                    mutableComponent = new TranslatableComponent("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
+                    mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
                 }
                 list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
             }
         }
         if (!list3.isEmpty()) {
-            list.add(TextComponent.EMPTY);
-            list.add(new TranslatableComponent("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
+            list.add(CommonComponents.EMPTY);
+            list.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
             for (Pair pair : list3) {
                 AttributeModifier attributeModifier3 = (AttributeModifier)pair.getSecond();
                 double d = attributeModifier3.getAmount();
                 double e = attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? attributeModifier3.getAmount() * 100.0 : attributeModifier3.getAmount();
                 if (d > 0.0) {
-                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.BLUE));
+                    list.add(Component.translatable("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.BLUE));
                     continue;
                 }
                 if (!(d < 0.0)) continue;
-                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.RED));
+                list.add(Component.translatable("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.RED));
             }
         }
     }

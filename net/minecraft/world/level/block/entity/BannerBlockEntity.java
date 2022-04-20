@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Nameable;
@@ -77,7 +76,7 @@ implements Nameable {
         if (this.name != null) {
             return this.name;
         }
-        return new TranslatableComponent("block.minecraft.banner");
+        return Component.translatable("block.minecraft.banner");
     }
 
     @Override

@@ -6,7 +6,6 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -48,7 +47,7 @@ extends FallingBlock {
     private static final VoxelShape Z_TOP = Block.box(3.0, 10.0, 0.0, 13.0, 16.0, 16.0);
     private static final VoxelShape X_AXIS_AABB = Shapes.or(BASE, X_LEG1, X_LEG2, X_TOP);
     private static final VoxelShape Z_AXIS_AABB = Shapes.or(BASE, Z_LEG1, Z_LEG2, Z_TOP);
-    private static final Component CONTAINER_TITLE = new TranslatableComponent("container.repair");
+    private static final Component CONTAINER_TITLE = Component.translatable("container.repair");
     private static final float FALL_DAMAGE_PER_DISTANCE = 2.0f;
     private static final int FALL_DAMAGE_MAX = 40;
 

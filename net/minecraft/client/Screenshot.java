@@ -23,8 +23,6 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -59,11 +57,11 @@ public class Screenshot {
         Util.ioPool().execute(() -> {
             try {
                 nativeImage.writeToFile(file3);
-                MutableComponent component = new TextComponent(file3.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
-                consumer.accept(new TranslatableComponent("screenshot.success", component));
+                MutableComponent component = Component.literal(file3.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
+                consumer.accept(Component.translatable("screenshot.success", component));
             } catch (Exception exception) {
                 LOGGER.warn("Couldn't save screenshot", exception);
-                consumer.accept(new TranslatableComponent("screenshot.failure", exception.getMessage()));
+                consumer.accept(Component.translatable("screenshot.failure", exception.getMessage()));
             } finally {
                 nativeImage.close();
             }

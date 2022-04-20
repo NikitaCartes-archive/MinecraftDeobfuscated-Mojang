@@ -465,7 +465,7 @@ extends Animal {
             this.spitOutItem(this.getItemBySlot(EquipmentSlot.MAINHAND));
             this.onItemPickup(itemEntity);
             this.setItemSlot(EquipmentSlot.MAINHAND, itemStack.split(1));
-            this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0f;
+            this.setGuaranteedDrop(EquipmentSlot.MAINHAND);
             this.take(itemEntity, itemStack.getCount());
             itemEntity.discard();
             this.ticksSinceEaten = 0;

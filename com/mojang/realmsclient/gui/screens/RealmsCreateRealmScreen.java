@@ -15,14 +15,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsCreateRealmScreen
 extends RealmsScreen {
-    private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.name");
-    private static final Component DESCRIPTION_LABEL = new TranslatableComponent("mco.configure.world.description");
+    private static final Component NAME_LABEL = Component.translatable("mco.configure.world.name");
+    private static final Component DESCRIPTION_LABEL = Component.translatable("mco.configure.world.description");
     private final RealmsServer server;
     private final RealmsMainScreen lastScreen;
     private EditBox nameBox;
@@ -30,7 +29,7 @@ extends RealmsScreen {
     private Button createButton;
 
     public RealmsCreateRealmScreen(RealmsServer realmsServer, RealmsMainScreen realmsMainScreen) {
-        super(new TranslatableComponent("mco.selectServer.create"));
+        super(Component.translatable("mco.selectServer.create"));
         this.server = realmsServer;
         this.lastScreen = realmsMainScreen;
     }
@@ -48,13 +47,13 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.createButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, new TranslatableComponent("mco.create.world"), button -> this.createWorld()));
+        this.createButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, Component.translatable("mco.create.world"), button -> this.createWorld()));
         this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
         this.createButton.active = false;
-        this.nameBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 65, 200, 20, null, new TranslatableComponent("mco.configure.world.name"));
+        this.nameBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 65, 200, 20, null, Component.translatable("mco.configure.world.name"));
         this.addWidget(this.nameBox);
         this.setInitialFocus(this.nameBox);
-        this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, new TranslatableComponent("mco.configure.world.description"));
+        this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, Component.translatable("mco.configure.world.description"));
         this.addWidget(this.descriptionBox);
     }
 
@@ -83,8 +82,8 @@ extends RealmsScreen {
 
     private void createWorld() {
         if (this.valid()) {
-            RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this.lastScreen, this.server, new TranslatableComponent("mco.selectServer.create"), new TranslatableComponent("mco.create.world.subtitle"), 0xA0A0A0, new TranslatableComponent("mco.create.world.skip"), () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.lastScreen.newScreen())), () -> this.minecraft.setScreen(this.lastScreen.newScreen()));
-            realmsResetWorldScreen.setResetTitle(new TranslatableComponent("mco.create.world.reset.title"));
+            RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this.lastScreen, this.server, Component.translatable("mco.selectServer.create"), Component.translatable("mco.create.world.subtitle"), 0xA0A0A0, Component.translatable("mco.create.world.skip"), () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.lastScreen.newScreen())), () -> this.minecraft.setScreen(this.lastScreen.newScreen()));
+            realmsResetWorldScreen.setResetTitle(Component.translatable("mco.create.world.reset.title"));
             this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new WorldCreationTask(this.server.id, this.nameBox.getValue(), this.descriptionBox.getValue(), realmsResetWorldScreen)));
         }
     }

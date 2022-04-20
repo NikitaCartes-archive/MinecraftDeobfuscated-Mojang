@@ -9,6 +9,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.particles.ParticleOptions;
@@ -21,6 +22,7 @@ import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -191,6 +193,7 @@ public class EntityDataSerializers {
     public static final EntityDataSerializer<Pose> POSE = EntityDataSerializer.simpleEnum(Pose.class);
     public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.simpleId(Registry.CAT_VARIANT);
     public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.simpleId(Registry.FROG_VARIANT);
+    public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.simpleId(Registry.PAINTING_VARIANT.asHolderIdMap());
 
     public static void registerSerializer(EntityDataSerializer<?> entityDataSerializer) {
         SERIALIZERS.add(entityDataSerializer);
@@ -231,6 +234,7 @@ public class EntityDataSerializers {
         EntityDataSerializers.registerSerializer(CAT_VARIANT);
         EntityDataSerializers.registerSerializer(FROG_VARIANT);
         EntityDataSerializers.registerSerializer(OPTIONAL_GLOBAL_POS);
+        EntityDataSerializers.registerSerializer(PAINTING_VARIANT);
     }
 }
 

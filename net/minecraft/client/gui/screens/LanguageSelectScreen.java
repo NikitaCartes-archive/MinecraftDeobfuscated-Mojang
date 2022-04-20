@@ -17,18 +17,16 @@ import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class LanguageSelectScreen
 extends OptionsSubScreen {
-    private static final Component WARNING_LABEL = new TextComponent("(").append(new TranslatableComponent("options.languageWarning")).append(")").withStyle(ChatFormatting.GRAY);
+    private static final Component WARNING_LABEL = Component.literal("(").append(Component.translatable("options.languageWarning")).append(")").withStyle(ChatFormatting.GRAY);
     private LanguageSelectionList packSelectionList;
     final LanguageManager languageManager;
 
     public LanguageSelectScreen(Screen screen, Options options, LanguageManager languageManager) {
-        super(screen, options, new TranslatableComponent("options.language"));
+        super(screen, options, Component.translatable("options.language"));
         this.languageManager = languageManager;
     }
 
@@ -124,7 +122,7 @@ extends OptionsSubScreen {
 
             @Override
             public Component getNarration() {
-                return new TranslatableComponent("narrator.select", this.language);
+                return Component.translatable("narrator.select", this.language);
             }
         }
     }

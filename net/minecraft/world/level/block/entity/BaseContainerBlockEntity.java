@@ -6,7 +6,6 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -84,7 +83,7 @@ Nameable {
         if (player.isSpectator() || lockCode.unlocksWith(player.getMainHandItem())) {
             return true;
         }
-        player.displayClientMessage(new TranslatableComponent("container.isLocked", component), true);
+        player.displayClientMessage(Component.translatable("container.isLocked", component), true);
         player.playNotifySound(SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0f, 1.0f);
         return false;
     }

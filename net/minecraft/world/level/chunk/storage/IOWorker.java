@@ -12,8 +12,8 @@ import java.nio.file.Path;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -128,28 +128,15 @@ AutoCloseable {
         }).thenCompose(Function.identity());
     }
 
-    @Nullable
-    public CompoundTag load(ChunkPos chunkPos) throws IOException {
-        CompletableFuture<CompoundTag> completableFuture = this.loadAsync(chunkPos);
-        try {
-            return completableFuture.join();
-        } catch (CompletionException completionException) {
-            if (completionException.getCause() instanceof IOException) {
-                throw (IOException)completionException.getCause();
-            }
-            throw completionException;
-        }
-    }
-
-    protected CompletableFuture<CompoundTag> loadAsync(ChunkPos chunkPos) {
+    public CompletableFuture<Optional<CompoundTag>> loadAsync(ChunkPos chunkPos) {
         return this.submitTask(() -> {
             PendingStore pendingStore = this.pendingWrites.get(chunkPos);
             if (pendingStore != null) {
-                return Either.left(pendingStore.data);
+                return Either.left(Optional.ofNullable(pendingStore.data));
             }
             try {
                 CompoundTag compoundTag = this.storage.read(chunkPos);
-                return Either.left(compoundTag);
+                return Either.left(Optional.ofNullable(compoundTag));
             } catch (Exception exception) {
                 LOGGER.warn("Failed to read chunk {}", (Object)chunkPos, (Object)exception);
                 return Either.right(exception);

@@ -15,14 +15,14 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.PlayerTeam;
 
 public class TeamArgument
 implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "123");
-    private static final DynamicCommandExceptionType ERROR_TEAM_NOT_FOUND = new DynamicCommandExceptionType(object -> new TranslatableComponent("team.notFound", object));
+    private static final DynamicCommandExceptionType ERROR_TEAM_NOT_FOUND = new DynamicCommandExceptionType(object -> Component.translatable("team.notFound", object));
 
     public static TeamArgument team() {
         return new TeamArgument();

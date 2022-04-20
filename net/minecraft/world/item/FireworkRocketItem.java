@@ -13,8 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -86,7 +84,7 @@ extends Item {
             return;
         }
         if (compoundTag.contains(TAG_FLIGHT, 99)) {
-            list.add(new TranslatableComponent("item.minecraft.firework_rocket.flight").append(" ").append(String.valueOf(compoundTag.getByte(TAG_FLIGHT))).withStyle(ChatFormatting.GRAY));
+            list.add(Component.translatable("item.minecraft.firework_rocket.flight").append(" ").append(String.valueOf(compoundTag.getByte(TAG_FLIGHT))).withStyle(ChatFormatting.GRAY));
         }
         if (!(listTag = compoundTag.getList(TAG_EXPLOSIONS, 10)).isEmpty()) {
             for (int i = 0; i < listTag.size(); ++i) {
@@ -95,7 +93,7 @@ extends Item {
                 FireworkStarItem.appendHoverText(compoundTag2, list2);
                 if (list2.isEmpty()) continue;
                 for (int j = 1; j < list2.size(); ++j) {
-                    list2.set(j, new TextComponent("  ").append((Component)list2.get(j)).withStyle(ChatFormatting.GRAY));
+                    list2.set(j, Component.literal("  ").append((Component)list2.get(j)).withStyle(ChatFormatting.GRAY));
                 }
                 list.addAll(list2);
             }

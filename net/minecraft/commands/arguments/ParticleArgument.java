@@ -18,13 +18,13 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class ParticleArgument
 implements ArgumentType<ParticleOptions> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "particle with options");
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_PARTICLE = new DynamicCommandExceptionType(object -> new TranslatableComponent("particle.notFound", object));
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_PARTICLE = new DynamicCommandExceptionType(object -> Component.translatable("particle.notFound", object));
 
     public static ParticleArgument particle() {
         return new ParticleArgument();

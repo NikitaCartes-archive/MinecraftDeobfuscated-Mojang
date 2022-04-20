@@ -17,18 +17,18 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class LocateCommand {
-    private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.locate.failed", object));
-    private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.locate.invalid", object));
+    private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.failed", object));
+    private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.invalid", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locate").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("structure", ResourceOrTagLocationArgument.resourceOrTag(Registry.STRUCTURE_REGISTRY)).executes(commandContext -> LocateCommand.locate((CommandSourceStack)commandContext.getSource(), ResourceOrTagLocationArgument.getStructure(commandContext, "structure")))));
@@ -51,8 +51,8 @@ public class LocateCommand {
         String string2 = result.unwrap().map(resourceKey -> resourceKey.location().toString(), tagKey -> "#" + tagKey.location() + " (" + ((Holder)pair.getSecond()).unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]") + ")");
         int i = bl ? Mth.floor(Mth.sqrt((float)blockPos.distSqr(blockPos2))) : Mth.floor(LocateCommand.dist(blockPos.getX(), blockPos.getZ(), blockPos2.getX(), blockPos2.getZ()));
         String string3 = bl ? String.valueOf(blockPos2.getY()) : "~";
-        MutableComponent component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("chat.coordinates", blockPos2.getX(), string3, blockPos2.getZ())).withStyle(style -> style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockPos2.getX() + " " + string3 + " " + blockPos2.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.coordinates.tooltip"))));
-        commandSourceStack.sendSuccess(new TranslatableComponent(string, string2, component, i), false);
+        MutableComponent component = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockPos2.getX(), string3, blockPos2.getZ())).withStyle(style -> style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockPos2.getX() + " " + string3 + " " + blockPos2.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip"))));
+        commandSourceStack.sendSuccess(Component.translatable(string, string2, component, i), false);
         return i;
     }
 

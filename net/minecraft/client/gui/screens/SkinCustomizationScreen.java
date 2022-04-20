@@ -12,14 +12,14 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.PlayerModelPart;
 
 @Environment(value=EnvType.CLIENT)
 public class SkinCustomizationScreen
 extends OptionsSubScreen {
     public SkinCustomizationScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("options.skinCustomisation.title"));
+        super(screen, options, Component.translatable("options.skinCustomisation.title"));
     }
 
     @Override

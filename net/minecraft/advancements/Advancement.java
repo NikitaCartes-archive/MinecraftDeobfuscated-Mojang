@@ -28,7 +28,6 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -59,7 +58,7 @@ public class Advancement {
             advancement.addChild(this);
         }
         if (displayInfo == null) {
-            this.chatComponent = new TextComponent(resourceLocation.toString());
+            this.chatComponent = Component.literal(resourceLocation.toString());
         } else {
             Component component = displayInfo.getTitle();
             ChatFormatting chatFormatting = displayInfo.getFrame().getChatColor();

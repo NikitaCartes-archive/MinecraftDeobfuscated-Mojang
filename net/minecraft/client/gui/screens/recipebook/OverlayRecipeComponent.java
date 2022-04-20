@@ -18,7 +18,7 @@ import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -211,7 +211,7 @@ GuiEventListener {
         protected final List<Pos> ingredientPos;
 
         public OverlayRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
-            super(i, j, 200, 20, TextComponent.EMPTY);
+            super(i, j, 200, 20, CommonComponents.EMPTY);
             this.ingredientPos = Lists.newArrayList();
             this.width = 24;
             this.height = 24;

@@ -53,8 +53,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -83,25 +82,25 @@ extends RealmsScreen {
     static final ResourceLocation CROSS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/cross_icon.png");
     private static final ResourceLocation TRIAL_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/trial_icon.png");
     static final ResourceLocation BUTTON_LOCATION = new ResourceLocation("minecraft", "textures/gui/widgets.png");
-    static final Component NO_PENDING_INVITES_TEXT = new TranslatableComponent("mco.invites.nopending");
-    static final Component PENDING_INVITES_TEXT = new TranslatableComponent("mco.invites.pending");
-    static final List<Component> TRIAL_MESSAGE_LINES = ImmutableList.of(new TranslatableComponent("mco.trial.message.line1"), new TranslatableComponent("mco.trial.message.line2"));
-    static final Component SERVER_UNITIALIZED_TEXT = new TranslatableComponent("mco.selectServer.uninitialized");
-    static final Component SUBSCRIPTION_EXPIRED_TEXT = new TranslatableComponent("mco.selectServer.expiredList");
-    static final Component SUBSCRIPTION_RENEW_TEXT = new TranslatableComponent("mco.selectServer.expiredRenew");
-    static final Component TRIAL_EXPIRED_TEXT = new TranslatableComponent("mco.selectServer.expiredTrial");
-    static final Component SUBSCRIPTION_CREATE_TEXT = new TranslatableComponent("mco.selectServer.expiredSubscribe");
-    static final Component SELECT_MINIGAME_PREFIX = new TranslatableComponent("mco.selectServer.minigame").append(" ");
-    private static final Component POPUP_TEXT = new TranslatableComponent("mco.selectServer.popup");
-    private static final Component SERVER_EXPIRED_TOOLTIP = new TranslatableComponent("mco.selectServer.expired");
-    private static final Component SERVER_EXPIRES_SOON_TOOLTIP = new TranslatableComponent("mco.selectServer.expires.soon");
-    private static final Component SERVER_EXPIRES_IN_DAY_TOOLTIP = new TranslatableComponent("mco.selectServer.expires.day");
-    private static final Component SERVER_OPEN_TOOLTIP = new TranslatableComponent("mco.selectServer.open");
-    private static final Component SERVER_CLOSED_TOOLTIP = new TranslatableComponent("mco.selectServer.closed");
-    private static final Component LEAVE_SERVER_TOOLTIP = new TranslatableComponent("mco.selectServer.leave");
-    private static final Component CONFIGURE_SERVER_TOOLTIP = new TranslatableComponent("mco.selectServer.configure");
-    private static final Component NEWS_TOOLTIP = new TranslatableComponent("mco.news");
-    static final Component UNITIALIZED_WORLD_NARRATION = new TranslatableComponent("gui.narrate.button", SERVER_UNITIALIZED_TEXT);
+    static final Component NO_PENDING_INVITES_TEXT = Component.translatable("mco.invites.nopending");
+    static final Component PENDING_INVITES_TEXT = Component.translatable("mco.invites.pending");
+    static final List<Component> TRIAL_MESSAGE_LINES = ImmutableList.of(Component.translatable("mco.trial.message.line1"), Component.translatable("mco.trial.message.line2"));
+    static final Component SERVER_UNITIALIZED_TEXT = Component.translatable("mco.selectServer.uninitialized");
+    static final Component SUBSCRIPTION_EXPIRED_TEXT = Component.translatable("mco.selectServer.expiredList");
+    static final Component SUBSCRIPTION_RENEW_TEXT = Component.translatable("mco.selectServer.expiredRenew");
+    static final Component TRIAL_EXPIRED_TEXT = Component.translatable("mco.selectServer.expiredTrial");
+    static final Component SUBSCRIPTION_CREATE_TEXT = Component.translatable("mco.selectServer.expiredSubscribe");
+    static final Component SELECT_MINIGAME_PREFIX = Component.translatable("mco.selectServer.minigame").append(" ");
+    private static final Component POPUP_TEXT = Component.translatable("mco.selectServer.popup");
+    private static final Component SERVER_EXPIRED_TOOLTIP = Component.translatable("mco.selectServer.expired");
+    private static final Component SERVER_EXPIRES_SOON_TOOLTIP = Component.translatable("mco.selectServer.expires.soon");
+    private static final Component SERVER_EXPIRES_IN_DAY_TOOLTIP = Component.translatable("mco.selectServer.expires.day");
+    private static final Component SERVER_OPEN_TOOLTIP = Component.translatable("mco.selectServer.open");
+    private static final Component SERVER_CLOSED_TOOLTIP = Component.translatable("mco.selectServer.closed");
+    private static final Component LEAVE_SERVER_TOOLTIP = Component.translatable("mco.selectServer.leave");
+    private static final Component CONFIGURE_SERVER_TOOLTIP = Component.translatable("mco.selectServer.configure");
+    private static final Component NEWS_TOOLTIP = Component.translatable("mco.news");
+    static final Component UNITIALIZED_WORLD_NARRATION = Component.translatable("gui.narrate.button", SERVER_UNITIALIZED_TEXT);
     static final Component TRIAL_TEXT = CommonComponents.joinLines(TRIAL_MESSAGE_LINES);
     private static List<ResourceLocation> teaserImages = ImmutableList.of();
     static final RealmsDataFetcher REALMS_DATA_FETCHER = new RealmsDataFetcher(Minecraft.getInstance(), RealmsClient.create());
@@ -232,29 +231,29 @@ extends RealmsScreen {
     }
 
     public void addButtons() {
-        this.leaveButton = this.addRenderableWidget(new Button(this.width / 2 - 202, this.height - 32, 90, 20, new TranslatableComponent("mco.selectServer.leave"), button -> this.leaveClicked(this.getSelectedServer())));
-        this.configureButton = this.addRenderableWidget(new Button(this.width / 2 - 190, this.height - 32, 90, 20, new TranslatableComponent("mco.selectServer.configure"), button -> this.configureClicked(this.getSelectedServer())));
-        this.playButton = this.addRenderableWidget(new Button(this.width / 2 - 93, this.height - 32, 90, 20, new TranslatableComponent("mco.selectServer.play"), button -> this.play(this.getSelectedServer(), this)));
+        this.leaveButton = this.addRenderableWidget(new Button(this.width / 2 - 202, this.height - 32, 90, 20, Component.translatable("mco.selectServer.leave"), button -> this.leaveClicked(this.getSelectedServer())));
+        this.configureButton = this.addRenderableWidget(new Button(this.width / 2 - 190, this.height - 32, 90, 20, Component.translatable("mco.selectServer.configure"), button -> this.configureClicked(this.getSelectedServer())));
+        this.playButton = this.addRenderableWidget(new Button(this.width / 2 - 93, this.height - 32, 90, 20, Component.translatable("mco.selectServer.play"), button -> this.play(this.getSelectedServer(), this)));
         this.backButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 32, 90, 20, CommonComponents.GUI_BACK, button -> {
             if (!this.justClosedPopup) {
                 this.minecraft.setScreen(this.lastScreen);
             }
         }));
-        this.renewButton = this.addRenderableWidget(new Button(this.width / 2 + 100, this.height - 32, 90, 20, new TranslatableComponent("mco.selectServer.expiredRenew"), button -> this.onRenew(this.getSelectedServer())));
+        this.renewButton = this.addRenderableWidget(new Button(this.width / 2 + 100, this.height - 32, 90, 20, Component.translatable("mco.selectServer.expiredRenew"), button -> this.onRenew(this.getSelectedServer())));
         this.newsButton = this.addRenderableWidget(new NewsButton());
-        this.showPopupButton = this.addRenderableWidget(new Button(this.width - 90, 6, 80, 20, new TranslatableComponent("mco.selectServer.purchase"), button -> {
+        this.showPopupButton = this.addRenderableWidget(new Button(this.width - 90, 6, 80, 20, Component.translatable("mco.selectServer.purchase"), button -> {
             this.popupOpenedByUser = !this.popupOpenedByUser;
         }));
         this.pendingInvitesButton = this.addRenderableWidget(new PendingInvitesButton());
         this.closeButton = this.addRenderableWidget(new CloseButton());
-        this.createTrialButton = this.addRenderableWidget(new Button(this.width / 2 + 52, this.popupY0() + 137 - 20, 98, 20, new TranslatableComponent("mco.selectServer.trial"), button -> {
+        this.createTrialButton = this.addRenderableWidget(new Button(this.width / 2 + 52, this.popupY0() + 137 - 20, 98, 20, Component.translatable("mco.selectServer.trial"), button -> {
             if (!this.trialsAvailable || this.createdTrial) {
                 return;
             }
             Util.getPlatform().openUri("https://aka.ms/startjavarealmstrial");
             this.minecraft.setScreen(this.lastScreen);
         }));
-        this.buyARealmButton = this.addRenderableWidget(new Button(this.width / 2 + 52, this.popupY0() + 160 - 20, 98, 20, new TranslatableComponent("mco.selectServer.buy"), button -> Util.getPlatform().openUri("https://aka.ms/BuyJavaRealms")));
+        this.buyARealmButton = this.addRenderableWidget(new Button(this.width / 2 + 52, this.popupY0() + 160 - 20, 98, 20, Component.translatable("mco.selectServer.buy"), button -> Util.getPlatform().openUri("https://aka.ms/BuyJavaRealms")));
         this.updateButtonStates(null);
     }
 
@@ -354,7 +353,7 @@ extends RealmsScreen {
         if (REALMS_DATA_FETCHER.isFetchedSinceLastTry(RealmsDataFetcher.Task.PENDING_INVITE)) {
             this.numberOfPendingInvites = REALMS_DATA_FETCHER.getPendingInvitesCount();
             if (this.numberOfPendingInvites > 0 && this.inviteNarrationLimiter.tryAcquire(1)) {
-                NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("mco.configure.world.invite.narration", this.numberOfPendingInvites));
+                NarratorChatListener.INSTANCE.sayNow(Component.translatable("mco.configure.world.invite.narration", this.numberOfPendingInvites));
             }
         }
         if (REALMS_DATA_FETCHER.isFetchedSinceLastTry(RealmsDataFetcher.Task.TRIAL_AVAILABLE) && !this.createdTrial) {
@@ -456,7 +455,7 @@ extends RealmsScreen {
                         checkedClientCompatability = false;
                         LOGGER.error("Couldn't connect to realms", realmsServiceException);
                         if (realmsServiceException.httpResultCode == 401) {
-                            realmsGenericErrorScreen = new RealmsGenericErrorScreen(new TranslatableComponent("mco.error.invalid.session.title"), new TranslatableComponent("mco.error.invalid.session.message"), RealmsMainScreen.this.lastScreen);
+                            realmsGenericErrorScreen = new RealmsGenericErrorScreen(Component.translatable("mco.error.invalid.session.title"), Component.translatable("mco.error.invalid.session.message"), RealmsMainScreen.this.lastScreen);
                             RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(realmsGenericErrorScreen));
                         }
                         RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(new RealmsGenericErrorScreen(realmsServiceException, RealmsMainScreen.this.lastScreen)));
@@ -554,8 +553,8 @@ extends RealmsScreen {
     void leaveClicked(@Nullable RealmsServer realmsServer) {
         if (realmsServer != null && !this.minecraft.getUser().getUuid().equals(realmsServer.ownerUUID)) {
             this.saveListScrollPosition();
-            TranslatableComponent component = new TranslatableComponent("mco.configure.world.leave.question.line1");
-            TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.leave.question.line2");
+            MutableComponent component = Component.translatable("mco.configure.world.leave.question.line1");
+            MutableComponent component2 = Component.translatable("mco.configure.world.leave.question.line2");
             this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> this.leaveServer(bl, realmsServer), RealmsLongConfirmationScreen.Type.Info, component, component2, true));
         }
     }
@@ -860,7 +859,7 @@ extends RealmsScreen {
             } else if (m == 1) {
                 this.setTooltip(SERVER_EXPIRES_IN_DAY_TOOLTIP);
             } else {
-                this.setTooltip(new TranslatableComponent("mco.selectServer.expires.days", m));
+                this.setTooltip(Component.translatable("mco.selectServer.expires.days", m));
             }
         }
     }
@@ -1101,7 +1100,7 @@ extends RealmsScreen {
     class NewsButton
     extends Button {
         public NewsButton() {
-            super(RealmsMainScreen.this.width - 115, 6, 20, 20, new TranslatableComponent("mco.news"), button -> {
+            super(RealmsMainScreen.this.width - 115, 6, 20, 20, Component.translatable("mco.news"), button -> {
                 if (realmsMainScreen.newsLink == null) {
                     return;
                 }
@@ -1125,7 +1124,7 @@ extends RealmsScreen {
     class PendingInvitesButton
     extends Button {
         public PendingInvitesButton() {
-            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, TextComponent.EMPTY, RealmsMainScreen.this::pendingButtonPress);
+            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, CommonComponents.EMPTY, RealmsMainScreen.this::pendingButtonPress);
         }
 
         public void tick() {
@@ -1142,7 +1141,7 @@ extends RealmsScreen {
     class CloseButton
     extends Button {
         public CloseButton() {
-            super(RealmsMainScreen.this.popupX0() + 4, RealmsMainScreen.this.popupY0() + 4, 12, 12, new TranslatableComponent("mco.selectServer.close"), button -> RealmsMainScreen.this.onClosePopup());
+            super(RealmsMainScreen.this.popupX0() + 4, RealmsMainScreen.this.popupY0() + 4, 12, 12, Component.translatable("mco.selectServer.close"), button -> RealmsMainScreen.this.onClosePopup());
         }
 
         @Override
@@ -1260,7 +1259,7 @@ extends RealmsScreen {
                 String string = ChatFormatting.GRAY + realmsServer.serverPing.nrOfPlayers;
                 RealmsMainScreen.this.font.draw(poseStack, string, (float)(i + 207 - RealmsMainScreen.this.font.width(string)), (float)(j + 3), 0x808080);
                 if (k >= i + 207 - RealmsMainScreen.this.font.width(string) && k <= i + 207 && l >= j + 1 && l <= j + 10 && l < RealmsMainScreen.this.height - 40 && l > 32 && !RealmsMainScreen.this.shouldShowPopup()) {
-                    RealmsMainScreen.this.setTooltip(new TextComponent(realmsServer.serverPing.playerList));
+                    RealmsMainScreen.this.setTooltip(Component.literal(realmsServer.serverPing.playerList));
                 }
             }
             if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.expired) {
@@ -1322,7 +1321,7 @@ extends RealmsScreen {
             if (this.serverData.state == RealmsServer.State.UNINITIALIZED) {
                 return UNITIALIZED_WORLD_NARRATION;
             }
-            return new TranslatableComponent("narrator.select", this.serverData.name);
+            return Component.translatable("narrator.select", this.serverData.name);
         }
 
         @Override

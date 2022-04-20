@@ -45,6 +45,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
@@ -58,14 +59,17 @@ public class Allay
 extends PathfinderMob
 implements InventoryCarrier,
 GameEventListener {
-    private static final boolean USE_V2_MOVE_PARTICLES = false;
     private static final int GAME_EVENT_LISTENER_RANGE = 16;
     private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 1, 1);
+    private static final int ANIMATION_DURATION = 5;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
+    public static final ImmutableList<Float> THROW_SOUND_PITCHES = ImmutableList.of(Float.valueOf(0.5625f), Float.valueOf(0.625f), Float.valueOf(0.75f), Float.valueOf(0.9375f), Float.valueOf(1.0f), Float.valueOf(1.0f), Float.valueOf(1.125f), Float.valueOf(1.25f), Float.valueOf(1.5f), Float.valueOf(1.875f), Float.valueOf(2.0f), Float.valueOf(2.25f), new Float[]{Float.valueOf(2.5f), Float.valueOf(3.0f), Float.valueOf(3.75f), Float.valueOf(4.0f)});
     private final EntityPositionSource entityPositionSource = new EntityPositionSource(this, this.getEyeHeight());
     private final DynamicGameEventListener<Allay> dynamicGameEventListener;
     private final SimpleContainer inventory = new SimpleContainer(1);
+    private float holdingItemAnimationTicks;
+    private float holdingItemAnimationTicks0;
 
     public Allay(EntityType<? extends Allay> entityType, Level level) {
         super((EntityType<? extends PathfinderMob>)entityType, level);
@@ -88,7 +92,7 @@ GameEventListener {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.FLYING_SPEED, 0.6f).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.ATTACK_DAMAGE, 2.0).add(Attributes.FOLLOW_RANGE, 48.0);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 20.0).add(Attributes.FLYING_SPEED, 0.1f).add(Attributes.MOVEMENT_SPEED, 0.1f).add(Attributes.ATTACK_DAMAGE, 2.0).add(Attributes.FOLLOW_RANGE, 48.0);
     }
 
     @Override
@@ -112,11 +116,9 @@ GameEventListener {
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
             } else {
-                float f = this.onGround ? this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91f : 0.91f;
-                float g = Mth.cube(0.6f) * Mth.cube(0.91f) / Mth.cube(f);
-                this.moveRelative(this.onGround ? 0.1f * g : 0.02f, vec3);
+                this.moveRelative(this.getSpeed(), vec3);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                this.setDeltaMovement(this.getDeltaMovement().scale(f));
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.91f));
             }
         }
         this.calculateEntityAnimation(this, false);
@@ -193,8 +195,21 @@ GameEventListener {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if (this.level.isClientSide) {
+            this.holdingItemAnimationTicks0 = this.holdingItemAnimationTicks;
+            this.holdingItemAnimationTicks = this.hasItemInHand() ? Mth.clamp(this.holdingItemAnimationTicks + 1.0f, 0.0f, 5.0f) : Mth.clamp(this.holdingItemAnimationTicks - 1.0f, 0.0f, 5.0f);
+        }
+    }
+
+    @Override
     public boolean canPickUpLoot() {
-        return !this.isOnPickupCooldown() && !this.getItemInHand(InteractionHand.MAIN_HAND).isEmpty();
+        return !this.isOnPickupCooldown() && this.hasItemInHand();
+    }
+
+    public boolean hasItemInHand() {
+        return !this.getItemInHand(InteractionHand.MAIN_HAND).isEmpty();
     }
 
     private boolean isOnPickupCooldown() {
@@ -303,6 +318,30 @@ GameEventListener {
         }
         AllayAi.hearNoteblock(this, new BlockPos(vec3));
         return true;
+    }
+
+    public boolean isFlying() {
+        return this.animationSpeed > 0.3f;
+    }
+
+    public float getHoldingItemAnimationProgress(float f) {
+        return Mth.lerp(f, this.holdingItemAnimationTicks0, this.holdingItemAnimationTicks) / 5.0f;
+    }
+
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+        this.inventory.removeAllItems().forEach(this::spawnAtLocation);
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack)) {
+            this.spawnAtLocation(itemStack);
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        }
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double d) {
+        return false;
     }
 
     @Override

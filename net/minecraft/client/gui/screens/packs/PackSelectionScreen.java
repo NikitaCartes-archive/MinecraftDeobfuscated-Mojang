@@ -42,8 +42,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
@@ -57,8 +55,8 @@ public class PackSelectionScreen
 extends Screen {
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int LIST_WIDTH = 200;
-    private static final Component DRAG_AND_DROP = new TranslatableComponent("pack.dropInfo").withStyle(ChatFormatting.GRAY);
-    static final Component DIRECTORY_BUTTON_TOOLTIP = new TranslatableComponent("pack.folderInfo");
+    private static final Component DRAG_AND_DROP = Component.translatable("pack.dropInfo").withStyle(ChatFormatting.GRAY);
+    static final Component DIRECTORY_BUTTON_TOOLTIP = Component.translatable("pack.folderInfo");
     private static final int RELOAD_COOLDOWN = 20;
     private static final ResourceLocation DEFAULT_ICON = new ResourceLocation("textures/misc/unknown_pack.png");
     private final PackSelectionModel model;
@@ -101,7 +99,7 @@ extends Screen {
     @Override
     protected void init() {
         this.doneButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> this.onClose()));
-        this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 48, 150, 20, new TranslatableComponent("pack.openFolder"), button -> Util.getPlatform().openFile(this.packDir), new Button.OnTooltip(){
+        this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 48, 150, 20, Component.translatable("pack.openFolder"), button -> Util.getPlatform().openFile(this.packDir), new Button.OnTooltip(){
 
             @Override
             public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
@@ -113,10 +111,10 @@ extends Screen {
                 consumer.accept(DIRECTORY_BUTTON_TOOLTIP);
             }
         }));
-        this.availablePackList = new TransferableSelectionList(this.minecraft, 200, this.height, new TranslatableComponent("pack.available.title"));
+        this.availablePackList = new TransferableSelectionList(this.minecraft, 200, this.height, Component.translatable("pack.available.title"));
         this.availablePackList.setLeftPos(this.width / 2 - 4 - 200);
         this.addWidget(this.availablePackList);
-        this.selectedPackList = new TransferableSelectionList(this.minecraft, 200, this.height, new TranslatableComponent("pack.selected.title"));
+        this.selectedPackList = new TransferableSelectionList(this.minecraft, 200, this.height, Component.translatable("pack.selected.title"));
         this.selectedPackList.setLeftPos(this.width / 2 + 4);
         this.addWidget(this.selectedPackList);
         this.reload();
@@ -198,7 +196,7 @@ extends Screen {
                 this.reload();
             }
             this.minecraft.setScreen(this);
-        }, new TranslatableComponent("pack.dropConfirm"), new TextComponent(string)));
+        }, Component.translatable("pack.dropConfirm"), Component.literal(string)));
     }
 
     /*

@@ -150,6 +150,7 @@ public final class BlockTags {
     public static final TagKey<Block> RABBITS_SPAWNABLE_ON = BlockTags.create("rabbits_spawnable_on");
     public static final TagKey<Block> FOXES_SPAWNABLE_ON = BlockTags.create("foxes_spawnable_on");
     public static final TagKey<Block> WOLVES_SPAWNABLE_ON = BlockTags.create("wolves_spawnable_on");
+    public static final TagKey<Block> FROGS_SPAWNABLE_ON = BlockTags.create("frogs_spawnable_on");
     public static final TagKey<Block> AZALEA_GROWS_ON = BlockTags.create("azalea_grows_on");
     public static final TagKey<Block> REPLACEABLE_PLANTS = BlockTags.create("replaceable_plants");
     public static final TagKey<Block> CONVERTABLE_TO_MUD = BlockTags.create("convertable_to_mud");

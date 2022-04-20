@@ -2196,7 +2196,7 @@ extends Entity {
         }
         if (this.isControlledByLocalInstance()) {
             this.lerpSteps = 0;
-            this.setPacketCoordinates(this.getX(), this.getY(), this.getZ());
+            this.syncPacketPositionCodec(this.getX(), this.getY(), this.getZ());
         }
         if (this.lerpSteps > 0) {
             double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
@@ -3017,7 +3017,7 @@ extends Entity {
         double f = clientboundAddEntityPacket.getZ();
         float g = clientboundAddEntityPacket.getYRot();
         float h = clientboundAddEntityPacket.getXRot();
-        this.setPacketCoordinates(d, e, f);
+        this.syncPacketPositionCodec(d, e, f);
         this.yBodyRot = clientboundAddEntityPacket.getYHeadRot();
         this.yHeadRot = clientboundAddEntityPacket.getYHeadRot();
         this.yBodyRotO = this.yBodyRot;

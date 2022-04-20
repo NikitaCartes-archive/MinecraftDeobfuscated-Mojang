@@ -10,8 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,7 +20,7 @@ public class ServerData {
     public Component motd;
     public long ping;
     public int protocol = SharedConstants.getCurrentVersion().getProtocolVersion();
-    public Component version = new TextComponent(SharedConstants.getCurrentVersion().getName());
+    public Component version = Component.literal(SharedConstants.getCurrentVersion().getName());
     public boolean pinged;
     public List<Component> playerList = Collections.emptyList();
     private ServerPackStatus packStatus = ServerPackStatus.PROMPT;
@@ -106,7 +104,7 @@ public class ServerData {
         private final Component name;
 
         private ServerPackStatus(String string2) {
-            this.name = new TranslatableComponent("addServer.resourcePack." + string2);
+            this.name = Component.translatable("addServer.resourcePack." + string2);
         }
 
         public Component getName() {

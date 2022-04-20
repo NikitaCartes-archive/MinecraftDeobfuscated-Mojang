@@ -55,7 +55,8 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
-import net.minecraft.world.entity.decoration.Motive;
+import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
@@ -149,7 +150,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<Potion>> POTION_REGISTRY = Registry.createRegistryKey("potion");
     public static final ResourceKey<Registry<ParticleType<?>>> PARTICLE_TYPE_REGISTRY = Registry.createRegistryKey("particle_type");
     public static final ResourceKey<Registry<BlockEntityType<?>>> BLOCK_ENTITY_TYPE_REGISTRY = Registry.createRegistryKey("block_entity_type");
-    public static final ResourceKey<Registry<Motive>> MOTIVE_REGISTRY = Registry.createRegistryKey("motive");
+    public static final ResourceKey<Registry<PaintingVariant>> PAINTING_VARIANT_REGISTRY = Registry.createRegistryKey("painting_variant");
     public static final ResourceKey<Registry<ResourceLocation>> CUSTOM_STAT_REGISTRY = Registry.createRegistryKey("custom_stat");
     public static final ResourceKey<Registry<ChunkStatus>> CHUNK_STATUS_REGISTRY = Registry.createRegistryKey("chunk_status");
     public static final ResourceKey<Registry<RuleTestType<?>>> RULE_TEST_REGISTRY = Registry.createRegistryKey("rule_test");
@@ -189,7 +190,7 @@ IdMap<T> {
     public static final DefaultedRegistry<Potion> POTION = Registry.registerDefaulted(POTION_REGISTRY, "empty", registry -> Potions.EMPTY);
     public static final Registry<ParticleType<?>> PARTICLE_TYPE = Registry.registerSimple(PARTICLE_TYPE_REGISTRY, registry -> ParticleTypes.BLOCK);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = Registry.registerSimple(BLOCK_ENTITY_TYPE_REGISTRY, registry -> BlockEntityType.FURNACE);
-    public static final DefaultedRegistry<Motive> MOTIVE = Registry.registerDefaulted(MOTIVE_REGISTRY, "kebab", registry -> Motive.KEBAB);
+    public static final DefaultedRegistry<PaintingVariant> PAINTING_VARIANT = Registry.registerDefaulted(PAINTING_VARIANT_REGISTRY, "kebab", PaintingVariants::bootstrap);
     public static final Registry<ResourceLocation> CUSTOM_STAT = Registry.registerSimple(CUSTOM_STAT_REGISTRY, registry -> Stats.JUMP);
     public static final DefaultedRegistry<ChunkStatus> CHUNK_STATUS = Registry.registerDefaulted(CHUNK_STATUS_REGISTRY, "empty", registry -> ChunkStatus.EMPTY);
     public static final Registry<RuleTestType<?>> RULE_TEST = Registry.registerSimple(RULE_TEST_REGISTRY, registry -> RuleTestType.ALWAYS_TRUE_TEST);

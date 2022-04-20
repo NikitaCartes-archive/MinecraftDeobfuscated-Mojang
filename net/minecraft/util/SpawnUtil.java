@@ -31,6 +31,9 @@ public class SpawnUtil {
     }
 
     private static boolean moveToPossibleSpawnPosition(ServerLevel serverLevel, int i, BlockPos.MutableBlockPos mutableBlockPos) {
+        if (!serverLevel.getWorldBorder().isWithinBounds(mutableBlockPos)) {
+            return false;
+        }
         BlockState blockState = serverLevel.getBlockState(mutableBlockPos);
         for (int j = i; j >= -i; --j) {
             mutableBlockPos.move(Direction.DOWN);

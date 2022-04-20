@@ -17,7 +17,6 @@ import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -38,9 +37,9 @@ public class TitleCommand {
             serverPlayer.connection.send(clientboundClearTitlesPacket);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.cleared.single", collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.cleared.single", collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.cleared.multiple", collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.cleared.multiple", collection.size()), true);
         }
         return collection.size();
     }
@@ -51,9 +50,9 @@ public class TitleCommand {
             serverPlayer.connection.send(clientboundClearTitlesPacket);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.reset.single", collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.reset.single", collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.reset.multiple", collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.reset.multiple", collection.size()), true);
         }
         return collection.size();
     }
@@ -63,9 +62,9 @@ public class TitleCommand {
             serverPlayer.connection.send(function.apply(ComponentUtils.updateForEntity(commandSourceStack, component, (Entity)serverPlayer, 0)));
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.show." + string + ".single", collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.show." + string + ".single", collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.show." + string + ".multiple", collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.show." + string + ".multiple", collection.size()), true);
         }
         return collection.size();
     }
@@ -76,9 +75,9 @@ public class TitleCommand {
             serverPlayer.connection.send(clientboundSetTitlesAnimationPacket);
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.times.single", collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.times.single", collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.title.times.multiple", collection.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.title.times.multiple", collection.size()), true);
         }
         return collection.size();
     }

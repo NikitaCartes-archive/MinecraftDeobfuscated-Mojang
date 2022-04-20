@@ -31,7 +31,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -97,7 +96,7 @@ GuiEventListener {
     @Override
     protected MutableComponent createNarrationMessage() {
         Component component = this.getMessage();
-        return new TranslatableComponent("gui.narrate.editBox", component, this.value);
+        return Component.translatable("gui.narrate.editBox", component, this.value);
     }
 
     public void setValue(String string) {
@@ -575,7 +574,7 @@ GuiEventListener {
 
     @Override
     public void updateNarration(NarrationElementOutput narrationElementOutput) {
-        narrationElementOutput.add(NarratedElementType.TITLE, (Component)new TranslatableComponent("narration.edit_box", this.getValue()));
+        narrationElementOutput.add(NarratedElementType.TITLE, (Component)Component.translatable("narration.edit_box", this.getValue()));
     }
 }
 

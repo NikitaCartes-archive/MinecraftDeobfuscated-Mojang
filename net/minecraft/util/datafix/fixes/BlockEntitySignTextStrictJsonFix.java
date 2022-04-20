@@ -15,9 +15,9 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 import java.lang.reflect.Type;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.References;
@@ -30,7 +30,7 @@ extends NamedEntityFix {
         @Override
         public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (jsonElement.isJsonPrimitive()) {
-                return new TextComponent(jsonElement.getAsString());
+                return Component.literal(jsonElement.getAsString());
             }
             if (jsonElement.isJsonArray()) {
                 JsonArray jsonArray = jsonElement.getAsJsonArray();
@@ -62,12 +62,12 @@ extends NamedEntityFix {
         String string2 = dynamic.get(string).asString("");
         Component component = null;
         if ("null".equals(string2) || StringUtils.isEmpty(string2)) {
-            component = TextComponent.EMPTY;
+            component = CommonComponents.EMPTY;
         } else if (string2.charAt(0) == '\"' && string2.charAt(string2.length() - 1) == '\"' || string2.charAt(0) == '{' && string2.charAt(string2.length() - 1) == '}') {
             try {
                 component = GsonHelper.fromJson(GSON, string2, Component.class, true);
                 if (component == null) {
-                    component = TextComponent.EMPTY;
+                    component = CommonComponents.EMPTY;
                 }
             } catch (Exception exception) {
                 // empty catch block
@@ -87,10 +87,10 @@ extends NamedEntityFix {
                 }
             }
             if (component == null) {
-                component = new TextComponent(string2);
+                component = Component.literal(string2);
             }
         } else {
-            component = new TextComponent(string2);
+            component = Component.literal(string2);
         }
         return dynamic.set(string, dynamic.createString(Component.Serializer.toJson(component)));
     }

@@ -7,7 +7,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,7 +35,7 @@ extends StandingAndWallBlockItem {
                 string = compoundTag2.getString("Name");
             }
             if (string != null) {
-                return new TranslatableComponent(this.getDescriptionId() + ".named", string);
+                return Component.translatable(this.getDescriptionId() + ".named", string);
             }
         }
         return super.getName(itemStack);

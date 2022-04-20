@@ -26,7 +26,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.jetbrains.annotations.Nullable;
@@ -38,12 +37,12 @@ extends Screen {
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
     static final Logger LOGGER = LogUtils.getLogger();
     private static final long NARRATION_DELAY_MS = 2000L;
-    public static final Component UNKNOWN_HOST_MESSAGE = new TranslatableComponent("disconnect.genericReason", new TranslatableComponent("disconnect.unknownHost"));
+    public static final Component UNKNOWN_HOST_MESSAGE = Component.translatable("disconnect.genericReason", Component.translatable("disconnect.unknownHost"));
     @Nullable
     volatile Connection connection;
     volatile boolean aborted;
     final Screen parent;
-    private Component status = new TranslatableComponent("connect.connecting");
+    private Component status = Component.translatable("connect.connecting");
     private long lastNarration = -1L;
 
     private ConnectScreen(Screen screen) {
@@ -93,7 +92,7 @@ extends Screen {
                     Exception exception3 = throwable instanceof Exception ? (exception2 = (Exception)throwable) : exception;
                     LOGGER.error("Couldn't connect to server", exception);
                     String string = inetSocketAddress == null ? exception3.getMessage() : exception3.getMessage().replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "").replaceAll(inetSocketAddress.toString(), "");
-                    minecraft.execute(() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string))));
+                    minecraft.execute(() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string))));
                 }
             }
         };
@@ -126,7 +125,7 @@ extends Screen {
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> {
             this.aborted = true;
             if (this.connection != null) {
-                this.connection.disconnect(new TranslatableComponent("connect.aborted"));
+                this.connection.disconnect(Component.translatable("connect.aborted"));
             }
             this.minecraft.setScreen(this.parent);
         }));
@@ -138,7 +137,7 @@ extends Screen {
         long l = Util.getMillis();
         if (l - this.lastNarration > 2000L) {
             this.lastNarration = l;
-            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.joining"));
+            NarratorChatListener.INSTANCE.sayNow(Component.translatable("narrator.joining"));
         }
         ConnectScreen.drawCenteredString(poseStack, this.font, this.status, this.width / 2, this.height / 2 - 50, 0xFFFFFF);
         super.render(poseStack, i, j, f);

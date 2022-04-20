@@ -29,7 +29,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
@@ -40,8 +39,8 @@ import org.slf4j.Logger;
 
 public class DebugCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.notRunning"));
-    private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.alreadyRunning"));
+    private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.notRunning"));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.alreadyRunning"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("debug").requires(commandSourceStack -> commandSourceStack.hasPermission(3))).then(Commands.literal("start").executes(commandContext -> DebugCommand.start((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("stop").executes(commandContext -> DebugCommand.stop((CommandSourceStack)commandContext.getSource())))).then(((LiteralArgumentBuilder)Commands.literal("function").requires(commandSourceStack -> commandSourceStack.hasPermission(3))).then(Commands.argument("name", FunctionArgument.functions()).suggests(FunctionCommand.SUGGEST_FUNCTION).executes(commandContext -> DebugCommand.traceFunction((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctions(commandContext, "name"))))));
@@ -53,7 +52,7 @@ public class DebugCommand {
             throw ERROR_ALREADY_RUNNING.create();
         }
         minecraftServer.startTimeProfiler();
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.started"), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.debug.started"), true);
         return 0;
     }
 
@@ -65,7 +64,7 @@ public class DebugCommand {
         ProfileResults profileResults = minecraftServer.stopTimeProfiler();
         double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
         double e = (double)profileResults.getTickDuration() / d;
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), profileResults.getTickDuration(), String.format("%.2f", e)), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), profileResults.getTickDuration(), String.format("%.2f", e)), true);
         return (int)e;
     }
 
@@ -86,12 +85,12 @@ public class DebugCommand {
             }
         } catch (IOException | UncheckedIOException exception) {
             LOGGER.warn("Tracing failed", exception);
-            commandSourceStack.sendFailure(new TranslatableComponent("commands.debug.function.traceFailed"));
+            commandSourceStack.sendFailure(Component.translatable("commands.debug.function.traceFailed"));
         }
         if (collection.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.function.success.single", i, collection.iterator().next().getId(), string), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.debug.function.success.single", i, collection.iterator().next().getId(), string), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.function.success.multiple", i, collection.size(), string), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.debug.function.success.multiple", i, collection.size(), string), true);
         }
         return i;
     }

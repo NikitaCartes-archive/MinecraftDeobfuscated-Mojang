@@ -14,7 +14,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import java.io.IOException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.chase.ChaseClient;
 import net.minecraft.server.chase.ChaseServer;
@@ -39,12 +39,12 @@ public class ChaseCommand {
     private static int stop(CommandSourceStack commandSourceStack) {
         if (chaseClient != null) {
             chaseClient.stop();
-            commandSourceStack.sendSuccess(new TextComponent("You have now stopped chasing"), false);
+            commandSourceStack.sendSuccess(Component.literal("You have now stopped chasing"), false);
             chaseClient = null;
         }
         if (chaseServer != null) {
             chaseServer.stop();
-            commandSourceStack.sendSuccess(new TextComponent("You are no longer being chased"), false);
+            commandSourceStack.sendSuccess(Component.literal("You are no longer being chased"), false);
             chaseServer = null;
         }
         return 0;
@@ -52,11 +52,11 @@ public class ChaseCommand {
 
     private static boolean alreadyRunning(CommandSourceStack commandSourceStack) {
         if (chaseServer != null) {
-            commandSourceStack.sendFailure(new TextComponent("Chase server is already running. Stop it using /chase stop"));
+            commandSourceStack.sendFailure(Component.literal("Chase server is already running. Stop it using /chase stop"));
             return true;
         }
         if (chaseClient != null) {
-            commandSourceStack.sendFailure(new TextComponent("You are already chasing someone. Stop it using /chase stop"));
+            commandSourceStack.sendFailure(Component.literal("You are already chasing someone. Stop it using /chase stop"));
             return true;
         }
         return false;
@@ -69,10 +69,10 @@ public class ChaseCommand {
         chaseServer = new ChaseServer(string, i, commandSourceStack.getServer().getPlayerList(), 100);
         try {
             chaseServer.start();
-            commandSourceStack.sendSuccess(new TextComponent("Chase server is now running on port " + i + ". Clients can follow you using /chase follow <ip> <port>"), false);
+            commandSourceStack.sendSuccess(Component.literal("Chase server is now running on port " + i + ". Clients can follow you using /chase follow <ip> <port>"), false);
         } catch (IOException iOException) {
             iOException.printStackTrace();
-            commandSourceStack.sendFailure(new TextComponent("Failed to start chase server on port " + i));
+            commandSourceStack.sendFailure(Component.literal("Failed to start chase server on port " + i));
             chaseServer = null;
         }
         return 0;
@@ -84,7 +84,7 @@ public class ChaseCommand {
         }
         chaseClient = new ChaseClient(string, i, commandSourceStack.getServer());
         chaseClient.start();
-        commandSourceStack.sendSuccess(new TextComponent("You are now chasing " + string + ":" + i + ". If that server does '/chase lead' then you will automatically go to the same position. Use '/chase stop' to stop chasing."), false);
+        commandSourceStack.sendSuccess(Component.literal("You are now chasing " + string + ":" + i + ". If that server does '/chase lead' then you will automatically go to the same position. Use '/chase stop' to stop chasing."), false);
         return 0;
     }
 }

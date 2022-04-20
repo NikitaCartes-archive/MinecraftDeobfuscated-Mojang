@@ -13,7 +13,6 @@ import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -24,8 +23,8 @@ import net.minecraft.world.item.ItemStack;
 public class CraftPlanksTutorialStep
 implements TutorialStepInstance {
     private static final int HINT_DELAY = 1200;
-    private static final Component CRAFT_TITLE = new TranslatableComponent("tutorial.craft_planks.title");
-    private static final Component CRAFT_DESCRIPTION = new TranslatableComponent("tutorial.craft_planks.description");
+    private static final Component CRAFT_TITLE = Component.translatable("tutorial.craft_planks.title");
+    private static final Component CRAFT_DESCRIPTION = Component.translatable("tutorial.craft_planks.description");
     private final Tutorial tutorial;
     private TutorialToast toast;
     private int timeWaiting;

@@ -4,7 +4,6 @@
 package net.minecraft.util;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public interface OptionEnum {
     public int getId();
@@ -12,7 +11,7 @@ public interface OptionEnum {
     public String getKey();
 
     default public Component getCaption() {
-        return new TranslatableComponent(this.getKey());
+        return Component.translatable(this.getKey());
     }
 }
 

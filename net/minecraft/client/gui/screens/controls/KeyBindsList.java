@@ -22,8 +22,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Environment(value=EnvType.CLIENT)
@@ -39,14 +37,14 @@ extends ContainerObjectSelectionList<Entry> {
         Arrays.sort(keyMappings);
         String string = null;
         for (Object keyMapping : keyMappings) {
-            TranslatableComponent component;
+            MutableComponent component;
             int i;
             String string2 = ((KeyMapping)keyMapping).getCategory();
             if (!string2.equals(string)) {
                 string = string2;
-                this.addEntry(new CategoryEntry(new TranslatableComponent(string2)));
+                this.addEntry(new CategoryEntry(Component.translatable(string2)));
             }
-            if ((i = minecraft.font.width(component = new TranslatableComponent(((KeyMapping)keyMapping).getName()))) > this.maxNameWidth) {
+            if ((i = minecraft.font.width(component = Component.translatable(((KeyMapping)keyMapping).getName()))) > this.maxNameWidth) {
                 this.maxNameWidth = i;
             }
             this.addEntry(new KeyEntry((KeyMapping)keyMapping, component));
@@ -124,19 +122,19 @@ extends ContainerObjectSelectionList<Entry> {
                 @Override
                 protected MutableComponent createNarrationMessage() {
                     if (keyMapping.isUnbound()) {
-                        return new TranslatableComponent("narrator.controls.unbound", component);
+                        return Component.translatable("narrator.controls.unbound", component);
                     }
-                    return new TranslatableComponent("narrator.controls.bound", component, super.createNarrationMessage());
+                    return Component.translatable("narrator.controls.bound", component, super.createNarrationMessage());
                 }
             };
-            this.resetButton = new Button(0, 0, 50, 20, new TranslatableComponent("controls.reset"), button -> {
+            this.resetButton = new Button(0, 0, 50, 20, Component.translatable("controls.reset"), button -> {
                 ((KeyBindsList)KeyBindsList.this).minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
                 KeyMapping.resetMapping();
             }){
 
                 @Override
                 protected MutableComponent createNarrationMessage() {
-                    return new TranslatableComponent("narrator.controls.reset", component);
+                    return Component.translatable("narrator.controls.reset", component);
                 }
             };
         }
@@ -161,7 +159,7 @@ extends ContainerObjectSelectionList<Entry> {
                 }
             }
             if (bl2) {
-                this.changeButton.setMessage(new TextComponent("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW));
+                this.changeButton.setMessage(Component.literal("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW));
             } else if (bl3) {
                 this.changeButton.setMessage(this.changeButton.getMessage().copy().withStyle(ChatFormatting.RED));
             }

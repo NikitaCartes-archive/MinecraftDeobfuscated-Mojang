@@ -19,7 +19,6 @@ import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -42,9 +41,9 @@ implements ClientAdvancements.Listener {
     public static final int BACKGROUND_TILE_HEIGHT = 16;
     public static final int BACKGROUND_TILE_COUNT_X = 14;
     public static final int BACKGROUND_TILE_COUNT_Y = 7;
-    private static final Component VERY_SAD_LABEL = new TranslatableComponent("advancements.sad_label");
-    private static final Component NO_ADVANCEMENTS_LABEL = new TranslatableComponent("advancements.empty");
-    private static final Component TITLE = new TranslatableComponent("gui.advancements");
+    private static final Component VERY_SAD_LABEL = Component.translatable("advancements.sad_label");
+    private static final Component NO_ADVANCEMENTS_LABEL = Component.translatable("advancements.empty");
+    private static final Component TITLE = Component.translatable("gui.advancements");
     private final ClientAdvancements advancements;
     private final Map<Advancement, AdvancementTab> tabs = Maps.newLinkedHashMap();
     @Nullable

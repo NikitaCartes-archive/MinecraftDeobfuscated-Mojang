@@ -10,7 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,7 +24,7 @@ extends AbstractWidget {
     protected int yDiffTex;
 
     public StateSwitchingButton(int i, int j, int k, int l, boolean bl) {
-        super(i, j, k, l, TextComponent.EMPTY);
+        super(i, j, k, l, CommonComponents.EMPTY);
         this.isStateTriggered = bl;
     }
 

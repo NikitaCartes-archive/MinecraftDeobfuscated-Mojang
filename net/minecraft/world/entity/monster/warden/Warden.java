@@ -137,7 +137,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean checkSpawnObstruction(LevelReader levelReader) {
-        return super.checkSpawnObstruction(levelReader) && levelReader.noCollision(this);
+        return super.checkSpawnObstruction(levelReader) && levelReader.noCollision(this, this.getType().getDimensions().makeBoundingBox(this.position()));
     }
 
     @Override
@@ -147,7 +147,10 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        return this.isDiggingOrEmerging() || super.isInvulnerableTo(damageSource);
+        if (this.isDiggingOrEmerging() && !damageSource.isBypassInvul()) {
+            return true;
+        }
+        return super.isInvulnerableTo(damageSource);
     }
 
     private boolean isDiggingOrEmerging() {
@@ -391,6 +394,7 @@ implements VibrationListener.VibrationListenerConfig {
         if (livingEntity.getType() == EntityType.WARDEN) return false;
         if (livingEntity.isInvulnerable()) return false;
         if (livingEntity.isDeadOrDying()) return false;
+        if (!this.level.getWorldBorder().isWithinBounds(livingEntity.getBoundingBox())) return false;
         return true;
     }
 
@@ -440,7 +444,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     @VisibleForTesting
     public void increaseAngerAt(@Nullable Entity entity, int i, boolean bl) {
-        if (this.canTargetEntity(entity)) {
+        if (!this.isNoAi() && this.canTargetEntity(entity)) {
             WardenAi.setDigCooldown(this);
             boolean bl2 = this.getEntityAngryAt().filter(livingEntity -> !(livingEntity instanceof Player)).isPresent();
             int j = this.angerManagement.increaseAnger(entity, i);
@@ -489,7 +493,7 @@ implements VibrationListener.VibrationListenerConfig {
         if (this.level.isClientSide) {
             return false;
         }
-        if (bl) {
+        if (bl && !this.isNoAi()) {
             Entity entity = damageSource.getEntity();
             this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
             if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {
@@ -523,7 +527,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     protected void doPush(Entity entity) {
-        if (!this.getBrain().hasMemoryValue(MemoryModuleType.TOUCH_COOLDOWN)) {
+        if (!this.isNoAi() && !this.getBrain().hasMemoryValue(MemoryModuleType.TOUCH_COOLDOWN)) {
             this.getBrain().setMemoryWithExpiry(MemoryModuleType.TOUCH_COOLDOWN, Unit.INSTANCE, 20L);
             this.increaseAngerAt(entity);
             WardenAi.setDisturbanceLocation(this, entity.blockPosition());
@@ -533,13 +537,12 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
-        if (this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN)) {
+        LivingEntity livingEntity;
+        if (this.isNoAi() || this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN) || this.isDiggingOrEmerging() || !serverLevel.getWorldBorder().isWithinBounds(blockPos)) {
             return false;
         }
-        if (this.isDiggingOrEmerging()) {
-            return false;
-        }
-        return !(context.sourceEntity() instanceof LivingEntity) || this.canTargetEntity(context.sourceEntity());
+        Entity entity = context.sourceEntity();
+        return !(entity instanceof LivingEntity) || this.canTargetEntity(livingEntity = (LivingEntity)entity);
     }
 
     @Override

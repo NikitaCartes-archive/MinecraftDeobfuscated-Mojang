@@ -94,13 +94,11 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
@@ -208,6 +206,7 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceKey;
@@ -235,7 +234,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Inventory;
@@ -289,7 +287,7 @@ import org.slf4j.Logger;
 public class ClientPacketListener
 implements ClientGamePacketListener {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Component GENERIC_DISCONNECT_MESSAGE = new TranslatableComponent("disconnect.lost");
+    private static final Component GENERIC_DISCONNECT_MESSAGE = Component.translatable("disconnect.lost");
     private final Connection connection;
     private final GameProfile localGameProfile;
     private final Screen callbackScreen;
@@ -411,20 +409,11 @@ implements ClientGamePacketListener {
         double e = clientboundAddExperienceOrbPacket.getY();
         double f = clientboundAddExperienceOrbPacket.getZ();
         ExperienceOrb entity = new ExperienceOrb(this.level, d, e, f, clientboundAddExperienceOrbPacket.getValue());
-        entity.setPacketCoordinates(d, e, f);
+        entity.syncPacketPositionCodec(d, e, f);
         entity.setYRot(0.0f);
         entity.setXRot(0.0f);
         entity.setId(clientboundAddExperienceOrbPacket.getId());
         this.level.putNonPlayerEntity(clientboundAddExperienceOrbPacket.getId(), entity);
-    }
-
-    @Override
-    public void handleAddPainting(ClientboundAddPaintingPacket clientboundAddPaintingPacket) {
-        PacketUtils.ensureRunningOnSameThread(clientboundAddPaintingPacket, this, this.minecraft);
-        Painting painting = new Painting(this.level, clientboundAddPaintingPacket.getPos(), clientboundAddPaintingPacket.getDirection(), clientboundAddPaintingPacket.getMotive());
-        painting.setId(clientboundAddPaintingPacket.getId());
-        painting.setUUID(clientboundAddPaintingPacket.getUUID());
-        this.level.putNonPlayerEntity(clientboundAddPaintingPacket.getId(), painting);
     }
 
     @Override
@@ -457,7 +446,7 @@ implements ClientGamePacketListener {
         int i = clientboundAddPlayerPacket.getEntityId();
         RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId()).getProfile());
         remotePlayer.setId(i);
-        remotePlayer.setPacketCoordinates(d, e, f);
+        remotePlayer.syncPacketPositionCodec(d, e, f);
         remotePlayer.absMoveTo(d, e, f, g, h);
         remotePlayer.setOldPosAndRot();
         this.level.addPlayer(i, remotePlayer);
@@ -473,7 +462,7 @@ implements ClientGamePacketListener {
         double d = clientboundTeleportEntityPacket.getX();
         double e = clientboundTeleportEntityPacket.getY();
         double f = clientboundTeleportEntityPacket.getZ();
-        entity.setPacketCoordinates(d, e, f);
+        entity.syncPacketPositionCodec(d, e, f);
         if (!entity.isControlledByLocalInstance()) {
             float g = (float)(clientboundTeleportEntityPacket.getyRot() * 360) / 256.0f;
             float h = (float)(clientboundTeleportEntityPacket.getxRot() * 360) / 256.0f;
@@ -499,15 +488,16 @@ implements ClientGamePacketListener {
         }
         if (!entity.isControlledByLocalInstance()) {
             if (clientboundMoveEntityPacket.hasPosition()) {
-                Vec3 vec3 = clientboundMoveEntityPacket.updateEntityPosition(entity.getPacketCoordinates());
-                entity.setPacketCoordinates(vec3);
+                VecDeltaCodec vecDeltaCodec = entity.getPositionCodec();
+                Vec3 vec3 = vecDeltaCodec.decode(clientboundMoveEntityPacket.getXa(), clientboundMoveEntityPacket.getYa(), clientboundMoveEntityPacket.getZa());
+                vecDeltaCodec.setBase(vec3);
                 float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f : entity.getYRot();
                 float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f : entity.getXRot();
                 entity.lerpTo(vec3.x(), vec3.y(), vec3.z(), f, g, 3, false);
             } else if (clientboundMoveEntityPacket.hasRotation()) {
                 float h = (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f;
-                float f = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f;
-                entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, f, 3, false);
+                float i = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f;
+                entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, i, 3, false);
             }
             entity.setOnGround(clientboundMoveEntityPacket.isOnGround());
         }
@@ -779,7 +769,7 @@ implements ClientGamePacketListener {
                 this.minecraft.player.setYRot(entity.getYRot());
                 this.minecraft.player.setYHeadRot(entity.getYRot());
             }
-            this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
+            this.minecraft.gui.setOverlayMessage(Component.translatable("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
         }
     }
 
@@ -1024,7 +1014,7 @@ implements ClientGamePacketListener {
         float f = clientboundGameEventPacket.getParam();
         int i = Mth.floor(f + 0.5f);
         if (type == ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE) {
-            ((Player)player).displayClientMessage(new TranslatableComponent("block.minecraft.spawn.not_valid"), false);
+            ((Player)player).displayClientMessage(Component.translatable("block.minecraft.spawn.not_valid"), false);
         } else if (type == ClientboundGameEventPacket.START_RAINING) {
             this.level.getLevelData().setRaining(true);
             this.level.setRainLevel(0.0f);
@@ -1045,13 +1035,13 @@ implements ClientGamePacketListener {
             if (f == 0.0f) {
                 this.minecraft.setScreen(new DemoIntroScreen());
             } else if (f == 101.0f) {
-                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("demo.help.movement", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("demo.help.movement", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()));
             } else if (f == 102.0f) {
-                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("demo.help.jump", options.keyJump.getTranslatedKeyMessage()));
             } else if (f == 103.0f) {
-                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()));
             } else if (f == 104.0f) {
-                this.minecraft.gui.getChat().addMessage(new TranslatableComponent("demo.day.6", options.keyScreenshot.getTranslatedKeyMessage()));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("demo.day.6", options.keyScreenshot.getTranslatedKeyMessage()));
             }
         } else if (type == ClientboundGameEventPacket.ARROW_HIT_PLAYER) {
             this.level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.18f, 0.45f);
@@ -1485,7 +1475,7 @@ implements ClientGamePacketListener {
                 } else {
                     this.send(ServerboundResourcePackPacket.Action.DECLINED);
                     if (bl) {
-                        this.connection.disconnect(new TranslatableComponent("multiplayer.requiredTexturePrompt.disconnect"));
+                        this.connection.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
                     } else if (serverData != null) {
                         serverData.setResourcePackStatus(ServerData.ServerPackStatus.DISABLED);
                     }
@@ -1493,11 +1483,11 @@ implements ClientGamePacketListener {
                 if (serverData != null) {
                     ServerList.saveSingleServer(serverData);
                 }
-            }, bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line1") : new TranslatableComponent("multiplayer.texturePrompt.line1"), ClientPacketListener.preparePackPrompt(bl ? new TranslatableComponent("multiplayer.requiredTexturePrompt.line2").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD) : new TranslatableComponent("multiplayer.texturePrompt.line2"), clientboundResourcePackPacket.getPrompt()), bl ? CommonComponents.GUI_PROCEED : CommonComponents.GUI_YES, bl ? new TranslatableComponent("menu.disconnect") : CommonComponents.GUI_NO)));
+            }, bl ? Component.translatable("multiplayer.requiredTexturePrompt.line1") : Component.translatable("multiplayer.texturePrompt.line1"), ClientPacketListener.preparePackPrompt(bl ? Component.translatable("multiplayer.requiredTexturePrompt.line2").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD) : Component.translatable("multiplayer.texturePrompt.line2"), clientboundResourcePackPacket.getPrompt()), bl ? CommonComponents.GUI_PROCEED : CommonComponents.GUI_YES, bl ? Component.translatable("menu.disconnect") : CommonComponents.GUI_NO)));
         } else {
             this.send(ServerboundResourcePackPacket.Action.DECLINED);
             if (bl) {
-                this.connection.disconnect(new TranslatableComponent("multiplayer.requiredTexturePrompt.disconnect"));
+                this.connection.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
             }
         }
     }
@@ -1506,7 +1496,7 @@ implements ClientGamePacketListener {
         if (component2 == null) {
             return component;
         }
-        return new TranslatableComponent("multiplayer.texturePrompt.serverPrompt", component, component2);
+        return Component.translatable("multiplayer.texturePrompt.serverPrompt", component, component2);
     }
 
     @Nullable

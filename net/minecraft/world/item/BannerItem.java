@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -43,7 +42,7 @@ extends StandingAndWallBlockItem {
             DyeColor dyeColor = DyeColor.byId(compoundTag2.getInt("Color"));
             BannerPattern bannerPattern = BannerPattern.byHash(compoundTag2.getString("Pattern"));
             if (bannerPattern == null) continue;
-            list.add(new TranslatableComponent(PATTERN_PREFIX + bannerPattern.getFilename() + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
+            list.add(Component.translatable(PATTERN_PREFIX + bannerPattern.getFilename() + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
         }
     }
 

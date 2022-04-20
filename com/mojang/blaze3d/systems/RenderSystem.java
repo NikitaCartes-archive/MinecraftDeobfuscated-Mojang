@@ -9,7 +9,6 @@ import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.FogShape;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -888,11 +887,13 @@ public class RenderSystem {
         return textureMatrix;
     }
 
-    public static AutoStorageIndexBuffer getSequentialBuffer(VertexFormat.Mode mode, int i) {
+    public static AutoStorageIndexBuffer getSequentialBuffer(VertexFormat.Mode mode) {
         RenderSystem.assertOnRenderThread();
-        AutoStorageIndexBuffer autoStorageIndexBuffer = mode == VertexFormat.Mode.QUADS ? sharedSequentialQuad : (mode == VertexFormat.Mode.LINES ? sharedSequentialLines : sharedSequential);
-        autoStorageIndexBuffer.ensureStorage(i);
-        return autoStorageIndexBuffer;
+        return switch (mode) {
+            case VertexFormat.Mode.QUADS -> sharedSequentialQuad;
+            case VertexFormat.Mode.LINES -> sharedSequentialLines;
+            default -> sharedSequential;
+        };
     }
 
     public static void setShaderGameTime(long l, float f) {
@@ -1189,18 +1190,26 @@ public class RenderSystem {
             this.generator = indexGenerator;
         }
 
-        void ensureStorage(int i) {
-            if (i <= this.indexCount) {
+        public boolean hasStorage(int i) {
+            return i <= this.indexCount;
+        }
+
+        public void bind(int i) {
+            if (this.name == 0) {
+                this.name = GlStateManager._glGenBuffers();
+            }
+            GlStateManager._glBindBuffer(34963, this.name);
+            this.ensureStorage(i);
+        }
+
+        private void ensureStorage(int i) {
+            if (this.hasStorage(i)) {
                 return;
             }
             i = Mth.roundToward(i * 2, this.indexStride);
             LOGGER.debug("Growing IndexBuffer: Old limit {}, new limit {}.", (Object)this.indexCount, (Object)i);
-            if (this.name == 0) {
-                this.name = GlStateManager._glGenBuffers();
-            }
             VertexFormat.IndexType indexType = VertexFormat.IndexType.least(i);
             int j = Mth.roundToward(i * indexType.bytes, 4);
-            GlStateManager._glBindBuffer(34963, this.name);
             GlStateManager._glBufferData(34963, j, 35048);
             ByteBuffer byteBuffer = GlStateManager._glMapBuffer(34963, 35001);
             if (byteBuffer == null) {
@@ -1212,9 +1221,7 @@ public class RenderSystem {
                 this.generator.accept(intConsumer, k * this.vertexStride / this.indexStride);
             }
             GlStateManager._glUnmapBuffer(34963);
-            GlStateManager._glBindBuffer(34963, 0);
             this.indexCount = i;
-            BufferUploader.invalidateElementArrayBufferBinding();
         }
 
         private IntConsumer intConsumer(ByteBuffer byteBuffer) {
@@ -1227,10 +1234,6 @@ public class RenderSystem {
                 }
             }
             return byteBuffer::putInt;
-        }
-
-        public int name() {
-            return this.name;
         }
 
         public VertexFormat.IndexType type() {

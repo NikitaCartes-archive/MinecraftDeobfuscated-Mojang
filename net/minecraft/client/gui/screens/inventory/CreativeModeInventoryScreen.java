@@ -33,9 +33,8 @@ import net.minecraft.client.searchtree.MutableSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -69,7 +68,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private static final int SCROLLER_WIDTH = 12;
     private static final int SCROLLER_HEIGHT = 15;
     static final SimpleContainer CONTAINER = new SimpleContainer(45);
-    private static final Component TRASH_SLOT_TOOLTIP = new TranslatableComponent("inventory.binSlot");
+    private static final Component TRASH_SLOT_TOOLTIP = Component.translatable("inventory.binSlot");
     private static final int TEXT_COLOR = 0xFFFFFF;
     private static int selectedTab = CreativeModeTab.TAB_BUILDING_BLOCKS.getId();
     private float scrollOffs;
@@ -85,7 +84,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private final Set<TagKey<Item>> visibleTags = new HashSet<TagKey<Item>>();
 
     public CreativeModeInventoryScreen(Player player) {
-        super(new ItemPickerMenu(player), player.getInventory(), TextComponent.EMPTY);
+        super(new ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
         player.containerMenu = this.menu;
         this.passEvents = true;
         this.imageHeight = 136;
@@ -232,7 +231,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         if (this.minecraft.gameMode.hasInfiniteItems()) {
             super.init();
             this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-            this.searchBox = new EditBox(this.font, this.leftPos + 82, this.topPos + 6, 80, this.font.lineHeight, new TranslatableComponent("itemGroup.search"));
+            this.searchBox = new EditBox(this.font, this.leftPos + 82, this.topPos + 6, 80, this.font.lineHeight, Component.translatable("itemGroup.search"));
             this.searchBox.setMaxLength(50);
             this.searchBox.setBordered(false);
             this.searchBox.setVisible(false);
@@ -421,7 +420,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
                             itemStack.getOrCreateTagElement(CUSTOM_SLOT_LOCK);
                             Component component = this.minecraft.options.keyHotbarSlots[j].getTranslatedKeyMessage();
                             Component component2 = this.minecraft.options.keySaveHotbarActivator.getTranslatedKeyMessage();
-                            itemStack.setHoverName(new TranslatableComponent("inventory.hotbarInfo", component2, component));
+                            itemStack.setHoverName(Component.translatable("inventory.hotbarInfo", component2, component));
                             ((ItemPickerMenu)this.menu).items.add(itemStack);
                             continue;
                         }
@@ -565,7 +564,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             }
             this.visibleTags.forEach(tagKey -> {
                 if (itemStack.is((TagKey<Item>)tagKey)) {
-                    list2.add(1, new TextComponent("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
+                    list2.add(1, Component.literal("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
                 }
             });
             if (creativeModeTab != null) {
@@ -689,7 +688,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             }
             Component component = minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
             Component component2 = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
-            minecraft.gui.setOverlayMessage(new TranslatableComponent("inventory.hotbarSaved", component2, component), false);
+            minecraft.gui.setOverlayMessage(Component.translatable("inventory.hotbarSaved", component2, component), false);
             hotbarManager.save();
         }
     }

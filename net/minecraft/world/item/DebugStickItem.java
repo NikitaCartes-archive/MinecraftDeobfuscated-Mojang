@@ -10,7 +10,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -65,7 +64,7 @@ extends Item {
         Collection<Property<?>> collection = stateDefinition.getProperties();
         String string = Registry.BLOCK.getKey(block).toString();
         if (collection.isEmpty()) {
-            DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".empty", string));
+            DebugStickItem.message(player, Component.translatable(this.getDescriptionId() + ".empty", string));
             return false;
         }
         CompoundTag compoundTag = itemStack.getOrCreateTagElement("DebugProperty");
@@ -77,12 +76,12 @@ extends Item {
             }
             BlockState blockState2 = DebugStickItem.cycleState(blockState, property, player.isSecondaryUseActive());
             levelAccessor.setBlock(blockPos, blockState2, 18);
-            DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".update", property.getName(), DebugStickItem.getNameHelper(blockState2, property)));
+            DebugStickItem.message(player, Component.translatable(this.getDescriptionId() + ".update", property.getName(), DebugStickItem.getNameHelper(blockState2, property)));
         } else {
             property = DebugStickItem.getRelative(collection, property, player.isSecondaryUseActive());
             String string3 = property.getName();
             compoundTag.putString(string, string3);
-            DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".select", string3, DebugStickItem.getNameHelper(blockState, property)));
+            DebugStickItem.message(player, Component.translatable(this.getDescriptionId() + ".select", string3, DebugStickItem.getNameHelper(blockState, property)));
         }
         return true;
     }

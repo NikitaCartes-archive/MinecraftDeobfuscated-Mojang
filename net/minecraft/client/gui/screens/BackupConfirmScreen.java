@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class BackupConfirmScreen
@@ -39,10 +38,10 @@ extends Screen {
         super.init();
         this.message = MultiLineLabel.create(this.font, (FormattedText)this.description, this.width - 50);
         int i = (this.message.getLineCount() + 1) * this.font.lineHeight;
-        this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, new TranslatableComponent("selectWorld.backupJoinConfirmButton"), button -> this.listener.proceed(true, this.eraseCache.selected())));
-        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, new TranslatableComponent("selectWorld.backupJoinSkipButton"), button -> this.listener.proceed(false, this.eraseCache.selected())));
+        this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, Component.translatable("selectWorld.backupJoinConfirmButton"), button -> this.listener.proceed(true, this.eraseCache.selected())));
+        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, 100 + i, 150, 20, Component.translatable("selectWorld.backupJoinSkipButton"), button -> this.listener.proceed(false, this.eraseCache.selected())));
         this.addRenderableWidget(new Button(this.width / 2 - 155 + 80, 124 + i, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
-        this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, new TranslatableComponent("selectWorld.backupEraseCache"), false);
+        this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, Component.translatable("selectWorld.backupEraseCache"), false);
         if (this.promptForCacheErase) {
             this.addRenderableWidget(this.eraseCache);
         }

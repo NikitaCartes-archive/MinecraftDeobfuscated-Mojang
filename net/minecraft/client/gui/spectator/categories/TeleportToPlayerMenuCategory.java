@@ -21,7 +21,6 @@ import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.GameType;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,8 +28,8 @@ public class TeleportToPlayerMenuCategory
 implements SpectatorMenuCategory,
 SpectatorMenuItem {
     private static final Ordering<PlayerInfo> PROFILE_ORDER = Ordering.from((playerInfo, playerInfo2) -> ComparisonChain.start().compare(playerInfo.getProfile().getId(), playerInfo2.getProfile().getId()).result());
-    private static final Component TELEPORT_TEXT = new TranslatableComponent("spectatorMenu.teleport");
-    private static final Component TELEPORT_PROMPT = new TranslatableComponent("spectatorMenu.teleport.prompt");
+    private static final Component TELEPORT_TEXT = Component.translatable("spectatorMenu.teleport");
+    private static final Component TELEPORT_PROMPT = Component.translatable("spectatorMenu.teleport.prompt");
     private final List<SpectatorMenuItem> items = Lists.newArrayList();
 
     public TeleportToPlayerMenuCategory() {

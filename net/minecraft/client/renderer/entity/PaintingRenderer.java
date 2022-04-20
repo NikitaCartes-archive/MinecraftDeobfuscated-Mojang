@@ -23,8 +23,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 
 @Environment(value=EnvType.CLIENT)
 public class PaintingRenderer
@@ -37,12 +37,12 @@ extends EntityRenderer<Painting> {
     public void render(Painting painting, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - f));
-        Motive motive = painting.motive;
+        PaintingVariant paintingVariant = painting.getVariant().value();
         float h = 0.0625f;
         poseStack.scale(0.0625f, 0.0625f, 0.0625f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(this.getTextureLocation(painting)));
         PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
-        this.renderPainting(poseStack, vertexConsumer, painting, motive.getWidth(), motive.getHeight(), paintingTextureManager.get(motive), paintingTextureManager.getBackSprite());
+        this.renderPainting(poseStack, vertexConsumer, painting, paintingVariant.getWidth(), paintingVariant.getHeight(), paintingTextureManager.get(paintingVariant), paintingTextureManager.getBackSprite());
         poseStack.popPose();
         super.render(painting, f, g, poseStack, multiBufferSource, i);
     }

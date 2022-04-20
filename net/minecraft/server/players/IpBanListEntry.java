@@ -6,7 +6,6 @@ package net.minecraft.server.players;
 import com.google.gson.JsonObject;
 import java.util.Date;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.players.BanListEntry;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +21,7 @@ extends BanListEntry<String> {
 
     @Override
     public Component getDisplayName() {
-        return new TextComponent(String.valueOf(this.getUser()));
+        return Component.literal(String.valueOf(this.getUser()));
     }
 
     public IpBanListEntry(JsonObject jsonObject) {

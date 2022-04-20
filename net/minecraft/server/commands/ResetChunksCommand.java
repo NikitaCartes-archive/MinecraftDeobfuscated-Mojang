@@ -19,7 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.thread.ProcessorMailbox;
@@ -106,7 +106,7 @@ public class ResetChunksCommand {
         }
         LOGGER.debug("blockChanged took " + (System.currentTimeMillis() - x) + " ms");
         long r = System.currentTimeMillis() - p;
-        commandSourceStack.sendSuccess(new TextComponent(String.format("%d chunks have been reset. This took %d ms for %d chunks, or %02f ms per chunk", q, r, q, Float.valueOf((float)r / (float)q))), true);
+        commandSourceStack.sendSuccess(Component.literal(String.format("%d chunks have been reset. This took %d ms for %d chunks, or %02f ms per chunk", q, r, q, Float.valueOf((float)r / (float)q))), true);
         return 1;
     }
 }

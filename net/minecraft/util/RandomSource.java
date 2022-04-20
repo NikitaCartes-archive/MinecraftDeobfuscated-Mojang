@@ -10,6 +10,9 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.levelgen.ThreadSafeLegacyRandomSource;
 
 public interface RandomSource {
+    @Deprecated
+    public static final double GAUSSIAN_SPREAD_FACTOR = 2.297;
+
     public static RandomSource create() {
         return RandomSource.create(System.nanoTime());
     }
@@ -50,6 +53,10 @@ public interface RandomSource {
     public double nextDouble();
 
     public double nextGaussian();
+
+    default public double triangle(double d, double e) {
+        return d + e * (this.nextDouble() - this.nextDouble());
+    }
 
     default public void consumeCount(int i) {
         for (int j = 0; j < i; ++j) {

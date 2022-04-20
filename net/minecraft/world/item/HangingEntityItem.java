@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.item;
 
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -42,7 +43,11 @@ extends Item {
         }
         Level level = useOnContext.getLevel();
         if (this.type == EntityType.PAINTING) {
-            hangingEntity = new Painting(level, blockPos2, direction);
+            Optional<Painting> optional = Painting.create(level, blockPos2, direction);
+            if (optional.isEmpty()) {
+                return InteractionResult.CONSUME;
+            }
+            hangingEntity = optional.get();
         } else if (this.type == EntityType.ITEM_FRAME) {
             hangingEntity = new ItemFrame(level, blockPos2, direction);
         } else if (this.type == EntityType.GLOW_ITEM_FRAME) {

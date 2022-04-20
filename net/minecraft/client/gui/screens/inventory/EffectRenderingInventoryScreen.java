@@ -16,8 +16,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -71,7 +69,7 @@ extends AbstractContainerScreen<T> {
                 n += m;
             }
             if (mobEffectInstance != null) {
-                List<Component> list = List.of(this.getEffectName(mobEffectInstance), new TextComponent(MobEffectUtil.formatDuration(mobEffectInstance, 1.0f)));
+                List<Component> list = List.of(this.getEffectName(mobEffectInstance), Component.literal(MobEffectUtil.formatDuration(mobEffectInstance, 1.0f)));
                 this.renderTooltip(poseStack, list, Optional.empty(), i, j);
             }
         }
@@ -117,7 +115,7 @@ extends AbstractContainerScreen<T> {
     private Component getEffectName(MobEffectInstance mobEffectInstance) {
         MutableComponent mutableComponent = mobEffectInstance.getEffect().getDisplayName().copy();
         if (mobEffectInstance.getAmplifier() >= 1 && mobEffectInstance.getAmplifier() <= 9) {
-            mutableComponent.append(" ").append(new TranslatableComponent("enchantment.level." + (mobEffectInstance.getAmplifier() + 1)));
+            mutableComponent.append(" ").append(Component.translatable("enchantment.level." + (mobEffectInstance.getAmplifier() + 1)));
         }
         return mutableComponent;
     }

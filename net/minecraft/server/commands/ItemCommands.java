@@ -29,7 +29,7 @@ import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -44,12 +44,12 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class ItemCommands {
-    static final Dynamic3CommandExceptionType ERROR_TARGET_NOT_A_CONTAINER = new Dynamic3CommandExceptionType((object, object2, object3) -> new TranslatableComponent("commands.item.target.not_a_container", object, object2, object3));
-    private static final Dynamic3CommandExceptionType ERROR_SOURCE_NOT_A_CONTAINER = new Dynamic3CommandExceptionType((object, object2, object3) -> new TranslatableComponent("commands.item.source.not_a_container", object, object2, object3));
-    static final DynamicCommandExceptionType ERROR_TARGET_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.item.target.no_such_slot", object));
-    private static final DynamicCommandExceptionType ERROR_SOURCE_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.item.source.no_such_slot", object));
-    private static final DynamicCommandExceptionType ERROR_TARGET_NO_CHANGES = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.item.target.no_changes", object));
-    private static final Dynamic2CommandExceptionType ERROR_TARGET_NO_CHANGES_KNOWN_ITEM = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.item.target.no_changed.known_item", object, object2));
+    static final Dynamic3CommandExceptionType ERROR_TARGET_NOT_A_CONTAINER = new Dynamic3CommandExceptionType((object, object2, object3) -> Component.translatable("commands.item.target.not_a_container", object, object2, object3));
+    private static final Dynamic3CommandExceptionType ERROR_SOURCE_NOT_A_CONTAINER = new Dynamic3CommandExceptionType((object, object2, object3) -> Component.translatable("commands.item.source.not_a_container", object, object2, object3));
+    static final DynamicCommandExceptionType ERROR_TARGET_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(object -> Component.translatable("commands.item.target.no_such_slot", object));
+    private static final DynamicCommandExceptionType ERROR_SOURCE_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(object -> Component.translatable("commands.item.source.no_such_slot", object));
+    private static final DynamicCommandExceptionType ERROR_TARGET_NO_CHANGES = new DynamicCommandExceptionType(object -> Component.translatable("commands.item.target.no_changes", object));
+    private static final Dynamic2CommandExceptionType ERROR_TARGET_NO_CHANGES_KNOWN_ITEM = new Dynamic2CommandExceptionType((object, object2) -> Component.translatable("commands.item.target.no_changed.known_item", object, object2));
     private static final SuggestionProvider<CommandSourceStack> SUGGEST_MODIFIER = (commandContext, suggestionsBuilder) -> {
         ItemModifierManager itemModifierManager = ((CommandSourceStack)commandContext.getSource()).getServer().getItemModifierManager();
         return SharedSuggestionProvider.suggestResource(itemModifierManager.getKeys(), suggestionsBuilder);
@@ -66,7 +66,7 @@ public class ItemCommands {
         }
         ItemStack itemStack = ItemCommands.applyModifier(commandSourceStack, lootItemFunction, container.getItem(i));
         container.setItem(i, itemStack);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.item.block.set.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack.getDisplayName()), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.item.block.set.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack.getDisplayName()), true);
         return 1;
     }
 
@@ -85,9 +85,9 @@ public class ItemCommands {
         }
         if (map.size() == 1) {
             Map.Entry entry = map.entrySet().iterator().next();
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.item.entity.set.success.single", ((Entity)entry.getKey()).getDisplayName(), ((ItemStack)entry.getValue()).getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.item.entity.set.success.single", ((Entity)entry.getKey()).getDisplayName(), ((ItemStack)entry.getValue()).getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.item.entity.set.success.multiple", map.size()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.item.entity.set.success.multiple", map.size()), true);
         }
         return map.size();
     }
@@ -98,7 +98,7 @@ public class ItemCommands {
             throw ERROR_TARGET_INAPPLICABLE_SLOT.create(i);
         }
         container.setItem(i, itemStack);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.item.block.set.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack.getDisplayName()), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.item.block.set.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack.getDisplayName()), true);
         return 1;
     }
 
@@ -123,9 +123,9 @@ public class ItemCommands {
             throw ERROR_TARGET_NO_CHANGES_KNOWN_ITEM.create(itemStack.getDisplayName(), i);
         }
         if (list.size() == 1) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.item.entity.set.success.single", ((Entity)list.iterator().next()).getDisplayName(), itemStack.getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.item.entity.set.success.single", ((Entity)list.iterator().next()).getDisplayName(), itemStack.getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.item.entity.set.success.multiple", list.size(), itemStack.getDisplayName()), true);
+            commandSourceStack.sendSuccess(Component.translatable("commands.item.entity.set.success.multiple", list.size(), itemStack.getDisplayName()), true);
         }
         return list.size();
     }

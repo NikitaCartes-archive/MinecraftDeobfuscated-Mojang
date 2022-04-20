@@ -56,7 +56,7 @@ extends TrunkPlacer {
             if (this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos.set(blockPos.getX(), k, blockPos.getZ()), treeConfiguration) && j < i - 1 && randomSource.nextFloat() < this.placeBranchPerLogProbability) {
                 Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
                 int l = this.extraBranchLength.sample(randomSource);
-                int m = l - this.extraBranchLength.sample(randomSource) - 1;
+                int m = Math.max(0, l - this.extraBranchLength.sample(randomSource) - 1);
                 int n = this.extraBranchSteps.sample(randomSource);
                 this.placeBranch(levelSimulatedReader, biConsumer, randomSource, i, treeConfiguration, list, mutableBlockPos, k, direction, m, n);
             }
@@ -78,7 +78,7 @@ extends TrunkPlacer {
             }
             list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));
         }
-        if (m > 1) {
+        if (m - j > 1) {
             BlockPos blockPos = new BlockPos(n, m, o);
             list.add(new FoliagePlacer.FoliageAttachment(blockPos, 0, false));
             list.add(new FoliagePlacer.FoliageAttachment(blockPos.below(2), 0, false));
