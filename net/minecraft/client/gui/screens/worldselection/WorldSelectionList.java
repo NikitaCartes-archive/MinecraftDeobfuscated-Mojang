@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -141,6 +142,7 @@ extends ObjectSelectionList<Entry> {
             return CompletableFuture.completedFuture(List.of());
         }
         return ((CompletableFuture)this.minecraft.getLevelSource().loadLevelSummaries(levelCandidates).thenApply(list -> {
+            list = new ArrayList(list);
             Collections.sort(list);
             return list;
         })).exceptionally(throwable -> {
