@@ -10,7 +10,7 @@ import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -29,7 +29,7 @@ public class DownloadTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(new TranslatableComponent("mco.download.preparing"));
+		this.setTitle(Component.translatable("mco.download.preparing"));
 		RealmsClient realmsClient = RealmsClient.create();
 		int i = 0;
 

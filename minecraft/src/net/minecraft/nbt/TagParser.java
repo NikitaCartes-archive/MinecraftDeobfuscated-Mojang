@@ -9,20 +9,20 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.List;
 import java.util.regex.Pattern;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class TagParser {
-	public static final SimpleCommandExceptionType ERROR_TRAILING_DATA = new SimpleCommandExceptionType(new TranslatableComponent("argument.nbt.trailing"));
-	public static final SimpleCommandExceptionType ERROR_EXPECTED_KEY = new SimpleCommandExceptionType(new TranslatableComponent("argument.nbt.expected.key"));
-	public static final SimpleCommandExceptionType ERROR_EXPECTED_VALUE = new SimpleCommandExceptionType(new TranslatableComponent("argument.nbt.expected.value"));
+	public static final SimpleCommandExceptionType ERROR_TRAILING_DATA = new SimpleCommandExceptionType(Component.translatable("argument.nbt.trailing"));
+	public static final SimpleCommandExceptionType ERROR_EXPECTED_KEY = new SimpleCommandExceptionType(Component.translatable("argument.nbt.expected.key"));
+	public static final SimpleCommandExceptionType ERROR_EXPECTED_VALUE = new SimpleCommandExceptionType(Component.translatable("argument.nbt.expected.value"));
 	public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_LIST = new Dynamic2CommandExceptionType(
-		(object, object2) -> new TranslatableComponent("argument.nbt.list.mixed", object, object2)
+		(object, object2) -> Component.translatable("argument.nbt.list.mixed", object, object2)
 	);
 	public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_ARRAY = new Dynamic2CommandExceptionType(
-		(object, object2) -> new TranslatableComponent("argument.nbt.array.mixed", object, object2)
+		(object, object2) -> Component.translatable("argument.nbt.array.mixed", object, object2)
 	);
 	public static final DynamicCommandExceptionType ERROR_INVALID_ARRAY = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.nbt.array.invalid", object)
+		object -> Component.translatable("argument.nbt.array.invalid", object)
 	);
 	public static final char ELEMENT_SEPARATOR = ',';
 	public static final char NAME_VALUE_SEPARATOR = ':';

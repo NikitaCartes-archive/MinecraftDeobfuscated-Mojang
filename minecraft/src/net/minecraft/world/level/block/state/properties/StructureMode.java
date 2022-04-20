@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block.state.properties;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringRepresentable;
 
 public enum StructureMode implements StringRepresentable {
@@ -15,7 +14,7 @@ public enum StructureMode implements StringRepresentable {
 
 	private StructureMode(String string2) {
 		this.name = string2;
-		this.displayName = new TranslatableComponent("structure_block.mode_info." + string2);
+		this.displayName = Component.translatable("structure_block.mode_info." + string2);
 	}
 
 	@Override

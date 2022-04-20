@@ -7,7 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -162,7 +162,7 @@ class ReportGameListener implements GameTestListener {
 
 	protected static void say(ServerLevel serverLevel, ChatFormatting chatFormatting, String string) {
 		serverLevel.getPlayers(serverPlayer -> true)
-			.forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(string).withStyle(chatFormatting), Util.NIL_UUID));
+			.forEach(serverPlayer -> serverPlayer.sendMessage(Component.literal(string).withStyle(chatFormatting), Util.NIL_UUID));
 	}
 
 	private static void showRedBox(ServerLevel serverLevel, BlockPos blockPos, String string) {

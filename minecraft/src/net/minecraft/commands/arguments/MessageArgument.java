@@ -14,7 +14,6 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 
 public class MessageArgument implements ArgumentType<MessageArgument.Message> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("Hello world!", "foo", "@e", "Hello @p :)");
@@ -56,7 +55,7 @@ public class MessageArgument implements ArgumentType<MessageArgument.Message> {
 
 		public Component toComponent(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {
 			if (this.parts.length != 0 && bl) {
-				MutableComponent mutableComponent = new TextComponent(this.text.substring(0, this.parts[0].getStart()));
+				MutableComponent mutableComponent = Component.literal(this.text.substring(0, this.parts[0].getStart()));
 				int i = this.parts[0].getStart();
 
 				for (MessageArgument.Part part : this.parts) {
@@ -78,7 +77,7 @@ public class MessageArgument implements ArgumentType<MessageArgument.Message> {
 
 				return mutableComponent;
 			} else {
-				return new TextComponent(this.text);
+				return Component.literal(this.text);
 			}
 		}
 

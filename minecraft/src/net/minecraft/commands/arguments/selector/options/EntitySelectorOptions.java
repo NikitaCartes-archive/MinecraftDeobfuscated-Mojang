@@ -24,7 +24,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
@@ -48,28 +47,28 @@ import net.minecraft.world.scores.Team;
 public class EntitySelectorOptions {
 	private static final Map<String, EntitySelectorOptions.Option> OPTIONS = Maps.<String, EntitySelectorOptions.Option>newHashMap();
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_OPTION = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.options.unknown", object)
+		object -> Component.translatable("argument.entity.options.unknown", object)
 	);
 	public static final DynamicCommandExceptionType ERROR_INAPPLICABLE_OPTION = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.options.inapplicable", object)
+		object -> Component.translatable("argument.entity.options.inapplicable", object)
 	);
 	public static final SimpleCommandExceptionType ERROR_RANGE_NEGATIVE = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.options.distance.negative")
+		Component.translatable("argument.entity.options.distance.negative")
 	);
 	public static final SimpleCommandExceptionType ERROR_LEVEL_NEGATIVE = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.options.level.negative")
+		Component.translatable("argument.entity.options.level.negative")
 	);
 	public static final SimpleCommandExceptionType ERROR_LIMIT_TOO_SMALL = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.options.limit.toosmall")
+		Component.translatable("argument.entity.options.limit.toosmall")
 	);
 	public static final DynamicCommandExceptionType ERROR_SORT_UNKNOWN = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.options.sort.irreversible", object)
+		object -> Component.translatable("argument.entity.options.sort.irreversible", object)
 	);
 	public static final DynamicCommandExceptionType ERROR_GAME_MODE_INVALID = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.options.mode.invalid", object)
+		object -> Component.translatable("argument.entity.options.mode.invalid", object)
 	);
 	public static final DynamicCommandExceptionType ERROR_ENTITY_TYPE_INVALID = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.options.type.invalid", object)
+		object -> Component.translatable("argument.entity.options.type.invalid", object)
 	);
 
 	private static void register(String string, EntitySelectorOptions.Modifier modifier, Predicate<EntitySelectorParser> predicate, Component component) {
@@ -94,7 +93,7 @@ public class EntitySelectorOptions {
 
 					entitySelectorParser.addPredicate(entity -> entity.getName().getString().equals(string) != bl);
 				}
-			}, entitySelectorParser -> !entitySelectorParser.hasNameEquals(), new TranslatableComponent("argument.entity.options.name.description"));
+			}, entitySelectorParser -> !entitySelectorParser.hasNameEquals(), Component.translatable("argument.entity.options.name.description"));
 			register("distance", entitySelectorParser -> {
 				int i = entitySelectorParser.getReader().getCursor();
 				MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromReader(entitySelectorParser.getReader());
@@ -105,7 +104,7 @@ public class EntitySelectorOptions {
 					entitySelectorParser.getReader().setCursor(i);
 					throw ERROR_RANGE_NEGATIVE.createWithContext(entitySelectorParser.getReader());
 				}
-			}, entitySelectorParser -> entitySelectorParser.getDistance().isAny(), new TranslatableComponent("argument.entity.options.distance.description"));
+			}, entitySelectorParser -> entitySelectorParser.getDistance().isAny(), Component.translatable("argument.entity.options.distance.description"));
 			register("level", entitySelectorParser -> {
 				int i = entitySelectorParser.getReader().getCursor();
 				MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromReader(entitySelectorParser.getReader());
@@ -116,42 +115,42 @@ public class EntitySelectorOptions {
 					entitySelectorParser.getReader().setCursor(i);
 					throw ERROR_LEVEL_NEGATIVE.createWithContext(entitySelectorParser.getReader());
 				}
-			}, entitySelectorParser -> entitySelectorParser.getLevel().isAny(), new TranslatableComponent("argument.entity.options.level.description"));
+			}, entitySelectorParser -> entitySelectorParser.getLevel().isAny(), Component.translatable("argument.entity.options.level.description"));
 			register("x", entitySelectorParser -> {
 				entitySelectorParser.setWorldLimited();
 				entitySelectorParser.setX(entitySelectorParser.getReader().readDouble());
-			}, entitySelectorParser -> entitySelectorParser.getX() == null, new TranslatableComponent("argument.entity.options.x.description"));
+			}, entitySelectorParser -> entitySelectorParser.getX() == null, Component.translatable("argument.entity.options.x.description"));
 			register("y", entitySelectorParser -> {
 				entitySelectorParser.setWorldLimited();
 				entitySelectorParser.setY(entitySelectorParser.getReader().readDouble());
-			}, entitySelectorParser -> entitySelectorParser.getY() == null, new TranslatableComponent("argument.entity.options.y.description"));
+			}, entitySelectorParser -> entitySelectorParser.getY() == null, Component.translatable("argument.entity.options.y.description"));
 			register("z", entitySelectorParser -> {
 				entitySelectorParser.setWorldLimited();
 				entitySelectorParser.setZ(entitySelectorParser.getReader().readDouble());
-			}, entitySelectorParser -> entitySelectorParser.getZ() == null, new TranslatableComponent("argument.entity.options.z.description"));
+			}, entitySelectorParser -> entitySelectorParser.getZ() == null, Component.translatable("argument.entity.options.z.description"));
 			register("dx", entitySelectorParser -> {
 				entitySelectorParser.setWorldLimited();
 				entitySelectorParser.setDeltaX(entitySelectorParser.getReader().readDouble());
-			}, entitySelectorParser -> entitySelectorParser.getDeltaX() == null, new TranslatableComponent("argument.entity.options.dx.description"));
+			}, entitySelectorParser -> entitySelectorParser.getDeltaX() == null, Component.translatable("argument.entity.options.dx.description"));
 			register("dy", entitySelectorParser -> {
 				entitySelectorParser.setWorldLimited();
 				entitySelectorParser.setDeltaY(entitySelectorParser.getReader().readDouble());
-			}, entitySelectorParser -> entitySelectorParser.getDeltaY() == null, new TranslatableComponent("argument.entity.options.dy.description"));
+			}, entitySelectorParser -> entitySelectorParser.getDeltaY() == null, Component.translatable("argument.entity.options.dy.description"));
 			register("dz", entitySelectorParser -> {
 				entitySelectorParser.setWorldLimited();
 				entitySelectorParser.setDeltaZ(entitySelectorParser.getReader().readDouble());
-			}, entitySelectorParser -> entitySelectorParser.getDeltaZ() == null, new TranslatableComponent("argument.entity.options.dz.description"));
+			}, entitySelectorParser -> entitySelectorParser.getDeltaZ() == null, Component.translatable("argument.entity.options.dz.description"));
 			register(
 				"x_rotation",
 				entitySelectorParser -> entitySelectorParser.setRotX(WrappedMinMaxBounds.fromReader(entitySelectorParser.getReader(), true, Mth::wrapDegrees)),
 				entitySelectorParser -> entitySelectorParser.getRotX() == WrappedMinMaxBounds.ANY,
-				new TranslatableComponent("argument.entity.options.x_rotation.description")
+				Component.translatable("argument.entity.options.x_rotation.description")
 			);
 			register(
 				"y_rotation",
 				entitySelectorParser -> entitySelectorParser.setRotY(WrappedMinMaxBounds.fromReader(entitySelectorParser.getReader(), true, Mth::wrapDegrees)),
 				entitySelectorParser -> entitySelectorParser.getRotY() == WrappedMinMaxBounds.ANY,
-				new TranslatableComponent("argument.entity.options.y_rotation.description")
+				Component.translatable("argument.entity.options.y_rotation.description")
 			);
 			register(
 				"limit",
@@ -167,7 +166,7 @@ public class EntitySelectorOptions {
 					}
 				},
 				entitySelectorParser -> !entitySelectorParser.isCurrentEntity() && !entitySelectorParser.isLimited(),
-				new TranslatableComponent("argument.entity.options.limit.description")
+				Component.translatable("argument.entity.options.limit.description")
 			);
 			register(
 				"sort",
@@ -191,7 +190,7 @@ public class EntitySelectorOptions {
 					entitySelectorParser.setSorted(true);
 				},
 				entitySelectorParser -> !entitySelectorParser.isCurrentEntity() && !entitySelectorParser.isSorted(),
-				new TranslatableComponent("argument.entity.options.sort.description")
+				Component.translatable("argument.entity.options.sort.description")
 			);
 			register("gamemode", entitySelectorParser -> {
 				entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
@@ -249,7 +248,7 @@ public class EntitySelectorOptions {
 						}
 					}
 				}
-			}, entitySelectorParser -> !entitySelectorParser.hasGamemodeEquals(), new TranslatableComponent("argument.entity.options.gamemode.description"));
+			}, entitySelectorParser -> !entitySelectorParser.hasGamemodeEquals(), Component.translatable("argument.entity.options.gamemode.description"));
 			register("team", entitySelectorParser -> {
 				boolean bl = entitySelectorParser.shouldInvertValue();
 				String string = entitySelectorParser.getReader().readUnquotedString();
@@ -267,7 +266,7 @@ public class EntitySelectorOptions {
 				} else {
 					entitySelectorParser.setHasTeamEquals(true);
 				}
-			}, entitySelectorParser -> !entitySelectorParser.hasTeamEquals(), new TranslatableComponent("argument.entity.options.team.description"));
+			}, entitySelectorParser -> !entitySelectorParser.hasTeamEquals(), Component.translatable("argument.entity.options.team.description"));
 			register("type", entitySelectorParser -> {
 				entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
 					SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.keySet(), suggestionsBuilder, String.valueOf('!'));
@@ -308,12 +307,12 @@ public class EntitySelectorOptions {
 						}
 					}
 				}
-			}, entitySelectorParser -> !entitySelectorParser.isTypeLimited(), new TranslatableComponent("argument.entity.options.type.description"));
+			}, entitySelectorParser -> !entitySelectorParser.isTypeLimited(), Component.translatable("argument.entity.options.type.description"));
 			register("tag", entitySelectorParser -> {
 				boolean bl = entitySelectorParser.shouldInvertValue();
 				String string = entitySelectorParser.getReader().readUnquotedString();
 				entitySelectorParser.addPredicate(entity -> "".equals(string) ? entity.getTags().isEmpty() != bl : entity.getTags().contains(string) != bl);
-			}, entitySelectorParser -> true, new TranslatableComponent("argument.entity.options.tag.description"));
+			}, entitySelectorParser -> true, Component.translatable("argument.entity.options.tag.description"));
 			register("nbt", entitySelectorParser -> {
 				boolean bl = entitySelectorParser.shouldInvertValue();
 				CompoundTag compoundTag = new TagParser(entitySelectorParser.getReader()).readStruct();
@@ -328,7 +327,7 @@ public class EntitySelectorOptions {
 
 					return NbtUtils.compareNbt(compoundTag, compoundTag2, true) != bl;
 				});
-			}, entitySelectorParser -> true, new TranslatableComponent("argument.entity.options.nbt.description"));
+			}, entitySelectorParser -> true, Component.translatable("argument.entity.options.nbt.description"));
 			register("scores", entitySelectorParser -> {
 				StringReader stringReader = entitySelectorParser.getReader();
 				Map<String, MinMaxBounds.Ints> map = Maps.<String, MinMaxBounds.Ints>newHashMap();
@@ -377,7 +376,7 @@ public class EntitySelectorOptions {
 				}
 
 				entitySelectorParser.setHasScores(true);
-			}, entitySelectorParser -> !entitySelectorParser.hasScores(), new TranslatableComponent("argument.entity.options.scores.description"));
+			}, entitySelectorParser -> !entitySelectorParser.hasScores(), Component.translatable("argument.entity.options.scores.description"));
 			register("advancements", entitySelectorParser -> {
 				StringReader stringReader = entitySelectorParser.getReader();
 				Map<ResourceLocation, Predicate<AdvancementProgress>> map = Maps.<ResourceLocation, Predicate<AdvancementProgress>>newHashMap();
@@ -457,7 +456,7 @@ public class EntitySelectorOptions {
 				}
 
 				entitySelectorParser.setHasAdvancements(true);
-			}, entitySelectorParser -> !entitySelectorParser.hasAdvancements(), new TranslatableComponent("argument.entity.options.advancements.description"));
+			}, entitySelectorParser -> !entitySelectorParser.hasAdvancements(), Component.translatable("argument.entity.options.advancements.description"));
 			register(
 				"predicate",
 				entitySelectorParser -> {
@@ -483,7 +482,7 @@ public class EntitySelectorOptions {
 					);
 				},
 				entitySelectorParser -> true,
-				new TranslatableComponent("argument.entity.options.predicate.description")
+				Component.translatable("argument.entity.options.predicate.description")
 			);
 		}
 	}

@@ -27,8 +27,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 import org.slf4j.Logger;
 
@@ -45,7 +43,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
 	@Nullable
 	private volatile Component errorMessage;
-	private volatile Component status = new TranslatableComponent("mco.download.preparing");
+	private volatile Component status = Component.translatable("mco.download.preparing");
 	@Nullable
 	private volatile String progress;
 	private volatile boolean cancelled;
@@ -70,7 +68,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		this.worldName = string;
 		this.worldDownload = worldDownload;
 		this.downloadStatus = new RealmsDownloadLatestWorldScreen.DownloadStatus();
-		this.downloadTitle = new TranslatableComponent("mco.download.title");
+		this.downloadTitle = Component.translatable("mco.download.title");
 		this.narrationRateLimiter = RateLimiter.create(0.1F);
 	}
 
@@ -87,8 +85,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private void checkDownloadSize() {
 		if (!this.finished) {
 			if (!this.checked && this.getContentLength(this.worldDownload.downloadLink) >= 5368709120L) {
-				Component component = new TranslatableComponent("mco.download.confirmation.line1", Unit.humanReadable(5368709120L));
-				Component component2 = new TranslatableComponent("mco.download.confirmation.line2");
+				Component component = Component.translatable("mco.download.confirmation.line1", Unit.humanReadable(5368709120L));
+				Component component2 = Component.translatable("mco.download.confirmation.line2");
 				this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
 					this.checked = true;
 					this.minecraft.setScreen(this);
@@ -120,8 +118,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		list.add(this.downloadTitle);
 		list.add(this.status);
 		if (this.progress != null) {
-			list.add(new TextComponent(this.progress + "%"));
-			list.add(new TextComponent(Unit.humanReadable(this.bytesPersSecond) + "/s"));
+			list.add(Component.literal(this.progress + "%"));
+			list.add(Component.literal(Unit.humanReadable(this.bytesPersSecond) + "/s"));
 		}
 
 		if (this.errorMessage != null) {
@@ -236,7 +234,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 			try {
 				try {
 					if (!DOWNLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
-						this.status = new TranslatableComponent("mco.download.failed");
+						this.status = Component.translatable("mco.download.failed");
 						return;
 					}
 
@@ -245,7 +243,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 						return;
 					}
 
-					this.status = new TranslatableComponent("mco.download.downloading", this.worldName);
+					this.status = Component.translatable("mco.download.downloading", this.worldName);
 					FileDownload fileDownload = new FileDownload();
 					fileDownload.contentLength(this.worldDownload.downloadLink);
 					fileDownload.download(this.worldDownload, this.worldName, this.downloadStatus, this.minecraft.getLevelSource());
@@ -253,14 +251,14 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 					while (!fileDownload.isFinished()) {
 						if (fileDownload.isError()) {
 							fileDownload.cancel();
-							this.errorMessage = new TranslatableComponent("mco.download.failed");
+							this.errorMessage = Component.translatable("mco.download.failed");
 							this.cancelButton.setMessage(CommonComponents.GUI_DONE);
 							return;
 						}
 
 						if (fileDownload.isExtracting()) {
 							if (!this.extracting) {
-								this.status = new TranslatableComponent("mco.download.extracting");
+								this.status = Component.translatable("mco.download.extracting");
 							}
 
 							this.extracting = true;
@@ -280,13 +278,13 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 					}
 
 					this.finished = true;
-					this.status = new TranslatableComponent("mco.download.done");
+					this.status = Component.translatable("mco.download.done");
 					this.cancelButton.setMessage(CommonComponents.GUI_DONE);
 					return;
 				} catch (InterruptedException var9) {
 					LOGGER.error("Could not acquire upload lock");
 				} catch (Exception var10) {
-					this.errorMessage = new TranslatableComponent("mco.download.failed");
+					this.errorMessage = Component.translatable("mco.download.failed");
 					var10.printStackTrace();
 				}
 			} finally {
@@ -302,7 +300,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	}
 
 	private void downloadCancelled() {
-		this.status = new TranslatableComponent("mco.download.cancelled");
+		this.status = Component.translatable("mco.download.cancelled");
 	}
 
 	@Environment(EnvType.CLIENT)

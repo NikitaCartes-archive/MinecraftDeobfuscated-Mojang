@@ -30,8 +30,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.commands.AttributeCommand;
@@ -225,7 +223,7 @@ public class Commands {
 			commandSourceStack.sendFailure(ComponentUtils.fromMessage(var14.getRawMessage()));
 			if (var14.getInput() != null && var14.getCursor() >= 0) {
 				int i = Math.min(var14.getInput().length(), var14.getCursor());
-				MutableComponent mutableComponent = new TextComponent("")
+				MutableComponent mutableComponent = Component.empty()
 					.withStyle(ChatFormatting.GRAY)
 					.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
 				if (i > 10) {
@@ -234,17 +232,17 @@ public class Commands {
 
 				mutableComponent.append(var14.getInput().substring(Math.max(0, i - 10), i));
 				if (i < var14.getInput().length()) {
-					Component component = new TextComponent(var14.getInput().substring(i)).withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.UNDERLINE});
+					Component component = Component.literal(var14.getInput().substring(i)).withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE);
 					mutableComponent.append(component);
 				}
 
-				mutableComponent.append(new TranslatableComponent("command.context.here").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.ITALIC}));
+				mutableComponent.append(Component.translatable("command.context.here").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
 				commandSourceStack.sendFailure(mutableComponent);
 			}
 
 			return 0;
 		} catch (Exception var15) {
-			MutableComponent mutableComponent2 = new TextComponent(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
+			MutableComponent mutableComponent2 = Component.literal(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.error("Command exception: {}", string, var15);
 				StackTraceElement[] stackTraceElements = var15.getStackTrace();
@@ -260,10 +258,10 @@ public class Commands {
 			}
 
 			commandSourceStack.sendFailure(
-				new TranslatableComponent("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2)))
+				Component.translatable("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2)))
 			);
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				commandSourceStack.sendFailure(new TextComponent(Util.describeError(var15)));
+				commandSourceStack.sendFailure(Component.literal(Util.describeError(var15)));
 				LOGGER.error("'{}' threw an exception", string, var15);
 			}
 

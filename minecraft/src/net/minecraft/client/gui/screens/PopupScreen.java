@@ -11,7 +11,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
 
 @Environment(EnvType.CLIENT)
 public class PopupScreen extends Screen {
@@ -28,7 +27,7 @@ public class PopupScreen extends Screen {
 	protected PopupScreen(Component component, List<Component> list, ImmutableList<PopupScreen.ButtonOption> immutableList) {
 		super(component);
 		this.message = FormattedText.composite(list);
-		this.narrationMessage = CommonComponents.joinForNarration(component, ComponentUtils.formatList(list, TextComponent.EMPTY));
+		this.narrationMessage = CommonComponents.joinForNarration(component, ComponentUtils.formatList(list, CommonComponents.EMPTY));
 		this.buttonOptions = immutableList;
 	}
 

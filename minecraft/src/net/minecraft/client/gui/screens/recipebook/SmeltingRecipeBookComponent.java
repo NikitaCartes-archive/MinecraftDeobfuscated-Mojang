@@ -4,13 +4,12 @@ import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class SmeltingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
-	private static final Component FILTER_NAME = new TranslatableComponent("gui.recipebook.toggleRecipes.smeltable");
+	private static final Component FILTER_NAME = Component.translatable("gui.recipebook.toggleRecipes.smeltable");
 
 	@Override
 	protected Component getRecipeFilterName() {

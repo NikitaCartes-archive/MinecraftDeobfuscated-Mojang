@@ -13,7 +13,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,7 +21,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
 public class PlaySoundCommand {
-	private static final SimpleCommandExceptionType ERROR_TOO_FAR = new SimpleCommandExceptionType(new TranslatableComponent("commands.playsound.failed"));
+	private static final SimpleCommandExceptionType ERROR_TOO_FAR = new SimpleCommandExceptionType(Component.translatable("commands.playsound.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> requiredArgumentBuilder = Commands.argument("sound", ResourceLocationArgument.id())
@@ -153,10 +153,10 @@ public class PlaySoundCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.playsound.success.single", resourceLocation, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					Component.translatable("commands.playsound.success.single", resourceLocation, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.playsound.success.multiple", resourceLocation, collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.playsound.success.multiple", resourceLocation, collection.size()), true);
 			}
 
 			return i;

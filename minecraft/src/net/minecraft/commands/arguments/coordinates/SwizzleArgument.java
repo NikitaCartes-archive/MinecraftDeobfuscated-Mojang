@@ -10,11 +10,11 @@ import java.util.Collection;
 import java.util.EnumSet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class SwizzleArgument implements ArgumentType<EnumSet<Direction.Axis>> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("xyz", "x");
-	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("arguments.swizzle.invalid"));
+	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("arguments.swizzle.invalid"));
 
 	public static SwizzleArgument swizzle() {
 		return new SwizzleArgument();

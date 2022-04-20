@@ -23,7 +23,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
@@ -33,10 +32,8 @@ import org.slf4j.Logger;
 
 public class DebugCommand {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.notRunning"));
-	private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(
-		new TranslatableComponent("commands.debug.alreadyRunning")
-	);
+	private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.notRunning"));
+	private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.alreadyRunning"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -62,7 +59,7 @@ public class DebugCommand {
 			throw ERROR_ALREADY_RUNNING.create();
 		} else {
 			minecraftServer.startTimeProfiler();
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.started"), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.debug.started"), true);
 			return 0;
 		}
 	}
@@ -76,8 +73,7 @@ public class DebugCommand {
 			double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
 			double e = (double)profileResults.getTickDuration() / d;
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), profileResults.getTickDuration(), String.format("%.2f", e)),
-				true
+				Component.translatable("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), profileResults.getTickDuration(), String.format("%.2f", e)), true
 			);
 			return (int)e;
 		}
@@ -118,15 +114,15 @@ public class DebugCommand {
 			}
 		} catch (IOException | UncheckedIOException var13) {
 			LOGGER.warn("Tracing failed", (Throwable)var13);
-			commandSourceStack.sendFailure(new TranslatableComponent("commands.debug.function.traceFailed"));
+			commandSourceStack.sendFailure(Component.translatable("commands.debug.function.traceFailed"));
 		}
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.debug.function.success.single", i, ((CommandFunction)collection.iterator().next()).getId(), string), true
+				Component.translatable("commands.debug.function.success.single", i, ((CommandFunction)collection.iterator().next()).getId(), string), true
 			);
 		} else {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.function.success.multiple", i, collection.size(), string), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.debug.function.success.multiple", i, collection.size(), string), true);
 		}
 
 		return i;

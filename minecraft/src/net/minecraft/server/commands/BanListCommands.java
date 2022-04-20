@@ -6,7 +6,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.BanListEntry;
 import net.minecraft.server.players.PlayerList;
 
@@ -32,13 +32,13 @@ public class BanListCommands {
 
 	private static int showList(CommandSourceStack commandSourceStack, Collection<? extends BanListEntry<?>> collection) {
 		if (collection.isEmpty()) {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.banlist.none"), false);
+			commandSourceStack.sendSuccess(Component.translatable("commands.banlist.none"), false);
 		} else {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.banlist.list", collection.size()), false);
+			commandSourceStack.sendSuccess(Component.translatable("commands.banlist.list", collection.size()), false);
 
 			for (BanListEntry<?> banListEntry : collection) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.banlist.entry", banListEntry.getDisplayName(), banListEntry.getSource(), banListEntry.getReason()), false
+					Component.translatable("commands.banlist.entry", banListEntry.getDisplayName(), banListEntry.getSource(), banListEntry.getReason()), false
 				);
 			}
 		}

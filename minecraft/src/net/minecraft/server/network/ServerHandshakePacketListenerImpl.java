@@ -4,15 +4,13 @@ import net.minecraft.SharedConstants;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.MinecraftServer;
 
 public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketListener {
-	private static final Component IGNORE_STATUS_REASON = new TextComponent("Ignoring status request");
+	private static final Component IGNORE_STATUS_REASON = Component.literal("Ignoring status request");
 	private final MinecraftServer server;
 	private final Connection connection;
 
@@ -29,9 +27,9 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
 				if (clientIntentionPacket.getProtocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
 					Component component;
 					if (clientIntentionPacket.getProtocolVersion() < 754) {
-						component = new TranslatableComponent("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName());
+						component = Component.translatable("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName());
 					} else {
-						component = new TranslatableComponent("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
+						component = Component.translatable("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
 					}
 
 					this.connection.send(new ClientboundLoginDisconnectPacket(component));

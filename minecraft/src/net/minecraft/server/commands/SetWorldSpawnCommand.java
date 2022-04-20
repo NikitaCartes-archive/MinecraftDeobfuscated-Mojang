@@ -6,7 +6,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.AngleArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class SetWorldSpawnCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -31,7 +31,7 @@ public class SetWorldSpawnCommand {
 
 	private static int setSpawn(CommandSourceStack commandSourceStack, BlockPos blockPos, float f) {
 		commandSourceStack.getLevel().setDefaultSpawnPos(blockPos, f);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.setworldspawn.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f), true);
+		commandSourceStack.sendSuccess(Component.translatable("commands.setworldspawn.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f), true);
 		return 1;
 	}
 }

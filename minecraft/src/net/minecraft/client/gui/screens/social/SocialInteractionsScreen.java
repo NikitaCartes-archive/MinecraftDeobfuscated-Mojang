@@ -23,25 +23,24 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class SocialInteractionsScreen extends Screen {
 	protected static final ResourceLocation SOCIAL_INTERACTIONS_LOCATION = new ResourceLocation("textures/gui/social_interactions.png");
-	private static final Component TAB_ALL = new TranslatableComponent("gui.socialInteractions.tab_all");
-	private static final Component TAB_HIDDEN = new TranslatableComponent("gui.socialInteractions.tab_hidden");
-	private static final Component TAB_BLOCKED = new TranslatableComponent("gui.socialInteractions.tab_blocked");
+	private static final Component TAB_ALL = Component.translatable("gui.socialInteractions.tab_all");
+	private static final Component TAB_HIDDEN = Component.translatable("gui.socialInteractions.tab_hidden");
+	private static final Component TAB_BLOCKED = Component.translatable("gui.socialInteractions.tab_blocked");
 	private static final Component TAB_ALL_SELECTED = TAB_ALL.plainCopy().withStyle(ChatFormatting.UNDERLINE);
 	private static final Component TAB_HIDDEN_SELECTED = TAB_HIDDEN.plainCopy().withStyle(ChatFormatting.UNDERLINE);
 	private static final Component TAB_BLOCKED_SELECTED = TAB_BLOCKED.plainCopy().withStyle(ChatFormatting.UNDERLINE);
-	private static final Component SEARCH_HINT = new TranslatableComponent("gui.socialInteractions.search_hint")
+	private static final Component SEARCH_HINT = Component.translatable("gui.socialInteractions.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
 		.withStyle(ChatFormatting.GRAY);
-	static final Component EMPTY_SEARCH = new TranslatableComponent("gui.socialInteractions.search_empty").withStyle(ChatFormatting.GRAY);
-	private static final Component EMPTY_HIDDEN = new TranslatableComponent("gui.socialInteractions.empty_hidden").withStyle(ChatFormatting.GRAY);
-	private static final Component EMPTY_BLOCKED = new TranslatableComponent("gui.socialInteractions.empty_blocked").withStyle(ChatFormatting.GRAY);
-	private static final Component BLOCKING_HINT = new TranslatableComponent("gui.socialInteractions.blocking_hint");
+	static final Component EMPTY_SEARCH = Component.translatable("gui.socialInteractions.search_empty").withStyle(ChatFormatting.GRAY);
+	private static final Component EMPTY_HIDDEN = Component.translatable("gui.socialInteractions.empty_hidden").withStyle(ChatFormatting.GRAY);
+	private static final Component EMPTY_BLOCKED = Component.translatable("gui.socialInteractions.empty_blocked").withStyle(ChatFormatting.GRAY);
+	private static final Component BLOCKING_HINT = Component.translatable("gui.socialInteractions.blocking_hint");
 	private static final String BLOCK_LINK = "https://aka.ms/javablocking";
 	private static final int BG_BORDER_SIZE = 8;
 	private static final int BG_UNITS = 16;
@@ -69,7 +68,7 @@ public class SocialInteractionsScreen extends Screen {
 	private Runnable postRenderRunnable;
 
 	public SocialInteractionsScreen() {
-		super(new TranslatableComponent("gui.socialInteractions.title"));
+		super(Component.translatable("gui.socialInteractions.title"));
 		this.updateServerLabel(Minecraft.getInstance());
 	}
 
@@ -114,19 +113,12 @@ public class SocialInteractionsScreen extends Screen {
 		int k = this.socialInteractionsPlayerList.getRowRight();
 		int l = this.font.width(BLOCKING_HINT) + 40;
 		int m = 64 + 16 * this.backgroundUnits();
-		int n = (this.width - l) / 2;
+		int n = (this.width - l) / 2 + 3;
 		this.allButton = this.addRenderableWidget(new Button(j, 45, i, 20, TAB_ALL, button -> this.showPage(SocialInteractionsScreen.Page.ALL)));
 		this.hiddenButton = this.addRenderableWidget(
 			new Button((j + k - i) / 2 + 1, 45, i, 20, TAB_HIDDEN, button -> this.showPage(SocialInteractionsScreen.Page.HIDDEN))
 		);
 		this.blockedButton = this.addRenderableWidget(new Button(k - i + 1, 45, i, 20, TAB_BLOCKED, button -> this.showPage(SocialInteractionsScreen.Page.BLOCKED)));
-		this.blockingHintButton = this.addRenderableWidget(new Button(n, m, l, 20, BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-				if (bl) {
-					Util.getPlatform().openUri("https://aka.ms/javablocking");
-				}
-
-				this.minecraft.setScreen(this);
-			}, "https://aka.ms/javablocking", true))));
 		String string = this.searchBox != null ? this.searchBox.getValue() : "";
 		this.searchBox = new EditBox(this.font, this.marginX() + 28, 78, 196, 16, SEARCH_HINT) {
 			@Override
@@ -144,6 +136,13 @@ public class SocialInteractionsScreen extends Screen {
 		this.searchBox.setResponder(this::checkSearchStringUpdate);
 		this.addWidget(this.searchBox);
 		this.addWidget(this.socialInteractionsPlayerList);
+		this.blockingHintButton = this.addRenderableWidget(new Button(n, m, l, 20, BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+				if (bl) {
+					Util.getPlatform().openUri("https://aka.ms/javablocking");
+				}
+
+				this.minecraft.setScreen(this);
+			}, "https://aka.ms/javablocking", true))));
 		this.initialized = true;
 		this.showPage(this.page);
 	}
@@ -279,9 +278,9 @@ public class SocialInteractionsScreen extends Screen {
 			}
 
 			if (i > 1) {
-				this.serverLabel = new TranslatableComponent("gui.socialInteractions.server_label.multiple", string, i);
+				this.serverLabel = Component.translatable("gui.socialInteractions.server_label.multiple", string, i);
 			} else {
-				this.serverLabel = new TranslatableComponent("gui.socialInteractions.server_label.single", string, i);
+				this.serverLabel = Component.translatable("gui.socialInteractions.server_label.single", string, i);
 			}
 
 			this.playerCount = i;

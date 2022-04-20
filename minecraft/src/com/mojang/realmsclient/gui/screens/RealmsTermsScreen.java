@@ -16,18 +16,16 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsTermsScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Component TITLE = new TranslatableComponent("mco.terms.title");
-	private static final Component TERMS_STATIC_TEXT = new TranslatableComponent("mco.terms.sentence.1");
-	private static final Component TERMS_LINK_TEXT = new TextComponent(" ")
-		.append(new TranslatableComponent("mco.terms.sentence.2").withStyle(Style.EMPTY.withUnderlined(true)));
+	private static final Component TITLE = Component.translatable("mco.terms.title");
+	private static final Component TERMS_STATIC_TEXT = Component.translatable("mco.terms.sentence.1");
+	private static final Component TERMS_LINK_TEXT = Component.literal(" ")
+		.append(Component.translatable("mco.terms.sentence.2").withStyle(Style.EMPTY.withUnderlined(true)));
 	private final Screen lastScreen;
 	private final RealmsMainScreen mainScreen;
 	private final RealmsServer realmsServer;
@@ -45,9 +43,9 @@ public class RealmsTermsScreen extends RealmsScreen {
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = this.width / 4 - 2;
-		this.addRenderableWidget(new Button(this.width / 4, row(12), i, 20, new TranslatableComponent("mco.terms.buttons.agree"), button -> this.agreedToTos()));
+		this.addRenderableWidget(new Button(this.width / 4, row(12), i, 20, Component.translatable("mco.terms.buttons.agree"), button -> this.agreedToTos()));
 		this.addRenderableWidget(
-			new Button(this.width / 2 + 4, row(12), i, 20, new TranslatableComponent("mco.terms.buttons.disagree"), button -> this.minecraft.setScreen(this.lastScreen))
+			new Button(this.width / 2 + 4, row(12), i, 20, Component.translatable("mco.terms.buttons.disagree"), button -> this.minecraft.setScreen(this.lastScreen))
 		);
 	}
 

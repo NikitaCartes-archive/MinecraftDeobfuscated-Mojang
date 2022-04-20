@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 
@@ -21,7 +20,7 @@ public class WeighedSoundEvents implements Weighted<Sound> {
 
 	public WeighedSoundEvents(ResourceLocation resourceLocation, @Nullable String string) {
 		this.location = resourceLocation;
-		this.subtitle = string == null ? null : new TranslatableComponent(string);
+		this.subtitle = string == null ? null : Component.translatable(string);
 	}
 
 	@Override

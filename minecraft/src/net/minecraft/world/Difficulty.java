@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public enum Difficulty {
 	PEACEFUL(0, "peaceful"),
@@ -26,7 +25,7 @@ public enum Difficulty {
 	}
 
 	public Component getDisplayName() {
-		return new TranslatableComponent("options.difficulty." + this.key);
+		return Component.translatable("options.difficulty." + this.key);
 	}
 
 	public static Difficulty byId(int i) {

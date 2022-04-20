@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleCommand {
@@ -31,13 +31,13 @@ public class GameRuleCommand {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
 		T value = commandSourceStack.getServer().getGameRules().getRule(key);
 		value.setFromArgument(commandContext, "value");
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.gamerule.set", key.getId(), value.toString()), true);
+		commandSourceStack.sendSuccess(Component.translatable("commands.gamerule.set", key.getId(), value.toString()), true);
 		return value.getCommandResult();
 	}
 
 	static <T extends GameRules.Value<T>> int queryRule(CommandSourceStack commandSourceStack, GameRules.Key<T> key) {
 		T value = commandSourceStack.getServer().getGameRules().getRule(key);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.gamerule.query", key.getId(), value.toString()), false);
+		commandSourceStack.sendSuccess(Component.translatable("commands.gamerule.query", key.getId(), value.toString()), false);
 		return value.getCommandResult();
 	}
 }

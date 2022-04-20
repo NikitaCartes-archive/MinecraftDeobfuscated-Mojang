@@ -51,7 +51,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -63,7 +62,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<String> ALLOWED_PROTOCOLS = Sets.<String>newHashSet("http", "https");
 	private static final int EXTRA_SPACE_AFTER_FIRST_TOOLTIP_LINE = 2;
-	private static final Component USAGE_NARRATION = new TranslatableComponent("narrator.screen.usage");
+	private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
 	protected final Component title;
 	private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
 	private final List<NarratableEntry> narratables = Lists.<NarratableEntry>newArrayList();
@@ -247,7 +246,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			bufferBuilder.end();
-			BufferUploader.end(bufferBuilder);
+			BufferUploader.drawWithShader(bufferBuilder);
 			RenderSystem.disableBlend();
 			RenderSystem.enableTexture();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
@@ -548,7 +547,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 		}
 	}
 
-	protected void triggerImmediateNarration(boolean bl) {
+	public void triggerImmediateNarration(boolean bl) {
 		if (this.shouldRunNarration()) {
 			this.runNarration(bl);
 		}
@@ -581,10 +580,10 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 
 			if (immutableList.size() > 1) {
 				narrationElementOutput.add(
-					NarratedElementType.POSITION, new TranslatableComponent("narrator.position.screen", narratableSearchResult.index + 1, immutableList.size())
+					NarratedElementType.POSITION, Component.translatable("narrator.position.screen", narratableSearchResult.index + 1, immutableList.size())
 				);
 				if (narratableSearchResult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
-					narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
+					narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
 				}
 			}
 

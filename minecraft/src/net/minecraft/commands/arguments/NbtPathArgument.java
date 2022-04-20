@@ -24,14 +24,14 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
-	public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(new TranslatableComponent("arguments.nbtpath.node.invalid"));
+	public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.node.invalid"));
 	public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("arguments.nbtpath.nothing_found", object)
+		object -> Component.translatable("arguments.nbtpath.nothing_found", object)
 	);
 	private static final char INDEX_MATCH_START = '[';
 	private static final char INDEX_MATCH_END = ']';

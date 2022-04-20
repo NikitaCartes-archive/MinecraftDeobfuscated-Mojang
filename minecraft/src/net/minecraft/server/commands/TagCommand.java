@@ -11,13 +11,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 
 public class TagCommand {
-	private static final SimpleCommandExceptionType ERROR_ADD_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.tag.add.failed"));
-	private static final SimpleCommandExceptionType ERROR_REMOVE_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.tag.remove.failed"));
+	private static final SimpleCommandExceptionType ERROR_ADD_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.tag.add.failed"));
+	private static final SimpleCommandExceptionType ERROR_REMOVE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.tag.remove.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -81,10 +81,10 @@ public class TagCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.tag.add.success.single", string, ((Entity)collection.iterator().next()).getDisplayName()), true
+					Component.translatable("commands.tag.add.success.single", string, ((Entity)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.tag.add.success.multiple", string, collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.tag.add.success.multiple", string, collection.size()), true);
 			}
 
 			return i;
@@ -105,10 +105,10 @@ public class TagCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.tag.remove.success.single", string, ((Entity)collection.iterator().next()).getDisplayName()), true
+					Component.translatable("commands.tag.remove.success.single", string, ((Entity)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.tag.remove.success.multiple", string, collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.tag.remove.success.multiple", string, collection.size()), true);
 			}
 
 			return i;
@@ -125,17 +125,17 @@ public class TagCommand {
 		if (collection.size() == 1) {
 			Entity entity2 = (Entity)collection.iterator().next();
 			if (set.isEmpty()) {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.tag.list.single.empty", entity2.getDisplayName()), false);
+				commandSourceStack.sendSuccess(Component.translatable("commands.tag.list.single.empty", entity2.getDisplayName()), false);
 			} else {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.tag.list.single.success", entity2.getDisplayName(), set.size(), ComponentUtils.formatList(set)), false
+					Component.translatable("commands.tag.list.single.success", entity2.getDisplayName(), set.size(), ComponentUtils.formatList(set)), false
 				);
 			}
 		} else if (set.isEmpty()) {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.tag.list.multiple.empty", collection.size()), false);
+			commandSourceStack.sendSuccess(Component.translatable("commands.tag.list.multiple.empty", collection.size()), false);
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.tag.list.multiple.success", collection.size(), set.size(), ComponentUtils.formatList(set)), false
+				Component.translatable("commands.tag.list.multiple.success", collection.size(), set.size(), ComponentUtils.formatList(set)), false
 			);
 		}
 

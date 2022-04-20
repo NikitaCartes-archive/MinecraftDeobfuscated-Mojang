@@ -233,7 +233,7 @@ public class Dolphin extends WaterAnimal {
 			if (this.canHoldItem(itemStack)) {
 				this.onItemPickup(itemEntity);
 				this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
-				this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0F;
+				this.setGuaranteedDrop(EquipmentSlot.MAINHAND);
 				this.take(itemEntity, itemStack.getCount());
 				itemEntity.discard();
 			}

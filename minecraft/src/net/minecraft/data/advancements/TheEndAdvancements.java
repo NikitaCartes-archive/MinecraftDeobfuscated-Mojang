@@ -15,7 +15,7 @@ import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
@@ -28,8 +28,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 		Advancement advancement = Advancement.Builder.advancement()
 			.display(
 				Blocks.END_STONE,
-				new TranslatableComponent("advancements.end.root.title"),
-				new TranslatableComponent("advancements.end.root.description"),
+				Component.translatable("advancements.end.root.title"),
+				Component.translatable("advancements.end.root.description"),
 				new ResourceLocation("textures/gui/advancements/backgrounds/end.png"),
 				FrameType.TASK,
 				false,
@@ -42,8 +42,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Blocks.DRAGON_HEAD,
-				new TranslatableComponent("advancements.end.kill_dragon.title"),
-				new TranslatableComponent("advancements.end.kill_dragon.description"),
+				Component.translatable("advancements.end.kill_dragon.title"),
+				Component.translatable("advancements.end.kill_dragon.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -56,8 +56,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.ENDER_PEARL,
-				new TranslatableComponent("advancements.end.enter_end_gateway.title"),
-				new TranslatableComponent("advancements.end.enter_end_gateway.description"),
+				Component.translatable("advancements.end.enter_end_gateway.title"),
+				Component.translatable("advancements.end.enter_end_gateway.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -70,8 +70,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.END_CRYSTAL,
-				new TranslatableComponent("advancements.end.respawn_dragon.title"),
-				new TranslatableComponent("advancements.end.respawn_dragon.description"),
+				Component.translatable("advancements.end.respawn_dragon.title"),
+				Component.translatable("advancements.end.respawn_dragon.description"),
 				null,
 				FrameType.GOAL,
 				true,
@@ -84,8 +84,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement3)
 			.display(
 				Blocks.PURPUR_BLOCK,
-				new TranslatableComponent("advancements.end.find_end_city.title"),
-				new TranslatableComponent("advancements.end.find_end_city.description"),
+				Component.translatable("advancements.end.find_end_city.title"),
+				Component.translatable("advancements.end.find_end_city.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -98,8 +98,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.DRAGON_BREATH,
-				new TranslatableComponent("advancements.end.dragon_breath.title"),
-				new TranslatableComponent("advancements.end.dragon_breath.description"),
+				Component.translatable("advancements.end.dragon_breath.title"),
+				Component.translatable("advancements.end.dragon_breath.description"),
 				null,
 				FrameType.GOAL,
 				true,
@@ -112,8 +112,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.SHULKER_SHELL,
-				new TranslatableComponent("advancements.end.levitate.title"),
-				new TranslatableComponent("advancements.end.levitate.description"),
+				Component.translatable("advancements.end.levitate.title"),
+				Component.translatable("advancements.end.levitate.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -127,8 +127,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.ELYTRA,
-				new TranslatableComponent("advancements.end.elytra.title"),
-				new TranslatableComponent("advancements.end.elytra.description"),
+				Component.translatable("advancements.end.elytra.title"),
+				Component.translatable("advancements.end.elytra.description"),
 				null,
 				FrameType.GOAL,
 				true,
@@ -141,8 +141,8 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Blocks.DRAGON_EGG,
-				new TranslatableComponent("advancements.end.dragon_egg.title"),
-				new TranslatableComponent("advancements.end.dragon_egg.description"),
+				Component.translatable("advancements.end.dragon_egg.title"),
+				Component.translatable("advancements.end.dragon_egg.description"),
 				null,
 				FrameType.GOAL,
 				true,

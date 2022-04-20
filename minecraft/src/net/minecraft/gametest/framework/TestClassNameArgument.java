@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class TestClassNameArgument implements ArgumentType<String> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("techtests", "mobtests");
@@ -23,7 +23,7 @@ public class TestClassNameArgument implements ArgumentType<String> {
 		if (GameTestRegistry.isTestClass(string)) {
 			return string;
 		} else {
-			Message message = new TextComponent("No such test class: " + string);
+			Message message = Component.literal("No such test class: " + string);
 			throw new CommandSyntaxException(new SimpleCommandExceptionType(message), message);
 		}
 	}

@@ -10,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
@@ -85,7 +84,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 
 	@Override
 	protected Component getDefaultName() {
-		return new TranslatableComponent("container.hopper");
+		return Component.translatable("container.hopper");
 	}
 
 	public static void pushItemsTick(Level level, BlockPos blockPos, BlockState blockState, HopperBlockEntity hopperBlockEntity) {

@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -42,23 +42,21 @@ public class EntitySelectorParser {
 	private static final char SELECTOR_RANDOM_PLAYERS = 'r';
 	private static final char SELECTOR_CURRENT_ENTITY = 's';
 	private static final char SELECTOR_ALL_ENTITIES = 'e';
-	public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.invalid")
-	);
+	public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(Component.translatable("argument.entity.invalid"));
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SELECTOR_TYPE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.selector.unknown", object)
+		object -> Component.translatable("argument.entity.selector.unknown", object)
 	);
 	public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.selector.not_allowed")
+		Component.translatable("argument.entity.selector.not_allowed")
 	);
 	public static final SimpleCommandExceptionType ERROR_MISSING_SELECTOR_TYPE = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.selector.missing")
+		Component.translatable("argument.entity.selector.missing")
 	);
 	public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_OPTIONS = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.entity.options.unterminated")
+		Component.translatable("argument.entity.options.unterminated")
 	);
 	public static final DynamicCommandExceptionType ERROR_EXPECTED_OPTION_VALUE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.entity.options.valueless", object)
+		object -> Component.translatable("argument.entity.options.valueless", object)
 	);
 	public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_ARBITRARY = (vec3, list) -> {
 	};
@@ -466,11 +464,11 @@ public class EntitySelectorParser {
 	}
 
 	private static void fillSelectorSuggestions(SuggestionsBuilder suggestionsBuilder) {
-		suggestionsBuilder.suggest("@p", new TranslatableComponent("argument.entity.selector.nearestPlayer"));
-		suggestionsBuilder.suggest("@a", new TranslatableComponent("argument.entity.selector.allPlayers"));
-		suggestionsBuilder.suggest("@r", new TranslatableComponent("argument.entity.selector.randomPlayer"));
-		suggestionsBuilder.suggest("@s", new TranslatableComponent("argument.entity.selector.self"));
-		suggestionsBuilder.suggest("@e", new TranslatableComponent("argument.entity.selector.allEntities"));
+		suggestionsBuilder.suggest("@p", Component.translatable("argument.entity.selector.nearestPlayer"));
+		suggestionsBuilder.suggest("@a", Component.translatable("argument.entity.selector.allPlayers"));
+		suggestionsBuilder.suggest("@r", Component.translatable("argument.entity.selector.randomPlayer"));
+		suggestionsBuilder.suggest("@s", Component.translatable("argument.entity.selector.self"));
+		suggestionsBuilder.suggest("@e", Component.translatable("argument.entity.selector.allEntities"));
 	}
 
 	private CompletableFuture<Suggestions> suggestNameOrSelector(SuggestionsBuilder suggestionsBuilder, Consumer<SuggestionsBuilder> consumer) {

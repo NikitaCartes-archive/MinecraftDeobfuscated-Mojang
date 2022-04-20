@@ -11,7 +11,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class MouseSettingsScreen extends OptionsSubScreen {
@@ -24,7 +24,7 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 	}
 
 	public MouseSettingsScreen(Screen screen, Options options) {
-		super(screen, options, new TranslatableComponent("options.mouse_settings.title"));
+		super(screen, options, Component.translatable("options.mouse_settings.title"));
 	}
 
 	@Override

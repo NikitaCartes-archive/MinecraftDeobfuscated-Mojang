@@ -38,9 +38,9 @@ public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
 		ItemEntity itemEntity = new ItemEntity(level, d, e, f, itemStack);
 		double g = level.random.nextDouble() * 0.1 + 0.2;
 		itemEntity.setDeltaMovement(
-			level.random.nextGaussian() * 0.0075F * (double)i + (double)direction.getStepX() * g,
-			level.random.nextGaussian() * 0.0075F * (double)i + 0.2F,
-			level.random.nextGaussian() * 0.0075F * (double)i + (double)direction.getStepZ() * g
+			level.random.triangle((double)direction.getStepX() * g, 0.0172275 * (double)i),
+			level.random.triangle(0.2, 0.0172275 * (double)i),
+			level.random.triangle((double)direction.getStepZ() * g, 0.0172275 * (double)i)
 		);
 		level.addFreshEntity(itemEntity);
 	}

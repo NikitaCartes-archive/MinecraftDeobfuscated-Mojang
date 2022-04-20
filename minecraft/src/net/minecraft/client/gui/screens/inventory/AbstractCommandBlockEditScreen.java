@@ -13,15 +13,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.BaseCommandBlock;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractCommandBlockEditScreen extends Screen {
-	private static final Component SET_COMMAND_LABEL = new TranslatableComponent("advMode.setCommand");
-	private static final Component COMMAND_LABEL = new TranslatableComponent("advMode.command");
-	private static final Component PREVIOUS_OUTPUT_LABEL = new TranslatableComponent("advMode.previousOutput");
+	private static final Component SET_COMMAND_LABEL = Component.translatable("advMode.setCommand");
+	private static final Component COMMAND_LABEL = Component.translatable("advMode.command");
+	private static final Component PREVIOUS_OUTPUT_LABEL = Component.translatable("advMode.previousOutput");
 	protected EditBox commandEdit;
 	protected EditBox previousEdit;
 	protected Button doneButton;
@@ -53,16 +51,16 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 		);
 		boolean bl = this.getCommandBlock().isTrackOutput();
 		this.outputButton = this.addRenderableWidget(
-			CycleButton.booleanBuilder(new TextComponent("O"), new TextComponent("X"))
+			CycleButton.booleanBuilder(Component.literal("O"), Component.literal("X"))
 				.withInitialValue(bl)
 				.displayOnlyValue()
-				.create(this.width / 2 + 150 - 20, this.getPreviousY(), 20, 20, new TranslatableComponent("advMode.trackOutput"), (cycleButton, boolean_) -> {
+				.create(this.width / 2 + 150 - 20, this.getPreviousY(), 20, 20, Component.translatable("advMode.trackOutput"), (cycleButton, boolean_) -> {
 					BaseCommandBlock baseCommandBlock = this.getCommandBlock();
 					baseCommandBlock.setTrackOutput(boolean_);
 					this.updatePreviousOutput(boolean_);
 				})
 		);
-		this.commandEdit = new EditBox(this.font, this.width / 2 - 150, 50, 300, 20, new TranslatableComponent("advMode.command")) {
+		this.commandEdit = new EditBox(this.font, this.width / 2 - 150, 50, 300, 20, Component.translatable("advMode.command")) {
 			@Override
 			protected MutableComponent createNarrationMessage() {
 				return super.createNarrationMessage().append(AbstractCommandBlockEditScreen.this.commandSuggestions.getNarrationMessage());
@@ -71,7 +69,7 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 		this.commandEdit.setMaxLength(32500);
 		this.commandEdit.setResponder(this::onEdited);
 		this.addWidget(this.commandEdit);
-		this.previousEdit = new EditBox(this.font, this.width / 2 - 150, this.getPreviousY(), 276, 20, new TranslatableComponent("advMode.previousOutput"));
+		this.previousEdit = new EditBox(this.font, this.width / 2 - 150, this.getPreviousY(), 276, 20, Component.translatable("advMode.previousOutput"));
 		this.previousEdit.setMaxLength(32500);
 		this.previousEdit.setEditable(false);
 		this.previousEdit.setValue("-");

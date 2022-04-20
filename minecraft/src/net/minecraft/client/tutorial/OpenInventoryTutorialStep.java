@@ -4,13 +4,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class OpenInventoryTutorialStep implements TutorialStepInstance {
 	private static final int HINT_DELAY = 600;
-	private static final Component TITLE = new TranslatableComponent("tutorial.open_inventory.title");
-	private static final Component DESCRIPTION = new TranslatableComponent("tutorial.open_inventory.description", Tutorial.key("inventory"));
+	private static final Component TITLE = Component.translatable("tutorial.open_inventory.title");
+	private static final Component DESCRIPTION = Component.translatable("tutorial.open_inventory.description", Tutorial.key("inventory"));
 	private final Tutorial tutorial;
 	private TutorialToast toast;
 	private int timeWaiting;

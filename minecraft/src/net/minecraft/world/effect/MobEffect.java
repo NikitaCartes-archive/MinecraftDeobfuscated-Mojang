@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -126,7 +125,7 @@ public class MobEffect {
 	}
 
 	public Component getDisplayName() {
-		return new TranslatableComponent(this.getDescriptionId());
+		return Component.translatable(this.getDescriptionId());
 	}
 
 	public MobEffectCategory getCategory() {

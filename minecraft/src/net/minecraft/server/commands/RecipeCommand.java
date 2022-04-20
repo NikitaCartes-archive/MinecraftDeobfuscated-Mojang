@@ -10,13 +10,13 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.Recipe;
 
 public class RecipeCommand {
-	private static final SimpleCommandExceptionType ERROR_GIVE_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.recipe.give.failed"));
-	private static final SimpleCommandExceptionType ERROR_TAKE_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.recipe.take.failed"));
+	private static final SimpleCommandExceptionType ERROR_GIVE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.recipe.give.failed"));
+	private static final SimpleCommandExceptionType ERROR_TAKE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.recipe.take.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -91,10 +91,10 @@ public class RecipeCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.recipe.give.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					Component.translatable("commands.recipe.give.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.recipe.give.success.multiple", collection2.size(), collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.recipe.give.success.multiple", collection2.size(), collection.size()), true);
 			}
 
 			return i;
@@ -113,10 +113,10 @@ public class RecipeCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.recipe.take.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					Component.translatable("commands.recipe.take.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.recipe.take.success.multiple", collection2.size(), collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.recipe.take.success.multiple", collection2.size(), collection.size()), true);
 			}
 
 			return i;

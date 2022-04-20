@@ -4,11 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 public class SaveOnCommand {
-	private static final SimpleCommandExceptionType ERROR_ALREADY_ON = new SimpleCommandExceptionType(new TranslatableComponent("commands.save.alreadyOn"));
+	private static final SimpleCommandExceptionType ERROR_ALREADY_ON = new SimpleCommandExceptionType(Component.translatable("commands.save.alreadyOn"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(Commands.literal("save-on").requires(commandSourceStack -> commandSourceStack.hasPermission(4)).executes(commandContext -> {
@@ -25,7 +25,7 @@ public class SaveOnCommand {
 			if (!bl) {
 				throw ERROR_ALREADY_ON.create();
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.save.enabled"), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.save.enabled"), true);
 				return 1;
 			}
 		}));

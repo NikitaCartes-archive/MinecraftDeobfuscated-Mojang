@@ -27,7 +27,6 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.TooltipAccessor;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.OptionEnum;
@@ -89,7 +88,7 @@ public final class OptionInstance<T> {
 		T object,
 		Consumer<T> consumer
 	) {
-		this.caption = new TranslatableComponent(string);
+		this.caption = Component.translatable(string);
 		this.tooltip = tooltipSupplierFactory;
 		this.toString = objectx -> captionBasedToString.toString(this.caption, (T)objectx);
 		this.values = valueSet;

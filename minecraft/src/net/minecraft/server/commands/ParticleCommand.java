@@ -13,12 +13,12 @@ import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public class ParticleCommand {
-	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.particle.failed"));
+	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.particle.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -160,7 +160,7 @@ public class ParticleCommand {
 			throw ERROR_FAILED.create();
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.particle.success", Registry.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true
+				Component.translatable("commands.particle.success", Registry.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true
 			);
 			return j;
 		}

@@ -3,7 +3,7 @@ package net.minecraft.server.level;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.InteractionHand;
@@ -45,7 +45,7 @@ public class DemoMode extends ServerPlayerGameMode {
 				if (m == 6L) {
 					this.player.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.DEMO_EVENT, 104.0F));
 				} else {
-					this.player.sendMessage(new TranslatableComponent("demo.day." + m), Util.NIL_UUID);
+					this.player.sendMessage(Component.translatable("demo.day." + m), Util.NIL_UUID);
 				}
 			}
 		} else if (m == 1L) {
@@ -57,13 +57,13 @@ public class DemoMode extends ServerPlayerGameMode {
 				this.player.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.DEMO_EVENT, 103.0F));
 			}
 		} else if (m == 5L && l % 24000L == 22000L) {
-			this.player.sendMessage(new TranslatableComponent("demo.day.warning"), Util.NIL_UUID);
+			this.player.sendMessage(Component.translatable("demo.day.warning"), Util.NIL_UUID);
 		}
 	}
 
 	private void outputDemoReminder() {
 		if (this.demoEndedReminder > 100) {
-			this.player.sendMessage(new TranslatableComponent("demo.reminder"), Util.NIL_UUID);
+			this.player.sendMessage(Component.translatable("demo.reminder"), Util.NIL_UUID);
 			this.demoEndedReminder = 0;
 		}
 	}

@@ -26,10 +26,9 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -569,8 +568,8 @@ public class ServerPlayer extends Player {
 						if (!future.isSuccess()) {
 							int i = 256;
 							String string = component.getString(256);
-							Component component2 = new TranslatableComponent("death.attack.message_too_long", new TextComponent(string).withStyle(ChatFormatting.YELLOW));
-							Component component3 = new TranslatableComponent("death.attack.even_more_magic", this.getDisplayName())
+							Component component2 = Component.translatable("death.attack.message_too_long", Component.literal(string).withStyle(ChatFormatting.YELLOW));
+							Component component3 = Component.translatable("death.attack.even_more_magic", this.getDisplayName())
 								.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
 							this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3));
 						}
@@ -585,7 +584,7 @@ public class ServerPlayer extends Player {
 				this.server.getPlayerList().broadcastToAllExceptTeam(this, component);
 			}
 		} else {
-			this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), TextComponent.EMPTY));
+			this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), CommonComponents.EMPTY));
 		}
 
 		this.removeEntitiesOnShoulder();
@@ -869,7 +868,7 @@ public class ServerPlayer extends Player {
 					CriteriaTriggers.SLEPT_IN_BED.trigger(this);
 				});
 				if (!this.getLevel().canSleepThroughNights()) {
-					this.displayClientMessage(new TranslatableComponent("sleep.not_possible"), true);
+					this.displayClientMessage(Component.translatable("sleep.not_possible"), true);
 				}
 
 				((ServerLevel)this.level).updateSleepingPlayerList();
@@ -990,7 +989,7 @@ public class ServerPlayer extends Player {
 			AbstractContainerMenu abstractContainerMenu = menuProvider.createMenu(this.containerCounter, this.getInventory(), this);
 			if (abstractContainerMenu == null) {
 				if (this.isSpectator()) {
-					this.displayClientMessage(new TranslatableComponent("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
+					this.displayClientMessage(Component.translatable("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
 				}
 
 				return OptionalInt.empty();
@@ -1282,12 +1281,10 @@ public class ServerPlayer extends Player {
 						if (!future.isSuccess() && (chatType == ChatType.GAME_INFO || chatType == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
 							int i = 256;
 							String string = component.getString(256);
-							Component component2 = new TextComponent(string).withStyle(ChatFormatting.YELLOW);
+							Component component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
 							this.connection
 								.send(
-									new ClientboundChatPacket(
-										new TranslatableComponent("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), ChatType.SYSTEM, uUID
-									)
+									new ClientboundChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), ChatType.SYSTEM, uUID)
 								);
 						}
 					}
@@ -1473,7 +1470,7 @@ public class ServerPlayer extends Player {
 		if (blockPos != null) {
 			boolean bl3 = blockPos.equals(this.respawnPosition) && resourceKey.equals(this.respawnDimension);
 			if (bl2 && !bl3) {
-				this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"), Util.NIL_UUID);
+				this.sendMessage(Component.translatable("block.minecraft.set_spawn"), Util.NIL_UUID);
 			}
 
 			this.respawnPosition = blockPos;

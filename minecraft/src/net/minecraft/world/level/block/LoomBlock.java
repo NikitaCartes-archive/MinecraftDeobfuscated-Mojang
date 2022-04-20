@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,7 +18,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class LoomBlock extends HorizontalDirectionalBlock {
-	private static final Component CONTAINER_TITLE = new TranslatableComponent("container.loom");
+	private static final Component CONTAINER_TITLE = Component.translatable("container.loom");
 
 	protected LoomBlock(BlockBehaviour.Properties properties) {
 		super(properties);

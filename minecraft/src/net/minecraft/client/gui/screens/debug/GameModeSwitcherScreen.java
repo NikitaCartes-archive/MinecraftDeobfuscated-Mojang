@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,8 +35,8 @@ public class GameModeSwitcherScreen extends Screen {
 	private static final int SLOT_AREA_PADDED = 31;
 	private static final int HELP_TIPS_OFFSET_Y = 5;
 	private static final int ALL_SLOTS_WIDTH = GameModeSwitcherScreen.GameModeIcon.values().length * 31 - 5;
-	private static final Component SELECT_KEY = new TranslatableComponent(
-		"debug.gamemodes.select_next", new TranslatableComponent("debug.gamemodes.press_f4").withStyle(ChatFormatting.AQUA)
+	private static final Component SELECT_KEY = Component.translatable(
+		"debug.gamemodes.select_next", Component.translatable("debug.gamemodes.press_f4").withStyle(ChatFormatting.AQUA)
 	);
 	private final Optional<GameModeSwitcherScreen.GameModeIcon> previousHovered;
 	private Optional<GameModeSwitcherScreen.GameModeIcon> currentlyHovered = Optional.empty();
@@ -149,10 +148,10 @@ public class GameModeSwitcherScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	static enum GameModeIcon {
-		CREATIVE(new TranslatableComponent("gameMode.creative"), "/gamemode creative", new ItemStack(Blocks.GRASS_BLOCK)),
-		SURVIVAL(new TranslatableComponent("gameMode.survival"), "/gamemode survival", new ItemStack(Items.IRON_SWORD)),
-		ADVENTURE(new TranslatableComponent("gameMode.adventure"), "/gamemode adventure", new ItemStack(Items.MAP)),
-		SPECTATOR(new TranslatableComponent("gameMode.spectator"), "/gamemode spectator", new ItemStack(Items.ENDER_EYE));
+		CREATIVE(Component.translatable("gameMode.creative"), "/gamemode creative", new ItemStack(Blocks.GRASS_BLOCK)),
+		SURVIVAL(Component.translatable("gameMode.survival"), "/gamemode survival", new ItemStack(Items.IRON_SWORD)),
+		ADVENTURE(Component.translatable("gameMode.adventure"), "/gamemode adventure", new ItemStack(Items.MAP)),
+		SPECTATOR(Component.translatable("gameMode.spectator"), "/gamemode spectator", new ItemStack(Items.ENDER_EYE));
 
 		protected static final GameModeSwitcherScreen.GameModeIcon[] VALUES = values();
 		private static final int ICON_AREA = 16;

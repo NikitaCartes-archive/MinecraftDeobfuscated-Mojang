@@ -18,11 +18,22 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.network.chat.contents.BlockDataSource;
+import net.minecraft.network.chat.contents.DataSource;
+import net.minecraft.network.chat.contents.EntityDataSource;
+import net.minecraft.network.chat.contents.KeybindContents;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.NbtContents;
+import net.minecraft.network.chat.contents.ScoreContents;
+import net.minecraft.network.chat.contents.SelectorContents;
+import net.minecraft.network.chat.contents.StorageDataSource;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
@@ -31,7 +42,7 @@ import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 public interface Component extends Message, FormattedText {
 	Style getStyle();
 
-	String getContents();
+	ComponentContents getContents();
 
 	@Override
 	default String getString() {
@@ -54,16 +65,20 @@ public interface Component extends Message, FormattedText {
 
 	List<Component> getSiblings();
 
-	MutableComponent plainCopy();
+	default MutableComponent plainCopy() {
+		return MutableComponent.create(this.getContents());
+	}
 
-	MutableComponent copy();
+	default MutableComponent copy() {
+		return new MutableComponent(this.getContents(), new ArrayList(this.getSiblings()), this.getStyle());
+	}
 
 	FormattedCharSequence getVisualOrderText();
 
 	@Override
 	default <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		Style style2 = this.getStyle().applyTo(style);
-		Optional<T> optional = this.visitSelf(styledContentConsumer, style2);
+		Optional<T> optional = this.getContents().visit(styledContentConsumer, style2);
 		if (optional.isPresent()) {
 			return optional;
 		} else {
@@ -80,7 +95,7 @@ public interface Component extends Message, FormattedText {
 
 	@Override
 	default <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
-		Optional<T> optional = this.visitSelf(contentConsumer);
+		Optional<T> optional = this.getContents().visit(contentConsumer);
 		if (optional.isPresent()) {
 			return optional;
 		} else {
@@ -95,19 +110,11 @@ public interface Component extends Message, FormattedText {
 		}
 	}
 
-	default <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
-		return styledContentConsumer.accept(style, this.getContents());
-	}
-
-	default <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
-		return contentConsumer.accept(this.getContents());
-	}
-
 	default List<Component> toFlatList(Style style) {
 		List<Component> list = Lists.<Component>newArrayList();
 		this.visit((stylex, string) -> {
 			if (!string.isEmpty()) {
-				list.add(new TextComponent(string).withStyle(stylex));
+				list.add(literal(string).withStyle(stylex));
 			}
 
 			return Optional.empty();
@@ -116,7 +123,39 @@ public interface Component extends Message, FormattedText {
 	}
 
 	static Component nullToEmpty(@Nullable String string) {
-		return (Component)(string != null ? new TextComponent(string) : TextComponent.EMPTY);
+		return (Component)(string != null ? literal(string) : CommonComponents.EMPTY);
+	}
+
+	static MutableComponent literal(String string) {
+		return MutableComponent.create(new LiteralContents(string));
+	}
+
+	static MutableComponent translatable(String string) {
+		return MutableComponent.create(new TranslatableContents(string));
+	}
+
+	static MutableComponent translatable(String string, Object... objects) {
+		return MutableComponent.create(new TranslatableContents(string, objects));
+	}
+
+	static MutableComponent empty() {
+		return MutableComponent.create(ComponentContents.EMPTY);
+	}
+
+	static MutableComponent keybind(String string) {
+		return MutableComponent.create(new KeybindContents(string));
+	}
+
+	static MutableComponent nbt(String string, boolean bl, Optional<Component> optional, DataSource dataSource) {
+		return MutableComponent.create(new NbtContents(string, bl, optional, dataSource));
+	}
+
+	static MutableComponent score(String string, String string2) {
+		return MutableComponent.create(new ScoreContents(string, string2));
+	}
+
+	static MutableComponent selector(String string, Optional<Component> optional) {
+		return MutableComponent.create(new SelectorContents(string, optional));
 	}
 
 	public static class Serializer implements JsonDeserializer<MutableComponent>, JsonSerializer<Component> {
@@ -151,7 +190,7 @@ public interface Component extends Message, FormattedText {
 
 		public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			if (jsonElement.isJsonPrimitive()) {
-				return new TextComponent(jsonElement.getAsString());
+				return Component.literal(jsonElement.getAsString());
 			} else if (!jsonElement.isJsonObject()) {
 				if (jsonElement.isJsonArray()) {
 					JsonArray jsonArray3 = jsonElement.getAsJsonArray();
@@ -174,7 +213,8 @@ public interface Component extends Message, FormattedText {
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				MutableComponent mutableComponent;
 				if (jsonObject.has("text")) {
-					mutableComponent = new TextComponent(GsonHelper.getAsString(jsonObject, "text"));
+					String string = GsonHelper.getAsString(jsonObject, "text");
+					mutableComponent = string.isEmpty() ? Component.empty() : Component.literal(string);
 				} else if (jsonObject.has("translate")) {
 					String string = GsonHelper.getAsString(jsonObject, "translate");
 					if (jsonObject.has("with")) {
@@ -182,18 +222,12 @@ public interface Component extends Message, FormattedText {
 						Object[] objects = new Object[jsonArray.size()];
 
 						for (int i = 0; i < objects.length; i++) {
-							objects[i] = this.deserialize(jsonArray.get(i), type, jsonDeserializationContext);
-							if (objects[i] instanceof TextComponent) {
-								TextComponent textComponent = (TextComponent)objects[i];
-								if (textComponent.getStyle().isEmpty() && textComponent.getSiblings().isEmpty()) {
-									objects[i] = textComponent.getText();
-								}
-							}
+							objects[i] = unwrapTextArgument(this.deserialize(jsonArray.get(i), type, jsonDeserializationContext));
 						}
 
-						mutableComponent = new TranslatableComponent(string, objects);
+						mutableComponent = Component.translatable(string, objects);
 					} else {
-						mutableComponent = new TranslatableComponent(string);
+						mutableComponent = Component.translatable(string);
 					}
 				} else if (jsonObject.has("score")) {
 					JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "score");
@@ -201,12 +235,12 @@ public interface Component extends Message, FormattedText {
 						throw new JsonParseException("A score component needs a least a name and an objective");
 					}
 
-					mutableComponent = new ScoreComponent(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
+					mutableComponent = Component.score(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
 				} else if (jsonObject.has("selector")) {
 					Optional<Component> optional = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
-					mutableComponent = new SelectorComponent(GsonHelper.getAsString(jsonObject, "selector"), optional);
+					mutableComponent = Component.selector(GsonHelper.getAsString(jsonObject, "selector"), optional);
 				} else if (jsonObject.has("keybind")) {
-					mutableComponent = new KeybindComponent(GsonHelper.getAsString(jsonObject, "keybind"));
+					mutableComponent = Component.keybind(GsonHelper.getAsString(jsonObject, "keybind"));
 				} else {
 					if (!jsonObject.has("nbt")) {
 						throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
@@ -215,17 +249,20 @@ public interface Component extends Message, FormattedText {
 					String string = GsonHelper.getAsString(jsonObject, "nbt");
 					Optional<Component> optional2 = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
 					boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpret", false);
+					DataSource dataSource;
 					if (jsonObject.has("block")) {
-						mutableComponent = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"), optional2);
+						dataSource = new BlockDataSource(GsonHelper.getAsString(jsonObject, "block"));
 					} else if (jsonObject.has("entity")) {
-						mutableComponent = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"), optional2);
+						dataSource = new EntityDataSource(GsonHelper.getAsString(jsonObject, "entity"));
 					} else {
 						if (!jsonObject.has("storage")) {
 							throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
 						}
 
-						mutableComponent = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")), optional2);
+						dataSource = new StorageDataSource(new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
 					}
+
+					mutableComponent = Component.nbt(string, bl, optional2, dataSource);
 				}
 
 				if (jsonObject.has("extra")) {
@@ -242,6 +279,17 @@ public interface Component extends Message, FormattedText {
 				mutableComponent.setStyle(jsonDeserializationContext.deserialize(jsonElement, Style.class));
 				return mutableComponent;
 			}
+		}
+
+		private static Object unwrapTextArgument(Object object) {
+			if (object instanceof Component component
+				&& component.getStyle().isEmpty()
+				&& component.getSiblings().isEmpty()
+				&& component.getContents() instanceof LiteralContents literalContents) {
+				return literalContents.text();
+			}
+
+			return object;
 		}
 
 		private Optional<Component> parseSeparator(Type type, JsonDeserializationContext jsonDeserializationContext, JsonObject jsonObject) {
@@ -269,20 +317,23 @@ public interface Component extends Message, FormattedText {
 				JsonArray jsonArray = new JsonArray();
 
 				for (Component component2 : component.getSiblings()) {
-					jsonArray.add(this.serialize(component2, component2.getClass(), jsonSerializationContext));
+					jsonArray.add(this.serialize(component2, Component.class, jsonSerializationContext));
 				}
 
 				jsonObject.add("extra", jsonArray);
 			}
 
-			if (component instanceof TextComponent) {
-				jsonObject.addProperty("text", ((TextComponent)component).getText());
-			} else if (component instanceof TranslatableComponent translatableComponent) {
-				jsonObject.addProperty("translate", translatableComponent.getKey());
-				if (translatableComponent.getArgs() != null && translatableComponent.getArgs().length > 0) {
+			ComponentContents componentContents = component.getContents();
+			if (componentContents == ComponentContents.EMPTY) {
+				jsonObject.addProperty("text", "");
+			} else if (componentContents instanceof LiteralContents literalContents) {
+				jsonObject.addProperty("text", literalContents.text());
+			} else if (componentContents instanceof TranslatableContents translatableContents) {
+				jsonObject.addProperty("translate", translatableContents.getKey());
+				if (translatableContents.getArgs().length > 0) {
 					JsonArray jsonArray2 = new JsonArray();
 
-					for (Object object : translatableComponent.getArgs()) {
+					for (Object object : translatableContents.getArgs()) {
 						if (object instanceof Component) {
 							jsonArray2.add(this.serialize((Component)object, object.getClass(), jsonSerializationContext));
 						} else {
@@ -292,34 +343,35 @@ public interface Component extends Message, FormattedText {
 
 					jsonObject.add("with", jsonArray2);
 				}
-			} else if (component instanceof ScoreComponent scoreComponent) {
+			} else if (componentContents instanceof ScoreContents scoreContents) {
 				JsonObject jsonObject2 = new JsonObject();
-				jsonObject2.addProperty("name", scoreComponent.getName());
-				jsonObject2.addProperty("objective", scoreComponent.getObjective());
+				jsonObject2.addProperty("name", scoreContents.getName());
+				jsonObject2.addProperty("objective", scoreContents.getObjective());
 				jsonObject.add("score", jsonObject2);
-			} else if (component instanceof SelectorComponent selectorComponent) {
-				jsonObject.addProperty("selector", selectorComponent.getPattern());
-				this.serializeSeparator(jsonSerializationContext, jsonObject, selectorComponent.getSeparator());
-			} else if (component instanceof KeybindComponent keybindComponent) {
-				jsonObject.addProperty("keybind", keybindComponent.getName());
+			} else if (componentContents instanceof SelectorContents selectorContents) {
+				jsonObject.addProperty("selector", selectorContents.getPattern());
+				this.serializeSeparator(jsonSerializationContext, jsonObject, selectorContents.getSeparator());
+			} else if (componentContents instanceof KeybindContents keybindContents) {
+				jsonObject.addProperty("keybind", keybindContents.getName());
 			} else {
-				if (!(component instanceof NbtComponent nbtComponent)) {
-					throw new IllegalArgumentException("Don't know how to serialize " + component + " as a Component");
+				if (!(componentContents instanceof NbtContents nbtContents)) {
+					throw new IllegalArgumentException("Don't know how to serialize " + componentContents + " as a Component");
 				}
 
-				jsonObject.addProperty("nbt", nbtComponent.getNbtPath());
-				jsonObject.addProperty("interpret", nbtComponent.isInterpreting());
-				this.serializeSeparator(jsonSerializationContext, jsonObject, nbtComponent.separator);
-				if (component instanceof NbtComponent.BlockNbtComponent blockNbtComponent) {
-					jsonObject.addProperty("block", blockNbtComponent.getPos());
-				} else if (component instanceof NbtComponent.EntityNbtComponent entityNbtComponent) {
-					jsonObject.addProperty("entity", entityNbtComponent.getSelector());
+				jsonObject.addProperty("nbt", nbtContents.getNbtPath());
+				jsonObject.addProperty("interpret", nbtContents.isInterpreting());
+				this.serializeSeparator(jsonSerializationContext, jsonObject, nbtContents.getSeparator());
+				DataSource dataSource = nbtContents.getDataSource();
+				if (dataSource instanceof BlockDataSource blockDataSource) {
+					jsonObject.addProperty("block", blockDataSource.posPattern());
+				} else if (dataSource instanceof EntityDataSource entityDataSource) {
+					jsonObject.addProperty("entity", entityDataSource.selectorPattern());
 				} else {
-					if (!(component instanceof NbtComponent.StorageNbtComponent storageNbtComponent)) {
-						throw new IllegalArgumentException("Don't know how to serialize " + component + " as a Component");
+					if (!(dataSource instanceof StorageDataSource storageDataSource)) {
+						throw new IllegalArgumentException("Don't know how to serialize " + componentContents + " as a Component");
 					}
 
-					jsonObject.addProperty("storage", storageNbtComponent.getId().toString());
+					jsonObject.addProperty("storage", storageDataSource.id().toString());
 				}
 			}
 

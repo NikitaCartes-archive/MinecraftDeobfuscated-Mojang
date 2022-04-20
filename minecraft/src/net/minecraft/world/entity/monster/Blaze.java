@@ -119,7 +119,7 @@ public class Blaze extends Monster {
 		this.nextHeightOffsetChangeTick--;
 		if (this.nextHeightOffsetChangeTick <= 0) {
 			this.nextHeightOffsetChangeTick = 100;
-			this.allowedHeightOffset = 0.5F + (float)this.random.nextGaussian() * 3.0F;
+			this.allowedHeightOffset = (float)this.random.triangle(0.5, 6.891);
 		}
 
 		LivingEntity livingEntity = this.getTarget();
@@ -239,7 +239,7 @@ public class Blaze extends Monster {
 
 							for (int i = 0; i < 1; i++) {
 								SmallFireball smallFireball = new SmallFireball(
-									this.blaze.level, this.blaze, e + this.blaze.getRandom().nextGaussian() * h, f, g + this.blaze.getRandom().nextGaussian() * h
+									this.blaze.level, this.blaze, this.blaze.getRandom().triangle(e, 2.297 * h), f, this.blaze.getRandom().triangle(g, 2.297 * h)
 								);
 								smallFireball.setPos(smallFireball.getX(), this.blaze.getY(0.5) + 0.5, smallFireball.getZ());
 								this.blaze.level.addFreshEntity(smallFireball);

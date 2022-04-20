@@ -15,7 +15,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -203,7 +203,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 		protected final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> ingredientPos = Lists.<OverlayRecipeComponent.OverlayRecipeButton.Pos>newArrayList();
 
 		public OverlayRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
-			super(i, j, 200, 20, TextComponent.EMPTY);
+			super(i, j, 200, 20, CommonComponents.EMPTY);
 			this.width = 24;
 			this.height = 24;
 			this.recipe = recipe;

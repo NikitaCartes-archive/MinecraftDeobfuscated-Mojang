@@ -3,14 +3,13 @@ package com.mojang.realmsclient.util;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public enum LevelType {
-	DEFAULT(0, new TranslatableComponent("generator.default")),
-	FLAT(1, new TranslatableComponent("generator.flat")),
-	LARGE_BIOMES(2, new TranslatableComponent("generator.large_biomes")),
-	AMPLIFIED(3, new TranslatableComponent("generator.amplified"));
+	DEFAULT(0, Component.translatable("generator.default")),
+	FLAT(1, Component.translatable("generator.flat")),
+	LARGE_BIOMES(2, Component.translatable("generator.large_biomes")),
+	AMPLIFIED(3, Component.translatable("generator.amplified"));
 
 	private final int index;
 	private final Component name;

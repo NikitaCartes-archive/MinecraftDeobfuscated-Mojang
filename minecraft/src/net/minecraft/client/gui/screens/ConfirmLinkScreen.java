@@ -7,19 +7,17 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class ConfirmLinkScreen extends ConfirmScreen {
-	private static final Component COPY_BUTTON_TEXT = new TranslatableComponent("chat.copy");
-	private static final Component WARNING_TEXT = new TranslatableComponent("chat.link.warning");
+	private static final Component COPY_BUTTON_TEXT = Component.translatable("chat.copy");
+	private static final Component WARNING_TEXT = Component.translatable("chat.link.warning");
 	private final String url;
 	private final boolean showWarning;
 
 	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, String string, boolean bl) {
-		super(booleanConsumer, new TranslatableComponent(bl ? "chat.link.confirmTrusted" : "chat.link.confirm"), new TextComponent(string));
-		this.yesButton = (Component)(bl ? new TranslatableComponent("chat.link.open") : CommonComponents.GUI_YES);
+		super(booleanConsumer, Component.translatable(bl ? "chat.link.confirmTrusted" : "chat.link.confirm"), Component.literal(string));
+		this.yesButton = (Component)(bl ? Component.translatable("chat.link.open") : CommonComponents.GUI_YES);
 		this.noButton = bl ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_NO;
 		this.showWarning = !bl;
 		this.url = string;

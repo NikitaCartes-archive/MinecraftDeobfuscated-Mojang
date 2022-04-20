@@ -10,7 +10,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
@@ -77,7 +76,7 @@ public class CustomBossEvent extends ServerBossEvent {
 		return ComponentUtils.wrapInSquareBrackets(this.getName())
 			.withStyle(
 				style -> style.withColor(this.getColor().getFormatting())
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(this.getTextId().toString())))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.getTextId().toString())))
 						.withInsertion(this.getTextId().toString())
 			);
 	}

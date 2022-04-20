@@ -11,8 +11,8 @@ import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class BaseCommandBlock implements CommandSource {
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
-	private static final Component DEFAULT_NAME = new TextComponent("@");
+	private static final Component DEFAULT_NAME = Component.literal("@");
 	private long lastExecution = -1L;
 	private boolean updateLastExecution = true;
 	private int successCount;
@@ -41,7 +41,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	}
 
 	public Component getLastOutput() {
-		return this.lastOutput == null ? TextComponent.EMPTY : this.lastOutput;
+		return this.lastOutput == null ? CommonComponents.EMPTY : this.lastOutput;
 	}
 
 	public CompoundTag save(CompoundTag compoundTag) {
@@ -76,7 +76,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 			try {
 				this.lastOutput = Component.Serializer.fromJson(compoundTag.getString("LastOutput"));
 			} catch (Throwable var3) {
-				this.lastOutput = new TextComponent(var3.getMessage());
+				this.lastOutput = Component.literal(var3.getMessage());
 			}
 		} else {
 			this.lastOutput = null;
@@ -106,7 +106,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 		if (level.isClientSide || level.getGameTime() == this.lastExecution) {
 			return false;
 		} else if ("Searge".equalsIgnoreCase(this.command)) {
-			this.lastOutput = new TextComponent("#itzlipofutzli");
+			this.lastOutput = Component.literal("#itzlipofutzli");
 			this.successCount = 1;
 			return true;
 		} else {
@@ -155,7 +155,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	@Override
 	public void sendMessage(Component component, UUID uUID) {
 		if (this.trackOutput) {
-			this.lastOutput = new TextComponent("[" + TIME_FORMAT.format(new Date()) + "] ").append(component);
+			this.lastOutput = Component.literal("[" + TIME_FORMAT.format(new Date()) + "] ").append(component);
 			this.onUpdated();
 		}
 	}

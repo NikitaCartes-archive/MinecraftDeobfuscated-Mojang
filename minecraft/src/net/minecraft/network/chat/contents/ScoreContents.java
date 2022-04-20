@@ -1,4 +1,4 @@
-package net.minecraft.network.chat;
+package net.minecraft.network.chat.contents;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,13 +8,16 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 
-public class ScoreComponent extends BaseComponent implements ContextAwareComponent {
+public class ScoreContents implements ComponentContents {
 	private static final String SCORER_PLACEHOLDER = "*";
 	private final String name;
 	@Nullable
@@ -30,13 +33,9 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 		}
 	}
 
-	public ScoreComponent(String string, String string2) {
-		this(string, parseSelector(string), string2);
-	}
-
-	private ScoreComponent(String string, @Nullable EntitySelector entitySelector, String string2) {
+	public ScoreContents(String string, String string2) {
 		this.name = string;
-		this.selector = entitySelector;
+		this.selector = parseSelector(string);
 		this.objective = string2;
 	}
 
@@ -82,34 +81,35 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 		return "";
 	}
 
-	public ScoreComponent plainCopy() {
-		return new ScoreComponent(this.name, this.selector, this.objective);
-	}
-
 	@Override
 	public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		if (commandSourceStack == null) {
-			return new TextComponent("");
+			return Component.empty();
 		} else {
 			String string = this.findTargetName(commandSourceStack);
 			String string2 = entity != null && string.equals("*") ? entity.getScoreboardName() : string;
-			return new TextComponent(this.getScore(string2, commandSourceStack));
+			return Component.literal(this.getScore(string2, commandSourceStack));
 		}
 	}
 
-	@Override
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
 		} else {
-			return !(object instanceof ScoreComponent scoreComponent)
-				? false
-				: this.name.equals(scoreComponent.name) && this.objective.equals(scoreComponent.objective) && super.equals(object);
+			if (object instanceof ScoreContents scoreContents && this.name.equals(scoreContents.name) && this.objective.equals(scoreContents.objective)) {
+				return true;
+			}
+
+			return false;
 		}
 	}
 
-	@Override
+	public int hashCode() {
+		int i = this.name.hashCode();
+		return 31 * i + this.objective.hashCode();
+	}
+
 	public String toString() {
-		return "ScoreComponent{name='" + this.name + "'objective='" + this.objective + "', siblings=" + this.siblings + ", style=" + this.getStyle() + "}";
+		return "score{name='" + this.name + "', objective='" + this.objective + "'}";
 	}
 }

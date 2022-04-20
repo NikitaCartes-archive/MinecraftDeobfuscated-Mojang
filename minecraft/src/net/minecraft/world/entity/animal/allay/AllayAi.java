@@ -35,13 +35,15 @@ import net.minecraft.world.level.block.Blocks;
 
 public class AllayAi {
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
-	private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_DEPOSIT_TARGET = 1.25F;
-	private static final float SPEED_MULTIPLIER_WHEN_RETRIEVING_ITEM = 2.0F;
-	private static final int MAX_DISTANCE_FOLLOW_TARGET = 16;
+	private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_DEPOSIT_TARGET = 2.25F;
+	private static final float SPEED_MULTIPLIER_WHEN_RETRIEVING_ITEM = 1.75F;
+	private static final int CLOSE_ENOUGH_TO_TARGET = 4;
+	private static final int TOO_FAR_FROM_TARGET = 16;
 	private static final int MAX_LOOK_DISTANCE = 6;
 	private static final int MIN_WAIT_DURATION = 30;
 	private static final int MAX_WAIT_DURATION = 60;
 	private static final int TIME_TO_FORGET_NOTEBLOCK = 600;
+	private static final int DISTANCE_TO_WANDER_ITEM = 32;
 
 	protected static Brain<?> makeBrain(Brain<Allay> brain) {
 		initCoreActivity(brain);
@@ -70,9 +72,9 @@ public class AllayAi {
 		brain.addActivityWithConditions(
 			Activity.IDLE,
 			ImmutableList.of(
-				Pair.of(0, new GoToWantedItem<>(allay -> true, 2.0F, true, 9)),
-				Pair.of(1, new GoAndGiveItemsToTarget<>(AllayAi::getItemDepositPosition, 1.25F)),
-				Pair.of(2, new StayCloseToTarget<>(AllayAi::getItemDepositPosition, 16, 1.25F)),
+				Pair.of(0, new GoToWantedItem<>(allay -> true, 1.75F, true, 32)),
+				Pair.of(1, new GoAndGiveItemsToTarget<>(AllayAi::getItemDepositPosition, 2.25F)),
+				Pair.of(2, new StayCloseToTarget<>(AllayAi::getItemDepositPosition, 4, 16, 2.25F)),
 				Pair.of(3, new RunSometimes<>(new SetEntityLookTarget(livingEntity -> true, 6.0F), UniformInt.of(30, 60))),
 				Pair.of(
 					4,

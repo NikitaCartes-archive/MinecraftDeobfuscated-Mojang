@@ -10,7 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -31,7 +31,7 @@ public class OpenServerTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(new TranslatableComponent("mco.configure.world.opening"));
+		this.setTitle(Component.translatable("mco.configure.world.opening"));
 		RealmsClient realmsClient = RealmsClient.create();
 
 		for (int i = 0; i < 25; i++) {

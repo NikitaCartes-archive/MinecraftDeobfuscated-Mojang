@@ -20,8 +20,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -63,13 +61,13 @@ public class Screenshot {
 				() -> {
 					try {
 						nativeImage.writeToFile(file3);
-						Component component = new TextComponent(file3.getName())
+						Component component = Component.literal(file3.getName())
 							.withStyle(ChatFormatting.UNDERLINE)
 							.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
-						consumer.accept(new TranslatableComponent("screenshot.success", component));
+						consumer.accept(Component.translatable("screenshot.success", component));
 					} catch (Exception var7) {
 						LOGGER.warn("Couldn't save screenshot", (Throwable)var7);
-						consumer.accept(new TranslatableComponent("screenshot.failure", var7.getMessage()));
+						consumer.accept(Component.translatable("screenshot.failure", var7.getMessage()));
 					} finally {
 						nativeImage.close();
 					}

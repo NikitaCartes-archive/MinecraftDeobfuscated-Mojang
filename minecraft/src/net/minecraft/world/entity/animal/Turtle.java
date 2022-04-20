@@ -39,8 +39,8 @@ import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -55,9 +55,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
 
 public class Turtle extends Animal {
@@ -595,20 +593,9 @@ public class Turtle extends Animal {
 		}
 	}
 
-	static class TurtlePathNavigation extends WaterBoundPathNavigation {
+	static class TurtlePathNavigation extends AmphibiousPathNavigation {
 		TurtlePathNavigation(Turtle turtle, Level level) {
 			super(turtle, level);
-		}
-
-		@Override
-		protected boolean canUpdatePath() {
-			return true;
-		}
-
-		@Override
-		protected PathFinder createPathFinder(int i) {
-			this.nodeEvaluator = new AmphibiousNodeEvaluator(true);
-			return new PathFinder(this.nodeEvaluator, i);
 		}
 
 		@Override

@@ -7,11 +7,10 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationSupplier;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public abstract class ObjectSelectionList<E extends ObjectSelectionList.Entry<E>> extends AbstractSelectionList<E> {
-	private static final Component USAGE_NARRATION = new TranslatableComponent("narration.selection.usage");
+	private static final Component USAGE_NARRATION = Component.translatable("narration.selection.usage");
 	private boolean inFocus;
 
 	public ObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {

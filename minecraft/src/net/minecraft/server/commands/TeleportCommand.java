@@ -19,7 +19,7 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,9 +34,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class TeleportCommand {
-	private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(
-		new TranslatableComponent("commands.teleport.invalidPosition")
-	);
+	private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(Component.translatable("commands.teleport.invalidPosition"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register(
@@ -171,11 +169,10 @@ public class TeleportCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.teleport.success.entity.single", ((Entity)collection.iterator().next()).getDisplayName(), entity.getDisplayName()),
-				true
+				Component.translatable("commands.teleport.success.entity.single", ((Entity)collection.iterator().next()).getDisplayName(), entity.getDisplayName()), true
 			);
 		} else {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.teleport.success.entity.multiple", collection.size(), entity.getDisplayName()), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.teleport.success.entity.multiple", collection.size(), entity.getDisplayName()), true);
 		}
 
 		return collection.size();
@@ -227,7 +224,7 @@ public class TeleportCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
+				Component.translatable(
 					"commands.teleport.success.location.single",
 					((Entity)collection.iterator().next()).getDisplayName(),
 					formatDouble(vec3.x),
@@ -238,9 +235,7 @@ public class TeleportCommand {
 			);
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
-					"commands.teleport.success.location.multiple", collection.size(), formatDouble(vec3.x), formatDouble(vec3.y), formatDouble(vec3.z)
-				),
+				Component.translatable("commands.teleport.success.location.multiple", collection.size(), formatDouble(vec3.x), formatDouble(vec3.y), formatDouble(vec3.z)),
 				true
 			);
 		}

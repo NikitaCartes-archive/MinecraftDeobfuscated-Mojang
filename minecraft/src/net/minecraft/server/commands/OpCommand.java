@@ -9,11 +9,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.PlayerList;
 
 public class OpCommand {
-	private static final SimpleCommandExceptionType ERROR_ALREADY_OP = new SimpleCommandExceptionType(new TranslatableComponent("commands.op.failed"));
+	private static final SimpleCommandExceptionType ERROR_ALREADY_OP = new SimpleCommandExceptionType(Component.translatable("commands.op.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -46,7 +46,7 @@ public class OpCommand {
 			if (!playerList.isOp(gameProfile)) {
 				playerList.op(gameProfile);
 				i++;
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.op.success", ((GameProfile)collection.iterator().next()).getName()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.op.success", ((GameProfile)collection.iterator().next()).getName()), true);
 			}
 		}
 

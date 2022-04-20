@@ -12,7 +12,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 public class MsgCommand {
@@ -40,23 +39,20 @@ public class MsgCommand {
 		Consumer<Component> consumer;
 		if (commandSourceStack.getEntity() instanceof ServerPlayer serverPlayer) {
 			consumer = component2 -> serverPlayer.sendMessage(
-					new TranslatableComponent("commands.message.display.outgoing", component2, component)
-						.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
+					Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
 					serverPlayer.getUUID()
 				);
 		} else {
 			consumer = component2 -> commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.message.display.outgoing", component2, component)
-						.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
-					false
+					Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false
 				);
 		}
 
 		for (ServerPlayer serverPlayer2 : collection) {
 			consumer.accept(serverPlayer2.getDisplayName());
 			serverPlayer2.sendMessage(
-				new TranslatableComponent("commands.message.display.incoming", commandSourceStack.getDisplayName(), component)
-					.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
+				Component.translatable("commands.message.display.incoming", commandSourceStack.getDisplayName(), component)
+					.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
 				uUID
 			);
 		}

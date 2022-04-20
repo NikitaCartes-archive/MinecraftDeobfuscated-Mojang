@@ -29,8 +29,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.NativeModuleLister;
@@ -95,12 +93,7 @@ public class KeyboardHandler {
 		this.minecraft
 			.gui
 			.getChat()
-			.addMessage(
-				new TextComponent("")
-					.append(new TranslatableComponent("debug.prefix").withStyle(new ChatFormatting[]{chatFormatting, ChatFormatting.BOLD}))
-					.append(" ")
-					.append(component)
-			);
+			.addMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(chatFormatting, ChatFormatting.BOLD)).append(" ").append(component));
 	}
 
 	private void debugFeedbackComponent(Component component) {
@@ -108,15 +101,15 @@ public class KeyboardHandler {
 	}
 
 	private void debugFeedbackTranslated(String string, Object... objects) {
-		this.debugFeedbackComponent(new TranslatableComponent(string, objects));
+		this.debugFeedbackComponent(Component.translatable(string, objects));
 	}
 
 	private void debugWarningTranslated(String string, Object... objects) {
-		this.debugComponent(ChatFormatting.RED, new TranslatableComponent(string, objects));
+		this.debugComponent(ChatFormatting.RED, Component.translatable(string, objects));
 	}
 
 	private void debugFeedback(String string, Object... objects) {
-		this.debugFeedbackComponent(new TextComponent(MessageFormat.format(string, objects)));
+		this.debugFeedbackComponent(Component.literal(MessageFormat.format(string, objects)));
 	}
 
 	private boolean handleDebugKeys(int i) {
@@ -202,20 +195,20 @@ public class KeyboardHandler {
 				case 81:
 					this.debugFeedbackTranslated("debug.help.message");
 					ChatComponent chatComponent = this.minecraft.gui.getChat();
-					chatComponent.addMessage(new TranslatableComponent("debug.reload_chunks.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.show_hitboxes.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.copy_location.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.clear_chat.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.chunk_boundaries.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.advanced_tooltips.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.inspect.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.profiling.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.creative_spectator.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.pause_focus.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.help.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.reload_resourcepacks.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.pause.help"));
-					chatComponent.addMessage(new TranslatableComponent("debug.gamemodes.help"));
+					chatComponent.addMessage(Component.translatable("debug.reload_chunks.help"));
+					chatComponent.addMessage(Component.translatable("debug.show_hitboxes.help"));
+					chatComponent.addMessage(Component.translatable("debug.copy_location.help"));
+					chatComponent.addMessage(Component.translatable("debug.clear_chat.help"));
+					chatComponent.addMessage(Component.translatable("debug.chunk_boundaries.help"));
+					chatComponent.addMessage(Component.translatable("debug.advanced_tooltips.help"));
+					chatComponent.addMessage(Component.translatable("debug.inspect.help"));
+					chatComponent.addMessage(Component.translatable("debug.profiling.help"));
+					chatComponent.addMessage(Component.translatable("debug.creative_spectator.help"));
+					chatComponent.addMessage(Component.translatable("debug.pause_focus.help"));
+					chatComponent.addMessage(Component.translatable("debug.help.help"));
+					chatComponent.addMessage(Component.translatable("debug.reload_resourcepacks.help"));
+					chatComponent.addMessage(Component.translatable("debug.pause.help"));
+					chatComponent.addMessage(Component.translatable("debug.gamemodes.help"));
 					return true;
 				case 84:
 					this.debugFeedbackTranslated("debug.reload_resourcepacks.message");

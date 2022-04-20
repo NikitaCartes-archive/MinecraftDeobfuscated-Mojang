@@ -20,7 +20,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -60,7 +59,7 @@ public class PlayerTabOverlay extends GuiComponent {
 	public Component getNameForDisplay(PlayerInfo playerInfo) {
 		return playerInfo.getTabListDisplayName() != null
 			? this.decorateName(playerInfo, playerInfo.getTabListDisplayName().copy())
-			: this.decorateName(playerInfo, PlayerTeam.formatNameForTeam(playerInfo.getTeam(), new TextComponent(playerInfo.getProfile().getName())));
+			: this.decorateName(playerInfo, PlayerTeam.formatNameForTeam(playerInfo.getTeam(), Component.literal(playerInfo.getProfile().getName())));
 	}
 
 	private Component decorateName(PlayerInfo playerInfo, MutableComponent mutableComponent) {

@@ -248,7 +248,7 @@ public abstract class RenderTarget {
 		bufferBuilder.vertex((double)f, 0.0, 0.0).uv(h, k).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0F, k).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.end();
-		BufferUploader._endInternal(bufferBuilder);
+		BufferUploader.draw(bufferBuilder);
 		shaderInstance.clear();
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);

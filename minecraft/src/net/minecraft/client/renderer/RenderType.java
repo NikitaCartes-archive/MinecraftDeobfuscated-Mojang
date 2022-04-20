@@ -623,6 +623,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.createCompositeState(false)
 	);
+	private static final ImmutableList<RenderType> CHUNK_BUFFER_LAYERS = ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent(), tripwire());
 	private final VertexFormat format;
 	private final VertexFormat.Mode mode;
 	private final int bufferSize;
@@ -904,7 +905,7 @@ public abstract class RenderType extends RenderStateShard {
 
 			bufferBuilder.end();
 			this.setupRenderState();
-			BufferUploader.end(bufferBuilder);
+			BufferUploader.drawWithShader(bufferBuilder);
 			this.clearRenderState();
 		}
 	}
@@ -915,7 +916,7 @@ public abstract class RenderType extends RenderStateShard {
 	}
 
 	public static List<RenderType> chunkBufferLayers() {
-		return ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent(), tripwire());
+		return CHUNK_BUFFER_LAYERS;
 	}
 
 	public int bufferSize() {

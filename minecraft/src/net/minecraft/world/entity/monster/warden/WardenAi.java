@@ -128,7 +128,18 @@ public class WardenAi {
 	}
 
 	private static void initIdleActivity(Brain<Warden> brain) {
-		brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new SetRoarTarget<>(Warden::getEntityAngryAt), new TryToSniff(), createIdleMovementBehaviors()));
+		brain.addActivity(
+			Activity.IDLE,
+			10,
+			ImmutableList.of(
+				new SetRoarTarget<>(Warden::getEntityAngryAt),
+				new TryToSniff(),
+				new RunOne(
+					ImmutableMap.of(MemoryModuleType.IS_SNIFFING, MemoryStatus.VALUE_ABSENT),
+					ImmutableList.of(Pair.of(new RandomStroll(0.5F), 2), Pair.of(new DoNothing(30, 60), 1))
+				)
+			)
+		);
 	}
 
 	private static void initInvestigateActivity(Brain<Warden> brain) {
@@ -182,10 +193,6 @@ public class WardenAi {
 		setDigCooldown(warden);
 	}
 
-	private static RunOne<Warden> createIdleMovementBehaviors() {
-		return new RunOne<>(ImmutableList.of(Pair.of(new RandomStroll(0.5F), 2), Pair.of(new DoNothing(30, 60), 1)));
-	}
-
 	public static void setDigCooldown(LivingEntity livingEntity) {
 		if (livingEntity.getBrain().hasMemoryValue(MemoryModuleType.DIG_COOLDOWN)) {
 			livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 1200L);
@@ -193,16 +200,14 @@ public class WardenAi {
 	}
 
 	public static void setDisturbanceLocation(Warden warden, BlockPos blockPos) {
-		if (shouldInvestigate(warden)) {
+		if (warden.level.getWorldBorder().isWithinBounds(blockPos)
+			&& !warden.getEntityAngryAt().isPresent()
+			&& !warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
 			setDigCooldown(warden);
 			warden.getBrain().setMemoryWithExpiry(MemoryModuleType.SNIFF_COOLDOWN, Unit.INSTANCE, 100L);
 			warden.getBrain().setMemoryWithExpiry(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(blockPos), 100L);
 			warden.getBrain().setMemoryWithExpiry(MemoryModuleType.DISTURBANCE_LOCATION, blockPos, 100L);
 			warden.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 		}
-	}
-
-	private static boolean shouldInvestigate(Warden warden) {
-		return warden.getEntityAngryAt().isEmpty() && warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty();
 	}
 }

@@ -10,11 +10,10 @@ import com.mojang.brigadier.tree.CommandNode;
 import java.util.Map;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class HelpCommand {
-	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.help.failed"));
+	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.help.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -23,7 +22,7 @@ public class HelpCommand {
 					Map<CommandNode<CommandSourceStack>, String> map = commandDispatcher.getSmartUsage(commandDispatcher.getRoot(), commandContext.getSource());
 
 					for (String string : map.values()) {
-						commandContext.getSource().sendSuccess(new TextComponent("/" + string), false);
+						commandContext.getSource().sendSuccess(Component.literal("/" + string), false);
 					}
 
 					return map.size();
@@ -43,7 +42,7 @@ public class HelpCommand {
 									);
 
 									for (String string : map.values()) {
-										commandContext.getSource().sendSuccess(new TextComponent("/" + parseResults.getReader().getString() + " " + string), false);
+										commandContext.getSource().sendSuccess(Component.literal("/" + parseResults.getReader().getString() + " " + string), false);
 									}
 
 									return map.size();

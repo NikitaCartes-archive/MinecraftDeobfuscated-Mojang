@@ -6,7 +6,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class DisconnectedScreen extends Screen {
@@ -36,7 +35,7 @@ public class DisconnectedScreen extends Screen {
 				Math.min(this.height / 2 + this.textHeight / 2 + 9, this.height - 30),
 				200,
 				20,
-				new TranslatableComponent("gui.toMenu"),
+				Component.translatable("gui.toMenu"),
 				button -> this.minecraft.setScreen(this.parent)
 			)
 		);

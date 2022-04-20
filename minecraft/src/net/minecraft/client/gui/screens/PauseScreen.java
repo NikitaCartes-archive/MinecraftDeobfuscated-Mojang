@@ -11,7 +11,6 @@ import net.minecraft.client.gui.screens.achievement.StatsScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class PauseScreen extends Screen {
@@ -21,7 +20,7 @@ public class PauseScreen extends Screen {
 	private final boolean showPauseMenu;
 
 	public PauseScreen(boolean bl) {
-		super(bl ? new TranslatableComponent("menu.game") : new TranslatableComponent("menu.paused"));
+		super(bl ? Component.translatable("menu.game") : Component.translatable("menu.paused"));
 		this.showPauseMenu = bl;
 	}
 
@@ -35,7 +34,7 @@ public class PauseScreen extends Screen {
 	private void createPauseMenu() {
 		int i = -16;
 		int j = 98;
-		this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 24 + -16, 204, 20, new TranslatableComponent("menu.returnToGame"), buttonx -> {
+		this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 24 + -16, 204, 20, Component.translatable("menu.returnToGame"), buttonx -> {
 			this.minecraft.setScreen(null);
 			this.minecraft.mouseHandler.grabMouse();
 		}));
@@ -45,7 +44,7 @@ public class PauseScreen extends Screen {
 				this.height / 4 + 48 + -16,
 				98,
 				20,
-				new TranslatableComponent("gui.advancements"),
+				Component.translatable("gui.advancements"),
 				buttonx -> this.minecraft.setScreen(new AdvancementsScreen(this.minecraft.player.connection.getAdvancements()))
 			)
 		);
@@ -55,7 +54,7 @@ public class PauseScreen extends Screen {
 				this.height / 4 + 48 + -16,
 				98,
 				20,
-				new TranslatableComponent("gui.stats"),
+				Component.translatable("gui.stats"),
 				buttonx -> this.minecraft.setScreen(new StatsScreen(this, this.minecraft.player.getStats()))
 			)
 		);
@@ -66,7 +65,7 @@ public class PauseScreen extends Screen {
 				this.height / 4 + 72 + -16,
 				98,
 				20,
-				new TranslatableComponent("menu.sendFeedback"),
+				Component.translatable("menu.sendFeedback"),
 				buttonx -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
 						if (bl) {
 							Util.getPlatform().openUri(string);
@@ -82,7 +81,7 @@ public class PauseScreen extends Screen {
 				this.height / 4 + 72 + -16,
 				98,
 				20,
-				new TranslatableComponent("menu.reportBugs"),
+				Component.translatable("menu.reportBugs"),
 				buttonx -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
 						if (bl) {
 							Util.getPlatform().openUri("https://aka.ms/snapshotbugs?ref=game");
@@ -99,7 +98,7 @@ public class PauseScreen extends Screen {
 				this.height / 4 + 96 + -16,
 				98,
 				20,
-				new TranslatableComponent("menu.options"),
+				Component.translatable("menu.options"),
 				buttonx -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))
 			)
 		);
@@ -109,19 +108,19 @@ public class PauseScreen extends Screen {
 				this.height / 4 + 96 + -16,
 				98,
 				20,
-				new TranslatableComponent("menu.shareToLan"),
+				Component.translatable("menu.shareToLan"),
 				buttonx -> this.minecraft.setScreen(new ShareToLanScreen(this))
 			)
 		);
 		button2.active = this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished();
-		Component component = this.minecraft.isLocalServer() ? new TranslatableComponent("menu.returnToMenu") : new TranslatableComponent("menu.disconnect");
+		Component component = this.minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
 		this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, buttonx -> {
 			boolean bl = this.minecraft.isLocalServer();
 			boolean bl2 = this.minecraft.isConnectedToRealms();
 			buttonx.active = false;
 			this.minecraft.level.disconnect();
 			if (bl) {
-				this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
+				this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
 			} else {
 				this.minecraft.clearLevel();
 			}

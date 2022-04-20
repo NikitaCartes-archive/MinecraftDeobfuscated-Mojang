@@ -43,7 +43,7 @@ public class SkeletonTrapGoal extends Goal {
 			AbstractHorse abstractHorse = this.createHorse(difficultyInstance);
 			Skeleton skeleton2 = this.createSkeleton(difficultyInstance, abstractHorse);
 			skeleton2.startRiding(abstractHorse);
-			abstractHorse.push(this.horse.getRandom().nextGaussian() * 0.5, 0.0, this.horse.getRandom().nextGaussian() * 0.5);
+			abstractHorse.push(this.horse.getRandom().triangle(0.0, 1.1485), 0.0, this.horse.getRandom().triangle(0.0, 1.1485));
 			serverLevel.addFreshEntityWithPassengers(abstractHorse);
 		}
 	}

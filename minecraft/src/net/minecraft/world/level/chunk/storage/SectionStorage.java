@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -115,17 +117,19 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	private void readColumn(ChunkPos chunkPos) {
-		this.readColumn(chunkPos, NbtOps.INSTANCE, this.tryRead(chunkPos));
+		Optional<CompoundTag> optional = (Optional<CompoundTag>)this.tryRead(chunkPos).join();
+		this.readColumn(chunkPos, NbtOps.INSTANCE, (Tag)optional.orElse(null));
 	}
 
-	@Nullable
-	private CompoundTag tryRead(ChunkPos chunkPos) {
-		try {
-			return this.worker.load(chunkPos);
-		} catch (IOException var3) {
-			LOGGER.error("Error reading chunk {} data from disk", chunkPos, var3);
-			return null;
-		}
+	private CompletableFuture<Optional<CompoundTag>> tryRead(ChunkPos chunkPos) {
+		return this.worker.loadAsync(chunkPos).exceptionally(throwable -> {
+			if (throwable instanceof IOException iOException) {
+				LOGGER.error("Error reading chunk {} data from disk", chunkPos, iOException);
+				return Optional.empty();
+			} else {
+				throw new CompletionException(throwable);
+			}
+		});
 	}
 
 	private <T> void readColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps, @Nullable T object) {

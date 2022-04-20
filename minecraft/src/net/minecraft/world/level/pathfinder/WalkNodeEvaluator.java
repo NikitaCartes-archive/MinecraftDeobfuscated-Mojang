@@ -96,17 +96,18 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				|| this.hasPositiveMalus(mutableBlockPos.set(aABB.minX, (double)i, aABB.maxZ))
 				|| this.hasPositiveMalus(mutableBlockPos.set(aABB.maxX, (double)i, aABB.minZ))
 				|| this.hasPositiveMalus(mutableBlockPos.set(aABB.maxX, (double)i, aABB.maxZ))) {
-				Node node = this.getNode(mutableBlockPos);
-				node.type = this.getBlockPathType(this.mob, node.asBlockPos());
-				node.costMalus = this.mob.getPathfindingMalus(node.type);
-				return node;
+				return this.getStartNode(mutableBlockPos);
 			}
 		}
 
-		Node node2 = this.getNode(blockPos.getX(), i, blockPos.getZ());
-		node2.type = this.getBlockPathType(this.mob, node2.asBlockPos());
-		node2.costMalus = this.mob.getPathfindingMalus(node2.type);
-		return node2;
+		return this.getStartNode(new BlockPos(blockPos.getX(), i, blockPos.getZ()));
+	}
+
+	protected Node getStartNode(BlockPos blockPos) {
+		Node node = this.getNode(blockPos);
+		node.type = this.getBlockPathType(this.mob, node.asBlockPos());
+		node.costMalus = this.mob.getPathfindingMalus(node.type);
+		return node;
 	}
 
 	private boolean hasPositiveMalus(BlockPos blockPos) {
@@ -192,9 +193,17 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		}
 	}
 
+	private static boolean doesBlockHavePartialCollision(BlockPathTypes blockPathTypes) {
+		return blockPathTypes == BlockPathTypes.FENCE || blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED || blockPathTypes == BlockPathTypes.DOOR_IRON_CLOSED;
+	}
+
 	private boolean canReachWithoutCollision(Node node) {
-		Vec3 vec3 = new Vec3((double)node.x - this.mob.getX(), (double)node.y - this.mob.getY(), (double)node.z - this.mob.getZ());
 		AABB aABB = this.mob.getBoundingBox();
+		Vec3 vec3 = new Vec3(
+			(double)node.x - this.mob.getX() + aABB.getXsize() / 2.0,
+			(double)node.y - this.mob.getY() + aABB.getYsize() / 2.0,
+			(double)node.z - this.mob.getZ() + aABB.getZsize() / 2.0
+		);
 		int i = Mth.ceil(vec3.length() / aABB.getSize());
 		vec3 = vec3.scale((double)(1.0F / (float)i));
 
@@ -239,7 +248,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				node.costMalus = Math.max(node.costMalus, f);
 			}
 
-			if (blockPathTypes == BlockPathTypes.FENCE && node != null && node.costMalus >= 0.0F && !this.canReachWithoutCollision(node)) {
+			if (doesBlockHavePartialCollision(blockPathTypes) && node != null && node.costMalus >= 0.0F && !this.canReachWithoutCollision(node)) {
 				node = null;
 			}
 
@@ -322,7 +331,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 					}
 				}
 
-				if (blockPathTypes2 == BlockPathTypes.FENCE) {
+				if (doesBlockHavePartialCollision(blockPathTypes2)) {
 					node = this.getNode(i, j, k);
 					node.closed = true;
 					node.type = blockPathTypes2;

@@ -21,7 +21,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -31,10 +31,10 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 public class ResourceOrTagLocationArgument<T> implements ArgumentType<ResourceOrTagLocationArgument.Result<T>> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012", "#skeletons", "#minecraft:skeletons");
 	private static final DynamicCommandExceptionType ERROR_INVALID_BIOME = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locatebiome.invalid", object)
+		object -> Component.translatable("commands.locatebiome.invalid", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_INVALID_STRUCTURE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locate.invalid", object)
+		object -> Component.translatable("commands.locate.invalid", object)
 	);
 	final ResourceKey<? extends Registry<T>> registryKey;
 

@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -79,7 +79,7 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 				map -> {
 					Map<ResourceLocation, CompletableFuture<CommandFunction>> map2 = Maps.<ResourceLocation, CompletableFuture<CommandFunction>>newHashMap();
 					CommandSourceStack commandSourceStack = new CommandSourceStack(
-						CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null
+						CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", CommonComponents.EMPTY, null, null
 					);
 
 					for (Entry<ResourceLocation, Resource> entry : map.entrySet()) {

@@ -12,13 +12,12 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 
 public class BanPlayerCommands {
-	private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.ban.failed"));
+	private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.ban.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -51,11 +50,11 @@ public class BanPlayerCommands {
 				userBanList.add(userBanListEntry);
 				i++;
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.ban.success", ComponentUtils.getDisplayName(gameProfile), userBanListEntry.getReason()), true
+					Component.translatable("commands.ban.success", ComponentUtils.getDisplayName(gameProfile), userBanListEntry.getReason()), true
 				);
 				ServerPlayer serverPlayer = commandSourceStack.getServer().getPlayerList().getPlayer(gameProfile.getId());
 				if (serverPlayer != null) {
-					serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.banned"));
+					serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
 				}
 			}
 		}

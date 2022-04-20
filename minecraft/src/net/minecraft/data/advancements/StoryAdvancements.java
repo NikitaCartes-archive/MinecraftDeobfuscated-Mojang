@@ -14,7 +14,7 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -27,8 +27,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 		Advancement advancement = Advancement.Builder.advancement()
 			.display(
 				Blocks.GRASS_BLOCK,
-				new TranslatableComponent("advancements.story.root.title"),
-				new TranslatableComponent("advancements.story.root.description"),
+				Component.translatable("advancements.story.root.title"),
+				Component.translatable("advancements.story.root.description"),
 				new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
 				FrameType.TASK,
 				false,
@@ -41,8 +41,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.WOODEN_PICKAXE,
-				new TranslatableComponent("advancements.story.mine_stone.title"),
-				new TranslatableComponent("advancements.story.mine_stone.description"),
+				Component.translatable("advancements.story.mine_stone.title"),
+				Component.translatable("advancements.story.mine_stone.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -55,8 +55,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.STONE_PICKAXE,
-				new TranslatableComponent("advancements.story.upgrade_tools.title"),
-				new TranslatableComponent("advancements.story.upgrade_tools.description"),
+				Component.translatable("advancements.story.upgrade_tools.title"),
+				Component.translatable("advancements.story.upgrade_tools.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -69,8 +69,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement3)
 			.display(
 				Items.IRON_INGOT,
-				new TranslatableComponent("advancements.story.smelt_iron.title"),
-				new TranslatableComponent("advancements.story.smelt_iron.description"),
+				Component.translatable("advancements.story.smelt_iron.title"),
+				Component.translatable("advancements.story.smelt_iron.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -83,8 +83,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.IRON_PICKAXE,
-				new TranslatableComponent("advancements.story.iron_tools.title"),
-				new TranslatableComponent("advancements.story.iron_tools.description"),
+				Component.translatable("advancements.story.iron_tools.title"),
+				Component.translatable("advancements.story.iron_tools.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -97,8 +97,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement5)
 			.display(
 				Items.DIAMOND,
-				new TranslatableComponent("advancements.story.mine_diamond.title"),
-				new TranslatableComponent("advancements.story.mine_diamond.description"),
+				Component.translatable("advancements.story.mine_diamond.title"),
+				Component.translatable("advancements.story.mine_diamond.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -111,8 +111,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.LAVA_BUCKET,
-				new TranslatableComponent("advancements.story.lava_bucket.title"),
-				new TranslatableComponent("advancements.story.lava_bucket.description"),
+				Component.translatable("advancements.story.lava_bucket.title"),
+				Component.translatable("advancements.story.lava_bucket.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -125,8 +125,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.IRON_CHESTPLATE,
-				new TranslatableComponent("advancements.story.obtain_armor.title"),
-				new TranslatableComponent("advancements.story.obtain_armor.description"),
+				Component.translatable("advancements.story.obtain_armor.title"),
+				Component.translatable("advancements.story.obtain_armor.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -143,8 +143,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement6)
 			.display(
 				Items.ENCHANTED_BOOK,
-				new TranslatableComponent("advancements.story.enchant_item.title"),
-				new TranslatableComponent("advancements.story.enchant_item.description"),
+				Component.translatable("advancements.story.enchant_item.title"),
+				Component.translatable("advancements.story.enchant_item.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -157,8 +157,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement7)
 			.display(
 				Blocks.OBSIDIAN,
-				new TranslatableComponent("advancements.story.form_obsidian.title"),
-				new TranslatableComponent("advancements.story.form_obsidian.description"),
+				Component.translatable("advancements.story.form_obsidian.title"),
+				Component.translatable("advancements.story.form_obsidian.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -171,8 +171,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement8)
 			.display(
 				Items.SHIELD,
-				new TranslatableComponent("advancements.story.deflect_arrow.title"),
-				new TranslatableComponent("advancements.story.deflect_arrow.description"),
+				Component.translatable("advancements.story.deflect_arrow.title"),
+				Component.translatable("advancements.story.deflect_arrow.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -190,8 +190,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement6)
 			.display(
 				Items.DIAMOND_CHESTPLATE,
-				new TranslatableComponent("advancements.story.shiny_gear.title"),
-				new TranslatableComponent("advancements.story.shiny_gear.description"),
+				Component.translatable("advancements.story.shiny_gear.title"),
+				Component.translatable("advancements.story.shiny_gear.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -208,8 +208,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement9)
 			.display(
 				Items.FLINT_AND_STEEL,
-				new TranslatableComponent("advancements.story.enter_the_nether.title"),
-				new TranslatableComponent("advancements.story.enter_the_nether.description"),
+				Component.translatable("advancements.story.enter_the_nether.title"),
+				Component.translatable("advancements.story.enter_the_nether.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -222,8 +222,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement10)
 			.display(
 				Items.GOLDEN_APPLE,
-				new TranslatableComponent("advancements.story.cure_zombie_villager.title"),
-				new TranslatableComponent("advancements.story.cure_zombie_villager.description"),
+				Component.translatable("advancements.story.cure_zombie_villager.title"),
+				Component.translatable("advancements.story.cure_zombie_villager.description"),
 				null,
 				FrameType.GOAL,
 				true,
@@ -236,8 +236,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement10)
 			.display(
 				Items.ENDER_EYE,
-				new TranslatableComponent("advancements.story.follow_ender_eye.title"),
-				new TranslatableComponent("advancements.story.follow_ender_eye.description"),
+				Component.translatable("advancements.story.follow_ender_eye.title"),
+				Component.translatable("advancements.story.follow_ender_eye.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -250,8 +250,8 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement11)
 			.display(
 				Blocks.END_STONE,
-				new TranslatableComponent("advancements.story.enter_the_end.title"),
-				new TranslatableComponent("advancements.story.enter_the_end.description"),
+				Component.translatable("advancements.story.enter_the_end.title"),
+				Component.translatable("advancements.story.enter_the_end.description"),
 				null,
 				FrameType.TASK,
 				true,

@@ -3,7 +3,7 @@ package net.minecraft.server.level.progress;
 import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -36,7 +36,7 @@ public class LoggerChunkProgressListener implements ChunkProgressListener {
 		int i = this.getProgress();
 		if (Util.getMillis() > this.nextTickTime) {
 			this.nextTickTime += 500L;
-			LOGGER.info(new TranslatableComponent("menu.preparingSpawn", Mth.clamp(i, 0, 100)).getString());
+			LOGGER.info(Component.translatable("menu.preparingSpawn", Mth.clamp(i, 0, 100)).getString());
 		}
 	}
 

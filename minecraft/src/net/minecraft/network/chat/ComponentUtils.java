@@ -12,12 +12,14 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.Entity;
 
 public class ComponentUtils {
 	public static final String DEFAULT_SEPARATOR_TEXT = ", ";
-	public static final Component DEFAULT_SEPARATOR = new TextComponent(", ").withStyle(ChatFormatting.GRAY);
-	public static final Component DEFAULT_NO_STYLE_SEPARATOR = new TextComponent(", ");
+	public static final Component DEFAULT_SEPARATOR = Component.literal(", ").withStyle(ChatFormatting.GRAY);
+	public static final Component DEFAULT_NO_STYLE_SEPARATOR = Component.literal(", ");
 
 	public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
 		if (style.isEmpty()) {
@@ -42,9 +44,7 @@ public class ComponentUtils {
 		if (i > 100) {
 			return component.copy();
 		} else {
-			MutableComponent mutableComponent = component instanceof ContextAwareComponent
-				? ((ContextAwareComponent)component).resolve(commandSourceStack, entity, i + 1)
-				: component.plainCopy();
+			MutableComponent mutableComponent = component.getContents().resolve(commandSourceStack, entity, i + 1);
 
 			for (Component component2 : component.getSiblings()) {
 				mutableComponent.append(updateForEntity(commandSourceStack, component2, entity, i + 1));
@@ -69,19 +69,19 @@ public class ComponentUtils {
 
 	public static Component getDisplayName(GameProfile gameProfile) {
 		if (gameProfile.getName() != null) {
-			return new TextComponent(gameProfile.getName());
+			return Component.literal(gameProfile.getName());
 		} else {
-			return gameProfile.getId() != null ? new TextComponent(gameProfile.getId().toString()) : new TextComponent("(unknown)");
+			return gameProfile.getId() != null ? Component.literal(gameProfile.getId().toString()) : Component.literal("(unknown)");
 		}
 	}
 
 	public static Component formatList(Collection<String> collection) {
-		return formatAndSortList(collection, string -> new TextComponent(string).withStyle(ChatFormatting.GREEN));
+		return formatAndSortList(collection, string -> Component.literal(string).withStyle(ChatFormatting.GREEN));
 	}
 
 	public static <T extends Comparable<T>> Component formatAndSortList(Collection<T> collection, Function<T, Component> function) {
 		if (collection.isEmpty()) {
-			return TextComponent.EMPTY;
+			return CommonComponents.EMPTY;
 		} else if (collection.size() == 1) {
 			return (Component)function.apply((Comparable)collection.iterator().next());
 		} else {
@@ -105,11 +105,11 @@ public class ComponentUtils {
 
 	public static <T> MutableComponent formatList(Collection<? extends T> collection, Component component, Function<T, Component> function) {
 		if (collection.isEmpty()) {
-			return new TextComponent("");
+			return Component.empty();
 		} else if (collection.size() == 1) {
 			return ((Component)function.apply(collection.iterator().next())).copy();
 		} else {
-			MutableComponent mutableComponent = new TextComponent("");
+			MutableComponent mutableComponent = Component.empty();
 			boolean bl = true;
 
 			for (T object : collection) {
@@ -126,10 +126,30 @@ public class ComponentUtils {
 	}
 
 	public static MutableComponent wrapInSquareBrackets(Component component) {
-		return new TranslatableComponent("chat.square_brackets", component);
+		return Component.translatable("chat.square_brackets", component);
 	}
 
 	public static Component fromMessage(Message message) {
-		return (Component)(message instanceof Component ? (Component)message : new TextComponent(message.getString()));
+		return (Component)(message instanceof Component ? (Component)message : Component.literal(message.getString()));
+	}
+
+	public static boolean isTranslationResolvable(@Nullable Component component) {
+		if (component instanceof TranslatableContents translatableContents) {
+			String string = translatableContents.getKey();
+			return Language.getInstance().has(string);
+		} else {
+			return true;
+		}
+	}
+
+	@Deprecated(
+		forRemoval = true
+	)
+	public static Component replaceTranslatableKey(Component component, String string, String string2) {
+		if (component instanceof TranslatableContents translatableContents && string.equals(translatableContents.getKey())) {
+			return Component.translatable(string2, translatableContents.getArgs());
+		}
+
+		return component;
 	}
 }

@@ -14,7 +14,7 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class RealmsConnect {
 		final Minecraft minecraft = Minecraft.getInstance();
 		minecraft.setConnectedToRealms(true);
 		minecraft.prepareForMultiplayer();
-		NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("mco.connect.success"));
+		NarratorChatListener.INSTANCE.sayNow(Component.translatable("mco.connect.success"));
 		final String string = serverAddress.getHost();
 		final int i = serverAddress.getPort();
 		(new Thread("Realms-connect-task") {
@@ -81,7 +81,7 @@ public class RealmsConnect {
 						}
 
 						DisconnectedRealmsScreen disconnectedRealmsScreen = new DisconnectedRealmsScreen(
-							RealmsConnect.this.onlineScreen, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string)
+							RealmsConnect.this.onlineScreen, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string)
 						);
 						minecraft.execute(() -> minecraft.setScreen(disconnectedRealmsScreen));
 					}
@@ -93,7 +93,7 @@ public class RealmsConnect {
 	public void abort() {
 		this.aborted = true;
 		if (this.connection != null && this.connection.isConnected()) {
-			this.connection.disconnect(new TranslatableComponent("disconnect.genericReason"));
+			this.connection.disconnect(Component.translatable("disconnect.genericReason"));
 			this.connection.handleDisconnection();
 		}
 	}

@@ -10,8 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -86,7 +84,7 @@ public class FireworkRocketItem extends Item {
 		if (compoundTag != null) {
 			if (compoundTag.contains("Flight", 99)) {
 				list.add(
-					new TranslatableComponent("item.minecraft.firework_rocket.flight")
+					Component.translatable("item.minecraft.firework_rocket.flight")
 						.append(" ")
 						.append(String.valueOf(compoundTag.getByte("Flight")))
 						.withStyle(ChatFormatting.GRAY)
@@ -101,7 +99,7 @@ public class FireworkRocketItem extends Item {
 					FireworkStarItem.appendHoverText(compoundTag2, list2);
 					if (!list2.isEmpty()) {
 						for (int j = 1; j < list2.size(); j++) {
-							list2.set(j, new TextComponent("  ").append((Component)list2.get(j)).withStyle(ChatFormatting.GRAY));
+							list2.set(j, Component.literal("  ").append((Component)list2.get(j)).withStyle(ChatFormatting.GRAY));
 						}
 
 						list.addAll(list2);

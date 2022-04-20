@@ -35,8 +35,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionHand;
@@ -52,8 +50,8 @@ public class BookEditScreen extends Screen {
 	private static final int TEXT_HEIGHT = 128;
 	private static final int IMAGE_WIDTH = 192;
 	private static final int IMAGE_HEIGHT = 192;
-	private static final Component EDIT_TITLE_LABEL = new TranslatableComponent("book.editTitle");
-	private static final Component FINALIZE_WARNING_LABEL = new TranslatableComponent("book.finalizeWarning");
+	private static final Component EDIT_TITLE_LABEL = Component.translatable("book.editTitle");
+	private static final Component FINALIZE_WARNING_LABEL = Component.translatable("book.finalizeWarning");
 	private static final FormattedCharSequence BLACK_CURSOR = FormattedCharSequence.forward("_", Style.EMPTY.withColor(ChatFormatting.BLACK));
 	private static final FormattedCharSequence GRAY_CURSOR = FormattedCharSequence.forward("_", Style.EMPTY.withColor(ChatFormatting.GRAY));
 	private final Player owner;
@@ -85,7 +83,7 @@ public class BookEditScreen extends Screen {
 	private final InteractionHand hand;
 	@Nullable
 	private BookEditScreen.DisplayCache displayCache = BookEditScreen.DisplayCache.EMPTY;
-	private Component pageMsg = TextComponent.EMPTY;
+	private Component pageMsg = CommonComponents.EMPTY;
 	private final Component ownerText;
 
 	public BookEditScreen(Player player, ItemStack itemStack, InteractionHand interactionHand) {
@@ -102,7 +100,7 @@ public class BookEditScreen extends Screen {
 			this.pages.add("");
 		}
 
-		this.ownerText = new TranslatableComponent("book.byAuthor", player.getName()).withStyle(ChatFormatting.DARK_GRAY);
+		this.ownerText = Component.translatable("book.byAuthor", player.getName()).withStyle(ChatFormatting.DARK_GRAY);
 	}
 
 	private void setClipboard(String string) {
@@ -129,7 +127,7 @@ public class BookEditScreen extends Screen {
 	protected void init() {
 		this.clearDisplayCache();
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.signButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, new TranslatableComponent("book.signButton"), button -> {
+		this.signButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, Component.translatable("book.signButton"), button -> {
 			this.isSigning = true;
 			this.updateButtonVisibility();
 		}));
@@ -137,7 +135,7 @@ public class BookEditScreen extends Screen {
 			this.minecraft.setScreen(null);
 			this.saveChanges(false);
 		}));
-		this.finalizeButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, new TranslatableComponent("book.finalizeButton"), button -> {
+		this.finalizeButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, Component.translatable("book.finalizeButton"), button -> {
 			if (this.isSigning) {
 				this.saveChanges(true);
 				this.minecraft.setScreen(null);
@@ -530,7 +528,7 @@ public class BookEditScreen extends Screen {
 	private BookEditScreen.DisplayCache getDisplayCache() {
 		if (this.displayCache == null) {
 			this.displayCache = this.rebuildDisplayCache();
-			this.pageMsg = new TranslatableComponent("book.pageIndicator", this.currentPage + 1, this.getNumPages());
+			this.pageMsg = Component.translatable("book.pageIndicator", this.currentPage + 1, this.getNumPages());
 		}
 
 		return this.displayCache;
@@ -704,7 +702,7 @@ public class BookEditScreen extends Screen {
 			this.contents = string;
 			this.x = i;
 			this.y = j;
-			this.asComponent = new TextComponent(string).setStyle(style);
+			this.asComponent = Component.literal(string).setStyle(style);
 		}
 	}
 

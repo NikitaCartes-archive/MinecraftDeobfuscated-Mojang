@@ -2,7 +2,6 @@ package net.minecraft.world.damagesource;
 
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,8 +36,8 @@ public class EntityDamageSource extends DamageSource {
 		ItemStack itemStack = this.entity instanceof LivingEntity ? ((LivingEntity)this.entity).getMainHandItem() : ItemStack.EMPTY;
 		String string = "death.attack." + this.msgId;
 		return !itemStack.isEmpty() && itemStack.hasCustomHoverName()
-			? new TranslatableComponent(string + ".item", livingEntity.getDisplayName(), this.entity.getDisplayName(), itemStack.getDisplayName())
-			: new TranslatableComponent(string, livingEntity.getDisplayName(), this.entity.getDisplayName());
+			? Component.translatable(string + ".item", livingEntity.getDisplayName(), this.entity.getDisplayName(), itemStack.getDisplayName())
+			: Component.translatable(string, livingEntity.getDisplayName(), this.entity.getDisplayName());
 	}
 
 	@Override

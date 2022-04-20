@@ -45,8 +45,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
@@ -73,13 +71,13 @@ import org.slf4j.Logger;
 public class CreateWorldScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String TEMP_WORLD_PREFIX = "mcworld-";
-	private static final Component GAME_MODEL_LABEL = new TranslatableComponent("selectWorld.gameMode");
-	private static final Component SEED_LABEL = new TranslatableComponent("selectWorld.enterSeed");
-	private static final Component SEED_INFO = new TranslatableComponent("selectWorld.seedInfo");
-	private static final Component NAME_LABEL = new TranslatableComponent("selectWorld.enterName");
-	private static final Component OUTPUT_DIR_INFO = new TranslatableComponent("selectWorld.resultFolder");
-	private static final Component COMMANDS_INFO = new TranslatableComponent("selectWorld.allowCommands.info");
-	private static final Component PREPARING_WORLD_DATA = new TranslatableComponent("createWorld.preparing");
+	private static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
+	private static final Component SEED_LABEL = Component.translatable("selectWorld.enterSeed");
+	private static final Component SEED_INFO = Component.translatable("selectWorld.seedInfo");
+	private static final Component NAME_LABEL = Component.translatable("selectWorld.enterName");
+	private static final Component OUTPUT_DIR_INFO = Component.translatable("selectWorld.resultFolder");
+	private static final Component COMMANDS_INFO = Component.translatable("selectWorld.allowCommands.info");
+	private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
 	@Nullable
 	private final Screen lastScreen;
 	private EditBox nameEdit;
@@ -164,7 +162,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private CreateWorldScreen(@Nullable Screen screen, DataPackConfig dataPackConfig, WorldGenSettingsComponent worldGenSettingsComponent) {
-		super(new TranslatableComponent("selectWorld.create"));
+		super(Component.translatable("selectWorld.create"));
 		this.lastScreen = screen;
 		this.initName = I18n.get("selectWorld.newWorld");
 		this.dataPacks = dataPackConfig;
@@ -180,10 +178,10 @@ public class CreateWorldScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, new TranslatableComponent("selectWorld.enterName")) {
+		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, Component.translatable("selectWorld.enterName")) {
 			@Override
 			protected MutableComponent createNarrationMessage() {
-				return CommonComponents.joinForNarration(super.createNarrationMessage(), new TranslatableComponent("selectWorld.resultFolder"))
+				return CommonComponents.joinForNarration(super.createNarrationMessage(), Component.translatable("selectWorld.resultFolder"))
 					.append(" ")
 					.append(CreateWorldScreen.this.resultFolder);
 			}
@@ -214,20 +212,20 @@ public class CreateWorldScreen extends Screen {
 			CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
 				.withValues(Difficulty.values())
 				.withInitialValue(this.getEffectiveDifficulty())
-				.create(j, 100, 150, 20, new TranslatableComponent("options.difficulty"), (cycleButton, difficulty) -> this.difficulty = difficulty)
+				.create(j, 100, 150, 20, Component.translatable("options.difficulty"), (cycleButton, difficulty) -> this.difficulty = difficulty)
 		);
 		this.commandsButton = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.commands && !this.hardCore)
 				.withCustomNarration(
-					cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), new TranslatableComponent("selectWorld.allowCommands.info"))
+					cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.allowCommands.info"))
 				)
-				.create(i, 151, 150, 20, new TranslatableComponent("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
+				.create(i, 151, 150, 20, Component.translatable("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
 					this.commandsChanged = true;
 					this.commands = boolean_;
 				})
 		);
 		this.dataPacksButton = this.addRenderableWidget(
-			new Button(j, 151, 150, 20, new TranslatableComponent("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen())
+			new Button(j, 151, 150, 20, Component.translatable("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen())
 		);
 		this.gameRulesButton = this.addRenderableWidget(
 			new Button(
@@ -235,7 +233,7 @@ public class CreateWorldScreen extends Screen {
 				185,
 				150,
 				20,
-				new TranslatableComponent("selectWorld.gameRules"),
+				Component.translatable("selectWorld.gameRules"),
 				button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
 						this.minecraft.setScreen(this);
 						optional.ifPresent(gameRules -> this.gameRules = gameRules);
@@ -244,10 +242,10 @@ public class CreateWorldScreen extends Screen {
 		);
 		this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
 		this.moreOptionsButton = this.addRenderableWidget(
-			new Button(j, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility())
+			new Button(j, 185, 150, 20, Component.translatable("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility())
 		);
 		this.createButton = this.addRenderableWidget(
-			new Button(i, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate())
+			new Button(i, this.height - 28, 150, 20, Component.translatable("selectWorld.create"), button -> this.onCreate())
 		);
 		this.createButton.active = !this.initName.isEmpty();
 		this.addRenderableWidget(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.popScreen()));
@@ -262,8 +260,8 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private void updateGameModeHelp() {
-		this.gameModeHelp1 = new TranslatableComponent("selectWorld.gameMode." + this.gameMode.name + ".line1");
-		this.gameModeHelp2 = new TranslatableComponent("selectWorld.gameMode." + this.gameMode.name + ".line2");
+		this.gameModeHelp1 = Component.translatable("selectWorld.gameMode." + this.gameMode.name + ".line1");
+		this.gameModeHelp2 = Component.translatable("selectWorld.gameMode." + this.gameMode.name + ".line2");
 	}
 
 	private void updateResultFolder() {
@@ -389,7 +387,7 @@ public class CreateWorldScreen extends Screen {
 		if (bl) {
 			this.moreOptionsButton.setMessage(CommonComponents.GUI_DONE);
 		} else {
-			this.moreOptionsButton.setMessage(new TranslatableComponent("selectWorld.moreWorldOptions"));
+			this.moreOptionsButton.setMessage(Component.translatable("selectWorld.moreWorldOptions"));
 		}
 
 		this.gameRulesButton.visible = !bl;
@@ -431,7 +429,7 @@ public class CreateWorldScreen extends Screen {
 			this.worldGenSettingsComponent.render(poseStack, i, j, f);
 		} else {
 			drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 100, 47, -6250336);
-			drawString(poseStack, this.font, new TextComponent("").append(OUTPUT_DIR_INFO).append(" ").append(this.resultFolder), this.width / 2 - 100, 85, -6250336);
+			drawString(poseStack, this.font, Component.empty().append(OUTPUT_DIR_INFO).append(" ").append(this.resultFolder), this.width / 2 - 100, 85, -6250336);
 			this.nameEdit.render(poseStack, i, j, f);
 			drawString(poseStack, this.font, this.gameModeHelp1, this.width / 2 - 150, 122, -6250336);
 			drawString(poseStack, this.font, this.gameModeHelp2, this.width / 2 - 150, 134, -6250336);
@@ -472,7 +470,7 @@ public class CreateWorldScreen extends Screen {
 		Pair<File, PackRepository> pair = this.getDataPackSelectionSettings();
 		if (pair != null) {
 			this.minecraft
-				.setScreen(new PackSelectionScreen(this, pair.getSecond(), this::tryApplyNewDataPacks, pair.getFirst(), new TranslatableComponent("dataPack.title")));
+				.setScreen(new PackSelectionScreen(this, pair.getSecond(), this::tryApplyNewDataPacks, pair.getFirst(), Component.translatable("dataPack.title")));
 		}
 	}
 
@@ -486,7 +484,7 @@ public class CreateWorldScreen extends Screen {
 		if (list.equals(this.dataPacks.getEnabled())) {
 			this.dataPacks = dataPackConfig;
 		} else {
-			this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(new TranslatableComponent("dataPack.validation.working"))));
+			this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(Component.translatable("dataPack.validation.working"))));
 			WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, dataPackConfig);
 			WorldLoader.<Pair, WorldCreationContext>load(
 					initConfig,
@@ -542,10 +540,10 @@ public class CreateWorldScreen extends Screen {
 															this.minecraft.setScreen(this);
 														}
 													},
-													new TranslatableComponent("dataPack.validation.failed"),
-													TextComponent.EMPTY,
-													new TranslatableComponent("dataPack.validation.back"),
-													new TranslatableComponent("dataPack.validation.reset")
+													Component.translatable("dataPack.validation.failed"),
+													CommonComponents.EMPTY,
+													Component.translatable("dataPack.validation.back"),
+													Component.translatable("dataPack.validation.reset")
 												)
 											)
 								);
@@ -733,7 +731,7 @@ public class CreateWorldScreen extends Screen {
 		private SelectedGameMode(String string2, GameType gameType) {
 			this.name = string2;
 			this.gameType = gameType;
-			this.displayName = new TranslatableComponent("selectWorld.gameMode." + string2);
+			this.displayName = Component.translatable("selectWorld.gameMode." + string2);
 		}
 
 		public Component getDisplayName() {

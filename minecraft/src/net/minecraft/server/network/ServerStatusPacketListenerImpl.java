@@ -2,7 +2,6 @@ package net.minecraft.server.network;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatusPacketListener;
@@ -11,7 +10,7 @@ import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import net.minecraft.server.MinecraftServer;
 
 public class ServerStatusPacketListenerImpl implements ServerStatusPacketListener {
-	private static final Component DISCONNECT_REASON = new TranslatableComponent("multiplayer.status.request_handled");
+	private static final Component DISCONNECT_REASON = Component.translatable("multiplayer.status.request_handled");
 	private final MinecraftServer server;
 	private final Connection connection;
 	private boolean hasRequestedStatus;

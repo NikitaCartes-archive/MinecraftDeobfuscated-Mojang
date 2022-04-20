@@ -23,8 +23,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -43,7 +42,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(new TranslatableComponent("mco.connect.connecting"));
+		this.setTitle(Component.translatable("mco.connect.connecting"));
 
 		RealmsServerAddress realmsServerAddress;
 		try {
@@ -62,7 +61,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 						(Screen)(bl
 							? new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id, this.server.worldType == RealmsServer.WorldType.MINIGAME)
 							: new RealmsGenericErrorScreen(
-								new TranslatableComponent("mco.brokenworld.nonowner.title"), new TranslatableComponent("mco.brokenworld.nonowner.error"), this.lastScreen
+								Component.translatable("mco.brokenworld.nonowner.title"), Component.translatable("mco.brokenworld.nonowner.error"), this.lastScreen
 							))
 					);
 					return;
@@ -72,7 +71,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 					return;
 			}
 		} catch (TimeoutException var6) {
-			this.error(new TranslatableComponent("mco.errorMessage.connectionFailure"));
+			this.error(Component.translatable("mco.errorMessage.connectionFailure"));
 			return;
 		} catch (Exception var7) {
 			LOGGER.error("Couldn't connect to world", (Throwable)var7);
@@ -118,7 +117,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 					this.scheduleResourcePackDownload(realmsServerAddress).thenRun(() -> setScreen((Screen)function.apply(realmsServerAddress))).exceptionally(throwable -> {
 						Minecraft.getInstance().getClientPackSource().clearServerPack();
 						LOGGER.error("Failed to download resource pack from {}", realmsServerAddress, throwable);
-						setScreen(new RealmsGenericErrorScreen(new TextComponent("Failed to download resource pack!"), this.lastScreen));
+						setScreen(new RealmsGenericErrorScreen(Component.literal("Failed to download resource pack!"), this.lastScreen));
 						return null;
 					});
 					return;
@@ -134,8 +133,8 @@ public class GetServerDetailsTask extends LongRunningTask {
 		return new RealmsLongConfirmationScreen(
 			booleanConsumer,
 			RealmsLongConfirmationScreen.Type.Info,
-			new TranslatableComponent("mco.configure.world.resourcepack.question.line1"),
-			new TranslatableComponent("mco.configure.world.resourcepack.question.line2"),
+			Component.translatable("mco.configure.world.resourcepack.question.line1"),
+			Component.translatable("mco.configure.world.resourcepack.question.line2"),
 			true
 		);
 	}

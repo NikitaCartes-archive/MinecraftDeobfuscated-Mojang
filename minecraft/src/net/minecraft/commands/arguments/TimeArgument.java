@@ -14,13 +14,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 public class TimeArgument implements ArgumentType<Integer> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("0d", "0s", "0t", "0");
-	private static final SimpleCommandExceptionType ERROR_INVALID_UNIT = new SimpleCommandExceptionType(new TranslatableComponent("argument.time.invalid_unit"));
+	private static final SimpleCommandExceptionType ERROR_INVALID_UNIT = new SimpleCommandExceptionType(Component.translatable("argument.time.invalid_unit"));
 	private static final DynamicCommandExceptionType ERROR_INVALID_TICK_COUNT = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.time.invalid_tick_count", object)
+		object -> Component.translatable("argument.time.invalid_tick_count", object)
 	);
 	private static final Object2IntMap<String> UNITS = new Object2IntOpenHashMap<>();
 

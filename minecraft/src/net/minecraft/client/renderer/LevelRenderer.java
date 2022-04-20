@@ -87,7 +87,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.server.level.ChunkMap;
@@ -106,7 +105,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -542,7 +540,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					.getResourceManager()
 					.listPacks()
 					.findFirst()
-					.map(packResources -> new TextComponent(packResources.getName()))
+					.map(packResources -> Component.literal(packResources.getName()))
 					.orElse(null);
 				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
 				this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
@@ -598,7 +596,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		this.darkBuffer = new VertexBuffer();
 		buildSkyDisc(bufferBuilder, -16.0F);
+		this.darkBuffer.bind();
 		this.darkBuffer.upload(bufferBuilder);
+		VertexBuffer.unbind();
 	}
 
 	private void createLightSky() {
@@ -610,7 +610,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		this.skyBuffer = new VertexBuffer();
 		buildSkyDisc(bufferBuilder, 16.0F);
+		this.skyBuffer.bind();
 		this.skyBuffer.upload(bufferBuilder);
+		VertexBuffer.unbind();
 	}
 
 	private static void buildSkyDisc(BufferBuilder bufferBuilder, float f) {
@@ -641,7 +643,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		this.starBuffer = new VertexBuffer();
 		this.drawStars(bufferBuilder);
 		bufferBuilder.end();
+		this.starBuffer.bind();
 		this.starBuffer.upload(bufferBuilder);
+		VertexBuffer.unbind();
 	}
 
 	private void drawStars(BufferBuilder bufferBuilder) {
@@ -1459,9 +1463,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		this.minecraft.getProfiler().popPush((Supplier<String>)(() -> "render_" + renderType));
 		boolean bl = renderType != RenderType.translucent();
 		ObjectListIterator<LevelRenderer.RenderChunkInfo> objectListIterator = this.renderChunksInFrustum.listIterator(bl ? 0 : this.renderChunksInFrustum.size());
-		VertexFormat vertexFormat = renderType.format();
 		ShaderInstance shaderInstance = RenderSystem.getShader();
-		BufferUploader.reset();
 
 		for (int k = 0; k < 12; k++) {
 			int l = RenderSystem.getShaderTexture(k);
@@ -1507,7 +1509,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		RenderSystem.setupShaderLights(shaderInstance);
 		shaderInstance.apply();
 		Uniform uniform = shaderInstance.CHUNK_OFFSET;
-		boolean bl2 = false;
 
 		while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
 			LevelRenderer.RenderChunkInfo renderChunkInfo2 = bl ? (LevelRenderer.RenderChunkInfo)objectListIterator.next() : objectListIterator.previous();
@@ -1520,8 +1521,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					uniform.upload();
 				}
 
-				vertexBuffer.drawChunkLayer();
-				bl2 = true;
+				vertexBuffer.bind();
+				vertexBuffer.draw();
 			}
 		}
 
@@ -1530,12 +1531,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 
 		shaderInstance.clear();
-		if (bl2) {
-			vertexFormat.clearBufferState();
-		}
-
 		VertexBuffer.unbind();
-		VertexBuffer.unbindVertexArray();
 		this.minecraft.getProfiler().pop();
 		renderType.clearRenderState();
 	}
@@ -1843,7 +1839,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					RenderSystem.depthMask(false);
 					RenderSystem.setShaderColor(g, h, i, 1.0F);
 					ShaderInstance shaderInstance = RenderSystem.getShader();
+					this.skyBuffer.bind();
 					this.skyBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
+					VertexBuffer.unbind();
 					RenderSystem.enableBlend();
 					RenderSystem.defaultBlendFunc();
 					float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
@@ -1872,7 +1870,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						}
 
 						bufferBuilder.end();
-						BufferUploader.end(bufferBuilder);
+						BufferUploader.drawWithShader(bufferBuilder);
 						poseStack.popPose();
 					}
 
@@ -1895,7 +1893,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					bufferBuilder.vertex(matrix4f3, l, 100.0F, l).uv(1.0F, 1.0F).endVertex();
 					bufferBuilder.vertex(matrix4f3, -l, 100.0F, l).uv(0.0F, 1.0F).endVertex();
 					bufferBuilder.end();
-					BufferUploader.end(bufferBuilder);
+					BufferUploader.drawWithShader(bufferBuilder);
 					l = 20.0F;
 					RenderSystem.setShaderTexture(0, MOON_LOCATION);
 					int s = this.level.getMoonPhase();
@@ -1911,13 +1909,15 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					bufferBuilder.vertex(matrix4f3, l, -100.0F, -l).uv(u, p).endVertex();
 					bufferBuilder.vertex(matrix4f3, -l, -100.0F, -l).uv(q, p).endVertex();
 					bufferBuilder.end();
-					BufferUploader.end(bufferBuilder);
+					BufferUploader.drawWithShader(bufferBuilder);
 					RenderSystem.disableTexture();
 					float v = this.level.getStarBrightness(f) * j;
 					if (v > 0.0F) {
 						RenderSystem.setShaderColor(v, v, v, v);
 						FogRenderer.setupNoFog();
+						this.starBuffer.bind();
 						this.starBuffer.drawWithShader(poseStack.last().pose(), matrix4f, GameRenderer.getPositionShader());
+						VertexBuffer.unbind();
 						runnable.run();
 					}
 
@@ -1930,7 +1930,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					if (d < 0.0) {
 						poseStack.pushPose();
 						poseStack.translate(0.0, 12.0, 0.0);
+						this.darkBuffer.bind();
 						this.darkBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
+						VertexBuffer.unbind();
 						poseStack.popPose();
 					}
 
@@ -1999,7 +2001,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.cloudBuffer = new VertexBuffer();
 				this.buildClouds(bufferBuilder, m, n, o, vec3);
 				bufferBuilder.end();
+				this.cloudBuffer.bind();
 				this.cloudBuffer.upload(bufferBuilder);
+				VertexBuffer.unbind();
 			}
 
 			RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
@@ -2009,6 +2013,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			poseStack.scale(12.0F, 1.0F, 12.0F);
 			poseStack.translate((double)(-p), (double)q, (double)(-r));
 			if (this.cloudBuffer != null) {
+				this.cloudBuffer.bind();
 				int v = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1;
 
 				for (int w = v; w < 2; w++) {
@@ -2021,6 +2026,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					ShaderInstance shaderInstance = RenderSystem.getShader();
 					this.cloudBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
 				}
+
+				VertexBuffer.unbind();
 			}
 
 			poseStack.popPose();
@@ -2376,7 +2383,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			}
 
 			bufferBuilder.end();
-			BufferUploader.end(bufferBuilder);
+			BufferUploader.drawWithShader(bufferBuilder);
 			RenderSystem.enableCull();
 			RenderSystem.polygonOffset(0.0F, 0.0F);
 			RenderSystem.disablePolygonOffset();
@@ -2703,7 +2710,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 	}
 
-	public void levelEvent(Player player, int i, BlockPos blockPos, int j) {
+	public void levelEvent(int i, BlockPos blockPos, int j) {
 		RandomSource randomSource = this.level.random;
 		switch (i) {
 			case 1000:
@@ -3132,20 +3139,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, x, y, false);
 					}
 
-					int lx = j & 63;
+					byte b = (byte)(j & 63);
 					IntProvider intProvider = UniformInt.of(0, k);
 					float ae = 0.005F;
 					Supplier<Vec3> supplier = () -> new Vec3(
 							Mth.nextDouble(randomSource, -0.005F, 0.005F), Mth.nextDouble(randomSource, -0.005F, 0.005F), Mth.nextDouble(randomSource, -0.005F, 0.005F)
 						);
-					if (lx == 0) {
+					if (b == 0) {
 						for (Direction direction2 : Direction.values()) {
 							float af = direction2 == Direction.DOWN ? (float) Math.PI : 0.0F;
 							double g = direction2.getAxis() == Direction.Axis.Y ? 0.65 : 0.57;
 							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(af), intProvider, direction2, supplier, g);
 						}
 					} else {
-						for (Direction direction3 : MultifaceBlock.unpack((byte)j)) {
+						for (Direction direction3 : MultifaceBlock.unpack(b)) {
 							float ag = direction3 == Direction.UP ? (float) Math.PI : 0.0F;
 							double ah = 0.35;
 							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(ag), intProvider, direction3, supplier, 0.35);
@@ -3201,9 +3208,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						0.6F + this.level.random.nextFloat() * 0.4F,
 						false
 					);
-				break;
-			case 3008:
-				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.ALLAY_DUST, UniformInt.of(3, 5));
 		}
 	}
 

@@ -140,27 +140,27 @@ public class Items {
 	public static final Item STRIPPED_JUNGLE_LOG = registerBlock(Blocks.STRIPPED_JUNGLE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_ACACIA_LOG = registerBlock(Blocks.STRIPPED_ACACIA_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_DARK_OAK_LOG = registerBlock(Blocks.STRIPPED_DARK_OAK_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item STRIPPED_MANGROVE_LOG = registerBlock(Blocks.STRIPPED_MANGROVE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_CRIMSON_STEM = registerBlock(Blocks.STRIPPED_CRIMSON_STEM, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_WARPED_STEM = registerBlock(Blocks.STRIPPED_WARPED_STEM, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item STRIPPED_MANGROVE_LOG = registerBlock(Blocks.STRIPPED_MANGROVE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_OAK_WOOD = registerBlock(Blocks.STRIPPED_OAK_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_SPRUCE_WOOD = registerBlock(Blocks.STRIPPED_SPRUCE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_BIRCH_WOOD = registerBlock(Blocks.STRIPPED_BIRCH_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_JUNGLE_WOOD = registerBlock(Blocks.STRIPPED_JUNGLE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_ACACIA_WOOD = registerBlock(Blocks.STRIPPED_ACACIA_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_DARK_OAK_WOOD = registerBlock(Blocks.STRIPPED_DARK_OAK_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item STRIPPED_MANGROVE_WOOD = registerBlock(Blocks.STRIPPED_MANGROVE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_CRIMSON_HYPHAE = registerBlock(Blocks.STRIPPED_CRIMSON_HYPHAE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item STRIPPED_WARPED_HYPHAE = registerBlock(Blocks.STRIPPED_WARPED_HYPHAE, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item STRIPPED_MANGROVE_WOOD = registerBlock(Blocks.STRIPPED_MANGROVE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item OAK_WOOD = registerBlock(Blocks.OAK_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item SPRUCE_WOOD = registerBlock(Blocks.SPRUCE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item BIRCH_WOOD = registerBlock(Blocks.BIRCH_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item JUNGLE_WOOD = registerBlock(Blocks.JUNGLE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item ACACIA_WOOD = registerBlock(Blocks.ACACIA_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item DARK_OAK_WOOD = registerBlock(Blocks.DARK_OAK_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item MANGROVE_WOOD = registerBlock(Blocks.MANGROVE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item CRIMSON_HYPHAE = registerBlock(Blocks.CRIMSON_HYPHAE, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item WARPED_HYPHAE = registerBlock(Blocks.WARPED_HYPHAE, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item MANGROVE_WOOD = registerBlock(Blocks.MANGROVE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item OAK_LEAVES = registerBlock(Blocks.OAK_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SPRUCE_LEAVES = registerBlock(Blocks.SPRUCE_LEAVES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BIRCH_LEAVES = registerBlock(Blocks.BIRCH_LEAVES, CreativeModeTab.TAB_DECORATIONS);
@@ -1632,9 +1632,13 @@ public class Items {
 		"music_disc_otherside",
 		new RecordItem(14, SoundEvents.MUSIC_DISC_OTHERSIDE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
 	);
+	public static final Item MUSIC_DISC_5 = registerItem(
+		"music_disc_5", new RecordItem(15, SoundEvents.MUSIC_DISC_5, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
+	);
 	public static final Item MUSIC_DISC_PIGSTEP = registerItem(
 		"music_disc_pigstep", new RecordItem(13, SoundEvents.MUSIC_DISC_PIGSTEP, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
 	);
+	public static final Item DISC_FRAGMENT_5 = registerItem("disc_fragment_5", new DiscFragmentItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item TRIDENT = registerItem("trident", new TridentItem(new Item.Properties().durability(250).tab(CreativeModeTab.TAB_COMBAT)));
 	public static final Item PHANTOM_MEMBRANE = registerItem("phantom_membrane", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
 	public static final Item NAUTILUS_SHELL = registerItem("nautilus_shell", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));

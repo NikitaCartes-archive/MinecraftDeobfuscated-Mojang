@@ -47,13 +47,13 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 	public CompletableFuture<ChunkEntities<Entity>> loadEntities(ChunkPos chunkPos) {
 		return this.emptyChunks.contains(chunkPos.toLong())
 			? CompletableFuture.completedFuture(emptyChunk(chunkPos))
-			: this.worker.loadAsync(chunkPos).thenApplyAsync(compoundTag -> {
-				if (compoundTag == null) {
+			: this.worker.loadAsync(chunkPos).thenApplyAsync(optional -> {
+				if (optional.isEmpty()) {
 					this.emptyChunks.add(chunkPos.toLong());
 					return emptyChunk(chunkPos);
 				} else {
 					try {
-						ChunkPos chunkPos2 = readChunkPos(compoundTag);
+						ChunkPos chunkPos2 = readChunkPos((CompoundTag)optional.get());
 						if (!Objects.equals(chunkPos, chunkPos2)) {
 							LOGGER.error("Chunk file at {} is in the wrong location. (Expected {}, got {})", chunkPos, chunkPos, chunkPos2);
 						}
@@ -61,8 +61,8 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 						LOGGER.warn("Failed to parse chunk {} position info", chunkPos, var6);
 					}
 
-					CompoundTag compoundTag2 = this.upgradeChunkTag(compoundTag);
-					ListTag listTag = compoundTag2.getList("Entities", 10);
+					CompoundTag compoundTag = this.upgradeChunkTag((CompoundTag)optional.get());
+					ListTag listTag = compoundTag.getList("Entities", 10);
 					List<Entity> list = (List<Entity>)EntityType.loadEntitiesRecursive(listTag, this.level).collect(ImmutableList.toImmutableList());
 					return new ChunkEntities(chunkPos, list);
 				}

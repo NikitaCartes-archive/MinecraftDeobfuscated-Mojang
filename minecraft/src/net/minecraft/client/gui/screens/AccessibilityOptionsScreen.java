@@ -7,7 +7,7 @@ import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
@@ -34,7 +34,7 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 	}
 
 	public AccessibilityOptionsScreen(Screen screen, Options options) {
-		super(screen, options, new TranslatableComponent("options.accessibility.title"), options(options));
+		super(screen, options, Component.translatable("options.accessibility.title"), options(options));
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 				this.height - 27,
 				150,
 				20,
-				new TranslatableComponent("options.accessibility.link"),
+				Component.translatable("options.accessibility.link"),
 				button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
 						if (bl) {
 							Util.getPlatform().openUri("https://aka.ms/MinecraftJavaAccessibility");

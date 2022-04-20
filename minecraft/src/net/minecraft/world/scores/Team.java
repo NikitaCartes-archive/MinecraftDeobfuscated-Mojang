@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public abstract class Team {
 	public boolean isAlliedTo(@Nullable Team team) {
@@ -55,7 +54,7 @@ public abstract class Team {
 		}
 
 		public Component getDisplayName() {
-			return new TranslatableComponent("team.collision." + this.name);
+			return Component.translatable("team.collision." + this.name);
 		}
 	}
 
@@ -85,7 +84,7 @@ public abstract class Team {
 		}
 
 		public Component getDisplayName() {
-			return new TranslatableComponent("team.visibility." + this.name);
+			return Component.translatable("team.visibility." + this.name);
 		}
 	}
 }

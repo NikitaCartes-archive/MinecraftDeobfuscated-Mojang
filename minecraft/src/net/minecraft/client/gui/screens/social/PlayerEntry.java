@@ -20,10 +20,9 @@ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
@@ -47,11 +46,11 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	final List<FormattedCharSequence> hideTooltip;
 	final List<FormattedCharSequence> showTooltip;
 	float tooltipHoverTime;
-	private static final Component HIDDEN = new TranslatableComponent("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
-	private static final Component BLOCKED = new TranslatableComponent("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
-	private static final Component OFFLINE = new TranslatableComponent("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
-	private static final Component HIDDEN_OFFLINE = new TranslatableComponent("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
-	private static final Component BLOCKED_OFFLINE = new TranslatableComponent("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
+	private static final Component HIDDEN = Component.translatable("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
+	private static final Component BLOCKED = Component.translatable("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
+	private static final Component OFFLINE = Component.translatable("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
+	private static final Component HIDDEN_OFFLINE = Component.translatable("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
+	private static final Component BLOCKED_OFFLINE = Component.translatable("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
 	private static final int SKIN_SIZE = 24;
 	private static final int PADDING = 4;
 	private static final int CHAT_TOGGLE_ICON_SIZE = 20;
@@ -68,8 +67,8 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		this.id = uUID;
 		this.playerName = string;
 		this.skinGetter = supplier;
-		this.hideText = new TranslatableComponent("gui.socialInteractions.tooltip.hide", string);
-		this.showText = new TranslatableComponent("gui.socialInteractions.tooltip.show", string);
+		this.hideText = Component.translatable("gui.socialInteractions.tooltip.hide", string);
+		this.showText = Component.translatable("gui.socialInteractions.tooltip.show", string);
 		this.hideTooltip = minecraft.font.split(this.hideText, 150);
 		this.showTooltip = minecraft.font.split(this.showText, 150);
 		PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
@@ -87,7 +86,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 				256,
 				button -> {
 					playerSocialManager.hidePlayer(uUID);
-					this.onHiddenOrShown(true, new TranslatableComponent("gui.socialInteractions.hidden_in_chat", string));
+					this.onHiddenOrShown(true, Component.translatable("gui.socialInteractions.hidden_in_chat", string));
 				},
 				new Button.OnTooltip() {
 					@Override
@@ -105,7 +104,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 						consumer.accept(PlayerEntry.this.hideText);
 					}
 				},
-				new TranslatableComponent("gui.socialInteractions.hide")
+				Component.translatable("gui.socialInteractions.hide")
 			) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
@@ -125,7 +124,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 				256,
 				button -> {
 					playerSocialManager.showPlayer(uUID);
-					this.onHiddenOrShown(false, new TranslatableComponent("gui.socialInteractions.shown_in_chat", string));
+					this.onHiddenOrShown(false, Component.translatable("gui.socialInteractions.shown_in_chat", string));
 				},
 				new Button.OnTooltip() {
 					@Override
@@ -143,7 +142,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 						consumer.accept(PlayerEntry.this.showText);
 					}
 				},
-				new TranslatableComponent("gui.socialInteractions.show")
+				Component.translatable("gui.socialInteractions.show")
 			) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
@@ -165,7 +164,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		int r = p + 24 + 4;
 		Component component = this.getStatusComponent();
 		int s;
-		if (component == TextComponent.EMPTY) {
+		if (component == CommonComponents.EMPTY) {
 			GuiComponent.fill(poseStack, k, j, k + l, j + m, BG_FILL);
 			s = j + (m - 9) / 2;
 		} else {
@@ -229,9 +228,9 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 
 	MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {
 		Component component = this.getStatusComponent();
-		return component == TextComponent.EMPTY
-			? new TextComponent(this.playerName).append(", ").append(mutableComponent)
-			: new TextComponent(this.playerName).append(", ").append(component).append(", ").append(mutableComponent);
+		return component == CommonComponents.EMPTY
+			? Component.literal(this.playerName).append(", ").append(mutableComponent)
+			: Component.literal(this.playerName).append(", ").append(component).append(", ").append(mutableComponent);
 	}
 
 	private Component getStatusComponent() {
@@ -246,7 +245,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		} else if (bl) {
 			return HIDDEN;
 		} else {
-			return this.isRemoved ? OFFLINE : TextComponent.EMPTY;
+			return this.isRemoved ? OFFLINE : CommonComponents.EMPTY;
 		}
 	}
 

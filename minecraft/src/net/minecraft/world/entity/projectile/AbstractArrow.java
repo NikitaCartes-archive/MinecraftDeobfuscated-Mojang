@@ -574,7 +574,7 @@ public abstract class AbstractArrow extends Projectile {
 	public void setEnchantmentEffectsFromEntity(LivingEntity livingEntity, float f) {
 		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER_ARROWS, livingEntity);
 		int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, livingEntity);
-		this.setBaseDamage((double)(f * 2.0F) + this.random.nextGaussian() * 0.25 + (double)((float)this.level.getDifficulty().getId() * 0.11F));
+		this.setBaseDamage((double)(f * 2.0F) + this.random.triangle((double)this.level.getDifficulty().getId() * 0.11, 0.57425));
 		if (i > 0) {
 			this.setBaseDamage(this.getBaseDamage() + (double)i * 0.5 + 0.5);
 		}

@@ -1,7 +1,16 @@
 package net.minecraft.world.level.storage;
 
-public class LevelStorageException extends Exception {
-	public LevelStorageException(String string) {
-		super(string);
+import net.minecraft.network.chat.Component;
+
+public class LevelStorageException extends RuntimeException {
+	private final Component messageComponent;
+
+	public LevelStorageException(Component component) {
+		super(component.getString());
+		this.messageComponent = component;
+	}
+
+	public Component getMessageComponent() {
+		return this.messageComponent;
 	}
 }

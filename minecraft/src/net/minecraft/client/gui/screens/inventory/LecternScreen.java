@@ -5,7 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
@@ -59,7 +58,7 @@ public class LecternScreen extends BookViewScreen implements MenuAccess<LecternM
 	protected void createMenuControls() {
 		if (this.minecraft.player.mayBuild()) {
 			this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, CommonComponents.GUI_DONE, button -> this.onClose()));
-			this.addRenderableWidget(new Button(this.width / 2 + 2, 196, 98, 20, new TranslatableComponent("lectern.take_book"), button -> this.sendButtonClick(3)));
+			this.addRenderableWidget(new Button(this.width / 2 + 2, 196, 98, 20, Component.translatable("lectern.take_book"), button -> this.sendButtonClick(3)));
 		} else {
 			super.createMenuControls();
 		}

@@ -4,9 +4,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 
@@ -100,7 +100,7 @@ public class EnchantmentNames {
 			stringBuilder.append(Util.getRandom(this.words, this.random));
 		}
 
-		return font.getSplitter().headByWidth(new TextComponent(stringBuilder.toString()).withStyle(ROOT_STYLE), i, Style.EMPTY);
+		return font.getSplitter().headByWidth(Component.literal(stringBuilder.toString()).withStyle(ROOT_STYLE), i, Style.EMPTY);
 	}
 
 	public void initSeed(long l) {

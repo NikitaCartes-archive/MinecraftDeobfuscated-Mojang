@@ -12,13 +12,12 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ChatScreen extends Screen {
 	public static final double MOUSE_SCROLL_SPEED = 7.0;
-	private static final Component USAGE_TEXT = new TranslatableComponent("chat_screen.usage");
+	private static final Component USAGE_TEXT = Component.translatable("chat_screen.usage");
 	private String historyBuffer = "";
 	private int historyPos = -1;
 	protected EditBox input;
@@ -26,7 +25,7 @@ public class ChatScreen extends Screen {
 	CommandSuggestions commandSuggestions;
 
 	public ChatScreen(String string) {
-		super(new TranslatableComponent("chat_screen.title"));
+		super(Component.translatable("chat_screen.title"));
 		this.initial = string;
 	}
 
@@ -34,7 +33,7 @@ public class ChatScreen extends Screen {
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.historyPos = this.minecraft.gui.getChat().getRecentChat().size();
-		this.input = new EditBox(this.font, 4, this.height - 12, this.width - 4, 12, new TranslatableComponent("chat.editBox")) {
+		this.input = new EditBox(this.font, 4, this.height - 12, this.width - 4, 12, Component.translatable("chat.editBox")) {
 			@Override
 			protected MutableComponent createNarrationMessage() {
 				return super.createNarrationMessage().append(ChatScreen.this.commandSuggestions.getNarrationMessage());
@@ -204,7 +203,7 @@ public class ChatScreen extends Screen {
 		narrationElementOutput.add(NarratedElementType.USAGE, USAGE_TEXT);
 		String string = this.input.getValue();
 		if (!string.isEmpty()) {
-			narrationElementOutput.nest().add(NarratedElementType.TITLE, new TranslatableComponent("chat_screen.message", string));
+			narrationElementOutput.nest().add(NarratedElementType.TITLE, Component.translatable("chat_screen.message", string));
 		}
 	}
 }

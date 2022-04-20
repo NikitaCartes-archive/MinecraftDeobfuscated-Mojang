@@ -18,8 +18,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Environment(EnvType.CLIENT)
@@ -38,10 +36,10 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 			String string2 = keyMapping.getCategory();
 			if (!string2.equals(string)) {
 				string = string2;
-				this.addEntry(new KeyBindsList.CategoryEntry(new TranslatableComponent(string2)));
+				this.addEntry(new KeyBindsList.CategoryEntry(Component.translatable(string2)));
 			}
 
-			Component component = new TranslatableComponent(keyMapping.getName());
+			Component component = Component.translatable(keyMapping.getName());
 			int i = minecraft.font.width(component);
 			if (i > this.maxNameWidth) {
 				this.maxNameWidth = i;
@@ -122,17 +120,17 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 				@Override
 				protected MutableComponent createNarrationMessage() {
 					return keyMapping.isUnbound()
-						? new TranslatableComponent("narrator.controls.unbound", component)
-						: new TranslatableComponent("narrator.controls.bound", component, super.createNarrationMessage());
+						? Component.translatable("narrator.controls.unbound", component)
+						: Component.translatable("narrator.controls.bound", component, super.createNarrationMessage());
 				}
 			};
-			this.resetButton = new Button(0, 0, 50, 20, new TranslatableComponent("controls.reset"), button -> {
+			this.resetButton = new Button(0, 0, 50, 20, Component.translatable("controls.reset"), button -> {
 				KeyBindsList.this.minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
 				KeyMapping.resetMapping();
 			}) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
-					return new TranslatableComponent("narrator.controls.reset", component);
+					return Component.translatable("narrator.controls.reset", component);
 				}
 			};
 		}
@@ -162,7 +160,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 			if (bl2) {
 				this.changeButton
 					.setMessage(
-						new TextComponent("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW)
+						Component.literal("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW)
 					);
 			} else if (bl3) {
 				this.changeButton.setMessage(this.changeButton.getMessage().copy().withStyle(ChatFormatting.RED));

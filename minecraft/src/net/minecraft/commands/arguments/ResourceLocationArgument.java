@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -21,16 +21,16 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class ResourceLocationArgument implements ArgumentType<ResourceLocation> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("advancement.advancementNotFound", object)
+		object -> Component.translatable("advancement.advancementNotFound", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("recipe.notFound", object)
+		object -> Component.translatable("recipe.notFound", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("predicate.unknown", object)
+		object -> Component.translatable("predicate.unknown", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("item_modifier.unknown", object)
+		object -> Component.translatable("item_modifier.unknown", object)
 	);
 
 	public static ResourceLocationArgument id() {

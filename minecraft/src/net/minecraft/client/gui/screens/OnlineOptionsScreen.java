@@ -5,13 +5,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
 
 @Environment(EnvType.CLIENT)
 public class OnlineOptionsScreen extends SimpleOptionsSubScreen {
 	public OnlineOptionsScreen(Screen screen, Options options) {
-		super(screen, options, new TranslatableComponent("options.online.title"), new OptionInstance[]{options.realmsNotifications(), options.allowServerListing()});
+		super(screen, options, Component.translatable("options.online.title"), new OptionInstance[]{options.realmsNotifications(), options.allowServerListing()});
 	}
 
 	@Override

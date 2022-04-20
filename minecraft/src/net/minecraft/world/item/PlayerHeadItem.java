@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +30,7 @@ public class PlayerHeadItem extends StandingAndWallBlockItem {
 			}
 
 			if (string != null) {
-				return new TranslatableComponent(this.getDescriptionId() + ".named", string);
+				return Component.translatable(this.getDescriptionId() + ".named", string);
 			}
 		}
 

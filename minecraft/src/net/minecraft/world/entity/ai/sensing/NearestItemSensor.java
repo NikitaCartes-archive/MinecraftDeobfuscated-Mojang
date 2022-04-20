@@ -12,9 +12,9 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 
 public class NearestItemSensor extends Sensor<Mob> {
-	private static final long XZ_RANGE = 8L;
-	private static final long Y_RANGE = 4L;
-	public static final int MAX_DISTANCE_TO_WANTED_ITEM = 9;
+	private static final long XZ_RANGE = 32L;
+	private static final long Y_RANGE = 16L;
+	public static final int MAX_DISTANCE_TO_WANTED_ITEM = 32;
 
 	@Override
 	public Set<MemoryModuleType<?>> requires() {
@@ -23,11 +23,11 @@ public class NearestItemSensor extends Sensor<Mob> {
 
 	protected void doTick(ServerLevel serverLevel, Mob mob) {
 		Brain<?> brain = mob.getBrain();
-		List<ItemEntity> list = serverLevel.getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(8.0, 4.0, 8.0), itemEntity -> true);
+		List<ItemEntity> list = serverLevel.getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(32.0, 16.0, 32.0), itemEntity -> true);
 		list.sort(Comparator.comparingDouble(mob::distanceToSqr));
 		Optional<ItemEntity> optional = list.stream()
 			.filter(itemEntity -> mob.wantsToPickUp(itemEntity.getItem()))
-			.filter(itemEntity -> itemEntity.closerThan(mob, 9.0))
+			.filter(itemEntity -> itemEntity.closerThan(mob, 32.0))
 			.filter(mob::hasLineOfSight)
 			.findFirst();
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, optional);

@@ -9,7 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -56,7 +56,7 @@ public class LevelLoadingScreen extends Screen {
 	@Override
 	protected void updateNarratedWidget(NarrationElementOutput narrationElementOutput) {
 		if (this.done) {
-			narrationElementOutput.add(NarratedElementType.TITLE, new TranslatableComponent("narrator.loading.done"));
+			narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narrator.loading.done"));
 		} else {
 			String string = this.getFormattedProgress();
 			narrationElementOutput.add(NarratedElementType.TITLE, string);

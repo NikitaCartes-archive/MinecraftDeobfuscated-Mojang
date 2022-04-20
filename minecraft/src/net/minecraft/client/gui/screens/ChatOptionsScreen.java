@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class ChatOptionsScreen extends SimpleOptionsSubScreen {
@@ -12,7 +12,7 @@ public class ChatOptionsScreen extends SimpleOptionsSubScreen {
 		super(
 			screen,
 			options,
-			new TranslatableComponent("options.chat.title"),
+			Component.translatable("options.chat.title"),
 			new OptionInstance[]{
 				options.chatVisibility(),
 				options.chatColors(),

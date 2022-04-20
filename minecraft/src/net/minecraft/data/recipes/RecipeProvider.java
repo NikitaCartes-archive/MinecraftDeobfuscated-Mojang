@@ -2044,6 +2044,13 @@ public class RecipeProvider implements DataProvider {
 			.pattern("SSS")
 			.unlockedBy("has_echo_shard", has(Items.ECHO_SHARD))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Items.MUSIC_DISC_5)
+			.define('S', Items.DISC_FRAGMENT_5)
+			.pattern("SSS")
+			.pattern("SSS")
+			.pattern("SSS")
+			.unlockedBy("has_disc_fragment_5", has(Items.DISC_FRAGMENT_5))
+			.save(consumer);
 		SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
 		SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
 		SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");

@@ -9,14 +9,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 
 public class EntitySummonArgument implements ArgumentType<ResourceLocation> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:pig", "cow");
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_ENTITY = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("entity.notFound", object)
+		object -> Component.translatable("entity.notFound", object)
 	);
 
 	public static EntitySummonArgument id() {

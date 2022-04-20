@@ -11,7 +11,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -486,7 +485,7 @@ public class Inventory implements Container, Nameable {
 
 	@Override
 	public Component getName() {
-		return new TranslatableComponent("container.inventory");
+		return Component.translatable("container.inventory");
 	}
 
 	public ItemStack getArmor(int i) {

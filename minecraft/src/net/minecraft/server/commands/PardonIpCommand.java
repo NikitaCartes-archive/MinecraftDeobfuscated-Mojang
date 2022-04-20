@@ -8,12 +8,12 @@ import java.util.regex.Matcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.IpBanList;
 
 public class PardonIpCommand {
-	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("commands.pardonip.invalid"));
-	private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.pardonip.failed"));
+	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("commands.pardonip.invalid"));
+	private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.pardonip.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -41,7 +41,7 @@ public class PardonIpCommand {
 				throw ERROR_NOT_BANNED.create();
 			} else {
 				ipBanList.remove(string);
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.pardonip.success", string), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.pardonip.success", string), true);
 				return 1;
 			}
 		}

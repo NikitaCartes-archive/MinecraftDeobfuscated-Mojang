@@ -31,7 +31,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -206,9 +205,9 @@ public abstract class PlayerList {
 		this.server.invalidateStatus();
 		MutableComponent mutableComponent;
 		if (serverPlayer.getGameProfile().getName().equalsIgnoreCase(string)) {
-			mutableComponent = new TranslatableComponent("multiplayer.player.joined", serverPlayer.getDisplayName());
+			mutableComponent = Component.translatable("multiplayer.player.joined", serverPlayer.getDisplayName());
 		} else {
-			mutableComponent = new TranslatableComponent("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
+			mutableComponent = Component.translatable("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
 		}
 
 		this.broadcastMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
@@ -389,25 +388,25 @@ public abstract class PlayerList {
 	public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
 		if (this.bans.isBanned(gameProfile)) {
 			UserBanListEntry userBanListEntry = this.bans.get(gameProfile);
-			MutableComponent mutableComponent = new TranslatableComponent("multiplayer.disconnect.banned.reason", userBanListEntry.getReason());
+			MutableComponent mutableComponent = Component.translatable("multiplayer.disconnect.banned.reason", userBanListEntry.getReason());
 			if (userBanListEntry.getExpires() != null) {
-				mutableComponent.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(userBanListEntry.getExpires())));
+				mutableComponent.append(Component.translatable("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(userBanListEntry.getExpires())));
 			}
 
 			return mutableComponent;
 		} else if (!this.isWhiteListed(gameProfile)) {
-			return new TranslatableComponent("multiplayer.disconnect.not_whitelisted");
+			return Component.translatable("multiplayer.disconnect.not_whitelisted");
 		} else if (this.ipBans.isBanned(socketAddress)) {
 			IpBanListEntry ipBanListEntry = this.ipBans.get(socketAddress);
-			MutableComponent mutableComponent = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", ipBanListEntry.getReason());
+			MutableComponent mutableComponent = Component.translatable("multiplayer.disconnect.banned_ip.reason", ipBanListEntry.getReason());
 			if (ipBanListEntry.getExpires() != null) {
-				mutableComponent.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(ipBanListEntry.getExpires())));
+				mutableComponent.append(Component.translatable("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(ipBanListEntry.getExpires())));
 			}
 
 			return mutableComponent;
 		} else {
 			return this.players.size() >= this.maxPlayers && !this.canBypassPlayerLimit(gameProfile)
-				? new TranslatableComponent("multiplayer.disconnect.server_full")
+				? Component.translatable("multiplayer.disconnect.server_full")
 				: null;
 		}
 	}
@@ -429,7 +428,7 @@ public abstract class PlayerList {
 		}
 
 		for (ServerPlayer serverPlayer3 : list) {
-			serverPlayer3.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login"));
+			serverPlayer3.connection.disconnect(Component.translatable("multiplayer.disconnect.duplicate_login"));
 		}
 
 		return new ServerPlayer(this.server, this.server.overworld(), gameProfile);
@@ -763,7 +762,7 @@ public abstract class PlayerList {
 
 	public void removeAll() {
 		for (int i = 0; i < this.players.size(); i++) {
-			((ServerPlayer)this.players.get(i)).connection.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown"));
+			((ServerPlayer)this.players.get(i)).connection.disconnect(Component.translatable("multiplayer.disconnect.server_shutdown"));
 		}
 	}
 

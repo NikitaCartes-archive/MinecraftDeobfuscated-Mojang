@@ -53,7 +53,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 			i += itemStack.getOrCreateTagElement("Fireworks").getByte("Flight");
 		}
 
-		this.setDeltaMovement(this.random.nextGaussian() * 0.001, 0.05, this.random.nextGaussian() * 0.001);
+		this.setDeltaMovement(this.random.triangle(0.0, 0.002297), 0.05, this.random.triangle(0.0, 0.002297));
 		this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);
 	}
 

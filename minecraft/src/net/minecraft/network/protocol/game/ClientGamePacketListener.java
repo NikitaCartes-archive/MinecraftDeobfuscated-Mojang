@@ -9,8 +9,6 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleAddObjective(ClientboundSetObjectivePacket clientboundSetObjectivePacket);
 
-	void handleAddPainting(ClientboundAddPaintingPacket clientboundAddPaintingPacket);
-
 	void handleAddPlayer(ClientboundAddPlayerPacket clientboundAddPlayerPacket);
 
 	void handleAnimate(ClientboundAnimatePacket clientboundAnimatePacket);

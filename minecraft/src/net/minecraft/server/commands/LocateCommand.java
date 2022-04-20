@@ -17,17 +17,16 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class LocateCommand {
 	private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locate.failed", object)
+		object -> Component.translatable("commands.locate.failed", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locate.invalid", object)
+		object -> Component.translatable("commands.locate.invalid", object)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -76,13 +75,13 @@ public class LocateCommand {
 			);
 		int i = bl ? Mth.floor(Mth.sqrt((float)blockPos.distSqr(blockPos2))) : Mth.floor(dist(blockPos.getX(), blockPos.getZ(), blockPos2.getX(), blockPos2.getZ()));
 		String string3 = bl ? String.valueOf(blockPos2.getY()) : "~";
-		Component component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("chat.coordinates", blockPos2.getX(), string3, blockPos2.getZ()))
+		Component component = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockPos2.getX(), string3, blockPos2.getZ()))
 			.withStyle(
 				style -> style.withColor(ChatFormatting.GREEN)
 						.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockPos2.getX() + " " + string3 + " " + blockPos2.getZ()))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.coordinates.tooltip")))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
 			);
-		commandSourceStack.sendSuccess(new TranslatableComponent(string, string2, component, i), false);
+		commandSourceStack.sendSuccess(Component.translatable(string, string2, component, i), false);
 		return i;
 	}
 

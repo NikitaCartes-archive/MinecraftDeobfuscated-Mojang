@@ -8,7 +8,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -21,8 +20,8 @@ import net.minecraft.world.phys.HitResult;
 @Environment(EnvType.CLIENT)
 public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 	private static final int HINT_DELAY = 6000;
-	private static final Component TITLE = new TranslatableComponent("tutorial.find_tree.title");
-	private static final Component DESCRIPTION = new TranslatableComponent("tutorial.find_tree.description");
+	private static final Component TITLE = Component.translatable("tutorial.find_tree.title");
+	private static final Component DESCRIPTION = Component.translatable("tutorial.find_tree.description");
 	private final Tutorial tutorial;
 	private TutorialToast toast;
 	private int timeWaiting;

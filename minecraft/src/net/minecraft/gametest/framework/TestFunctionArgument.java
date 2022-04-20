@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class TestFunctionArgument implements ArgumentType<TestFunction> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("techtests.piston", "techtests");
@@ -26,7 +26,7 @@ public class TestFunctionArgument implements ArgumentType<TestFunction> {
 		if (optional.isPresent()) {
 			return (TestFunction)optional.get();
 		} else {
-			Message message = new TextComponent("No such test: " + string);
+			Message message = Component.literal("No such test: " + string);
 			throw new CommandSyntaxException(new SimpleCommandExceptionType(message), message);
 		}
 	}

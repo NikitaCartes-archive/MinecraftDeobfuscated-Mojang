@@ -12,7 +12,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -351,16 +350,16 @@ public class MapItem extends ComplexItem {
 		Integer integer = getMapId(itemStack);
 		MapItemSavedData mapItemSavedData = level == null ? null : getSavedData(integer, level);
 		if (mapItemSavedData != null && mapItemSavedData.locked) {
-			list.add(new TranslatableComponent("filled_map.locked", integer).withStyle(ChatFormatting.GRAY));
+			list.add(Component.translatable("filled_map.locked", integer).withStyle(ChatFormatting.GRAY));
 		}
 
 		if (tooltipFlag.isAdvanced()) {
 			if (mapItemSavedData != null) {
-				list.add(new TranslatableComponent("filled_map.id", integer).withStyle(ChatFormatting.GRAY));
-				list.add(new TranslatableComponent("filled_map.scale", 1 << mapItemSavedData.scale).withStyle(ChatFormatting.GRAY));
-				list.add(new TranslatableComponent("filled_map.level", mapItemSavedData.scale, 4).withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("filled_map.id", integer).withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("filled_map.scale", 1 << mapItemSavedData.scale).withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("filled_map.level", mapItemSavedData.scale, 4).withStyle(ChatFormatting.GRAY));
 			} else {
-				list.add(new TranslatableComponent("filled_map.unknown").withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
 			}
 		}
 	}

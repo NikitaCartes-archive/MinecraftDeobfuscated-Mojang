@@ -10,12 +10,12 @@ import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.biome.Biome;
 
 public class LocateBiomeCommand {
 	private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.locatebiome.notFound", object)
+		object -> Component.translatable("commands.locatebiome.notFound", object)
 	);
 	private static final int MAX_SEARCH_RADIUS = 6400;
 	private static final int SAMPLE_RESOLUTION_HORIZONTAL = 32;

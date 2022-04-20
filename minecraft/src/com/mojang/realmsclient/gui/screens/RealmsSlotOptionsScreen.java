@@ -13,8 +13,6 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Mth;
@@ -27,8 +25,8 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	public static final List<Difficulty> DIFFICULTIES = ImmutableList.of(Difficulty.PEACEFUL, Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD);
 	private static final int DEFAULT_GAME_MODE = 0;
 	public static final List<GameType> GAME_MODES = ImmutableList.of(GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE);
-	private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.edit.slot.name");
-	static final Component SPAWN_PROTECTION_TEXT = new TranslatableComponent("mco.configure.world.spawnProtection");
+	private static final Component NAME_LABEL = Component.translatable("mco.configure.world.edit.slot.name");
+	static final Component SPAWN_PROTECTION_TEXT = Component.translatable("mco.configure.world.spawnProtection");
 	private EditBox nameEdit;
 	protected final RealmsConfigureWorldScreen parent;
 	private int column1X;
@@ -50,7 +48,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	public RealmsSlotOptionsScreen(
 		RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsWorldOptions realmsWorldOptions, RealmsServer.WorldType worldType, int i
 	) {
-		super(new TranslatableComponent("mco.configure.world.buttons.options"));
+		super(Component.translatable("mco.configure.world.buttons.options"));
 		this.parent = realmsConfigureWorldScreen;
 		this.options = realmsWorldOptions;
 		this.worldType = worldType;
@@ -108,11 +106,11 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		} else {
 			Component component;
 			if (this.worldType == RealmsServer.WorldType.ADVENTUREMAP) {
-				component = new TranslatableComponent("mco.configure.world.edit.subscreen.adventuremap");
+				component = Component.translatable("mco.configure.world.edit.subscreen.adventuremap");
 			} else if (this.worldType == RealmsServer.WorldType.INSPIRATION) {
-				component = new TranslatableComponent("mco.configure.world.edit.subscreen.inspiration");
+				component = Component.translatable("mco.configure.world.edit.subscreen.inspiration");
 			} else {
-				component = new TranslatableComponent("mco.configure.world.edit.subscreen.experience");
+				component = Component.translatable("mco.configure.world.edit.subscreen.experience");
 			}
 
 			this.addLabel(new RealmsLabel(component, this.width / 2, 26, 16711680));
@@ -126,38 +124,36 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		}
 
 		this.nameEdit = new EditBox(
-			this.minecraft.font, this.column1X + 2, row(1), this.columnWidth - 4, 20, null, new TranslatableComponent("mco.configure.world.edit.slot.name")
+			this.minecraft.font, this.column1X + 2, row(1), this.columnWidth - 4, 20, null, Component.translatable("mco.configure.world.edit.slot.name")
 		);
 		this.nameEdit.setMaxLength(10);
 		this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
 		this.magicalSpecialHackyFocus(this.nameEdit);
 		CycleButton<Boolean> cycleButton = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.pvp)
-				.create(i, row(1), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.pvp"), (cycleButtonx, boolean_) -> this.pvp = boolean_)
+				.create(i, row(1), this.columnWidth, 20, Component.translatable("mco.configure.world.pvp"), (cycleButtonx, boolean_) -> this.pvp = boolean_)
 		);
 		this.addRenderableWidget(
 			CycleButton.<GameType>builder(GameType::getShortDisplayName)
 				.withValues(GAME_MODES)
 				.withInitialValue(this.gameMode)
-				.create(
-					this.column1X, row(3), this.columnWidth, 20, new TranslatableComponent("selectWorld.gameMode"), (cycleButtonx, gameType) -> this.gameMode = gameType
-				)
+				.create(this.column1X, row(3), this.columnWidth, 20, Component.translatable("selectWorld.gameMode"), (cycleButtonx, gameType) -> this.gameMode = gameType)
 		);
 		CycleButton<Boolean> cycleButton2 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.spawnAnimals)
 				.create(
-					i, row(3), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnAnimals"), (cycleButtonx, boolean_) -> this.spawnAnimals = boolean_
+					i, row(3), this.columnWidth, 20, Component.translatable("mco.configure.world.spawnAnimals"), (cycleButtonx, boolean_) -> this.spawnAnimals = boolean_
 				)
 		);
 		CycleButton<Boolean> cycleButton3 = CycleButton.onOffBuilder(this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters)
 			.create(
-				i, row(5), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnMonsters"), (cycleButtonx, boolean_) -> this.spawnMonsters = boolean_
+				i, row(5), this.columnWidth, 20, Component.translatable("mco.configure.world.spawnMonsters"), (cycleButtonx, boolean_) -> this.spawnMonsters = boolean_
 			);
 		this.addRenderableWidget(
 			CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
 				.withValues(DIFFICULTIES)
 				.withInitialValue(this.difficulty)
-				.create(this.column1X, row(5), this.columnWidth, 20, new TranslatableComponent("options.difficulty"), (cycleButton2x, difficulty) -> {
+				.create(this.column1X, row(5), this.columnWidth, 20, Component.translatable("options.difficulty"), (cycleButton2x, difficulty) -> {
 					this.difficulty = difficulty;
 					if (this.worldType == RealmsServer.WorldType.NORMAL) {
 						boolean bl = this.difficulty != Difficulty.PEACEFUL;
@@ -172,7 +168,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		);
 		CycleButton<Boolean> cycleButton4 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.spawnNPCs)
-				.create(i, row(7), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.spawnNPCs"), (cycleButtonx, boolean_) -> this.spawnNPCs = boolean_)
+				.create(i, row(7), this.columnWidth, 20, Component.translatable("mco.configure.world.spawnNPCs"), (cycleButtonx, boolean_) -> this.spawnNPCs = boolean_)
 		);
 		CycleButton<Boolean> cycleButton5 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.forceGameMode)
@@ -181,14 +177,14 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 					row(9),
 					this.columnWidth,
 					20,
-					new TranslatableComponent("mco.configure.world.forceGameMode"),
+					Component.translatable("mco.configure.world.forceGameMode"),
 					(cycleButtonx, boolean_) -> this.forceGameMode = boolean_
 				)
 		);
 		CycleButton<Boolean> cycleButton6 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.commandBlocks)
 				.create(
-					i, row(9), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.commandBlocks"), (cycleButtonx, boolean_) -> this.commandBlocks = boolean_
+					i, row(9), this.columnWidth, 20, Component.translatable("mco.configure.world.commandBlocks"), (cycleButtonx, boolean_) -> this.commandBlocks = boolean_
 				)
 		);
 		if (this.worldType != RealmsServer.WorldType.NORMAL) {
@@ -206,7 +202,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		}
 
 		this.addRenderableWidget(
-			new Button(this.column1X, row(13), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.buttons.done"), button -> this.saveSettings())
+			new Button(this.column1X, row(13), this.columnWidth, 20, Component.translatable("mco.configure.world.buttons.done"), button -> this.saveSettings())
 		);
 		this.addRenderableWidget(new Button(i, row(13), this.columnWidth, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
 		this.addWidget(this.nameEdit);
@@ -267,7 +263,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		private final double maxValue;
 
 		public SettingsSlider(int i, int j, int k, int l, float f, float g) {
-			super(i, j, k, 20, TextComponent.EMPTY, 0.0);
+			super(i, j, k, 20, CommonComponents.EMPTY, 0.0);
 			this.minValue = (double)f;
 			this.maxValue = (double)g;
 			this.value = (double)((Mth.clamp((float)l, f, g) - f) / (g - f));
@@ -288,7 +284,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 					RealmsSlotOptionsScreen.SPAWN_PROTECTION_TEXT,
 					(Component)(RealmsSlotOptionsScreen.this.spawnProtection == 0
 						? CommonComponents.OPTION_OFF
-						: new TextComponent(String.valueOf(RealmsSlotOptionsScreen.this.spawnProtection)))
+						: Component.literal(String.valueOf(RealmsSlotOptionsScreen.this.spawnProtection)))
 				)
 			);
 		}

@@ -11,7 +11,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -301,7 +300,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 
 	@Override
 	public Component getDisplayName() {
-		return (Component)(this.name != null ? this.name : new TranslatableComponent("container.beacon"));
+		return (Component)(this.name != null ? this.name : Component.translatable("container.beacon"));
 	}
 
 	@Override

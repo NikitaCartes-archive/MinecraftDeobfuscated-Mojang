@@ -7,7 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -33,7 +32,7 @@ public class IntegratedPlayerList extends PlayerList {
 	@Override
 	public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
 		return (Component)(gameProfile.getName().equalsIgnoreCase(this.getServer().getSingleplayerName()) && this.getPlayerByName(gameProfile.getName()) != null
-			? new TranslatableComponent("multiplayer.disconnect.name_taken")
+			? Component.translatable("multiplayer.disconnect.name_taken")
 			: super.canPlayerLogin(socketAddress, gameProfile));
 	}
 

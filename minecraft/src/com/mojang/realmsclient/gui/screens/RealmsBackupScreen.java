@@ -23,7 +23,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -34,10 +33,10 @@ public class RealmsBackupScreen extends RealmsScreen {
 	static final Logger LOGGER = LogUtils.getLogger();
 	static final ResourceLocation PLUS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/plus_icon.png");
 	static final ResourceLocation RESTORE_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/restore_icon.png");
-	static final Component RESTORE_TOOLTIP = new TranslatableComponent("mco.backup.button.restore");
-	static final Component HAS_CHANGES_TOOLTIP = new TranslatableComponent("mco.backup.changes.tooltip");
-	private static final Component TITLE = new TranslatableComponent("mco.configure.world.backup");
-	private static final Component NO_BACKUPS_LABEL = new TranslatableComponent("mco.backup.nobackups");
+	static final Component RESTORE_TOOLTIP = Component.translatable("mco.backup.button.restore");
+	static final Component HAS_CHANGES_TOOLTIP = Component.translatable("mco.backup.changes.tooltip");
+	private static final Component TITLE = Component.translatable("mco.configure.world.backup");
+	private static final Component NO_BACKUPS_LABEL = Component.translatable("mco.backup.nobackups");
 	static int lastScrollPosition = -1;
 	private final RealmsConfigureWorldScreen lastScreen;
 	List<Backup> backups = Collections.emptyList();
@@ -54,7 +53,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 	private static final String UPLOADED_KEY = "Uploaded";
 
 	public RealmsBackupScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer, int i) {
-		super(new TranslatableComponent("mco.configure.world.backup"));
+		super(Component.translatable("mco.configure.world.backup"));
 		this.lastScreen = realmsConfigureWorldScreen;
 		this.serverData = realmsServer;
 		this.slotId = i;
@@ -91,17 +90,15 @@ public class RealmsBackupScreen extends RealmsScreen {
 			}
 		}).start();
 		this.downloadButton = this.addRenderableWidget(
-			new Button(this.width - 135, row(1), 120, 20, new TranslatableComponent("mco.backup.button.download"), button -> this.downloadClicked())
+			new Button(this.width - 135, row(1), 120, 20, Component.translatable("mco.backup.button.download"), button -> this.downloadClicked())
 		);
 		this.restoreButton = this.addRenderableWidget(
-			new Button(this.width - 135, row(3), 120, 20, new TranslatableComponent("mco.backup.button.restore"), button -> this.restoreClicked(this.selectedBackup))
+			new Button(this.width - 135, row(3), 120, 20, Component.translatable("mco.backup.button.restore"), button -> this.restoreClicked(this.selectedBackup))
 		);
-		this.changesButton = this.addRenderableWidget(
-			new Button(this.width - 135, row(5), 120, 20, new TranslatableComponent("mco.backup.changes.tooltip"), button -> {
-				this.minecraft.setScreen(new RealmsBackupInfoScreen(this, (Backup)this.backups.get(this.selectedBackup)));
-				this.selectedBackup = -1;
-			})
-		);
+		this.changesButton = this.addRenderableWidget(new Button(this.width - 135, row(5), 120, 20, Component.translatable("mco.backup.changes.tooltip"), button -> {
+			this.minecraft.setScreen(new RealmsBackupInfoScreen(this, (Backup)this.backups.get(this.selectedBackup)));
+			this.selectedBackup = -1;
+		}));
 		this.addRenderableWidget(
 			new Button(this.width - 100, this.height - 35, 85, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
 		);
@@ -169,8 +166,8 @@ public class RealmsBackupScreen extends RealmsScreen {
 			Date date = ((Backup)this.backups.get(i)).lastModifiedDate;
 			String string = DateFormat.getDateTimeInstance(3, 3).format(date);
 			String string2 = RealmsUtil.convertToAgePresentationFromInstant(date);
-			Component component = new TranslatableComponent("mco.configure.world.restore.question.line1", string, string2);
-			Component component2 = new TranslatableComponent("mco.configure.world.restore.question.line2");
+			Component component = Component.translatable("mco.configure.world.restore.question.line1", string, string2);
+			Component component2 = Component.translatable("mco.configure.world.restore.question.line2");
 			this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
 				if (bl) {
 					this.restore();
@@ -183,8 +180,8 @@ public class RealmsBackupScreen extends RealmsScreen {
 	}
 
 	private void downloadClicked() {
-		Component component = new TranslatableComponent("mco.configure.world.restore.download.question.line1");
-		Component component2 = new TranslatableComponent("mco.configure.world.restore.download.question.line2");
+		Component component = Component.translatable("mco.configure.world.restore.download.question.line1");
+		Component component2 = Component.translatable("mco.configure.world.restore.download.question.line2");
 		this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
 			if (bl) {
 				this.downloadWorldData();
@@ -399,7 +396,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 		@Override
 		public Component getNarration() {
-			return new TranslatableComponent("narrator.select", this.backup.lastModifiedDate.toString());
+			return Component.translatable("narrator.select", this.backup.lastModifiedDate.toString());
 		}
 	}
 }

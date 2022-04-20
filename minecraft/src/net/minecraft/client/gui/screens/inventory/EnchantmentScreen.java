@@ -17,11 +17,10 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -196,25 +195,25 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int o = l + 1;
 			if (this.isHovering(60, 14 + 19 * l, 108, 17, (double)i, (double)j) && m > 0 && n >= 0 && enchantment != null) {
 				List<Component> list = Lists.<Component>newArrayList();
-				list.add(new TranslatableComponent("container.enchant.clue", enchantment.getFullname(n)).withStyle(ChatFormatting.WHITE));
+				list.add(Component.translatable("container.enchant.clue", enchantment.getFullname(n)).withStyle(ChatFormatting.WHITE));
 				if (!bl) {
-					list.add(TextComponent.EMPTY);
+					list.add(CommonComponents.EMPTY);
 					if (this.minecraft.player.experienceLevel < m) {
-						list.add(new TranslatableComponent("container.enchant.level.requirement", this.menu.costs[l]).withStyle(ChatFormatting.RED));
+						list.add(Component.translatable("container.enchant.level.requirement", this.menu.costs[l]).withStyle(ChatFormatting.RED));
 					} else {
 						MutableComponent mutableComponent;
 						if (o == 1) {
-							mutableComponent = new TranslatableComponent("container.enchant.lapis.one");
+							mutableComponent = Component.translatable("container.enchant.lapis.one");
 						} else {
-							mutableComponent = new TranslatableComponent("container.enchant.lapis.many", o);
+							mutableComponent = Component.translatable("container.enchant.lapis.many", o);
 						}
 
 						list.add(mutableComponent.withStyle(k >= o ? ChatFormatting.GRAY : ChatFormatting.RED));
 						MutableComponent mutableComponent2;
 						if (o == 1) {
-							mutableComponent2 = new TranslatableComponent("container.enchant.level.one");
+							mutableComponent2 = Component.translatable("container.enchant.level.one");
 						} else {
-							mutableComponent2 = new TranslatableComponent("container.enchant.level.many", o);
+							mutableComponent2 = Component.translatable("container.enchant.level.many", o);
 						}
 
 						list.add(mutableComponent2.withStyle(ChatFormatting.GRAY));

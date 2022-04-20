@@ -9,12 +9,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 
 public class WrappedMinMaxBounds {
 	public static final WrappedMinMaxBounds ANY = new WrappedMinMaxBounds(null, null);
-	public static final SimpleCommandExceptionType ERROR_INTS_ONLY = new SimpleCommandExceptionType(new TranslatableComponent("argument.range.ints"));
+	public static final SimpleCommandExceptionType ERROR_INTS_ONLY = new SimpleCommandExceptionType(Component.translatable("argument.range.ints"));
 	@Nullable
 	private final Float min;
 	@Nullable

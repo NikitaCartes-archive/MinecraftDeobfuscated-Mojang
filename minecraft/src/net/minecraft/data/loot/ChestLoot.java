@@ -2,7 +2,7 @@ package net.minecraft.data.loot;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.effect.MobEffects;
@@ -391,6 +391,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
 						)
 						.add(LootItem.lootTableItem(Items.ECHO_SHARD).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(LootItem.lootTableItem(Items.DISC_FRAGMENT_5).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 						.add(
 							LootItem.lootTableItem(Items.POTION)
 								.setWeight(5)
@@ -652,7 +653,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
 								)
-								.apply(SetNameFunction.setName(new TranslatableComponent("filled_map.buried_treasure")))
+								.apply(SetNameFunction.setName(Component.translatable("filled_map.buried_treasure")))
 						)
 				)
 				.withPool(
@@ -886,7 +887,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
 								)
-								.apply(SetNameFunction.setName(new TranslatableComponent("filled_map.buried_treasure")))
+								.apply(SetNameFunction.setName(Component.translatable("filled_map.buried_treasure")))
 						)
 				)
 		);
@@ -918,7 +919,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
 								)
-								.apply(SetNameFunction.setName(new TranslatableComponent("filled_map.buried_treasure")))
+								.apply(SetNameFunction.setName(Component.translatable("filled_map.buried_treasure")))
 						)
 				)
 		);

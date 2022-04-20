@@ -1,4 +1,4 @@
-package net.minecraft.network.chat;
+package net.minecraft.network.chat.contents;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -12,9 +12,15 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.Entity;
 
-public class TranslatableComponent extends BaseComponent implements ContextAwareComponent {
+public class TranslatableContents implements ComponentContents {
 	private static final Object[] NO_ARGS = new Object[0];
 	private static final FormattedText TEXT_PERCENT = FormattedText.of("%");
 	private static final FormattedText TEXT_NULL = FormattedText.of("null");
@@ -25,12 +31,12 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 	private List<FormattedText> decomposedParts = ImmutableList.of();
 	private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-	public TranslatableComponent(String string) {
+	public TranslatableContents(String string) {
 		this.key = string;
 		this.args = NO_ARGS;
 	}
 
-	public TranslatableComponent(String string, Object... objects) {
+	public TranslatableContents(String string, Object... objects) {
 		this.key = string;
 		this.args = objects;
 	}
@@ -115,12 +121,8 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 		}
 	}
 
-	public TranslatableComponent plainCopy() {
-		return new TranslatableComponent(this.key, this.args);
-	}
-
 	@Override
-	public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
+	public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		this.decompose();
 
 		for (FormattedText formattedText : this.decomposedParts) {
@@ -134,7 +136,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 	}
 
 	@Override
-	public <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
+	public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
 		this.decompose();
 
 		for (FormattedText formattedText : this.decomposedParts) {
@@ -160,38 +162,31 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 			}
 		}
 
-		return new TranslatableComponent(this.key, objects);
+		return MutableComponent.create(new TranslatableContents(this.key, objects));
 	}
 
-	@Override
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
 		} else {
-			return !(object instanceof TranslatableComponent translatableComponent)
-				? false
-				: Arrays.equals(this.args, translatableComponent.args) && this.key.equals(translatableComponent.key) && super.equals(object);
+			if (object instanceof TranslatableContents translatableContents
+				&& this.key.equals(translatableContents.key)
+				&& Arrays.equals(this.args, translatableContents.args)) {
+				return true;
+			}
+
+			return false;
 		}
 	}
 
-	@Override
 	public int hashCode() {
 		int i = super.hashCode();
 		i = 31 * i + this.key.hashCode();
 		return 31 * i + Arrays.hashCode(this.args);
 	}
 
-	@Override
 	public String toString() {
-		return "TranslatableComponent{key='"
-			+ this.key
-			+ "', args="
-			+ Arrays.toString(this.args)
-			+ ", siblings="
-			+ this.siblings
-			+ ", style="
-			+ this.getStyle()
-			+ "}";
+		return "translation{key='" + this.key + "', args=" + Arrays.toString(this.args) + "}";
 	}
 
 	public String getKey() {

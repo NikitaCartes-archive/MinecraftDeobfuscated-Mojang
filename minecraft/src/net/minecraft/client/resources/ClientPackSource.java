@@ -31,7 +31,6 @@ import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.FolderPackResources;
@@ -54,7 +53,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class ClientPackSource implements RepositorySource {
 	private static final PackMetadataSection BUILT_IN = new PackMetadataSection(
-		new TranslatableComponent("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())
+		Component.translatable("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())
 	);
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
@@ -64,7 +63,7 @@ public class ClientPackSource implements RepositorySource {
 	private static final String SERVER_ID = "server";
 	private static final String PROGRAMMER_ART_ID = "programer_art";
 	private static final String PROGRAMMER_ART_NAME = "Programmer Art";
-	private static final Component APPLYING_PACK_TEXT = new TranslatableComponent("multiplayer.applyingPack");
+	private static final Component APPLYING_PACK_TEXT = Component.translatable("multiplayer.applyingPack");
 	private final VanillaPackResources vanillaPack;
 	private final File serverPackDir;
 	private final ReentrantLock downloadLock = new ReentrantLock();
@@ -161,14 +160,14 @@ public class ClientPackSource implements RepositorySource {
 												} else {
 													ClientPacketListener clientPacketListener = minecraftx.getConnection();
 													if (clientPacketListener != null) {
-														clientPacketListener.getConnection().disconnect(new TranslatableComponent("connect.aborted"));
+														clientPacketListener.getConnection().disconnect(Component.translatable("connect.aborted"));
 													}
 												}
 											},
-											new TranslatableComponent("multiplayer.texturePrompt.failure.line1"),
-											new TranslatableComponent("multiplayer.texturePrompt.failure.line2"),
+											Component.translatable("multiplayer.texturePrompt.failure.line1"),
+											Component.translatable("multiplayer.texturePrompt.failure.line2"),
 											CommonComponents.GUI_PROCEED,
-											new TranslatableComponent("menu.disconnect")
+											Component.translatable("menu.disconnect")
 										)
 									)
 							);
@@ -271,7 +270,7 @@ public class ClientPackSource implements RepositorySource {
 			"server",
 			true,
 			() -> new FilePackResources(file),
-			new TranslatableComponent("resourcePack.server.name"),
+			Component.translatable("resourcePack.server.name"),
 			packMetadataSection.getDescription(),
 			PackCompatibility.forMetadata(packMetadataSection, PackType.CLIENT_RESOURCES),
 			Pack.Position.TOP,

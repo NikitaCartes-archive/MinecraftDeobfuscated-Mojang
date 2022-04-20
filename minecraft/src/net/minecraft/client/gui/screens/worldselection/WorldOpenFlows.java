@@ -24,7 +24,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.WorldLoader;
@@ -194,8 +193,8 @@ public class WorldOpenFlows {
 			.setScreen(
 				new ConfirmScreen(
 					completableFuture::complete,
-					new TranslatableComponent("multiplayer.texturePrompt.failure.line1"),
-					new TranslatableComponent("multiplayer.texturePrompt.failure.line2"),
+					Component.translatable("multiplayer.texturePrompt.failure.line1"),
+					Component.translatable("multiplayer.texturePrompt.failure.line2"),
 					CommonComponents.GUI_PROCEED,
 					CommonComponents.GUI_CANCEL
 				)
@@ -215,11 +214,11 @@ public class WorldOpenFlows {
 		Component component;
 		Component component2;
 		if (bl) {
-			component = new TranslatableComponent("selectWorld.backupQuestion.customized");
-			component2 = new TranslatableComponent("selectWorld.backupWarning.customized");
+			component = Component.translatable("selectWorld.backupQuestion.customized");
+			component2 = Component.translatable("selectWorld.backupWarning.customized");
 		} else {
-			component = new TranslatableComponent("selectWorld.backupQuestion.experimental");
-			component2 = new TranslatableComponent("selectWorld.backupWarning.experimental");
+			component = Component.translatable("selectWorld.backupQuestion.experimental");
+			component2 = Component.translatable("selectWorld.backupWarning.experimental");
 		}
 
 		this.minecraft.setScreen(new BackupConfirmScreen(screen, (blx, bl2) -> {
@@ -245,16 +244,16 @@ public class WorldOpenFlows {
 			minecraft.setScreen(
 				new ConfirmScreen(
 					booleanConsumer,
-					new TranslatableComponent("selectWorld.import_worldgen_settings.experimental.title"),
-					new TranslatableComponent("selectWorld.import_worldgen_settings.experimental.question")
+					Component.translatable("selectWorld.import_worldgen_settings.experimental.title"),
+					Component.translatable("selectWorld.import_worldgen_settings.experimental.question")
 				)
 			);
 		} else {
 			minecraft.setScreen(
 				new ConfirmScreen(
 					booleanConsumer,
-					new TranslatableComponent("selectWorld.import_worldgen_settings.deprecated.title"),
-					new TranslatableComponent("selectWorld.import_worldgen_settings.deprecated.question")
+					Component.translatable("selectWorld.import_worldgen_settings.deprecated.title"),
+					Component.translatable("selectWorld.import_worldgen_settings.deprecated.question")
 				)
 			);
 		}

@@ -12,14 +12,14 @@ import java.util.function.ToIntFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 public class ExperienceCommand {
 	private static final SimpleCommandExceptionType ERROR_SET_POINTS_INVALID = new SimpleCommandExceptionType(
-		new TranslatableComponent("commands.experience.set.points.invalid")
+		Component.translatable("commands.experience.set.points.invalid")
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -128,7 +128,7 @@ public class ExperienceCommand {
 
 	private static int queryExperience(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, ExperienceCommand.Type type) {
 		int i = type.query.applyAsInt(serverPlayer);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.query." + type.name, serverPlayer.getDisplayName(), i), false);
+		commandSourceStack.sendSuccess(Component.translatable("commands.experience.query." + type.name, serverPlayer.getDisplayName(), i), false);
 		return i;
 	}
 
@@ -139,11 +139,10 @@ public class ExperienceCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.experience.add." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()),
-				true
+				Component.translatable("commands.experience.add." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 			);
 		} else {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.add." + type.name + ".success.multiple", i, collection.size()), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.experience.add." + type.name + ".success.multiple", i, collection.size()), true);
 		}
 
 		return collection.size();
@@ -163,11 +162,10 @@ public class ExperienceCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.experience.set." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()),
-					true
+					Component.translatable("commands.experience.set." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.experience.set." + type.name + ".success.multiple", i, collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.experience.set." + type.name + ".success.multiple", i, collection.size()), true);
 			}
 
 			return collection.size();

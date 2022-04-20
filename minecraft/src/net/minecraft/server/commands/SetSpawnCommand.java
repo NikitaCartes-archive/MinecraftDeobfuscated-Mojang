@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.AngleArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -67,7 +67,7 @@ public class SetSpawnCommand {
 		String string = resourceKey.location().toString();
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
+				Component.translatable(
 					"commands.spawnpoint.success.single",
 					blockPos.getX(),
 					blockPos.getY(),
@@ -80,7 +80,7 @@ public class SetSpawnCommand {
 			);
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()), true
+				Component.translatable("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()), true
 			);
 		}
 

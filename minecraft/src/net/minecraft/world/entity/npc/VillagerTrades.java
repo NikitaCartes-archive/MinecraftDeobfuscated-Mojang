@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
@@ -1022,7 +1022,7 @@ public class VillagerTrades {
 					ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack);
 					MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.destinationType);
-					itemStack.setHoverName(new TranslatableComponent(this.displayName));
+					itemStack.setHoverName(Component.translatable(this.displayName));
 					return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemStack, this.maxUses, this.villagerXp, 0.2F);
 				} else {
 					return null;

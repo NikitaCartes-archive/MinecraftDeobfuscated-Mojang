@@ -7,13 +7,13 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.HttpUtil;
 
 public class PublishCommand {
-	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.publish.failed"));
+	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.publish.failed"));
 	private static final DynamicCommandExceptionType ERROR_ALREADY_PUBLISHED = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.publish.alreadyPublished", object)
+		object -> Component.translatable("commands.publish.alreadyPublished", object)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -34,7 +34,7 @@ public class PublishCommand {
 		} else if (!commandSourceStack.getServer().publishServer(null, false, i)) {
 			throw ERROR_FAILED.create();
 		} else {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.publish.success", i), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.publish.success", i), true);
 			return i;
 		}
 	}

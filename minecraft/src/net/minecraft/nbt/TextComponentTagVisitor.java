@@ -12,9 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import org.slf4j.Logger;
 
 public class TextComponentTagVisitor implements TagVisitor {
@@ -37,7 +37,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 	private static final String NEWLINE = "\n";
 	private final String indentation;
 	private final int depth;
-	private Component result = TextComponent.EMPTY;
+	private Component result = CommonComponents.EMPTY;
 
 	public TextComponentTagVisitor(String string, int i) {
 		this.indentation = string;
@@ -53,53 +53,53 @@ public class TextComponentTagVisitor implements TagVisitor {
 	public void visitString(StringTag stringTag) {
 		String string = StringTag.quoteAndEscape(stringTag.getAsString());
 		String string2 = string.substring(0, 1);
-		Component component = new TextComponent(string.substring(1, string.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_STRING);
-		this.result = new TextComponent(string2).append(component).append(string2);
+		Component component = Component.literal(string.substring(1, string.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_STRING);
+		this.result = Component.literal(string2).append(component).append(string2);
 	}
 
 	@Override
 	public void visitByte(ByteTag byteTag) {
-		Component component = new TextComponent("b").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		this.result = new TextComponent(String.valueOf(byteTag.getAsNumber())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+		Component component = Component.literal("b").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		this.result = Component.literal(String.valueOf(byteTag.getAsNumber())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 	}
 
 	@Override
 	public void visitShort(ShortTag shortTag) {
-		Component component = new TextComponent("s").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		this.result = new TextComponent(String.valueOf(shortTag.getAsNumber())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+		Component component = Component.literal("s").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		this.result = Component.literal(String.valueOf(shortTag.getAsNumber())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 	}
 
 	@Override
 	public void visitInt(IntTag intTag) {
-		this.result = new TextComponent(String.valueOf(intTag.getAsNumber())).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+		this.result = Component.literal(String.valueOf(intTag.getAsNumber())).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 	}
 
 	@Override
 	public void visitLong(LongTag longTag) {
-		Component component = new TextComponent("L").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		this.result = new TextComponent(String.valueOf(longTag.getAsNumber())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+		Component component = Component.literal("L").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		this.result = Component.literal(String.valueOf(longTag.getAsNumber())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 	}
 
 	@Override
 	public void visitFloat(FloatTag floatTag) {
-		Component component = new TextComponent("f").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		this.result = new TextComponent(String.valueOf(floatTag.getAsFloat())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+		Component component = Component.literal("f").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		this.result = Component.literal(String.valueOf(floatTag.getAsFloat())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 	}
 
 	@Override
 	public void visitDouble(DoubleTag doubleTag) {
-		Component component = new TextComponent("d").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		this.result = new TextComponent(String.valueOf(doubleTag.getAsDouble())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+		Component component = Component.literal("d").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		this.result = Component.literal(String.valueOf(doubleTag.getAsDouble())).append(component).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 	}
 
 	@Override
 	public void visitByteArray(ByteArrayTag byteArrayTag) {
-		Component component = new TextComponent("B").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
+		Component component = Component.literal("B").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		MutableComponent mutableComponent = Component.literal("[").append(component).append(";");
 		byte[] bs = byteArrayTag.getAsByteArray();
 
 		for (int i = 0; i < bs.length; i++) {
-			MutableComponent mutableComponent2 = new TextComponent(String.valueOf(bs[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+			MutableComponent mutableComponent2 = Component.literal(String.valueOf(bs[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 			mutableComponent.append(" ").append(mutableComponent2).append(component);
 			if (i != bs.length - 1) {
 				mutableComponent.append(ELEMENT_SEPARATOR);
@@ -112,12 +112,12 @@ public class TextComponentTagVisitor implements TagVisitor {
 
 	@Override
 	public void visitIntArray(IntArrayTag intArrayTag) {
-		Component component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
+		Component component = Component.literal("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		MutableComponent mutableComponent = Component.literal("[").append(component).append(";");
 		int[] is = intArrayTag.getAsIntArray();
 
 		for (int i = 0; i < is.length; i++) {
-			mutableComponent.append(" ").append(new TextComponent(String.valueOf(is[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
+			mutableComponent.append(" ").append(Component.literal(String.valueOf(is[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
 			if (i != is.length - 1) {
 				mutableComponent.append(ELEMENT_SEPARATOR);
 			}
@@ -129,12 +129,12 @@ public class TextComponentTagVisitor implements TagVisitor {
 
 	@Override
 	public void visitLongArray(LongArrayTag longArrayTag) {
-		Component component = new TextComponent("L").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
+		Component component = Component.literal("L").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+		MutableComponent mutableComponent = Component.literal("[").append(component).append(";");
 		long[] ls = longArrayTag.getAsLongArray();
 
 		for (int i = 0; i < ls.length; i++) {
-			Component component2 = new TextComponent(String.valueOf(ls[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+			Component component2 = Component.literal(String.valueOf(ls[i])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
 			mutableComponent.append(" ").append(component2).append(component);
 			if (i != ls.length - 1) {
 				mutableComponent.append(ELEMENT_SEPARATOR);
@@ -148,10 +148,10 @@ public class TextComponentTagVisitor implements TagVisitor {
 	@Override
 	public void visitList(ListTag listTag) {
 		if (listTag.isEmpty()) {
-			this.result = new TextComponent("[]");
+			this.result = Component.literal("[]");
 		} else if (INLINE_ELEMENT_TYPES.contains(listTag.getElementType()) && listTag.size() <= 8) {
 			String string = ELEMENT_SEPARATOR + " ";
-			MutableComponent mutableComponent = new TextComponent("[");
+			MutableComponent mutableComponent = Component.literal("[");
 
 			for (int i = 0; i < listTag.size(); i++) {
 				if (i != 0) {
@@ -164,13 +164,13 @@ public class TextComponentTagVisitor implements TagVisitor {
 			mutableComponent.append("]");
 			this.result = mutableComponent;
 		} else {
-			MutableComponent mutableComponent2 = new TextComponent("[");
+			MutableComponent mutableComponent2 = Component.literal("[");
 			if (!this.indentation.isEmpty()) {
 				mutableComponent2.append("\n");
 			}
 
 			for (int j = 0; j < listTag.size(); j++) {
-				MutableComponent mutableComponent3 = new TextComponent(Strings.repeat(this.indentation, this.depth + 1));
+				MutableComponent mutableComponent3 = Component.literal(Strings.repeat(this.indentation, this.depth + 1));
 				mutableComponent3.append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(listTag.get(j)));
 				if (j != listTag.size() - 1) {
 					mutableComponent3.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? " " : "\n");
@@ -191,9 +191,9 @@ public class TextComponentTagVisitor implements TagVisitor {
 	@Override
 	public void visitCompound(CompoundTag compoundTag) {
 		if (compoundTag.isEmpty()) {
-			this.result = new TextComponent("{}");
+			this.result = Component.literal("{}");
 		} else {
-			MutableComponent mutableComponent = new TextComponent("{");
+			MutableComponent mutableComponent = Component.literal("{");
 			Collection<String> collection = compoundTag.getAllKeys();
 			if (LOGGER.isDebugEnabled()) {
 				List<String> list = Lists.<String>newArrayList(compoundTag.getAllKeys());
@@ -209,7 +209,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 
 			while (iterator.hasNext()) {
 				String string = (String)iterator.next();
-				MutableComponent mutableComponent2 = new TextComponent(Strings.repeat(this.indentation, this.depth + 1))
+				MutableComponent mutableComponent2 = Component.literal(Strings.repeat(this.indentation, this.depth + 1))
 					.append(handleEscapePretty(string))
 					.append(NAME_VALUE_SEPARATOR)
 					.append(" ")
@@ -232,17 +232,17 @@ public class TextComponentTagVisitor implements TagVisitor {
 
 	protected static Component handleEscapePretty(String string) {
 		if (SIMPLE_VALUE.matcher(string).matches()) {
-			return new TextComponent(string).withStyle(SYNTAX_HIGHLIGHTING_KEY);
+			return Component.literal(string).withStyle(SYNTAX_HIGHLIGHTING_KEY);
 		} else {
 			String string2 = StringTag.quoteAndEscape(string);
 			String string3 = string2.substring(0, 1);
-			Component component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_KEY);
-			return new TextComponent(string3).append(component).append(string3);
+			Component component = Component.literal(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_KEY);
+			return Component.literal(string3).append(component).append(string3);
 		}
 	}
 
 	@Override
 	public void visitEnd(EndTag endTag) {
-		this.result = TextComponent.EMPTY;
+		this.result = CommonComponents.EMPTY;
 	}
 }

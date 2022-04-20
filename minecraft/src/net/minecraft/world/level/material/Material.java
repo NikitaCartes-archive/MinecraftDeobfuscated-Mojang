@@ -95,6 +95,7 @@ public final class Material {
 	public static final Material AMETHYST = new Material.Builder(MaterialColor.COLOR_PURPLE).build();
 	public static final Material POWDER_SNOW = new Material.Builder(MaterialColor.SNOW).nonSolid().noCollider().build();
 	public static final Material FROGSPAWN = new Material.Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().destroyOnPush().build();
+	public static final Material FROGLIGHT = new Material.Builder(MaterialColor.NONE).build();
 	private final MaterialColor color;
 	private final PushReaction pushReaction;
 	private final boolean blocksMotion;

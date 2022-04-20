@@ -12,9 +12,9 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
 import java.lang.reflect.Type;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,7 +22,7 @@ public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
 	public static final Gson GSON = new GsonBuilder().registerTypeAdapter(Component.class, new JsonDeserializer<Component>() {
 		public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			if (jsonElement.isJsonPrimitive()) {
-				return new TextComponent(jsonElement.getAsString());
+				return Component.literal(jsonElement.getAsString());
 			} else if (jsonElement.isJsonArray()) {
 				JsonArray jsonArray = jsonElement.getAsJsonArray();
 				MutableComponent mutableComponent = null;
@@ -55,7 +55,7 @@ public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
 				try {
 					component = GsonHelper.fromJson(GSON, string2, Component.class, true);
 					if (component == null) {
-						component = TextComponent.EMPTY;
+						component = CommonComponents.EMPTY;
 					}
 				} catch (Exception var8) {
 				}
@@ -75,13 +75,13 @@ public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
 				}
 
 				if (component == null) {
-					component = new TextComponent(string2);
+					component = Component.literal(string2);
 				}
 			} else {
-				component = new TextComponent(string2);
+				component = Component.literal(string2);
 			}
 		} else {
-			component = TextComponent.EMPTY;
+			component = CommonComponents.EMPTY;
 		}
 
 		return dynamic.set(string, dynamic.createString(Component.Serializer.toJson(component)));

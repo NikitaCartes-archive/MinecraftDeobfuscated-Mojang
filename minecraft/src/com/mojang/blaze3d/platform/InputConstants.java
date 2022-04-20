@@ -17,8 +17,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.LazyLoadedValue;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCharModsCallbackI;
@@ -304,15 +302,14 @@ public class InputConstants {
 	public static enum Type {
 		KEYSYM("key.keyboard", (integer, string) -> {
 			String string2 = GLFW.glfwGetKeyName(integer, -1);
-			return (Component)(string2 != null ? new TextComponent(string2) : new TranslatableComponent(string));
+			return string2 != null ? Component.literal(string2) : Component.translatable(string);
 		}),
 		SCANCODE("scancode", (integer, string) -> {
 			String string2 = GLFW.glfwGetKeyName(-1, integer);
-			return (Component)(string2 != null ? new TextComponent(string2) : new TranslatableComponent(string));
+			return string2 != null ? Component.literal(string2) : Component.translatable(string);
 		}),
 		MOUSE(
-			"key.mouse",
-			(integer, string) -> Language.getInstance().has(string) ? new TranslatableComponent(string) : new TranslatableComponent("key.mouse", integer + 1)
+			"key.mouse", (integer, string) -> Language.getInstance().has(string) ? Component.translatable(string) : Component.translatable("key.mouse", integer + 1)
 		);
 
 		private final Int2ObjectMap<InputConstants.Key> map = new Int2ObjectOpenHashMap<>();

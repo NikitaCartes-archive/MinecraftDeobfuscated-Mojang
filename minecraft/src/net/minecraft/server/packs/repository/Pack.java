@@ -11,7 +11,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -42,7 +41,7 @@ public class Pack {
 					return null;
 				}
 
-				var8 = packConstructor.create(string, new TextComponent(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
+				var8 = packConstructor.create(string, Component.literal(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
 			}
 
 			return var8;
@@ -106,11 +105,11 @@ public class Pack {
 	}
 
 	public Component getChatLink(boolean bl) {
-		return ComponentUtils.wrapInSquareBrackets(this.packSource.decorate(new TextComponent(this.id)))
+		return ComponentUtils.wrapInSquareBrackets(this.packSource.decorate(Component.literal(this.id)))
 			.withStyle(
 				style -> style.withColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED)
 						.withInsertion(StringArgumentType.escapeIfRequired(this.id))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("").append(this.title).append("\n").append(this.description)))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.empty().append(this.title).append("\n").append(this.description)))
 			);
 	}
 

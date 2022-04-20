@@ -2,8 +2,8 @@ package net.minecraft.world.entity.vehicle;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -44,7 +44,7 @@ public class MinecartCommandBlock extends AbstractMinecart {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.getEntityData().define(DATA_ID_COMMAND_NAME, "");
-		this.getEntityData().define(DATA_ID_LAST_OUTPUT, TextComponent.EMPTY);
+		this.getEntityData().define(DATA_ID_LAST_OUTPUT, CommonComponents.EMPTY);
 	}
 
 	@Override

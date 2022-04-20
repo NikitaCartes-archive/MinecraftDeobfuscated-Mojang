@@ -1,8 +1,8 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -27,7 +27,7 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
 		this.objectiveName = friendlyByteBuf.readUtf();
 		this.method = friendlyByteBuf.readByte();
 		if (this.method != 0 && this.method != 2) {
-			this.displayName = TextComponent.EMPTY;
+			this.displayName = CommonComponents.EMPTY;
 			this.renderType = ObjectiveCriteria.RenderType.INTEGER;
 		} else {
 			this.displayName = friendlyByteBuf.readComponent();

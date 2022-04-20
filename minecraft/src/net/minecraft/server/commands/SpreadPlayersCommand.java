@@ -19,7 +19,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -34,13 +34,13 @@ import net.minecraft.world.scores.Team;
 public class SpreadPlayersCommand {
 	private static final int MAX_ITERATION_COUNT = 10000;
 	private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_TEAMS = new Dynamic4CommandExceptionType(
-		(object, object2, object3, object4) -> new TranslatableComponent("commands.spreadplayers.failed.teams", object, object2, object3, object4)
+		(object, object2, object3, object4) -> Component.translatable("commands.spreadplayers.failed.teams", object, object2, object3, object4)
 	);
 	private static final Dynamic4CommandExceptionType ERROR_FAILED_TO_SPREAD_ENTITIES = new Dynamic4CommandExceptionType(
-		(object, object2, object3, object4) -> new TranslatableComponent("commands.spreadplayers.failed.entities", object, object2, object3, object4)
+		(object, object2, object3, object4) -> Component.translatable("commands.spreadplayers.failed.entities", object, object2, object3, object4)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_INVALID_MAX_HEIGHT = new Dynamic2CommandExceptionType(
-		(object, object2) -> new TranslatableComponent("commands.spreadplayers.failed.invalid.height", object, object2)
+		(object, object2) -> Component.translatable("commands.spreadplayers.failed.invalid.height", object, object2)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -116,7 +116,7 @@ public class SpreadPlayersCommand {
 			spreadPositions(vec2, (double)f, serverLevel, randomSource, d, e, h, k, i, positions, bl);
 			double l = setPlayerPositions(collection, serverLevel, positions, i, bl);
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
+				Component.translatable(
 					"commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, vec2.x, vec2.y, String.format(Locale.ROOT, "%.2f", l)
 				),
 				true

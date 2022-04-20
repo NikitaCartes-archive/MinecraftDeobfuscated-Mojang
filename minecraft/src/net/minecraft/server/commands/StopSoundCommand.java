@@ -10,7 +10,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -66,14 +66,14 @@ public class StopSoundCommand {
 
 		if (soundSource != null) {
 			if (resourceLocation != null) {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.source.sound", resourceLocation, soundSource.getName()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.stopsound.success.source.sound", resourceLocation, soundSource.getName()), true);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.source.any", soundSource.getName()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.stopsound.success.source.any", soundSource.getName()), true);
 			}
 		} else if (resourceLocation != null) {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.sourceless.sound", resourceLocation), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.stopsound.success.sourceless.sound", resourceLocation), true);
 		} else {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.sourceless.any"), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.stopsound.success.sourceless.any"), true);
 		}
 
 		return collection.size();

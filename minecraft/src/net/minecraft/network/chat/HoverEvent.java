@@ -212,8 +212,8 @@ public class HoverEvent {
 					this.linesCache.add(this.name);
 				}
 
-				this.linesCache.add(new TranslatableComponent("gui.entity_tooltip.type", this.type.getDescription()));
-				this.linesCache.add(new TextComponent(this.id.toString()));
+				this.linesCache.add(Component.translatable("gui.entity_tooltip.type", this.type.getDescription()));
+				this.linesCache.add(Component.literal(this.id.toString()));
 			}
 
 			return this.linesCache;

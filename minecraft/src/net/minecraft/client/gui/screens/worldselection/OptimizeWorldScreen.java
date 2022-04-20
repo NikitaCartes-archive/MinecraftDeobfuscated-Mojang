@@ -14,7 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.WorldStem;
 import net.minecraft.util.Mth;
@@ -67,7 +67,7 @@ public class OptimizeWorldScreen extends Screen {
 		boolean bl,
 		WorldGenSettings worldGenSettings
 	) {
-		super(new TranslatableComponent("optimizeWorld.title", levelSettings.levelName()));
+		super(Component.translatable("optimizeWorld.title", levelSettings.levelName()));
 		this.callback = booleanConsumer;
 		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldGenSettings, bl);
 	}
@@ -109,9 +109,9 @@ public class OptimizeWorldScreen extends Screen {
 		drawCenteredString(poseStack, this.font, this.upgrader.getStatus(), this.width / 2, m - 9 - 2, 10526880);
 		if (this.upgrader.getTotalChunks() > 0) {
 			fill(poseStack, k - 1, m - 1, l + 1, n + 1, -16777216);
-			drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 10526880);
-			drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + 9 + 3, 10526880);
-			drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (9 + 3) * 2, 10526880);
+			drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 10526880);
+			drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + 9 + 3, 10526880);
+			drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (9 + 3) * 2, 10526880);
 			int o = 0;
 
 			for (ResourceKey<Level> resourceKey : this.upgrader.levels()) {

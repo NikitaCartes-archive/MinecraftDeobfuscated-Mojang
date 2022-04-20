@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Nameable;
@@ -106,7 +105,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 
 	@Override
 	public Component getName() {
-		return (Component)(this.name != null ? this.name : new TranslatableComponent("container.enchant"));
+		return (Component)(this.name != null ? this.name : Component.translatable("container.enchant"));
 	}
 
 	public void setCustomName(@Nullable Component component) {

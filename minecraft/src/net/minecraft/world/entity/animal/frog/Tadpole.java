@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -34,7 +33,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class Tadpole extends AbstractFish {
 	@VisibleForTesting
@@ -134,11 +132,6 @@ public class Tadpole extends AbstractFish {
 	@Override
 	protected SoundEvent getDeathSound() {
 		return SoundEvents.TADPOLE_DEATH;
-	}
-
-	@Override
-	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
-		this.playSound(SoundEvents.TADPOLE_STEP, 0.15F, 1.0F);
 	}
 
 	@Override

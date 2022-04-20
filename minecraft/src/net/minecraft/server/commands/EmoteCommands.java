@@ -8,7 +8,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -56,6 +55,6 @@ public class EmoteCommands {
 	}
 
 	private static Component createMessage(CommandContext<CommandSourceStack> commandContext, String string) {
-		return new TranslatableComponent("chat.type.emote", commandContext.getSource().getDisplayName(), string);
+		return Component.translatable("chat.type.emote", commandContext.getSource().getDisplayName(), string);
 	}
 }

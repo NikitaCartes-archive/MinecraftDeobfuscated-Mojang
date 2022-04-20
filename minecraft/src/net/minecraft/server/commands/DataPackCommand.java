@@ -13,20 +13,20 @@ import java.util.stream.Collectors;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 
 public class DataPackCommand {
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_PACK = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.datapack.unknown", object)
+		object -> Component.translatable("commands.datapack.unknown", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_PACK_ALREADY_ENABLED = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.datapack.enable.failed", object)
+		object -> Component.translatable("commands.datapack.enable.failed", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_PACK_ALREADY_DISABLED = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.datapack.disable.failed", object)
+		object -> Component.translatable("commands.datapack.disable.failed", object)
 	);
 	private static final SuggestionProvider<CommandSourceStack> SELECTED_PACKS = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
 			commandContext.getSource().getServer().getPackRepository().getSelectedIds().stream().map(StringArgumentType::escapeIfRequired), suggestionsBuilder
@@ -111,7 +111,7 @@ public class DataPackCommand {
 		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
 		List<Pack> list = Lists.<Pack>newArrayList(packRepository.getSelectedPacks());
 		inserter.apply(list, pack);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.modify.enable", pack.getChatLink(true)), true);
+		commandSourceStack.sendSuccess(Component.translatable("commands.datapack.modify.enable", pack.getChatLink(true)), true);
 		ReloadCommand.reloadPacks((Collection<String>)list.stream().map(Pack::getId).collect(Collectors.toList()), commandSourceStack);
 		return list.size();
 	}
@@ -120,7 +120,7 @@ public class DataPackCommand {
 		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
 		List<Pack> list = Lists.<Pack>newArrayList(packRepository.getSelectedPacks());
 		list.remove(pack);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.modify.disable", pack.getChatLink(true)), true);
+		commandSourceStack.sendSuccess(Component.translatable("commands.datapack.modify.disable", pack.getChatLink(true)), true);
 		ReloadCommand.reloadPacks((Collection<String>)list.stream().map(Pack::getId).collect(Collectors.toList()), commandSourceStack);
 		return list.size();
 	}
@@ -136,10 +136,10 @@ public class DataPackCommand {
 		Collection<? extends Pack> collection2 = packRepository.getAvailablePacks();
 		List<Pack> list = (List<Pack>)collection2.stream().filter(pack -> !collection.contains(pack)).collect(Collectors.toList());
 		if (list.isEmpty()) {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.available.none"), false);
+			commandSourceStack.sendSuccess(Component.translatable("commands.datapack.list.available.none"), false);
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.datapack.list.available.success", list.size(), ComponentUtils.formatList(list, pack -> pack.getChatLink(false))), false
+				Component.translatable("commands.datapack.list.available.success", list.size(), ComponentUtils.formatList(list, pack -> pack.getChatLink(false))), false
 			);
 		}
 
@@ -151,12 +151,10 @@ public class DataPackCommand {
 		packRepository.reload();
 		Collection<? extends Pack> collection = packRepository.getSelectedPacks();
 		if (collection.isEmpty()) {
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.enabled.none"), false);
+			commandSourceStack.sendSuccess(Component.translatable("commands.datapack.list.enabled.none"), false);
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
-					"commands.datapack.list.enabled.success", collection.size(), ComponentUtils.formatList(collection, pack -> pack.getChatLink(true))
-				),
+				Component.translatable("commands.datapack.list.enabled.success", collection.size(), ComponentUtils.formatList(collection, pack -> pack.getChatLink(true))),
 				false
 			);
 		}

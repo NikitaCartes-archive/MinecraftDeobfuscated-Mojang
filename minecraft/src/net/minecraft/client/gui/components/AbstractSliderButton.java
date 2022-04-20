@@ -10,7 +10,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -29,7 +28,7 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 
 	@Override
 	protected MutableComponent createNarrationMessage() {
-		return new TranslatableComponent("gui.narrate.slider", this.getMessage());
+		return Component.translatable("gui.narrate.slider", this.getMessage());
 	}
 
 	@Override
@@ -37,9 +36,9 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 		narrationElementOutput.add(NarratedElementType.TITLE, this.createNarrationMessage());
 		if (this.active) {
 			if (this.isFocused()) {
-				narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.slider.usage.focused"));
+				narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.slider.usage.focused"));
 			} else {
-				narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.slider.usage.hovered"));
+				narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.slider.usage.hovered"));
 			}
 		}
 	}

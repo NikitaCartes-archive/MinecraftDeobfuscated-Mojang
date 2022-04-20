@@ -3,6 +3,7 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketListener> {
 	private final int id;
@@ -15,9 +16,10 @@ public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketL
 
 	public ClientboundTeleportEntityPacket(Entity entity) {
 		this.id = entity.getId();
-		this.x = entity.getX();
-		this.y = entity.getY();
-		this.z = entity.getZ();
+		Vec3 vec3 = entity.trackingPosition();
+		this.x = vec3.x;
+		this.y = vec3.y;
+		this.z = vec3.z;
 		this.yRot = (byte)((int)(entity.getYRot() * 256.0F / 360.0F));
 		this.xRot = (byte)((int)(entity.getXRot() * 256.0F / 360.0F));
 		this.onGround = entity.isOnGround();

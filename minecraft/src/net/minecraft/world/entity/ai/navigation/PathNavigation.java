@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class PathNavigation {
@@ -334,6 +336,11 @@ public abstract class PathNavigation {
 
 	protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32) {
 		return false;
+	}
+
+	protected static boolean isClearForMovementBetween(Mob mob, Vec3 vec3, Vec3 vec32) {
+		Vec3 vec33 = new Vec3(vec32.x, vec32.y + (double)mob.getBbHeight() * 0.5, vec32.z);
+		return mob.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob)).getType() == HitResult.Type.MISS;
 	}
 
 	public boolean isStableDestination(BlockPos blockPos) {

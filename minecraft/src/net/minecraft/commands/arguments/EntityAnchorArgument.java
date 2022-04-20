@@ -17,14 +17,14 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class EntityAnchorArgument implements ArgumentType<EntityAnchorArgument.Anchor> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("eyes", "feet");
 	private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.anchor.invalid", object)
+		object -> Component.translatable("argument.anchor.invalid", object)
 	);
 
 	public static EntityAnchorArgument.Anchor getAnchor(CommandContext<CommandSourceStack> commandContext, String string) {

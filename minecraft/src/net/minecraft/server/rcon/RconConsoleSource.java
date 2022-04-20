@@ -4,7 +4,6 @@ import java.util.UUID;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec2;
@@ -12,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class RconConsoleSource implements CommandSource {
 	private static final String RCON = "Rcon";
-	private static final Component RCON_COMPONENT = new TextComponent("Rcon");
+	private static final Component RCON_COMPONENT = Component.literal("Rcon");
 	private final StringBuffer buffer = new StringBuffer();
 	private final MinecraftServer server;
 

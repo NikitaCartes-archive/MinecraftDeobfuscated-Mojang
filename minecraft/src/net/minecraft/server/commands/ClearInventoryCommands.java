@@ -12,16 +12,16 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public class ClearInventoryCommands {
 	private static final DynamicCommandExceptionType ERROR_SINGLE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("clear.failed.single", object)
+		object -> Component.translatable("clear.failed.single", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_MULTIPLE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("clear.failed.multiple", object)
+		object -> Component.translatable("clear.failed.multiple", object)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
@@ -78,17 +78,17 @@ public class ClearInventoryCommands {
 			if (i == 0) {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
-						new TranslatableComponent("commands.clear.test.single", j, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+						Component.translatable("commands.clear.test.single", j, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 					);
 				} else {
-					commandSourceStack.sendSuccess(new TranslatableComponent("commands.clear.test.multiple", j, collection.size()), true);
+					commandSourceStack.sendSuccess(Component.translatable("commands.clear.test.multiple", j, collection.size()), true);
 				}
 			} else if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.clear.success.single", j, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					Component.translatable("commands.clear.success.single", j, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.clear.success.multiple", j, collection.size()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.clear.success.multiple", j, collection.size()), true);
 			}
 
 			return j;

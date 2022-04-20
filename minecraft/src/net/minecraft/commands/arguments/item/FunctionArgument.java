@@ -12,17 +12,17 @@ import java.util.Collection;
 import java.util.Collections;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 
 public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "#foo");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("arguments.function.tag.unknown", object)
+		object -> Component.translatable("arguments.function.tag.unknown", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_FUNCTION = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("arguments.function.unknown", object)
+		object -> Component.translatable("arguments.function.unknown", object)
 	);
 
 	public static FunctionArgument functions() {

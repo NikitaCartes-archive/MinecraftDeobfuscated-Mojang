@@ -31,8 +31,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
@@ -46,10 +44,10 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class WorldGenSettingsComponent implements Widget {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Component CUSTOM_WORLD_DESCRIPTION = new TranslatableComponent("generator.custom");
-	private static final Component AMPLIFIED_HELP_TEXT = new TranslatableComponent("generator.minecraft.amplified.info");
-	private static final Component MAP_FEATURES_INFO = new TranslatableComponent("selectWorld.mapFeatures.info");
-	private static final Component SELECT_FILE_PROMPT = new TranslatableComponent("selectWorld.import_worldgen_settings.select_file");
+	private static final Component CUSTOM_WORLD_DESCRIPTION = Component.translatable("generator.custom");
+	private static final Component AMPLIFIED_HELP_TEXT = Component.translatable("generator.minecraft.amplified.info");
+	private static final Component MAP_FEATURES_INFO = Component.translatable("selectWorld.mapFeatures.info");
+	private static final Component SELECT_FILE_PROMPT = Component.translatable("selectWorld.import_worldgen_settings.select_file");
 	private MultiLineLabel amplifiedWorldInfo = MultiLineLabel.EMPTY;
 	private Font font;
 	private int width;
@@ -77,7 +75,7 @@ public class WorldGenSettingsComponent implements Widget {
 	public void init(CreateWorldScreen createWorldScreen, Minecraft minecraft, Font font) {
 		this.font = font;
 		this.width = createWorldScreen.width;
-		this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, new TranslatableComponent("selectWorld.enterSeed"));
+		this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, Component.translatable("selectWorld.enterSeed"));
 		this.seedEdit.setValue(toString(this.seed));
 		this.seedEdit.setResponder(string -> this.seed = WorldGenSettings.parseSeed(this.seedEdit.getValue()));
 		createWorldScreen.addWidget(this.seedEdit);
@@ -86,14 +84,14 @@ public class WorldGenSettingsComponent implements Widget {
 		this.featuresButton = createWorldScreen.addRenderableWidget(
 			CycleButton.onOffBuilder(this.settings.worldGenSettings().generateStructures())
 				.withCustomNarration(
-					cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), new TranslatableComponent("selectWorld.mapFeatures.info"))
+					cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.mapFeatures.info"))
 				)
 				.create(
 					i,
 					100,
 					150,
 					20,
-					new TranslatableComponent("selectWorld.mapFeatures"),
+					Component.translatable("selectWorld.mapFeatures"),
 					(cycleButton, boolean_) -> this.updateSettings(WorldGenSettings::withStructuresToggled)
 				)
 		);
@@ -110,7 +108,7 @@ public class WorldGenSettingsComponent implements Widget {
 							? CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), AMPLIFIED_HELP_TEXT)
 							: cycleButton.createDefaultNarrationMessage()
 				)
-				.create(j, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), (cycleButton, holder) -> {
+				.create(j, 100, 150, 20, Component.translatable("selectWorld.mapType"), (cycleButton, holder) -> {
 					this.preset = Optional.of(holder);
 					this.updateSettings(worldGenSettings -> ((WorldPreset)holder.value()).recreateWorldGenSettings(worldGenSettings));
 					createWorldScreen.refreshWorldGenSettingsVisibility();
@@ -119,29 +117,22 @@ public class WorldGenSettingsComponent implements Widget {
 		this.preset.ifPresent(this.typeButton::setValue);
 		this.typeButton.visible = false;
 		this.customWorldDummyButton = createWorldScreen.addRenderableWidget(
-			new Button(j, 100, 150, 20, CommonComponents.optionNameValue(new TranslatableComponent("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {
+			new Button(j, 100, 150, 20, CommonComponents.optionNameValue(Component.translatable("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {
 			})
 		);
 		this.customWorldDummyButton.active = false;
 		this.customWorldDummyButton.visible = false;
-		this.customizeTypeButton = createWorldScreen.addRenderableWidget(
-			new Button(j, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
-				PresetEditor presetEditor = (PresetEditor)PresetEditor.EDITORS.get(this.preset.flatMap(Holder::unwrapKey));
-				if (presetEditor != null) {
-					minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
-				}
-			})
-		);
+		this.customizeTypeButton = createWorldScreen.addRenderableWidget(new Button(j, 120, 150, 20, Component.translatable("selectWorld.customizeType"), button -> {
+			PresetEditor presetEditor = (PresetEditor)PresetEditor.EDITORS.get(this.preset.flatMap(Holder::unwrapKey));
+			if (presetEditor != null) {
+				minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
+			}
+		}));
 		this.customizeTypeButton.visible = false;
 		this.bonusItemsButton = createWorldScreen.addRenderableWidget(
 			CycleButton.onOffBuilder(this.settings.worldGenSettings().generateBonusChest() && !createWorldScreen.hardCore)
 				.create(
-					i,
-					151,
-					150,
-					20,
-					new TranslatableComponent("selectWorld.bonusItems"),
-					(cycleButton, boolean_) -> this.updateSettings(WorldGenSettings::withBonusChestToggled)
+					i, 151, 150, 20, Component.translatable("selectWorld.bonusItems"), (cycleButton, boolean_) -> this.updateSettings(WorldGenSettings::withBonusChestToggled)
 				)
 		);
 		this.bonusItemsButton.visible = false;
@@ -151,7 +142,7 @@ public class WorldGenSettingsComponent implements Widget {
 				185,
 				150,
 				20,
-				new TranslatableComponent("selectWorld.import_worldgen_settings"),
+				Component.translatable("selectWorld.import_worldgen_settings"),
 				button -> {
 					String string = TinyFileDialogs.tinyfd_openFileDialog(SELECT_FILE_PROMPT.getString(), null, null, null, false);
 					if (string != null) {
@@ -184,10 +175,10 @@ public class WorldGenSettingsComponent implements Widget {
 						}
 
 						if (dataResult.error().isPresent()) {
-							Component component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
+							Component component = Component.translatable("selectWorld.import_worldgen_settings.failure");
 							String string2 = ((PartialResult)dataResult.error().get()).message();
 							LOGGER.error("Error parsing world settings: {}", string2);
-							Component component2 = new TextComponent(string2);
+							Component component2 = Component.literal(string2);
 							minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
 						} else {
 							Lifecycle lifecycle = dataResult.lifecycle();
@@ -214,7 +205,7 @@ public class WorldGenSettingsComponent implements Widget {
 
 	private static Component describePreset(Holder<WorldPreset> holder) {
 		return (Component)holder.unwrapKey()
-			.map(resourceKey -> new TranslatableComponent(resourceKey.location().toLanguageKey("generator")))
+			.map(resourceKey -> Component.translatable(resourceKey.location().toLanguageKey("generator")))
 			.orElse(CUSTOM_WORLD_DESCRIPTION);
 	}
 

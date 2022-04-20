@@ -160,10 +160,10 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.KeybindComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.KeybindResolver;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
@@ -245,7 +245,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
 	private static final ResourceLocation REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
-	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
+	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = Component.translatable("multiplayer.socialInteractions.not_available");
 	public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
 	private final File resourcePackDirectory;
 	private final PropertyMap profileProperties;
@@ -403,7 +403,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			i = 0;
 		}
 
-		KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
+		KeybindResolver.setKeyResolver(KeyMapping::createNameSupplier);
 		this.fixerUpper = DataFixers.getDataFixer();
 		this.toast = new ToastComponent(this);
 		this.gameThread = Thread.currentThread();
@@ -630,7 +630,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.options.save();
 		this.reloadResourcePacks(true).thenRun(() -> {
 			ToastComponent toastComponent = this.getToasts();
-			SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
+			SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
 		});
 	}
 
@@ -847,7 +847,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			for (ItemStack itemStack : nonNullList) {
 				String string = itemStack.getDescriptionId();
-				String string2 = new TranslatableComponent(string).getString();
+				String string2 = Component.translatable(string).getString();
 				if (string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) {
 					LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
 				}
@@ -1203,14 +1203,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				this.singleplayerServer.halt(true);
 			}
 
-			this.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
+			this.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
 		} catch (Throwable var2) {
 		}
 
 		System.gc();
 	}
 
-	public boolean debugClientMetricsStart(Consumer<TranslatableComponent> consumer) {
+	public boolean debugClientMetricsStart(Consumer<Component> consumer) {
 		if (this.metricsRecorder.isRecording()) {
 			this.debugClientMetricsStop();
 			return false;
@@ -1221,16 +1221,16 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
 					this.execute(
 						() -> consumer.accept(
-								new TranslatableComponent("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d))
+								Component.translatable("commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d))
 							)
 					);
 				}
 			};
 			Consumer<Path> consumer3 = path -> {
-				Component component = new TextComponent(path.toString())
+				Component component = Component.literal(path.toString())
 					.withStyle(ChatFormatting.UNDERLINE)
 					.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toFile().getParent())));
-				this.execute(() -> consumer.accept(new TranslatableComponent("debug.profiling.stop", component)));
+				this.execute(() -> consumer.accept(Component.translatable("debug.profiling.stop", component)));
 			};
 			SystemReport systemReport = fillSystemReport(new SystemReport(), this, this.languageManager, this.launchedVersion, this.options);
 			Consumer<List<Path>> consumer4 = list -> {
@@ -1687,8 +1687,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		if (this.level != null) {
 			if (!this.pause) {
 				if (!this.options.joinedFirstServer && this.isMultiplayerServer()) {
-					Component component = new TranslatableComponent("tutorial.socialInteractions.title");
-					Component component2 = new TranslatableComponent("tutorial.socialInteractions.description", Tutorial.key("socialInteractions"));
+					Component component = Component.translatable("tutorial.socialInteractions.title");
+					Component component2 = Component.translatable("tutorial.socialInteractions.description", Tutorial.key("socialInteractions"));
 					this.socialInteractionsToast = new TutorialToast(TutorialToast.Icons.SOCIAL_INTERACTIONS, component, component2, true);
 					this.tutorial.addTimedToast(this.socialInteractionsToast, 160);
 					this.options.joinedFirstServer = true;
@@ -1924,7 +1924,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void setLevel(ClientLevel clientLevel) {
 		ProgressScreen progressScreen = new ProgressScreen(true);
-		progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining"));
+		progressScreen.progressStartNoAbort(Component.translatable("connect.joining"));
 		this.updateScreenAndTick(progressScreen);
 		this.level = clientLevel;
 		this.updateLevelInEngines(clientLevel);
@@ -2457,7 +2457,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		float m = this.player.yRotO;
 		this.gameRenderer.setRenderBlockOutline(false);
 
-		TranslatableComponent var12;
+		MutableComponent var12;
 		try {
 			this.gameRenderer.setPanoramicMode(true);
 			this.levelRenderer.graphicsChanged();
@@ -2506,13 +2506,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				});
 			}
 
-			Component component = new TextComponent(file.getName())
+			Component component = Component.literal(file.getName())
 				.withStyle(ChatFormatting.UNDERLINE)
 				.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
-			return new TranslatableComponent("screenshot.success", component);
+			return Component.translatable("screenshot.success", component);
 		} catch (Exception var18) {
 			LOGGER.error("Couldn't save image", (Throwable)var18);
-			var12 = new TranslatableComponent("screenshot.failure", var18.getMessage());
+			var12 = Component.translatable("screenshot.failure", var18.getMessage());
 		} finally {
 			this.player.setXRot(f);
 			this.player.setYRot(g);
@@ -2558,13 +2558,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			File file2 = screenshot.close();
 			GlUtil.freeMemory(byteBuffer);
-			Component component = new TextComponent(file2.getName())
+			Component component = Component.literal(file2.getName())
 				.withStyle(ChatFormatting.UNDERLINE)
 				.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file2.getAbsolutePath())));
-			return new TranslatableComponent("screenshot.success", component);
+			return Component.translatable("screenshot.success", component);
 		} catch (Exception var15) {
 			LOGGER.warn("Couldn't save screenshot", (Throwable)var15);
-			return new TranslatableComponent("screenshot.failure", var15.getMessage());
+			return Component.translatable("screenshot.failure", var15.getMessage());
 		}
 	}
 
@@ -2654,25 +2654,25 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	@Environment(EnvType.CLIENT)
 	public static enum ChatStatus {
-		ENABLED(TextComponent.EMPTY) {
+		ENABLED(CommonComponents.EMPTY) {
 			@Override
 			public boolean isChatAllowed(boolean bl) {
 				return true;
 			}
 		},
-		DISABLED_BY_OPTIONS(new TranslatableComponent("chat.disabled.options").withStyle(ChatFormatting.RED)) {
+		DISABLED_BY_OPTIONS(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED)) {
 			@Override
 			public boolean isChatAllowed(boolean bl) {
 				return false;
 			}
 		},
-		DISABLED_BY_LAUNCHER(new TranslatableComponent("chat.disabled.launcher").withStyle(ChatFormatting.RED)) {
+		DISABLED_BY_LAUNCHER(Component.translatable("chat.disabled.launcher").withStyle(ChatFormatting.RED)) {
 			@Override
 			public boolean isChatAllowed(boolean bl) {
 				return bl;
 			}
 		},
-		DISABLED_BY_PROFILE(new TranslatableComponent("chat.disabled.profile").withStyle(ChatFormatting.RED)) {
+		DISABLED_BY_PROFILE(Component.translatable("chat.disabled.profile").withStyle(ChatFormatting.RED)) {
 			@Override
 			public boolean isChatAllowed(boolean bl) {
 				return bl;

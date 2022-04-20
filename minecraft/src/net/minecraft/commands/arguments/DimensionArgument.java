@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +25,7 @@ public class DimensionArgument implements ArgumentType<ResourceLocation> {
 		.map(resourceKey -> resourceKey.location().toString())
 		.collect(Collectors.toList());
 	private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.dimension.invalid", object)
+		object -> Component.translatable("argument.dimension.invalid", object)
 	);
 
 	public ResourceLocation parse(StringReader stringReader) throws CommandSyntaxException {

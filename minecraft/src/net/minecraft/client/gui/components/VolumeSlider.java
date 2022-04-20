@@ -5,8 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundSource;
 
 @Environment(EnvType.CLIENT)
@@ -23,8 +21,8 @@ public class VolumeSlider extends AbstractOptionSliderButton {
 	protected void updateMessage() {
 		Component component = (Component)((float)this.value == (float)this.getYImage(false)
 			? CommonComponents.OPTION_OFF
-			: new TextComponent((int)(this.value * 100.0) + "%"));
-		this.setMessage(new TranslatableComponent("soundCategory." + this.source.getName()).append(": ").append(component));
+			: Component.literal((int)(this.value * 100.0) + "%"));
+		this.setMessage(Component.translatable("soundCategory." + this.source.getName()).append(": ").append(component));
 	}
 
 	@Override

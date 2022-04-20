@@ -114,7 +114,7 @@ public abstract class Projectile extends Entity {
 	public void shoot(double d, double e, double f, float g, float h) {
 		Vec3 vec3 = new Vec3(d, e, f)
 			.normalize()
-			.add(this.random.nextGaussian() * 0.0075F * (double)h, this.random.nextGaussian() * 0.0075F * (double)h, this.random.nextGaussian() * 0.0075F * (double)h)
+			.add(this.random.triangle(0.0, 0.0172275 * (double)h), this.random.triangle(0.0, 0.0172275 * (double)h), this.random.triangle(0.0, 0.0172275 * (double)h))
 			.scale((double)g);
 		this.setDeltaMovement(vec3);
 		double i = vec3.horizontalDistance();

@@ -8,7 +8,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -63,7 +62,7 @@ public class DebugStickItem extends Item {
 			Collection<Property<?>> collection = stateDefinition.getProperties();
 			String string = Registry.BLOCK.getKey(block).toString();
 			if (collection.isEmpty()) {
-				message(player, new TranslatableComponent(this.getDescriptionId() + ".empty", string));
+				message(player, Component.translatable(this.getDescriptionId() + ".empty", string));
 				return false;
 			} else {
 				CompoundTag compoundTag = itemStack.getOrCreateTagElement("DebugProperty");
@@ -76,12 +75,12 @@ public class DebugStickItem extends Item {
 
 					BlockState blockState2 = cycleState(blockState, property, player.isSecondaryUseActive());
 					levelAccessor.setBlock(blockPos, blockState2, 18);
-					message(player, new TranslatableComponent(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockState2, property)));
+					message(player, Component.translatable(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockState2, property)));
 				} else {
 					property = getRelative(collection, property, player.isSecondaryUseActive());
 					String string3 = property.getName();
 					compoundTag.putString(string, string3);
-					message(player, new TranslatableComponent(this.getDescriptionId() + ".select", string3, getNameHelper(blockState, property)));
+					message(player, Component.translatable(this.getDescriptionId() + ".select", string3, getNameHelper(blockState, property)));
 				}
 
 				return true;

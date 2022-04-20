@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -63,15 +62,15 @@ public class MobBucketItem extends BucketItem {
 
 				for (int j = 0; j < TropicalFish.COMMON_VARIANTS.length; j++) {
 					if (i == TropicalFish.COMMON_VARIANTS[j]) {
-						list.add(new TranslatableComponent(TropicalFish.getPredefinedName(j)).withStyle(chatFormattings));
+						list.add(Component.translatable(TropicalFish.getPredefinedName(j)).withStyle(chatFormattings));
 						return;
 					}
 				}
 
-				list.add(new TranslatableComponent(TropicalFish.getFishTypeName(i)).withStyle(chatFormattings));
-				MutableComponent mutableComponent = new TranslatableComponent(string);
+				list.add(Component.translatable(TropicalFish.getFishTypeName(i)).withStyle(chatFormattings));
+				MutableComponent mutableComponent = Component.translatable(string);
 				if (!string.equals(string2)) {
-					mutableComponent.append(", ").append(new TranslatableComponent(string2));
+					mutableComponent.append(", ").append(Component.translatable(string2));
 				}
 
 				mutableComponent.withStyle(chatFormattings);

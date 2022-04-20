@@ -28,8 +28,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -41,8 +39,8 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
 	static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
 	static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
-	static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
-	static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
+	static final Component PUBLISHER_LINK_TOOLTIP = Component.translatable("mco.template.info.tooltip");
+	static final Component TRAILER_LINK_TOOLTIP = Component.translatable("mco.template.trailer.tooltip");
 	private final Consumer<WorldTemplate> callback;
 	RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
 	int selectedTemplate = -1;
@@ -106,16 +104,16 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			this.worldTemplateObjectSelectionList.getTemplates()
 		);
 		this.trailerButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 206, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.trailer"), buttonx -> this.onTrailer())
+			new Button(this.width / 2 - 206, this.height - 32, 100, 20, Component.translatable("mco.template.button.trailer"), buttonx -> this.onTrailer())
 		);
 		this.selectButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 100, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.select"), buttonx -> this.selectTemplate())
+			new Button(this.width / 2 - 100, this.height - 32, 100, 20, Component.translatable("mco.template.button.select"), buttonx -> this.selectTemplate())
 		);
 		Component component = this.worldType == RealmsServer.WorldType.MINIGAME ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_BACK;
 		Button button = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, buttonx -> this.onClose());
 		this.addRenderableWidget(button);
 		this.publisherButton = this.addRenderableWidget(
-			new Button(this.width / 2 + 112, this.height - 32, 100, 20, new TranslatableComponent("mco.template.button.publisher"), buttonx -> this.onPublish())
+			new Button(this.width / 2 + 112, this.height - 32, 100, 20, Component.translatable("mco.template.button.publisher"), buttonx -> this.onPublish())
 		);
 		this.selectButton.active = false;
 		this.trailerButton.visible = false;
@@ -313,7 +311,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 				int o = lineSegment.isLink() ? 3368635 : 16777215;
 				int p = this.font.drawShadow(poseStack, lineSegment.renderedText(), (float)n, (float)l, o);
 				if (lineSegment.isLink() && i > n && i < p && j > l - 3 && j < l + 8) {
-					this.toolTip = new TextComponent(lineSegment.getLinkUrl());
+					this.toolTip = Component.literal(lineSegment.getLinkUrl());
 					this.currentLink = lineSegment.getLinkUrl();
 				}
 
@@ -415,12 +413,12 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		@Override
 		public Component getNarration() {
 			Component component = CommonComponents.joinLines(
-				new TextComponent(this.template.name),
-				new TranslatableComponent("mco.template.select.narrate.authors", this.template.author),
-				new TextComponent(this.template.recommendedPlayers),
-				new TranslatableComponent("mco.template.select.narrate.version", this.template.version)
+				Component.literal(this.template.name),
+				Component.translatable("mco.template.select.narrate.authors", this.template.author),
+				Component.literal(this.template.recommendedPlayers),
+				Component.translatable("mco.template.select.narrate.version", this.template.version)
 			);
-			return new TranslatableComponent("narrator.select", component);
+			return Component.translatable("narrator.select", component);
 		}
 	}
 

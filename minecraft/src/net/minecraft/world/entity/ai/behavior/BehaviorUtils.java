@@ -83,13 +83,17 @@ public class BehaviorUtils {
 	}
 
 	public static void throwItem(LivingEntity livingEntity, ItemStack itemStack, Vec3 vec3) {
-		double d = livingEntity.getEyeY() - 0.3F;
+		Vec3 vec32 = new Vec3(0.3F, 0.3F, 0.3F);
+		throwItem(livingEntity, itemStack, vec3, vec32, 0.3F);
+	}
+
+	public static void throwItem(LivingEntity livingEntity, ItemStack itemStack, Vec3 vec3, Vec3 vec32, float f) {
+		double d = livingEntity.getEyeY() - (double)f;
 		ItemEntity itemEntity = new ItemEntity(livingEntity.level, livingEntity.getX(), d, livingEntity.getZ(), itemStack);
 		itemEntity.setThrower(livingEntity.getUUID());
-		float f = 0.3F;
-		Vec3 vec32 = vec3.subtract(livingEntity.position());
-		vec32 = vec32.normalize().scale(0.3F);
-		itemEntity.setDeltaMovement(vec32);
+		Vec3 vec33 = vec3.subtract(livingEntity.position());
+		vec33 = vec33.normalize().multiply(vec32.x, vec32.y, vec32.z);
+		itemEntity.setDeltaMovement(vec33);
 		itemEntity.setDefaultPickUpDelay();
 		livingEntity.level.addFreshEntity(itemEntity);
 	}

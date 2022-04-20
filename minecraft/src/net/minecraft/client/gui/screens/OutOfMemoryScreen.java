@@ -5,27 +5,27 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class OutOfMemoryScreen extends Screen {
 	private MultiLineLabel message = MultiLineLabel.EMPTY;
 
 	public OutOfMemoryScreen() {
-		super(new TranslatableComponent("outOfMemory.error"));
+		super(Component.translatable("outOfMemory.error"));
 	}
 
 	@Override
 	protected void init() {
 		this.addRenderableWidget(
 			new Button(
-				this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20, new TranslatableComponent("gui.toTitle"), button -> this.minecraft.setScreen(new TitleScreen())
+				this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20, Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(new TitleScreen())
 			)
 		);
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, 150, 20, new TranslatableComponent("menu.quit"), button -> this.minecraft.stop())
+			new Button(this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, 150, 20, Component.translatable("menu.quit"), button -> this.minecraft.stop())
 		);
-		this.message = MultiLineLabel.create(this.font, new TranslatableComponent("outOfMemory.message"), 295);
+		this.message = MultiLineLabel.create(this.font, Component.translatable("outOfMemory.message"), 295);
 	}
 
 	@Override

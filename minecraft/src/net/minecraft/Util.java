@@ -367,21 +367,36 @@ public class Util {
 	}
 
 	public static <V> CompletableFuture<List<V>> sequenceFailFast(List<? extends CompletableFuture<? extends V>> list) {
+		CompletableFuture<List<V>> completableFuture = new CompletableFuture();
+		return fallibleSequence(list, completableFuture::completeExceptionally).applyToEither(completableFuture, Function.identity());
+	}
+
+	public static <V> CompletableFuture<List<V>> sequenceFailFastAndCancel(List<? extends CompletableFuture<? extends V>> list) {
+		CompletableFuture<List<V>> completableFuture = new CompletableFuture();
+		return fallibleSequence(list, throwable -> {
+			for (CompletableFuture<? extends V> completableFuture2 : list) {
+				completableFuture2.cancel(true);
+			}
+
+			completableFuture.completeExceptionally(throwable);
+		}).applyToEither(completableFuture, Function.identity());
+	}
+
+	private static <V> CompletableFuture<List<V>> fallibleSequence(List<? extends CompletableFuture<? extends V>> list, Consumer<Throwable> consumer) {
 		List<V> list2 = Lists.<V>newArrayListWithCapacity(list.size());
 		CompletableFuture<?>[] completableFutures = new CompletableFuture[list.size()];
-		CompletableFuture<Void> completableFuture = new CompletableFuture();
-		list.forEach(completableFuture2 -> {
+		list.forEach(completableFuture -> {
 			int i = list2.size();
 			list2.add(null);
-			completableFutures[i] = completableFuture2.whenComplete((object, throwable) -> {
+			completableFutures[i] = completableFuture.whenComplete((object, throwable) -> {
 				if (throwable != null) {
-					completableFuture.completeExceptionally(throwable);
+					consumer.accept(throwable);
 				} else {
 					list2.set(i, object);
 				}
 			});
 		});
-		return CompletableFuture.allOf(completableFutures).applyToEither(completableFuture, void_ -> list2);
+		return CompletableFuture.allOf(completableFutures).thenApply(void_ -> list2);
 	}
 
 	public static <T> Optional<T> ifElse(Optional<T> optional, Consumer<T> consumer, Runnable runnable) {

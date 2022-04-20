@@ -6,6 +6,9 @@ public class LevelResource {
 	public static final LevelResource PLAYER_DATA_DIR = new LevelResource("playerdata");
 	public static final LevelResource PLAYER_OLD_DATA_DIR = new LevelResource("players");
 	public static final LevelResource LEVEL_DATA_FILE = new LevelResource("level.dat");
+	public static final LevelResource OLD_LEVEL_DATA_FILE = new LevelResource("level.dat_old");
+	public static final LevelResource ICON_FILE = new LevelResource("icon.png");
+	public static final LevelResource LOCK_FILE = new LevelResource("session.lock");
 	public static final LevelResource GENERATED_DIR = new LevelResource("generated");
 	public static final LevelResource DATAPACK_DIR = new LevelResource("datapacks");
 	public static final LevelResource MAP_RESOURCE_FILE = new LevelResource("resources.zip");

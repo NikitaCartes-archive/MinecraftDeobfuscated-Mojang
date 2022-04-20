@@ -10,12 +10,11 @@ import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsParentalConsentScreen extends RealmsScreen {
-	private static final Component MESSAGE = new TranslatableComponent("mco.account.privacyinfo");
+	private static final Component MESSAGE = Component.translatable("mco.account.privacyinfo");
 	private final Screen nextScreen;
 	private MultiLineLabel messageLines = MultiLineLabel.EMPTY;
 
@@ -26,10 +25,10 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		Component component = new TranslatableComponent("mco.account.update");
+		Component component = Component.translatable("mco.account.update");
 		Component component2 = CommonComponents.GUI_BACK;
 		int i = Math.max(this.font.width(component), this.font.width(component2)) + 30;
-		Component component3 = new TranslatableComponent("mco.account.privacy.info");
+		Component component3 = Component.translatable("mco.account.privacy.info");
 		int j = (int)((double)this.font.width(component3) * 1.2);
 		this.addRenderableWidget(new Button(this.width / 2 - j / 2, row(11), j, 20, component3, button -> Util.getPlatform().openUri("https://aka.ms/MinecraftGDPR")));
 		this.addRenderableWidget(

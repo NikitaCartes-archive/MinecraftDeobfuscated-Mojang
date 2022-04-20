@@ -27,9 +27,8 @@ import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -60,7 +59,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private static final int SCROLLER_WIDTH = 12;
 	private static final int SCROLLER_HEIGHT = 15;
 	static final SimpleContainer CONTAINER = new SimpleContainer(45);
-	private static final Component TRASH_SLOT_TOOLTIP = new TranslatableComponent("inventory.binSlot");
+	private static final Component TRASH_SLOT_TOOLTIP = Component.translatable("inventory.binSlot");
 	private static final int TEXT_COLOR = 16777215;
 	private static int selectedTab = CreativeModeTab.TAB_BUILDING_BLOCKS.getId();
 	private float scrollOffs;
@@ -76,7 +75,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private final Set<TagKey<Item>> visibleTags = new HashSet();
 
 	public CreativeModeInventoryScreen(Player player) {
-		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), TextComponent.EMPTY);
+		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
 		player.containerMenu = this.menu;
 		this.passEvents = true;
 		this.imageHeight = 136;
@@ -236,7 +235,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
 			super.init();
 			this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-			this.searchBox = new EditBox(this.font, this.leftPos + 82, this.topPos + 6, 80, 9, new TranslatableComponent("itemGroup.search"));
+			this.searchBox = new EditBox(this.font, this.leftPos + 82, this.topPos + 6, 80, 9, Component.translatable("itemGroup.search"));
 			this.searchBox.setMaxLength(50);
 			this.searchBox.setBordered(false);
 			this.searchBox.setVisible(false);
@@ -439,7 +438,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 							itemStack.getOrCreateTagElement("CustomCreativeLock");
 							Component component = this.minecraft.options.keyHotbarSlots[j].getTranslatedKeyMessage();
 							Component component2 = this.minecraft.options.keySaveHotbarActivator.getTranslatedKeyMessage();
-							itemStack.setHoverName(new TranslatableComponent("inventory.hotbarInfo", component2, component));
+							itemStack.setHoverName(Component.translatable("inventory.hotbarInfo", component2, component));
 							this.menu.items.add(itemStack);
 						} else {
 							this.menu.items.add(ItemStack.EMPTY);
@@ -612,7 +611,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 			this.visibleTags.forEach(tagKey -> {
 				if (itemStack.is(tagKey)) {
-					list2.add(1, new TextComponent("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
+					list2.add(1, Component.literal("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
 				}
 			});
 			if (creativeModeTab != null) {
@@ -762,7 +761,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 			Component component = minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
 			Component component2 = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
-			minecraft.gui.setOverlayMessage(new TranslatableComponent("inventory.hotbarSaved", component2, component), false);
+			minecraft.gui.setOverlayMessage(Component.translatable("inventory.hotbarSaved", component2, component), false);
 			hotbarManager.save();
 		}
 	}

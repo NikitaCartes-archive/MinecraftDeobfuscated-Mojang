@@ -5,7 +5,6 @@ import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -23,7 +22,7 @@ public enum NarratorStatus {
 
 	private NarratorStatus(int j, String string2) {
 		this.id = j;
-		this.name = new TranslatableComponent(string2);
+		this.name = Component.translatable(string2);
 	}
 
 	public int getId() {

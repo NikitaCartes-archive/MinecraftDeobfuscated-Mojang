@@ -565,35 +565,48 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkLoad(ChunkPos chunkPos) {
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.level.getProfiler().incrementCounter("chunkLoad");
-				CompoundTag compoundTag = this.readChunk(chunkPos);
-				if (compoundTag != null) {
-					boolean bl = compoundTag.contains("Status", 8);
-					if (bl) {
-						ChunkAccess chunkAccess = ChunkSerializer.read(this.level, this.poiManager, chunkPos, compoundTag);
-						this.markPosition(chunkPos, chunkAccess.getStatus().getChunkType());
-						return Either.left(chunkAccess);
-					}
-
+		return this.readChunk(chunkPos).thenApply(optional -> optional.filter(compoundTag -> {
+				boolean bl = isChunkDataValid(compoundTag);
+				if (!bl) {
 					LOGGER.error("Chunk file at {} is missing level data, skipping", chunkPos);
 				}
-			} catch (ReportedException var5) {
-				Throwable throwable = var5.getCause();
-				if (!(throwable instanceof IOException)) {
-					this.markPositionReplaceable(chunkPos);
-					throw var5;
-				}
 
-				LOGGER.error("Couldn't load chunk {}", chunkPos, throwable);
-			} catch (Exception var6) {
-				LOGGER.error("Couldn't load chunk {}", chunkPos, var6);
+				return bl;
+			})).thenApplyAsync(optional -> {
+			this.level.getProfiler().incrementCounter("chunkLoad");
+			if (optional.isPresent()) {
+				ChunkAccess chunkAccess = ChunkSerializer.read(this.level, this.poiManager, chunkPos, (CompoundTag)optional.get());
+				this.markPosition(chunkPos, chunkAccess.getStatus().getChunkType());
+				return Either.left(chunkAccess);
+			} else {
+				return Either.left(this.createEmptyChunk(chunkPos));
+			}
+		}, this.mainThreadExecutor).exceptionallyAsync(throwable -> this.handleChunkLoadFailure(throwable, chunkPos), this.mainThreadExecutor);
+	}
+
+	private static boolean isChunkDataValid(CompoundTag compoundTag) {
+		return compoundTag.contains("Status", 8);
+	}
+
+	private Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> handleChunkLoadFailure(Throwable throwable, ChunkPos chunkPos) {
+		if (throwable instanceof ReportedException reportedException) {
+			Throwable throwable2 = reportedException.getCause();
+			if (!(throwable2 instanceof IOException)) {
+				this.markPositionReplaceable(chunkPos);
+				throw reportedException;
 			}
 
-			this.markPositionReplaceable(chunkPos);
-			return Either.left(new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null));
-		}, this.mainThreadExecutor);
+			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable2);
+		} else if (throwable instanceof IOException) {
+			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable);
+		}
+
+		return Either.left(this.createEmptyChunk(chunkPos));
+	}
+
+	private ChunkAccess createEmptyChunk(ChunkPos chunkPos) {
+		this.markPositionReplaceable(chunkPos);
+		return new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
 	}
 
 	private void markPositionReplaceable(ChunkPos chunkPos) {
@@ -802,7 +815,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		} else {
 			CompoundTag compoundTag;
 			try {
-				compoundTag = this.readChunk(chunkPos);
+				compoundTag = (CompoundTag)((Optional)this.readChunk(chunkPos).join()).orElse(null);
 				if (compoundTag == null) {
 					this.markPositionReplaceable(chunkPos);
 					return false;
@@ -931,12 +944,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		}
 	}
 
-	@Nullable
-	private CompoundTag readChunk(ChunkPos chunkPos) throws IOException {
-		CompoundTag compoundTag = this.read(chunkPos);
-		return compoundTag == null
-			? null
-			: this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag, this.generator.getTypeNameForDataFixer());
+	private CompletableFuture<Optional<CompoundTag>> readChunk(ChunkPos chunkPos) {
+		return this.read(chunkPos).thenApplyAsync(optional -> optional.map(this::upgradeChunkTag), Util.backgroundExecutor());
+	}
+
+	private CompoundTag upgradeChunkTag(CompoundTag compoundTag) {
+		return this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag, this.generator.getTypeNameForDataFixer());
 	}
 
 	boolean anyPlayerCloseEnoughForSpawning(ChunkPos chunkPos) {

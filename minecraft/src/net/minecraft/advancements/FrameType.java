@@ -2,7 +2,6 @@ package net.minecraft.advancements;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public enum FrameType {
 	TASK("task", 0, ChatFormatting.GREEN),
@@ -18,7 +17,7 @@ public enum FrameType {
 		this.name = string2;
 		this.texture = j;
 		this.chatColor = chatFormatting;
-		this.displayName = new TranslatableComponent("advancements.toast." + string2);
+		this.displayName = Component.translatable("advancements.toast." + string2);
 	}
 
 	public String getName() {

@@ -41,7 +41,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
@@ -217,7 +216,7 @@ public class CommandSuggestions {
 		String string = commandSyntaxException.getContext();
 		return string == null
 			? component.getVisualOrderText()
-			: new TranslatableComponent("command.context.parse_error", component, commandSyntaxException.getCursor(), string).getVisualOrderText();
+			: Component.translatable("command.context.parse_error", component, commandSyntaxException.getCursor(), string).getVisualOrderText();
 	}
 
 	private void updateUsageInfo() {
@@ -550,8 +549,8 @@ public class CommandSuggestions {
 			Suggestion suggestion = (Suggestion)this.suggestionList.get(this.current);
 			Message message = suggestion.getTooltip();
 			return message != null
-				? new TranslatableComponent("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message)
-				: new TranslatableComponent("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
+				? Component.translatable("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message)
+				: Component.translatable("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
 		}
 
 		public void hide() {

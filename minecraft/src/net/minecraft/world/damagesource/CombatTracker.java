@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -72,7 +71,7 @@ public class CombatTracker {
 
 	public Component getDeathMessage() {
 		if (this.entries.isEmpty()) {
-			return new TranslatableComponent("death.attack.generic", this.mob.getDisplayName());
+			return Component.translatable("death.attack.generic", this.mob.getDisplayName());
 		} else {
 			CombatEntry combatEntry = this.getMostSignificantFall();
 			CombatEntry combatEntry2 = (CombatEntry)this.entries.get(this.entries.size() - 1);
@@ -82,24 +81,24 @@ public class CombatTracker {
 			if (combatEntry != null && combatEntry2.getSource() == DamageSource.FALL) {
 				Component component2 = combatEntry.getAttackerName();
 				if (combatEntry.getSource() == DamageSource.FALL || combatEntry.getSource() == DamageSource.OUT_OF_WORLD) {
-					component3 = new TranslatableComponent("death.fell.accident." + this.getFallLocation(combatEntry), this.mob.getDisplayName());
+					component3 = Component.translatable("death.fell.accident." + this.getFallLocation(combatEntry), this.mob.getDisplayName());
 				} else if (component2 != null && !component2.equals(component)) {
 					Entity entity2 = combatEntry.getSource().getEntity();
 					ItemStack itemStack = entity2 instanceof LivingEntity ? ((LivingEntity)entity2).getMainHandItem() : ItemStack.EMPTY;
 					if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {
-						component3 = new TranslatableComponent("death.fell.assist.item", this.mob.getDisplayName(), component2, itemStack.getDisplayName());
+						component3 = Component.translatable("death.fell.assist.item", this.mob.getDisplayName(), component2, itemStack.getDisplayName());
 					} else {
-						component3 = new TranslatableComponent("death.fell.assist", this.mob.getDisplayName(), component2);
+						component3 = Component.translatable("death.fell.assist", this.mob.getDisplayName(), component2);
 					}
 				} else if (component != null) {
 					ItemStack itemStack2 = entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem() : ItemStack.EMPTY;
 					if (!itemStack2.isEmpty() && itemStack2.hasCustomHoverName()) {
-						component3 = new TranslatableComponent("death.fell.finish.item", this.mob.getDisplayName(), component, itemStack2.getDisplayName());
+						component3 = Component.translatable("death.fell.finish.item", this.mob.getDisplayName(), component, itemStack2.getDisplayName());
 					} else {
-						component3 = new TranslatableComponent("death.fell.finish", this.mob.getDisplayName(), component);
+						component3 = Component.translatable("death.fell.finish", this.mob.getDisplayName(), component);
 					}
 				} else {
-					component3 = new TranslatableComponent("death.fell.killer", this.mob.getDisplayName());
+					component3 = Component.translatable("death.fell.killer", this.mob.getDisplayName());
 				}
 			} else {
 				component3 = combatEntry2.getSource().getLocalizedDeathMessage(this.mob);

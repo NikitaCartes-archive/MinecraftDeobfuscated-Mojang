@@ -3,13 +3,10 @@ package net.minecraft.network.protocol.game;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 public abstract class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListener> {
-	private static final double TRUNCATION_STEPS = 4096.0;
 	protected final int entityId;
 	protected final short xa;
 	protected final short ya;
@@ -19,25 +16,6 @@ public abstract class ClientboundMoveEntityPacket implements Packet<ClientGamePa
 	protected final boolean onGround;
 	protected final boolean hasRot;
 	protected final boolean hasPos;
-
-	public static long entityToPacket(double d) {
-		return Mth.lfloor(d * 4096.0);
-	}
-
-	public static double packetToEntity(long l) {
-		return (double)l / 4096.0;
-	}
-
-	public Vec3 updateEntityPosition(Vec3 vec3) {
-		double d = this.xa == 0 ? vec3.x : packetToEntity(entityToPacket(vec3.x) + (long)this.xa);
-		double e = this.ya == 0 ? vec3.y : packetToEntity(entityToPacket(vec3.y) + (long)this.ya);
-		double f = this.za == 0 ? vec3.z : packetToEntity(entityToPacket(vec3.z) + (long)this.za);
-		return new Vec3(d, e, f);
-	}
-
-	public static Vec3 packetToEntity(long l, long m, long n) {
-		return new Vec3((double)l, (double)m, (double)n).scale(2.4414062E-4F);
-	}
 
 	protected ClientboundMoveEntityPacket(int i, short s, short t, short u, byte b, byte c, boolean bl, boolean bl2, boolean bl3) {
 		this.entityId = i;

@@ -17,7 +17,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Options;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundEventRegistration;
 import net.minecraft.client.resources.sounds.SoundEventRegistrationSerializer;
@@ -25,7 +24,7 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -116,11 +115,8 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			for (ResourceLocation resourceLocation : this.registry.keySet()) {
 				WeighedSoundEvents weighedSoundEvents = (WeighedSoundEvents)this.registry.get(resourceLocation);
-				if (weighedSoundEvents.getSubtitle() instanceof TranslatableComponent) {
-					String string = ((TranslatableComponent)weighedSoundEvents.getSubtitle()).getKey();
-					if (!I18n.exists(string) && Registry.SOUND_EVENT.containsKey(resourceLocation)) {
-						LOGGER.error("Missing subtitle {} for sound event: {}", string, resourceLocation);
-					}
+				if (!ComponentUtils.isTranslationResolvable(weighedSoundEvents.getSubtitle()) && Registry.SOUND_EVENT.containsKey(resourceLocation)) {
+					LOGGER.error("Missing subtitle {} for sound event: {}", weighedSoundEvents.getSubtitle(), resourceLocation);
 				}
 			}
 		}

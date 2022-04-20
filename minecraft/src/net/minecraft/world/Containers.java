@@ -38,7 +38,9 @@ public class Containers {
 		while (!itemStack.isEmpty()) {
 			ItemEntity itemEntity = new ItemEntity(level, j, k, l, itemStack.split(level.random.nextInt(21) + 10));
 			float m = 0.05F;
-			itemEntity.setDeltaMovement(level.random.nextGaussian() * 0.05F, level.random.nextGaussian() * 0.05F + 0.2F, level.random.nextGaussian() * 0.05F);
+			itemEntity.setDeltaMovement(
+				level.random.triangle(0.0, 0.11485000171139836), level.random.triangle(0.2, 0.11485000171139836), level.random.triangle(0.0, 0.11485000171139836)
+			);
 			level.addFreshEntity(itemEntity);
 		}
 	}

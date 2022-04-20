@@ -35,7 +35,6 @@ import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
@@ -107,7 +106,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 
 	@Override
 	public void channelInactive(ChannelHandlerContext channelHandlerContext) {
-		this.disconnect(new TranslatableComponent("disconnect.endOfStream"));
+		this.disconnect(Component.translatable("disconnect.endOfStream"));
 	}
 
 	@Override
@@ -120,9 +119,9 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			if (this.channel.isOpen()) {
 				if (throwable instanceof TimeoutException) {
 					LOGGER.debug("Timeout", throwable);
-					this.disconnect(new TranslatableComponent("disconnect.timeout"));
+					this.disconnect(Component.translatable("disconnect.timeout"));
 				} else {
-					Component component = new TranslatableComponent("disconnect.genericReason", "Internal Exception: " + throwable);
+					Component component = Component.translatable("disconnect.genericReason", "Internal Exception: " + throwable);
 					if (bl) {
 						LOGGER.debug("Failed to sent packet", throwable);
 						ConnectionProtocol connectionProtocol = this.getCurrentProtocol();
@@ -146,10 +145,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 				genericsFtw(packet, this.packetListener);
 			} catch (RunningOnDifferentThreadException var4) {
 			} catch (RejectedExecutionException var5) {
-				this.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown"));
+				this.disconnect(Component.translatable("multiplayer.disconnect.server_shutdown"));
 			} catch (ClassCastException var6) {
 				LOGGER.error("Received {} that couldn't be processed", packet.getClass(), var6);
-				this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_packet"));
+				this.disconnect(Component.translatable("multiplayer.disconnect.invalid_packet"));
 			}
 
 			this.receivedPackets++;
@@ -394,7 +393,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 				if (this.getDisconnectedReason() != null) {
 					this.getPacketListener().onDisconnect(this.getDisconnectedReason());
 				} else if (this.getPacketListener() != null) {
-					this.getPacketListener().onDisconnect(new TranslatableComponent("multiplayer.disconnect.generic"));
+					this.getPacketListener().onDisconnect(Component.translatable("multiplayer.disconnect.generic"));
 				}
 			}
 		}

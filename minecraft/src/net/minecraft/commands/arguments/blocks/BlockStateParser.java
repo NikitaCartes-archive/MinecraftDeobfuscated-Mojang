@@ -24,7 +24,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -34,29 +34,27 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class BlockStateParser {
-	public static final SimpleCommandExceptionType ERROR_NO_TAGS_ALLOWED = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.block.tag.disallowed")
-	);
+	public static final SimpleCommandExceptionType ERROR_NO_TAGS_ALLOWED = new SimpleCommandExceptionType(Component.translatable("argument.block.tag.disallowed"));
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_BLOCK = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("argument.block.id.invalid", object)
+		object -> Component.translatable("argument.block.id.invalid", object)
 	);
 	public static final Dynamic2CommandExceptionType ERROR_UNKNOWN_PROPERTY = new Dynamic2CommandExceptionType(
-		(object, object2) -> new TranslatableComponent("argument.block.property.unknown", object, object2)
+		(object, object2) -> Component.translatable("argument.block.property.unknown", object, object2)
 	);
 	public static final Dynamic2CommandExceptionType ERROR_DUPLICATE_PROPERTY = new Dynamic2CommandExceptionType(
-		(object, object2) -> new TranslatableComponent("argument.block.property.duplicate", object2, object)
+		(object, object2) -> Component.translatable("argument.block.property.duplicate", object2, object)
 	);
 	public static final Dynamic3CommandExceptionType ERROR_INVALID_VALUE = new Dynamic3CommandExceptionType(
-		(object, object2, object3) -> new TranslatableComponent("argument.block.property.invalid", object, object3, object2)
+		(object, object2, object3) -> Component.translatable("argument.block.property.invalid", object, object3, object2)
 	);
 	public static final Dynamic2CommandExceptionType ERROR_EXPECTED_VALUE = new Dynamic2CommandExceptionType(
-		(object, object2) -> new TranslatableComponent("argument.block.property.novalue", object, object2)
+		(object, object2) -> Component.translatable("argument.block.property.novalue", object, object2)
 	);
 	public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_PROPERTIES = new SimpleCommandExceptionType(
-		new TranslatableComponent("argument.block.property.unclosed")
+		Component.translatable("argument.block.property.unclosed")
 	);
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("arguments.block.tag.unknown", object)
+		object -> Component.translatable("arguments.block.tag.unknown", object)
 	);
 	private static final char SYNTAX_START_PROPERTIES = '[';
 	private static final char SYNTAX_START_NBT = '{';

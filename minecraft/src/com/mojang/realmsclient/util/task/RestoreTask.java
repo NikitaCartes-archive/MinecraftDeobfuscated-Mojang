@@ -9,7 +9,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -26,7 +26,7 @@ public class RestoreTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(new TranslatableComponent("mco.backup.restoring"));
+		this.setTitle(Component.translatable("mco.backup.restoring"));
 		RealmsClient realmsClient = RealmsClient.create();
 		int i = 0;
 

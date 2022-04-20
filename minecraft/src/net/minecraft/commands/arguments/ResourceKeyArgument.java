@@ -19,7 +19,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -28,10 +28,10 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("attribute.unknown", object)
+		object -> Component.translatable("attribute.unknown", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_INVALID_FEATURE = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.placefeature.invalid", object)
+		object -> Component.translatable("commands.placefeature.invalid", object)
 	);
 	final ResourceKey<? extends Registry<T>> registryKey;
 

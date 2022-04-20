@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 
 public class PlayerTeam extends Team {
 	private static final int BIT_FRIENDLY_FIRE = 0;
@@ -19,8 +19,8 @@ public class PlayerTeam extends Team {
 	private final String name;
 	private final Set<String> players = Sets.<String>newHashSet();
 	private Component displayName;
-	private Component playerPrefix = TextComponent.EMPTY;
-	private Component playerSuffix = TextComponent.EMPTY;
+	private Component playerPrefix = CommonComponents.EMPTY;
+	private Component playerSuffix = CommonComponents.EMPTY;
 	private boolean allowFriendlyFire = true;
 	private boolean seeFriendlyInvisibles = true;
 	private Team.Visibility nameTagVisibility = Team.Visibility.ALWAYS;
@@ -32,8 +32,8 @@ public class PlayerTeam extends Team {
 	public PlayerTeam(Scoreboard scoreboard, String string) {
 		this.scoreboard = scoreboard;
 		this.name = string;
-		this.displayName = new TextComponent(string);
-		this.displayNameStyle = Style.EMPTY.withInsertion(string).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(string)));
+		this.displayName = Component.literal(string);
+		this.displayNameStyle = Style.EMPTY.withInsertion(string).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(string)));
 	}
 
 	public Scoreboard getScoreboard() {
@@ -69,7 +69,7 @@ public class PlayerTeam extends Team {
 	}
 
 	public void setPlayerPrefix(@Nullable Component component) {
-		this.playerPrefix = component == null ? TextComponent.EMPTY : component;
+		this.playerPrefix = component == null ? CommonComponents.EMPTY : component;
 		this.scoreboard.onTeamChanged(this);
 	}
 
@@ -78,7 +78,7 @@ public class PlayerTeam extends Team {
 	}
 
 	public void setPlayerSuffix(@Nullable Component component) {
-		this.playerSuffix = component == null ? TextComponent.EMPTY : component;
+		this.playerSuffix = component == null ? CommonComponents.EMPTY : component;
 		this.scoreboard.onTeamChanged(this);
 	}
 
@@ -93,7 +93,7 @@ public class PlayerTeam extends Team {
 
 	@Override
 	public MutableComponent getFormattedName(Component component) {
-		MutableComponent mutableComponent = new TextComponent("").append(this.playerPrefix).append(component).append(this.playerSuffix);
+		MutableComponent mutableComponent = Component.empty().append(this.playerPrefix).append(component).append(this.playerSuffix);
 		ChatFormatting chatFormatting = this.getColor();
 		if (chatFormatting != ChatFormatting.RESET) {
 			mutableComponent.withStyle(chatFormatting);

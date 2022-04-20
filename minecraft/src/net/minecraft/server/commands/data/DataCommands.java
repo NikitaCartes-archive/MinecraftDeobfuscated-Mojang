@@ -28,26 +28,26 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 public class DataCommands {
-	private static final SimpleCommandExceptionType ERROR_MERGE_UNCHANGED = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.merge.failed"));
+	private static final SimpleCommandExceptionType ERROR_MERGE_UNCHANGED = new SimpleCommandExceptionType(Component.translatable("commands.data.merge.failed"));
 	private static final DynamicCommandExceptionType ERROR_GET_NOT_NUMBER = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.data.get.invalid", object)
+		object -> Component.translatable("commands.data.get.invalid", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_GET_NON_EXISTENT = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.data.get.unknown", object)
+		object -> Component.translatable("commands.data.get.unknown", object)
 	);
-	private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.get.multiple"));
+	private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
 	private static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.data.modify.expected_list", object)
+		object -> Component.translatable("commands.data.modify.expected_list", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_EXPECTED_OBJECT = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.data.modify.expected_object", object)
+		object -> Component.translatable("commands.data.modify.expected_object", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("commands.data.modify.invalid_index", object)
+		object -> Component.translatable("commands.data.modify.invalid_index", object)
 	);
 	public static final List<Function<String, DataCommands.DataProvider>> ALL_PROVIDERS = ImmutableList.of(
 		EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER, StorageDataAccessor.PROVIDER

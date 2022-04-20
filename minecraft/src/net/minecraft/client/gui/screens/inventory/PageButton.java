@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.sounds.SoundEvents;
 
 @Environment(EnvType.CLIENT)
@@ -17,7 +17,7 @@ public class PageButton extends Button {
 	private final boolean playTurnSound;
 
 	public PageButton(int i, int j, boolean bl, Button.OnPress onPress, boolean bl2) {
-		super(i, j, 23, 13, TextComponent.EMPTY, onPress);
+		super(i, j, 23, 13, CommonComponents.EMPTY, onPress);
 		this.isForward = bl;
 		this.playTurnSound = bl2;
 	}

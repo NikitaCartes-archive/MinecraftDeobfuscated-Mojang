@@ -9,11 +9,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.PlayerList;
 
 public class DeOpCommands {
-	private static final SimpleCommandExceptionType ERROR_NOT_OP = new SimpleCommandExceptionType(new TranslatableComponent("commands.deop.failed"));
+	private static final SimpleCommandExceptionType ERROR_NOT_OP = new SimpleCommandExceptionType(Component.translatable("commands.deop.failed"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -39,7 +39,7 @@ public class DeOpCommands {
 			if (playerList.isOp(gameProfile)) {
 				playerList.deop(gameProfile);
 				i++;
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.deop.success", ((GameProfile)collection.iterator().next()).getName()), true);
+				commandSourceStack.sendSuccess(Component.translatable("commands.deop.success", ((GameProfile)collection.iterator().next()).getName()), true);
 			}
 		}
 

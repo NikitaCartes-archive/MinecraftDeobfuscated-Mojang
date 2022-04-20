@@ -10,7 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -53,7 +53,7 @@ public class GiveCommand {
 		int j = itemInput.getItem().getMaxStackSize();
 		int k = j * 100;
 		if (i > k) {
-			commandSourceStack.sendFailure(new TranslatableComponent("commands.give.failed.toomanyitems", k, itemInput.createItemStack(i, false).getDisplayName()));
+			commandSourceStack.sendFailure(Component.translatable("commands.give.failed.toomanyitems", k, itemInput.createItemStack(i, false).getDisplayName()));
 			return 0;
 		} else {
 			for (ServerPlayer serverPlayer : collection) {
@@ -95,14 +95,14 @@ public class GiveCommand {
 
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent(
+					Component.translatable(
 						"commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
 					),
 					true
 				);
 			} else {
 				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), collection.size()), true
+					Component.translatable("commands.give.success.single", i, itemInput.createItemStack(i, false).getDisplayName(), collection.size()), true
 				);
 			}
 

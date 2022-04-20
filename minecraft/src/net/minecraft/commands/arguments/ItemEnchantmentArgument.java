@@ -13,14 +13,14 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class ItemEnchantmentArgument implements ArgumentType<Enchantment> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("unbreaking", "silk_touch");
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_ENCHANTMENT = new DynamicCommandExceptionType(
-		object -> new TranslatableComponent("enchantment.unknown", object)
+		object -> Component.translatable("enchantment.unknown", object)
 	);
 
 	public static ItemEnchantmentArgument enchantment() {

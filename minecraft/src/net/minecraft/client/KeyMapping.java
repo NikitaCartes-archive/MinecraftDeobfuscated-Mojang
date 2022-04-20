@@ -11,7 +11,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class KeyMapping implements Comparable<KeyMapping> {
@@ -133,7 +132,7 @@ public class KeyMapping implements Comparable<KeyMapping> {
 
 	public static Supplier<Component> createNameSupplier(String string) {
 		KeyMapping keyMapping = (KeyMapping)ALL.get(string);
-		return keyMapping == null ? () -> new TranslatableComponent(string) : keyMapping::getTranslatedKeyMessage;
+		return keyMapping == null ? () -> Component.translatable(string) : keyMapping::getTranslatedKeyMessage;
 	}
 
 	public boolean same(KeyMapping keyMapping) {

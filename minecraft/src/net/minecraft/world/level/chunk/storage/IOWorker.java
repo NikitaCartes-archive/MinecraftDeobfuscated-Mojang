@@ -9,9 +9,9 @@ import java.nio.file.Path;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -120,30 +120,15 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 			.thenCompose(Function.identity());
 	}
 
-	@Nullable
-	public CompoundTag load(ChunkPos chunkPos) throws IOException {
-		CompletableFuture<CompoundTag> completableFuture = this.loadAsync(chunkPos);
-
-		try {
-			return (CompoundTag)completableFuture.join();
-		} catch (CompletionException var4) {
-			if (var4.getCause() instanceof IOException) {
-				throw (IOException)var4.getCause();
-			} else {
-				throw var4;
-			}
-		}
-	}
-
-	protected CompletableFuture<CompoundTag> loadAsync(ChunkPos chunkPos) {
+	public CompletableFuture<Optional<CompoundTag>> loadAsync(ChunkPos chunkPos) {
 		return this.submitTask(() -> {
 			IOWorker.PendingStore pendingStore = (IOWorker.PendingStore)this.pendingWrites.get(chunkPos);
 			if (pendingStore != null) {
-				return Either.left(pendingStore.data);
+				return Either.left(Optional.ofNullable(pendingStore.data));
 			} else {
 				try {
 					CompoundTag compoundTag = this.storage.read(chunkPos);
-					return Either.left(compoundTag);
+					return Either.left(Optional.ofNullable(compoundTag));
 				} catch (Exception var4) {
 					LOGGER.warn("Failed to read chunk {}", chunkPos, var4);
 					return Either.right(var4);

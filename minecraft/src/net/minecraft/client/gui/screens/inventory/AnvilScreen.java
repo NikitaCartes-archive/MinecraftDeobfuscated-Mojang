@@ -7,7 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 @Environment(EnvType.CLIENT)
 public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	private static final ResourceLocation ANVIL_LOCATION = new ResourceLocation("textures/gui/container/anvil.png");
-	private static final Component TOO_EXPENSIVE_TEXT = new TranslatableComponent("container.repair.expensive");
+	private static final Component TOO_EXPENSIVE_TEXT = Component.translatable("container.repair.expensive");
 	private EditBox name;
 	private final Player player;
 
@@ -41,7 +40,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = (this.width - this.imageWidth) / 2;
 		int j = (this.height - this.imageHeight) / 2;
-		this.name = new EditBox(this.font, i + 62, j + 24, 103, 12, new TranslatableComponent("container.repair"));
+		this.name = new EditBox(this.font, i + 62, j + 24, 103, 12, Component.translatable("container.repair"));
 		this.name.setCanLoseFocus(false);
 		this.name.setTextColor(-1);
 		this.name.setTextColorUneditable(-1);
@@ -103,7 +102,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 			} else if (!this.menu.getSlot(2).hasItem()) {
 				component = null;
 			} else {
-				component = new TranslatableComponent("container.repair.cost", k);
+				component = Component.translatable("container.repair.cost", k);
 				if (!this.menu.getSlot(2).mayPickup(this.player)) {
 					l = 16736352;
 				}

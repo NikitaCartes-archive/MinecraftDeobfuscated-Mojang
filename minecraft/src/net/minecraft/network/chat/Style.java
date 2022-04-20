@@ -304,27 +304,53 @@ public class Style {
 	}
 
 	public String toString() {
-		return "Style{ color="
-			+ this.color
-			+ ", bold="
-			+ this.bold
-			+ ", italic="
-			+ this.italic
-			+ ", underlined="
-			+ this.underlined
-			+ ", strikethrough="
-			+ this.strikethrough
-			+ ", obfuscated="
-			+ this.obfuscated
-			+ ", clickEvent="
-			+ this.getClickEvent()
-			+ ", hoverEvent="
-			+ this.getHoverEvent()
-			+ ", insertion="
-			+ this.getInsertion()
-			+ ", font="
-			+ this.getFont()
-			+ "}";
+		final StringBuilder stringBuilder = new StringBuilder("{");
+
+		class Collector {
+			private boolean isNotFirst;
+
+			private void prependSeparator() {
+				if (this.isNotFirst) {
+					stringBuilder.append(',');
+				}
+
+				this.isNotFirst = true;
+			}
+
+			void addFlagString(String string, @Nullable Boolean boolean_) {
+				if (boolean_ != null) {
+					this.prependSeparator();
+					if (!boolean_) {
+						stringBuilder.append('!');
+					}
+
+					stringBuilder.append(string);
+				}
+			}
+
+			void addValueString(String string, @Nullable Object object) {
+				if (object != null) {
+					this.prependSeparator();
+					stringBuilder.append(string);
+					stringBuilder.append('=');
+					stringBuilder.append(object);
+				}
+			}
+		}
+
+		Collector lv = new Collector();
+		lv.addValueString("color", this.color);
+		lv.addFlagString("bold", this.bold);
+		lv.addFlagString("italic", this.italic);
+		lv.addFlagString("underlined", this.underlined);
+		lv.addFlagString("strikethrough", this.strikethrough);
+		lv.addFlagString("obfuscated", this.obfuscated);
+		lv.addValueString("clickEvent", this.clickEvent);
+		lv.addValueString("hoverEvent", this.hoverEvent);
+		lv.addValueString("insertion", this.insertion);
+		lv.addValueString("font", this.font);
+		stringBuilder.append("}");
+		return stringBuilder.toString();
 	}
 
 	public boolean equals(Object object) {

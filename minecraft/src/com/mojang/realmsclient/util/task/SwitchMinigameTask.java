@@ -7,7 +7,7 @@ import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -25,7 +25,7 @@ public class SwitchMinigameTask extends LongRunningTask {
 
 	public void run() {
 		RealmsClient realmsClient = RealmsClient.create();
-		this.setTitle(new TranslatableComponent("mco.minigame.world.starting.screen.title"));
+		this.setTitle(Component.translatable("mco.minigame.world.starting.screen.title"));
 
 		for (int i = 0; i < 25; i++) {
 			try {

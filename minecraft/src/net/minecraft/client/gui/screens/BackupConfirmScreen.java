@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class BackupConfirmScreen extends Screen {
@@ -39,7 +38,7 @@ public class BackupConfirmScreen extends Screen {
 				100 + i,
 				150,
 				20,
-				new TranslatableComponent("selectWorld.backupJoinConfirmButton"),
+				Component.translatable("selectWorld.backupJoinConfirmButton"),
 				button -> this.listener.proceed(true, this.eraseCache.selected())
 			)
 		);
@@ -49,14 +48,14 @@ public class BackupConfirmScreen extends Screen {
 				100 + i,
 				150,
 				20,
-				new TranslatableComponent("selectWorld.backupJoinSkipButton"),
+				Component.translatable("selectWorld.backupJoinSkipButton"),
 				button -> this.listener.proceed(false, this.eraseCache.selected())
 			)
 		);
 		this.addRenderableWidget(
 			new Button(this.width / 2 - 155 + 80, 124 + i, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
 		);
-		this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, new TranslatableComponent("selectWorld.backupEraseCache"), false);
+		this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, Component.translatable("selectWorld.backupEraseCache"), false);
 		if (this.promptForCacheErase) {
 			this.addRenderableWidget(this.eraseCache);
 		}

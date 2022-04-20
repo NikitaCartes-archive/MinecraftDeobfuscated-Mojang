@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 public class UserBanListEntry extends BanListEntry<GameProfile> {
 	public UserBanListEntry(GameProfile gameProfile) {
@@ -34,7 +33,7 @@ public class UserBanListEntry extends BanListEntry<GameProfile> {
 	@Override
 	public Component getDisplayName() {
 		GameProfile gameProfile = this.getUser();
-		return new TextComponent(gameProfile.getName() != null ? gameProfile.getName() : Objects.toString(gameProfile.getId(), "(Unknown)"));
+		return Component.literal(gameProfile.getName() != null ? gameProfile.getName() : Objects.toString(gameProfile.getId(), "(Unknown)"));
 	}
 
 	private static GameProfile createGameProfile(JsonObject jsonObject) {

@@ -6,7 +6,7 @@ import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.storage.WorldData;
@@ -18,7 +18,7 @@ public class ReloadCommand {
 	public static void reloadPacks(Collection<String> collection, CommandSourceStack commandSourceStack) {
 		commandSourceStack.getServer().reloadResources(collection).exceptionally(throwable -> {
 			LOGGER.warn("Failed to execute reload", throwable);
-			commandSourceStack.sendFailure(new TranslatableComponent("commands.reload.failure"));
+			commandSourceStack.sendFailure(Component.translatable("commands.reload.failure"));
 			return null;
 		});
 	}
@@ -45,7 +45,7 @@ public class ReloadCommand {
 			WorldData worldData = minecraftServer.getWorldData();
 			Collection<String> collection = packRepository.getSelectedIds();
 			Collection<String> collection2 = discoverNewPacks(packRepository, worldData, collection);
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.reload.success"), true);
+			commandSourceStack.sendSuccess(Component.translatable("commands.reload.success"), true);
 			reloadPacks(collection2, commandSourceStack);
 			return 0;
 		}));

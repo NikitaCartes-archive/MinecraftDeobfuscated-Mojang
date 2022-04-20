@@ -24,7 +24,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -553,7 +553,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		if (list.size() > 1) {
 			int i = list.indexOf(entry);
 			if (i != -1) {
-				narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.list", i + 1, list.size()));
+				narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.list", i + 1, list.size()));
 			}
 		}
 	}

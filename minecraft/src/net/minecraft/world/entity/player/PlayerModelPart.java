@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.player;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public enum PlayerModelPart {
 	CAPE(0, "cape"),
@@ -21,7 +20,7 @@ public enum PlayerModelPart {
 		this.bit = j;
 		this.mask = 1 << j;
 		this.id = string2;
-		this.name = new TranslatableComponent("options.modelPart." + string2);
+		this.name = Component.translatable("options.modelPart." + string2);
 	}
 
 	public int getMask() {

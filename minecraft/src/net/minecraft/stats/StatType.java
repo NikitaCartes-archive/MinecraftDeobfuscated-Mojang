@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public class StatType<T> implements Iterable<Stat<T>> {
 	private final Registry<T> registry;
@@ -44,7 +43,7 @@ public class StatType<T> implements Iterable<Stat<T>> {
 
 	public Component getDisplayName() {
 		if (this.displayName == null) {
-			this.displayName = new TranslatableComponent(this.getTranslationKey());
+			this.displayName = Component.translatable(this.getTranslationKey());
 		}
 
 		return this.displayName;

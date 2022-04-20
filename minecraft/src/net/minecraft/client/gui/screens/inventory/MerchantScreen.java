@@ -6,9 +6,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -40,9 +39,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	private static final int SCROLL_BAR_HEIGHT = 139;
 	private static final int SCROLL_BAR_TOP_POS_Y = 18;
 	private static final int SCROLL_BAR_START_X = 94;
-	private static final Component TRADES_LABEL = new TranslatableComponent("merchant.trades");
-	private static final Component LEVEL_SEPARATOR = new TextComponent(" - ");
-	private static final Component DEPRECATED_TOOLTIP = new TranslatableComponent("merchant.deprecated");
+	private static final Component TRADES_LABEL = Component.translatable("merchant.trades");
+	private static final Component LEVEL_SEPARATOR = Component.literal(" - ");
+	private static final Component DEPRECATED_TOOLTIP = Component.translatable("merchant.deprecated");
 	private int shopItem;
 	private final MerchantScreen.TradeOfferButton[] tradeOfferButtons = new MerchantScreen.TradeOfferButton[7];
 	int scrollOff;
@@ -82,7 +81,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
 		int k = this.menu.getTraderLevel();
 		if (k > 0 && k <= 5 && this.menu.showProgressBar()) {
-			Component component = this.title.copy().append(LEVEL_SEPARATOR).append(new TranslatableComponent("merchant.level." + k));
+			Component component = this.title.copy().append(LEVEL_SEPARATOR).append(Component.translatable("merchant.level." + k));
 			int l = this.font.width(component);
 			int m = 49 + this.imageWidth / 2 - l / 2;
 			this.font.draw(poseStack, component, (float)m, 6.0F, 4210752);
@@ -300,7 +299,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		final int index;
 
 		public TradeOfferButton(int i, int j, int k, Button.OnPress onPress) {
-			super(i, j, 89, 20, TextComponent.EMPTY, onPress);
+			super(i, j, 89, 20, CommonComponents.EMPTY, onPress);
 			this.index = k;
 			this.visible = false;
 		}

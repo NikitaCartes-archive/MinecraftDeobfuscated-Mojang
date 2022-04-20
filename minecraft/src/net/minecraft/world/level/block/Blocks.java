@@ -3742,15 +3742,21 @@ public class Blocks {
 	);
 	public static final Block OCHRE_FROGLIGHT = register(
 		"ochre_froglight",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockStatex -> 15).sound(SoundType.FROGLIGHT))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.FROGLIGHT, MaterialColor.SAND).strength(0.3F).lightLevel(blockStatex -> 15).sound(SoundType.FROGLIGHT)
+		)
 	);
 	public static final Block VERDANT_FROGLIGHT = register(
 		"verdant_froglight",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockStatex -> 15).sound(SoundType.FROGLIGHT))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.FROGLIGHT, MaterialColor.GLOW_LICHEN).strength(0.3F).lightLevel(blockStatex -> 15).sound(SoundType.FROGLIGHT)
+		)
 	);
 	public static final Block PEARLESCENT_FROGLIGHT = register(
 		"pearlescent_froglight",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DECORATION).instabreak().lightLevel(blockStatex -> 15).sound(SoundType.FROGLIGHT))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.FROGLIGHT, MaterialColor.COLOR_PINK).strength(0.3F).lightLevel(blockStatex -> 15).sound(SoundType.FROGLIGHT)
+		)
 	);
 	public static final Block FROGSPAWN = register(
 		"frogspawn", new FrogspawnBlock(BlockBehaviour.Properties.of(Material.FROGSPAWN).instabreak().noOcclusion().noCollission().sound(SoundType.FROGSPAWN))

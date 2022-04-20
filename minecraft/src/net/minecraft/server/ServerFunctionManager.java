@@ -13,13 +13,12 @@ import javax.annotation.Nullable;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.level.GameRules;
 
 public class ServerFunctionManager {
-	private static final Component NO_RECURSIVE_TRACES = new TranslatableComponent("commands.debug.function.noRecursion");
+	private static final Component NO_RECURSIVE_TRACES = Component.translatable("commands.debug.function.noRecursion");
 	private static final ResourceLocation TICK_FUNCTION_TAG = new ResourceLocation("tick");
 	private static final ResourceLocation LOAD_FUNCTION_TAG = new ResourceLocation("load");
 	final MinecraftServer server;

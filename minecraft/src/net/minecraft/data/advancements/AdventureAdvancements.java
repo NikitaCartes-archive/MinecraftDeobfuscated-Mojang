@@ -33,7 +33,7 @@ import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EntityTypeTags;
@@ -111,8 +111,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 		Advancement advancement = Advancement.Builder.advancement()
 			.display(
 				Items.MAP,
-				new TranslatableComponent("advancements.adventure.root.title"),
-				new TranslatableComponent("advancements.adventure.root.description"),
+				Component.translatable("advancements.adventure.root.title"),
+				Component.translatable("advancements.adventure.root.description"),
 				new ResourceLocation("textures/gui/advancements/backgrounds/adventure.png"),
 				FrameType.TASK,
 				false,
@@ -127,8 +127,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Blocks.RED_BED,
-				new TranslatableComponent("advancements.adventure.sleep_in_bed.title"),
-				new TranslatableComponent("advancements.adventure.sleep_in_bed.description"),
+				Component.translatable("advancements.adventure.sleep_in_bed.title"),
+				Component.translatable("advancements.adventure.sleep_in_bed.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -141,8 +141,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.DIAMOND_BOOTS,
-				new TranslatableComponent("advancements.adventure.adventuring_time.title"),
-				new TranslatableComponent("advancements.adventure.adventuring_time.description"),
+				Component.translatable("advancements.adventure.adventuring_time.title"),
+				Component.translatable("advancements.adventure.adventuring_time.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -155,8 +155,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.EMERALD,
-				new TranslatableComponent("advancements.adventure.trade.title"),
-				new TranslatableComponent("advancements.adventure.trade.description"),
+				Component.translatable("advancements.adventure.trade.title"),
+				Component.translatable("advancements.adventure.trade.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -169,8 +169,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement3)
 			.display(
 				Items.EMERALD,
-				new TranslatableComponent("advancements.adventure.trade_at_world_height.title"),
-				new TranslatableComponent("advancements.adventure.trade_at_world_height.description"),
+				Component.translatable("advancements.adventure.trade_at_world_height.title"),
+				Component.translatable("advancements.adventure.trade_at_world_height.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -188,8 +188,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.IRON_SWORD,
-				new TranslatableComponent("advancements.adventure.kill_a_mob.title"),
-				new TranslatableComponent("advancements.adventure.kill_a_mob.description"),
+				Component.translatable("advancements.adventure.kill_a_mob.title"),
+				Component.translatable("advancements.adventure.kill_a_mob.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -202,8 +202,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.DIAMOND_SWORD,
-				new TranslatableComponent("advancements.adventure.kill_all_mobs.title"),
-				new TranslatableComponent("advancements.adventure.kill_all_mobs.description"),
+				Component.translatable("advancements.adventure.kill_all_mobs.title"),
+				Component.translatable("advancements.adventure.kill_all_mobs.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -216,8 +216,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.BOW,
-				new TranslatableComponent("advancements.adventure.shoot_arrow.title"),
-				new TranslatableComponent("advancements.adventure.shoot_arrow.description"),
+				Component.translatable("advancements.adventure.shoot_arrow.title"),
+				Component.translatable("advancements.adventure.shoot_arrow.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -236,8 +236,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.TRIDENT,
-				new TranslatableComponent("advancements.adventure.throw_trident.title"),
-				new TranslatableComponent("advancements.adventure.throw_trident.description"),
+				Component.translatable("advancements.adventure.throw_trident.title"),
+				Component.translatable("advancements.adventure.throw_trident.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -256,8 +256,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement6)
 			.display(
 				Items.TRIDENT,
-				new TranslatableComponent("advancements.adventure.very_very_frightening.title"),
-				new TranslatableComponent("advancements.adventure.very_very_frightening.description"),
+				Component.translatable("advancements.adventure.very_very_frightening.title"),
+				Component.translatable("advancements.adventure.very_very_frightening.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -272,8 +272,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement3)
 			.display(
 				Blocks.CARVED_PUMPKIN,
-				new TranslatableComponent("advancements.adventure.summon_iron_golem.title"),
-				new TranslatableComponent("advancements.adventure.summon_iron_golem.description"),
+				Component.translatable("advancements.adventure.summon_iron_golem.title"),
+				Component.translatable("advancements.adventure.summon_iron_golem.description"),
 				null,
 				FrameType.GOAL,
 				true,
@@ -286,8 +286,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement5)
 			.display(
 				Items.ARROW,
-				new TranslatableComponent("advancements.adventure.sniper_duel.title"),
-				new TranslatableComponent("advancements.adventure.sniper_duel.description"),
+				Component.translatable("advancements.adventure.sniper_duel.title"),
+				Component.translatable("advancements.adventure.sniper_duel.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -307,8 +307,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement4)
 			.display(
 				Items.TOTEM_OF_UNDYING,
-				new TranslatableComponent("advancements.adventure.totem_of_undying.title"),
-				new TranslatableComponent("advancements.adventure.totem_of_undying.description"),
+				Component.translatable("advancements.adventure.totem_of_undying.title"),
+				Component.translatable("advancements.adventure.totem_of_undying.description"),
 				null,
 				FrameType.GOAL,
 				true,
@@ -321,8 +321,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.CROSSBOW,
-				new TranslatableComponent("advancements.adventure.ol_betsy.title"),
-				new TranslatableComponent("advancements.adventure.ol_betsy.description"),
+				Component.translatable("advancements.adventure.ol_betsy.title"),
+				Component.translatable("advancements.adventure.ol_betsy.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -335,8 +335,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement7)
 			.display(
 				Items.CROSSBOW,
-				new TranslatableComponent("advancements.adventure.whos_the_pillager_now.title"),
-				new TranslatableComponent("advancements.adventure.whos_the_pillager_now.description"),
+				Component.translatable("advancements.adventure.whos_the_pillager_now.title"),
+				Component.translatable("advancements.adventure.whos_the_pillager_now.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -349,8 +349,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement7)
 			.display(
 				Items.CROSSBOW,
-				new TranslatableComponent("advancements.adventure.two_birds_one_arrow.title"),
-				new TranslatableComponent("advancements.adventure.two_birds_one_arrow.description"),
+				Component.translatable("advancements.adventure.two_birds_one_arrow.title"),
+				Component.translatable("advancements.adventure.two_birds_one_arrow.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -369,8 +369,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement7)
 			.display(
 				Items.CROSSBOW,
-				new TranslatableComponent("advancements.adventure.arbalistic.title"),
-				new TranslatableComponent("advancements.adventure.arbalistic.description"),
+				Component.translatable("advancements.adventure.arbalistic.title"),
+				Component.translatable("advancements.adventure.arbalistic.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -384,8 +384,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Raid.getLeaderBannerInstance(),
-				new TranslatableComponent("advancements.adventure.voluntary_exile.title"),
-				new TranslatableComponent("advancements.adventure.voluntary_exile.description"),
+				Component.translatable("advancements.adventure.voluntary_exile.title"),
+				Component.translatable("advancements.adventure.voluntary_exile.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -401,8 +401,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement8)
 			.display(
 				Raid.getLeaderBannerInstance(),
-				new TranslatableComponent("advancements.adventure.hero_of_the_village.title"),
-				new TranslatableComponent("advancements.adventure.hero_of_the_village.description"),
+				Component.translatable("advancements.adventure.hero_of_the_village.title"),
+				Component.translatable("advancements.adventure.hero_of_the_village.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -416,8 +416,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Blocks.HONEY_BLOCK.asItem(),
-				new TranslatableComponent("advancements.adventure.honey_block_slide.title"),
-				new TranslatableComponent("advancements.adventure.honey_block_slide.description"),
+				Component.translatable("advancements.adventure.honey_block_slide.title"),
+				Component.translatable("advancements.adventure.honey_block_slide.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -430,8 +430,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement5)
 			.display(
 				Blocks.TARGET.asItem(),
-				new TranslatableComponent("advancements.adventure.bullseye.title"),
-				new TranslatableComponent("advancements.adventure.bullseye.description"),
+				Component.translatable("advancements.adventure.bullseye.title"),
+				Component.translatable("advancements.adventure.bullseye.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -451,8 +451,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.LEATHER_BOOTS,
-				new TranslatableComponent("advancements.adventure.walk_on_powder_snow_with_leather_boots.title"),
-				new TranslatableComponent("advancements.adventure.walk_on_powder_snow_with_leather_boots.description"),
+				Component.translatable("advancements.adventure.walk_on_powder_snow_with_leather_boots.title"),
+				Component.translatable("advancements.adventure.walk_on_powder_snow_with_leather_boots.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -465,8 +465,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.LIGHTNING_ROD,
-				new TranslatableComponent("advancements.adventure.lightning_rod_with_villager_no_fire.title"),
-				new TranslatableComponent("advancements.adventure.lightning_rod_with_villager_no_fire.description"),
+				Component.translatable("advancements.adventure.lightning_rod_with_villager_no_fire.title"),
+				Component.translatable("advancements.adventure.lightning_rod_with_villager_no_fire.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -482,8 +482,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.SPYGLASS,
-				new TranslatableComponent("advancements.adventure.spyglass_at_parrot.title"),
-				new TranslatableComponent("advancements.adventure.spyglass_at_parrot.description"),
+				Component.translatable("advancements.adventure.spyglass_at_parrot.title"),
+				Component.translatable("advancements.adventure.spyglass_at_parrot.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -496,8 +496,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement9)
 			.display(
 				Items.SPYGLASS,
-				new TranslatableComponent("advancements.adventure.spyglass_at_ghast.title"),
-				new TranslatableComponent("advancements.adventure.spyglass_at_ghast.description"),
+				Component.translatable("advancements.adventure.spyglass_at_ghast.title"),
+				Component.translatable("advancements.adventure.spyglass_at_ghast.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -510,8 +510,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement2)
 			.display(
 				Items.JUKEBOX,
-				new TranslatableComponent("advancements.adventure.play_jukebox_in_meadows.title"),
-				new TranslatableComponent("advancements.adventure.play_jukebox_in_meadows.description"),
+				Component.translatable("advancements.adventure.play_jukebox_in_meadows.title"),
+				Component.translatable("advancements.adventure.play_jukebox_in_meadows.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -530,8 +530,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement10)
 			.display(
 				Items.SPYGLASS,
-				new TranslatableComponent("advancements.adventure.spyglass_at_dragon.title"),
-				new TranslatableComponent("advancements.adventure.spyglass_at_dragon.description"),
+				Component.translatable("advancements.adventure.spyglass_at_dragon.title"),
+				Component.translatable("advancements.adventure.spyglass_at_dragon.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -544,8 +544,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Items.WATER_BUCKET,
-				new TranslatableComponent("advancements.adventure.fall_from_world_height.title"),
-				new TranslatableComponent("advancements.adventure.fall_from_world_height.description"),
+				Component.translatable("advancements.adventure.fall_from_world_height.title"),
+				Component.translatable("advancements.adventure.fall_from_world_height.description"),
 				null,
 				FrameType.TASK,
 				true,
@@ -565,8 +565,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Blocks.SCULK_CATALYST,
-				new TranslatableComponent("advancements.adventure.kill_mob_near_sculk_catalyst.title"),
-				new TranslatableComponent("advancements.adventure.kill_mob_near_sculk_catalyst.description"),
+				Component.translatable("advancements.adventure.kill_mob_near_sculk_catalyst.title"),
+				Component.translatable("advancements.adventure.kill_mob_near_sculk_catalyst.description"),
 				null,
 				FrameType.CHALLENGE,
 				true,
@@ -579,8 +579,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.parent(advancement)
 			.display(
 				Blocks.SCULK_SENSOR,
-				new TranslatableComponent("advancements.adventure.avoid_vibration.title"),
-				new TranslatableComponent("advancements.adventure.avoid_vibration.description"),
+				Component.translatable("advancements.adventure.avoid_vibration.title"),
+				Component.translatable("advancements.adventure.avoid_vibration.description"),
 				null,
 				FrameType.TASK,
 				true,

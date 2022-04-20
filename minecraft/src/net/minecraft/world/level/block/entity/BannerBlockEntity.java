@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.item.BlockItem;
@@ -65,7 +64,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 
 	@Override
 	public Component getName() {
-		return (Component)(this.name != null ? this.name : new TranslatableComponent("block.minecraft.banner"));
+		return (Component)(this.name != null ? this.name : Component.translatable("block.minecraft.banner"));
 	}
 
 	@Nullable

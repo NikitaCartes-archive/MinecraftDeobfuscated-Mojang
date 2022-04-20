@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
@@ -64,7 +63,7 @@ public class RecordItem extends Item {
 	}
 
 	public MutableComponent getDisplayName() {
-		return new TranslatableComponent(this.getDescriptionId() + ".desc");
+		return Component.translatable(this.getDescriptionId() + ".desc");
 	}
 
 	@Nullable
