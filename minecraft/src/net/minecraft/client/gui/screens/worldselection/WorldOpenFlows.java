@@ -176,7 +176,7 @@ public class WorldOpenFlows {
 						this.minecraft.getClientPackSource().clearServerPack().thenRunAsync(() -> this.minecraft.setScreen(screen), this.minecraft);
 					}
 				}, this.minecraft).exceptionally(throwable -> {
-					this.minecraft.delayCrash(() -> CrashReport.forThrowable(throwable, "Load world"));
+					this.minecraft.delayCrash(CrashReport.forThrowable(throwable, "Load world"));
 					return null;
 				});
 			} else {

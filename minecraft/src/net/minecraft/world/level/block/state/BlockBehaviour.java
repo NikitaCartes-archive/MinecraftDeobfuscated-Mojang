@@ -323,7 +323,7 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
 	}
 
 	@Deprecated
@@ -640,8 +640,8 @@ public abstract class BlockBehaviour {
 			this.getBlock().entityInside(this.asState(), level, blockPos, entity);
 		}
 
-		public void spawnAfterBreak(ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
-			this.getBlock().spawnAfterBreak(this.asState(), serverLevel, blockPos, itemStack);
+		public void spawnAfterBreak(ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+			this.getBlock().spawnAfterBreak(this.asState(), serverLevel, blockPos, itemStack, bl);
 		}
 
 		public List<ItemStack> getDrops(LootContext.Builder builder) {

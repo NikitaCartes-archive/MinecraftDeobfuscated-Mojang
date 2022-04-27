@@ -1,7 +1,6 @@
 package net.minecraft.client.player;
 
 import com.mojang.authlib.GameProfile;
-import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -78,10 +77,8 @@ public class RemotePlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	public void sendMessage(Component component, UUID uUID) {
+	public void sendSystemMessage(Component component) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!minecraft.isBlocked(uUID)) {
-			minecraft.gui.getChat().addMessage(component);
-		}
+		minecraft.gui.getChat().addMessage(component);
 	}
 }

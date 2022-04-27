@@ -55,7 +55,7 @@ public class IllagerModel<T extends AbstractIllager> extends HierarchicalModel<T
 				.texOffs(16, 20)
 				.addBox(-4.0F, 0.0F, -3.0F, 8.0F, 12.0F, 6.0F)
 				.texOffs(0, 38)
-				.addBox(-4.0F, 0.0F, -3.0F, 8.0F, 18.0F, 6.0F, new CubeDeformation(0.5F)),
+				.addBox(-4.0F, 0.0F, -3.0F, 8.0F, 20.0F, 6.0F, new CubeDeformation(0.5F)),
 			PartPose.offset(0.0F, 0.0F, 0.0F)
 		);
 		PartDefinition partDefinition3 = partDefinition.addOrReplaceChild(

@@ -245,6 +245,16 @@ public class FrogAnimation {
 			)
 		)
 		.addAnimation(
+			"head",
+			new AnimationChannel(
+				AnimationChannel.Targets.SCALE,
+				new Keyframe(0.0F, KeyframeAnimations.degreeVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.0833F, KeyframeAnimations.degreeVec(0.998F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(0.998F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.5F, KeyframeAnimations.degreeVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR)
+			)
+		)
+		.addAnimation(
 			"tongue",
 			new AnimationChannel(
 				AnimationChannel.Targets.ROTATION,

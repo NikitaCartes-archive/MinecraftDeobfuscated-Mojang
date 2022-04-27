@@ -28,7 +28,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -62,6 +61,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
@@ -106,6 +106,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
@@ -198,7 +199,6 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundBlockUpdatePacket.class, ClientboundBlockUpdatePacket::new)
 					.addPacket(ClientboundBossEventPacket.class, ClientboundBossEventPacket::new)
 					.addPacket(ClientboundChangeDifficultyPacket.class, ClientboundChangeDifficultyPacket::new)
-					.addPacket(ClientboundChatPacket.class, ClientboundChatPacket::new)
 					.addPacket(ClientboundClearTitlesPacket.class, ClientboundClearTitlesPacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
 					.addPacket(ClientboundCommandsPacket.class, ClientboundCommandsPacket::new)
@@ -234,6 +234,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundPingPacket.class, ClientboundPingPacket::new)
 					.addPacket(ClientboundPlaceGhostRecipePacket.class, ClientboundPlaceGhostRecipePacket::new)
 					.addPacket(ClientboundPlayerAbilitiesPacket.class, ClientboundPlayerAbilitiesPacket::new)
+					.addPacket(ClientboundPlayerChatPacket.class, ClientboundPlayerChatPacket::new)
 					.addPacket(ClientboundPlayerCombatEndPacket.class, ClientboundPlayerCombatEndPacket::new)
 					.addPacket(ClientboundPlayerCombatEnterPacket.class, ClientboundPlayerCombatEnterPacket::new)
 					.addPacket(ClientboundPlayerCombatKillPacket.class, ClientboundPlayerCombatKillPacket::new)
@@ -278,6 +279,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundSoundEntityPacket.class, ClientboundSoundEntityPacket::new)
 					.addPacket(ClientboundSoundPacket.class, ClientboundSoundPacket::new)
 					.addPacket(ClientboundStopSoundPacket.class, ClientboundStopSoundPacket::new)
+					.addPacket(ClientboundSystemChatPacket.class, ClientboundSystemChatPacket::new)
 					.addPacket(ClientboundTabListPacket.class, ClientboundTabListPacket::new)
 					.addPacket(ClientboundTagQueryPacket.class, ClientboundTagQueryPacket::new)
 					.addPacket(ClientboundTakeItemEntityPacket.class, ClientboundTakeItemEntityPacket::new)

@@ -3,7 +3,6 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ChatType;
@@ -23,31 +22,24 @@ public class EmoteCommands {
 								String string = StringArgumentType.getString(commandContext, "action");
 								Entity entity = commandContext.getSource().getEntity();
 								MinecraftServer minecraftServer = commandContext.getSource().getServer();
-								if (entity != null) {
-									if (entity instanceof ServerPlayer serverPlayer) {
-										serverPlayer.getTextFilter()
-											.processStreamMessage(string)
-											.thenAcceptAsync(
-												filteredText -> {
-													String stringx = filteredText.getFiltered();
-													Component component = stringx.isEmpty() ? null : createMessage(commandContext, stringx);
-													Component component2 = createMessage(commandContext, filteredText.getRaw());
-													minecraftServer.getPlayerList()
-														.broadcastMessage(
-															component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? component : component2, ChatType.CHAT, entity.getUUID()
-														);
-												},
-												minecraftServer
-											);
-										return 1;
-									}
-
-									minecraftServer.getPlayerList().broadcastMessage(createMessage(commandContext, string), ChatType.CHAT, entity.getUUID());
+								if (entity instanceof ServerPlayer serverPlayer) {
+									serverPlayer.getTextFilter()
+										.processStreamMessage(string)
+										.thenAcceptAsync(
+											filteredText -> {
+												String stringx = filteredText.getFiltered();
+												Component component = stringx.isEmpty() ? null : createMessage(commandContext, stringx);
+												Component component2 = createMessage(commandContext, filteredText.getRaw());
+												minecraftServer.getPlayerList()
+													.broadcastSystemMessage(component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? component : component2, ChatType.SYSTEM);
+											},
+											minecraftServer
+										);
+									return 1;
 								} else {
-									minecraftServer.getPlayerList().broadcastMessage(createMessage(commandContext, string), ChatType.SYSTEM, Util.NIL_UUID);
+									minecraftServer.getPlayerList().broadcastSystemMessage(createMessage(commandContext, string), ChatType.SYSTEM);
+									return 1;
 								}
-
-								return 1;
 							}
 						)
 				)

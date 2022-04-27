@@ -1,9 +1,10 @@
 package net.minecraft.client.gui.chat;
 
-import java.util.UUID;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 
@@ -16,11 +17,16 @@ public class StandardChatListener implements ChatListener {
 	}
 
 	@Override
-	public void handle(ChatType chatType, Component component, UUID uUID) {
+	public void handle(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
 		if (chatType != ChatType.CHAT) {
 			this.minecraft.gui.getChat().addMessage(component);
 		} else {
-			this.minecraft.gui.getChat().enqueueMessage(component);
+			Component component2 = chatSender != null ? decorateMessage(component, chatSender) : component;
+			this.minecraft.gui.getChat().enqueueMessage(component2);
 		}
+	}
+
+	private static Component decorateMessage(Component component, ChatSender chatSender) {
+		return Component.translatable("chat.type.text", chatSender.name(), component);
 	}
 }

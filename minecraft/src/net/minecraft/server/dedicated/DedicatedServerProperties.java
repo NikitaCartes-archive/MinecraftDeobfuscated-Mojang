@@ -86,6 +86,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final String textFilteringConfig = this.get("text-filtering-config", "");
 	public final Settings<DedicatedServerProperties>.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
 	public final Settings<DedicatedServerProperties>.MutableValue<Boolean> whiteList = this.getMutable("white-list", false);
+	public final boolean enforceSecureProfile = this.get("enforce-secure-profile", false);
 	private final DedicatedServerProperties.WorldGenProperties worldGenProperties = new DedicatedServerProperties.WorldGenProperties(
 		this.get("level-seed", ""),
 		this.get("generator-settings", string -> GsonHelper.parse(!string.isEmpty() ? string : "{}"), new JsonObject()),

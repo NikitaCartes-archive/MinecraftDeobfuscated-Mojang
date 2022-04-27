@@ -55,10 +55,9 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 				.texOffs(16, 14)
 				.addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F)
 				.texOffs(16, 14)
-				.mirror()
 				.addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F)
 				.texOffs(0, 10)
-				.addBox(-0.5F, 0.0F, -5.0F, 3.0F, 3.0F, 4.0F),
+				.addBox(-0.5F, -0.001F, -5.0F, 3.0F, 3.0F, 4.0F),
 			PartPose.ZERO
 		);
 		partDefinition.addOrReplaceChild(
@@ -72,11 +71,10 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 			PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
 		);
 		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
-		CubeListBuilder cubeListBuilder2 = CubeListBuilder.create().texOffs(0, 18).mirror().addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
 		partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-2.5F, 16.0F, 7.0F));
-		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder2, PartPose.offset(0.5F, 16.0F, 7.0F));
+		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(0.5F, 16.0F, 7.0F));
 		partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-2.5F, 16.0F, -4.0F));
-		partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder2, PartPose.offset(0.5F, 16.0F, -4.0F));
+		partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder, PartPose.offset(0.5F, 16.0F, -4.0F));
 		PartDefinition partDefinition3 = partDefinition.addOrReplaceChild(
 			"tail", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 12.0F, 8.0F, (float) (Math.PI / 5), 0.0F, 0.0F)
 		);

@@ -107,7 +107,7 @@ public class Boat extends Entity {
 
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
-		return Entity.MovementEmission.NONE;
+		return Entity.MovementEmission.EVENTS;
 	}
 
 	@Override
@@ -196,9 +196,8 @@ public class Boat extends Entity {
 		if (this.random.nextInt(20) == 0) {
 			this.level
 				.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSwimSplashSound(), this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat(), false);
+			this.gameEvent(GameEvent.SPLASH, this.getControllingPassenger());
 		}
-
-		this.gameEvent(GameEvent.SPLASH, this.getControllingPassenger());
 	}
 
 	@Override
@@ -312,7 +311,6 @@ public class Boat extends Entity {
 						double d = i == 1 ? -vec3.z : vec3.z;
 						double e = i == 1 ? vec3.x : -vec3.x;
 						this.level.playSound(null, this.getX() + d, this.getY(), this.getZ() + e, soundEvent, this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat());
-						this.level.gameEvent(this.getControllingPassenger(), GameEvent.SPLASH, new Vec3(this.getX() + d, this.getY(), this.getZ() + e));
 					}
 				}
 

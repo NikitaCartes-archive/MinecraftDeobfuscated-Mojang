@@ -157,7 +157,7 @@ public class IntegratedServer extends MinecraftServer {
 
 	@Override
 	public void onServerCrash(CrashReport crashReport) {
-		this.minecraft.delayCrash(() -> crashReport);
+		this.minecraft.delayCrashRaw(crashReport);
 	}
 
 	@Override

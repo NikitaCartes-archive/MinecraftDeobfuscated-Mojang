@@ -404,8 +404,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		bufferBuilder.vertex((double)(i + 0), (double)(j + l), 0.0).color(m, n, o, p).endVertex();
 		bufferBuilder.vertex((double)(i + k), (double)(j + l), 0.0).color(m, n, o, p).endVertex();
 		bufferBuilder.vertex((double)(i + k), (double)(j + 0), 0.0).color(m, n, o, p).endVertex();
-		bufferBuilder.end();
-		BufferUploader.drawWithShader(bufferBuilder);
+		BufferUploader.drawWithShader(bufferBuilder.end());
 	}
 
 	@Override

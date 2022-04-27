@@ -52,13 +52,6 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 		this.levelList = (List<LevelSummary>)((List)this.minecraft.getLevelSource().loadLevelSummaries(levelCandidates).join())
 			.stream()
 			.filter(levelSummaryx -> !levelSummaryx.requiresManualConversion() && !levelSummaryx.isLocked())
-			.sorted((levelSummaryx, levelSummary2) -> {
-				if (levelSummaryx.getLastPlayed() < levelSummary2.getLastPlayed()) {
-					return 1;
-				} else {
-					return levelSummaryx.getLastPlayed() > levelSummary2.getLastPlayed() ? -1 : levelSummaryx.getLevelId().compareTo(levelSummary2.getLevelId());
-				}
-			})
 			.collect(Collectors.toList());
 
 		for (LevelSummary levelSummary : this.levelList) {

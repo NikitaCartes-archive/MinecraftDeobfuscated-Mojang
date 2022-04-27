@@ -161,8 +161,7 @@ class ReportGameListener implements GameTestListener {
 	}
 
 	protected static void say(ServerLevel serverLevel, ChatFormatting chatFormatting, String string) {
-		serverLevel.getPlayers(serverPlayer -> true)
-			.forEach(serverPlayer -> serverPlayer.sendMessage(Component.literal(string).withStyle(chatFormatting), Util.NIL_UUID));
+		serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendSystemMessage(Component.literal(string).withStyle(chatFormatting)));
 	}
 
 	private static void showRedBox(ServerLevel serverLevel, BlockPos blockPos, String string) {

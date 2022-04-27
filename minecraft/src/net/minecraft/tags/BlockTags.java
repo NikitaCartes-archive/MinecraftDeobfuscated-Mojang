@@ -22,6 +22,7 @@ public final class BlockTags {
 	public static final TagKey<Block> DOORS = create("doors");
 	public static final TagKey<Block> SAPLINGS = create("saplings");
 	public static final TagKey<Block> LOGS_THAT_BURN = create("logs_that_burn");
+	public static final TagKey<Block> OVERWORLD_NATURAL_LOGS = create("overworld_natural_logs");
 	public static final TagKey<Block> LOGS = create("logs");
 	public static final TagKey<Block> DARK_OAK_LOGS = create("dark_oak_logs");
 	public static final TagKey<Block> OAK_LOGS = create("oak_logs");
@@ -153,6 +154,7 @@ public final class BlockTags {
 	public static final TagKey<Block> MANGROVE_LOGS_CAN_GROW_THROUGH = create("mangrove_logs_can_grow_through");
 	public static final TagKey<Block> MANGROVE_ROOTS_CAN_GROW_THROUGH = create("mangrove_roots_can_grow_through");
 	public static final TagKey<Block> DEAD_BUSH_MAY_PLACE_ON = create("dead_bush_may_place_on");
+	public static final TagKey<Block> SNAPS_GOAT_HORN = create("snaps_goat_horn");
 
 	private BlockTags() {
 	}

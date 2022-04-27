@@ -300,6 +300,7 @@ public class Structures {
 				TerrainAdjustment.BEARD_BOX
 			),
 			AncientCityStructurePieces.START,
+			Optional.empty(),
 			7,
 			ConstantHeight.of(VerticalAnchor.absolute(-51)),
 			false,

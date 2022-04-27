@@ -904,7 +904,10 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 		);
 		this.add(EntityType.VEX, LootTable.lootTable());
 		this.add(EntityType.VILLAGER, LootTable.lootTable());
-		this.add(EntityType.WARDEN, LootTable.lootTable());
+		this.add(
+			EntityType.WARDEN,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.SCULK_CATALYST)))
+		);
 		this.add(EntityType.WANDERING_TRADER, LootTable.lootTable());
 		this.add(
 			EntityType.VINDICATOR,

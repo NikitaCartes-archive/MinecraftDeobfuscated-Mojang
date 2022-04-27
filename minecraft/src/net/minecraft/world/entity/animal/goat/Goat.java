@@ -34,7 +34,9 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.GoatHornItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -43,6 +45,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 
 public class Goat extends Animal {
 	public static final EntityDimensions LONG_JUMPING_DIMENSIONS = EntityDimensions.scalable(0.9F, 1.3F).scale(0.7F);
@@ -75,7 +78,10 @@ public class Goat extends Animal {
 	);
 	public static final int GOAT_FALL_DAMAGE_REDUCTION = 10;
 	public static final double GOAT_SCREAMING_CHANCE = 0.02;
+	public static final double UNIHORN_CHANCE = 0.1F;
 	private static final EntityDataAccessor<Boolean> DATA_IS_SCREAMING_GOAT = SynchedEntityData.defineId(Goat.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_HAS_LEFT_HORN = SynchedEntityData.defineId(Goat.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_HAS_RIGHT_HORN = SynchedEntityData.defineId(Goat.class, EntityDataSerializers.BOOLEAN);
 	private boolean isLoweringHead;
 	private int lowerHeadTick;
 
@@ -104,8 +110,10 @@ public class Goat extends Animal {
 	protected void ageBoundaryReached() {
 		if (this.isBaby()) {
 			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(1.0);
+			this.removeHorns();
 		} else {
 			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2.0);
+			this.addHorns();
 		}
 	}
 
@@ -212,6 +220,12 @@ public class Goat extends Animal {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		GoatAi.initMemories(this, randomSource);
 		this.setScreamingGoat(randomSource.nextDouble() < 0.02);
+		this.ageBoundaryReached();
+		if (!this.isBaby() && (double)randomSource.nextFloat() < 0.1F) {
+			EntityDataAccessor<Boolean> entityDataAccessor = randomSource.nextBoolean() ? DATA_HAS_LEFT_HORN : DATA_HAS_RIGHT_HORN;
+			this.entityData.set(entityDataAccessor, false);
+		}
+
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
@@ -230,12 +244,16 @@ public class Goat extends Animal {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putBoolean("IsScreamingGoat", this.isScreamingGoat());
+		compoundTag.putBoolean("HasLeftHorn", this.hasLeftHorn());
+		compoundTag.putBoolean("HasRightHorn", this.hasRightHorn());
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.setScreamingGoat(compoundTag.getBoolean("IsScreamingGoat"));
+		this.entityData.set(DATA_HAS_LEFT_HORN, compoundTag.getBoolean("HasLeftHorn"));
+		this.entityData.set(DATA_HAS_RIGHT_HORN, compoundTag.getBoolean("HasRightHorn"));
 	}
 
 	@Override
@@ -265,6 +283,53 @@ public class Goat extends Animal {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_IS_SCREAMING_GOAT, false);
+		this.entityData.define(DATA_HAS_LEFT_HORN, true);
+		this.entityData.define(DATA_HAS_RIGHT_HORN, true);
+	}
+
+	public boolean hasLeftHorn() {
+		return this.entityData.get(DATA_HAS_LEFT_HORN);
+	}
+
+	public boolean hasRightHorn() {
+		return this.entityData.get(DATA_HAS_RIGHT_HORN);
+	}
+
+	public boolean dropHorn() {
+		boolean bl = this.hasLeftHorn();
+		boolean bl2 = this.hasRightHorn();
+		if (!bl && !bl2) {
+			return false;
+		} else {
+			EntityDataAccessor<Boolean> entityDataAccessor;
+			if (!bl) {
+				entityDataAccessor = DATA_HAS_RIGHT_HORN;
+			} else if (!bl2) {
+				entityDataAccessor = DATA_HAS_LEFT_HORN;
+			} else {
+				entityDataAccessor = this.random.nextBoolean() ? DATA_HAS_LEFT_HORN : DATA_HAS_RIGHT_HORN;
+			}
+
+			this.entityData.set(entityDataAccessor, false);
+			Vec3 vec3 = this.position();
+			ItemStack itemStack = GoatHornItem.createFromGoat(this);
+			double d = (double)Mth.randomBetween(this.random, -0.2F, 0.2F);
+			double e = (double)Mth.randomBetween(this.random, 0.3F, 0.7F);
+			double f = (double)Mth.randomBetween(this.random, -0.2F, 0.2F);
+			ItemEntity itemEntity = new ItemEntity(this.level, vec3.x(), vec3.y(), vec3.z(), itemStack, d, e, f);
+			this.level.addFreshEntity(itemEntity);
+			return true;
+		}
+	}
+
+	public void addHorns() {
+		this.entityData.set(DATA_HAS_LEFT_HORN, true);
+		this.entityData.set(DATA_HAS_RIGHT_HORN, true);
+	}
+
+	public void removeHorns() {
+		this.entityData.set(DATA_HAS_LEFT_HORN, false);
+		this.entityData.set(DATA_HAS_RIGHT_HORN, false);
 	}
 
 	public boolean isScreamingGoat() {

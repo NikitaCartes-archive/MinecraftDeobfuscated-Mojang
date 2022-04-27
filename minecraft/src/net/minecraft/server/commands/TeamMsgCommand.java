@@ -44,9 +44,13 @@ public class TeamMsgCommand {
 
 			for (ServerPlayer serverPlayer : list) {
 				if (serverPlayer == entity) {
-					serverPlayer.sendMessage(Component.translatable("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
+					serverPlayer.sendUnsignedMessageFrom(
+						Component.translatable("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component), entity.getUUID()
+					);
 				} else if (serverPlayer.getTeam() == playerTeam) {
-					serverPlayer.sendMessage(Component.translatable("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
+					serverPlayer.sendUnsignedMessageFrom(
+						Component.translatable("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component), entity.getUUID()
+					);
 				}
 			}
 

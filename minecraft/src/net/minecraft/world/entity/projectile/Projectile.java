@@ -137,12 +137,12 @@ public abstract class Projectile extends Entity {
 		HitResult.Type type = hitResult.getType();
 		if (type == HitResult.Type.ENTITY) {
 			this.onHitEntity((EntityHitResult)hitResult);
+			this.level.gameEvent(GameEvent.PROJECTILE_LAND, hitResult.getLocation(), GameEvent.Context.of(this, null));
 		} else if (type == HitResult.Type.BLOCK) {
-			this.onHitBlock((BlockHitResult)hitResult);
-		}
-
-		if (type != HitResult.Type.MISS) {
-			this.level.gameEvent(this, GameEvent.PROJECTILE_LAND, hitResult.getLocation());
+			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+			this.onHitBlock(blockHitResult);
+			BlockPos blockPos = blockHitResult.getBlockPos();
+			this.level.gameEvent(GameEvent.PROJECTILE_LAND, blockPos, GameEvent.Context.of(this, this.level.getBlockState(blockPos)));
 		}
 	}
 

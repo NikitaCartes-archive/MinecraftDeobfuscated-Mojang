@@ -34,6 +34,7 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
 		super.done();
 	}
 
+	@Nullable
 	@Override
 	public Node getStart() {
 		return this.getStartNode(
@@ -41,9 +42,10 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
 		);
 	}
 
+	@Nullable
 	@Override
 	public Target getGoal(double d, double e, double f) {
-		return new Target(this.getNode(Mth.floor(d), Mth.floor(e + 0.5), Mth.floor(f)));
+		return this.getTargetFromNode(this.getNode(Mth.floor(d), Mth.floor(e + 0.5), Mth.floor(f)));
 	}
 
 	@Override

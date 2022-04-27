@@ -54,10 +54,10 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 			completableFuture
 		);
 		this.total.start();
-		this.allDone.thenAcceptAsync(this::finish, executor2);
+		this.allDone = this.allDone.thenApplyAsync(this::finish, executor2);
 	}
 
-	private void finish(List<ProfiledReloadInstance.State> list) {
+	private List<ProfiledReloadInstance.State> finish(List<ProfiledReloadInstance.State> list) {
 		this.total.stop();
 		int i = 0;
 		LOGGER.info("Resource reload finished after {} ms", this.total.elapsed(TimeUnit.MILLISECONDS));
@@ -74,6 +74,7 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 		}
 
 		LOGGER.info("Total blocking time: {} ms", i);
+		return list;
 	}
 
 	public static class State {

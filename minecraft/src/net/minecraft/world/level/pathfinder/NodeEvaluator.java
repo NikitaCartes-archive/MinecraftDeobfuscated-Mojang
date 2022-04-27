@@ -3,6 +3,7 @@ package net.minecraft.world.level.pathfinder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
@@ -34,17 +35,26 @@ public abstract class NodeEvaluator {
 		this.mob = null;
 	}
 
+	@Nullable
 	protected Node getNode(BlockPos blockPos) {
 		return this.getNode(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 
+	@Nullable
 	protected Node getNode(int i, int j, int k) {
 		return this.nodes.computeIfAbsent(Node.createHash(i, j, k), (Int2ObjectFunction<? extends Node>)(l -> new Node(i, j, k)));
 	}
 
+	@Nullable
 	public abstract Node getStart();
 
+	@Nullable
 	public abstract Target getGoal(double d, double e, double f);
+
+	@Nullable
+	protected Target getTargetFromNode(@Nullable Node node) {
+		return node != null ? new Target(node) : null;
+	}
 
 	public abstract int getNeighbors(Node[] nodes, Node node);
 

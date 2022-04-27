@@ -64,7 +64,7 @@ public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 			"head",
 			CubeListBuilder.create()
 				.addBox("main", -2.5F, -2.0F, -3.0F, 5.0F, 4.0F, 5.0F, cubeDeformation)
-				.addBox("nose", -1.5F, 0.0F, -4.0F, 3, 2, 2, cubeDeformation, 0, 24)
+				.addBox("nose", -1.5F, -0.001F, -4.0F, 3, 2, 2, cubeDeformation, 0, 24)
 				.addBox("ear1", -2.0F, -3.0F, 0.0F, 1, 1, 2, cubeDeformation, 0, 10)
 				.addBox("ear2", 1.0F, -3.0F, 0.0F, 1, 1, 2, cubeDeformation, 6, 10),
 			PartPose.offset(0.0F, 15.0F, -9.0F)

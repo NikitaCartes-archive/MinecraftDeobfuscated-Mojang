@@ -37,6 +37,7 @@ public class DamageSource {
 	public static final DamageSource FREEZE = new DamageSource("freeze").bypassArmor();
 	public static final DamageSource FALLING_STALACTITE = new DamageSource("fallingStalactite").damageHelmet();
 	public static final DamageSource STALAGMITE = new DamageSource("stalagmite").bypassArmor().setIsFall();
+	public static final DamageSource SONIC_BOOM = new DamageSource("sonic_boom").bypassArmor().setMagic();
 	private boolean damageHelmet;
 	private boolean bypassArmor;
 	private boolean bypassInvul;

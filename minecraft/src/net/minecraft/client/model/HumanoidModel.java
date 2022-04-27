@@ -25,6 +25,8 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 	private static final float SPYGLASS_ARM_ROT_Y = (float) (Math.PI / 12);
 	private static final float SPYGLASS_ARM_ROT_X = 1.9198622F;
 	private static final float SPYGLASS_ARM_CROUCH_ROT_X = (float) (Math.PI / 12);
+	public static final float TOOT_HORN_XROT_BASE = 1.4835298F;
+	public static final float TOOT_HORN_YROT_BASE = (float) (Math.PI / 6);
 	public final ModelPart head;
 	public final ModelPart hat;
 	public final ModelPart body;
@@ -282,6 +284,10 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			case SPYGLASS:
 				this.rightArm.xRot = Mth.clamp(this.head.xRot - 1.9198622F - (livingEntity.isCrouching() ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F);
 				this.rightArm.yRot = this.head.yRot - (float) (Math.PI / 12);
+				break;
+			case TOOT_HORN:
+				this.rightArm.xRot = Mth.clamp(this.head.xRot, -1.2F, 1.2F) - 1.4835298F;
+				this.rightArm.yRot = this.head.yRot - (float) (Math.PI / 6);
 		}
 	}
 
@@ -317,6 +323,10 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			case SPYGLASS:
 				this.leftArm.xRot = Mth.clamp(this.head.xRot - 1.9198622F - (livingEntity.isCrouching() ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F);
 				this.leftArm.yRot = this.head.yRot + (float) (Math.PI / 12);
+				break;
+			case TOOT_HORN:
+				this.leftArm.xRot = Mth.clamp(this.head.xRot, -1.2F, 1.2F) - 1.4835298F;
+				this.leftArm.yRot = this.head.yRot + (float) (Math.PI / 6);
 		}
 	}
 
@@ -418,7 +428,8 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		THROW_SPEAR(false),
 		CROSSBOW_CHARGE(true),
 		CROSSBOW_HOLD(true),
-		SPYGLASS(false);
+		SPYGLASS(false),
+		TOOT_HORN(false);
 
 		private final boolean twoHanded;
 

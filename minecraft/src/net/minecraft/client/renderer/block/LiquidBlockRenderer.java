@@ -68,7 +68,7 @@ public class LiquidBlockRenderer {
 		return !isFaceOccludedBySelf(blockAndTintGetter, blockPos, blockState, direction) && !isNeighborSameFluid(fluidState, fluidState2);
 	}
 
-	public boolean tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
+	public void tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
 		boolean bl = fluidState.is(FluidTags.LAVA);
 		TextureAtlasSprite[] textureAtlasSprites = bl ? this.lavaIcons : this.waterIcons;
 		int i = bl ? 16777215 : BiomeColors.getAverageWaterColor(blockAndTintGetter, blockPos);
@@ -94,10 +94,7 @@ public class LiquidBlockRenderer {
 		boolean bl5 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.SOUTH, fluidState5);
 		boolean bl6 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.WEST, fluidState6);
 		boolean bl7 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.EAST, fluidState7);
-		if (!bl2 && !bl3 && !bl7 && !bl6 && !bl4 && !bl5) {
-			return false;
-		} else {
-			boolean bl8 = false;
+		if (bl2 || bl3 || bl7 || bl6 || bl4 || bl5) {
 			float j = blockAndTintGetter.getShade(Direction.DOWN, true);
 			float k = blockAndTintGetter.getShade(Direction.UP, true);
 			float l = blockAndTintGetter.getShade(Direction.NORTH, true);
@@ -130,7 +127,6 @@ public class LiquidBlockRenderer {
 			float x = 0.001F;
 			float y = bl3 ? 0.001F : 0.0F;
 			if (bl2 && !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, Direction.UP, Math.min(Math.min(p, r), Math.min(q, o)), blockState3)) {
-				bl8 = true;
 				p -= 0.001F;
 				r -= 0.001F;
 				q -= 0.001F;
@@ -212,7 +208,6 @@ public class LiquidBlockRenderer {
 				this.vertex(vertexConsumer, d, e + (double)y, w, acx, aex, agx, zx, adx, aq);
 				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w, acx, aex, agx, abx, adx, aq);
 				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w + 1.0, acx, aex, agx, abx, afx, aq);
-				bl8 = true;
 			}
 
 			int ar = this.getLightColor(blockAndTintGetter, blockPos);
@@ -224,7 +219,7 @@ public class LiquidBlockRenderer {
 				double au;
 				double at;
 				double av;
-				boolean bl9;
+				boolean bl8;
 				switch (direction) {
 					case NORTH:
 						afx = p;
@@ -233,7 +228,7 @@ public class LiquidBlockRenderer {
 						at = d + 1.0;
 						au = w + 0.001F;
 						av = w + 0.001F;
-						bl9 = bl4;
+						bl8 = bl4;
 						break;
 					case SOUTH:
 						afx = q;
@@ -242,7 +237,7 @@ public class LiquidBlockRenderer {
 						at = d;
 						au = w + 1.0 - 0.001F;
 						av = w + 1.0 - 0.001F;
-						bl9 = bl5;
+						bl8 = bl5;
 						break;
 					case WEST:
 						afx = r;
@@ -251,7 +246,7 @@ public class LiquidBlockRenderer {
 						at = d + 0.001F;
 						au = w + 1.0;
 						av = w;
-						bl9 = bl6;
+						bl8 = bl6;
 						break;
 					default:
 						afx = o;
@@ -260,12 +255,11 @@ public class LiquidBlockRenderer {
 						at = d + 1.0 - 0.001F;
 						au = w;
 						av = w + 1.0;
-						bl9 = bl7;
+						bl8 = bl7;
 				}
 
-				if (bl9
+				if (bl8
 					&& !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, direction, Math.max(afx, aax), blockAndTintGetter.getBlockState(blockPos.relative(direction)))) {
-					bl8 = true;
 					BlockPos blockPos2 = blockPos.relative(direction);
 					TextureAtlasSprite textureAtlasSprite2 = textureAtlasSprites[1];
 					if (!bl) {
@@ -296,8 +290,6 @@ public class LiquidBlockRenderer {
 					}
 				}
 			}
-
-			return bl8;
 		}
 	}
 

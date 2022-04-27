@@ -10,9 +10,7 @@ import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -45,17 +43,10 @@ public class InfestedBlock extends Block {
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
-		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
 		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
 			this.spawnInfestation(serverLevel, blockPos);
-		}
-	}
-
-	@Override
-	public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
-		if (level instanceof ServerLevel) {
-			this.spawnInfestation((ServerLevel)level, blockPos);
 		}
 	}
 

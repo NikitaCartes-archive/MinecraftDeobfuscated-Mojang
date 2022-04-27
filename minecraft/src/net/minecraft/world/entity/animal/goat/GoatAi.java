@@ -134,12 +134,13 @@ public class GoatAi {
 			ImmutableList.of(
 				Pair.of(
 					0,
-					new RamTarget<>(
+					new RamTarget(
 						goat -> goat.isScreamingGoat() ? TIME_BETWEEN_RAMS_SCREAMER : TIME_BETWEEN_RAMS,
 						RAM_TARGET_CONDITIONS,
 						3.0F,
 						goat -> goat.isBaby() ? 1.0 : 2.5,
-						goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_RAM_IMPACT : SoundEvents.GOAT_RAM_IMPACT
+						goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_RAM_IMPACT : SoundEvents.GOAT_RAM_IMPACT,
+						goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_HORN_BREAK : SoundEvents.GOAT_HORN_BREAK
 					)
 				),
 				Pair.of(

@@ -49,6 +49,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -106,6 +107,7 @@ import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
@@ -307,6 +309,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final EntityModelSet entityModels;
 	private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 	private final UUID deviceSessionId = UUID.randomUUID();
+	private final ProfileKeyPairManager profileKeyPairManager;
 	@Nullable
 	public MultiPlayerGameMode gameMode;
 	@Nullable
@@ -539,6 +542,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.window.setDefaultErrorCallback();
 		this.resizeDisplay();
 		this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
+		this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
 		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
@@ -750,8 +754,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.versionType;
 	}
 
-	public void delayCrash(Supplier<CrashReport> supplier) {
-		this.delayedCrash = supplier;
+	public void delayCrash(CrashReport crashReport) {
+		this.delayedCrash = () -> this.fillReport(crashReport);
+	}
+
+	public void delayCrashRaw(CrashReport crashReport) {
+		this.delayedCrash = () -> crashReport;
 	}
 
 	public static void crash(CrashReport crashReport) {
@@ -1854,6 +1862,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.gpuUtilization;
 	}
 
+	public ProfileKeyPairManager getProfileKeyPairManager() {
+		return this.profileKeyPairManager;
+	}
+
 	public WorldOpenFlows createWorldOpenFlows() {
 		return new WorldOpenFlows(this, this.levelSource);
 	}
@@ -1918,7 +1930,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, component -> {
 		}));
 		connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
-		connection.send(new ServerboundHelloPacket(this.getUser().getGameProfile()));
+		connection.send(new ServerboundHelloPacket(this.getUser().getName(), Optional.ofNullable(this.profileKeyPairManager.profilePublicKey())));
 		this.pendingConnection = connection;
 	}
 

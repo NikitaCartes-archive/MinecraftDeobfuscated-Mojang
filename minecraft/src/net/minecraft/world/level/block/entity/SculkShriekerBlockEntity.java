@@ -104,7 +104,7 @@ public class SculkShriekerBlockEntity extends BlockEntity implements VibrationLi
 		@Nullable Entity entity2,
 		int i
 	) {
-		this.shriek(serverLevel);
+		this.shriek(serverLevel, entity2 != null ? entity2 : entity);
 	}
 
 	private boolean canShriek(ServerLevel serverLevel) {
@@ -119,13 +119,14 @@ public class SculkShriekerBlockEntity extends BlockEntity implements VibrationLi
 		}
 	}
 
-	public void shriek(ServerLevel serverLevel) {
+	public void shriek(ServerLevel serverLevel, @Nullable Entity entity) {
 		BlockState blockState = this.getBlockState();
 		if (this.canShriek(serverLevel) && this.tryToWarn(serverLevel, blockState)) {
 			BlockPos blockPos = this.getBlockPos();
 			serverLevel.setBlock(blockPos, blockState.setValue(SculkShriekerBlock.SHRIEKING, Boolean.valueOf(true)), 2);
 			serverLevel.scheduleTick(blockPos, blockState.getBlock(), 90);
 			serverLevel.levelEvent(3007, blockPos, 0);
+			serverLevel.gameEvent(GameEvent.SHRIEK, blockPos, GameEvent.Context.of(entity));
 		}
 	}
 

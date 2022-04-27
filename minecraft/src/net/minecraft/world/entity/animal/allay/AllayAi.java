@@ -107,9 +107,9 @@ public class AllayAi {
 		Brain<?> brain = livingEntity.getBrain();
 		Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
 		if (optional.isPresent()) {
-			BlockPos blockPos = ((GlobalPos)optional.get()).pos();
-			if (shouldDepositItemsAtLikedNoteblock(livingEntity, brain, blockPos)) {
-				return Optional.of(new BlockPosTracker(blockPos.above()));
+			GlobalPos globalPos = (GlobalPos)optional.get();
+			if (shouldDepositItemsAtLikedNoteblock(livingEntity, brain, globalPos)) {
+				return Optional.of(new BlockPosTracker(globalPos.pos().above()));
 			}
 
 			brain.eraseMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
@@ -118,9 +118,10 @@ public class AllayAi {
 		return getLikedPlayerPositionTracker(livingEntity);
 	}
 
-	private static boolean shouldDepositItemsAtLikedNoteblock(LivingEntity livingEntity, Brain<?> brain, BlockPos blockPos) {
+	private static boolean shouldDepositItemsAtLikedNoteblock(LivingEntity livingEntity, Brain<?> brain, GlobalPos globalPos) {
 		Optional<Integer> optional = brain.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS);
-		return livingEntity.getLevel().getBlockState(blockPos).is(Blocks.NOTE_BLOCK) && optional.isPresent();
+		Level level = livingEntity.getLevel();
+		return level.dimension() == globalPos.dimension() && level.getBlockState(globalPos.pos()).is(Blocks.NOTE_BLOCK) && optional.isPresent();
 	}
 
 	private static Optional<PositionTracker> getLikedPlayerPositionTracker(LivingEntity livingEntity) {

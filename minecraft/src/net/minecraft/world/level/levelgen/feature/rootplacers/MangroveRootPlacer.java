@@ -12,7 +12,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
@@ -43,28 +42,34 @@ public class MangroveRootPlacer extends RootPlacer {
 		TreeConfiguration treeConfiguration
 	) {
 		List<BlockPos> list = Lists.<BlockPos>newArrayList();
-		if (!this.canPlaceRoot(levelSimulatedReader, blockPos2)) {
-			return false;
-		} else {
-			list.add(blockPos2.below());
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
-			for (Direction direction : Direction.Plane.HORIZONTAL) {
-				BlockPos blockPos3 = blockPos2.relative(direction);
-				List<BlockPos> list2 = Lists.<BlockPos>newArrayList();
-				if (!this.simulateRoots(levelSimulatedReader, randomSource, blockPos3, direction, blockPos2, list2, 0)) {
-					return false;
-				}
-
-				list.addAll(list2);
-				list.add(blockPos2.relative(direction));
+		while (mutableBlockPos.getY() < blockPos2.getY()) {
+			if (!this.canPlaceRoot(levelSimulatedReader, mutableBlockPos)) {
+				return false;
 			}
 
-			for (BlockPos blockPos4 : list) {
-				this.placeRoot(levelSimulatedReader, biConsumer, randomSource, blockPos4, treeConfiguration);
-			}
-
-			return true;
+			mutableBlockPos.move(Direction.UP);
 		}
+
+		list.add(blockPos2.below());
+
+		for (Direction direction : Direction.Plane.HORIZONTAL) {
+			BlockPos blockPos3 = blockPos2.relative(direction);
+			List<BlockPos> list2 = Lists.<BlockPos>newArrayList();
+			if (!this.simulateRoots(levelSimulatedReader, randomSource, blockPos3, direction, blockPos2, list2, 0)) {
+				return false;
+			}
+
+			list.addAll(list2);
+			list.add(blockPos2.relative(direction));
+		}
+
+		for (BlockPos blockPos4 : list) {
+			this.placeRoot(levelSimulatedReader, biConsumer, randomSource, blockPos4, treeConfiguration);
+		}
+
+		return true;
 	}
 
 	private boolean simulateRoots(
@@ -104,8 +109,9 @@ public class MangroveRootPlacer extends RootPlacer {
 		}
 	}
 
+	@Override
 	protected boolean canPlaceRoot(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-		return TreeFeature.validTreePos(levelSimulatedReader, blockPos)
+		return super.canPlaceRoot(levelSimulatedReader, blockPos)
 			|| levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(this.mangroveRootPlacement.canGrowThrough()));
 	}
 

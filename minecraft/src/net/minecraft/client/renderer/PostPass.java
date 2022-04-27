@@ -81,8 +81,7 @@ public class PostPass implements AutoCloseable {
 		bufferBuilder.vertex((double)g, 0.0, 500.0).endVertex();
 		bufferBuilder.vertex((double)g, (double)h, 500.0).endVertex();
 		bufferBuilder.vertex(0.0, (double)h, 500.0).endVertex();
-		bufferBuilder.end();
-		BufferUploader.draw(bufferBuilder);
+		BufferUploader.draw(bufferBuilder.end());
 		RenderSystem.depthFunc(515);
 		this.effect.clear();
 		this.outTarget.unbindWrite();

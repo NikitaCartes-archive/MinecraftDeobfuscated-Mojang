@@ -40,7 +40,7 @@ public class ModelBlockRenderer {
 		this.blockColors = blockColors;
 	}
 
-	public boolean tesselateBlock(
+	public void tesselateBlock(
 		BlockAndTintGetter blockAndTintGetter,
 		BakedModel bakedModel,
 		BlockState blockState,
@@ -57,9 +57,11 @@ public class ModelBlockRenderer {
 		poseStack.translate(vec3.x, vec3.y, vec3.z);
 
 		try {
-			return bl2
-				? this.tesselateWithAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i)
-				: this.tesselateWithoutAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i);
+			if (bl2) {
+				this.tesselateWithAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i);
+			} else {
+				this.tesselateWithoutAO(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, l, i);
+			}
 		} catch (Throwable var17) {
 			CrashReport crashReport = CrashReport.forThrowable(var17, "Tesselating block model");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block model being tesselated");
@@ -69,7 +71,7 @@ public class ModelBlockRenderer {
 		}
 	}
 
-	public boolean tesselateWithAO(
+	public void tesselateWithAO(
 		BlockAndTintGetter blockAndTintGetter,
 		BakedModel bakedModel,
 		BlockState blockState,
@@ -81,7 +83,6 @@ public class ModelBlockRenderer {
 		long l,
 		int i
 	) {
-		boolean bl2 = false;
 		float[] fs = new float[DIRECTIONS.length * 2];
 		BitSet bitSet = new BitSet(3);
 		ModelBlockRenderer.AmbientOcclusionFace ambientOcclusionFace = new ModelBlockRenderer.AmbientOcclusionFace();
@@ -94,7 +95,6 @@ public class ModelBlockRenderer {
 				mutableBlockPos.setWithOffset(blockPos, direction);
 				if (!bl || Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) {
 					this.renderModelFaceAO(blockAndTintGetter, blockState, blockPos, poseStack, vertexConsumer, list, fs, bitSet, ambientOcclusionFace, i);
-					bl2 = true;
 				}
 			}
 		}
@@ -103,13 +103,10 @@ public class ModelBlockRenderer {
 		List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, randomSource);
 		if (!list2.isEmpty()) {
 			this.renderModelFaceAO(blockAndTintGetter, blockState, blockPos, poseStack, vertexConsumer, list2, fs, bitSet, ambientOcclusionFace, i);
-			bl2 = true;
 		}
-
-		return bl2;
 	}
 
-	public boolean tesselateWithoutAO(
+	public void tesselateWithoutAO(
 		BlockAndTintGetter blockAndTintGetter,
 		BakedModel bakedModel,
 		BlockState blockState,
@@ -121,7 +118,6 @@ public class ModelBlockRenderer {
 		long l,
 		int i
 	) {
-		boolean bl2 = false;
 		BitSet bitSet = new BitSet(3);
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
@@ -133,7 +129,6 @@ public class ModelBlockRenderer {
 				if (!bl || Block.shouldRenderFace(blockState, blockAndTintGetter, blockPos, direction, mutableBlockPos)) {
 					int j = LevelRenderer.getLightColor(blockAndTintGetter, blockState, mutableBlockPos);
 					this.renderModelFaceFlat(blockAndTintGetter, blockState, blockPos, j, i, false, poseStack, vertexConsumer, list, bitSet);
-					bl2 = true;
 				}
 			}
 		}
@@ -142,10 +137,7 @@ public class ModelBlockRenderer {
 		List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, randomSource);
 		if (!list2.isEmpty()) {
 			this.renderModelFaceFlat(blockAndTintGetter, blockState, blockPos, -1, i, true, poseStack, vertexConsumer, list2, bitSet);
-			bl2 = true;
 		}
-
-		return bl2;
 	}
 
 	private void renderModelFaceAO(
@@ -665,7 +657,7 @@ public class ModelBlockRenderer {
 	}
 
 	@Environment(EnvType.CLIENT)
-	class AmbientOcclusionFace {
+	static class AmbientOcclusionFace {
 		final float[] brightness = new float[4];
 		final int[] lightmap = new int[4];
 

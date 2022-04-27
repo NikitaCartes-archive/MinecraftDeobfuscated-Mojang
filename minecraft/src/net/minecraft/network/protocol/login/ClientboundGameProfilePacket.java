@@ -1,8 +1,6 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.authlib.GameProfile;
-import java.util.UUID;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -14,24 +12,12 @@ public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketLis
 	}
 
 	public ClientboundGameProfilePacket(FriendlyByteBuf friendlyByteBuf) {
-		int[] is = new int[4];
-
-		for (int i = 0; i < is.length; i++) {
-			is[i] = friendlyByteBuf.readInt();
-		}
-
-		UUID uUID = UUIDUtil.uuidFromIntArray(is);
-		String string = friendlyByteBuf.readUtf(16);
-		this.gameProfile = new GameProfile(uUID, string);
+		this.gameProfile = friendlyByteBuf.readGameProfile();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		for (int i : UUIDUtil.uuidToIntArray(this.gameProfile.getId())) {
-			friendlyByteBuf.writeInt(i);
-		}
-
-		friendlyByteBuf.writeUtf(this.gameProfile.getName());
+		friendlyByteBuf.writeGameProfile(this.gameProfile);
 	}
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {

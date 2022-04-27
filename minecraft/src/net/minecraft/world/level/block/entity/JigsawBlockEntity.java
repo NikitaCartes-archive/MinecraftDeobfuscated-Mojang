@@ -1,29 +1,31 @@
 package net.minecraft.world.level.block.entity;
 
-import com.google.common.collect.Lists;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
+import net.minecraft.core.FrontAndTop;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.JigsawBlock;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
-import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
-import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class JigsawBlockEntity extends BlockEntity {
@@ -121,29 +123,33 @@ public class JigsawBlockEntity extends BlockEntity {
 		StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
 		StructureManager structureManager = serverLevel.structureManager();
 		RandomSource randomSource = serverLevel.getRandom();
-		BlockPos blockPos = this.getBlockPos();
-		List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
-		StructureTemplate structureTemplate = new StructureTemplate();
-		structureTemplate.fillFromWorld(serverLevel, blockPos, new Vec3i(1, 1, 1), false, null);
-		StructurePoolElement structurePoolElement = new SinglePoolElement(structureTemplate);
-		PoolElementStructurePiece poolElementStructurePiece = new PoolElementStructurePiece(
-			structureTemplateManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos)
-		);
-		JigsawPlacement.addPieces(
+		Registry<StructureTemplatePool> registry = serverLevel.registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+		ResourceKey<StructureTemplatePool> resourceKey = ResourceKey.create(Registry.TEMPLATE_POOL_REGISTRY, this.pool);
+		Holder<StructureTemplatePool> holder = registry.getHolderOrThrow(resourceKey);
+		BlockPos blockPos = this.getBlockPos().relative(((FrontAndTop)this.getBlockState().getValue(JigsawBlock.ORIENTATION)).front());
+		Structure.GenerationContext generationContext = new Structure.GenerationContext(
 			serverLevel.registryAccess(),
-			poolElementStructurePiece,
-			i,
-			PoolElementStructurePiece::new,
 			chunkGenerator,
+			chunkGenerator.getBiomeSource(),
+			serverLevel.getChunkSource().randomState(),
 			structureTemplateManager,
-			list,
-			randomSource,
+			serverLevel.getSeed(),
+			new ChunkPos(blockPos),
 			serverLevel,
-			serverLevel.getChunkSource().randomState()
+			holderx -> true
 		);
+		Optional<Structure.GenerationStub> optional = JigsawPlacement.addPieces(
+			generationContext, holder, Optional.of(this.target), i, blockPos, false, Optional.empty(), 128
+		);
+		if (optional.isPresent()) {
+			StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+			((Structure.GenerationStub)optional.get()).generator().accept(structurePiecesBuilder);
 
-		for (PoolElementStructurePiece poolElementStructurePiece2 : list) {
-			poolElementStructurePiece2.place(serverLevel, structureManager, chunkGenerator, randomSource, BoundingBox.infinite(), blockPos, bl);
+			for (StructurePiece structurePiece : structurePiecesBuilder.build().pieces()) {
+				if (structurePiece instanceof PoolElementStructurePiece poolElementStructurePiece) {
+					poolElementStructurePiece.place(serverLevel, structureManager, chunkGenerator, randomSource, BoundingBox.infinite(), blockPos, bl);
+				}
+			}
 		}
 	}
 

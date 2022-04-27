@@ -1671,6 +1671,7 @@ public class Items {
 	public static final Item PIGLIN_BANNER_PATTERN = registerItem(
 		"piglin_banner_pattern", new BannerPatternItem(BannerPattern.PIGLIN, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
+	public static final Item GOAT_HORN = registerItem("goat_horn", new GoatHornItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).stacksTo(1)));
 	public static final Item COMPOSTER = registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BARREL = registerBlock(Blocks.BARREL, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SMOKER = registerBlock(Blocks.SMOKER, CreativeModeTab.TAB_DECORATIONS);

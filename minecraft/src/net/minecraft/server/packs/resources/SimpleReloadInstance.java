@@ -16,7 +16,7 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 	private static final int EXTRA_RELOAD_PROGRESS_WEIGHT = 2;
 	private static final int LISTENER_PROGRESS_WEIGHT = 1;
 	protected final CompletableFuture<Unit> allPreparations = new CompletableFuture();
-	protected final CompletableFuture<List<S>> allDone;
+	protected CompletableFuture<List<S>> allDone;
 	final Set<PreparableReloadListener> preparingListeners;
 	private final int listenerCount;
 	private int startedReloads;

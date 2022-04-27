@@ -255,6 +255,7 @@ public class Explosion {
 
 		if (bl2) {
 			ObjectArrayList<Pair<ItemStack, BlockPos>> objectArrayList = new ObjectArrayList<>();
+			boolean bl3 = this.getSourceMob() instanceof Player;
 			Util.shuffle(this.toBlow, this.level.random);
 
 			for (BlockPos blockPos : this.toBlow) {
@@ -263,19 +264,24 @@ public class Explosion {
 				if (!blockState.isAir()) {
 					BlockPos blockPos2 = blockPos.immutable();
 					this.level.getProfiler().push("explosion_blocks");
-					if (block.dropFromExplosion(this) && this.level instanceof ServerLevel) {
-						BlockEntity blockEntity = blockState.hasBlockEntity() ? this.level.getBlockEntity(blockPos) : null;
-						LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
-							.withRandom(this.level.random)
-							.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
-							.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
-							.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity)
-							.withOptionalParameter(LootContextParams.THIS_ENTITY, this.source);
-						if (this.blockInteraction == Explosion.BlockInteraction.DESTROY) {
-							builder.withParameter(LootContextParams.EXPLOSION_RADIUS, this.radius);
-						}
+					if (block.dropFromExplosion(this)) {
+						Level blockEntity = this.level;
+						if (blockEntity instanceof ServerLevel) {
+							ServerLevel serverLevel = (ServerLevel)blockEntity;
+							BlockEntity blockEntityx = blockState.hasBlockEntity() ? this.level.getBlockEntity(blockPos) : null;
+							LootContext.Builder builder = new LootContext.Builder(serverLevel)
+								.withRandom(this.level.random)
+								.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
+								.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+								.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntityx)
+								.withOptionalParameter(LootContextParams.THIS_ENTITY, this.source);
+							if (this.blockInteraction == Explosion.BlockInteraction.DESTROY) {
+								builder.withParameter(LootContextParams.EXPLOSION_RADIUS, this.radius);
+							}
 
-						blockState.getDrops(builder).forEach(itemStack -> addBlockDrops(objectArrayList, itemStack, blockPos2));
+							blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, bl3);
+							blockState.getDrops(builder).forEach(itemStack -> addBlockDrops(objectArrayList, itemStack, blockPos2));
+						}
 					}
 
 					this.level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);

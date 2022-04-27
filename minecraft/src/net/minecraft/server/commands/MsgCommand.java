@@ -38,7 +38,7 @@ public class MsgCommand {
 		UUID uUID = commandSourceStack.getEntity() == null ? Util.NIL_UUID : commandSourceStack.getEntity().getUUID();
 		Consumer<Component> consumer;
 		if (commandSourceStack.getEntity() instanceof ServerPlayer serverPlayer) {
-			consumer = component2 -> serverPlayer.sendMessage(
+			consumer = component2 -> serverPlayer.sendUnsignedMessageFrom(
 					Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
 					serverPlayer.getUUID()
 				);
@@ -50,7 +50,7 @@ public class MsgCommand {
 
 		for (ServerPlayer serverPlayer2 : collection) {
 			consumer.accept(serverPlayer2.getDisplayName());
-			serverPlayer2.sendMessage(
+			serverPlayer2.sendUnsignedMessageFrom(
 				Component.translatable("commands.message.display.incoming", commandSourceStack.getDisplayName(), component)
 					.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
 				uUID

@@ -537,8 +537,7 @@ public class DebugScreenOverlay extends GuiComponent {
 			n++;
 		}
 
-		bufferBuilder.end();
-		BufferUploader.drawWithShader(bufferBuilder);
+		BufferUploader.drawWithShader(bufferBuilder.end());
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 		if (bl) {

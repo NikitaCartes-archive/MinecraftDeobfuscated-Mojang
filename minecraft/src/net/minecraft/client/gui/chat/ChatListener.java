@@ -1,12 +1,13 @@
 package net.minecraft.client.gui.chat;
 
-import java.util.UUID;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public interface ChatListener {
-	void handle(ChatType chatType, Component component, UUID uUID);
+	void handle(ChatType chatType, Component component, @Nullable ChatSender chatSender);
 }

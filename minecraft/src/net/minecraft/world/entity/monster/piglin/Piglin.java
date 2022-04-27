@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
-import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -147,7 +146,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 
 	@VisibleForDebug
 	@Override
-	public Container getInventory() {
+	public SimpleContainer getInventory() {
 		return this.inventory;
 	}
 

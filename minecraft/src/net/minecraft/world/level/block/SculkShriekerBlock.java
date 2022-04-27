@@ -55,8 +55,18 @@ public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterlo
 
 	@Override
 	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
-		if (level instanceof ServerLevel serverLevel && (entity instanceof Player || entity.getControllingPassenger() instanceof Player)) {
-			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.shriek(serverLevel));
+		Entity entity2;
+		if (entity instanceof Player) {
+			entity2 = entity;
+		} else if (entity.getControllingPassenger() instanceof Player) {
+			entity2 = entity.getControllingPassenger();
+		} else {
+			entity2 = null;
+		}
+
+		if (level instanceof ServerLevel serverLevel && entity2 != null) {
+			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER)
+				.ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.shriek(serverLevel, entity2));
 		}
 
 		super.stepOn(level, blockPos, blockState, entity);
@@ -131,9 +141,11 @@ public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
-		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
-		this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+		if (bl) {
+			this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
+		}
 	}
 
 	@Nullable

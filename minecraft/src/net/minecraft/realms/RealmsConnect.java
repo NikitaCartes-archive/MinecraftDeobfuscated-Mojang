@@ -3,6 +3,7 @@ package net.minecraft.realms;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.RealmsServer;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +18,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -65,7 +67,9 @@ public class RealmsConnect {
 							return;
 						}
 
-						RealmsConnect.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
+						String string = minecraft.getUser().getName();
+						ProfilePublicKey profilePublicKey = minecraft.getProfileKeyPairManager().profilePublicKey();
+						RealmsConnect.this.connection.send(new ServerboundHelloPacket(string, Optional.ofNullable(profilePublicKey)));
 						minecraft.setCurrentServer(realmsServer.toServerData(string));
 					} catch (Exception var5) {
 						minecraft.getClientPackSource().clearServerPack();
@@ -74,14 +78,14 @@ public class RealmsConnect {
 						}
 
 						RealmsConnect.LOGGER.error("Couldn't connect to world", (Throwable)var5);
-						String string = var5.toString();
+						String string2 = var5.toString();
 						if (inetSocketAddress != null) {
-							String string2 = inetSocketAddress + ":" + i;
-							string = string.replaceAll(string2, "");
+							String string3 = inetSocketAddress + ":" + i;
+							string2 = string2.replaceAll(string3, "");
 						}
 
 						DisconnectedRealmsScreen disconnectedRealmsScreen = new DisconnectedRealmsScreen(
-							RealmsConnect.this.onlineScreen, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string)
+							RealmsConnect.this.onlineScreen, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string2)
 						);
 						minecraft.execute(() -> minecraft.setScreen(disconnectedRealmsScreen));
 					}

@@ -287,27 +287,27 @@ public class Block extends BlockBehaviour implements ItemLike {
 		ServerLevel serverLevel = builder.getLevel();
 		BlockPos blockPos = new BlockPos(builder.getParameter(LootContextParams.ORIGIN));
 		blockState.getDrops(builder).forEach(itemStack -> popResource(serverLevel, blockPos, itemStack));
-		blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY);
+		blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, true);
 	}
 
 	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos) {
 		if (level instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)level, blockPos, null).forEach(itemStack -> popResource(level, blockPos, itemStack));
-			blockState.spawnAfterBreak((ServerLevel)level, blockPos, ItemStack.EMPTY);
+			blockState.spawnAfterBreak((ServerLevel)level, blockPos, ItemStack.EMPTY, true);
 		}
 	}
 
 	public static void dropResources(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, @Nullable BlockEntity blockEntity) {
 		if (levelAccessor instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)levelAccessor, blockPos, blockEntity).forEach(itemStack -> popResource((ServerLevel)levelAccessor, blockPos, itemStack));
-			blockState.spawnAfterBreak((ServerLevel)levelAccessor, blockPos, ItemStack.EMPTY);
+			blockState.spawnAfterBreak((ServerLevel)levelAccessor, blockPos, ItemStack.EMPTY, true);
 		}
 	}
 
 	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack itemStack) {
 		if (level instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)level, blockPos, blockEntity, entity, itemStack).forEach(itemStackx -> popResource(level, blockPos, itemStackx));
-			blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack);
+			blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack, true);
 		}
 	}
 

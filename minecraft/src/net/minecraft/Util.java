@@ -38,12 +38,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -51,6 +54,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -724,6 +728,34 @@ public class Util {
 			int k = randomSource.nextInt(j);
 			objectArrayList.set(j - 1, objectArrayList.set(k, objectArrayList.get(j - 1)));
 		}
+	}
+
+	public static <T> CompletableFuture<T> blockUntilDone(Function<Executor, CompletableFuture<T>> function) {
+		return blockUntilDone(function, CompletableFuture::isDone);
+	}
+
+	public static <T> T blockUntilDone(Function<Executor, T> function, Predicate<T> predicate) {
+		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue();
+		T object = (T)function.apply(blockingQueue::add);
+
+		while (!predicate.test(object)) {
+			try {
+				Runnable runnable = (Runnable)blockingQueue.poll(100L, TimeUnit.MILLISECONDS);
+				if (runnable != null) {
+					runnable.run();
+				}
+			} catch (InterruptedException var5) {
+				LOGGER.warn("Interrupted wait");
+				break;
+			}
+		}
+
+		int i = blockingQueue.size();
+		if (i > 0) {
+			LOGGER.warn("Tasks left in queue: {}", i);
+		}
+
+		return object;
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {

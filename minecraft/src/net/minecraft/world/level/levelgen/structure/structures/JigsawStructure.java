@@ -8,11 +8,11 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.Pools;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
-import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
@@ -24,6 +24,7 @@ public final class JigsawStructure extends Structure {
 			instance -> instance.group(
 						settingsCodec(instance),
 						StructureTemplatePool.CODEC.fieldOf("start_pool").forGetter(jigsawStructure -> jigsawStructure.startPool),
+						ResourceLocation.CODEC.optionalFieldOf("start_jigsaw_name").forGetter(jigsawStructure -> jigsawStructure.startJigsawName),
 						Codec.intRange(0, 7).fieldOf("size").forGetter(jigsawStructure -> jigsawStructure.maxDepth),
 						HeightProvider.CODEC.fieldOf("start_height").forGetter(jigsawStructure -> jigsawStructure.startHeight),
 						Codec.BOOL.fieldOf("use_expansion_hack").forGetter(jigsawStructure -> jigsawStructure.useExpansionHack),
@@ -35,6 +36,7 @@ public final class JigsawStructure extends Structure {
 		.<JigsawStructure>flatXmap(verifyRange(), verifyRange())
 		.codec();
 	private final Holder<StructureTemplatePool> startPool;
+	private final Optional<ResourceLocation> startJigsawName;
 	private final int maxDepth;
 	private final HeightProvider startHeight;
 	private final boolean useExpansionHack;
@@ -56,29 +58,31 @@ public final class JigsawStructure extends Structure {
 	public JigsawStructure(
 		Structure.StructureSettings structureSettings,
 		Holder<StructureTemplatePool> holder,
+		Optional<ResourceLocation> optional,
 		int i,
 		HeightProvider heightProvider,
 		boolean bl,
-		Optional<Heightmap.Types> optional,
+		Optional<Heightmap.Types> optional2,
 		int j
 	) {
 		super(structureSettings);
 		this.startPool = holder;
+		this.startJigsawName = optional;
 		this.maxDepth = i;
 		this.startHeight = heightProvider;
 		this.useExpansionHack = bl;
-		this.projectStartToHeightmap = optional;
+		this.projectStartToHeightmap = optional2;
 		this.maxDistanceFromCenter = j;
 	}
 
 	public JigsawStructure(
 		Structure.StructureSettings structureSettings, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl, Heightmap.Types types
 	) {
-		this(structureSettings, holder, i, heightProvider, bl, Optional.of(types), 80);
+		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.of(types), 80);
 	}
 
 	public JigsawStructure(Structure.StructureSettings structureSettings, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl) {
-		this(structureSettings, holder, i, heightProvider, bl, Optional.empty(), 80);
+		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.empty(), 80);
 	}
 
 	@Override
@@ -91,8 +95,8 @@ public final class JigsawStructure extends Structure {
 		return JigsawPlacement.addPieces(
 			generationContext,
 			this.startPool,
+			this.startJigsawName,
 			this.maxDepth,
-			PoolElementStructurePiece::new,
 			blockPos,
 			this.useExpansionHack,
 			this.projectStartToHeightmap,

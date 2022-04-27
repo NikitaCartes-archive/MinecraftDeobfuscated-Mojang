@@ -595,9 +595,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 
 		this.darkBuffer = new VertexBuffer();
-		buildSkyDisc(bufferBuilder, -16.0F);
+		BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, -16.0F);
 		this.darkBuffer.bind();
-		this.darkBuffer.upload(bufferBuilder);
+		this.darkBuffer.upload(renderedBuffer);
 		VertexBuffer.unbind();
 	}
 
@@ -609,13 +609,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 
 		this.skyBuffer = new VertexBuffer();
-		buildSkyDisc(bufferBuilder, 16.0F);
+		BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, 16.0F);
 		this.skyBuffer.bind();
-		this.skyBuffer.upload(bufferBuilder);
+		this.skyBuffer.upload(renderedBuffer);
 		VertexBuffer.unbind();
 	}
 
-	private static void buildSkyDisc(BufferBuilder bufferBuilder, float f) {
+	private static BufferBuilder.RenderedBuffer buildSkyDisc(BufferBuilder bufferBuilder, float f) {
 		float g = Math.signum(f) * 512.0F;
 		float h = 512.0F;
 		RenderSystem.setShader(GameRenderer::getPositionShader);
@@ -629,7 +629,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				.endVertex();
 		}
 
-		bufferBuilder.end();
+		return bufferBuilder.end();
 	}
 
 	private void createStars() {
@@ -641,14 +641,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 
 		this.starBuffer = new VertexBuffer();
-		this.drawStars(bufferBuilder);
-		bufferBuilder.end();
+		BufferBuilder.RenderedBuffer renderedBuffer = this.drawStars(bufferBuilder);
 		this.starBuffer.bind();
-		this.starBuffer.upload(bufferBuilder);
+		this.starBuffer.upload(renderedBuffer);
 		VertexBuffer.unbind();
 	}
 
-	private void drawStars(BufferBuilder bufferBuilder) {
+	private BufferBuilder.RenderedBuffer drawStars(BufferBuilder bufferBuilder) {
 		RandomSource randomSource = RandomSource.create(10842L);
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
@@ -691,6 +690,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 			}
 		}
+
+		return bufferBuilder.end();
 	}
 
 	public void setLevel(@Nullable ClientLevel clientLevel) {
@@ -1869,8 +1870,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 							bufferBuilder.vertex(matrix4f2, q * 120.0F, r * 120.0F, -r * 40.0F * fs[3]).color(fs[0], fs[1], fs[2], 0.0F).endVertex();
 						}
 
-						bufferBuilder.end();
-						BufferUploader.drawWithShader(bufferBuilder);
+						BufferUploader.drawWithShader(bufferBuilder.end());
 						poseStack.popPose();
 					}
 
@@ -1892,8 +1892,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					bufferBuilder.vertex(matrix4f3, l, 100.0F, -l).uv(1.0F, 0.0F).endVertex();
 					bufferBuilder.vertex(matrix4f3, l, 100.0F, l).uv(1.0F, 1.0F).endVertex();
 					bufferBuilder.vertex(matrix4f3, -l, 100.0F, l).uv(0.0F, 1.0F).endVertex();
-					bufferBuilder.end();
-					BufferUploader.drawWithShader(bufferBuilder);
+					BufferUploader.drawWithShader(bufferBuilder.end());
 					l = 20.0F;
 					RenderSystem.setShaderTexture(0, MOON_LOCATION);
 					int s = this.level.getMoonPhase();
@@ -1908,8 +1907,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					bufferBuilder.vertex(matrix4f3, l, -100.0F, l).uv(u, r).endVertex();
 					bufferBuilder.vertex(matrix4f3, l, -100.0F, -l).uv(u, p).endVertex();
 					bufferBuilder.vertex(matrix4f3, -l, -100.0F, -l).uv(q, p).endVertex();
-					bufferBuilder.end();
-					BufferUploader.drawWithShader(bufferBuilder);
+					BufferUploader.drawWithShader(bufferBuilder.end());
 					RenderSystem.disableTexture();
 					float v = this.level.getStarBrightness(f) * j;
 					if (v > 0.0F) {
@@ -1999,10 +1997,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 
 				this.cloudBuffer = new VertexBuffer();
-				this.buildClouds(bufferBuilder, m, n, o, vec3);
-				bufferBuilder.end();
+				BufferBuilder.RenderedBuffer renderedBuffer = this.buildClouds(bufferBuilder, m, n, o, vec3);
 				this.cloudBuffer.bind();
-				this.cloudBuffer.upload(bufferBuilder);
+				this.cloudBuffer.upload(renderedBuffer);
 				VertexBuffer.unbind();
 			}
 
@@ -2037,7 +2034,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 	}
 
-	private void buildClouds(BufferBuilder bufferBuilder, double d, double e, double f, Vec3 vec3) {
+	private BufferBuilder.RenderedBuffer buildClouds(BufferBuilder bufferBuilder, double d, double e, double f, Vec3 vec3) {
 		float g = 4.0F;
 		float h = 0.00390625F;
 		int i = 8;
@@ -2241,6 +2238,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 			}
 		}
+
+		return bufferBuilder.end();
 	}
 
 	private void compileChunks(Camera camera) {
@@ -2382,8 +2381,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 			}
 
-			bufferBuilder.end();
-			BufferUploader.drawWithShader(bufferBuilder);
+			BufferUploader.drawWithShader(bufferBuilder.end());
 			RenderSystem.enableCull();
 			RenderSystem.polygonOffset(0.0F, 0.0F);
 			RenderSystem.disablePolygonOffset();

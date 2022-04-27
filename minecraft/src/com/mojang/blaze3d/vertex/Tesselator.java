@@ -25,8 +25,7 @@ public class Tesselator {
 	}
 
 	public void end() {
-		this.builder.end();
-		BufferUploader.drawWithShader(this.builder);
+		BufferUploader.drawWithShader(this.builder.end());
 	}
 
 	public BufferBuilder getBuilder() {

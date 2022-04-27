@@ -280,9 +280,7 @@ public abstract class AbstractContainerMenu {
 		return this.slots.get(i);
 	}
 
-	public ItemStack quickMoveStack(Player player, int i) {
-		return this.slots.get(i).getItem();
-	}
+	public abstract ItemStack quickMoveStack(Player player, int i);
 
 	public void clicked(int i, int j, ClickType clickType, Player player) {
 		try {

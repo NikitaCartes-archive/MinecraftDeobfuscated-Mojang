@@ -21,7 +21,7 @@ public class SonicBoom extends Behavior<Warden> {
 	private static final int DISTANCE_Y = 20;
 	private static final double KNOCKBACK_VERTICAL = 0.5;
 	private static final double KNOCKBACK_HORIZONTAL = 2.5;
-	public static final int COOLDOWN = 100;
+	public static final int COOLDOWN = 40;
 	private static final int TICKS_BEFORE_PLAYING_SOUND = 34;
 	private static final int DURATION = Mth.ceil(60.0F);
 
@@ -71,7 +71,7 @@ public class SonicBoom extends Behavior<Warden> {
 				}
 
 				warden.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
-				livingEntity.hurt(DamageSource.mobAttack(warden), (float)warden.getAttributeValue(Attributes.ATTACK_DAMAGE));
+				livingEntity.hurt(DamageSource.SONIC_BOOM, 10.0F);
 				double d = 0.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 				double e = 2.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 				livingEntity.push(vec33.x() * e, vec33.y() * d, vec33.z() * e);
@@ -80,7 +80,7 @@ public class SonicBoom extends Behavior<Warden> {
 	}
 
 	protected void stop(ServerLevel serverLevel, Warden warden, long l) {
-		setCooldown(warden, 100);
+		setCooldown(warden, 40);
 	}
 
 	public static void setCooldown(LivingEntity livingEntity, int i) {

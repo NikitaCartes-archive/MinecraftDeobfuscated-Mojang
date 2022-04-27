@@ -20,6 +20,7 @@ public final class ItemTags {
 	public static final TagKey<Item> DOORS = bind("doors");
 	public static final TagKey<Item> SAPLINGS = bind("saplings");
 	public static final TagKey<Item> LOGS_THAT_BURN = bind("logs_that_burn");
+	public static final TagKey<Item> OVERWORLD_NATURAL_LOGS = bind("overworld_natural_logs");
 	public static final TagKey<Item> LOGS = bind("logs");
 	public static final TagKey<Item> DARK_OAK_LOGS = bind("dark_oak_logs");
 	public static final TagKey<Item> OAK_LOGS = bind("oak_logs");

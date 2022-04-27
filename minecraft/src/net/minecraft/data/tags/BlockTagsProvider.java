@@ -155,6 +155,14 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.addTag(BlockTags.JUNGLE_LOGS)
 			.addTag(BlockTags.SPRUCE_LOGS)
 			.addTag(BlockTags.MANGROVE_LOGS);
+		this.tag(BlockTags.OVERWORLD_NATURAL_LOGS)
+			.add(Blocks.ACACIA_LOG)
+			.add(Blocks.BIRCH_LOG)
+			.add(Blocks.OAK_LOG)
+			.add(Blocks.JUNGLE_LOG)
+			.add(Blocks.SPRUCE_LOG)
+			.add(Blocks.DARK_OAK_LOG)
+			.add(Blocks.MANGROVE_LOG);
 		this.tag(BlockTags.LOGS).addTag(BlockTags.LOGS_THAT_BURN).addTag(BlockTags.CRIMSON_STEMS).addTag(BlockTags.WARPED_STEMS);
 		this.tag(BlockTags.ANVIL).add(Blocks.ANVIL, Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL);
 		this.tag(BlockTags.SMALL_FLOWERS)
@@ -1393,7 +1401,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.DEEPSLATE_TILES)
 			.add(Blocks.COBBLED_DEEPSLATE)
 			.add(Blocks.CRACKED_DEEPSLATE_BRICKS)
-			.add(Blocks.CRACKED_DEEPSLATE_TILES);
+			.add(Blocks.CRACKED_DEEPSLATE_TILES)
+			.add(Blocks.POLISHED_DEEPSLATE);
 		this.tag(BlockTags.CONVERTABLE_TO_MUD).add(Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT);
 		this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE)
 			.add(Blocks.DEEPSLATE)
@@ -1423,5 +1432,12 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MOSS_CARPET, Blocks.VINE, Blocks.MANGROVE_PROPAGULE, Blocks.SNOW);
 		this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT);
 		this.tag(BlockTags.COMPLETES_FIND_TREE_TUTORIAL).addTag(BlockTags.LOGS).addTag(BlockTags.LEAVES).addTag(BlockTags.WART_BLOCKS);
+		this.tag(BlockTags.SNAPS_GOAT_HORN)
+			.addTag(BlockTags.OVERWORLD_NATURAL_LOGS)
+			.add(Blocks.STONE)
+			.add(Blocks.PACKED_ICE)
+			.add(Blocks.IRON_ORE)
+			.add(Blocks.COAL_ORE)
+			.add(Blocks.EMERALD_ORE);
 	}
 }

@@ -15,8 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
-import java.util.UUID;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -128,7 +126,7 @@ public class DebugCommand {
 		return i;
 	}
 
-	static class Tracer implements CommandSource, ServerFunctionManager.TraceCallbacks {
+	static class Tracer implements ServerFunctionManager.TraceCallbacks, CommandSource {
 		public static final int INDENT_OFFSET = 1;
 		private final PrintWriter output;
 		private int lastIndent;
@@ -199,15 +197,10 @@ public class DebugCommand {
 		}
 
 		@Override
-		public void sendMessage(Component component, UUID uUID) {
+		public void sendSystemMessage(Component component) {
 			this.newLine();
 			this.printIndent(this.lastIndent + 1);
 			this.output.print("[M] ");
-			if (uUID != Util.NIL_UUID) {
-				this.output.print(uUID);
-				this.output.print(": ");
-			}
-
 			this.output.println(component.getString());
 		}
 

@@ -201,8 +201,7 @@ public class SignEditScreen extends Screen {
 					bufferBuilder.vertex(matrix4f, (float)y, (float)(o + 9), 0.0F).color(0, 0, 255, 255).endVertex();
 					bufferBuilder.vertex(matrix4f, (float)y, (float)o, 0.0F).color(0, 0, 255, 255).endVertex();
 					bufferBuilder.vertex(matrix4f, (float)x, (float)o, 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.end();
-					BufferUploader.drawWithShader(bufferBuilder);
+					BufferUploader.drawWithShader(bufferBuilder.end());
 					RenderSystem.disableColorLogicOp();
 					RenderSystem.enableTexture();
 				}

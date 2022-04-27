@@ -233,5 +233,10 @@ public class ItemProperties {
 
 			return 1.0F;
 		});
+		register(
+			Items.GOAT_HORN,
+			new ResourceLocation("tooting"),
+			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
+		);
 	}
 }

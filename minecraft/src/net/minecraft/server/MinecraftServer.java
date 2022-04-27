@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -62,6 +61,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -644,41 +644,41 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	protected void runServer() {
 		try {
-			if (this.initServer()) {
-				this.nextTickTime = Util.getMillis();
-				this.status.setDescription(Component.literal(this.motd));
-				this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
-				this.updateStatusIcon(this.status);
+			if (!this.initServer()) {
+				throw new IllegalStateException("Failed to initialize server");
+			}
 
-				while (this.running) {
-					long l = Util.getMillis() - this.nextTickTime;
-					if (l > 2000L && this.nextTickTime - this.lastOverloadWarning >= 15000L) {
-						long m = l / 50L;
-						LOGGER.warn("Can't keep up! Is the server overloaded? Running {}ms or {} ticks behind", l, m);
-						this.nextTickTime += m * 50L;
-						this.lastOverloadWarning = this.nextTickTime;
-					}
+			this.nextTickTime = Util.getMillis();
+			this.status.setDescription(Component.literal(this.motd));
+			this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
+			this.updateStatusIcon(this.status);
 
-					if (this.debugCommandProfilerDelayStart) {
-						this.debugCommandProfilerDelayStart = false;
-						this.debugCommandProfiler = new MinecraftServer.TimeProfiler(Util.getNanos(), this.tickCount);
-					}
-
-					this.nextTickTime += 50L;
-					this.startMetricsRecordingTick();
-					this.profiler.push("tick");
-					this.tickServer(this::haveTime);
-					this.profiler.popPush("nextTickWait");
-					this.mayHaveDelayedTasks = true;
-					this.delayedTasksMaxNextTickTime = Math.max(Util.getMillis() + 50L, this.nextTickTime);
-					this.waitUntilNextTick();
-					this.profiler.pop();
-					this.endMetricsRecordingTick();
-					this.isReady = true;
-					JvmProfiler.INSTANCE.onServerTick(this.averageTickTime);
+			while (this.running) {
+				long l = Util.getMillis() - this.nextTickTime;
+				if (l > 2000L && this.nextTickTime - this.lastOverloadWarning >= 15000L) {
+					long m = l / 50L;
+					LOGGER.warn("Can't keep up! Is the server overloaded? Running {}ms or {} ticks behind", l, m);
+					this.nextTickTime += m * 50L;
+					this.lastOverloadWarning = this.nextTickTime;
 				}
-			} else {
-				this.onServerCrash(null);
+
+				if (this.debugCommandProfilerDelayStart) {
+					this.debugCommandProfilerDelayStart = false;
+					this.debugCommandProfiler = new MinecraftServer.TimeProfiler(Util.getNanos(), this.tickCount);
+				}
+
+				this.nextTickTime += 50L;
+				this.startMetricsRecordingTick();
+				this.profiler.push("tick");
+				this.tickServer(this::haveTime);
+				this.profiler.popPush("nextTickWait");
+				this.mayHaveDelayedTasks = true;
+				this.delayedTasksMaxNextTickTime = Math.max(Util.getMillis() + 50L, this.nextTickTime);
+				this.waitUntilNextTick();
+				this.profiler.pop();
+				this.endMetricsRecordingTick();
+				this.isReady = true;
+				JvmProfiler.INSTANCE.onServerTick(this.averageTickTime);
 			}
 		} catch (Throwable var44) {
 			LOGGER.error("Encountered an unexpected exception", var44);
@@ -807,9 +807,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	protected void onServerCrash(CrashReport crashReport) {
+		LOGGER.error("Game test server crashed\n{}", crashReport.getFriendlyReport());
 	}
 
 	public void onServerExit() {
+		LOGGER.info("Game test server shutting down");
 	}
 
 	public void tickServer(BooleanSupplier booleanSupplier) {
@@ -998,7 +1000,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	@Override
-	public void sendMessage(Component component, UUID uUID) {
+	public void sendSystemMessage(Component component) {
 		LOGGER.info(component.getString());
 	}
 
@@ -1257,6 +1259,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public int getCompressionThreshold() {
 		return 256;
+	}
+
+	public boolean enforceSecureProfile() {
+		return false;
 	}
 
 	public long getNextTickTime() {
@@ -1806,6 +1812,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public int getMaxChainedNeighborUpdates() {
 		return 1000000;
+	}
+
+	public void logMessageFrom(ChatSender chatSender, Component component) {
+		LOGGER.info(Component.translatable("chat.type.text", chatSender.name(), component).getString());
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

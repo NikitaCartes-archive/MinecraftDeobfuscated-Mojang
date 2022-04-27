@@ -3,10 +3,8 @@ package com.mojang.blaze3d.vertex;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -33,38 +31,20 @@ public class VertexBuffer implements AutoCloseable {
 		this.arrayObjectId = GlStateManager._glGenVertexArrays();
 	}
 
-	public CompletableFuture<Void> uploadLater(BufferBuilder bufferBuilder) {
-		if (!RenderSystem.isOnRenderThread()) {
-			return CompletableFuture.runAsync(() -> this.runDeferredUpload(bufferBuilder), runnable -> RenderSystem.recordRenderCall(runnable::run));
-		} else {
-			this.runDeferredUpload(bufferBuilder);
-			return CompletableFuture.completedFuture(null);
-		}
-	}
-
-	private void runDeferredUpload(BufferBuilder bufferBuilder) {
+	public void upload(BufferBuilder.RenderedBuffer renderedBuffer) {
 		if (!this.isInvalid()) {
-			this.bind();
-			this.upload(bufferBuilder);
-			unbind();
-		}
-	}
+			RenderSystem.assertOnRenderThread();
 
-	public void upload(BufferBuilder bufferBuilder) {
-		RenderSystem.assertOnRenderThread();
-		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
-		this.upload(pair.getFirst(), pair.getSecond());
-	}
-
-	public void upload(BufferBuilder.DrawState drawState, ByteBuffer byteBuffer) {
-		if (!this.isInvalid()) {
-			this.format = this.uploadVertexBuffer(drawState, byteBuffer);
-			this.sequentialIndices = this.uploadIndexBuffer(drawState, byteBuffer);
-			byteBuffer.limit(drawState.bufferSize());
-			byteBuffer.position(0);
-			this.indexCount = drawState.indexCount();
-			this.indexType = drawState.indexType();
-			this.mode = drawState.mode();
+			try {
+				BufferBuilder.DrawState drawState = renderedBuffer.drawState();
+				this.format = this.uploadVertexBuffer(drawState, renderedBuffer.vertexBuffer());
+				this.sequentialIndices = this.uploadIndexBuffer(drawState, renderedBuffer.indexBuffer());
+				this.indexCount = drawState.indexCount();
+				this.indexType = drawState.indexType();
+				this.mode = drawState.mode();
+			} finally {
+				renderedBuffer.release();
+			}
 		}
 	}
 
@@ -85,8 +65,6 @@ public class VertexBuffer implements AutoCloseable {
 				GlStateManager._glBindBuffer(34962, this.vertexBufferId);
 			}
 
-			byteBuffer.position(drawState.vertexBufferStart());
-			byteBuffer.limit(drawState.vertexBufferEnd());
 			RenderSystem.glBufferData(34962, byteBuffer, 35044);
 		}
 
@@ -97,8 +75,6 @@ public class VertexBuffer implements AutoCloseable {
 	private RenderSystem.AutoStorageIndexBuffer uploadIndexBuffer(BufferBuilder.DrawState drawState, ByteBuffer byteBuffer) {
 		if (!drawState.sequentialIndex()) {
 			GlStateManager._glBindBuffer(34963, this.indexBufferId);
-			byteBuffer.position(drawState.indexBufferStart());
-			byteBuffer.limit(drawState.indexBufferEnd());
 			RenderSystem.glBufferData(34963, byteBuffer, 35044);
 			return null;
 		} else {

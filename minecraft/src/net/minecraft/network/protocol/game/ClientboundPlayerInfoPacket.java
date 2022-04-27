@@ -3,8 +3,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -91,18 +89,7 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 		ADD_PLAYER {
 			@Override
 			protected ClientboundPlayerInfoPacket.PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
-				GameProfile gameProfile = new GameProfile(friendlyByteBuf.readUUID(), friendlyByteBuf.readUtf(16));
-				PropertyMap propertyMap = gameProfile.getProperties();
-				friendlyByteBuf.readWithCount(friendlyByteBufx -> {
-					String string = friendlyByteBufx.readUtf();
-					String string2 = friendlyByteBufx.readUtf();
-					if (friendlyByteBufx.readBoolean()) {
-						String string3 = friendlyByteBufx.readUtf();
-						propertyMap.put(string, new Property(string, string2, string3));
-					} else {
-						propertyMap.put(string, new Property(string, string2));
-					}
-				});
+				GameProfile gameProfile = friendlyByteBuf.readGameProfile();
 				GameType gameType = GameType.byId(friendlyByteBuf.readVarInt());
 				int i = friendlyByteBuf.readVarInt();
 				Component component = ClientboundPlayerInfoPacket.readDisplayName(friendlyByteBuf);
@@ -111,18 +98,7 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
 
 			@Override
 			protected void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
-				friendlyByteBuf.writeUUID(playerUpdate.getProfile().getId());
-				friendlyByteBuf.writeUtf(playerUpdate.getProfile().getName());
-				friendlyByteBuf.writeCollection(playerUpdate.getProfile().getProperties().values(), (friendlyByteBufx, property) -> {
-					friendlyByteBufx.writeUtf(property.getName());
-					friendlyByteBufx.writeUtf(property.getValue());
-					if (property.hasSignature()) {
-						friendlyByteBufx.writeBoolean(true);
-						friendlyByteBufx.writeUtf(property.getSignature());
-					} else {
-						friendlyByteBufx.writeBoolean(false);
-					}
-				});
+				friendlyByteBuf.writeGameProfile(playerUpdate.getProfile());
 				friendlyByteBuf.writeVarInt(playerUpdate.getGameMode().getId());
 				friendlyByteBuf.writeVarInt(playerUpdate.getLatency());
 				ClientboundPlayerInfoPacket.writeDisplayName(friendlyByteBuf, playerUpdate.getDisplayName());
