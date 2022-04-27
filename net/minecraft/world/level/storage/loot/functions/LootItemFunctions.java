@@ -28,6 +28,7 @@ import net.minecraft.world.level.storage.loot.functions.SetBannerPatternFunction
 import net.minecraft.world.level.storage.loot.functions.SetContainerContents;
 import net.minecraft.world.level.storage.loot.functions.SetContainerLootTable;
 import net.minecraft.world.level.storage.loot.functions.SetEnchantmentsFunction;
+import net.minecraft.world.level.storage.loot.functions.SetGoatHornSoundFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.functions.SetLoreFunction;
@@ -63,6 +64,7 @@ public class LootItemFunctions {
     public static final LootItemFunctionType COPY_STATE = LootItemFunctions.register("copy_state", new CopyBlockState.Serializer());
     public static final LootItemFunctionType SET_BANNER_PATTERN = LootItemFunctions.register("set_banner_pattern", new SetBannerPatternFunction.Serializer());
     public static final LootItemFunctionType SET_POTION = LootItemFunctions.register("set_potion", new SetPotionFunction.Serializer());
+    public static final LootItemFunctionType SET_GOAT_HORN_SOUND = LootItemFunctions.register("set_goat_horn_sound", new SetGoatHornSoundFunction.Serializer());
 
     private static LootItemFunctionType register(String string, Serializer<? extends LootItemFunction> serializer) {
         return Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));

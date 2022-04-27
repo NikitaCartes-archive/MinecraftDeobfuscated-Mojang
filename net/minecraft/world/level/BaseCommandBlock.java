@@ -5,7 +5,6 @@ package net.minecraft.world.level;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -138,7 +137,7 @@ implements CommandSource {
     }
 
     @Override
-    public void sendMessage(Component component, UUID uUID) {
+    public void sendSystemMessage(Component component) {
         if (this.trackOutput) {
             this.lastOutput = Component.literal("[" + TIME_FORMAT.format(new Date()) + "] ").append(component);
             this.onUpdated();

@@ -12,7 +12,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.animal.goat.Goat;
 
 @Environment(value=EnvType.CLIENT)
@@ -39,8 +38,8 @@ extends QuadrupedModel<T> {
 
     @Override
     public void setupAnim(T goat, float f, float g, float h, float i, float j) {
-        this.head.getChild((String)"left_horn").visible = !((AgeableMob)goat).isBaby();
-        this.head.getChild((String)"right_horn").visible = !((AgeableMob)goat).isBaby();
+        this.head.getChild((String)"left_horn").visible = ((Goat)goat).hasLeftHorn();
+        this.head.getChild((String)"right_horn").visible = ((Goat)goat).hasRightHorn();
         super.setupAnim(goat, f, g, h, i, j);
         float k = ((Goat)goat).getRammingXHeadRot();
         if (k != 0.0f) {

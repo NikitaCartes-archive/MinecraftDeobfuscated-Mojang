@@ -37,7 +37,9 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.goat.GoatAi;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.GoatHornItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -46,6 +48,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Goat
@@ -57,7 +60,10 @@ extends Animal {
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, new MemoryModuleType[]{MemoryModuleType.IS_TEMPTED, MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryModuleType.RAM_TARGET});
     public static final int GOAT_FALL_DAMAGE_REDUCTION = 10;
     public static final double GOAT_SCREAMING_CHANCE = 0.02;
+    public static final double UNIHORN_CHANCE = (double)0.1f;
     private static final EntityDataAccessor<Boolean> DATA_IS_SCREAMING_GOAT = SynchedEntityData.defineId(Goat.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_HAS_LEFT_HORN = SynchedEntityData.defineId(Goat.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_HAS_RIGHT_HORN = SynchedEntityData.defineId(Goat.class, EntityDataSerializers.BOOLEAN);
     private boolean isLoweringHead;
     private int lowerHeadTick;
 
@@ -85,8 +91,10 @@ extends Animal {
     protected void ageBoundaryReached() {
         if (this.isBaby()) {
             this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(1.0);
+            this.removeHorns();
         } else {
             this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2.0);
+            this.addHorns();
         }
     }
 
@@ -196,6 +204,11 @@ extends Animal {
         RandomSource randomSource = serverLevelAccessor.getRandom();
         GoatAi.initMemories(this, randomSource);
         this.setScreamingGoat(randomSource.nextDouble() < 0.02);
+        this.ageBoundaryReached();
+        if (!this.isBaby() && (double)randomSource.nextFloat() < (double)0.1f) {
+            EntityDataAccessor<Boolean> entityDataAccessor = randomSource.nextBoolean() ? DATA_HAS_LEFT_HORN : DATA_HAS_RIGHT_HORN;
+            this.entityData.set(entityDataAccessor, false);
+        }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -214,12 +227,16 @@ extends Animal {
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         compoundTag.putBoolean("IsScreamingGoat", this.isScreamingGoat());
+        compoundTag.putBoolean("HasLeftHorn", this.hasLeftHorn());
+        compoundTag.putBoolean("HasRightHorn", this.hasRightHorn());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.setScreamingGoat(compoundTag.getBoolean("IsScreamingGoat"));
+        this.entityData.set(DATA_HAS_LEFT_HORN, compoundTag.getBoolean("HasLeftHorn"));
+        this.entityData.set(DATA_HAS_RIGHT_HORN, compoundTag.getBoolean("HasRightHorn"));
     }
 
     @Override
@@ -244,6 +261,44 @@ extends Animal {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_IS_SCREAMING_GOAT, false);
+        this.entityData.define(DATA_HAS_LEFT_HORN, true);
+        this.entityData.define(DATA_HAS_RIGHT_HORN, true);
+    }
+
+    public boolean hasLeftHorn() {
+        return this.entityData.get(DATA_HAS_LEFT_HORN);
+    }
+
+    public boolean hasRightHorn() {
+        return this.entityData.get(DATA_HAS_RIGHT_HORN);
+    }
+
+    public boolean dropHorn() {
+        boolean bl = this.hasLeftHorn();
+        boolean bl2 = this.hasRightHorn();
+        if (!bl && !bl2) {
+            return false;
+        }
+        EntityDataAccessor<Boolean> entityDataAccessor = !bl ? DATA_HAS_RIGHT_HORN : (!bl2 ? DATA_HAS_LEFT_HORN : (this.random.nextBoolean() ? DATA_HAS_LEFT_HORN : DATA_HAS_RIGHT_HORN));
+        this.entityData.set(entityDataAccessor, false);
+        Vec3 vec3 = this.position();
+        ItemStack itemStack = GoatHornItem.createFromGoat(this);
+        double d = Mth.randomBetween(this.random, -0.2f, 0.2f);
+        double e = Mth.randomBetween(this.random, 0.3f, 0.7f);
+        double f = Mth.randomBetween(this.random, -0.2f, 0.2f);
+        ItemEntity itemEntity = new ItemEntity(this.level, vec3.x(), vec3.y(), vec3.z(), itemStack, d, e, f);
+        this.level.addFreshEntity(itemEntity);
+        return true;
+    }
+
+    public void addHorns() {
+        this.entityData.set(DATA_HAS_LEFT_HORN, true);
+        this.entityData.set(DATA_HAS_RIGHT_HORN, true);
+    }
+
+    public void removeHorns() {
+        this.entityData.set(DATA_HAS_LEFT_HORN, false);
+        this.entityData.set(DATA_HAS_RIGHT_HORN, false);
     }
 
     public boolean isScreamingGoat() {

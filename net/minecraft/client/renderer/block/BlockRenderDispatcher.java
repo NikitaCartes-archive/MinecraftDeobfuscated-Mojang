@@ -61,13 +61,12 @@ implements ResourceManagerReloadListener {
         this.modelRenderer.tesselateBlock(blockAndTintGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l, OverlayTexture.NO_OVERLAY);
     }
 
-    public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, RandomSource randomSource) {
+    public void renderBatched(BlockState blockState, BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, RandomSource randomSource) {
         try {
             RenderShape renderShape = blockState.getRenderShape();
-            if (renderShape != RenderShape.MODEL) {
-                return false;
+            if (renderShape == RenderShape.MODEL) {
+                this.modelRenderer.tesselateBlock(blockAndTintGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, blockState.getSeed(blockPos), OverlayTexture.NO_OVERLAY);
             }
-            return this.modelRenderer.tesselateBlock(blockAndTintGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, randomSource, blockState.getSeed(blockPos), OverlayTexture.NO_OVERLAY);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
@@ -76,9 +75,9 @@ implements ResourceManagerReloadListener {
         }
     }
 
-    public boolean renderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
+    public void renderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
         try {
-            return this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, blockState, fluidState);
+            this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, blockState, fluidState);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating liquid in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");

@@ -14,6 +14,7 @@ import java.io.File;
 import java.net.SocketAddress;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,7 +25,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.FileUtil;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
@@ -33,6 +33,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -83,6 +84,7 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagNetworkSerialization;
+import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -183,7 +185,7 @@ public abstract class PlayerList {
         this.updateEntireScoreboard(serverLevel2.getScoreboard(), serverPlayer);
         this.server.invalidateStatus();
         MutableComponent mutableComponent = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? Component.translatable("multiplayer.player.joined", serverPlayer.getDisplayName()) : Component.translatable("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
-        this.broadcastMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
+        this.broadcastSystemMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM);
         serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
         this.players.add(serverPlayer);
         this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
@@ -469,20 +471,20 @@ public abstract class PlayerList {
         for (String string : collection) {
             ServerPlayer serverPlayer = this.getPlayerByName(string);
             if (serverPlayer == null || serverPlayer == player) continue;
-            serverPlayer.sendMessage(component, player.getUUID());
+            serverPlayer.sendUnsignedMessageFrom(component, player.getUUID());
         }
     }
 
     public void broadcastToAllExceptTeam(Player player, Component component) {
         Team team = player.getTeam();
         if (team == null) {
-            this.broadcastMessage(component, ChatType.SYSTEM, player.getUUID());
+            this.broadcastUnsignedMessage(component, ChatType.SYSTEM, player.getUUID());
             return;
         }
         for (int i = 0; i < this.players.size(); ++i) {
             ServerPlayer serverPlayer = this.players.get(i);
             if (serverPlayer.getTeam() == team) continue;
-            serverPlayer.sendMessage(component, player.getUUID());
+            serverPlayer.sendUnsignedMessageFrom(component, player.getUUID());
         }
     }
 
@@ -649,19 +651,33 @@ public abstract class PlayerList {
         }
     }
 
-    public void broadcastMessage(Component component, ChatType chatType, UUID uUID) {
-        this.server.sendMessage(component, uUID);
+    @Deprecated
+    public void broadcastUnsignedMessage(Component component, ChatType chatType, UUID uUID) {
+        this.server.sendSystemMessage(component);
         for (ServerPlayer serverPlayer : this.players) {
-            serverPlayer.sendMessage(component, chatType, uUID);
+            serverPlayer.sendUnsignedMessageFrom(component, chatType, uUID);
         }
     }
 
-    public void broadcastMessage(Component component, Function<ServerPlayer, Component> function, ChatType chatType, UUID uUID) {
-        this.server.sendMessage(component, uUID);
+    public void broadcastSystemMessage(Component component, ChatType chatType) {
+        this.broadcastSystemMessage(component, serverPlayer -> component, chatType);
+    }
+
+    public void broadcastSystemMessage(Component component, Function<ServerPlayer, Component> function, ChatType chatType) {
+        this.server.sendSystemMessage(component);
         for (ServerPlayer serverPlayer : this.players) {
             Component component2 = function.apply(serverPlayer);
             if (component2 == null) continue;
-            serverPlayer.sendMessage(component2, chatType, uUID);
+            serverPlayer.sendSystemMessage(component2, chatType);
+        }
+    }
+
+    public void broadcastPlayerMessage(Component component, Function<ServerPlayer, Component> function, ChatType chatType, ChatSender chatSender, Instant instant, Crypt.SaltSignaturePair saltSignaturePair) {
+        this.server.logMessageFrom(chatSender, component);
+        for (ServerPlayer serverPlayer : this.players) {
+            Component component2 = function.apply(serverPlayer);
+            if (component2 == null) continue;
+            serverPlayer.sendPlayerMessage(component2, chatType, chatSender, instant, saltSignaturePair);
         }
     }
 

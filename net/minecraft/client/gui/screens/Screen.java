@@ -245,8 +245,7 @@ implements Widget {
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());

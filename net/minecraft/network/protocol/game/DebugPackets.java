@@ -26,8 +26,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.Container;
 import net.minecraft.world.Nameable;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -136,8 +136,8 @@ public class DebugPackets {
         Brain<Path> brain = livingEntity.getBrain();
         long l = livingEntity.level.getGameTime();
         if (livingEntity instanceof InventoryCarrier) {
-            Container container = ((InventoryCarrier)((Object)livingEntity)).getInventory();
-            friendlyByteBuf2.writeUtf(container.isEmpty() ? "" : container.toString());
+            SimpleContainer container = ((InventoryCarrier)((Object)livingEntity)).getInventory();
+            friendlyByteBuf2.writeUtf(container.isEmpty() ? "" : ((Object)container).toString());
         } else {
             friendlyByteBuf2.writeUtf("");
         }

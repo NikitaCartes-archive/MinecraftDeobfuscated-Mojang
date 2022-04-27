@@ -39,6 +39,7 @@ extends WalkNodeEvaluator {
     }
 
     @Override
+    @Nullable
     public Node getStart() {
         BlockPos blockPos;
         BlockPathTypes blockPathTypes;
@@ -67,7 +68,7 @@ extends WalkNodeEvaluator {
 
     @Override
     public Target getGoal(double d, double e, double f) {
-        return new Target(super.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
+        return this.getTargetFromNode(super.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
     }
 
     @Override
@@ -194,8 +195,7 @@ extends WalkNodeEvaluator {
         Node node = null;
         BlockPathTypes blockPathTypes = this.getCachedBlockPathType(i, j, k);
         float f = this.mob.getPathfindingMalus(blockPathTypes);
-        if (f >= 0.0f) {
-            node = super.getNode(i, j, k);
+        if (f >= 0.0f && (node = super.getNode(i, j, k)) != null) {
             node.type = blockPathTypes;
             node.costMalus = Math.max(node.costMalus, f);
             if (blockPathTypes == BlockPathTypes.WALKABLE) {

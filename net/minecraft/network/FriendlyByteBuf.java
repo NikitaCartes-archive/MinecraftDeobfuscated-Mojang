@@ -6,6 +6,10 @@ package net.minecraft.network;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import io.netty.buffer.ByteBuf;
@@ -205,6 +209,23 @@ extends ByteBuf {
             return Optional.of(function.apply(this));
         }
         return Optional.empty();
+    }
+
+    public <L, R> void writeEither(Either<L, R> either, BiConsumer<FriendlyByteBuf, L> biConsumer, BiConsumer<FriendlyByteBuf, R> biConsumer2) {
+        either.ifLeft(object -> {
+            this.writeBoolean(true);
+            biConsumer.accept(this, object);
+        }).ifRight(object -> {
+            this.writeBoolean(false);
+            biConsumer2.accept(this, object);
+        });
+    }
+
+    public <L, R> Either<L, R> readEither(Function<FriendlyByteBuf, L> function, Function<FriendlyByteBuf, R> function2) {
+        if (this.readBoolean()) {
+            return Either.left(function.apply(this));
+        }
+        return Either.right(function2.apply(this));
     }
 
     public byte[] readByteArray() {
@@ -539,6 +560,45 @@ extends ByteBuf {
 
     public void writeBitSet(BitSet bitSet) {
         this.writeLongArray(bitSet.toLongArray());
+    }
+
+    public GameProfile readGameProfile() {
+        UUID uUID = this.readUUID();
+        String string = this.readUtf(16);
+        GameProfile gameProfile = new GameProfile(uUID, string);
+        PropertyMap propertyMap = gameProfile.getProperties();
+        this.readWithCount(friendlyByteBuf -> {
+            Property property = this.readProperty();
+            propertyMap.put(property.getName(), property);
+        });
+        return gameProfile;
+    }
+
+    public void writeGameProfile(GameProfile gameProfile) {
+        this.writeUUID(gameProfile.getId());
+        this.writeUtf(gameProfile.getName());
+        this.writeCollection(gameProfile.getProperties().values(), FriendlyByteBuf::writeProperty);
+    }
+
+    public Property readProperty() {
+        String string = this.readUtf();
+        String string2 = this.readUtf();
+        if (this.readBoolean()) {
+            String string3 = this.readUtf();
+            return new Property(string, string2, string3);
+        }
+        return new Property(string, string2);
+    }
+
+    public void writeProperty(Property property) {
+        this.writeUtf(property.getName());
+        this.writeUtf(property.getValue());
+        if (property.hasSignature()) {
+            this.writeBoolean(true);
+            this.writeUtf(property.getSignature());
+        } else {
+            this.writeBoolean(false);
+        }
     }
 
     @Override

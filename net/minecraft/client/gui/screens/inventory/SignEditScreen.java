@@ -195,8 +195,7 @@ extends Screen {
             bufferBuilder.vertex(matrix4f, y, o + this.minecraft.font.lineHeight, 0.0f).color(0, 0, 255, 255).endVertex();
             bufferBuilder.vertex(matrix4f, y, o, 0.0f).color(0, 0, 255, 255).endVertex();
             bufferBuilder.vertex(matrix4f, x, o, 0.0f).color(0, 0, 255, 255).endVertex();
-            bufferBuilder.end();
-            BufferUploader.drawWithShader(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder.end());
             RenderSystem.disableColorLogicOp();
             RenderSystem.enableTexture();
         }

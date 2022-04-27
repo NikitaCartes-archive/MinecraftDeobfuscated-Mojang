@@ -416,8 +416,7 @@ extends GuiComponent {
             ++n;
             m = frameTimer.wrapIndex(m + 1);
         }
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         if (bl) {

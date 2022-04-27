@@ -162,7 +162,7 @@ public class LevelStorageSource {
                 return null;
             }, Util.backgroundExecutor()));
         }
-        return Util.sequenceFailFastAndCancel(list2).thenApply(list -> list.stream().filter(Objects::nonNull).toList());
+        return Util.sequenceFailFastAndCancel(list2).thenApply(list -> list.stream().filter(Objects::nonNull).sorted().toList());
     }
 
     private int getStorageVersion() {

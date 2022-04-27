@@ -36,6 +36,8 @@ HeadedModel {
     private static final float SPYGLASS_ARM_ROT_Y = 0.2617994f;
     private static final float SPYGLASS_ARM_ROT_X = 1.9198622f;
     private static final float SPYGLASS_ARM_CROUCH_ROT_X = 0.2617994f;
+    public static final float TOOT_HORN_XROT_BASE = 1.4835298f;
+    public static final float TOOT_HORN_YROT_BASE = 0.5235988f;
     public final ModelPart head;
     public final ModelPart hat;
     public final ModelPart body;
@@ -263,6 +265,11 @@ HeadedModel {
             case SPYGLASS: {
                 this.rightArm.xRot = Mth.clamp(this.head.xRot - 1.9198622f - (((Entity)livingEntity).isCrouching() ? 0.2617994f : 0.0f), -2.4f, 3.3f);
                 this.rightArm.yRot = this.head.yRot - 0.2617994f;
+                break;
+            }
+            case TOOT_HORN: {
+                this.rightArm.xRot = Mth.clamp(this.head.xRot, -1.2f, 1.2f) - 1.4835298f;
+                this.rightArm.yRot = this.head.yRot - 0.5235988f;
             }
         }
     }
@@ -306,6 +313,11 @@ HeadedModel {
             case SPYGLASS: {
                 this.leftArm.xRot = Mth.clamp(this.head.xRot - 1.9198622f - (((Entity)livingEntity).isCrouching() ? 0.2617994f : 0.0f), -2.4f, 3.3f);
                 this.leftArm.yRot = this.head.yRot + 0.2617994f;
+                break;
+            }
+            case TOOT_HORN: {
+                this.leftArm.xRot = Mth.clamp(this.head.xRot, -1.2f, 1.2f) - 1.4835298f;
+                this.leftArm.yRot = this.head.yRot + 0.5235988f;
             }
         }
     }
@@ -410,7 +422,8 @@ HeadedModel {
         THROW_SPEAR(false),
         CROSSBOW_CHARGE(true),
         CROSSBOW_HOLD(true),
-        SPYGLASS(false);
+        SPYGLASS(false),
+        TOOT_HORN(false);
 
         private final boolean twoHanded;
 

@@ -26,9 +26,11 @@ extends Block {
     }
 
     @Override
-    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
-        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
-        this.tryDropExperience(serverLevel, blockPos, itemStack, this.xpRange);
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+        if (bl) {
+            this.tryDropExperience(serverLevel, blockPos, itemStack, this.xpRange);
+        }
     }
 }
 

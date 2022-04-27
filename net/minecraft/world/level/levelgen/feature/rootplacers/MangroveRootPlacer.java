@@ -18,7 +18,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.rootplacers.AboveRootPlacement;
 import net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacement;
@@ -41,8 +40,12 @@ extends RootPlacer {
     @Override
     public boolean placeRoots(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, BlockPos blockPos, BlockPos blockPos2, TreeConfiguration treeConfiguration) {
         ArrayList<BlockPos> list = Lists.newArrayList();
-        if (!this.canPlaceRoot(levelSimulatedReader, blockPos2)) {
-            return false;
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        while (mutableBlockPos.getY() < blockPos2.getY()) {
+            if (!this.canPlaceRoot(levelSimulatedReader, mutableBlockPos)) {
+                return false;
+            }
+            mutableBlockPos.move(Direction.UP);
         }
         list.add(blockPos2.below());
         for (Direction direction : Direction.Plane.HORIZONTAL) {
@@ -93,8 +96,9 @@ extends RootPlacer {
         return randomSource.nextBoolean() ? List.of(blockPos4) : List.of(blockPos3);
     }
 
+    @Override
     protected boolean canPlaceRoot(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return TreeFeature.validTreePos(levelSimulatedReader, blockPos) || levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(this.mangroveRootPlacement.canGrowThrough()));
+        return super.canPlaceRoot(levelSimulatedReader, blockPos) || levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(this.mangroveRootPlacement.canGrowThrough()));
     }
 
     @Override

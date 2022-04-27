@@ -3,7 +3,6 @@
  */
 package net.minecraft.server.rcon;
 
-import java.util.UUID;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -37,7 +36,7 @@ implements CommandSource {
     }
 
     @Override
-    public void sendMessage(Component component, UUID uUID) {
+    public void sendSystemMessage(Component component) {
         this.buffer.append(component.getString());
     }
 

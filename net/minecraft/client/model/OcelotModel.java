@@ -65,7 +65,7 @@ extends AgeableListModel<T> {
     public static MeshDefinition createBodyMesh(CubeDeformation cubeDeformation) {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().addBox("main", -2.5f, -2.0f, -3.0f, 5.0f, 4.0f, 5.0f, cubeDeformation).addBox("nose", -1.5f, 0.0f, -4.0f, 3, 2, 2, cubeDeformation, 0, 24).addBox("ear1", -2.0f, -3.0f, 0.0f, 1, 1, 2, cubeDeformation, 0, 10).addBox("ear2", 1.0f, -3.0f, 0.0f, 1, 1, 2, cubeDeformation, 6, 10), PartPose.offset(0.0f, 15.0f, -9.0f));
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().addBox("main", -2.5f, -2.0f, -3.0f, 5.0f, 4.0f, 5.0f, cubeDeformation).addBox("nose", -1.5f, -0.001f, -4.0f, 3, 2, 2, cubeDeformation, 0, 24).addBox("ear1", -2.0f, -3.0f, 0.0f, 1, 1, 2, cubeDeformation, 0, 10).addBox("ear2", 1.0f, -3.0f, 0.0f, 1, 1, 2, cubeDeformation, 6, 10), PartPose.offset(0.0f, 15.0f, -9.0f));
         partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(20, 0).addBox(-2.0f, 3.0f, -8.0f, 4.0f, 16.0f, 6.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 12.0f, -10.0f, 1.5707964f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild(TAIL_1, CubeListBuilder.create().texOffs(0, 15).addBox(-0.5f, 0.0f, 0.0f, 1.0f, 8.0f, 1.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 15.0f, 8.0f, 0.9f, 0.0f, 0.0f));
         partDefinition.addOrReplaceChild(TAIL_2, CubeListBuilder.create().texOffs(4, 15).addBox(-0.5f, 0.0f, 0.0f, 1.0f, 8.0f, 1.0f, cubeDeformation), PartPose.offset(0.0f, 20.0f, 14.0f));

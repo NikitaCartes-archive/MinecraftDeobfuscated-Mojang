@@ -141,10 +141,10 @@ public class Main {
             }
             PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
             try {
-                DataPackConfig dataPackConfig2 = Objects.requireNonNullElse(levelStorageAccess.getDataPacks(), DataPackConfig.DEFAULT);
-                WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, dataPackConfig2, bl);
+                DataPackConfig dataPackConfig = Objects.requireNonNullElse(levelStorageAccess.getDataPacks(), DataPackConfig.DEFAULT);
+                WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, dataPackConfig, bl);
                 WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel);
-                worldStem = WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
+                worldStem = (WorldStem)Util.blockUntilDone(executor -> WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
                     WorldGenSettings worldGenSettings;
                     LevelSettings levelSettings;
                     RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
@@ -163,7 +163,7 @@ public class Main {
                     }
                     PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
                     return Pair.of(primaryLevelData, writable.freeze());
-                }, Util.backgroundExecutor(), Runnable::run).get();
+                }, Util.backgroundExecutor(), executor)).get();
             } catch (Exception exception) {
                 LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", exception);
                 return;

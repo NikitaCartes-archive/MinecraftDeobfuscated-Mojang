@@ -54,6 +54,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -1128,15 +1129,24 @@ extends GuiComponent {
         return this.minecraft.getPlayerSocialManager().getDiscoveredUUID(string2);
     }
 
-    public void handleChat(ChatType chatType, Component component, UUID uUID) {
-        if (this.minecraft.isBlocked(uUID)) {
+    public void handlePlayerChat(ChatType chatType, Component component, ChatSender chatSender) {
+        if (this.minecraft.isBlocked(chatSender.uuid())) {
             return;
         }
         if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
             return;
         }
         for (ChatListener chatListener : this.chatListeners.get((Object)chatType)) {
-            chatListener.handle(chatType, component, uUID);
+            chatListener.handle(chatType, component, chatSender);
+        }
+    }
+
+    public void handleSystemChat(ChatType chatType, Component component) {
+        if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
+            return;
+        }
+        for (ChatListener chatListener : this.chatListeners.get((Object)chatType)) {
+            chatListener.handle(chatType, component, null);
         }
     }
 

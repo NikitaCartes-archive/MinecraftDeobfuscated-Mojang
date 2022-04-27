@@ -641,7 +641,7 @@ CommandSource {
                         this.playStepSound(blockPos, blockState2);
                     }
                     if (movementEmission.emitsEvents() && (this.onGround || vec3.y == 0.0 || this.isInPowderSnow || bl3)) {
-                        this.gameEvent(GameEvent.STEP);
+                        this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
                     }
                 }
             } else if (blockState2.isAir()) {
@@ -960,7 +960,7 @@ CommandSource {
         if (bl) {
             if (this.fallDistance > 0.0f) {
                 blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
-                this.gameEvent(GameEvent.HIT_GROUND);
+                this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
             }
             this.resetFallDistance();
         } else if (d < 0.0) {
@@ -2430,7 +2430,7 @@ CommandSource {
     }
 
     @Override
-    public void sendMessage(Component component, UUID uUID) {
+    public void sendSystemMessage(Component component) {
     }
 
     public Level getCommandSenderWorld() {

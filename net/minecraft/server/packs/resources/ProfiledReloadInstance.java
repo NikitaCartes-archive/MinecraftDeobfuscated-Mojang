@@ -45,10 +45,10 @@ extends SimpleReloadInstance<State> {
             }, executor22);
         }, completableFuture);
         this.total.start();
-        this.allDone.thenAcceptAsync(this::finish, executor22);
+        this.allDone = this.allDone.thenApplyAsync(this::finish, executor22);
     }
 
-    private void finish(List<State> list) {
+    private List<State> finish(List<State> list) {
         this.total.stop();
         int i = 0;
         LOGGER.info("Resource reload finished after {} ms", (Object)this.total.elapsed(TimeUnit.MILLISECONDS));
@@ -63,6 +63,7 @@ extends SimpleReloadInstance<State> {
             i += k;
         }
         LOGGER.info("Total blocking time: {} ms", (Object)i);
+        return list;
     }
 
     public static class State {

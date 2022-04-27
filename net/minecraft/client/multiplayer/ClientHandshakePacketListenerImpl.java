@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.multiplayer;
 
+import com.google.common.primitives.Longs;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
@@ -11,7 +12,9 @@ import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.util.function.Consumer;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -71,9 +74,18 @@ implements ClientLoginPacketListener {
             string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
             cipher = Crypt.getCipher(2, secretKey);
             cipher2 = Crypt.getCipher(1, secretKey);
-            serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, clientboundHelloPacket.getNonce());
-        } catch (CryptException cryptException) {
-            throw new IllegalStateException("Protocol error", cryptException);
+            byte[] bs = clientboundHelloPacket.getNonce();
+            Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
+            if (signature == null) {
+                serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, bs);
+            } else {
+                long l = Crypt.SaltSupplier.getLong();
+                signature.update(bs);
+                signature.update(Longs.toByteArray(l));
+                serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, l, signature.sign());
+            }
+        } catch (GeneralSecurityException | CryptException exception) {
+            throw new IllegalStateException("Protocol error", exception);
         }
         this.updateStatus.accept(Component.translatable("connect.authorizing"));
         HttpUtil.DOWNLOAD_EXECUTOR.submit(() -> {

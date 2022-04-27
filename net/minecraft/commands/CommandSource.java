@@ -3,14 +3,13 @@
  */
 package net.minecraft.commands;
 
-import java.util.UUID;
 import net.minecraft.network.chat.Component;
 
 public interface CommandSource {
     public static final CommandSource NULL = new CommandSource(){
 
         @Override
-        public void sendMessage(Component component, UUID uUID) {
+        public void sendSystemMessage(Component component) {
         }
 
         @Override
@@ -29,7 +28,7 @@ public interface CommandSource {
         }
     };
 
-    public void sendMessage(Component var1, UUID var2);
+    public void sendSystemMessage(Component var1);
 
     public boolean acceptsSuccess();
 

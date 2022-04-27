@@ -13,6 +13,7 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +41,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -47,7 +49,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
@@ -55,6 +56,7 @@ import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
@@ -155,7 +157,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -468,11 +469,11 @@ ServerGamePacketListener {
     public void handleSetCommandBlock(ServerboundSetCommandBlockPacket serverboundSetCommandBlockPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundSetCommandBlockPacket, this, this.player.getLevel());
         if (!this.server.isCommandBlockEnabled()) {
-            this.player.sendMessage(Component.translatable("advMode.notEnabled"), Util.NIL_UUID);
+            this.player.sendSystemMessage(Component.translatable("advMode.notEnabled"));
             return;
         }
         if (!this.player.canUseGameMasterBlocks()) {
-            this.player.sendMessage(Component.translatable("advMode.notAllowed"), Util.NIL_UUID);
+            this.player.sendSystemMessage(Component.translatable("advMode.notAllowed"));
             return;
         }
         BaseCommandBlock baseCommandBlock = null;
@@ -510,7 +511,7 @@ ServerGamePacketListener {
             }
             baseCommandBlock.onUpdated();
             if (!StringUtil.isNullOrEmpty(string)) {
-                this.player.sendMessage(Component.translatable("advMode.setCommand.success", string), Util.NIL_UUID);
+                this.player.sendSystemMessage(Component.translatable("advMode.setCommand.success", string));
             }
         }
     }
@@ -519,11 +520,11 @@ ServerGamePacketListener {
     public void handleSetCommandMinecart(ServerboundSetCommandMinecartPacket serverboundSetCommandMinecartPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundSetCommandMinecartPacket, this, this.player.getLevel());
         if (!this.server.isCommandBlockEnabled()) {
-            this.player.sendMessage(Component.translatable("advMode.notEnabled"), Util.NIL_UUID);
+            this.player.sendSystemMessage(Component.translatable("advMode.notEnabled"));
             return;
         }
         if (!this.player.canUseGameMasterBlocks()) {
-            this.player.sendMessage(Component.translatable("advMode.notAllowed"), Util.NIL_UUID);
+            this.player.sendSystemMessage(Component.translatable("advMode.notAllowed"));
             return;
         }
         BaseCommandBlock baseCommandBlock = serverboundSetCommandMinecartPacket.getCommandBlock(this.player.level);
@@ -534,7 +535,7 @@ ServerGamePacketListener {
                 baseCommandBlock.setLastOutput(null);
             }
             baseCommandBlock.onUpdated();
-            this.player.sendMessage(Component.translatable("advMode.setCommand.success", serverboundSetCommandMinecartPacket.getCommand()), Util.NIL_UUID);
+            this.player.sendSystemMessage(Component.translatable("advMode.setCommand.success", serverboundSetCommandMinecartPacket.getCommand()));
         }
     }
 
@@ -976,14 +977,14 @@ ServerGamePacketListener {
                 InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
                 if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
                     MutableComponent component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
-                    this.player.sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
+                    this.player.sendSystemMessage(component, ChatType.GAME_INFO);
                 } else if (interactionResult.shouldSwing()) {
                     this.player.swing(interactionHand, true);
                 }
             }
         } else {
             MutableComponent component2 = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
-            this.player.sendMessage(component2, ChatType.GAME_INFO, Util.NIL_UUID);
+            this.player.sendSystemMessage(component2, ChatType.GAME_INFO);
         }
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos.relative(direction)));
@@ -1045,7 +1046,7 @@ ServerGamePacketListener {
     public void onDisconnect(Component component) {
         LOGGER.info("{} lost connection: {}", (Object)this.player.getName().getString(), (Object)component.getString());
         this.server.invalidateStatus();
-        this.server.getPlayerList().broadcastMessage(Component.translatable("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
+        this.server.getPlayerList().broadcastSystemMessage(Component.translatable("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM);
         this.player.disconnect();
         this.server.getPlayerList().remove(this.player);
         this.player.getTextFilter().leave();
@@ -1094,34 +1095,46 @@ ServerGamePacketListener {
 
     @Override
     public void handleChat(ServerboundChatPacket serverboundChatPacket) {
-        String string = StringUtils.normalizeSpace(serverboundChatPacket.getMessage());
-        for (int i = 0; i < string.length(); ++i) {
-            if (SharedConstants.isAllowedChatCharacter(string.charAt(i))) continue;
+        if (serverboundChatPacket.hasExpired(Instant.now())) {
+            LOGGER.warn("{} tried to send expired message", (Object)this.player.getName().getString());
+            return;
+        }
+        if (ServerGamePacketListenerImpl.isChatMessageIllegal(serverboundChatPacket.getMessage())) {
             this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
             return;
         }
+        String string = serverboundChatPacket.getMessageNormalized();
         if (string.startsWith("/")) {
             PacketUtils.ensureRunningOnSameThread(serverboundChatPacket, this, this.player.getLevel());
-            this.handleChat(TextFilter.FilteredText.passThrough(string));
+            this.handleChat(serverboundChatPacket, TextFilter.FilteredText.passThrough(string));
         } else {
-            this.filterTextPacket(string, this::handleChat);
+            this.filterTextPacket(serverboundChatPacket.getMessage(), (TextFilter.FilteredText filteredText) -> this.handleChat(serverboundChatPacket, (TextFilter.FilteredText)filteredText));
         }
     }
 
-    private void handleChat(TextFilter.FilteredText filteredText) {
+    private static boolean isChatMessageIllegal(String string) {
+        for (int i = 0; i < string.length(); ++i) {
+            if (SharedConstants.isAllowedChatCharacter(string.charAt(i))) continue;
+            return true;
+        }
+        return false;
+    }
+
+    private void handleChat(ServerboundChatPacket serverboundChatPacket, TextFilter.FilteredText filteredText) {
         if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-            this.send(new ClientboundChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM, Util.NIL_UUID));
+            this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM));
             return;
         }
         this.player.resetLastActionTime();
-        String string = filteredText.getRaw();
+        String string = serverboundChatPacket.getMessageNormalized();
         if (string.startsWith("/")) {
             this.handleCommand(string);
         } else {
             String string2 = filteredText.getFiltered();
-            MutableComponent component = string2.isEmpty() ? null : Component.translatable("chat.type.text", this.player.getDisplayName(), string2);
-            MutableComponent component2 = Component.translatable("chat.type.text", this.player.getDisplayName(), string);
-            this.server.getPlayerList().broadcastMessage(component2, serverPlayer -> this.player.shouldFilterMessageTo((ServerPlayer)serverPlayer) ? component : component2, ChatType.CHAT, this.player.getUUID());
+            MutableComponent component = string2.isEmpty() ? null : Component.literal(string2);
+            MutableComponent component2 = Component.literal(serverboundChatPacket.getMessage());
+            ChatSender chatSender = this.player.asChatSender();
+            this.server.getPlayerList().broadcastPlayerMessage(component2, serverPlayer -> this.player.shouldFilterMessageTo((ServerPlayer)serverPlayer) ? component : component2, ChatType.CHAT, chatSender, serverboundChatPacket.getTimeStamp(), serverboundChatPacket.getSaltSignature());
         }
         this.chatSpamTickCount += 20;
         if (this.chatSpamTickCount > 200 && !this.server.getPlayerList().isOp(this.player.getGameProfile())) {

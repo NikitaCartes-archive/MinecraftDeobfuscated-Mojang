@@ -277,27 +277,27 @@ implements ItemLike {
         ServerLevel serverLevel = builder.getLevel();
         BlockPos blockPos = new BlockPos(builder.getParameter(LootContextParams.ORIGIN));
         blockState.getDrops(builder).forEach(itemStack -> Block.popResource((Level)serverLevel, blockPos, itemStack));
-        blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY);
+        blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, true);
     }
 
     public static void dropResources(BlockState blockState, Level level, BlockPos blockPos) {
         if (level instanceof ServerLevel) {
             Block.getDrops(blockState, (ServerLevel)level, blockPos, null).forEach(itemStack -> Block.popResource(level, blockPos, itemStack));
-            blockState.spawnAfterBreak((ServerLevel)level, blockPos, ItemStack.EMPTY);
+            blockState.spawnAfterBreak((ServerLevel)level, blockPos, ItemStack.EMPTY, true);
         }
     }
 
     public static void dropResources(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, @Nullable BlockEntity blockEntity) {
         if (levelAccessor instanceof ServerLevel) {
             Block.getDrops(blockState, (ServerLevel)levelAccessor, blockPos, blockEntity).forEach(itemStack -> Block.popResource((Level)((ServerLevel)levelAccessor), blockPos, itemStack));
-            blockState.spawnAfterBreak((ServerLevel)levelAccessor, blockPos, ItemStack.EMPTY);
+            blockState.spawnAfterBreak((ServerLevel)levelAccessor, blockPos, ItemStack.EMPTY, true);
         }
     }
 
     public static void dropResources(BlockState blockState, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack itemStack2) {
         if (level instanceof ServerLevel) {
             Block.getDrops(blockState, (ServerLevel)level, blockPos, blockEntity, entity, itemStack2).forEach(itemStack -> Block.popResource(level, blockPos, itemStack));
-            blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack2);
+            blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack2, true);
         }
     }
 

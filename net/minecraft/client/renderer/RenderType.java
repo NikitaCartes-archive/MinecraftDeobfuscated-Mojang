@@ -370,9 +370,9 @@ extends RenderStateShard {
         if (this.sortOnUpload) {
             bufferBuilder.setQuadSortOrigin(i, j, k);
         }
-        bufferBuilder.end();
+        BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
         this.setupRenderState();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(renderedBuffer);
         this.clearRenderState();
     }
 

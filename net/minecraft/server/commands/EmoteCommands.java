@@ -9,7 +9,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import java.util.concurrent.Executor;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ChatType;
@@ -24,21 +23,17 @@ public class EmoteCommands {
             String string = StringArgumentType.getString(commandContext, "action");
             Entity entity = ((CommandSourceStack)commandContext.getSource()).getEntity();
             MinecraftServer minecraftServer = ((CommandSourceStack)commandContext.getSource()).getServer();
-            if (entity != null) {
-                if (entity instanceof ServerPlayer) {
-                    ServerPlayer serverPlayer = (ServerPlayer)entity;
-                    serverPlayer.getTextFilter().processStreamMessage(string).thenAcceptAsync(filteredText -> {
-                        String string = filteredText.getFiltered();
-                        Component component = string.isEmpty() ? null : EmoteCommands.createMessage(commandContext, string);
-                        Component component2 = EmoteCommands.createMessage(commandContext, filteredText.getRaw());
-                        minecraftServer.getPlayerList().broadcastMessage(component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? component : component2, ChatType.CHAT, entity.getUUID());
-                    }, (Executor)minecraftServer);
-                    return 1;
-                }
-                minecraftServer.getPlayerList().broadcastMessage(EmoteCommands.createMessage(commandContext, string), ChatType.CHAT, entity.getUUID());
-            } else {
-                minecraftServer.getPlayerList().broadcastMessage(EmoteCommands.createMessage(commandContext, string), ChatType.SYSTEM, Util.NIL_UUID);
+            if (entity instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer)entity;
+                serverPlayer.getTextFilter().processStreamMessage(string).thenAcceptAsync(filteredText -> {
+                    String string = filteredText.getFiltered();
+                    Component component = string.isEmpty() ? null : EmoteCommands.createMessage(commandContext, string);
+                    Component component2 = EmoteCommands.createMessage(commandContext, filteredText.getRaw());
+                    minecraftServer.getPlayerList().broadcastSystemMessage(component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? component : component2, ChatType.SYSTEM);
+                }, (Executor)minecraftServer);
+                return 1;
             }
+            minecraftServer.getPlayerList().broadcastSystemMessage(EmoteCommands.createMessage(commandContext, string), ChatType.SYSTEM);
             return 1;
         })));
     }

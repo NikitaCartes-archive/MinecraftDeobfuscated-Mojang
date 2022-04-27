@@ -101,7 +101,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, int i) {
-        this.shriek(serverLevel);
+        this.shriek(serverLevel, entity2 != null ? entity2 : entity);
     }
 
     private boolean canShriek(ServerLevel serverLevel) {
@@ -116,13 +116,14 @@ implements VibrationListener.VibrationListenerConfig {
         return SculkShriekerBlockEntity.tryGetSpawnTracker(serverLevel, blockPos).map(wardenSpawnTracker -> wardenSpawnTracker.canWarn(serverLevel, blockPos)).orElse(false);
     }
 
-    public void shriek(ServerLevel serverLevel) {
+    public void shriek(ServerLevel serverLevel, @Nullable Entity entity) {
         BlockState blockState = this.getBlockState();
         if (this.canShriek(serverLevel) && this.tryToWarn(serverLevel, blockState)) {
             BlockPos blockPos = this.getBlockPos();
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SculkShriekerBlock.SHRIEKING, true), 2);
             serverLevel.scheduleTick(blockPos, blockState.getBlock(), 90);
             serverLevel.levelEvent(3007, blockPos, 0);
+            serverLevel.gameEvent(GameEvent.SHRIEK, blockPos, GameEvent.Context.of(entity));
         }
     }
 

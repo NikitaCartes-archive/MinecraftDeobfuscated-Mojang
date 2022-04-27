@@ -177,7 +177,7 @@ implements BiomeResolver {
             return null;
         }
         int l = Math.floorDiv(i, j);
-        int[] is = Mth.outFromOrigin(blockPos.getY(), levelReader.getMinBuildHeight(), levelReader.getMaxBuildHeight(), k).toArray();
+        int[] is = Mth.outFromOrigin(blockPos.getY(), levelReader.getMinBuildHeight() + 1, levelReader.getMaxBuildHeight(), k).toArray();
         for (BlockPos.MutableBlockPos mutableBlockPos : BlockPos.spiralAround(BlockPos.ZERO, l, Direction.EAST, Direction.SOUTH)) {
             int m = blockPos.getX() + mutableBlockPos.getX() * j;
             int n = blockPos.getZ() + mutableBlockPos.getZ() * j;

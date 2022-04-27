@@ -53,6 +53,7 @@ public class ServerEntity {
     private final int updateInterval;
     private final boolean trackDelta;
     private final Consumer<Packet<?>> broadcast;
+    private final VecDeltaCodec positionCodec = new VecDeltaCodec();
     private int yRotp;
     private int xRotp;
     private int yHeadRotp;
@@ -69,7 +70,7 @@ public class ServerEntity {
         this.entity = entity;
         this.updateInterval = i;
         this.trackDelta = bl;
-        entity.getPositionCodec().setBase(entity.trackingPosition());
+        this.positionCodec.setBase(entity.trackingPosition());
         this.yRotp = Mth.floor(entity.getYRot() * 256.0f / 360.0f);
         this.xRotp = Mth.floor(entity.getXRot() * 256.0f / 360.0f);
         this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0f / 360.0f);
@@ -102,7 +103,6 @@ public class ServerEntity {
         }
         if (this.tickCount % this.updateInterval == 0 || this.entity.hasImpulse || this.entity.getEntityData().isDirty()) {
             int i;
-            VecDeltaCodec vecDeltaCodec = this.entity.getPositionCodec();
             if (this.entity.isPassenger()) {
                 boolean bl;
                 i = Mth.floor(this.entity.getYRot() * 256.0f / 360.0f);
@@ -113,7 +113,7 @@ public class ServerEntity {
                     this.yRotp = i;
                     this.xRotp = j;
                 }
-                vecDeltaCodec.setBase(this.entity.trackingPosition());
+                this.positionCodec.setBase(this.entity.trackingPosition());
                 this.sendDirtyEntityData();
                 this.wasRiding = true;
             } else {
@@ -124,15 +124,15 @@ public class ServerEntity {
                 i = Mth.floor(this.entity.getYRot() * 256.0f / 360.0f);
                 int j = Mth.floor(this.entity.getXRot() * 256.0f / 360.0f);
                 Vec3 vec3 = this.entity.trackingPosition();
-                boolean bl2 = vecDeltaCodec.delta(vec3).lengthSqr() >= 7.62939453125E-6;
+                boolean bl2 = this.positionCodec.delta(vec3).lengthSqr() >= 7.62939453125E-6;
                 Packet<ClientGamePacketListener> packet2 = null;
                 boolean bl3 = bl2 || this.tickCount % 60 == 0;
                 boolean bl = bl4 = Math.abs(i - this.yRotp) >= 1 || Math.abs(j - this.xRotp) >= 1;
                 if (this.tickCount > 0 || this.entity instanceof AbstractArrow) {
                     boolean bl5;
-                    long l = vecDeltaCodec.encodeX(vec3);
-                    long m = vecDeltaCodec.encodeY(vec3);
-                    long n = vecDeltaCodec.encodeZ(vec3);
+                    long l = this.positionCodec.encodeX(vec3);
+                    long m = this.positionCodec.encodeY(vec3);
+                    long n = this.positionCodec.encodeZ(vec3);
                     boolean bl6 = bl5 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
                     if (bl5 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.isOnGround()) {
                         this.wasOnGround = this.entity.isOnGround();
@@ -155,7 +155,7 @@ public class ServerEntity {
                 }
                 this.sendDirtyEntityData();
                 if (bl3) {
-                    vecDeltaCodec.setBase(vec3);
+                    this.positionCodec.setBase(vec3);
                 }
                 if (bl4) {
                     this.yRotp = i;

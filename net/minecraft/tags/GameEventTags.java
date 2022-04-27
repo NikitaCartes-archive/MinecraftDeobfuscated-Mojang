@@ -13,7 +13,7 @@ public class GameEventTags {
     public static final TagKey<GameEvent> WARDEN_CAN_LISTEN = GameEventTags.create("warden_can_listen");
     public static final TagKey<GameEvent> SHRIEKER_CAN_LISTEN = GameEventTags.create("shrieker_can_listen");
     public static final TagKey<GameEvent> IGNORE_VIBRATIONS_SNEAKING = GameEventTags.create("ignore_vibrations_sneaking");
-    public static final TagKey<GameEvent> DAMPENABLE_VIBRATIONS = GameEventTags.create("dampenable_vibrations");
+    public static final TagKey<GameEvent> ALLAY_CAN_LISTEN = GameEventTags.create("allay_can_listen");
 
     private static TagKey<GameEvent> create(String string) {
         return TagKey.create(Registry.GAME_EVENT_REGISTRY, new ResourceLocation(string));

@@ -11,7 +11,8 @@ public enum UseAnim {
     BOW,
     SPEAR,
     CROSSBOW,
-    SPYGLASS;
+    SPYGLASS,
+    TOOT_HORN;
 
 }
 

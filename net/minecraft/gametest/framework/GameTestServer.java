@@ -3,6 +3,7 @@
  */
 package net.minecraft.gametest.framework;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
@@ -11,6 +12,7 @@ import com.mojang.serialization.Lifecycle;
 import java.net.Proxy;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import net.minecraft.CrashReport;
 import net.minecraft.SystemReport;
@@ -67,12 +69,16 @@ extends MinecraftServer {
         WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, DataPackConfig.DEFAULT, false);
         WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.DEDICATED, 4);
         try {
-            WorldStem worldStem = WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
+            LOGGER.debug("Starting resource loading");
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            WorldStem worldStem = (WorldStem)Util.blockUntilDone(executor -> WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
                 RegistryAccess.Frozen frozen = RegistryAccess.BUILTIN.get();
                 WorldGenSettings worldGenSettings = frozen.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldGenSettings(0L, false, false);
                 PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, worldGenSettings, Lifecycle.stable());
                 return Pair.of(worldData, frozen);
-            }, Util.backgroundExecutor(), Runnable::run).get();
+            }, Util.backgroundExecutor(), executor)).get();
+            stopwatch.stop();
+            LOGGER.debug("Finished resource loading after {} ms", (Object)stopwatch.elapsed(TimeUnit.MILLISECONDS));
             return new GameTestServer(thread, levelStorageAccess, packRepository, worldStem, collection, blockPos);
         } catch (Exception exception) {
             LOGGER.warn("Failed to load vanilla datapack, bit oops", exception);
@@ -95,6 +101,7 @@ extends MinecraftServer {
         serverLevel.setDefaultSpawnPos(this.spawnPos, 0.0f);
         int i = 20000000;
         serverLevel.setWeatherParameters(20000000, 20000000, false, false);
+        LOGGER.info("Started game test server");
         return true;
     }
 

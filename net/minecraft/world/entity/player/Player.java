@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -1169,6 +1170,10 @@ extends LivingEntity {
     }
 
     public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
+    }
+
+    public ChatSender asChatSender() {
+        return new ChatSender(this.getUUID(), this.getDisplayName());
     }
 
     public Either<BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {

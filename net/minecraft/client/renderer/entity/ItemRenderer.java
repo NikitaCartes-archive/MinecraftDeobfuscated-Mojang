@@ -342,8 +342,7 @@ implements ResourceManagerReloadListener {
         bufferBuilder.vertex(i + 0, j + l, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + k, j + l, 0.0).color(m, n, o, p).endVertex();
         bufferBuilder.vertex(i + k, j + 0, 0.0).color(m, n, o, p).endVertex();
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     @Override

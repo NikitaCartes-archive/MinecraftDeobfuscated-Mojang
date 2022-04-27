@@ -5,7 +5,6 @@ package net.minecraft.world.entity;
 
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -210,7 +209,7 @@ implements OwnableEntity {
     @Override
     public void die(DamageSource damageSource) {
         if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
-            this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage(), Util.NIL_UUID);
+            this.getOwner().sendSystemMessage(this.getCombatTracker().getDeathMessage());
         }
         super.die(damageSource);
     }

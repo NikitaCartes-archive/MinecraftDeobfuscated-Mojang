@@ -447,6 +447,11 @@ implements ServerInterface {
         return this.getProperties().networkCompressionThreshold;
     }
 
+    @Override
+    public boolean enforceSecureProfile() {
+        return this.getProperties().enforceSecureProfile;
+    }
+
     protected boolean convertOldUsers() {
         int i;
         boolean bl = false;

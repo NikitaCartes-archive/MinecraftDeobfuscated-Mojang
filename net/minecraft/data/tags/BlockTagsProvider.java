@@ -40,6 +40,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.WARPED_STEMS).add((Block[])new Block[]{Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE});
         this.tag(BlockTags.MANGROVE_LOGS).add((Block[])new Block[]{Blocks.MANGROVE_LOG, Blocks.MANGROVE_WOOD, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_WOOD});
         this.tag(BlockTags.LOGS_THAT_BURN).addTag(BlockTags.DARK_OAK_LOGS).addTag(BlockTags.OAK_LOGS).addTag(BlockTags.ACACIA_LOGS).addTag(BlockTags.BIRCH_LOGS).addTag(BlockTags.JUNGLE_LOGS).addTag(BlockTags.SPRUCE_LOGS).addTag(BlockTags.MANGROVE_LOGS);
+        this.tag(BlockTags.OVERWORLD_NATURAL_LOGS).add(Blocks.ACACIA_LOG).add(Blocks.BIRCH_LOG).add(Blocks.OAK_LOG).add(Blocks.JUNGLE_LOG).add(Blocks.SPRUCE_LOG).add(Blocks.DARK_OAK_LOG).add(Blocks.MANGROVE_LOG);
         this.tag(BlockTags.LOGS).addTag(BlockTags.LOGS_THAT_BURN).addTag(BlockTags.CRIMSON_STEMS).addTag(BlockTags.WARPED_STEMS);
         this.tag(BlockTags.ANVIL).add((Block[])new Block[]{Blocks.ANVIL, Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL});
         this.tag(BlockTags.SMALL_FLOWERS).add((Block[])new Block[]{Blocks.DANDELION, Blocks.POPPY, Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET, Blocks.RED_TULIP, Blocks.ORANGE_TULIP, Blocks.WHITE_TULIP, Blocks.PINK_TULIP, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.WITHER_ROSE});
@@ -159,13 +160,14 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.REPLACEABLE_PLANTS).add((Block[])new Block[]{Blocks.GRASS, Blocks.FERN, Blocks.DEAD_BUSH, Blocks.VINE, Blocks.GLOW_LICHEN, Blocks.SUNFLOWER, Blocks.LILAC, Blocks.ROSE_BUSH, Blocks.PEONY, Blocks.TALL_GRASS, Blocks.LARGE_FERN, Blocks.HANGING_ROOTS});
         this.tag(BlockTags.FROG_PREFER_JUMP_TO).add((Block[])new Block[]{Blocks.LILY_PAD, Blocks.BIG_DRIPLEAF});
         this.tag(BlockTags.SCULK_REPLACEABLE).addTag(BlockTags.BASE_STONE_OVERWORLD).addTag(BlockTags.DIRT).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.NYLIUM).addTag(BlockTags.BASE_STONE_NETHER).addTag(BlockTags.SAND).add(Blocks.GRAVEL).add(Blocks.SOUL_SAND).add(Blocks.SOUL_SOIL).add(Blocks.CALCITE).add(Blocks.SMOOTH_BASALT).add(Blocks.CLAY).add(Blocks.DRIPSTONE_BLOCK).add(Blocks.END_STONE).add(Blocks.RED_SANDSTONE).add(Blocks.SANDSTONE);
-        this.tag(BlockTags.SCULK_REPLACEABLE_WORLD_GEN).addTag(BlockTags.SCULK_REPLACEABLE).add(Blocks.DEEPSLATE_BRICKS).add(Blocks.DEEPSLATE_TILES).add(Blocks.COBBLED_DEEPSLATE).add(Blocks.CRACKED_DEEPSLATE_BRICKS).add(Blocks.CRACKED_DEEPSLATE_TILES);
+        this.tag(BlockTags.SCULK_REPLACEABLE_WORLD_GEN).addTag(BlockTags.SCULK_REPLACEABLE).add(Blocks.DEEPSLATE_BRICKS).add(Blocks.DEEPSLATE_TILES).add(Blocks.COBBLED_DEEPSLATE).add(Blocks.CRACKED_DEEPSLATE_BRICKS).add(Blocks.CRACKED_DEEPSLATE_TILES).add(Blocks.POLISHED_DEEPSLATE);
         this.tag(BlockTags.CONVERTABLE_TO_MUD).add((Block[])new Block[]{Blocks.DIRT, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT});
         this.tag(BlockTags.ANCIENT_CITY_REPLACEABLE).add(Blocks.DEEPSLATE).add(Blocks.DEEPSLATE_BRICKS).add(Blocks.DEEPSLATE_TILES).add(Blocks.DEEPSLATE_BRICK_SLAB).add(Blocks.DEEPSLATE_TILE_SLAB).add(Blocks.DEEPSLATE_BRICK_STAIRS).add(Blocks.DEEPSLATE_TILE_WALL).add(Blocks.DEEPSLATE_BRICK_WALL).add(Blocks.COBBLED_DEEPSLATE).add(Blocks.CRACKED_DEEPSLATE_BRICKS).add(Blocks.CRACKED_DEEPSLATE_TILES).add(Blocks.GRAY_WOOL);
         this.tag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH).add((Block[])new Block[]{Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MANGROVE_LEAVES, Blocks.MANGROVE_LOG, Blocks.MANGROVE_PROPAGULE, Blocks.MOSS_CARPET, Blocks.VINE});
         this.tag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH).add((Block[])new Block[]{Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MOSS_CARPET, Blocks.VINE, Blocks.MANGROVE_PROPAGULE, Blocks.SNOW});
         this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT);
         this.tag(BlockTags.COMPLETES_FIND_TREE_TUTORIAL).addTag(BlockTags.LOGS).addTag(BlockTags.LEAVES).addTag(BlockTags.WART_BLOCKS);
+        this.tag(BlockTags.SNAPS_GOAT_HORN).addTag(BlockTags.OVERWORLD_NATURAL_LOGS).add(Blocks.STONE).add(Blocks.PACKED_ICE).add(Blocks.IRON_ORE).add(Blocks.COAL_ORE).add(Blocks.EMERALD_ORE);
     }
 }
 

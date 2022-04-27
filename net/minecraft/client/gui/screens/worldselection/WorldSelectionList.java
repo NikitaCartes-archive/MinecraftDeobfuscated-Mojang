@@ -18,8 +18,6 @@ import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -141,12 +139,8 @@ extends ObjectSelectionList<Entry> {
             CreateWorldScreen.openFresh(this.minecraft, null);
             return CompletableFuture.completedFuture(List.of());
         }
-        return ((CompletableFuture)this.minecraft.getLevelSource().loadLevelSummaries(levelCandidates).thenApply(list -> {
-            list = new ArrayList(list);
-            Collections.sort(list);
-            return list;
-        })).exceptionally(throwable -> {
-            this.minecraft.delayCrash(() -> CrashReport.forThrowable(throwable, "Couldn't load level list"));
+        return this.minecraft.getLevelSource().loadLevelSummaries(levelCandidates).exceptionally(throwable -> {
+            this.minecraft.delayCrash(CrashReport.forThrowable(throwable, "Couldn't load level list"));
             return List.of();
         });
     }

@@ -68,7 +68,7 @@ public class LiquidBlockRenderer {
         return !LiquidBlockRenderer.isFaceOccludedBySelf(blockAndTintGetter, blockPos, blockState, direction) && !LiquidBlockRenderer.isNeighborSameFluid(fluidState, fluidState2);
     }
 
-    public boolean tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
+    public void tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
         float ap;
         float ao;
         float ag;
@@ -108,9 +108,8 @@ public class LiquidBlockRenderer {
         boolean bl6 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.WEST, fluidState6);
         boolean bl7 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.EAST, fluidState7);
         if (!(bl2 || bl3 || bl7 || bl6 || bl4 || bl5)) {
-            return false;
+            return;
         }
-        boolean bl8 = false;
         float j = blockAndTintGetter.getShade(Direction.DOWN, true);
         float k = blockAndTintGetter.getShade(Direction.UP, true);
         float l = blockAndTintGetter.getShade(Direction.NORTH, true);
@@ -143,7 +142,6 @@ public class LiquidBlockRenderer {
             float ai;
             float ah;
             float aa;
-            bl8 = true;
             p -= 0.001f;
             r -= 0.001f;
             q -= 0.001f;
@@ -215,7 +213,6 @@ public class LiquidBlockRenderer {
             this.vertex(vertexConsumer, d, e + (double)y, w, ac, ae, ag, z, ad, aq);
             this.vertex(vertexConsumer, d + 1.0, e + (double)y, w, ac, ae, ag, ab, ad, aq);
             this.vertex(vertexConsumer, d + 1.0, e + (double)y, w + 1.0, ac, ae, ag, ab, af, aq);
-            bl8 = true;
         }
         int ar = this.getLightColor(blockAndTintGetter, blockPos);
         for (Direction direction : Direction.Plane.HORIZONTAL) {
@@ -263,7 +260,6 @@ public class LiquidBlockRenderer {
                     yield bl7;
                 }
             }) || LiquidBlockRenderer.isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, direction, Math.max(af, aa), blockAndTintGetter.getBlockState(blockPos.relative(direction)))) continue;
-            bl8 = true;
             BlockPos blockPos2 = blockPos.relative(direction);
             TextureAtlasSprite textureAtlasSprite2 = textureAtlasSprites[1];
             if (!bl && ((block = blockAndTintGetter.getBlockState(blockPos2).getBlock()) instanceof HalfTransparentBlock || block instanceof LeavesBlock)) {
@@ -288,7 +284,6 @@ public class LiquidBlockRenderer {
             this.vertex(vertexConsumer, at, e + (double)aa, av, ba, bb, bc, ap, ax, ar);
             this.vertex(vertexConsumer, as, e + (double)af, au, ba, bb, bc, ao, aw, ar);
         }
-        return bl8;
     }
 
     private float calculateAverageHeight(BlockAndTintGetter blockAndTintGetter, Fluid fluid, float f, float g, float h, BlockPos blockPos) {

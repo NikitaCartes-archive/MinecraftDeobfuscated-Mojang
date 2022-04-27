@@ -45,13 +45,15 @@ extends NodeEvaluator {
     }
 
     @Override
+    @Nullable
     public Node getStart() {
         return super.getNode(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5), Mth.floor(this.mob.getBoundingBox().minZ));
     }
 
     @Override
+    @Nullable
     public Target getGoal(double d, double e, double f) {
-        return new Target(super.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
+        return this.getTargetFromNode(super.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
     }
 
     @Override
@@ -87,8 +89,7 @@ extends NodeEvaluator {
         float f;
         Node node = null;
         BlockPathTypes blockPathTypes = this.getCachedBlockType(i, j, k);
-        if ((this.allowBreaching && blockPathTypes == BlockPathTypes.BREACH || blockPathTypes == BlockPathTypes.WATER) && (f = this.mob.getPathfindingMalus(blockPathTypes)) >= 0.0f) {
-            node = super.getNode(i, j, k);
+        if ((this.allowBreaching && blockPathTypes == BlockPathTypes.BREACH || blockPathTypes == BlockPathTypes.WATER) && (f = this.mob.getPathfindingMalus(blockPathTypes)) >= 0.0f && (node = super.getNode(i, j, k)) != null) {
             node.type = blockPathTypes;
             node.costMalus = Math.max(node.costMalus, f);
             if (this.level.getFluidState(new BlockPos(i, j, k)).isEmpty()) {

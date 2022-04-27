@@ -79,6 +79,11 @@ extends AbstractContainerMenu {
     }
 
     @Override
+    public ItemStack quickMoveStack(Player player, int i) {
+        return ItemStack.EMPTY;
+    }
+
+    @Override
     public void setData(int i, int j) {
         super.setData(i, j);
         this.broadcastChanges();

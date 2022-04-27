@@ -43,13 +43,15 @@ extends WalkNodeEvaluator {
     }
 
     @Override
+    @Nullable
     public Node getStart() {
         return this.getStartNode(new BlockPos(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5), Mth.floor(this.mob.getBoundingBox().minZ)));
     }
 
     @Override
+    @Nullable
     public Target getGoal(double d, double e, double f) {
-        return new Target(this.getNode(Mth.floor(d), Mth.floor(e + 0.5), Mth.floor(f)));
+        return this.getTargetFromNode(this.getNode(Mth.floor(d), Mth.floor(e + 0.5), Mth.floor(f)));
     }
 
     @Override

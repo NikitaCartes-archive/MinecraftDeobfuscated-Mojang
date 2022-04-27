@@ -17,6 +17,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +50,7 @@ public class ExtraCodecs {
             return DataResult.error("Invalid regex pattern '" + string + "': " + patternSyntaxException.getMessage());
         }
     }, Pattern::pattern);
+    public static final Codec<Instant> INSTANT_ISO8601 = ExtraCodecs.instantCodec(DateTimeFormatter.ISO_INSTANT);
 
     public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
         return new XorCodec<F, S>(codec, codec2);
@@ -267,6 +270,16 @@ public class ExtraCodecs {
                 }
             }
         });
+    }
+
+    public static Codec<Instant> instantCodec(DateTimeFormatter dateTimeFormatter) {
+        return Codec.STRING.comapFlatMap(string -> {
+            try {
+                return DataResult.success(Instant.from(dateTimeFormatter.parse((CharSequence)string)));
+            } catch (Exception exception) {
+                return DataResult.error(exception.getMessage());
+            }
+        }, dateTimeFormatter::format);
     }
 
     static final class XorCodec<F, S>

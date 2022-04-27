@@ -77,8 +77,7 @@ public abstract class GuiComponent {
         bufferBuilder.vertex(matrix4f, k, l, 0.0f).color(g, h, o, f).endVertex();
         bufferBuilder.vertex(matrix4f, k, j, 0.0f).color(g, h, o, f).endVertex();
         bufferBuilder.vertex(matrix4f, i, j, 0.0f).color(g, h, o, f).endVertex();
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
@@ -183,8 +182,7 @@ public abstract class GuiComponent {
         bufferBuilder.vertex(matrix4f, j, l, m).uv(g, n).endVertex();
         bufferBuilder.vertex(matrix4f, j, k, m).uv(g, h).endVertex();
         bufferBuilder.vertex(matrix4f, i, k, m).uv(f, h).endVertex();
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     public int getBlitOffset() {

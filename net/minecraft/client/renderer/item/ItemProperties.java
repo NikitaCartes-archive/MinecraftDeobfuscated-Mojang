@@ -177,6 +177,7 @@ public class ItemProperties {
             }
             return 1.0f;
         });
+        ItemProperties.register(Items.GOAT_HORN, new ResourceLocation("tooting"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
     }
 }
 

@@ -5,7 +5,6 @@ package net.minecraft.client.gui.chat;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.text2speech.Narrator;
-import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -14,10 +13,11 @@ import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.gui.chat.ChatListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,7 +29,7 @@ implements ChatListener {
     private final Narrator narrator = Narrator.getNarrator();
 
     @Override
-    public void handle(ChatType chatType, Component component, UUID uUID) {
+    public void handle(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
         NarratorStatus narratorStatus = NarratorChatListener.getStatus();
         if (narratorStatus == NarratorStatus.OFF) {
             return;
@@ -39,11 +39,18 @@ implements ChatListener {
             return;
         }
         if (narratorStatus == NarratorStatus.ALL || narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT || narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
-            Component component2 = ComponentUtils.replaceTranslatableKey(component, "chat.type.text", "chat.type.text.narrate");
+            Component component2 = this.decorateMessage(chatType, component, chatSender);
             String string = component2.getString();
             this.logNarratedMessage(string);
             this.narrator.say(string, chatType.shouldInterrupt());
         }
+    }
+
+    private Component decorateMessage(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
+        if (chatSender != null && chatType == ChatType.CHAT) {
+            return Component.translatable("chat.type.text.narrate", chatSender.name(), component);
+        }
+        return component;
     }
 
     public void sayNow(Component component) {

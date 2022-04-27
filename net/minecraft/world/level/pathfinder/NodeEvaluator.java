@@ -13,6 +13,7 @@ import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Target;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NodeEvaluator {
     protected PathNavigationRegion level;
@@ -39,17 +40,29 @@ public abstract class NodeEvaluator {
         this.mob = null;
     }
 
+    @Nullable
     protected Node getNode(BlockPos blockPos) {
         return this.getNode(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
+    @Nullable
     protected Node getNode(int i, int j, int k) {
         return this.nodes.computeIfAbsent(Node.createHash(i, j, k), l -> new Node(i, j, k));
     }
 
+    @Nullable
     public abstract Node getStart();
 
+    @Nullable
     public abstract Target getGoal(double var1, double var3, double var5);
+
+    @Nullable
+    protected Target getTargetFromNode(@Nullable Node node) {
+        if (node != null) {
+            return new Target(node);
+        }
+        return null;
+    }
 
     public abstract int getNeighbors(Node[] var1, Node var2);
 

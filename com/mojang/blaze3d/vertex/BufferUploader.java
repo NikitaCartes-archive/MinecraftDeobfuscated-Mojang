@@ -7,8 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
-import java.nio.ByteBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
@@ -29,40 +27,37 @@ public class BufferUploader {
         lastImmediateBuffer = null;
     }
 
-    public static void drawWithShader(BufferBuilder bufferBuilder) {
+    public static void drawWithShader(BufferBuilder.RenderedBuffer renderedBuffer) {
         if (!RenderSystem.isOnRenderThreadOrInit()) {
-            RenderSystem.recordRenderCall(() -> BufferUploader._drawWithShader(bufferBuilder));
+            RenderSystem.recordRenderCall(() -> BufferUploader._drawWithShader(renderedBuffer));
         } else {
-            BufferUploader._drawWithShader(bufferBuilder);
+            BufferUploader._drawWithShader(renderedBuffer);
         }
     }
 
-    private static void _drawWithShader(BufferBuilder bufferBuilder) {
-        VertexBuffer vertexBuffer = BufferUploader.upload(bufferBuilder);
+    private static void _drawWithShader(BufferBuilder.RenderedBuffer renderedBuffer) {
+        VertexBuffer vertexBuffer = BufferUploader.upload(renderedBuffer);
         if (vertexBuffer != null) {
             vertexBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
         }
     }
 
-    public static void draw(BufferBuilder bufferBuilder) {
-        VertexBuffer vertexBuffer = BufferUploader.upload(bufferBuilder);
+    public static void draw(BufferBuilder.RenderedBuffer renderedBuffer) {
+        VertexBuffer vertexBuffer = BufferUploader.upload(renderedBuffer);
         if (vertexBuffer != null) {
             vertexBuffer.draw();
         }
     }
 
     @Nullable
-    private static VertexBuffer upload(BufferBuilder bufferBuilder) {
+    private static VertexBuffer upload(BufferBuilder.RenderedBuffer renderedBuffer) {
         RenderSystem.assertOnRenderThread();
-        Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
-        BufferBuilder.DrawState drawState = pair.getFirst();
-        ByteBuffer byteBuffer = pair.getSecond();
-        byteBuffer.clear();
-        if (drawState.vertexCount() <= 0) {
+        if (renderedBuffer.isEmpty()) {
+            renderedBuffer.release();
             return null;
         }
-        VertexBuffer vertexBuffer = BufferUploader.bindImmediateBuffer(drawState.format());
-        vertexBuffer.upload(drawState, byteBuffer);
+        VertexBuffer vertexBuffer = BufferUploader.bindImmediateBuffer(renderedBuffer.drawState().format());
+        vertexBuffer.upload(renderedBuffer);
         return vertexBuffer;
     }
 

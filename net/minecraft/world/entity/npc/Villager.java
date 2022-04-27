@@ -75,6 +75,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -697,22 +698,7 @@ VillagerDataHolder {
 
     @Override
     protected void pickUpItem(ItemEntity itemEntity) {
-        ItemStack itemStack = itemEntity.getItem();
-        if (this.wantsToPickUp(itemStack)) {
-            SimpleContainer simpleContainer = this.getInventory();
-            boolean bl = simpleContainer.canAddItem(itemStack);
-            if (!bl) {
-                return;
-            }
-            this.onItemPickup(itemEntity);
-            this.take(itemEntity, itemStack.getCount());
-            ItemStack itemStack2 = simpleContainer.addItem(itemStack);
-            if (itemStack2.isEmpty()) {
-                itemEntity.discard();
-            } else {
-                itemStack.setCount(itemStack2.getCount());
-            }
-        }
+        InventoryCarrier.pickUpItem(this, this, itemEntity);
     }
 
     @Override

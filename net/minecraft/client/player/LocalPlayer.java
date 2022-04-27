@@ -4,10 +4,13 @@
 package net.minecraft.client.player;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
+import java.security.GeneralSecurityException;
+import java.security.Signature;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -55,6 +58,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -86,11 +90,14 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class LocalPlayer
 extends AbstractClientPlayer {
+    public static final Logger LOGGER = LogUtils.getLogger();
     private static final int POSITION_REMINDER_INTERVAL = 20;
     private static final int WATER_VISION_MAX_TIME = 600;
     private static final int WATER_VISION_QUICK_TIME = 100;
@@ -279,7 +286,23 @@ extends AbstractClientPlayer {
     }
 
     public void chat(String string) {
-        this.connection.send(new ServerboundChatPacket(string));
+        Instant instant = Instant.now();
+        string = StringUtils.normalizeSpace(string);
+        this.connection.send(new ServerboundChatPacket(instant, string, this.signChatMessage(instant, string)));
+    }
+
+    private Crypt.SaltSignaturePair signChatMessage(Instant instant, String string) {
+        try {
+            Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
+            if (signature != null) {
+                long l = Crypt.SaltSupplier.getLong();
+                Crypt.updateChatSignature(signature, l, this.uuid, instant, string);
+                return new Crypt.SaltSignaturePair(l, signature.sign());
+            }
+        } catch (GeneralSecurityException generalSecurityException) {
+            LOGGER.error("Failed to sign chat message {}", (Object)instant, (Object)generalSecurityException);
+        }
+        return Crypt.SaltSignaturePair.EMPTY;
     }
 
     @Override
@@ -454,7 +477,7 @@ extends AbstractClientPlayer {
     }
 
     @Override
-    public void sendMessage(Component component, UUID uUID) {
+    public void sendSystemMessage(Component component) {
         this.minecraft.gui.getChat().addMessage(component);
     }
 

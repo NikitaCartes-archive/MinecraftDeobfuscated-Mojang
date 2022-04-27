@@ -44,6 +44,9 @@ public class PathFinder {
         this.openSet.clear();
         this.nodeEvaluator.prepare(pathNavigationRegion, mob);
         Node node = this.nodeEvaluator.getStart();
+        if (node == null) {
+            return null;
+        }
         Map<Target, BlockPos> map = set.stream().collect(Collectors.toMap(blockPos -> this.nodeEvaluator.getGoal(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Function.identity()));
         Path path = this.findPath(pathNavigationRegion.getProfiler(), node, map, f, i, g);
         this.nodeEvaluator.done();

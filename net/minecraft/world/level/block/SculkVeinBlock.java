@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.PushReaction;
 
 public class SculkVeinBlock
@@ -187,7 +188,11 @@ SimpleWaterloggedBlock {
             if (!fluidState.isEmpty() && !fluidState.is(Fluids.WATER)) {
                 return false;
             }
-            return blockState.getMaterial().isReplaceable() || super.stateCanBeReplaced(blockGetter, blockPos, blockPos2, direction, blockState);
+            Material material = blockState.getMaterial();
+            if (material == Material.FIRE) {
+                return false;
+            }
+            return material.isReplaceable() || super.stateCanBeReplaced(blockGetter, blockPos, blockPos2, direction, blockState);
         }
 
         @Override

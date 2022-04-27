@@ -24,6 +24,7 @@ public final class ItemTags {
     public static final TagKey<Item> DOORS = ItemTags.bind("doors");
     public static final TagKey<Item> SAPLINGS = ItemTags.bind("saplings");
     public static final TagKey<Item> LOGS_THAT_BURN = ItemTags.bind("logs_that_burn");
+    public static final TagKey<Item> OVERWORLD_NATURAL_LOGS = ItemTags.bind("overworld_natural_logs");
     public static final TagKey<Item> LOGS = ItemTags.bind("logs");
     public static final TagKey<Item> DARK_OAK_LOGS = ItemTags.bind("dark_oak_logs");
     public static final TagKey<Item> OAK_LOGS = ItemTags.bind("oak_logs");

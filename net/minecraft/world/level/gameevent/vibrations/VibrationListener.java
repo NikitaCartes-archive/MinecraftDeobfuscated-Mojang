@@ -145,9 +145,6 @@ implements GameEventListener {
                 if (entity.dampensVibrations()) {
                     return false;
                 }
-                if (gameEvent.is(GameEventTags.DAMPENABLE_VIBRATIONS)) {
-                    return !entity.getBlockStateOn().is(BlockTags.DAMPENS_VIBRATIONS);
-                }
             }
             if (context.affectedState() != null) {
                 return !context.affectedState().is(BlockTags.DAMPENS_VIBRATIONS);

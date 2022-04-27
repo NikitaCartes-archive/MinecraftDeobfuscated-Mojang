@@ -306,9 +306,11 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
-        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
-        this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+        if (bl) {
+            this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
+        }
     }
 }
 

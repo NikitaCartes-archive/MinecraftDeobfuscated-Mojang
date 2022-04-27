@@ -33,13 +33,13 @@ public class MsgCommand {
         Entity entity = commandSourceStack.getEntity();
         if (entity instanceof ServerPlayer) {
             ServerPlayer serverPlayer = (ServerPlayer)entity;
-            consumer = component2 -> serverPlayer.sendMessage(Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), serverPlayer.getUUID());
+            consumer = component2 -> serverPlayer.sendUnsignedMessageFrom(Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), serverPlayer.getUUID());
         } else {
             consumer = component2 -> commandSourceStack.sendSuccess(Component.translatable("commands.message.display.outgoing", component2, component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false);
         }
         for (ServerPlayer serverPlayer2 : collection) {
             consumer.accept(serverPlayer2.getDisplayName());
-            serverPlayer2.sendMessage(Component.translatable("commands.message.display.incoming", commandSourceStack.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), uUID);
+            serverPlayer2.sendUnsignedMessageFrom(Component.translatable("commands.message.display.incoming", commandSourceStack.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), uUID);
         }
         return collection.size();
     }

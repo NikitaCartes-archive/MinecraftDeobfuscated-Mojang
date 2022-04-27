@@ -5,7 +5,6 @@ package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
@@ -21,9 +20,9 @@ public class SayCommand {
             MutableComponent component2 = Component.translatable("chat.type.announcement", ((CommandSourceStack)commandContext.getSource()).getDisplayName(), component);
             Entity entity = ((CommandSourceStack)commandContext.getSource()).getEntity();
             if (entity != null) {
-                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastMessage(component2, ChatType.CHAT, entity.getUUID());
+                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastUnsignedMessage(component2, ChatType.SYSTEM, entity.getUUID());
             } else {
-                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastMessage(component2, ChatType.SYSTEM, Util.NIL_UUID);
+                ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().broadcastSystemMessage(component2, serverPlayer -> component2, ChatType.SYSTEM);
             }
             return 1;
         })));

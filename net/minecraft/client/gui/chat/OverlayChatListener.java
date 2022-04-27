@@ -3,13 +3,14 @@
  */
 package net.minecraft.client.gui.chat;
 
-import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.ChatListener;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class OverlayChatListener
@@ -21,7 +22,7 @@ implements ChatListener {
     }
 
     @Override
-    public void handle(ChatType chatType, Component component, UUID uUID) {
+    public void handle(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
         this.minecraft.gui.setOverlayMessage(component, false);
     }
 }

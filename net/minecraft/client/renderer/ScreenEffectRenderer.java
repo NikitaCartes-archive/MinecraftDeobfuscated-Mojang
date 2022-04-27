@@ -84,8 +84,7 @@ public class ScreenEffectRenderer {
         bufferBuilder.vertex(matrix4f, 1.0f, -1.0f, -0.5f).color(0.1f, 0.1f, 0.1f, 1.0f).uv(l, o).endVertex();
         bufferBuilder.vertex(matrix4f, 1.0f, 1.0f, -0.5f).color(0.1f, 0.1f, 0.1f, 1.0f).uv(l, n).endVertex();
         bufferBuilder.vertex(matrix4f, -1.0f, 1.0f, -0.5f).color(0.1f, 0.1f, 0.1f, 1.0f).uv(m, n).endVertex();
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     private static void renderWater(Minecraft minecraft, PoseStack poseStack) {
@@ -112,8 +111,7 @@ public class ScreenEffectRenderer {
         bufferBuilder.vertex(matrix4f, 1.0f, -1.0f, -0.5f).uv(0.0f + m, 4.0f + n).endVertex();
         bufferBuilder.vertex(matrix4f, 1.0f, 1.0f, -0.5f).uv(0.0f + m, 0.0f + n).endVertex();
         bufferBuilder.vertex(matrix4f, -1.0f, 1.0f, -0.5f).uv(4.0f + m, 0.0f + n).endVertex();
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.disableBlend();
     }
 
@@ -154,8 +152,7 @@ public class ScreenEffectRenderer {
             bufferBuilder.vertex(matrix4f, 0.5f, -0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(m, p).endVertex();
             bufferBuilder.vertex(matrix4f, 0.5f, 0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(m, o).endVertex();
             bufferBuilder.vertex(matrix4f, -0.5f, 0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(n, o).endVertex();
-            bufferBuilder.end();
-            BufferUploader.drawWithShader(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder.end());
             poseStack.popPose();
         }
         RenderSystem.disableBlend();

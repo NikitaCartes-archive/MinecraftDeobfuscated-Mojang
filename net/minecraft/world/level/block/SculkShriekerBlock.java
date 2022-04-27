@@ -58,10 +58,11 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+        Entity entity2 = entity instanceof Player ? entity : (entity.getControllingPassenger() instanceof Player ? entity.getControllingPassenger() : null);
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            if (entity instanceof Player || entity.getControllingPassenger() instanceof Player) {
-                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.shriek(serverLevel));
+            if (entity2 != null) {
+                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.shriek(serverLevel, entity2));
             }
         }
         super.stepOn(level, blockPos, blockState, entity);
@@ -135,9 +136,11 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
-        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
-        this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+        if (bl) {
+            this.tryDropExperience(serverLevel, blockPos, itemStack, ConstantInt.of(5));
+        }
     }
 
     @Override

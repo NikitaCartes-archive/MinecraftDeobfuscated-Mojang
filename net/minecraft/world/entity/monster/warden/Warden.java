@@ -214,7 +214,7 @@ implements VibrationListener.VibrationListenerConfig {
     public boolean doHurtTarget(Entity entity) {
         this.level.broadcastEntityEvent(this, (byte)4);
         this.playSound(SoundEvents.WARDEN_ATTACK_IMPACT, 10.0f, this.getVoicePitch());
-        SonicBoom.setCooldown(this, 100);
+        SonicBoom.setCooldown(this, 40);
         return super.doHurtTarget(entity);
     }
 

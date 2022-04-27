@@ -41,11 +41,11 @@ public class TeamMsgCommand {
         List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers();
         for (ServerPlayer serverPlayer : list) {
             if (serverPlayer == entity) {
-                serverPlayer.sendMessage(Component.translatable("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
+                serverPlayer.sendUnsignedMessageFrom(Component.translatable("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
                 continue;
             }
             if (serverPlayer.getTeam() != playerTeam) continue;
-            serverPlayer.sendMessage(Component.translatable("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
+            serverPlayer.sendUnsignedMessageFrom(Component.translatable("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
         }
         return list.size();
     }

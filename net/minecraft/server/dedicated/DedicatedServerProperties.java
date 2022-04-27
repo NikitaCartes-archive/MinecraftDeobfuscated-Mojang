@@ -91,6 +91,7 @@ extends Settings<DedicatedServerProperties> {
     public final String textFilteringConfig = this.get("text-filtering-config", "");
     public final Settings.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
     public final Settings.MutableValue<Boolean> whiteList = this.getMutable("white-list", false);
+    public final boolean enforceSecureProfile = this.get("enforce-secure-profile", false);
     private final WorldGenProperties worldGenProperties = new WorldGenProperties(this.get("level-seed", ""), this.get("generator-settings", (String string) -> GsonHelper.parse(!string.isEmpty() ? string : "{}"), new JsonObject()), this.get("generate-structures", true), this.get("level-type", (String string) -> string.toLowerCase(Locale.ROOT), WorldPresets.NORMAL.location().toString()));
     @Nullable
     private WorldGenSettings worldGenSettings;

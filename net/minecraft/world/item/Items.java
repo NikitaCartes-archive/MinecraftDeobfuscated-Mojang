@@ -59,6 +59,7 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.FlintAndSteelItem;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.item.GameMasterBlockItem;
+import net.minecraft.world.item.GoatHornItem;
 import net.minecraft.world.item.HangingEntityItem;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.HoneyBottleItem;
@@ -1195,6 +1196,7 @@ public class Items {
     public static final Item MOJANG_BANNER_PATTERN = Items.registerItem("mojang_banner_pattern", (Item)new BannerPatternItem(BannerPattern.MOJANG, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.EPIC)));
     public static final Item GLOBE_BANNER_PATTERN = Items.registerItem("globe_banner_pattern", (Item)new BannerPatternItem(BannerPattern.GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
     public static final Item PIGLIN_BANNER_PATTERN = Items.registerItem("piglin_banner_pattern", (Item)new BannerPatternItem(BannerPattern.PIGLIN, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
+    public static final Item GOAT_HORN = Items.registerItem("goat_horn", (Item)new GoatHornItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).stacksTo(1)));
     public static final Item COMPOSTER = Items.registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BARREL = Items.registerBlock(Blocks.BARREL, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SMOKER = Items.registerBlock(Blocks.SMOKER, CreativeModeTab.TAB_DECORATIONS);
