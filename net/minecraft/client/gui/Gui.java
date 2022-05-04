@@ -5,7 +5,6 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -19,7 +18,6 @@ import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
@@ -141,7 +139,7 @@ extends GuiComponent {
     private int screenHeight;
     private float autosaveIndicatorValue;
     private float lastAutosaveIndicatorValue;
-    private final Map<ChatType, List<ChatListener>> chatListeners = Maps.newHashMap();
+    private final List<ChatListener> chatListeners;
     private float scopeScale;
 
     public Gui(Minecraft minecraft, ItemRenderer itemRenderer) {
@@ -153,15 +151,7 @@ extends GuiComponent {
         this.tabList = new PlayerTabOverlay(minecraft, this);
         this.bossOverlay = new BossHealthOverlay(minecraft);
         this.subtitleOverlay = new SubtitleOverlay(minecraft);
-        for (ChatType chatType : ChatType.values()) {
-            this.chatListeners.put(chatType, Lists.newArrayList());
-        }
-        NarratorChatListener chatListener = NarratorChatListener.INSTANCE;
-        this.chatListeners.get((Object)ChatType.CHAT).add(new StandardChatListener(minecraft));
-        this.chatListeners.get((Object)ChatType.CHAT).add(chatListener);
-        this.chatListeners.get((Object)ChatType.SYSTEM).add(new StandardChatListener(minecraft));
-        this.chatListeners.get((Object)ChatType.SYSTEM).add(chatListener);
-        this.chatListeners.get((Object)ChatType.GAME_INFO).add(new OverlayChatListener(minecraft));
+        this.chatListeners = List.of(new StandardChatListener(minecraft), NarratorChatListener.INSTANCE, new OverlayChatListener(minecraft));
         this.resetTitleTimes();
     }
 
@@ -1136,7 +1126,7 @@ extends GuiComponent {
         if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
             return;
         }
-        for (ChatListener chatListener : this.chatListeners.get((Object)chatType)) {
+        for (ChatListener chatListener : this.chatListeners) {
             chatListener.handle(chatType, component, chatSender);
         }
     }
@@ -1145,7 +1135,7 @@ extends GuiComponent {
         if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
             return;
         }
-        for (ChatListener chatListener : this.chatListeners.get((Object)chatType)) {
+        for (ChatListener chatListener : this.chatListeners) {
             chatListener.handle(chatType, component, null);
         }
     }

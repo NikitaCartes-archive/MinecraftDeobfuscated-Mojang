@@ -43,28 +43,23 @@ implements Packet<ClientGamePacketListener> {
         this.factorData = mobEffectInstance.getFactorData().orElse(null);
     }
 
-    public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.entityId = friendlyByteBuf.readVarInt();
-        this.effect = friendlyByteBuf.readById(Registry.MOB_EFFECT);
-        this.effectAmplifier = friendlyByteBuf.readByte();
-        this.effectDurationTicks = friendlyByteBuf.readVarInt();
-        this.flags = friendlyByteBuf.readByte();
-        boolean bl = friendlyByteBuf.readBoolean();
-        this.factorData = bl ? friendlyByteBuf.readWithCodec(MobEffectInstance.FactorData.CODEC) : null;
+    public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf2) {
+        this.entityId = friendlyByteBuf2.readVarInt();
+        this.effect = friendlyByteBuf2.readById(Registry.MOB_EFFECT);
+        this.effectAmplifier = friendlyByteBuf2.readByte();
+        this.effectDurationTicks = friendlyByteBuf2.readVarInt();
+        this.flags = friendlyByteBuf2.readByte();
+        this.factorData = (MobEffectInstance.FactorData)friendlyByteBuf2.readNullable(friendlyByteBuf -> friendlyByteBuf.readWithCodec(MobEffectInstance.FactorData.CODEC));
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeVarInt(this.entityId);
-        friendlyByteBuf.writeId(Registry.MOB_EFFECT, this.effect);
-        friendlyByteBuf.writeByte(this.effectAmplifier);
-        friendlyByteBuf.writeVarInt(this.effectDurationTicks);
-        friendlyByteBuf.writeByte(this.flags);
-        boolean bl = this.factorData != null;
-        friendlyByteBuf.writeBoolean(bl);
-        if (bl) {
-            friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, this.factorData);
-        }
+    public void write(FriendlyByteBuf friendlyByteBuf2) {
+        friendlyByteBuf2.writeVarInt(this.entityId);
+        friendlyByteBuf2.writeId(Registry.MOB_EFFECT, this.effect);
+        friendlyByteBuf2.writeByte(this.effectAmplifier);
+        friendlyByteBuf2.writeVarInt(this.effectDurationTicks);
+        friendlyByteBuf2.writeByte(this.flags);
+        friendlyByteBuf2.writeNullable(this.factorData, (friendlyByteBuf, factorData) -> friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, factorData));
     }
 
     public boolean isSuperLongDuration() {

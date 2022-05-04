@@ -37,14 +37,16 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.SignedMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -62,6 +64,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
@@ -104,6 +107,7 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -635,7 +639,7 @@ ServerGamePacketListener {
             JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
             jigsawBlockEntity.setName(serverboundSetJigsawBlockPacket.getName());
             jigsawBlockEntity.setTarget(serverboundSetJigsawBlockPacket.getTarget());
-            jigsawBlockEntity.setPool(serverboundSetJigsawBlockPacket.getPool());
+            jigsawBlockEntity.setPool(ResourceKey.create(Registry.TEMPLATE_POOL_REGISTRY, serverboundSetJigsawBlockPacket.getPool()));
             jigsawBlockEntity.setFinalState(serverboundSetJigsawBlockPacket.getFinalState());
             jigsawBlockEntity.setJoint(serverboundSetJigsawBlockPacket.getJoint());
             jigsawBlockEntity.setChanged();
@@ -1095,20 +1099,32 @@ ServerGamePacketListener {
 
     @Override
     public void handleChat(ServerboundChatPacket serverboundChatPacket) {
-        if (serverboundChatPacket.hasExpired(Instant.now())) {
-            LOGGER.warn("{} tried to send expired message", (Object)this.player.getName().getString());
-            return;
-        }
         if (ServerGamePacketListenerImpl.isChatMessageIllegal(serverboundChatPacket.getMessage())) {
             this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
             return;
         }
-        String string = serverboundChatPacket.getMessageNormalized();
-        if (string.startsWith("/")) {
-            PacketUtils.ensureRunningOnSameThread(serverboundChatPacket, this, this.player.getLevel());
-            this.handleChat(serverboundChatPacket, TextFilter.FilteredText.passThrough(string));
-        } else {
-            this.filterTextPacket(serverboundChatPacket.getMessage(), (TextFilter.FilteredText filteredText) -> this.handleChat(serverboundChatPacket, (TextFilter.FilteredText)filteredText));
+        if (serverboundChatPacket.hasExpired(Instant.now())) {
+            LOGGER.warn("{} tried to send expired message: '{}'", (Object)this.player.getName().getString(), (Object)serverboundChatPacket.getMessage());
+            return;
+        }
+        this.filterTextPacket(serverboundChatPacket.getMessage(), (TextFilter.FilteredText filteredText) -> this.handleChat(serverboundChatPacket, (TextFilter.FilteredText)filteredText));
+    }
+
+    @Override
+    public void handleChatCommand(ServerboundChatCommandPacket serverboundChatCommandPacket) {
+        if (ServerGamePacketListenerImpl.isChatMessageIllegal(serverboundChatCommandPacket.command())) {
+            this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
+            return;
+        }
+        if (serverboundChatCommandPacket.hasExpired(Instant.now())) {
+            LOGGER.warn("{} tried to send expired command: '{}'", (Object)this.player.getName().getString(), (Object)serverboundChatCommandPacket.command());
+            return;
+        }
+        PacketUtils.ensureRunningOnSameThread(serverboundChatCommandPacket, this, this.player.getLevel());
+        if (this.resetLastActionTime()) {
+            CommandSourceStack commandSourceStack = this.player.createCommandSourceStack().withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
+            this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
+            this.detectRateSpam();
         }
     }
 
@@ -1120,30 +1136,31 @@ ServerGamePacketListener {
         return false;
     }
 
-    private void handleChat(ServerboundChatPacket serverboundChatPacket, TextFilter.FilteredText filteredText) {
+    private boolean resetLastActionTime() {
         if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-            this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), ChatType.SYSTEM));
-            return;
+            Registry<ChatType> registry = this.player.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+            int i = registry.getId(registry.get(ChatType.SYSTEM));
+            this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), i));
+            return false;
         }
         this.player.resetLastActionTime();
-        String string = serverboundChatPacket.getMessageNormalized();
-        if (string.startsWith("/")) {
-            this.handleCommand(string);
-        } else {
-            String string2 = filteredText.getFiltered();
-            MutableComponent component = string2.isEmpty() ? null : Component.literal(string2);
-            MutableComponent component2 = Component.literal(serverboundChatPacket.getMessage());
-            ChatSender chatSender = this.player.asChatSender();
-            this.server.getPlayerList().broadcastPlayerMessage(component2, serverPlayer -> this.player.shouldFilterMessageTo((ServerPlayer)serverPlayer) ? component : component2, ChatType.CHAT, chatSender, serverboundChatPacket.getTimeStamp(), serverboundChatPacket.getSaltSignature());
+        return true;
+    }
+
+    private void handleChat(ServerboundChatPacket serverboundChatPacket, TextFilter.FilteredText filteredText) {
+        if (this.resetLastActionTime()) {
+            MessageSignature messageSignature = serverboundChatPacket.getSignature(this.player.getUUID());
+            SignedMessage signedMessage = new SignedMessage(Component.literal(serverboundChatPacket.getMessage()), messageSignature);
+            this.server.getPlayerList().broadcastChatMessage(signedMessage, filteredText, this.player, ChatType.CHAT);
+            this.detectRateSpam();
         }
+    }
+
+    private void detectRateSpam() {
         this.chatSpamTickCount += 20;
         if (this.chatSpamTickCount > 200 && !this.server.getPlayerList().isOp(this.player.getGameProfile())) {
             this.disconnect(Component.translatable("disconnect.spam"));
         }
-    }
-
-    private void handleCommand(String string) {
-        this.server.getCommands().performCommand(this.player.createCommandSourceStack(), string);
     }
 
     @Override

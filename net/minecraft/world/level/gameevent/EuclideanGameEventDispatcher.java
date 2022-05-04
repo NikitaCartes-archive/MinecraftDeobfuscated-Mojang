@@ -9,13 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class EuclideanGameEventDispatcher
 implements GameEventDispatcher {
@@ -57,9 +57,9 @@ implements GameEventDispatcher {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     @Override
-    public void post(GameEvent gameEvent, Vec3 vec3, @Nullable GameEvent.Context context) {
-        boolean bl = false;
+    public boolean walkListeners(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context, BiConsumer<GameEventListener, Vec3> biConsumer) {
         this.processing = true;
+        boolean bl = false;
         try {
             Iterator<GameEventListener> iterator = this.listeners.iterator();
             while (iterator.hasNext()) {
@@ -68,7 +68,9 @@ implements GameEventDispatcher {
                     iterator.remove();
                     continue;
                 }
-                if (!EuclideanGameEventDispatcher.postToListener(this.level, gameEvent, context, vec3, gameEventListener)) continue;
+                Optional<Vec3> optional = EuclideanGameEventDispatcher.getPostableListenerPosition(this.level, vec3, gameEventListener);
+                if (!optional.isPresent()) continue;
+                biConsumer.accept(gameEventListener, optional.get());
                 bl = true;
             }
         } finally {
@@ -82,19 +84,20 @@ implements GameEventDispatcher {
             this.listeners.removeAll(this.listenersToRemove);
             this.listenersToRemove.clear();
         }
-        if (bl) {
-            DebugPackets.sendGameEventInfo(this.level, gameEvent, vec3);
-        }
+        return bl;
     }
 
-    private static boolean postToListener(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, GameEventListener gameEventListener) {
+    private static Optional<Vec3> getPostableListenerPosition(ServerLevel serverLevel, Vec3 vec3, GameEventListener gameEventListener) {
         int i;
         Optional<Vec3> optional = gameEventListener.getListenerSource().getPosition(serverLevel);
         if (optional.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
         double d = optional.get().distanceToSqr(vec3);
-        return d <= (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius()) && gameEventListener.handleGameEvent(serverLevel, gameEvent, context, vec3);
+        if (d > (double)(i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius())) {
+            return Optional.empty();
+        }
+        return optional;
     }
 }
 

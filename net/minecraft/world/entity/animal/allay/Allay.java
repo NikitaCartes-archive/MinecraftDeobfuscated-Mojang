@@ -71,8 +71,8 @@ VibrationListener.VibrationListenerConfig {
     private static final int GAME_EVENT_LISTENER_RANGE = 16;
     private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 1, 1);
     private static final int ANIMATION_DURATION = 5;
-    protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
+    protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS);
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.HURT_BY, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
     public static final ImmutableList<Float> THROW_SOUND_PITCHES = ImmutableList.of(Float.valueOf(0.5625f), Float.valueOf(0.625f), Float.valueOf(0.75f), Float.valueOf(0.9375f), Float.valueOf(1.0f), Float.valueOf(1.0f), Float.valueOf(1.125f), Float.valueOf(1.25f), Float.valueOf(1.5f), Float.valueOf(1.875f), Float.valueOf(2.0f), Float.valueOf(2.25f), new Float[]{Float.valueOf(2.5f), Float.valueOf(3.0f), Float.valueOf(3.75f), Float.valueOf(4.0f)});
     private final DynamicGameEventListener<VibrationListener> dynamicGameEventListener;
     private final SimpleContainer inventory = new SimpleContainer(1);
@@ -273,7 +273,7 @@ VibrationListener.VibrationListenerConfig {
     @Override
     public boolean wantsToPickUp(ItemStack itemStack) {
         ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-        return !itemStack2.isEmpty() && itemStack2.sameItemStackIgnoreDurability(itemStack) && this.inventory.canAddItem(itemStack2);
+        return !itemStack2.isEmpty() && itemStack2.sameItemStackIgnoreDurability(itemStack) && this.inventory.canAddItem(itemStack);
     }
 
     @Override
@@ -327,7 +327,7 @@ VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
-        if (this.isNoAi()) {
+        if (this.level != serverLevel || this.isRemoved() || this.isNoAi()) {
             return false;
         }
         if (!this.brain.hasMemoryValue(MemoryModuleType.LIKED_NOTEBLOCK_POSITION)) {
@@ -352,15 +352,22 @@ VibrationListener.VibrationListenerConfig {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
+        compoundTag.put("Inventory", this.inventory.createTag());
         VibrationListener.codec(this).encodeStart(NbtOps.INSTANCE, this.dynamicGameEventListener.getListener()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", (Tag)tag));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
+        this.inventory.fromTag(compoundTag.getList("Inventory", 10));
         if (compoundTag.contains("listener", 10)) {
             VibrationListener.codec(this).parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("listener"))).resultOrPartial(LOGGER::error).ifPresent(vibrationListener -> this.dynamicGameEventListener.updateListener((VibrationListener)vibrationListener, this.level));
         }
+    }
+
+    @Override
+    protected boolean shouldStayCloseToLeashHolder() {
+        return false;
     }
 }
 

@@ -16,6 +16,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +61,7 @@ import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -756,6 +758,14 @@ public class Util {
             LOGGER.warn("Tasks left in queue: {}", (Object)i);
         }
         return object;
+    }
+
+    public static <T> ToIntFunction<T> createIndexLookup(List<T> list) {
+        Object2IntOpenHashMap<T> object2IntMap = new Object2IntOpenHashMap<T>();
+        for (int i = 0; i < list.size(); ++i) {
+            object2IntMap.put(list.get(i), i);
+        }
+        return object2IntMap;
     }
 
     /*

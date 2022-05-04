@@ -50,7 +50,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -159,10 +158,10 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.searchtree.MutableSearchTree;
-import net.minecraft.client.searchtree.ReloadableIdSearchTree;
-import net.minecraft.client.searchtree.ReloadableSearchTree;
+import net.minecraft.client.searchtree.FullTextSearchTree;
+import net.minecraft.client.searchtree.IdSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
+import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
@@ -669,20 +668,9 @@ implements WindowEventHandler {
     }
 
     private void createSearchTrees() {
-        ReloadableSearchTree<ItemStack> reloadableSearchTree = new ReloadableSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(Registry.ITEM.getKey(itemStack.getItem())));
-        ReloadableIdSearchTree<ItemStack> reloadableIdSearchTree = new ReloadableIdSearchTree<ItemStack>(itemStack -> itemStack.getTags().map(TagKey::location));
-        NonNullList<ItemStack> nonNullList = NonNullList.create();
-        for (Item item : Registry.ITEM) {
-            item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
-        }
-        nonNullList.forEach(itemStack -> {
-            reloadableSearchTree.add((ItemStack)itemStack);
-            reloadableIdSearchTree.add((ItemStack)itemStack);
-        });
-        ReloadableSearchTree<RecipeCollection> reloadableSearchTree2 = new ReloadableSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> Registry.ITEM.getKey(recipe.getResultItem().getItem())));
-        this.searchRegistry.register(SearchRegistry.CREATIVE_NAMES, reloadableSearchTree);
-        this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, reloadableIdSearchTree);
-        this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, reloadableSearchTree2);
+        this.searchRegistry.register(SearchRegistry.CREATIVE_NAMES, list -> new FullTextSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(Registry.ITEM.getKey(itemStack.getItem())), (List<ItemStack>)list));
+        this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, list -> new IdSearchTree<ItemStack>(itemStack -> itemStack.getTags().map(TagKey::location), (List<ItemStack>)list));
+        this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, list -> new FullTextSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> Registry.ITEM.getKey(recipe.getResultItem().getItem())), (List<RecipeCollection>)list));
     }
 
     private void onFullscreenError(int i, long l) {
@@ -1717,7 +1705,7 @@ implements WindowEventHandler {
         Connection connection = Connection.connectToLocalServer(socketAddress);
         connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, component -> {}));
         connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
-        connection.send(new ServerboundHelloPacket(this.getUser().getName(), Optional.ofNullable(this.profileKeyPairManager.profilePublicKey())));
+        connection.send(new ServerboundHelloPacket(this.getUser().getName(), this.profileKeyPairManager.profilePublicKeyData()));
         this.pendingConnection = connection;
     }
 
@@ -2149,8 +2137,12 @@ implements WindowEventHandler {
         return this.itemRenderer;
     }
 
-    public <T> MutableSearchTree<T> getSearchTree(SearchRegistry.Key<T> key) {
+    public <T> SearchTree<T> getSearchTree(SearchRegistry.Key<T> key) {
         return this.searchRegistry.getTree(key);
+    }
+
+    public <T> void populateSearchTree(SearchRegistry.Key<T> key, List<T> list) {
+        this.searchRegistry.populate(key, list);
     }
 
     public FrameTimer getFrameTimer() {

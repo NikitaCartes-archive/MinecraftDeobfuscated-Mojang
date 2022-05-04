@@ -4,42 +4,34 @@
 package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import java.util.concurrent.Executor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.chat.SignedMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.network.TextFilter;
+import net.minecraft.server.players.PlayerList;
 
 public class EmoteCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("me").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("action", StringArgumentType.greedyString()).executes(commandContext -> {
-            String string = StringArgumentType.getString(commandContext, "action");
-            Entity entity = ((CommandSourceStack)commandContext.getSource()).getEntity();
-            MinecraftServer minecraftServer = ((CommandSourceStack)commandContext.getSource()).getServer();
-            if (entity instanceof ServerPlayer) {
-                ServerPlayer serverPlayer = (ServerPlayer)entity;
-                serverPlayer.getTextFilter().processStreamMessage(string).thenAcceptAsync(filteredText -> {
-                    String string = filteredText.getFiltered();
-                    Component component = string.isEmpty() ? null : EmoteCommands.createMessage(commandContext, string);
-                    Component component2 = EmoteCommands.createMessage(commandContext, filteredText.getRaw());
-                    minecraftServer.getPlayerList().broadcastSystemMessage(component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? component : component2, ChatType.SYSTEM);
-                }, (Executor)minecraftServer);
-                return 1;
+        commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("me").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("action", MessageArgument.message()).executes(commandContext -> {
+            SignedMessage signedMessage = MessageArgument.getSignedMessage(commandContext, "action");
+            CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
+            if (commandSourceStack.isPlayer()) {
+                ServerPlayer serverPlayer = commandSourceStack.getPlayerOrException();
+                serverPlayer.getTextFilter().processStreamMessage(signedMessage.content().getString()).thenAcceptAsync(filteredText -> {
+                    PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+                    playerList.broadcastChatMessage(signedMessage, (TextFilter.FilteredText)filteredText, serverPlayer, ChatType.EMOTE_COMMAND);
+                }, (Executor)commandSourceStack.getServer());
+            } else {
+                commandSourceStack.getServer().getPlayerList().broadcastChatMessage(signedMessage, commandSourceStack.asChatSender(), ChatType.EMOTE_COMMAND);
             }
-            minecraftServer.getPlayerList().broadcastSystemMessage(EmoteCommands.createMessage(commandContext, string), ChatType.SYSTEM);
             return 1;
         })));
-    }
-
-    private static Component createMessage(CommandContext<CommandSourceStack> commandContext, String string) {
-        return Component.translatable("chat.type.emote", commandContext.getSource().getDisplayName(), string);
     }
 }
 

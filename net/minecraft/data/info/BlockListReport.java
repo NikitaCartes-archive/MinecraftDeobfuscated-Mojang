@@ -3,8 +3,6 @@
  */
 package net.minecraft.data.info;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.io.IOException;
@@ -22,7 +20,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 
 public class BlockListReport
 implements DataProvider {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final DataGenerator generator;
 
     public BlockListReport(DataGenerator dataGenerator) {
@@ -67,7 +64,7 @@ implements DataProvider {
             jsonObject.add(resourceLocation.toString(), jsonObject2);
         }
         Path path = this.generator.getOutputFolder().resolve("reports/blocks.json");
-        DataProvider.save(GSON, cachedOutput, jsonObject, path);
+        DataProvider.saveStable(cachedOutput, jsonObject, path);
     }
 
     @Override

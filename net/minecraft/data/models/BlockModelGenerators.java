@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.List;
@@ -81,14 +82,7 @@ public class BlockModelGenerators {
         textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_RED_SANDSTONE));
     })).build();
     static final Map<BlockFamily.Variant, BiConsumer<BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, BlockFamilyProvider::button).put(BlockFamily.Variant.DOOR, BlockFamilyProvider::door).put(BlockFamily.Variant.CHISELED, BlockFamilyProvider::fullBlockVariant).put(BlockFamily.Variant.CRACKED, BlockFamilyProvider::fullBlockVariant).put(BlockFamily.Variant.FENCE, BlockFamilyProvider::fence).put(BlockFamily.Variant.FENCE_GATE, BlockFamilyProvider::fenceGate).put(BlockFamily.Variant.SIGN, BlockFamilyProvider::sign).put(BlockFamily.Variant.SLAB, BlockFamilyProvider::slab).put(BlockFamily.Variant.STAIRS, BlockFamilyProvider::stairs).put(BlockFamily.Variant.PRESSURE_PLATE, BlockFamilyProvider::pressurePlate).put(BlockFamily.Variant.TRAPDOOR, BlockFamilyProvider::trapdoor).put(BlockFamily.Variant.WALL, BlockFamilyProvider::wall).build();
-    public static final Map<BooleanProperty, Function<ResourceLocation, Variant>> MULTIFACE_GENERATOR = Util.make(Maps.newHashMap(), hashMap -> {
-        hashMap.put(BlockStateProperties.NORTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation));
-        hashMap.put(BlockStateProperties.EAST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true));
-        hashMap.put(BlockStateProperties.SOUTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180).with(VariantProperties.UV_LOCK, true));
-        hashMap.put(BlockStateProperties.WEST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true));
-        hashMap.put(BlockStateProperties.UP, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true));
-        hashMap.put(BlockStateProperties.DOWN, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true));
-    });
+    public static final List<Pair<BooleanProperty, Function<ResourceLocation, Variant>>> MULTIFACE_GENERATOR = List.of(Pair.of(BlockStateProperties.NORTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation)), Pair.of(BlockStateProperties.EAST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.SOUTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.WEST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.UP, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.DOWN, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true)));
 
     private static BlockStateGenerator createMirroredCubeGenerator(Block block, ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer) {
         ResourceLocation resourceLocation2 = ModelTemplates.CUBE_MIRRORED_ALL.create(block, textureMapping, biConsumer);
@@ -1132,17 +1126,18 @@ public class BlockModelGenerators {
         this.createSimpleFlatItemModel(block);
         ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
         MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
-        Condition.TerminalCondition terminalCondition2 = Util.make(Condition.condition(), terminalCondition -> MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
+        Condition.TerminalCondition terminalCondition2 = Util.make(Condition.condition(), terminalCondition -> MULTIFACE_GENERATOR.stream().map(Pair::getFirst).forEach(booleanProperty -> {
             if (block.defaultBlockState().hasProperty(booleanProperty)) {
                 terminalCondition.term(booleanProperty, false);
             }
         }));
-        MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
-            if (block.defaultBlockState().hasProperty(booleanProperty)) {
-                multiPartGenerator.with((Condition)Condition.condition().term(booleanProperty, true), (Variant)function.apply(resourceLocation));
-                multiPartGenerator.with((Condition)terminalCondition2, (Variant)function.apply(resourceLocation));
-            }
-        });
+        for (Pair<BooleanProperty, Function<ResourceLocation, Variant>> pair : MULTIFACE_GENERATOR) {
+            BooleanProperty booleanProperty = pair.getFirst();
+            Function<ResourceLocation, Variant> function = pair.getSecond();
+            if (!block.defaultBlockState().hasProperty(booleanProperty)) continue;
+            multiPartGenerator.with((Condition)Condition.condition().term(booleanProperty, true), function.apply(resourceLocation));
+            multiPartGenerator.with((Condition)terminalCondition2, function.apply(resourceLocation));
+        }
         this.blockStateOutput.accept(multiPartGenerator);
     }
 

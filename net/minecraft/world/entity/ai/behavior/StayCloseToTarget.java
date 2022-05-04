@@ -37,7 +37,7 @@ extends Behavior<E> {
             return false;
         }
         PositionTracker positionTracker = optional.get();
-        return positionTracker.isVisibleBy((LivingEntity)livingEntity) && !((Entity)livingEntity).position().closerThan(positionTracker.currentPosition(), this.tooFar);
+        return !((Entity)livingEntity).position().closerThan(positionTracker.currentPosition(), this.tooFar);
     }
 
     @Override

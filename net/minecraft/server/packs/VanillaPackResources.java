@@ -139,7 +139,15 @@ implements PackResources {
     private static void getResources(Collection<ResourceLocation> collection, String string, Path path3, String string2, Predicate<ResourceLocation> predicate) throws IOException {
         Path path22 = path3.resolve(string);
         try (Stream<Path> stream = Files.walk(path22.resolve(string2), new FileVisitOption[0]);){
-            stream.filter(path -> !path.endsWith(".mcmeta") && Files.isRegularFile(path, new LinkOption[0])).map(path2 -> new ResourceLocation(string, path22.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).filter(predicate).forEach(collection::add);
+            stream.filter(path -> !path.endsWith(".mcmeta") && Files.isRegularFile(path, new LinkOption[0])).mapMulti((path2, consumer) -> {
+                String string2 = path22.relativize((Path)path2).toString().replaceAll("\\\\", "/");
+                ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string2);
+                if (resourceLocation == null) {
+                    Util.logAndPauseIfInIde("Invalid path in datapack: %s:%s, ignoring".formatted(string, string2));
+                } else {
+                    consumer.accept(resourceLocation);
+                }
+            }).filter(predicate).forEach(collection::add);
         }
     }
 

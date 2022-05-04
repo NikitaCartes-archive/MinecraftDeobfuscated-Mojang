@@ -4,7 +4,9 @@
 package net.minecraft.world.level.storage.loot.entries;
 
 import com.google.common.collect.Lists;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.ComposableEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.CompositeEntryBase;
@@ -58,6 +60,10 @@ extends CompositeEntryBase {
 
     public static Builder alternatives(LootPoolEntryContainer.Builder<?> ... builders) {
         return new Builder(builders);
+    }
+
+    public static <E> Builder alternatives(Collection<E> collection, Function<E, LootPoolEntryContainer.Builder<?>> function) {
+        return new Builder((LootPoolEntryContainer.Builder[])collection.stream().map(function::apply).toArray(LootPoolEntryContainer.Builder[]::new));
     }
 
     public static class Builder

@@ -7,6 +7,7 @@ import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -16,14 +17,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class BannerPatternItem
 extends Item {
-    private final BannerPattern bannerPattern;
+    private final TagKey<BannerPattern> bannerPattern;
 
-    public BannerPatternItem(BannerPattern bannerPattern, Item.Properties properties) {
+    public BannerPatternItem(TagKey<BannerPattern> tagKey, Item.Properties properties) {
         super(properties);
-        this.bannerPattern = bannerPattern;
+        this.bannerPattern = tagKey;
     }
 
-    public BannerPattern getBannerPattern() {
+    public TagKey<BannerPattern> getBannerPattern() {
         return this.bannerPattern;
     }
 

@@ -20,28 +20,21 @@ implements Packet<ServerLoginPacketListener> {
         this.data = friendlyByteBuf;
     }
 
-    public ServerboundCustomQueryPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.transactionId = friendlyByteBuf.readVarInt();
-        if (friendlyByteBuf.readBoolean()) {
+    public ServerboundCustomQueryPacket(FriendlyByteBuf friendlyByteBuf2) {
+        this.transactionId = friendlyByteBuf2.readVarInt();
+        this.data = (FriendlyByteBuf)friendlyByteBuf2.readNullable(friendlyByteBuf -> {
             int i = friendlyByteBuf.readableBytes();
             if (i < 0 || i > 0x100000) {
                 throw new IllegalArgumentException("Payload may not be larger than 1048576 bytes");
             }
-            this.data = new FriendlyByteBuf(friendlyByteBuf.readBytes(i));
-        } else {
-            this.data = null;
-        }
+            return new FriendlyByteBuf(friendlyByteBuf.readBytes(i));
+        });
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeVarInt(this.transactionId);
-        if (this.data != null) {
-            friendlyByteBuf.writeBoolean(true);
-            friendlyByteBuf.writeBytes(this.data.copy());
-        } else {
-            friendlyByteBuf.writeBoolean(false);
-        }
+    public void write(FriendlyByteBuf friendlyByteBuf3) {
+        friendlyByteBuf3.writeVarInt(this.transactionId);
+        friendlyByteBuf3.writeNullable(this.data, (friendlyByteBuf, friendlyByteBuf2) -> friendlyByteBuf.writeBytes(friendlyByteBuf2.slice()));
     }
 
     @Override

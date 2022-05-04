@@ -4,18 +4,18 @@
 package net.minecraft.commands.arguments;
 
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.SignedArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public class ComponentArgument
-implements ArgumentType<Component> {
+implements SignedArgument<Component> {
     private static final Collection<String> EXAMPLES = Arrays.asList("\"hello world\"", "\"\"", "\"{\"text\":\"hello world\"}", "[\"\"]");
     public static final DynamicCommandExceptionType ERROR_INVALID_JSON = new DynamicCommandExceptionType(object -> Component.translatable("argument.component.invalid", object));
 
@@ -47,6 +47,11 @@ implements ArgumentType<Component> {
     @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
+    }
+
+    @Override
+    public Component getPlainSignableComponent(Component component) {
+        return component;
     }
 
     @Override

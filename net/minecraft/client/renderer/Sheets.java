@@ -17,6 +17,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -47,8 +49,8 @@ public class Sheets {
     public static final Material DEFAULT_SHULKER_TEXTURE_LOCATION = new Material(SHULKER_SHEET, new ResourceLocation("entity/shulker/shulker"));
     public static final List<Material> SHULKER_TEXTURE_LOCATION = Stream.of("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black").map(string -> new Material(SHULKER_SHEET, new ResourceLocation("entity/shulker/shulker_" + string))).collect(ImmutableList.toImmutableList());
     public static final Map<WoodType, Material> SIGN_MATERIALS = WoodType.values().collect(Collectors.toMap(Function.identity(), Sheets::createSignMaterial));
-    public static final Map<BannerPattern, Material> BANNER_MATERIALS = Arrays.stream(BannerPattern.values()).collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
-    public static final Map<BannerPattern, Material> SHIELD_MATERIALS = Arrays.stream(BannerPattern.values()).collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
+    public static final Map<ResourceKey<BannerPattern>, Material> BANNER_MATERIALS = Registry.BANNER_PATTERN.registryKeySet().stream().collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
+    public static final Map<ResourceKey<BannerPattern>, Material> SHIELD_MATERIALS = Registry.BANNER_PATTERN.registryKeySet().stream().collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
     public static final Material[] BED_TEXTURES = (Material[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).map(dyeColor -> new Material(BED_SHEET, new ResourceLocation("entity/bed/" + dyeColor.getName()))).toArray(Material[]::new);
     public static final Material CHEST_TRAP_LOCATION = Sheets.chestMaterial("trapped");
     public static final Material CHEST_TRAP_LOCATION_LEFT = Sheets.chestMaterial("trapped_left");
@@ -130,20 +132,20 @@ public class Sheets {
         return SIGN_MATERIALS.get(woodType);
     }
 
-    private static Material createBannerMaterial(BannerPattern bannerPattern) {
-        return new Material(BANNER_SHEET, bannerPattern.location(true));
+    private static Material createBannerMaterial(ResourceKey<BannerPattern> resourceKey) {
+        return new Material(BANNER_SHEET, BannerPattern.location(resourceKey, true));
     }
 
-    public static Material getBannerMaterial(BannerPattern bannerPattern) {
-        return BANNER_MATERIALS.get((Object)bannerPattern);
+    public static Material getBannerMaterial(ResourceKey<BannerPattern> resourceKey) {
+        return BANNER_MATERIALS.get(resourceKey);
     }
 
-    private static Material createShieldMaterial(BannerPattern bannerPattern) {
-        return new Material(SHIELD_SHEET, bannerPattern.location(false));
+    private static Material createShieldMaterial(ResourceKey<BannerPattern> resourceKey) {
+        return new Material(SHIELD_SHEET, BannerPattern.location(resourceKey, false));
     }
 
-    public static Material getShieldMaterial(BannerPattern bannerPattern) {
-        return SHIELD_MATERIALS.get((Object)bannerPattern);
+    public static Material getShieldMaterial(ResourceKey<BannerPattern> resourceKey) {
+        return SHIELD_MATERIALS.get(resourceKey);
     }
 
     private static Material chestMaterial(String string) {

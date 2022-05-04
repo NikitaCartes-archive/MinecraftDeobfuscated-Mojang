@@ -34,7 +34,6 @@ import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class GameEventListenerRenderer
@@ -164,7 +163,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
 
         @Override
-        public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable GameEvent.Context context, Vec3 vec3) {
+        public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
             return false;
         }
     }

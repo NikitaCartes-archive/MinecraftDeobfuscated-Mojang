@@ -55,5 +55,9 @@ public class StringUtil {
     public static boolean endsWithNewLine(String string) {
         return LINE_END_PATTERN.matcher(string).find();
     }
+
+    public static String trimChatMessage(String string) {
+        return StringUtil.truncateStringIfNecessary(string, 256, false);
+    }
 }
 

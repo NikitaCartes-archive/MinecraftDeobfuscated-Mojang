@@ -3,13 +3,15 @@
  */
 package net.minecraft.client.player;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.logging.LogUtils;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
-import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
@@ -37,10 +39,15 @@ import net.minecraft.client.resources.sounds.RidingMinecartSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.UnderwaterAmbientSoundHandler;
 import net.minecraft.client.resources.sounds.UnderwaterAmbientSoundInstances;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.MessageSigner;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
@@ -58,7 +65,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -146,7 +152,7 @@ extends AbstractClientPlayer {
     private boolean showDeathScreen = true;
 
     public LocalPlayer(Minecraft minecraft, ClientLevel clientLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook, boolean bl, boolean bl2) {
-        super(clientLevel, clientPacketListener.getLocalGameProfile());
+        super(clientLevel, clientPacketListener.getLocalGameProfile(), minecraft.getProfileKeyPairManager().profilePublicKey());
         this.minecraft = minecraft;
         this.connection = clientPacketListener;
         this.stats = statsCounter;
@@ -286,23 +292,52 @@ extends AbstractClientPlayer {
     }
 
     public void chat(String string) {
-        Instant instant = Instant.now();
-        string = StringUtils.normalizeSpace(string);
-        this.connection.send(new ServerboundChatPacket(instant, string, this.signChatMessage(instant, string)));
+        MessageSigner messageSigner = MessageSigner.create(this.getUUID());
+        if ((string = StringUtils.normalizeSpace(string)).startsWith("/")) {
+            this.sendCommand(messageSigner, string.substring(1));
+        } else {
+            MessageSignature messageSignature = this.signChatMessage(messageSigner, Component.literal(string));
+            this.connection.send(new ServerboundChatPacket(string, messageSignature));
+        }
     }
 
-    private Crypt.SaltSignaturePair signChatMessage(Instant instant, String string) {
+    private MessageSignature signChatMessage(MessageSigner messageSigner, Component component) {
         try {
             Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
             if (signature != null) {
-                long l = Crypt.SaltSupplier.getLong();
-                Crypt.updateChatSignature(signature, l, this.uuid, instant, string);
-                return new Crypt.SaltSignaturePair(l, signature.sign());
+                return messageSigner.sign(signature, component);
             }
         } catch (GeneralSecurityException generalSecurityException) {
-            LOGGER.error("Failed to sign chat message {}", (Object)instant, (Object)generalSecurityException);
+            LOGGER.error("Failed to sign chat message: '{}'", (Object)component.getString(), (Object)generalSecurityException);
         }
-        return Crypt.SaltSignaturePair.EMPTY;
+        return MessageSignature.unsigned();
+    }
+
+    private void sendCommand(MessageSigner messageSigner, String string) {
+        ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, (SharedSuggestionProvider)this.connection.getSuggestionsProvider());
+        ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults);
+        this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures));
+    }
+
+    private ArgumentSignatures signCommandArguments(MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults) {
+        Map<String, Component> map = ArgumentSignatures.collectLastChildPlainSignableComponents(parseResults.getContext());
+        if (map.isEmpty()) {
+            return ArgumentSignatures.empty();
+        }
+        try {
+            ImmutableMap.Builder<String, byte[]> builder = ImmutableMap.builder();
+            for (Map.Entry<String, Component> entry : map.entrySet()) {
+                Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
+                if (signature == null) continue;
+                Component component = entry.getValue();
+                MessageSignature messageSignature = messageSigner.sign(signature, component);
+                builder.put(entry.getKey(), messageSignature.saltSignature().signature());
+            }
+            return new ArgumentSignatures(messageSigner.salt(), builder.build());
+        } catch (GeneralSecurityException generalSecurityException) {
+            LOGGER.error("Failed to sign command arguments", generalSecurityException);
+            return ArgumentSignatures.empty();
+        }
     }
 
     @Override

@@ -64,7 +64,7 @@ implements ServerLoginPacketListener {
     @Nullable
     private ServerPlayer delayedAcceptPlayer;
     @Nullable
-    private ProfilePublicKey.Trusted playerProfilePublicKey;
+    private ProfilePublicKey playerProfilePublicKey;
 
     public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
         this.server = minecraftServer;
@@ -114,13 +114,10 @@ implements ServerLoginPacketListener {
                 this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
             }
             this.gameProfile = this.server.getSessionService().fillProfileProperties(this.gameProfile, true);
-            if (this.playerProfilePublicKey != null) {
-                this.playerProfilePublicKey.data().fillGameProfile(this.gameProfile);
-            }
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
             ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
             try {
-                ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
+                ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, this.playerProfilePublicKey);
                 if (serverPlayer != null) {
                     this.state = State.DELAY_ACCEPT;
                     this.delayedAcceptPlayer = serverPlayer2;
@@ -153,16 +150,16 @@ implements ServerLoginPacketListener {
     }
 
     @Nullable
-    private static ProfilePublicKey.Trusted validatePublicKey(ServerboundHelloPacket serverboundHelloPacket, MinecraftSessionService minecraftSessionService, boolean bl) throws PublicKeyParseException {
+    private static ProfilePublicKey validatePublicKey(ServerboundHelloPacket serverboundHelloPacket, MinecraftSessionService minecraftSessionService, boolean bl) throws PublicKeyParseException {
         try {
-            Optional<ProfilePublicKey> optional = serverboundHelloPacket.publicKey();
+            Optional<ProfilePublicKey.Data> optional = serverboundHelloPacket.publicKey();
             if (optional.isEmpty()) {
                 if (bl) {
                     throw new PublicKeyParseException(MISSING_PROFILE_PUBLIC_KEY);
                 }
                 return null;
             }
-            return optional.get().verify(minecraftSessionService);
+            return ProfilePublicKey.parseAndValidate(minecraftSessionService, optional.get());
         } catch (InsecurePublicKeyException.MissingException missingException) {
             if (bl) {
                 throw new PublicKeyParseException(INVALID_SIGNATURE, (Throwable)missingException);
@@ -179,7 +176,6 @@ implements ServerLoginPacketListener {
     public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
         Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
         Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
-        this.gameProfile = new GameProfile(null, serverboundHelloPacket.name());
         try {
             this.playerProfilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(serverboundHelloPacket, this.server.getSessionService(), this.server.enforceSecureProfile());
         } catch (PublicKeyParseException publicKeyParseException) {
@@ -187,7 +183,14 @@ implements ServerLoginPacketListener {
             this.disconnect(publicKeyParseException.getComponent());
             return;
         }
-        if (!this.server.isSingleplayer() && this.server.usesAuthentication() && !this.connection.isMemoryConnection()) {
+        GameProfile gameProfile = this.server.getSingleplayerProfile();
+        if (gameProfile != null && serverboundHelloPacket.name().equalsIgnoreCase(gameProfile.getName())) {
+            this.gameProfile = gameProfile;
+            this.state = State.READY_TO_ACCEPT;
+            return;
+        }
+        this.gameProfile = new GameProfile(null, serverboundHelloPacket.name());
+        if (this.server.usesAuthentication() && !this.connection.isMemoryConnection()) {
             this.state = State.KEY;
             this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.nonce));
         } else {

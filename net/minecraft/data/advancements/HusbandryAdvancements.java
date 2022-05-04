@@ -3,6 +3,8 @@
  */
 package net.minecraft.data.advancements;
 
+import java.util.Comparator;
+import java.util.Map;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
@@ -115,7 +117,7 @@ implements Consumer<Consumer<Advancement>> {
     }
 
     private Advancement.Builder addCatVariants(Advancement.Builder builder) {
-        Registry.CAT_VARIANT.entrySet().forEach(entry -> builder.addCriterion(((ResourceKey)entry.getKey()).location().toString(), TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicate.variant((CatVariant)entry.getValue())).build())));
+        Registry.CAT_VARIANT.entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceKey::location))).forEach(entry -> builder.addCriterion(((ResourceKey)entry.getKey()).location().toString(), TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicate.variant((CatVariant)entry.getValue())).build())));
         return builder;
     }
 

@@ -20,6 +20,7 @@ import net.minecraft.data.worldgen.SavannaVillagePools;
 import net.minecraft.data.worldgen.SnowyVillagePools;
 import net.minecraft.data.worldgen.TaigaVillagePools;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.WeightedEntry;
@@ -87,7 +88,7 @@ public class Structures {
     public static final Holder<Structure> RUINED_PORTAL_MOUNTAIN = Structures.register(BuiltinStructures.RUINED_PORTAL_MOUNTAIN, new RuinedPortalStructure(Structures.structure(BiomeTags.HAS_RUINED_PORTAL_MOUNTAIN, TerrainAdjustment.NONE), List.of(new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN, 1.0f, 0.2f, false, false, true, false, 0.5f), new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5f, 0.2f, false, false, true, false, 0.5f))));
     public static final Holder<Structure> RUINED_PORTAL_OCEAN = Structures.register(BuiltinStructures.RUINED_PORTAL_OCEAN, new RuinedPortalStructure(Structures.structure(BiomeTags.HAS_RUINED_PORTAL_OCEAN, TerrainAdjustment.NONE), new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR, 0.0f, 0.8f, false, false, true, false, 1.0f)));
     public static final Holder<Structure> RUINED_PORTAL_NETHER = Structures.register(BuiltinStructures.RUINED_PORTAL_NETHER, new RuinedPortalStructure(Structures.structure(BiomeTags.HAS_RUINED_PORTAL_NETHER, TerrainAdjustment.NONE), new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_NETHER, 0.5f, 0.0f, false, false, false, true, 1.0f)));
-    public static final Holder<Structure> ANCIENT_CITY = Structures.register(BuiltinStructures.ANCIENT_CITY, new JigsawStructure(Structures.structure(BiomeTags.HAS_ANCIENT_CITY, Arrays.stream(MobCategory.values()).collect(Collectors.toMap(mobCategory -> mobCategory, mobCategory -> new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create()))), GenerationStep.Decoration.UNDERGROUND_DECORATION, TerrainAdjustment.BEARD_BOX), AncientCityStructurePieces.START, Optional.empty(), 7, ConstantHeight.of(VerticalAnchor.absolute(-51)), false, Optional.empty(), 100));
+    public static final Holder<Structure> ANCIENT_CITY = Structures.register(BuiltinStructures.ANCIENT_CITY, new JigsawStructure(Structures.structure(BiomeTags.HAS_ANCIENT_CITY, Arrays.stream(MobCategory.values()).collect(Collectors.toMap(mobCategory -> mobCategory, mobCategory -> new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create()))), GenerationStep.Decoration.UNDERGROUND_DECORATION, TerrainAdjustment.BEARD_BOX), AncientCityStructurePieces.START, Optional.of(new ResourceLocation("city_anchor")), 7, ConstantHeight.of(VerticalAnchor.absolute(-27)), false, Optional.empty(), 116));
 
     public static Holder<? extends Structure> bootstrap() {
         return MINESHAFT;

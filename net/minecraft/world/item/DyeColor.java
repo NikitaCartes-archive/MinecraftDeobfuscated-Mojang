@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MaterialColor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 public enum DyeColor implements StringRepresentable
@@ -82,7 +83,9 @@ public enum DyeColor implements StringRepresentable
         return BY_ID[i];
     }
 
-    public static DyeColor byName(String string, DyeColor dyeColor) {
+    @Nullable
+    @Contract(value="_,!null->!null;_,null->_")
+    public static DyeColor byName(String string, @Nullable DyeColor dyeColor) {
         for (DyeColor dyeColor2 : DyeColor.values()) {
             if (!dyeColor2.name.equals(string)) continue;
             return dyeColor2;

@@ -74,6 +74,7 @@ import net.minecraft.client.particle.SculkChargePopParticle;
 import net.minecraft.client.particle.ShriekParticle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.client.particle.SnowflakeParticle;
+import net.minecraft.client.particle.SonicBoomParticle;
 import net.minecraft.client.particle.SoulParticle;
 import net.minecraft.client.particle.SpellParticle;
 import net.minecraft.client.particle.SpitParticle;
@@ -174,7 +175,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.ENTITY_EFFECT, SpellParticle.MobProvider::new);
         this.register(ParticleTypes.EXPLOSION_EMITTER, new HugeExplosionSeedParticle.Provider());
         this.register(ParticleTypes.EXPLOSION, HugeExplosionParticle.Provider::new);
-        this.register(ParticleTypes.SONIC_BOOM, HugeExplosionParticle.Provider::new);
+        this.register(ParticleTypes.SONIC_BOOM, SonicBoomParticle.Provider::new);
         this.register(ParticleTypes.FALLING_DUST, FallingDustParticle.Provider::new);
         this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
         this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);

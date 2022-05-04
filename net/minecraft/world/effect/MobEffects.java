@@ -19,7 +19,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class MobEffects {
-    private static final int DARKNESS_EFFECT_FACTOR_PADDING_DURATION = 120;
+    private static final int DARKNESS_EFFECT_FACTOR_PADDING_DURATION_TICKS = 22;
     public static final MobEffect MOVEMENT_SPEED = MobEffects.register(1, "speed", new MobEffect(MobEffectCategory.BENEFICIAL, 8171462).addAttributeModifier(Attributes.MOVEMENT_SPEED, "91AEAA56-376B-4498-935B-2F7F68070635", 0.2f, AttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final MobEffect MOVEMENT_SLOWDOWN = MobEffects.register(2, "slowness", new MobEffect(MobEffectCategory.HARMFUL, 5926017).addAttributeModifier(Attributes.MOVEMENT_SPEED, "7107DE5E-7CE8-4030-940E-514C1F160890", -0.15f, AttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final MobEffect DIG_SPEED = MobEffects.register(3, "haste", new MobEffect(MobEffectCategory.BENEFICIAL, 14270531).addAttributeModifier(Attributes.ATTACK_SPEED, "AF8B6E3F-3328-4C0A-AA36-5BA2BB9DBEF3", 0.1f, AttributeModifier.Operation.MULTIPLY_TOTAL));
@@ -72,7 +72,7 @@ public class MobEffects {
         }
     });
     public static final MobEffect HERO_OF_THE_VILLAGE = MobEffects.register(32, "hero_of_the_village", new MobEffect(MobEffectCategory.BENEFICIAL, 0x44FF44));
-    public static final MobEffect DARKNESS = MobEffects.register(33, "darkness", new MobEffect(MobEffectCategory.HARMFUL, 2696993).setFactorDataFactory(() -> new MobEffectInstance.FactorData(120)));
+    public static final MobEffect DARKNESS = MobEffects.register(33, "darkness", new MobEffect(MobEffectCategory.HARMFUL, 2696993).setFactorDataFactory(() -> new MobEffectInstance.FactorData(22)));
 
     private static MobEffect register(int i, String string, MobEffect mobEffect) {
         return Registry.registerMapping(Registry.MOB_EFFECT, i, string, mobEffect);

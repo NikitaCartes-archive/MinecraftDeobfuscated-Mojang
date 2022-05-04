@@ -3,8 +3,6 @@
  */
 package net.minecraft.data.info;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.IOException;
@@ -18,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 
 public class RegistryDumpReport
 implements DataProvider {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final DataGenerator generator;
 
     public RegistryDumpReport(DataGenerator dataGenerator) {
@@ -30,7 +27,7 @@ implements DataProvider {
         JsonObject jsonObject = new JsonObject();
         Registry.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), RegistryDumpReport.dumpRegistry((Registry)reference.value())));
         Path path = this.generator.getOutputFolder().resolve("reports/registries.json");
-        DataProvider.save(GSON, cachedOutput, jsonObject, path);
+        DataProvider.saveStable(cachedOutput, jsonObject, path);
     }
 
     private static <T> JsonElement dumpRegistry(Registry<T> registry) {

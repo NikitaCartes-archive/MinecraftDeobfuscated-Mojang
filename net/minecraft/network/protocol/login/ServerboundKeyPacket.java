@@ -53,10 +53,10 @@ implements Packet<ServerLoginPacketListener> {
         return Crypt.decryptByteToSecretKey(privateKey, this.keybytes);
     }
 
-    public boolean isChallengeSignatureValid(byte[] bs2, ProfilePublicKey.Trusted trusted) {
+    public boolean isChallengeSignatureValid(byte[] bs2, ProfilePublicKey profilePublicKey) {
         return this.nonceOrSaltSignature.map(bs -> false, saltSignaturePair -> {
             try {
-                Signature signature = trusted.verifySignature();
+                Signature signature = profilePublicKey.verifySignature();
                 signature.update(bs2);
                 signature.update(saltSignaturePair.saltAsBytes());
                 return signature.verify(saltSignaturePair.signature());

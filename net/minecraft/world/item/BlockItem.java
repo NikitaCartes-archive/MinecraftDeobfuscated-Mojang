@@ -183,7 +183,7 @@ extends Item {
 
     @Override
     public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (this.allowdedIn(creativeModeTab)) {
+        if (this.allowedIn(creativeModeTab)) {
             this.getBlock().fillItemCategory(creativeModeTab, nonNullList);
         }
     }

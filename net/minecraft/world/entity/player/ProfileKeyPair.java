@@ -14,7 +14,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 
 public record ProfileKeyPair(PrivateKey privateKey, ProfilePublicKey publicKey, Instant refreshedAfter) {
-    public static final Codec<ProfileKeyPair> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Crypt.PRIVATE_KEY_CODEC.fieldOf("private_key")).forGetter(ProfileKeyPair::privateKey), ((MapCodec)ProfilePublicKey.CODEC.fieldOf("public_key")).forGetter(ProfileKeyPair::publicKey), ((MapCodec)ExtraCodecs.INSTANT_ISO8601.fieldOf("refreshed_after")).forGetter(ProfileKeyPair::refreshedAfter)).apply((Applicative<ProfileKeyPair, ?>)instance, ProfileKeyPair::new));
+    public static final Codec<ProfileKeyPair> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Crypt.PRIVATE_KEY_CODEC.fieldOf("private_key")).forGetter(ProfileKeyPair::privateKey), ((MapCodec)ProfilePublicKey.TRUSTED_CODEC.fieldOf("public_key")).forGetter(ProfileKeyPair::publicKey), ((MapCodec)ExtraCodecs.INSTANT_ISO8601.fieldOf("refreshed_after")).forGetter(ProfileKeyPair::refreshedAfter)).apply((Applicative<ProfileKeyPair, ?>)instance, ProfileKeyPair::new));
 
     public boolean dueRefresh() {
         return this.refreshedAfter.isBefore(Instant.now());

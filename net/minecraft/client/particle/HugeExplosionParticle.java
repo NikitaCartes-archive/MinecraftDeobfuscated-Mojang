@@ -18,7 +18,7 @@ public class HugeExplosionParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    HugeExplosionParticle(ClientLevel clientLevel, double d, double e, double f, double g, SpriteSet spriteSet) {
+    protected HugeExplosionParticle(ClientLevel clientLevel, double d, double e, double f, double g, SpriteSet spriteSet) {
         super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float h;
         this.lifetime = 6 + this.random.nextInt(4);

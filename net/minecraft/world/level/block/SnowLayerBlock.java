@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -86,10 +87,10 @@ extends Block {
     @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-        if (blockState2.is(Blocks.ICE) || blockState2.is(Blocks.PACKED_ICE) || blockState2.is(Blocks.BARRIER)) {
+        if (blockState2.is(BlockTags.SNOW_LAYER_CANNOT_SURVIVE_ON)) {
             return false;
         }
-        if (blockState2.is(Blocks.HONEY_BLOCK) || blockState2.is(Blocks.SOUL_SAND)) {
+        if (blockState2.is(BlockTags.SNOW_LAYER_CAN_SURVIVE_ON)) {
             return true;
         }
         return Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP) || blockState2.is(this) && blockState2.getValue(LAYERS) == 8;

@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.ai.behavior.warden;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Unit;
@@ -37,16 +36,7 @@ extends Behavior<Warden> {
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, Warden warden, long l) {
-        Brain<Warden> brain = warden.getBrain();
-        Optional<LivingEntity> optional = brain.getMemory(MemoryModuleType.ROAR_TARGET);
-        if (optional.isPresent()) {
-            LivingEntity livingEntity = optional.get();
-            if (warden.canTargetEntity(livingEntity)) {
-                return true;
-            }
-            brain.eraseMemory(MemoryModuleType.ROAR_TARGET);
-        }
-        return false;
+        return true;
     }
 
     @Override

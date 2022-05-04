@@ -141,13 +141,7 @@ public class DebugPackets {
         } else {
             friendlyByteBuf2.writeUtf("");
         }
-        if (brain.hasMemoryValue(MemoryModuleType.PATH)) {
-            friendlyByteBuf2.writeBoolean(true);
-            Path path = brain.getMemory(MemoryModuleType.PATH).get();
-            path.writeToStream(friendlyByteBuf2);
-        } else {
-            friendlyByteBuf2.writeBoolean(false);
-        }
+        friendlyByteBuf2.writeOptional(brain.hasMemoryValue(MemoryModuleType.PATH) ? brain.getMemory(MemoryModuleType.PATH) : Optional.empty(), (friendlyByteBuf, path) -> path.writeToStream((FriendlyByteBuf)friendlyByteBuf));
         if (livingEntity instanceof Villager) {
             Villager villager = (Villager)livingEntity;
             boolean bl = villager.wantsToSpawnGolem(l);
@@ -263,6 +257,10 @@ public class DebugPackets {
         for (Player player : serverLevel.players()) {
             ((ServerPlayer)player).connection.send(packet);
         }
+    }
+
+    private static /* synthetic */ void method_43894(FriendlyByteBuf friendlyByteBuf, Path path) {
+        path.writeToStream(friendlyByteBuf);
     }
 
     private static /* synthetic */ void method_36163(FriendlyByteBuf friendlyByteBuf, Raid raid) {

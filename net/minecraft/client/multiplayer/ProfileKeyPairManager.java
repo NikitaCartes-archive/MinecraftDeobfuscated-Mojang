@@ -4,6 +4,7 @@
 package net.minecraft.client.multiplayer;
 
 import com.google.gson.JsonParser;
+import com.mojang.authlib.exceptions.MinecraftClientException;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.response.KeyPairResponse;
 import com.mojang.logging.LogUtils;
@@ -46,7 +47,7 @@ public class ProfileKeyPairManager {
 
     private CompletableFuture<ProfileKeyPair> readOrFetchProfileKeyPair(UserApiService userApiService) {
         return CompletableFuture.supplyAsync(() -> {
-            Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().hasExpired());
+            Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired());
             if (optional.isPresent() && !optional.get().dueRefresh()) {
                 return optional.get();
             }
@@ -54,7 +55,7 @@ public class ProfileKeyPairManager {
                 ProfileKeyPair profileKeyPair2 = this.fetchProfileKeyPair(userApiService);
                 this.writeProfileKeyPair(profileKeyPair2);
                 return profileKeyPair2;
-            } catch (IOException | CryptException exception) {
+            } catch (MinecraftClientException | IOException | CryptException exception) {
                 LOGGER.error("Failed to retrieve profile key pair", exception);
                 this.writeProfileKeyPair(null);
                 return optional.orElse(null);
@@ -114,7 +115,8 @@ public class ProfileKeyPairManager {
     private ProfileKeyPair fetchProfileKeyPair(UserApiService userApiService) throws CryptException, IOException {
         KeyPairResponse keyPairResponse = userApiService.getKeyPair();
         if (keyPairResponse != null) {
-            return new ProfileKeyPair(Crypt.stringToPemRsaPrivateKey(keyPairResponse.getPrivateKey()), new ProfilePublicKey(Instant.parse(keyPairResponse.getExpiresAt()), keyPairResponse.getPublicKey(), keyPairResponse.getPublicKeySignature()), Instant.parse(keyPairResponse.getRefreshedAfter()));
+            ProfilePublicKey.Data data = new ProfilePublicKey.Data(Instant.parse(keyPairResponse.getExpiresAt()), keyPairResponse.getPublicKey(), keyPairResponse.getPublicKeySignature());
+            return new ProfileKeyPair(Crypt.stringToPemRsaPrivateKey(keyPairResponse.getPrivateKey()), ProfilePublicKey.parseTrusted(data), Instant.parse(keyPairResponse.getRefreshedAfter()));
         }
         throw new IOException("Could not retrieve profile key pair");
     }
@@ -125,9 +127,14 @@ public class ProfileKeyPairManager {
         if (privateKey == null) {
             return null;
         }
-        Signature signature = Signature.getInstance("SHA1withRSA");
+        Signature signature = Signature.getInstance("SHA256withRSA");
         signature.initSign(privateKey);
         return signature;
+    }
+
+    public Optional<ProfilePublicKey.Data> profilePublicKeyData() {
+        ProfilePublicKey profilePublicKey = this.profilePublicKey();
+        return Optional.ofNullable(profilePublicKey).map(ProfilePublicKey::data);
     }
 
     @Nullable

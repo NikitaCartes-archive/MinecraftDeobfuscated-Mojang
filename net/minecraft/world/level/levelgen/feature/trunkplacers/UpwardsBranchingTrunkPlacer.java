@@ -67,14 +67,15 @@ extends TrunkPlacer {
     }
 
     private void placeBranch(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, int i, TreeConfiguration treeConfiguration, List<FoliagePlacer.FoliageAttachment> list, BlockPos.MutableBlockPos mutableBlockPos, int j, Direction direction, int k, int l) {
-        int m = 0;
+        int m = j + k;
         int n = mutableBlockPos.getX();
         int o = mutableBlockPos.getZ();
         for (int p = k; p < i && l > 0; ++p, --l) {
             if (p < 1) continue;
             int q = j + p;
+            m = q;
             if (this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos.set(n += direction.getStepX(), q, o += direction.getStepZ()), treeConfiguration)) {
-                m = q + 1;
+                ++m;
             }
             list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));
         }

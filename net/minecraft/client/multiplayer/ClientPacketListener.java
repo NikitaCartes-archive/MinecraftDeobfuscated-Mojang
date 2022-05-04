@@ -53,7 +53,6 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.multiplayer.ClientChunkCache;
@@ -79,12 +78,12 @@ import net.minecraft.client.resources.sounds.GuardianAttackSoundInstance;
 import net.minecraft.client.resources.sounds.MinecartSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.searchtree.MutableSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -93,6 +92,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -249,6 +249,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -447,7 +448,8 @@ implements ClientGamePacketListener {
         float g = (float)(clientboundAddPlayerPacket.getyRot() * 360) / 256.0f;
         float h = (float)(clientboundAddPlayerPacket.getxRot() * 360) / 256.0f;
         int i = clientboundAddPlayerPacket.getEntityId();
-        RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId()).getProfile());
+        PlayerInfo playerInfo = this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId());
+        RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, playerInfo.getProfile(), playerInfo.getProfilePublicKey());
         remotePlayer.setId(i);
         remotePlayer.syncPacketPositionCodec(d, e, f);
         remotePlayer.absMoveTo(d, e, f, g, h);
@@ -706,19 +708,23 @@ implements ClientGamePacketListener {
     @Override
     public void handleSystemChat(ClientboundSystemChatPacket clientboundSystemChatPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundSystemChatPacket, this, this.minecraft);
-        this.minecraft.gui.handleSystemChat(clientboundSystemChatPacket.type(), clientboundSystemChatPacket.content());
+        Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+        ChatType chatType = clientboundSystemChatPacket.resolveType(registry);
+        this.minecraft.gui.handleSystemChat(chatType, clientboundSystemChatPacket.content());
     }
 
     @Override
     public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
         if (clientboundPlayerChatPacket.hasExpired(Instant.now())) {
-            LOGGER.warn("Received expired player chat packet from {}", (Object)clientboundPlayerChatPacket.sender().name().getString());
+            LOGGER.warn("Received expired chat packet from {}", (Object)clientboundPlayerChatPacket.sender().name().getString());
         }
         if (!this.hasValidSignature(clientboundPlayerChatPacket)) {
-            LOGGER.warn("Received unsigned player chat packet from {}", (Object)clientboundPlayerChatPacket.sender().name().getString());
+            LOGGER.warn("Received unsigned chat packet from {}", (Object)clientboundPlayerChatPacket.sender().name().getString());
         }
-        this.minecraft.gui.handlePlayerChat(clientboundPlayerChatPacket.type(), clientboundPlayerChatPacket.content(), clientboundPlayerChatPacket.sender());
+        Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+        ChatType chatType = clientboundPlayerChatPacket.resolveType(registry);
+        this.minecraft.gui.handlePlayerChat(chatType, clientboundPlayerChatPacket.content(), clientboundPlayerChatPacket.sender());
     }
 
     private boolean hasValidSignature(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
@@ -726,8 +732,8 @@ implements ClientGamePacketListener {
         if (playerInfo == null) {
             return false;
         }
-        ProfilePublicKey.Trusted trusted = playerInfo.getProfilePublicKey();
-        return trusted != null && clientboundPlayerChatPacket.isSignatureValid(trusted);
+        ProfilePublicKey profilePublicKey = playerInfo.getProfilePublicKey();
+        return profilePublicKey != null && clientboundPlayerChatPacket.getSignedMessage().verify(profilePublicKey);
     }
 
     @Override
@@ -1150,12 +1156,9 @@ implements ClientGamePacketListener {
     public void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundUpdateRecipesPacket, this, this.minecraft);
         this.recipeManager.replaceRecipes(clientboundUpdateRecipesPacket.getRecipes());
-        MutableSearchTree<RecipeCollection> mutableSearchTree = this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS);
-        mutableSearchTree.clear();
         ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
         clientRecipeBook.setupCollections(this.recipeManager.getRecipes());
-        clientRecipeBook.getCollections().forEach(mutableSearchTree::add);
-        mutableSearchTree.refresh();
+        this.minecraft.populateSearchTree(SearchRegistry.RECIPE_COLLECTIONS, clientRecipeBook.getCollections());
     }
 
     @Override
@@ -1250,7 +1253,12 @@ implements ClientGamePacketListener {
         if (!this.connection.isMemoryConnection()) {
             Blocks.rebuildCache();
         }
-        this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS).refresh();
+        NonNullList<ItemStack> nonNullList = NonNullList.create();
+        for (Item item : Registry.ITEM) {
+            item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
+        }
+        this.minecraft.populateSearchTree(SearchRegistry.CREATIVE_NAMES, nonNullList);
+        this.minecraft.populateSearchTree(SearchRegistry.CREATIVE_TAGS, nonNullList);
     }
 
     private <T> void updateTagsForRegistry(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
@@ -1679,11 +1687,10 @@ implements ClientGamePacketListener {
                 float h = friendlyByteBuf.readFloat();
                 float q = friendlyByteBuf.readFloat();
                 String string6 = friendlyByteBuf.readUtf();
+                Path path2 = (Path)friendlyByteBuf.readNullable(Path::createFromStream);
                 boolean bl2 = friendlyByteBuf.readBoolean();
-                Path path2 = bl2 ? Path.createFromStream(friendlyByteBuf) : null;
-                boolean bl3 = friendlyByteBuf.readBoolean();
                 int r = friendlyByteBuf.readInt();
-                BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string4, string5, p, h, q, position, string6, path2, bl3, r);
+                BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string4, string5, p, h, q, position, string6, path2, bl2, r);
                 int s = friendlyByteBuf.readVarInt();
                 for (t = 0; t < s; ++t) {
                     String string7 = friendlyByteBuf.readUtf();
@@ -1716,37 +1723,25 @@ implements ClientGamePacketListener {
                 }
                 this.minecraft.debugRenderer.brainDebugRenderer.addOrUpdateBrainDump(brainDump);
             } else if (ClientboundCustomPayloadPacket.DEBUG_BEE.equals(resourceLocation)) {
-                int r;
+                int aa;
                 double d = friendlyByteBuf.readDouble();
                 double e = friendlyByteBuf.readDouble();
                 double g = friendlyByteBuf.readDouble();
                 PositionImpl position = new PositionImpl(d, e, g);
                 UUID uUID = friendlyByteBuf.readUUID();
                 int o = friendlyByteBuf.readInt();
-                boolean bl4 = friendlyByteBuf.readBoolean();
-                BlockPos blockPos5 = null;
-                if (bl4) {
-                    blockPos5 = friendlyByteBuf.readBlockPos();
-                }
-                boolean bl5 = friendlyByteBuf.readBoolean();
-                BlockPos blockPos6 = null;
-                if (bl5) {
-                    blockPos6 = friendlyByteBuf.readBlockPos();
-                }
-                int z = friendlyByteBuf.readInt();
-                boolean bl6 = friendlyByteBuf.readBoolean();
-                Path path3 = null;
-                if (bl6) {
-                    path3 = Path.createFromStream(friendlyByteBuf);
-                }
-                BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos5, blockPos6, z);
-                int aa = friendlyByteBuf.readVarInt();
-                for (r = 0; r < aa; ++r) {
+                BlockPos blockPos5 = (BlockPos)friendlyByteBuf.readNullable(FriendlyByteBuf::readBlockPos);
+                BlockPos blockPos6 = (BlockPos)friendlyByteBuf.readNullable(FriendlyByteBuf::readBlockPos);
+                int p = friendlyByteBuf.readInt();
+                Path path3 = (Path)friendlyByteBuf.readNullable(Path::createFromStream);
+                BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos5, blockPos6, p);
+                int z = friendlyByteBuf.readVarInt();
+                for (aa = 0; aa < z; ++aa) {
                     String string11 = friendlyByteBuf.readUtf();
                     beeInfo.goals.add(string11);
                 }
-                r = friendlyByteBuf.readVarInt();
-                for (int ab = 0; ab < r; ++ab) {
+                aa = friendlyByteBuf.readVarInt();
+                for (int ab = 0; ab < aa; ++ab) {
                     BlockPos blockPos7 = friendlyByteBuf.readBlockPos();
                     beeInfo.blacklistedHives.add(blockPos7);
                 }
@@ -1756,8 +1751,8 @@ implements ClientGamePacketListener {
                 String string2 = friendlyByteBuf.readUtf();
                 int j = friendlyByteBuf.readInt();
                 int ac = friendlyByteBuf.readInt();
-                boolean bl7 = friendlyByteBuf.readBoolean();
-                BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string2, j, ac, bl7, this.level.getGameTime());
+                boolean bl3 = friendlyByteBuf.readBoolean();
+                BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string2, j, ac, bl3, this.level.getGameTime());
                 this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateHiveInfo(hiveInfo);
             } else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR.equals(resourceLocation)) {
                 this.minecraft.debugRenderer.gameTestDebugRenderer.clear();

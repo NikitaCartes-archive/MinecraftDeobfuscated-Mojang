@@ -4,13 +4,9 @@
 package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
-import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.animation.definitions.WardenAnimation;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -21,7 +17,6 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.monster.warden.Warden;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,7 +24,6 @@ public class WardenModel<T extends Warden>
 extends HierarchicalModel<T> {
     private static final float DEFAULT_ARM_X_Y = 13.0f;
     private static final float DEFAULT_ARM_Z = 1.0f;
-    private static final Vector3f ANIMATION_VECTOR_CACHE = new Vector3f();
     private final ModelPart root;
     protected final ModelPart bone;
     protected final ModelPart body;
@@ -88,17 +82,16 @@ extends HierarchicalModel<T> {
     public void setupAnim(T warden, float f, float g, float h, float i, float j) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
         float k = h - (float)((Warden)warden).tickCount;
-        long l = Util.getMillis();
         this.animateHeadLookTarget(i, j);
         this.animateWalk(f, g);
         this.animateIdlePose(h);
         this.animateTendrils(warden, h, k);
-        this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK, l);
-        this.animate(((Warden)warden).sonicBoomAnimationState, WardenAnimation.WARDEN_SONIC_BOOM, l);
-        this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG, l);
-        this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE, l);
-        this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR, l);
-        this.animate(((Warden)warden).sniffAnimationState, WardenAnimation.WARDEN_SNIFF, l);
+        this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK);
+        this.animate(((Warden)warden).sonicBoomAnimationState, WardenAnimation.WARDEN_SONIC_BOOM);
+        this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG);
+        this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE);
+        this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR);
+        this.animate(((Warden)warden).sniffAnimationState, WardenAnimation.WARDEN_SNIFF);
     }
 
     private void animateHeadLookTarget(float f, float g) {
@@ -150,10 +143,6 @@ extends HierarchicalModel<T> {
         float h;
         this.leftTendril.xRot = h = ((Warden)warden).getTendrilAnimation(g) * (float)(Math.cos((double)f * 2.25) * Math.PI * (double)0.1f);
         this.rightTendril.xRot = -h;
-    }
-
-    public void animate(AnimationState animationState2, AnimationDefinition animationDefinition, long l) {
-        animationState2.ifStarted(animationState -> KeyframeAnimations.animate(this, animationDefinition, l - animationState.startTime(), 1.0f, ANIMATION_VECTOR_CACHE));
     }
 
     @Override

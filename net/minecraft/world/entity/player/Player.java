@@ -31,7 +31,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -84,6 +83,7 @@ import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -171,16 +171,19 @@ extends LivingEntity {
     protected final float defaultFlySpeed = 0.02f;
     private int lastLevelUpTime;
     private final GameProfile gameProfile;
+    @Nullable
+    private final ProfilePublicKey profilePublicKey;
     private boolean reducedDebugInfo;
     private ItemStack lastItemInMainHand = ItemStack.EMPTY;
     private final ItemCooldowns cooldowns = this.createItemCooldowns();
     @Nullable
     public FishingHook fishing;
 
-    public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+    public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
         super((EntityType<? extends LivingEntity>)EntityType.PLAYER, level);
         this.setUUID(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
         this.gameProfile = gameProfile;
+        this.profilePublicKey = profilePublicKey;
         this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
         this.containerMenu = this.inventoryMenu;
         this.moveTo((double)blockPos.getX() + 0.5, blockPos.getY() + 1, (double)blockPos.getZ() + 0.5, f, 0.0f);
@@ -1161,6 +1164,11 @@ extends LivingEntity {
         return this.gameProfile;
     }
 
+    @Nullable
+    public ProfilePublicKey getProfilePublicKey() {
+        return this.profilePublicKey;
+    }
+
     public Inventory getInventory() {
         return this.inventory;
     }
@@ -1170,10 +1178,6 @@ extends LivingEntity {
     }
 
     public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
-    }
-
-    public ChatSender asChatSender() {
-        return new ChatSender(this.getUUID(), this.getDisplayName());
     }
 
     public Either<BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {

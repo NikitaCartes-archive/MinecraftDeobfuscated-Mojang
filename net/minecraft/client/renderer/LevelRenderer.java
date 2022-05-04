@@ -1592,14 +1592,12 @@ AutoCloseable {
         int n;
         float l;
         float j;
-        LivingEntity livingEntity;
-        Entity entity;
         runnable.run();
         if (bl) {
             return;
         }
         FogType fogType = camera.getFluidInCamera();
-        if (fogType == FogType.POWDER_SNOW || fogType == FogType.LAVA || (entity = camera.getEntity()) instanceof LivingEntity && (livingEntity = (LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
+        if (fogType == FogType.POWDER_SNOW || fogType == FogType.LAVA || this.doesMobEffectBlockSky(camera)) {
             return;
         }
         if (this.minecraft.level.effects().skyType() == DimensionSpecialEffects.SkyType.END) {
@@ -1713,6 +1711,15 @@ AutoCloseable {
         }
         RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
+    }
+
+    private boolean doesMobEffectBlockSky(Camera camera) {
+        Entity entity = camera.getEntity();
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity)entity;
+            return livingEntity.hasEffect(MobEffects.BLINDNESS) || livingEntity.hasEffect(MobEffects.DARKNESS);
+        }
+        return false;
     }
 
     public void renderClouds(PoseStack poseStack, Matrix4f matrix4f, float f, double d, double e, double g) {

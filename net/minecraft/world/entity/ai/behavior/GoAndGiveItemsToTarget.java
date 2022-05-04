@@ -84,7 +84,7 @@ extends Behavior<E> {
             return false;
         }
         Optional<PositionTracker> optional = this.targetPositionGetter.apply((LivingEntity)livingEntity);
-        return optional.isPresent() && optional.get().isVisibleBy((LivingEntity)livingEntity);
+        return optional.isPresent();
     }
 
     private static Vec3 getThrowPosition(PositionTracker positionTracker) {

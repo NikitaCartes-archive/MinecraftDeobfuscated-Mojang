@@ -32,7 +32,7 @@ implements Packet<ClientGamePacketListener> {
         this.url = friendlyByteBuf.readUtf();
         this.hash = friendlyByteBuf.readUtf(40);
         this.required = friendlyByteBuf.readBoolean();
-        this.prompt = friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null;
+        this.prompt = (Component)friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent);
     }
 
     @Override
@@ -40,12 +40,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeUtf(this.url);
         friendlyByteBuf.writeUtf(this.hash);
         friendlyByteBuf.writeBoolean(this.required);
-        if (this.prompt != null) {
-            friendlyByteBuf.writeBoolean(true);
-            friendlyByteBuf.writeComponent(this.prompt);
-        } else {
-            friendlyByteBuf.writeBoolean(false);
-        }
+        friendlyByteBuf.writeNullable(this.prompt, FriendlyByteBuf::writeComponent);
     }
 
     @Override

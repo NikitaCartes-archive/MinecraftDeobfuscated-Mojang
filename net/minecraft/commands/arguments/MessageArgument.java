@@ -5,21 +5,22 @@ package net.minecraft.commands.arguments;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.SignedArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.SignedMessage;
 import org.jetbrains.annotations.Nullable;
 
 public class MessageArgument
-implements ArgumentType<Message> {
+implements SignedArgument<Message> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Hello world!", "foo", "@e", "Hello @p :)");
 
     public static MessageArgument message() {
@@ -27,7 +28,18 @@ implements ArgumentType<Message> {
     }
 
     public static Component getMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        return commandContext.getArgument(string, Message.class).toComponent(commandContext.getSource(), commandContext.getSource().hasPermission(2));
+        Message message = commandContext.getArgument(string, Message.class);
+        return MessageArgument.resolveComponent(commandContext.getSource(), message);
+    }
+
+    public static SignedMessage getSignedMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+        Message message = commandContext.getArgument(string, Message.class);
+        MutableComponent component = Component.literal(message.getText());
+        return commandContext.getSource().getSigningContext().signArgument(commandContext, string, component);
+    }
+
+    private static Component resolveComponent(CommandSourceStack commandSourceStack, Message message) throws CommandSyntaxException {
+        return message.toComponent(commandSourceStack, commandSourceStack.hasPermission(2));
     }
 
     @Override
@@ -38,6 +50,11 @@ implements ArgumentType<Message> {
     @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
+    }
+
+    @Override
+    public Component getPlainSignableComponent(Message message) {
+        return Component.literal(message.getText());
     }
 
     @Override

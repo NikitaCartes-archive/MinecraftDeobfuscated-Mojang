@@ -272,28 +272,18 @@ public class Advancement {
             return jsonObject;
         }
 
-        public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
+        public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf2) {
             if (this.requirements == null) {
                 this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
             }
-            if (this.parentId == null) {
-                friendlyByteBuf.writeBoolean(false);
-            } else {
-                friendlyByteBuf.writeBoolean(true);
-                friendlyByteBuf.writeResourceLocation(this.parentId);
-            }
-            if (this.display == null) {
-                friendlyByteBuf.writeBoolean(false);
-            } else {
-                friendlyByteBuf.writeBoolean(true);
-                this.display.serializeToNetwork(friendlyByteBuf);
-            }
-            Criterion.serializeToNetwork(this.criteria, friendlyByteBuf);
-            friendlyByteBuf.writeVarInt(this.requirements.length);
+            friendlyByteBuf2.writeNullable(this.parentId, FriendlyByteBuf::writeResourceLocation);
+            friendlyByteBuf2.writeNullable(this.display, (friendlyByteBuf, displayInfo) -> displayInfo.serializeToNetwork((FriendlyByteBuf)friendlyByteBuf));
+            Criterion.serializeToNetwork(this.criteria, friendlyByteBuf2);
+            friendlyByteBuf2.writeVarInt(this.requirements.length);
             for (String[] strings : this.requirements) {
-                friendlyByteBuf.writeVarInt(strings.length);
+                friendlyByteBuf2.writeVarInt(strings.length);
                 for (String string : strings) {
-                    friendlyByteBuf.writeUtf(string);
+                    friendlyByteBuf2.writeUtf(string);
                 }
             }
         }
@@ -353,8 +343,8 @@ public class Advancement {
         }
 
         public static Builder fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-            ResourceLocation resourceLocation = friendlyByteBuf.readBoolean() ? friendlyByteBuf.readResourceLocation() : null;
-            DisplayInfo displayInfo = friendlyByteBuf.readBoolean() ? DisplayInfo.fromNetwork(friendlyByteBuf) : null;
+            ResourceLocation resourceLocation = (ResourceLocation)friendlyByteBuf.readNullable(FriendlyByteBuf::readResourceLocation);
+            DisplayInfo displayInfo = (DisplayInfo)friendlyByteBuf.readNullable(DisplayInfo::fromNetwork);
             Map<String, Criterion> map = Criterion.criteriaFromNetwork(friendlyByteBuf);
             String[][] strings = new String[friendlyByteBuf.readVarInt()][];
             for (int i = 0; i < strings.length; ++i) {

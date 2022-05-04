@@ -4,6 +4,7 @@
 package net.minecraft;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,9 +12,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
-public enum ChatFormatting {
+public enum ChatFormatting implements StringRepresentable
+{
     BLACK("BLACK", '0', 0, 0),
     DARK_BLUE("DARK_BLUE", '1', 1, 170),
     DARK_GREEN("DARK_GREEN", '2', 2, 43520),
@@ -37,6 +40,7 @@ public enum ChatFormatting {
     ITALIC("ITALIC", 'o', true),
     RESET("RESET", 'r', -1, null);
 
+    public static final Codec<ChatFormatting> CODEC;
     public static final char PREFIX_CODE = '\u00a7';
     private static final Map<String, ChatFormatting> FORMATTING_BY_NAME;
     private static final Pattern STRIP_FORMATTING_PATTERN;
@@ -142,7 +146,13 @@ public enum ChatFormatting {
         return list;
     }
 
+    @Override
+    public String getSerializedName() {
+        return this.getName();
+    }
+
     static {
+        CODEC = StringRepresentable.fromEnum(ChatFormatting::values);
         FORMATTING_BY_NAME = Arrays.stream(ChatFormatting.values()).collect(Collectors.toMap(chatFormatting -> ChatFormatting.cleanName(chatFormatting.name), chatFormatting -> chatFormatting));
         STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)\u00a7[0-9A-FK-OR]");
     }

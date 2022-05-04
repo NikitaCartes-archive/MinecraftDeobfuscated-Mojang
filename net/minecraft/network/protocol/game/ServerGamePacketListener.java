@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.game.ServerPacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
@@ -55,6 +56,8 @@ extends ServerPacketListener {
     public void handleAnimate(ServerboundSwingPacket var1);
 
     public void handleChat(ServerboundChatPacket var1);
+
+    public void handleChatCommand(ServerboundChatCommandPacket var1);
 
     public void handleClientCommand(ServerboundClientCommandPacket var1);
 

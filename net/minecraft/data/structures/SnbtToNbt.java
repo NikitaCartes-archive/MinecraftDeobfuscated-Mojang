@@ -4,6 +4,9 @@
 package net.minecraft.data.structures;
 
 import com.google.common.collect.Lists;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingOutputStream;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -90,11 +93,12 @@ implements DataProvider {
                 String string2 = IOUtils.toString(bufferedReader);
                 CompoundTag compoundTag = this.applyFilters(string, NbtUtils.snbtToStructure(string2));
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                NbtIo.writeCompressed(compoundTag, byteArrayOutputStream);
+                HashingOutputStream hashingOutputStream = new HashingOutputStream(Hashing.sha1(), byteArrayOutputStream);
+                NbtIo.writeCompressed(compoundTag, hashingOutputStream);
                 byte[] bs = byteArrayOutputStream.toByteArray();
-                String string3 = SHA1.hashBytes(bs).toString();
-                String string4 = DUMP_SNBT_TO != null ? NbtUtils.structureToSnbt(compoundTag) : null;
-                taskResult = new TaskResult(string, bs, string4, string3);
+                HashCode hashCode = hashingOutputStream.hash();
+                String string3 = DUMP_SNBT_TO != null ? NbtUtils.structureToSnbt(compoundTag) : null;
+                taskResult = new TaskResult(string, bs, string3, hashCode);
                 if (bufferedReader == null) break block8;
             } catch (Throwable throwable) {
                 try {
@@ -138,18 +142,10 @@ implements DataProvider {
         public CompoundTag apply(String var1, CompoundTag var2);
     }
 
-    static class TaskResult {
-        final String name;
-        final byte[] payload;
+    record TaskResult(String name, byte[] payload, @Nullable String snbtPayload, HashCode hash) {
         @Nullable
-        final String snbtPayload;
-        final String hash;
-
-        public TaskResult(String string, byte[] bs, @Nullable String string2, String string3) {
-            this.name = string;
-            this.payload = bs;
-            this.snbtPayload = string2;
-            this.hash = string3;
+        public String snbtPayload() {
+            return this.snbtPayload;
         }
     }
 

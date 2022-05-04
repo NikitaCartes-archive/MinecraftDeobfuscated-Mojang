@@ -26,7 +26,7 @@ extends Behavior<Warden> {
     private static final double KNOCKBACK_VERTICAL = 0.5;
     private static final double KNOCKBACK_HORIZONTAL = 2.5;
     public static final int COOLDOWN = 40;
-    private static final int TICKS_BEFORE_PLAYING_SOUND = 34;
+    private static final int TICKS_BEFORE_PLAYING_SOUND = Mth.ceil(34.0);
     private static final int DURATION = Mth.ceil(60.0f);
 
     public SonicBoom() {
@@ -46,7 +46,7 @@ extends Behavior<Warden> {
     @Override
     protected void start(ServerLevel serverLevel, Warden warden, long l) {
         warden.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, DURATION);
-        warden.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_SOUND_DELAY, Unit.INSTANCE, 34L);
+        warden.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_SOUND_DELAY, Unit.INSTANCE, TICKS_BEFORE_PLAYING_SOUND);
         serverLevel.broadcastEntityEvent(warden, (byte)62);
         warden.playSound(SoundEvents.WARDEN_SONIC_CHARGE, 3.0f, 1.0f);
     }
@@ -56,8 +56,8 @@ extends Behavior<Warden> {
         if (warden.getBrain().hasMemoryValue(MemoryModuleType.SONIC_BOOM_SOUND_DELAY) || warden.getBrain().hasMemoryValue(MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN)) {
             return;
         }
-        warden.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN, Unit.INSTANCE, DURATION - 34);
-        warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(livingEntity -> warden.closerThan((Entity)livingEntity, 15.0, 20.0)).ifPresent(livingEntity -> {
+        warden.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN, Unit.INSTANCE, DURATION - TICKS_BEFORE_PLAYING_SOUND);
+        warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(warden::canTargetEntity).filter(livingEntity -> warden.closerThan((Entity)livingEntity, 15.0, 20.0)).ifPresent(livingEntity -> {
             Vec3 vec3 = warden.position().add(0.0, 1.6f, 0.0);
             Vec3 vec32 = livingEntity.getEyePosition().subtract(vec3);
             Vec3 vec33 = vec32.normalize();

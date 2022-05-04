@@ -19,8 +19,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -30,6 +33,8 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.pools.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawJunction;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -113,6 +118,26 @@ public class JigsawPlacement {
             PieceState pieceState = placer.placing.removeFirst();
             placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor, randomState);
         }
+    }
+
+    public static boolean generateJigsaw(ServerLevel serverLevel, Holder<StructureTemplatePool> holder2, ResourceLocation resourceLocation, int i, BlockPos blockPos, boolean bl) {
+        ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
+        StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+        StructureManager structureManager = serverLevel.structureManager();
+        RandomSource randomSource = serverLevel.getRandom();
+        Structure.GenerationContext generationContext = new Structure.GenerationContext(serverLevel.registryAccess(), chunkGenerator, chunkGenerator.getBiomeSource(), serverLevel.getChunkSource().randomState(), structureTemplateManager, serverLevel.getSeed(), new ChunkPos(blockPos), serverLevel, holder -> true);
+        Optional<Structure.GenerationStub> optional = JigsawPlacement.addPieces(generationContext, holder2, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128);
+        if (optional.isPresent()) {
+            StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+            optional.get().generator().accept(structurePiecesBuilder);
+            for (StructurePiece structurePiece : structurePiecesBuilder.build().pieces()) {
+                if (!(structurePiece instanceof PoolElementStructurePiece)) continue;
+                PoolElementStructurePiece poolElementStructurePiece = (PoolElementStructurePiece)structurePiece;
+                poolElementStructurePiece.place(serverLevel, structureManager, chunkGenerator, randomSource, BoundingBox.infinite(), blockPos, bl);
+            }
+            return true;
+        }
+        return false;
     }
 
     static final class Placer {

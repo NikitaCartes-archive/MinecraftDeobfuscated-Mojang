@@ -42,7 +42,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.monster.warden.AngerLevel;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -105,7 +104,7 @@ public class WardenAi {
     }
 
     private static void initInvestigateActivity(Brain<Warden> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.INVESTIGATE, 5, ImmutableList.of(new SetRoarTarget<Warden>(Warden::getEntityAngryAt), new GoToTargetLocation(MemoryModuleType.DISTURBANCE_LOCATION, 2, 0.7f), new DoNothing(10, 20)), MemoryModuleType.DISTURBANCE_LOCATION);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.INVESTIGATE, 5, ImmutableList.of(new SetRoarTarget<Warden>(Warden::getEntityAngryAt), new GoToTargetLocation(MemoryModuleType.DISTURBANCE_LOCATION, 2, 0.7f)), MemoryModuleType.DISTURBANCE_LOCATION);
     }
 
     private static void initSniffingActivity(Brain<Warden> brain) {
@@ -117,7 +116,7 @@ public class WardenAi {
     }
 
     private static void initFightActivity(Warden warden, Brain<Warden> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(DIG_COOLDOWN_SETTER, new StopAttackingIfTargetInvalid<Warden>(livingEntity -> warden.getAngerLevel() != AngerLevel.ANGRY || !warden.canTargetEntity((Entity)livingEntity), WardenAi::onTargetInvalid, false), new SetEntityLookTarget(livingEntity -> WardenAi.isTarget(warden, livingEntity), (float)warden.getAttributeValue(Attributes.FOLLOW_RANGE)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.2f), new SonicBoom(), new MeleeAttack(18)), MemoryModuleType.ATTACK_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(DIG_COOLDOWN_SETTER, new StopAttackingIfTargetInvalid<Warden>(livingEntity -> !warden.getAngerLevel().isAngry() || !warden.canTargetEntity((Entity)livingEntity), WardenAi::onTargetInvalid, false), new SetEntityLookTarget(livingEntity -> WardenAi.isTarget(warden, livingEntity), (float)warden.getAttributeValue(Attributes.FOLLOW_RANGE)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.2f), new SonicBoom(), new MeleeAttack(18)), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static boolean isTarget(Warden warden, LivingEntity livingEntity) {

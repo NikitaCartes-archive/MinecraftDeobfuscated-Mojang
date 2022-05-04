@@ -14,7 +14,6 @@ import java.io.File;
 import java.net.SocketAddress;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -36,7 +35,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.SignedMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -70,6 +71,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
@@ -84,12 +86,12 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagNetworkSerialization;
-import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -196,9 +198,7 @@ public abstract class PlayerList {
         serverLevel2.addNewPlayer(serverPlayer);
         this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
         this.sendLevelInfo(serverPlayer, serverLevel2);
-        if (!this.server.getResourcePack().isEmpty()) {
-            serverPlayer.sendTexturePack(this.server.getResourcePack(), this.server.getResourcePackHash(), this.server.isResourcePackRequired(), this.server.getResourcePackPrompt());
-        }
+        this.server.getServerResourcePack().ifPresent(serverResourcePackInfo -> serverPlayer.sendTexturePack(serverResourcePackInfo.url(), serverResourcePackInfo.hash(), serverResourcePackInfo.isRequired(), serverResourcePackInfo.prompt()));
         for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
             serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));
         }
@@ -287,7 +287,7 @@ public abstract class PlayerList {
     public CompoundTag load(ServerPlayer serverPlayer) {
         CompoundTag compoundTag2;
         CompoundTag compoundTag = this.server.getWorldData().getLoadedPlayerTag();
-        if (serverPlayer.getName().getString().equals(this.server.getSingleplayerName()) && compoundTag != null) {
+        if (this.server.isSingleplayerOwner(serverPlayer.getGameProfile()) && compoundTag != null) {
             compoundTag2 = compoundTag;
             serverPlayer.load(compoundTag2);
             LOGGER.debug("loading single player");
@@ -361,7 +361,7 @@ public abstract class PlayerList {
         return null;
     }
 
-    public ServerPlayer getPlayerForLogin(GameProfile gameProfile) {
+    public ServerPlayer getPlayerForLogin(GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
         UUID uUID = UUIDUtil.getOrCreatePlayerUUID(gameProfile);
         ArrayList<ServerPlayer> list = Lists.newArrayList();
         for (int i = 0; i < this.players.size(); ++i) {
@@ -376,7 +376,7 @@ public abstract class PlayerList {
         for (ServerPlayer serverPlayer3 : list) {
             serverPlayer3.connection.disconnect(Component.translatable("multiplayer.disconnect.duplicate_login"));
         }
-        return new ServerPlayer(this.server, this.server.overworld(), gameProfile);
+        return new ServerPlayer(this.server, this.server.overworld(), gameProfile, profilePublicKey);
     }
 
     public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {
@@ -388,7 +388,7 @@ public abstract class PlayerList {
         ServerLevel serverLevel = this.server.getLevel(serverPlayer.getRespawnDimension());
         Optional<Object> optional = serverLevel != null && blockPos != null ? Player.findRespawnPositionAndUseSpawnBlock(serverLevel, blockPos, f, bl2, bl) : Optional.empty();
         ServerLevel serverLevel2 = serverLevel != null && optional.isPresent() ? serverLevel : this.server.overworld();
-        ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile());
+        ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile(), serverPlayer.getProfilePublicKey());
         serverPlayer2.connection = serverPlayer.connection;
         serverPlayer2.restoreFrom(serverPlayer, bl);
         serverPlayer2.setId(serverPlayer.getId());
@@ -462,7 +462,7 @@ public abstract class PlayerList {
         }
     }
 
-    public void broadcastToTeam(Player player, Component component) {
+    public void broadcastSystemToTeam(Player player, Component component) {
         Team team = player.getTeam();
         if (team == null) {
             return;
@@ -471,20 +471,20 @@ public abstract class PlayerList {
         for (String string : collection) {
             ServerPlayer serverPlayer = this.getPlayerByName(string);
             if (serverPlayer == null || serverPlayer == player) continue;
-            serverPlayer.sendUnsignedMessageFrom(component, player.getUUID());
+            serverPlayer.sendSystemMessage(component);
         }
     }
 
-    public void broadcastToAllExceptTeam(Player player, Component component) {
+    public void broadcastSystemToAllExceptTeam(Player player, Component component) {
         Team team = player.getTeam();
         if (team == null) {
-            this.broadcastUnsignedMessage(component, ChatType.SYSTEM, player.getUUID());
+            this.broadcastSystemMessage(component, ChatType.SYSTEM);
             return;
         }
         for (int i = 0; i < this.players.size(); ++i) {
             ServerPlayer serverPlayer = this.players.get(i);
             if (serverPlayer.getTeam() == team) continue;
-            serverPlayer.sendUnsignedMessageFrom(component, player.getUUID());
+            serverPlayer.sendSystemMessage(component);
         }
     }
 
@@ -651,33 +651,40 @@ public abstract class PlayerList {
         }
     }
 
-    @Deprecated
-    public void broadcastUnsignedMessage(Component component, ChatType chatType, UUID uUID) {
-        this.server.sendSystemMessage(component);
-        for (ServerPlayer serverPlayer : this.players) {
-            serverPlayer.sendUnsignedMessageFrom(component, chatType, uUID);
-        }
+    public void broadcastSystemMessage(Component component, ResourceKey<ChatType> resourceKey) {
+        this.broadcastSystemMessage(component, serverPlayer -> component, resourceKey);
     }
 
-    public void broadcastSystemMessage(Component component, ChatType chatType) {
-        this.broadcastSystemMessage(component, serverPlayer -> component, chatType);
-    }
-
-    public void broadcastSystemMessage(Component component, Function<ServerPlayer, Component> function, ChatType chatType) {
+    public void broadcastSystemMessage(Component component, Function<ServerPlayer, Component> function, ResourceKey<ChatType> resourceKey) {
         this.server.sendSystemMessage(component);
         for (ServerPlayer serverPlayer : this.players) {
             Component component2 = function.apply(serverPlayer);
             if (component2 == null) continue;
-            serverPlayer.sendSystemMessage(component2, chatType);
+            serverPlayer.sendSystemMessage(component2, resourceKey);
         }
     }
 
-    public void broadcastPlayerMessage(Component component, Function<ServerPlayer, Component> function, ChatType chatType, ChatSender chatSender, Instant instant, Crypt.SaltSignaturePair saltSignaturePair) {
-        this.server.logMessageFrom(chatSender, component);
+    public void broadcastChatMessage(SignedMessage signedMessage, TextFilter.FilteredText filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey) {
+        SignedMessage signedMessage2;
+        if (!filteredText.getFiltered().isEmpty()) {
+            MutableComponent component = Component.literal(filteredText.getFiltered());
+            signedMessage2 = new SignedMessage(component, MessageSignature.unsigned());
+        } else {
+            signedMessage2 = null;
+        }
+        this.broadcastChatMessage(signedMessage, (ServerPlayer serverPlayer2) -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? signedMessage2 : signedMessage, serverPlayer.asChatSender(), resourceKey);
+    }
+
+    public void broadcastChatMessage(SignedMessage signedMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+        this.broadcastChatMessage(signedMessage, (ServerPlayer serverPlayer) -> signedMessage, chatSender, resourceKey);
+    }
+
+    public void broadcastChatMessage(SignedMessage signedMessage, Function<ServerPlayer, SignedMessage> function, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+        this.server.logMessageFrom(chatSender, signedMessage.content());
         for (ServerPlayer serverPlayer : this.players) {
-            Component component2 = function.apply(serverPlayer);
-            if (component2 == null) continue;
-            serverPlayer.sendPlayerMessage(component2, chatType, chatSender, instant, saltSignaturePair);
+            SignedMessage signedMessage2 = function.apply(serverPlayer);
+            if (signedMessage2 == null) continue;
+            serverPlayer.sendChatMessage(signedMessage2, chatSender, resourceKey);
         }
     }
 

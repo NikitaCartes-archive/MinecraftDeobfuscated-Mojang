@@ -80,17 +80,20 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
+        GameEvent.Context context;
         if (this.receivingEvent != null) {
             return false;
         }
-        if (!this.config.isValidVibration(gameEvent, context)) {
+        GameEvent gameEvent = message.gameEvent();
+        if (!this.config.isValidVibration(gameEvent, context = message.context())) {
             return false;
         }
         Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
         if (optional.isEmpty()) {
             return false;
         }
+        Vec3 vec3 = message.source();
         Vec3 vec32 = optional.get();
         if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
             return false;
@@ -126,6 +129,10 @@ implements GameEventListener {
             return GameEventTags.VIBRATIONS;
         }
 
+        default public boolean canTriggerAvoidVibration() {
+            return false;
+        }
+
         default public boolean isValidVibration(GameEvent gameEvent, GameEvent.Context context) {
             if (!gameEvent.is(this.getListenableEvents())) {
                 return false;
@@ -136,7 +143,7 @@ implements GameEventListener {
                     return false;
                 }
                 if (entity.isSteppingCarefully() && gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
-                    if (entity instanceof ServerPlayer) {
+                    if (this.canTriggerAvoidVibration() && entity instanceof ServerPlayer) {
                         ServerPlayer serverPlayer = (ServerPlayer)entity;
                         CriteriaTriggers.AVOID_VIBRATION.trigger(serverPlayer);
                     }

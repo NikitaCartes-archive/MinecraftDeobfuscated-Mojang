@@ -104,7 +104,7 @@ LevelTimeAccess {
         this.levelEvent(null, i, blockPos, j);
     }
 
-    public void gameEvent(GameEvent var1, Vec3 var2, @Nullable GameEvent.Context var3);
+    public void gameEvent(GameEvent var1, Vec3 var2, GameEvent.Context var3);
 
     default public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
         this.gameEvent(gameEvent, vec3, new GameEvent.Context(entity, null));

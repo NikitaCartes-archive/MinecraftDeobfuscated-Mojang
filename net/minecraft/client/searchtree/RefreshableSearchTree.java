@@ -3,17 +3,19 @@
  */
 package net.minecraft.client.searchtree;
 
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.searchtree.SearchTree;
 
 @Environment(value=EnvType.CLIENT)
-public interface MutableSearchTree<T>
+public interface RefreshableSearchTree<T>
 extends SearchTree<T> {
-    public void add(T var1);
+    public static <T> RefreshableSearchTree<T> empty() {
+        return string -> List.of();
+    }
 
-    public void clear();
-
-    public void refresh();
+    default public void refresh() {
+    }
 }
 

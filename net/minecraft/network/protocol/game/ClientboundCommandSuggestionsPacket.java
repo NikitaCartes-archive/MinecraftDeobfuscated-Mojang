@@ -30,23 +30,20 @@ implements Packet<ClientGamePacketListener> {
         StringRange stringRange = StringRange.between(i, i + j);
         List<Suggestion> list = friendlyByteBuf2.readList(friendlyByteBuf -> {
             String string = friendlyByteBuf.readUtf();
-            Component component = friendlyByteBuf.readBoolean() ? friendlyByteBuf.readComponent() : null;
+            Component component = (Component)friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent);
             return new Suggestion(stringRange, string, component);
         });
         this.suggestions = new Suggestions(stringRange, list);
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeVarInt(this.id);
-        friendlyByteBuf2.writeVarInt(this.suggestions.getRange().getStart());
-        friendlyByteBuf2.writeVarInt(this.suggestions.getRange().getLength());
-        friendlyByteBuf2.writeCollection(this.suggestions.getList(), (friendlyByteBuf, suggestion) -> {
-            friendlyByteBuf.writeUtf(suggestion.getText());
-            friendlyByteBuf.writeBoolean(suggestion.getTooltip() != null);
-            if (suggestion.getTooltip() != null) {
-                friendlyByteBuf.writeComponent(ComponentUtils.fromMessage(suggestion.getTooltip()));
-            }
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeVarInt(this.id);
+        friendlyByteBuf.writeVarInt(this.suggestions.getRange().getStart());
+        friendlyByteBuf.writeVarInt(this.suggestions.getRange().getLength());
+        friendlyByteBuf.writeCollection(this.suggestions.getList(), (friendlyByteBuf2, suggestion) -> {
+            friendlyByteBuf2.writeUtf(suggestion.getText());
+            friendlyByteBuf2.writeNullable(suggestion.getTooltip(), (friendlyByteBuf, message) -> friendlyByteBuf.writeComponent(ComponentUtils.fromMessage(message)));
         });
     }
 

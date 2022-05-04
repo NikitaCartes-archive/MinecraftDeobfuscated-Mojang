@@ -32,6 +32,8 @@ public final class OverworldBiomeBuilder {
     public static final float FAR_INLAND_START = 0.3f;
     public static final float EROSION_INDEX_1_START = -0.78f;
     public static final float EROSION_INDEX_2_START = -0.375f;
+    private static final float EROSION_DEEP_DARK_DRYNESS_THRESHOLD = -0.225f;
+    private static final float DEPTH_DEEP_DARK_DRYNESS_THRESHOLD = 0.9f;
     private final Climate.Parameter FULL_RANGE = Climate.Parameter.span(-1.0f, 1.0f);
     private final Climate.Parameter[] temperatures = new Climate.Parameter[]{Climate.Parameter.span(-1.0f, -0.45f), Climate.Parameter.span(-0.45f, -0.15f), Climate.Parameter.span(-0.15f, 0.2f), Climate.Parameter.span(0.2f, 0.55f), Climate.Parameter.span(0.55f, 1.0f)};
     private final Climate.Parameter[] humidities = new Climate.Parameter[]{Climate.Parameter.span(-1.0f, -0.35f), Climate.Parameter.span(-0.35f, -0.1f), Climate.Parameter.span(-0.1f, 0.1f), Climate.Parameter.span(0.1f, 0.3f), Climate.Parameter.span(0.3f, 1.0f)};
@@ -365,6 +367,10 @@ public final class OverworldBiomeBuilder {
 
     private void addBottomBiome(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer, Climate.Parameter parameter, Climate.Parameter parameter2, Climate.Parameter parameter3, Climate.Parameter parameter4, Climate.Parameter parameter5, float f, ResourceKey<Biome> resourceKey) {
         consumer.accept(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.Parameter.point(1.1f), parameter5, f), resourceKey));
+    }
+
+    public static boolean isDeepDarkRegion(double d, double e) {
+        return d < (double)-0.225f && e > (double)0.9f;
     }
 
     public static String getDebugStringForPeaksAndValleys(double d) {

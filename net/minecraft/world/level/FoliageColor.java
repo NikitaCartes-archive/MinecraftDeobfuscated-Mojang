@@ -31,5 +31,9 @@ public class FoliageColor {
     public static int getDefaultColor() {
         return 4764952;
     }
+
+    public static int getMangroveColor() {
+        return 9619016;
+    }
 }
 

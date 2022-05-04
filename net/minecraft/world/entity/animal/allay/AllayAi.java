@@ -16,6 +16,7 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
@@ -42,6 +43,7 @@ public class AllayAi {
     private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0f;
     private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_DEPOSIT_TARGET = 2.25f;
     private static final float SPEED_MULTIPLIER_WHEN_RETRIEVING_ITEM = 1.75f;
+    private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.5f;
     private static final int CLOSE_ENOUGH_TO_TARGET = 4;
     private static final int TOO_FAR_FROM_TARGET = 16;
     private static final int MAX_LOOK_DISTANCE = 6;
@@ -60,7 +62,7 @@ public class AllayAi {
     }
 
     private static void initCoreActivity(Brain<Allay> brain) {
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8f), new LookAtTargetSink(45, 90), new MoveToTargetSink(), new CountDownCooldownTicks(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS), new CountDownCooldownTicks(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS)));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8f), new AnimalPanic(2.5f), new LookAtTargetSink(45, 90), new MoveToTargetSink(), new CountDownCooldownTicks(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS), new CountDownCooldownTicks(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS)));
     }
 
     private static void initIdleActivity(Brain<Allay> brain) {
@@ -112,15 +114,14 @@ public class AllayAi {
             ServerLevel serverLevel = (ServerLevel)level;
             Optional<UUID> optional = livingEntity.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
             if (optional.isPresent()) {
-                Optional<ServerPlayer> optional2;
                 Entity entity = serverLevel.getEntity(optional.get());
                 if (entity instanceof ServerPlayer) {
                     ServerPlayer serverPlayer = (ServerPlayer)entity;
-                    optional2 = Optional.of(serverPlayer);
-                } else {
-                    optional2 = Optional.empty();
+                    if ((serverPlayer.gameMode.isSurvival() || serverPlayer.gameMode.isCreative()) && serverPlayer.closerThan(livingEntity, 64.0)) {
+                        return Optional.of(serverPlayer);
+                    }
                 }
-                return optional2;
+                return Optional.empty();
             }
         }
         return Optional.empty();

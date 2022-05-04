@@ -14,11 +14,17 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -519,8 +525,62 @@ public class GsonHelper {
         return GsonHelper.parse(reader, false);
     }
 
+    public static JsonArray parseArray(String string) {
+        return GsonHelper.parseArray(new StringReader(string));
+    }
+
     public static JsonArray parseArray(Reader reader) {
         return GsonHelper.fromJson(GSON, reader, JsonArray.class, false);
+    }
+
+    public static String toStableString(JsonElement jsonElement) {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        try {
+            GsonHelper.writeValue(jsonWriter, jsonElement, Comparator.naturalOrder());
+        } catch (IOException iOException) {
+            throw new AssertionError((Object)iOException);
+        }
+        return stringWriter.toString();
+    }
+
+    public static void writeValue(JsonWriter jsonWriter, @Nullable JsonElement jsonElement, @Nullable Comparator<String> comparator) throws IOException {
+        if (jsonElement == null || jsonElement.isJsonNull()) {
+            jsonWriter.nullValue();
+        } else if (jsonElement.isJsonPrimitive()) {
+            JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+            if (jsonPrimitive.isNumber()) {
+                jsonWriter.value(jsonPrimitive.getAsNumber());
+            } else if (jsonPrimitive.isBoolean()) {
+                jsonWriter.value(jsonPrimitive.getAsBoolean());
+            } else {
+                jsonWriter.value(jsonPrimitive.getAsString());
+            }
+        } else if (jsonElement.isJsonArray()) {
+            jsonWriter.beginArray();
+            for (JsonElement jsonElement2 : jsonElement.getAsJsonArray()) {
+                GsonHelper.writeValue(jsonWriter, jsonElement2, comparator);
+            }
+            jsonWriter.endArray();
+        } else if (jsonElement.isJsonObject()) {
+            jsonWriter.beginObject();
+            for (Map.Entry<String, JsonElement> entry : GsonHelper.sortByKeyIfNeeded(jsonElement.getAsJsonObject().entrySet(), comparator)) {
+                jsonWriter.name(entry.getKey());
+                GsonHelper.writeValue(jsonWriter, entry.getValue(), comparator);
+            }
+            jsonWriter.endObject();
+        } else {
+            throw new IllegalArgumentException("Couldn't write " + jsonElement.getClass());
+        }
+    }
+
+    private static Collection<Map.Entry<String, JsonElement>> sortByKeyIfNeeded(Collection<Map.Entry<String, JsonElement>> collection, @Nullable Comparator<String> comparator) {
+        if (comparator == null) {
+            return collection;
+        }
+        ArrayList<Map.Entry<String, JsonElement>> list = new ArrayList<Map.Entry<String, JsonElement>>(collection);
+        list.sort(Map.Entry.comparingByKey(comparator));
+        return list;
     }
 }
 

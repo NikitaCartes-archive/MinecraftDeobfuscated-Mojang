@@ -158,7 +158,12 @@ extends LootPoolEntryContainer {
         }
 
         @Override
-        public /* synthetic */ Object apply(LootItemFunction.Builder builder) {
+        public /* synthetic */ FunctionUserBuilder unwrap() {
+            return (FunctionUserBuilder)((Object)super.unwrap());
+        }
+
+        @Override
+        public /* synthetic */ FunctionUserBuilder apply(LootItemFunction.Builder builder) {
             return this.apply(builder);
         }
     }

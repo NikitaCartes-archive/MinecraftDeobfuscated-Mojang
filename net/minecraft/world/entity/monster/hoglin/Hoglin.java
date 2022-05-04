@@ -223,7 +223,7 @@ HoglinBase {
     }
 
     @Override
-    protected boolean shouldDropExperience() {
+    public boolean shouldDropExperience() {
         return true;
     }
 

@@ -159,6 +159,8 @@ public final class BlockTags {
     public static final TagKey<Block> MANGROVE_ROOTS_CAN_GROW_THROUGH = BlockTags.create("mangrove_roots_can_grow_through");
     public static final TagKey<Block> DEAD_BUSH_MAY_PLACE_ON = BlockTags.create("dead_bush_may_place_on");
     public static final TagKey<Block> SNAPS_GOAT_HORN = BlockTags.create("snaps_goat_horn");
+    public static final TagKey<Block> SNOW_LAYER_CANNOT_SURVIVE_ON = BlockTags.create("snow_layer_cannot_survive_on");
+    public static final TagKey<Block> SNOW_LAYER_CAN_SURVIVE_ON = BlockTags.create("snow_layer_can_survive_on");
 
     private BlockTags() {
     }

@@ -386,6 +386,10 @@ FormattedText {
             return GSON.toJson(component);
         }
 
+        public static String toStableJson(Component component) {
+            return GsonHelper.toStableString(Serializer.toJsonTree(component));
+        }
+
         public static JsonElement toJsonTree(Component component) {
             return GSON.toJsonTree(component);
         }

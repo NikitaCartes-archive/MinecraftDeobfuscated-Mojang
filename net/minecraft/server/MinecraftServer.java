@@ -226,10 +226,8 @@ AutoCloseable {
     @Nullable
     private KeyPair keyPair;
     @Nullable
-    private String singleplayerName;
+    private GameProfile singleplayerProfile;
     private boolean isDemo;
-    private String resourcePack = "";
-    private String resourcePackHash = "";
     private volatile boolean isReady;
     private long lastOverloadWarning;
     private final MinecraftSessionService sessionService;
@@ -927,16 +925,17 @@ AutoCloseable {
         this.port = i;
     }
 
-    public String getSingleplayerName() {
-        return this.singleplayerName;
+    @Nullable
+    public GameProfile getSingleplayerProfile() {
+        return this.singleplayerProfile;
     }
 
-    public void setSingleplayerName(String string) {
-        this.singleplayerName = string;
+    public void setSingleplayerProfile(@Nullable GameProfile gameProfile) {
+        this.singleplayerProfile = gameProfile;
     }
 
     public boolean isSingleplayer() {
-        return this.singleplayerName != null;
+        return this.singleplayerProfile != null;
     }
 
     protected void initializeKeyPair() {
@@ -989,17 +988,12 @@ AutoCloseable {
         this.isDemo = bl;
     }
 
-    public String getResourcePack() {
-        return this.resourcePack;
+    public Optional<ServerResourcePackInfo> getServerResourcePack() {
+        return Optional.empty();
     }
 
-    public String getResourcePackHash() {
-        return this.resourcePackHash;
-    }
-
-    public void setResourcePack(String string, String string2) {
-        this.resourcePack = string;
-        this.resourcePackHash = string2;
+    public boolean isResourcePackRequired() {
+        return this.getServerResourcePack().filter(ServerResourcePackInfo::isRequired).isPresent();
     }
 
     public abstract boolean isDedicatedServer();
@@ -1542,10 +1536,6 @@ AutoCloseable {
         return TextFilter.DUMMY;
     }
 
-    public boolean isResourcePackRequired() {
-        return false;
-    }
-
     public ServerPlayerGameMode createGameModeForPlayer(ServerPlayer serverPlayer) {
         return this.isDemo() ? new DemoMode(serverPlayer) : new ServerPlayerGameMode(serverPlayer);
     }
@@ -1557,11 +1547,6 @@ AutoCloseable {
 
     public ResourceManager getResourceManager() {
         return this.resources.resourceManager;
-    }
-
-    @Nullable
-    public Component getResourcePackPrompt() {
-        return null;
     }
 
     public boolean isCurrentlySaving() {
@@ -1663,6 +1648,13 @@ AutoCloseable {
                     return "";
                 }
             };
+        }
+    }
+
+    public record ServerResourcePackInfo(String url, String hash, boolean isRequired, @Nullable Component prompt) {
+        @Nullable
+        public Component prompt() {
+            return this.prompt;
         }
     }
 }

@@ -4,6 +4,8 @@
 package net.minecraft.network.chat;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -13,6 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 public final class TextColor {
     private static final String CUSTOM_COLOR_PREFIX = "#";
+    public static final Codec<TextColor> CODEC = Codec.STRING.comapFlatMap(string -> {
+        TextColor textColor = TextColor.parseColor(string);
+        return textColor != null ? DataResult.success(textColor) : DataResult.error("String is not a valid color name or hex color code");
+    }, TextColor::serialize);
     private static final Map<ChatFormatting, TextColor> LEGACY_FORMAT_TO_COLOR = Stream.of(ChatFormatting.values()).filter(ChatFormatting::isColor).collect(ImmutableMap.toImmutableMap(Function.identity(), chatFormatting -> new TextColor(chatFormatting.getColor(), chatFormatting.getName())));
     private static final Map<String, TextColor> NAMED_COLORS = LEGACY_FORMAT_TO_COLOR.values().stream().collect(ImmutableMap.toImmutableMap(textColor -> textColor.name, Function.identity()));
     private final int value;
@@ -65,7 +71,7 @@ public final class TextColor {
 
     @Nullable
     public static TextColor fromLegacyFormat(ChatFormatting chatFormatting) {
-        return LEGACY_FORMAT_TO_COLOR.get((Object)chatFormatting);
+        return LEGACY_FORMAT_TO_COLOR.get(chatFormatting);
     }
 
     public static TextColor fromRgb(int i) {

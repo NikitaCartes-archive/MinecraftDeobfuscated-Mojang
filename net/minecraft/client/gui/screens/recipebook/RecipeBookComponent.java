@@ -192,7 +192,7 @@ PlaceRecipe<Ingredient> {
         list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
         String string = this.searchBox.getValue();
         if (!string.isEmpty()) {
-            ObjectLinkedOpenHashSet objectSet = new ObjectLinkedOpenHashSet(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT)));
+            ObjectLinkedOpenHashSet<RecipeCollection> objectSet = new ObjectLinkedOpenHashSet<RecipeCollection>(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT)));
             list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
         }
         if (this.book.isFiltering(this.menu)) {

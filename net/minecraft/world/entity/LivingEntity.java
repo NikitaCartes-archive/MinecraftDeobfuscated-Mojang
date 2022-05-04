@@ -527,7 +527,7 @@ extends Entity {
         }
     }
 
-    protected boolean shouldDropExperience() {
+    public boolean shouldDropExperience() {
         return !this.isBaby();
     }
 

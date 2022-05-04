@@ -14,7 +14,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.Registry;
@@ -76,7 +76,7 @@ extends LootItemConditionalFunction {
 
     public static class Builder
     extends LootItemConditionalFunction.Builder<Builder> {
-        private final Map<MobEffect, NumberProvider> effectDurationMap = Maps.newHashMap();
+        private final Map<MobEffect, NumberProvider> effectDurationMap = Maps.newLinkedHashMap();
 
         @Override
         protected Builder getThis() {
@@ -122,7 +122,7 @@ extends LootItemConditionalFunction {
 
         @Override
         public SetStewEffectFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            HashMap<MobEffect, NumberProvider> map = Maps.newHashMap();
+            LinkedHashMap<MobEffect, NumberProvider> map = Maps.newLinkedHashMap();
             if (jsonObject.has("effects")) {
                 JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "effects");
                 for (JsonElement jsonElement : jsonArray) {

@@ -29,8 +29,8 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.inventory.Hotbar;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.searchtree.MutableSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
+import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.CommonComponents;
@@ -330,7 +330,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
                 item.fillItemCategory(CreativeModeTab.TAB_SEARCH, ((ItemPickerMenu)this.menu).items);
             }
         } else {
-            MutableSearchTree<ItemStack> searchTree;
+            SearchTree<ItemStack> searchTree;
             if (string.startsWith("#")) {
                 string = string.substring(1);
                 searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS);

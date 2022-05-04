@@ -54,7 +54,7 @@ extends MinecraftServer {
 
     public IntegratedServer(Thread thread, Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super(thread, levelStorageAccess, packRepository, worldStem, minecraft.getProxy(), minecraft.getFixerUpper(), minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
-        this.setSingleplayerName(minecraft.getUser().getName());
+        this.setSingleplayerProfile(minecraft.getUser().getGameProfile());
         this.setDemo(minecraft.isDemo());
         this.setPlayerList(new IntegratedPlayerList(this, this.registryAccess(), this.playerDataStorage));
         this.minecraft = minecraft;
@@ -68,7 +68,9 @@ extends MinecraftServer {
         this.setFlightAllowed(true);
         this.initializeKeyPair();
         this.loadLevel();
-        this.setMotd(this.getSingleplayerName() + " - " + this.getWorldData().getLevelName());
+        GameProfile gameProfile = this.getSingleplayerProfile();
+        String string = this.getWorldData().getLevelName();
+        this.setMotd((String)(gameProfile != null ? gameProfile.getName() + " - " + string : string));
         return true;
     }
 
@@ -240,7 +242,7 @@ extends MinecraftServer {
 
     @Override
     public boolean isSingleplayerOwner(GameProfile gameProfile) {
-        return gameProfile.getName().equalsIgnoreCase(this.getSingleplayerName());
+        return this.getSingleplayerProfile() != null && gameProfile.getName().equalsIgnoreCase(this.getSingleplayerProfile().getName());
     }
 
     @Override

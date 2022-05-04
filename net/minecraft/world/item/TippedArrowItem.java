@@ -31,7 +31,7 @@ extends ArrowItem {
 
     @Override
     public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (this.allowdedIn(creativeModeTab)) {
+        if (this.allowedIn(creativeModeTab)) {
             for (Potion potion : Registry.POTION) {
                 if (potion.getEffects().isEmpty()) continue;
                 nonNullList.add(PotionUtils.setPotion(new ItemStack(this), potion));

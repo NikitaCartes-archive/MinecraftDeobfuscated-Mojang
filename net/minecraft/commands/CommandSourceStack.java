@@ -17,11 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -56,12 +58,13 @@ implements SharedSuggestionProvider {
     private final ResultConsumer<CommandSourceStack> consumer;
     private final EntityAnchorArgument.Anchor anchor;
     private final Vec2 rotation;
+    private final CommandSigningContext signingContext;
 
     public CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i2, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity) {
-        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET);
+        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.NONE);
     }
 
-    protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, @Nullable ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor) {
+    protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, @Nullable ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor, CommandSigningContext commandSigningContext) {
         this.source = commandSource;
         this.worldPosition = vec3;
         this.level = serverLevel;
@@ -74,41 +77,42 @@ implements SharedSuggestionProvider {
         this.consumer = resultConsumer;
         this.anchor = anchor;
         this.rotation = vec2;
+        this.signingContext = commandSigningContext;
     }
 
     public CommandSourceStack withSource(CommandSource commandSource) {
         if (this.source == commandSource) {
             return this;
         }
-        return new CommandSourceStack(commandSource, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(commandSource, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withEntity(Entity entity) {
         if (this.entity == entity) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, entity.getName().getString(), entity.getDisplayName(), this.server, entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, entity.getName().getString(), entity.getDisplayName(), this.server, entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withPosition(Vec3 vec3) {
         if (this.worldPosition.equals(vec3)) {
             return this;
         }
-        return new CommandSourceStack(this.source, vec3, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, vec3, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withRotation(Vec2 vec2) {
         if (this.rotation.equals(vec2)) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, vec2, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, vec2, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withCallback(ResultConsumer<CommandSourceStack> resultConsumer) {
         if (Objects.equals(this.consumer, resultConsumer)) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, resultConsumer, this.anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, resultConsumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withCallback(ResultConsumer<CommandSourceStack> resultConsumer, BinaryOperator<ResultConsumer<CommandSourceStack>> binaryOperator) {
@@ -120,28 +124,28 @@ implements SharedSuggestionProvider {
         if (this.silent || this.source.alwaysAccepts()) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, true, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, true, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withPermission(int i) {
         if (i == this.permissionLevel) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, i, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, i, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withMaximumPermission(int i) {
         if (i <= this.permissionLevel) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, i, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, i, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack withAnchor(EntityAnchorArgument.Anchor anchor) {
         if (anchor == this.anchor) {
             return this;
         }
-        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, anchor);
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, anchor, this.signingContext);
     }
 
     public CommandSourceStack withLevel(ServerLevel serverLevel) {
@@ -150,7 +154,7 @@ implements SharedSuggestionProvider {
         }
         double d = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
         Vec3 vec3 = new Vec3(this.worldPosition.x * d, this.worldPosition.y, this.worldPosition.z * d);
-        return new CommandSourceStack(this.source, vec3, this.rotation, serverLevel, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+        return new CommandSourceStack(this.source, vec3, this.rotation, serverLevel, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     public CommandSourceStack facing(Entity entity, EntityAnchorArgument.Anchor anchor) {
@@ -168,12 +172,26 @@ implements SharedSuggestionProvider {
         return this.withRotation(new Vec2(h, i));
     }
 
+    public CommandSourceStack withSigningContext(CommandSigningContext commandSigningContext) {
+        if (commandSigningContext == this.signingContext) {
+            return this;
+        }
+        return new CommandSourceStack(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, commandSigningContext);
+    }
+
     public Component getDisplayName() {
         return this.displayName;
     }
 
     public String getTextName() {
         return this.textName;
+    }
+
+    public ChatSender asChatSender() {
+        if (this.entity != null) {
+            return this.entity.asChatSender();
+        }
+        return ChatSender.system(this.getDisplayName());
     }
 
     @Override
@@ -202,10 +220,16 @@ implements SharedSuggestionProvider {
     }
 
     public ServerPlayer getPlayerOrException() throws CommandSyntaxException {
-        if (!(this.entity instanceof ServerPlayer)) {
-            throw ERROR_NOT_PLAYER.create();
+        Entity entity = this.entity;
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)entity;
+            return serverPlayer;
         }
-        return (ServerPlayer)this.entity;
+        throw ERROR_NOT_PLAYER.create();
+    }
+
+    public boolean isPlayer() {
+        return this.entity instanceof ServerPlayer;
     }
 
     public Vec2 getRotation() {
@@ -218,6 +242,10 @@ implements SharedSuggestionProvider {
 
     public EntityAnchorArgument.Anchor getAnchor() {
         return this.anchor;
+    }
+
+    public CommandSigningContext getSigningContext() {
+        return this.signingContext;
     }
 
     public void sendSuccess(Component component, boolean bl) {

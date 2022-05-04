@@ -113,7 +113,12 @@ extends AbstractPackResources {
                 }
                 if (file2.getName().endsWith(".mcmeta")) continue;
                 try {
-                    ResourceLocation resourceLocation = new ResourceLocation(string, string2 + file2.getName());
+                    String string3 = string2 + file2.getName();
+                    ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string3);
+                    if (resourceLocation == null) {
+                        LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", (Object)string, (Object)string3);
+                        continue;
+                    }
                     if (!predicate.test(resourceLocation)) continue;
                     list.add(resourceLocation);
                 } catch (ResourceLocationException resourceLocationException) {

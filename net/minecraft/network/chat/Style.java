@@ -11,8 +11,12 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.ClickEvent;
@@ -24,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Style {
     public static final Style EMPTY = new Style(null, null, null, null, null, null, null, null, null, null);
+    public static final Codec<Style> FORMATTING_CODEC = RecordCodecBuilder.create(instance -> instance.group(TextColor.CODEC.optionalFieldOf("color").forGetter(style -> Optional.ofNullable(style.color)), Codec.BOOL.optionalFieldOf("bold").forGetter(style -> Optional.ofNullable(style.bold)), Codec.BOOL.optionalFieldOf("italic").forGetter(style -> Optional.ofNullable(style.italic)), Codec.BOOL.optionalFieldOf("underlined").forGetter(style -> Optional.ofNullable(style.underlined)), Codec.BOOL.optionalFieldOf("strikethrough").forGetter(style -> Optional.ofNullable(style.strikethrough)), Codec.BOOL.optionalFieldOf("obfuscated").forGetter(style -> Optional.ofNullable(style.obfuscated)), Codec.STRING.optionalFieldOf("insertion").forGetter(style -> Optional.ofNullable(style.insertion)), ResourceLocation.CODEC.optionalFieldOf("font").forGetter(style -> Optional.ofNullable(style.font))).apply((Applicative<Style, ?>)instance, Style::create));
     public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("minecraft", "default");
     @Nullable
     final TextColor color;
@@ -45,6 +50,10 @@ public class Style {
     final String insertion;
     @Nullable
     final ResourceLocation font;
+
+    private static Style create(Optional<TextColor> optional, Optional<Boolean> optional2, Optional<Boolean> optional3, Optional<Boolean> optional4, Optional<Boolean> optional5, Optional<Boolean> optional6, Optional<String> optional7, Optional<ResourceLocation> optional8) {
+        return new Style(optional.orElse(null), optional2.orElse(null), optional3.orElse(null), optional4.orElse(null), optional5.orElse(null), optional6.orElse(null), null, null, optional7.orElse(null), optional8.orElse(null));
+    }
 
     Style(@Nullable TextColor textColor, @Nullable Boolean boolean_, @Nullable Boolean boolean2, @Nullable Boolean boolean3, @Nullable Boolean boolean4, @Nullable Boolean boolean5, @Nullable ClickEvent clickEvent, @Nullable HoverEvent hoverEvent, @Nullable String string, @Nullable ResourceLocation resourceLocation) {
         this.color = textColor;

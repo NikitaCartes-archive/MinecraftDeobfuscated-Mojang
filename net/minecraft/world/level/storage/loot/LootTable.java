@@ -201,12 +201,12 @@ public class LootTable {
         }
 
         @Override
-        public /* synthetic */ Object unwrap() {
+        public /* synthetic */ FunctionUserBuilder unwrap() {
             return this.unwrap();
         }
 
         @Override
-        public /* synthetic */ Object apply(LootItemFunction.Builder builder) {
+        public /* synthetic */ FunctionUserBuilder apply(LootItemFunction.Builder builder) {
             return this.apply(builder);
         }
     }

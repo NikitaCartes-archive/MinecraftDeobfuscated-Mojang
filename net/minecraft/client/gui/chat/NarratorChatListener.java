@@ -38,19 +38,14 @@ implements ChatListener {
             this.logNarratedMessage(component.getString());
             return;
         }
-        if (narratorStatus == NarratorStatus.ALL || narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT || narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
-            Component component2 = this.decorateMessage(chatType, component, chatSender);
-            String string = component2.getString();
-            this.logNarratedMessage(string);
-            this.narrator.say(string, chatType.shouldInterrupt());
-        }
-    }
-
-    private Component decorateMessage(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
-        if (chatSender != null && chatType == ChatType.CHAT) {
-            return Component.translatable("chat.type.text.narrate", chatSender.name(), component);
-        }
-        return component;
+        chatType.narration().ifPresent(narration -> {
+            if (narratorStatus.shouldNarrate(narration.priority())) {
+                Component component2 = narration.decorate(component, chatSender);
+                String string = component2.getString();
+                this.logNarratedMessage(string);
+                this.narrator.say(string, narration.priority().interrupts());
+            }
+        });
     }
 
     public void sayNow(Component component) {

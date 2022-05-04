@@ -8,10 +8,12 @@ import net.minecraft.Util;
 
 public class AnimationState {
     private static final long STOPPED = Long.MAX_VALUE;
-    private long startTime = Long.MAX_VALUE;
+    private long lastTime = Long.MAX_VALUE;
+    private long accumulatedTime;
 
     public void start() {
-        this.startTime = Util.getMillis();
+        this.lastTime = Util.getMillis();
+        this.accumulatedTime = 0L;
     }
 
     public void startIfStopped() {
@@ -21,11 +23,7 @@ public class AnimationState {
     }
 
     public void stop() {
-        this.startTime = Long.MAX_VALUE;
-    }
-
-    public long startTime() {
-        return this.startTime;
+        this.lastTime = Long.MAX_VALUE;
     }
 
     public void ifStarted(Consumer<AnimationState> consumer) {
@@ -34,8 +32,23 @@ public class AnimationState {
         }
     }
 
+    public void updateTime(boolean bl, float f) {
+        if (!this.isStarted()) {
+            return;
+        }
+        long l = Util.getMillis();
+        if (!bl) {
+            this.accumulatedTime += (long)((float)(l - this.lastTime) * f);
+        }
+        this.lastTime = l;
+    }
+
+    public long getAccumulatedTime() {
+        return this.accumulatedTime;
+    }
+
     public boolean isStarted() {
-        return this.startTime != Long.MAX_VALUE;
+        return this.lastTime != Long.MAX_VALUE;
     }
 }
 

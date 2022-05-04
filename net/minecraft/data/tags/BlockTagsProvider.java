@@ -166,6 +166,8 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH).add((Block[])new Block[]{Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MANGROVE_LEAVES, Blocks.MANGROVE_LOG, Blocks.MANGROVE_PROPAGULE, Blocks.MOSS_CARPET, Blocks.VINE});
         this.tag(BlockTags.MANGROVE_ROOTS_CAN_GROW_THROUGH).add((Block[])new Block[]{Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.MANGROVE_ROOTS, Blocks.MOSS_CARPET, Blocks.VINE, Blocks.MANGROVE_PROPAGULE, Blocks.SNOW});
         this.tag(BlockTags.DEAD_BUSH_MAY_PLACE_ON).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).addTag(BlockTags.DIRT);
+        this.tag(BlockTags.SNOW_LAYER_CANNOT_SURVIVE_ON).add(Blocks.ICE).add(Blocks.PACKED_ICE).add(Blocks.BARRIER);
+        this.tag(BlockTags.SNOW_LAYER_CAN_SURVIVE_ON).add(Blocks.HONEY_BLOCK).add(Blocks.SOUL_SAND).add(Blocks.MUD);
         this.tag(BlockTags.COMPLETES_FIND_TREE_TUTORIAL).addTag(BlockTags.LOGS).addTag(BlockTags.LEAVES).addTag(BlockTags.WART_BLOCKS);
         this.tag(BlockTags.SNAPS_GOAT_HORN).addTag(BlockTags.OVERWORLD_NATURAL_LOGS).add(Blocks.STONE).add(Blocks.PACKED_ICE).add(Blocks.IRON_ORE).add(Blocks.COAL_ORE).add(Blocks.EMERALD_ORE);
     }

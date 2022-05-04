@@ -8,6 +8,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class GameEvent {
@@ -90,6 +92,49 @@ public class GameEvent {
 
     public boolean is(TagKey<GameEvent> tagKey) {
         return this.builtInRegistryHolder.is(tagKey);
+    }
+
+    public static final class Message
+    implements Comparable<Message> {
+        private final GameEvent gameEvent;
+        private final Vec3 source;
+        private final Context context;
+        private final GameEventListener recipient;
+        private final double distanceToRecipient;
+
+        public Message(GameEvent gameEvent, Vec3 vec3, Context context, GameEventListener gameEventListener, Vec3 vec32) {
+            this.gameEvent = gameEvent;
+            this.source = vec3;
+            this.context = context;
+            this.recipient = gameEventListener;
+            this.distanceToRecipient = vec3.distanceToSqr(vec32);
+        }
+
+        @Override
+        public int compareTo(Message message) {
+            return Double.compare(this.distanceToRecipient, message.distanceToRecipient);
+        }
+
+        public GameEvent gameEvent() {
+            return this.gameEvent;
+        }
+
+        public Vec3 source() {
+            return this.source;
+        }
+
+        public Context context() {
+            return this.context;
+        }
+
+        public GameEventListener recipient() {
+            return this.recipient;
+        }
+
+        @Override
+        public /* synthetic */ int compareTo(Object object) {
+            return this.compareTo((Message)object);
+        }
     }
 
     public record Context(@Nullable Entity sourceEntity, @Nullable BlockState affectedState) {

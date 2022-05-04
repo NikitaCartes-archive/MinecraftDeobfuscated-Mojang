@@ -23,7 +23,6 @@ import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
-import net.minecraft.world.phys.Vec3;
 
 public class SculkCatalystBlockEntity
 extends BlockEntity
@@ -38,6 +37,11 @@ implements GameEventListener {
     }
 
     @Override
+    public boolean handleEventsImmediately() {
+        return true;
+    }
+
+    @Override
     public PositionSource getListenerSource() {
         return this.blockPosSource;
     }
@@ -48,12 +52,19 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
         Entity entity;
-        if (gameEvent == GameEvent.ENTITY_DIE && (entity = context.sourceEntity()) instanceof LivingEntity) {
+        if (this.isRemoved()) {
+            return false;
+        }
+        GameEvent.Context context = message.context();
+        if (message.gameEvent() == GameEvent.ENTITY_DIE && (entity = context.sourceEntity()) instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity;
             if (!livingEntity.wasExperienceConsumed()) {
-                this.sculkSpreader.addCursors(new BlockPos(vec3.relative(Direction.UP, 0.5)), livingEntity.getExperienceReward());
+                int i = livingEntity.getExperienceReward();
+                if (livingEntity.shouldDropExperience() && i > 0) {
+                    this.sculkSpreader.addCursors(new BlockPos(message.source().relative(Direction.UP, 0.5)), i);
+                }
                 livingEntity.skipDropExperience();
                 LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
                 if (livingEntity2 instanceof ServerPlayer) {

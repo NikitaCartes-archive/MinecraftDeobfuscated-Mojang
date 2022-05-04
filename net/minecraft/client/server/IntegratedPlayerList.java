@@ -28,7 +28,7 @@ extends PlayerList {
 
     @Override
     protected void save(ServerPlayer serverPlayer) {
-        if (serverPlayer.getName().getString().equals(this.getServer().getSingleplayerName())) {
+        if (this.getServer().isSingleplayerOwner(serverPlayer.getGameProfile())) {
             this.playerData = serverPlayer.saveWithoutId(new CompoundTag());
         }
         super.save(serverPlayer);
@@ -36,7 +36,7 @@ extends PlayerList {
 
     @Override
     public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
-        if (gameProfile.getName().equalsIgnoreCase(this.getServer().getSingleplayerName()) && this.getPlayerByName(gameProfile.getName()) != null) {
+        if (this.getServer().isSingleplayerOwner(gameProfile) && this.getPlayerByName(gameProfile.getName()) != null) {
             return Component.translatable("multiplayer.disconnect.name_taken");
         }
         return super.canPlayerLogin(socketAddress, gameProfile);

@@ -25,6 +25,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.BannerBlock;
@@ -65,7 +66,7 @@ implements BlockEntityRenderer<BannerBlockEntity> {
     @Override
     public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         long l;
-        List<Pair<BannerPattern, DyeColor>> list = bannerBlockEntity.getPatterns();
+        List<Pair<Holder<BannerPattern>, DyeColor>> list = bannerBlockEntity.getPatterns();
         float g = 0.6666667f;
         boolean bl = bannerBlockEntity.getLevel() == null;
         poseStack.pushPose();
@@ -103,18 +104,16 @@ implements BlockEntityRenderer<BannerBlockEntity> {
         poseStack.popPose();
     }
 
-    public static void renderPatterns(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, boolean bl, List<Pair<BannerPattern, DyeColor>> list) {
+    public static void renderPatterns(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, boolean bl, List<Pair<Holder<BannerPattern>, DyeColor>> list) {
         BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, modelPart, material, bl, list, false);
     }
 
-    public static void renderPatterns(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, boolean bl, List<Pair<BannerPattern, DyeColor>> list, boolean bl2) {
-        modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
+    public static void renderPatterns(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material2, boolean bl, List<Pair<Holder<BannerPattern>, DyeColor>> list, boolean bl2) {
+        modelPart.render(poseStack, material2.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
         for (int k = 0; k < 17 && k < list.size(); ++k) {
-            Pair<BannerPattern, DyeColor> pair = list.get(k);
+            Pair<Holder<BannerPattern>, DyeColor> pair = list.get(k);
             float[] fs = pair.getSecond().getTextureDiffuseColors();
-            BannerPattern bannerPattern = pair.getFirst();
-            Material material2 = bl ? Sheets.getBannerMaterial(bannerPattern) : Sheets.getShieldMaterial(bannerPattern);
-            modelPart.render(poseStack, material2.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0f);
+            pair.getFirst().unwrapKey().map(resourceKey -> bl ? Sheets.getBannerMaterial(resourceKey) : Sheets.getShieldMaterial(resourceKey)).ifPresent(material -> modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0f));
         }
     }
 }

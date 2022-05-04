@@ -44,6 +44,10 @@ public enum AngerLevel {
         return CALM;
     }
 
+    public boolean isAngry() {
+        return this == ANGRY;
+    }
+
     static {
         SORTED_LEVELS = Util.make(AngerLevel.values(), angerLevels -> Arrays.sort(angerLevels, (angerLevel, angerLevel2) -> Integer.compare(angerLevel2.minimumAnger, angerLevel.minimumAnger)));
     }

@@ -6,6 +6,7 @@ package net.minecraft.server.packs;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.logging.LogUtils;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,11 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 public class FilePackResources
 extends AbstractPackResources {
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final Splitter SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
     @Nullable
     private ZipFile zipFile;
@@ -114,11 +117,16 @@ extends AbstractPackResources {
         String string3 = packType.getDirectory() + "/" + string + "/";
         String string4 = string3 + string2 + "/";
         while (enumeration.hasMoreElements()) {
-            String string6;
-            ResourceLocation resourceLocation;
             String string5;
             ZipEntry zipEntry = enumeration.nextElement();
-            if (zipEntry.isDirectory() || (string5 = zipEntry.getName()).endsWith(".mcmeta") || !string5.startsWith(string4) || !predicate.test(resourceLocation = new ResourceLocation(string, string6 = string5.substring(string3.length())))) continue;
+            if (zipEntry.isDirectory() || (string5 = zipEntry.getName()).endsWith(".mcmeta") || !string5.startsWith(string4)) continue;
+            String string6 = string5.substring(string3.length());
+            ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string6);
+            if (resourceLocation == null) {
+                LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", (Object)string, (Object)string6);
+                continue;
+            }
+            if (!predicate.test(resourceLocation)) continue;
             list.add(resourceLocation);
         }
         return list;

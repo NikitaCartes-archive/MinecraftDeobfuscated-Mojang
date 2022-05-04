@@ -124,12 +124,12 @@ implements LootItemFunction {
         }
 
         @Override
-        public /* synthetic */ Object unwrap() {
+        public /* synthetic */ ConditionUserBuilder unwrap() {
             return this.unwrap();
         }
 
         @Override
-        public /* synthetic */ Object when(LootItemCondition.Builder builder) {
+        public /* synthetic */ ConditionUserBuilder when(LootItemCondition.Builder builder) {
             return this.when(builder);
         }
     }
