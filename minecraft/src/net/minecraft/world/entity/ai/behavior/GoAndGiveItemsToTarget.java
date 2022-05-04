@@ -87,7 +87,7 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
 			return false;
 		} else {
 			Optional<PositionTracker> optional = (Optional<PositionTracker>)this.targetPositionGetter.apply(livingEntity);
-			return optional.isPresent() && ((PositionTracker)optional.get()).isVisibleBy(livingEntity);
+			return optional.isPresent();
 		}
 	}
 

@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -14,6 +17,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.InstrumentTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -36,7 +41,8 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.GoatHornItem;
+import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.InstrumentItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -90,6 +96,13 @@ public class Goat extends Animal {
 		this.getNavigation().setCanFloat(true);
 		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
+	}
+
+	public ItemStack createHorn() {
+		RandomSource randomSource = RandomSource.create((long)this.getUUID().hashCode());
+		TagKey<Instrument> tagKey = this.isScreamingGoat() ? InstrumentTags.SCREAMING_GOAT_HORNS : InstrumentTags.REGULAR_GOAT_HORNS;
+		HolderSet<Instrument> holderSet = Registry.INSTRUMENT.getOrCreateTag(tagKey);
+		return InstrumentItem.create(Items.GOAT_HORN, (Holder<Instrument>)holderSet.getRandomElement(randomSource).get());
 	}
 
 	@Override
@@ -312,7 +325,7 @@ public class Goat extends Animal {
 
 			this.entityData.set(entityDataAccessor, false);
 			Vec3 vec3 = this.position();
-			ItemStack itemStack = GoatHornItem.createFromGoat(this);
+			ItemStack itemStack = this.createHorn();
 			double d = (double)Mth.randomBetween(this.random, -0.2F, 0.2F);
 			double e = (double)Mth.randomBetween(this.random, 0.3F, 0.7F);
 			double f = (double)Mth.randomBetween(this.random, -0.2F, 0.2F);

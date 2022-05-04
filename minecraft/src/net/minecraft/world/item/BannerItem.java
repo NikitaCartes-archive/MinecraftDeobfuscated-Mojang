@@ -3,6 +3,7 @@ package net.minecraft.world.item;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -29,9 +30,11 @@ public class BannerItem extends StandingAndWallBlockItem {
 			for (int i = 0; i < listTag.size() && i < 6; i++) {
 				CompoundTag compoundTag2 = listTag.getCompound(i);
 				DyeColor dyeColor = DyeColor.byId(compoundTag2.getInt("Color"));
-				BannerPattern bannerPattern = BannerPattern.byHash(compoundTag2.getString("Pattern"));
-				if (bannerPattern != null) {
-					list.add(Component.translatable("block.minecraft.banner." + bannerPattern.getFilename() + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY));
+				Holder<BannerPattern> holder = BannerPattern.byHash(compoundTag2.getString("Pattern"));
+				if (holder != null) {
+					holder.unwrapKey()
+						.map(resourceKey -> resourceKey.location().toShortLanguageKey())
+						.ifPresent(string -> list.add(Component.translatable("block.minecraft.banner." + string + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY)));
 				}
 			}
 		}

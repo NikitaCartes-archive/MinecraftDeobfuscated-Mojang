@@ -64,7 +64,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 1, 1);
 	private static final int ANIMATION_DURATION = 5;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS
+		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS
 	);
 	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.PATH,
@@ -72,6 +72,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.WALK_TARGET,
 		MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+		MemoryModuleType.HURT_BY,
 		MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
 		MemoryModuleType.LIKED_PLAYER,
 		MemoryModuleType.LIKED_NOTEBLOCK_POSITION,
@@ -296,7 +297,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
 		ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-		return !itemStack2.isEmpty() && itemStack2.sameItemStackIgnoreDurability(itemStack) && this.inventory.canAddItem(itemStack2);
+		return !itemStack2.isEmpty() && itemStack2.sameItemStackIgnoreDurability(itemStack) && this.inventory.canAddItem(itemStack);
 	}
 
 	@Override
@@ -348,7 +349,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 
 	@Override
 	public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
-		if (this.isNoAi()) {
+		if (this.level != serverLevel || this.isRemoved() || this.isNoAi()) {
 			return false;
 		} else if (!this.brain.hasMemoryValue(MemoryModuleType.LIKED_NOTEBLOCK_POSITION)) {
 			return true;
@@ -381,6 +382,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
+		compoundTag.put("Inventory", this.inventory.createTag());
 		VibrationListener.codec(this)
 			.encodeStart(NbtOps.INSTANCE, this.dynamicGameEventListener.getListener())
 			.resultOrPartial(LOGGER::error)
@@ -390,11 +392,17 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
+		this.inventory.fromTag(compoundTag.getList("Inventory", 10));
 		if (compoundTag.contains("listener", 10)) {
 			VibrationListener.codec(this)
 				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("listener")))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(vibrationListener -> this.dynamicGameEventListener.updateListener(vibrationListener, this.level));
 		}
+	}
+
+	@Override
+	protected boolean shouldStayCloseToLeashHolder() {
+		return false;
 	}
 }

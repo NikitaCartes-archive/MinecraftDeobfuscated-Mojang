@@ -22,7 +22,7 @@ public class IntegratedPlayerList extends PlayerList {
 
 	@Override
 	protected void save(ServerPlayer serverPlayer) {
-		if (serverPlayer.getName().getString().equals(this.getServer().getSingleplayerName())) {
+		if (this.getServer().isSingleplayerOwner(serverPlayer.getGameProfile())) {
 			this.playerData = serverPlayer.saveWithoutId(new CompoundTag());
 		}
 
@@ -31,7 +31,7 @@ public class IntegratedPlayerList extends PlayerList {
 
 	@Override
 	public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
-		return (Component)(gameProfile.getName().equalsIgnoreCase(this.getServer().getSingleplayerName()) && this.getPlayerByName(gameProfile.getName()) != null
+		return (Component)(this.getServer().isSingleplayerOwner(gameProfile) && this.getPlayerByName(gameProfile.getName()) != null
 			? Component.translatable("multiplayer.disconnect.name_taken")
 			: super.canPlayerLogin(socketAddress, gameProfile));
 	}

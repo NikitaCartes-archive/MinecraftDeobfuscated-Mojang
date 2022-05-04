@@ -133,9 +133,19 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1.jar"
 	},
 	{
+		"sha1sum": "0f46cadcf95675908fd3a550d63d9d709cb68998",
+		"name": "lwjgl-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1-natives-windows-arm64.jar"
+	},
+	{
 		"sha1sum": "cbac1b8d30cb4795149c1ef540f912671a8616d0",
 		"name": "lwjgl-glfw-3.3.1.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1.jar"
+	},
+	{
+		"sha1sum": "beda65ee503443e60aa196d58ed31f8d001dc22a",
+		"name": "lwjgl-glfw-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1-natives-windows-arm64.jar"
 	},
 	{
 		"sha1sum": "a817bcf213db49f710603677457567c37d53e103",
@@ -143,9 +153,19 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-jemalloc/3.3.1/lwjgl-jemalloc-3.3.1.jar"
 	},
 	{
+		"sha1sum": "cae85c4edb219c88b6a0c26a87955ad98dc9519d",
+		"name": "lwjgl-jemalloc-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-jemalloc/3.3.1/lwjgl-jemalloc-3.3.1-natives-windows-arm64.jar"
+	},
+	{
 		"sha1sum": "2623a6b8ae1dfcd880738656a9f0243d2e6840bd",
 		"name": "lwjgl-openal-3.3.1.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-openal/3.3.1/lwjgl-openal-3.3.1.jar"
+	},
+	{
+		"sha1sum": "40d65f1a7368a2aa47336f9cb69f5a190cf9975a",
+		"name": "lwjgl-openal-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-openal/3.3.1/lwjgl-openal-3.3.1-natives-windows-arm64.jar"
 	},
 	{
 		"sha1sum": "831a5533a21a5f4f81bbc51bb13e9899319b5411",
@@ -153,9 +173,19 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-opengl/3.3.1/lwjgl-opengl-3.3.1.jar"
 	},
 	{
+		"sha1sum": "527d78f1e9056aff3ed02ce93019c73c5e8f1721",
+		"name": "lwjgl-opengl-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-opengl/3.3.1/lwjgl-opengl-3.3.1-natives-windows-arm64.jar"
+	},
+	{
 		"sha1sum": "b119297cf8ed01f247abe8685857f8e7fcf5980f",
 		"name": "lwjgl-stb-3.3.1.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-stb/3.3.1/lwjgl-stb-3.3.1.jar"
+	},
+	{
+		"sha1sum": "fde63cdd2605c00636721a6c8b961e41d1f6b247",
+		"name": "lwjgl-stb-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-stb/3.3.1/lwjgl-stb-3.3.1-natives-windows-arm64.jar"
 	},
 	{
 		"sha1sum": "0ff1914111ef2e3e0110ef2dabc8d8cdaad82347",
@@ -163,9 +193,49 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.3.1/lwjgl-tinyfd-3.3.1.jar"
 	},
 	{
-		"sha1sum": "b8266a3c93c1c051109f71d3449e5dcd5d60b333",
-		"name": "netty-all-4.1.68.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-all/4.1.68.Final/netty-all-4.1.68.Final.jar"
+		"sha1sum": "83a5e780df610829ff3a737822b4f931cffecd91",
+		"name": "lwjgl-tinyfd-3.3.1-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.3.1/lwjgl-tinyfd-3.3.1-natives-windows-arm64.jar"
+	},
+	{
+		"sha1sum": "d97571f99e5e739d86824d0df99f35d295276b5f",
+		"name": "netty-buffer-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-buffer/4.1.77.Final/netty-buffer-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "4efc5f59335301d6ba0d7cd31dd10651119b03c8",
+		"name": "netty-codec-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-codec/4.1.77.Final/netty-codec-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "ea0fc20f4e6178966b9d62017b7fcb83dfe0e713",
+		"name": "netty-common-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-common/4.1.77.Final/netty-common-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "47a81089de03635a27f509f3e4e13386ae1db275",
+		"name": "netty-handler-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-handler/4.1.77.Final/netty-handler-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "4a239dbf8d8bb5f98aa51462c35011c0516395fd",
+		"name": "netty-resolver-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-resolver/4.1.77.Final/netty-resolver-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "2a3373bbd20d520c821f210bd5ee886788512043",
+		"name": "netty-transport-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport/4.1.77.Final/netty-transport-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "dd70dbccbcf98382223a59044f3c08d8e9920cad",
+		"name": "netty-transport-classes-epoll-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport-classes-epoll/4.1.77.Final/netty-transport-classes-epoll-4.1.77.Final.jar"
+	},
+	{
+		"sha1sum": "c95d53486414b3270d08057957c5da8e0c37e4eb",
+		"name": "netty-transport-native-unix-common-4.1.77.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-unix-common/4.1.77.Final/netty-transport-native-unix-common-4.1.77.Final.jar"
 	},
 	{
 		"sha1sum": "1d0ec654d820741327f5a9229d513732a4b7ce50",
@@ -183,8 +253,8 @@
 		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar"
 	},
 	{
-		"sha1sum": "5f4e3a6ef86cb021f7ca87ca192cddb50c26eb59",
-		"name": "text2speech-1.13.9.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.13.9/text2speech-1.13.9.jar"
+		"sha1sum": "ee4095669061d1fe4bce5fea23d69d1520bc2d58",
+		"name": "text2speech-1.16.7.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.16.7/text2speech-1.16.7.jar"
 	}
 ]

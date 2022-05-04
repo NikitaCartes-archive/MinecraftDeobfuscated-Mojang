@@ -19,6 +19,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -125,6 +126,7 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -176,6 +178,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	protected final Raids raids;
 	private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet<>();
 	private final List<BlockEventData> blockEventsToReschedule = new ArrayList(64);
+	private List<GameEvent.Message> gameEventMessages = new ArrayList();
 	private boolean handlingTick;
 	private final List<CustomSpawner> customSpawners;
 	@Nullable
@@ -359,6 +362,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		profilerFiller.push("entityManagement");
 		this.entityManager.tick();
+		profilerFiller.push("gameEvents");
+		this.sendGameEvents();
 		profilerFiller.pop();
 	}
 
@@ -895,16 +900,50 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		int m = SectionPos.blockToSectionCoord(blockPos.getX() + i);
 		int n = SectionPos.blockToSectionCoord(blockPos.getY() + i);
 		int o = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
+		List<GameEvent.Message> list = new ArrayList();
+		boolean bl = false;
 
 		for (int p = j; p <= m; p++) {
 			for (int q = l; q <= o; q++) {
 				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
 				if (chunkAccess != null) {
 					for (int r = k; r <= n; r++) {
-						chunkAccess.getEventDispatcher(r).post(gameEvent, vec3, context);
+						bl |= chunkAccess.getEventDispatcher(r)
+							.walkListeners(
+								gameEvent,
+								vec3,
+								context,
+								(gameEventListener, vec32) -> (gameEventListener.handleEventsImmediately() ? list : this.gameEventMessages)
+										.add(new GameEvent.Message(gameEvent, vec3, context, gameEventListener, vec32))
+							);
 					}
 				}
 			}
+		}
+
+		if (!list.isEmpty()) {
+			this.handleGameEventMessagesInQueue(list);
+		}
+
+		if (bl) {
+			DebugPackets.sendGameEventInfo(this, gameEvent, vec3);
+		}
+	}
+
+	private void sendGameEvents() {
+		if (!this.gameEventMessages.isEmpty()) {
+			List<GameEvent.Message> list = this.gameEventMessages;
+			this.gameEventMessages = new ArrayList();
+			this.handleGameEventMessagesInQueue(list);
+		}
+	}
+
+	private void handleGameEventMessagesInQueue(List<GameEvent.Message> list) {
+		Collections.sort(list);
+
+		for (GameEvent.Message message : list) {
+			GameEventListener gameEventListener = message.recipient();
+			gameEventListener.handleGameEvent(this, message);
 		}
 	}
 

@@ -51,6 +51,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -590,14 +591,14 @@ public class Raid {
 		ItemStack itemStack = new ItemStack(Items.WHITE_BANNER);
 		CompoundTag compoundTag = new CompoundTag();
 		ListTag listTag = new BannerPattern.Builder()
-			.addPattern(BannerPattern.RHOMBUS_MIDDLE, DyeColor.CYAN)
-			.addPattern(BannerPattern.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPattern.STRIPE_CENTER, DyeColor.GRAY)
-			.addPattern(BannerPattern.BORDER, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPattern.STRIPE_MIDDLE, DyeColor.BLACK)
-			.addPattern(BannerPattern.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPattern.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPattern.BORDER, DyeColor.BLACK)
+			.addPattern(BannerPatterns.RHOMBUS_MIDDLE, DyeColor.CYAN)
+			.addPattern(BannerPatterns.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY)
+			.addPattern(BannerPatterns.STRIPE_CENTER, DyeColor.GRAY)
+			.addPattern(BannerPatterns.BORDER, DyeColor.LIGHT_GRAY)
+			.addPattern(BannerPatterns.STRIPE_MIDDLE, DyeColor.BLACK)
+			.addPattern(BannerPatterns.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY)
+			.addPattern(BannerPatterns.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY)
+			.addPattern(BannerPatterns.BORDER, DyeColor.BLACK)
 			.toListTag();
 		compoundTag.put("Patterns", listTag);
 		BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);

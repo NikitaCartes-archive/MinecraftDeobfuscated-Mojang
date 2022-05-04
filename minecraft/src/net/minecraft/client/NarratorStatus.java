@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -35,5 +36,14 @@ public enum NarratorStatus {
 
 	public static NarratorStatus byId(int i) {
 		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+	}
+
+	public boolean shouldNarrate(ChatType.Narration.Priority priority) {
+		return switch (this) {
+			case OFF -> false;
+			case ALL -> true;
+			case CHAT -> priority == ChatType.Narration.Priority.CHAT;
+			case SYSTEM -> priority == ChatType.Narration.Priority.SYSTEM;
+		};
 	}
 }

@@ -8,11 +8,12 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 
 @Environment(EnvType.CLIENT)
 public class RemotePlayer extends AbstractClientPlayer {
-	public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile) {
-		super(clientLevel, gameProfile);
+	public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
+		super(clientLevel, gameProfile, profilePublicKey);
 		this.maxUpStep = 1.0F;
 		this.noPhysics = true;
 	}

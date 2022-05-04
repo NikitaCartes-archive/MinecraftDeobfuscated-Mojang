@@ -119,6 +119,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
@@ -296,6 +297,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundAcceptTeleportationPacket.class, ServerboundAcceptTeleportationPacket::new)
 					.addPacket(ServerboundBlockEntityTagQuery.class, ServerboundBlockEntityTagQuery::new)
 					.addPacket(ServerboundChangeDifficultyPacket.class, ServerboundChangeDifficultyPacket::new)
+					.addPacket(ServerboundChatCommandPacket.class, ServerboundChatCommandPacket::new)
 					.addPacket(ServerboundChatPacket.class, ServerboundChatPacket::new)
 					.addPacket(ServerboundClientCommandPacket.class, ServerboundClientCommandPacket::new)
 					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)

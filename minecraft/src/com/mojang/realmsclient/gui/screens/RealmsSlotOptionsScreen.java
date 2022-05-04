@@ -5,12 +5,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import java.util.List;
+import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsLabel;
@@ -27,15 +30,18 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	public static final List<GameType> GAME_MODES = ImmutableList.of(GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE);
 	private static final Component NAME_LABEL = Component.translatable("mco.configure.world.edit.slot.name");
 	static final Component SPAWN_PROTECTION_TEXT = Component.translatable("mco.configure.world.spawnProtection");
+	private static final Component SPAWN_WARNING_TITLE = Component.translatable("mco.configure.world.spawn_toggle.title")
+		.withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
 	private EditBox nameEdit;
 	protected final RealmsConfigureWorldScreen parent;
 	private int column1X;
 	private int columnWidth;
 	private final RealmsWorldOptions options;
 	private final RealmsServer.WorldType worldType;
-	private final int activeSlot;
 	private Difficulty difficulty;
 	private GameType gameMode;
+	private final String defaultSlotName;
+	private String worldName;
 	private boolean pvp;
 	private boolean spawnNPCs;
 	private boolean spawnAnimals;
@@ -52,7 +58,27 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		this.parent = realmsConfigureWorldScreen;
 		this.options = realmsWorldOptions;
 		this.worldType = worldType;
-		this.activeSlot = i;
+		this.difficulty = findByIndex(DIFFICULTIES, realmsWorldOptions.difficulty, 2);
+		this.gameMode = findByIndex(GAME_MODES, realmsWorldOptions.gameMode, 0);
+		this.defaultSlotName = realmsWorldOptions.getDefaultSlotName(i);
+		this.setWorldName(realmsWorldOptions.getSlotName(i));
+		if (worldType == RealmsServer.WorldType.NORMAL) {
+			this.pvp = realmsWorldOptions.pvp;
+			this.spawnProtection = realmsWorldOptions.spawnProtection;
+			this.forceGameMode = realmsWorldOptions.forceGameMode;
+			this.spawnAnimals = realmsWorldOptions.spawnAnimals;
+			this.spawnMonsters = realmsWorldOptions.spawnMonsters;
+			this.spawnNPCs = realmsWorldOptions.spawnNPCs;
+			this.commandBlocks = realmsWorldOptions.commandBlocks;
+		} else {
+			this.pvp = true;
+			this.spawnProtection = 0;
+			this.forceGameMode = false;
+			this.spawnAnimals = true;
+			this.spawnMonsters = true;
+			this.spawnNPCs = true;
+			this.commandBlocks = true;
+		}
 	}
 
 	@Override
@@ -93,17 +119,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		this.columnWidth = 170;
 		this.column1X = this.width / 2 - this.columnWidth;
 		int i = this.width / 2 + 10;
-		this.difficulty = findByIndex(DIFFICULTIES, this.options.difficulty, 2);
-		this.gameMode = findByIndex(GAME_MODES, this.options.gameMode, 0);
-		if (this.worldType == RealmsServer.WorldType.NORMAL) {
-			this.pvp = this.options.pvp;
-			this.spawnProtection = this.options.spawnProtection;
-			this.forceGameMode = this.options.forceGameMode;
-			this.spawnAnimals = this.options.spawnAnimals;
-			this.spawnMonsters = this.options.spawnMonsters;
-			this.spawnNPCs = this.options.spawnNPCs;
-			this.commandBlocks = this.options.commandBlocks;
-		} else {
+		if (this.worldType != RealmsServer.WorldType.NORMAL) {
 			Component component;
 			if (this.worldType == RealmsServer.WorldType.ADVENTUREMAP) {
 				component = Component.translatable("mco.configure.world.edit.subscreen.adventuremap");
@@ -114,20 +130,14 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 			}
 
 			this.addLabel(new RealmsLabel(component, this.width / 2, 26, 16711680));
-			this.pvp = true;
-			this.spawnProtection = 0;
-			this.forceGameMode = false;
-			this.spawnAnimals = true;
-			this.spawnMonsters = true;
-			this.spawnNPCs = true;
-			this.commandBlocks = true;
 		}
 
 		this.nameEdit = new EditBox(
 			this.minecraft.font, this.column1X + 2, row(1), this.columnWidth - 4, 20, null, Component.translatable("mco.configure.world.edit.slot.name")
 		);
 		this.nameEdit.setMaxLength(10);
-		this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
+		this.nameEdit.setValue(this.worldName);
+		this.nameEdit.setResponder(this::setWorldName);
 		this.magicalSpecialHackyFocus(this.nameEdit);
 		CycleButton<Boolean> cycleButton = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.pvp)
@@ -139,15 +149,26 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 				.withInitialValue(this.gameMode)
 				.create(this.column1X, row(3), this.columnWidth, 20, Component.translatable("selectWorld.gameMode"), (cycleButtonx, gameType) -> this.gameMode = gameType)
 		);
+		Component component2 = Component.translatable("mco.configure.world.spawn_toggle.message");
 		CycleButton<Boolean> cycleButton2 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.spawnAnimals)
 				.create(
-					i, row(3), this.columnWidth, 20, Component.translatable("mco.configure.world.spawnAnimals"), (cycleButtonx, boolean_) -> this.spawnAnimals = boolean_
+					i,
+					row(3),
+					this.columnWidth,
+					20,
+					Component.translatable("mco.configure.world.spawnAnimals"),
+					this.confirmDangerousOption(component2, boolean_ -> this.spawnAnimals = boolean_)
 				)
 		);
 		CycleButton<Boolean> cycleButton3 = CycleButton.onOffBuilder(this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters)
 			.create(
-				i, row(5), this.columnWidth, 20, Component.translatable("mco.configure.world.spawnMonsters"), (cycleButtonx, boolean_) -> this.spawnMonsters = boolean_
+				i,
+				row(5),
+				this.columnWidth,
+				20,
+				Component.translatable("mco.configure.world.spawnMonsters"),
+				this.confirmDangerousOption(component2, boolean_ -> this.spawnMonsters = boolean_)
 			);
 		this.addRenderableWidget(
 			CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
@@ -168,7 +189,14 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		);
 		CycleButton<Boolean> cycleButton4 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.spawnNPCs)
-				.create(i, row(7), this.columnWidth, 20, Component.translatable("mco.configure.world.spawnNPCs"), (cycleButtonx, boolean_) -> this.spawnNPCs = boolean_)
+				.create(
+					i,
+					row(7),
+					this.columnWidth,
+					20,
+					Component.translatable("mco.configure.world.spawnNPCs"),
+					this.confirmDangerousOption(Component.translatable("mco.configure.world.spawn_toggle.message.npc"), boolean_ -> this.spawnNPCs = boolean_)
+				)
 		);
 		CycleButton<Boolean> cycleButton5 = this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.forceGameMode)
@@ -208,6 +236,22 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		this.addWidget(this.nameEdit);
 	}
 
+	private CycleButton.OnValueChange<Boolean> confirmDangerousOption(Component component, Consumer<Boolean> consumer) {
+		return (cycleButton, boolean_) -> {
+			if (boolean_) {
+				consumer.accept(true);
+			} else {
+				this.minecraft.setScreen(new ConfirmScreen(bl -> {
+					if (bl) {
+						consumer.accept(false);
+					}
+
+					this.minecraft.setScreen(this);
+				}, SPAWN_WARNING_TITLE, component, CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+			}
+		};
+	}
+
 	@Override
 	public Component getNarrationMessage() {
 		return CommonComponents.joinForNarration(this.getTitle(), this.createLabelNarration());
@@ -222,8 +266,12 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		super.render(poseStack, i, j, f);
 	}
 
-	private String getSlotName() {
-		return this.nameEdit.getValue().equals(this.options.getDefaultSlotName(this.activeSlot)) ? "" : this.nameEdit.getValue();
+	private void setWorldName(String string) {
+		if (string.equals(this.defaultSlotName)) {
+			this.worldName = "";
+		} else {
+			this.worldName = string;
+		}
 	}
 
 	private void saveSettings() {
@@ -232,11 +280,10 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		if (this.worldType != RealmsServer.WorldType.ADVENTUREMAP
 			&& this.worldType != RealmsServer.WorldType.EXPERIENCE
 			&& this.worldType != RealmsServer.WorldType.INSPIRATION) {
+			boolean bl = this.worldType == RealmsServer.WorldType.NORMAL && this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters;
 			this.parent
 				.saveSlotSettings(
-					new RealmsWorldOptions(
-						this.pvp, this.spawnAnimals, this.spawnMonsters, this.spawnNPCs, this.spawnProtection, this.commandBlocks, i, j, this.forceGameMode, this.getSlotName()
-					)
+					new RealmsWorldOptions(this.pvp, this.spawnAnimals, bl, this.spawnNPCs, this.spawnProtection, this.commandBlocks, i, j, this.forceGameMode, this.worldName)
 				);
 		} else {
 			this.parent
@@ -251,7 +298,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 						i,
 						j,
 						this.options.forceGameMode,
-						this.getSlotName()
+						this.worldName
 					)
 				);
 		}

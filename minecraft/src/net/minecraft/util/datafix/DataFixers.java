@@ -91,6 +91,7 @@ import net.minecraft.util.datafix.fixes.EntityZombieVillagerTypeFix;
 import net.minecraft.util.datafix.fixes.EntityZombifiedPiglinRenameFix;
 import net.minecraft.util.datafix.fixes.ForcePoiRebuild;
 import net.minecraft.util.datafix.fixes.FurnaceRecipeFix;
+import net.minecraft.util.datafix.fixes.GoatHornIdFix;
 import net.minecraft.util.datafix.fixes.GossipUUIDFix;
 import net.minecraft.util.datafix.fixes.HeightmapRenamingFix;
 import net.minecraft.util.datafix.fixes.IglooMetadataRemovalFix;
@@ -956,6 +957,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new BlendingDataFix(schema165));
 		Schema schema166 = dataFixerBuilder.addSchema(3090, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new EntityPaintingFieldsRenameFix(schema166));
+		Schema schema167 = dataFixerBuilder.addSchema(3094, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new GoatHornIdFix(schema167));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

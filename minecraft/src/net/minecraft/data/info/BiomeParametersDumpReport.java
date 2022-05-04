@@ -1,7 +1,5 @@
 package net.minecraft.data.info;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DynamicOps;
@@ -23,7 +21,6 @@ import org.slf4j.Logger;
 
 public class BiomeParametersDumpReport implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private final DataGenerator generator;
 
 	public BiomeParametersDumpReport(DataGenerator dataGenerator) {
@@ -47,7 +44,7 @@ public class BiomeParametersDumpReport implements DataProvider {
 			Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object)
 				.resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", path, string));
 			if (optional.isPresent()) {
-				DataProvider.save(GSON, cachedOutput, (JsonElement)optional.get(), path);
+				DataProvider.saveStable(cachedOutput, (JsonElement)optional.get(), path);
 			}
 		} catch (IOException var6) {
 			LOGGER.error("Couldn't save element {}", path, var6);

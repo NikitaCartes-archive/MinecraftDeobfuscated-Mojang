@@ -1,5 +1,6 @@
 package net.minecraft.data;
 
+import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
@@ -157,43 +158,13 @@ public class HashCache {
 			this.newCache = new HashCache.ProviderCache(string);
 		}
 
-		private boolean shouldWrite(Path path, String string) {
-			return !Objects.equals(this.oldCache.get(path), string) || !Files.exists(path, new LinkOption[0]);
+		private boolean shouldWrite(Path path, HashCode hashCode) {
+			return !Objects.equals(this.oldCache.get(path), hashCode) || !Files.exists(path, new LinkOption[0]);
 		}
 
 		@Override
-		public void writeIfNeeded(Path path, String string) throws IOException {
-			String string2 = Hashing.sha1().hashUnencodedChars(string).toString();
-			if (this.shouldWrite(path, string2)) {
-				this.writes++;
-				Files.createDirectories(path.getParent());
-				BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
-
-				try {
-					bufferedWriter.write(string);
-				} catch (Throwable var8) {
-					if (bufferedWriter != null) {
-						try {
-							bufferedWriter.close();
-						} catch (Throwable var7) {
-							var8.addSuppressed(var7);
-						}
-					}
-
-					throw var8;
-				}
-
-				if (bufferedWriter != null) {
-					bufferedWriter.close();
-				}
-			}
-
-			this.newCache.put(path, string2);
-		}
-
-		@Override
-		public void writeIfNeeded(Path path, byte[] bs, String string) throws IOException {
-			if (this.shouldWrite(path, string)) {
+		public void writeIfNeeded(Path path, byte[] bs, HashCode hashCode) throws IOException {
+			if (this.shouldWrite(path, hashCode)) {
 				this.writes++;
 				Files.createDirectories(path.getParent());
 				OutputStream outputStream = Files.newOutputStream(path);
@@ -217,23 +188,23 @@ public class HashCache {
 				}
 			}
 
-			this.newCache.put(path, string);
+			this.newCache.put(path, hashCode);
 		}
 	}
 
-	static record ProviderCache(String version, Map<Path, String> data) {
+	static record ProviderCache(String version, Map<Path, HashCode> data) {
 
 		ProviderCache(String string) {
 			this(string, new HashMap());
 		}
 
 		@Nullable
-		public String get(Path path) {
-			return (String)this.data.get(path);
+		public HashCode get(Path path) {
+			return (HashCode)this.data.get(path);
 		}
 
-		public void put(Path path, String string) {
-			this.data.put(path, string);
+		public void put(Path path, HashCode hashCode) {
+			this.data.put(path, hashCode);
 		}
 
 		public int count() {
@@ -252,10 +223,10 @@ public class HashCache {
 
 				String[] strings = string.substring("// ".length()).split("\t", 2);
 				String string2 = strings[0];
-				Map<Path, String> map = new HashMap();
+				Map<Path, HashCode> map = new HashMap();
 				bufferedReader.lines().forEach(stringx -> {
 					int i = stringx.indexOf(32);
-					map.put(path.resolve(stringx.substring(i + 1)), stringx.substring(0, i));
+					map.put(path.resolve(stringx.substring(i + 1)), HashCode.fromString(stringx.substring(0, i)));
 				});
 				var7 = new HashCache.ProviderCache(string2, Map.copyOf(map));
 			} catch (Throwable var9) {
@@ -288,8 +259,8 @@ public class HashCache {
 					bufferedWriter.write(string);
 					bufferedWriter.newLine();
 
-					for (Entry<Path, String> entry : this.data.entrySet()) {
-						bufferedWriter.write((String)entry.getValue());
+					for (Entry<Path, HashCode> entry : this.data.entrySet()) {
+						bufferedWriter.write(((HashCode)entry.getValue()).toString());
 						bufferedWriter.write(32);
 						bufferedWriter.write(path.relativize((Path)entry.getKey()).toString());
 						bufferedWriter.newLine();

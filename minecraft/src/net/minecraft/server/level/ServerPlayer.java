@@ -4,12 +4,10 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
 import net.minecraft.ChatFormatting;
@@ -23,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -31,6 +30,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.SignedMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -79,7 +79,6 @@ import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
@@ -102,6 +101,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
@@ -238,8 +238,8 @@ public class ServerPlayer extends Player {
 	public int latency;
 	public boolean wonGame;
 
-	public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
-		super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
+	public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+		super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile, profilePublicKey);
 		this.textFilter = minecraftServer.createTextFilterForPlayer(this);
 		this.gameMode = minecraftServer.createGameModeForPlayer(this);
 		this.server = minecraftServer;
@@ -583,9 +583,9 @@ public class ServerPlayer extends Player {
 			if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
 				this.server.getPlayerList().broadcastSystemMessage(component, ChatType.SYSTEM);
 			} else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OTHER_TEAMS) {
-				this.server.getPlayerList().broadcastToTeam(this, component);
+				this.server.getPlayerList().broadcastSystemToTeam(this, component);
 			} else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OWN_TEAM) {
-				this.server.getPlayerList().broadcastToAllExceptTeam(this, component);
+				this.server.getPlayerList().broadcastSystemToAllExceptTeam(this, component);
 			}
 		} else {
 			this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), CommonComponents.EMPTY));
@@ -1276,48 +1276,48 @@ public class ServerPlayer extends Player {
 		this.sendSystemMessage(component, ChatType.SYSTEM);
 	}
 
-	public void sendSystemMessage(Component component, ChatType chatType) {
-		if (this.acceptsChat(chatType)) {
-			this.connection.send(new ClientboundSystemChatPacket(component, chatType), future -> {
+	public void sendSystemMessage(Component component, ResourceKey<ChatType> resourceKey) {
+		if (this.acceptsChat(resourceKey)) {
+			this.connection.send(new ClientboundSystemChatPacket(component, this.resolveChatTypeId(resourceKey)), future -> {
 				if (!future.isSuccess()) {
-					this.handleMessageDeliveryFailure(component, chatType);
+					this.handleMessageDeliveryFailure(component, resourceKey);
 				}
 			});
 		}
 	}
 
-	@Deprecated
-	public void sendUnsignedMessageFrom(Component component, UUID uUID) {
-		this.sendUnsignedMessageFrom(component, ChatType.SYSTEM, uUID);
-	}
-
-	@Deprecated
-	public void sendUnsignedMessageFrom(Component component, ChatType chatType, UUID uUID) {
-		if (this.acceptsChat(chatType)) {
-			this.connection.send(new ClientboundSystemChatPacket(component, chatType), future -> {
-				if (!future.isSuccess()) {
-					this.handleMessageDeliveryFailure(component, chatType);
-				}
-			});
-		}
-	}
-
-	private void handleMessageDeliveryFailure(Component component, ChatType chatType) {
-		if ((chatType == ChatType.GAME_INFO || chatType == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
+	private void handleMessageDeliveryFailure(Component component, ResourceKey<ChatType> resourceKey) {
+		if ((resourceKey == ChatType.GAME_INFO || resourceKey == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
 			int i = 256;
 			String string = component.getString(256);
 			Component component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
 			this.connection
 				.send(
-					new ClientboundSystemChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), ChatType.SYSTEM)
+					new ClientboundSystemChatPacket(
+						Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), this.resolveChatTypeId(ChatType.SYSTEM)
+					)
 				);
 		}
 	}
 
-	public void sendPlayerMessage(Component component, ChatType chatType, ChatSender chatSender, Instant instant, Crypt.SaltSignaturePair saltSignaturePair) {
-		if (this.acceptsChat(chatType)) {
-			this.connection.send(new ClientboundPlayerChatPacket(component, chatType, chatSender, instant, saltSignaturePair));
+	public void sendChatMessage(SignedMessage signedMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+		if (this.acceptsChat(resourceKey)) {
+			this.connection
+				.send(
+					new ClientboundPlayerChatPacket(
+						signedMessage.content(),
+						this.resolveChatTypeId(resourceKey),
+						chatSender,
+						signedMessage.signature().timeStamp(),
+						signedMessage.signature().saltSignature()
+					)
+				);
 		}
+	}
+
+	private int resolveChatTypeId(ResourceKey<ChatType> resourceKey) {
+		Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		return registry.getId(registry.get(resourceKey));
 	}
 
 	public String getIpAddress() {
@@ -1343,12 +1343,12 @@ public class ServerPlayer extends Player {
 		return this.chatVisibility;
 	}
 
-	private boolean acceptsChat(ChatType chatType) {
+	private boolean acceptsChat(ResourceKey<ChatType> resourceKey) {
 		switch (this.chatVisibility) {
 			case HIDDEN:
-				return chatType == ChatType.GAME_INFO;
+				return resourceKey == ChatType.GAME_INFO;
 			case SYSTEM:
-				return chatType == ChatType.SYSTEM || chatType == ChatType.GAME_INFO;
+				return resourceKey == ChatType.SYSTEM || resourceKey == ChatType.GAME_INFO;
 			case FULL:
 			default:
 				return true;

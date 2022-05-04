@@ -70,7 +70,7 @@ import net.minecraft.server.commands.PardonCommand;
 import net.minecraft.server.commands.PardonIpCommand;
 import net.minecraft.server.commands.ParticleCommand;
 import net.minecraft.server.commands.PerfCommand;
-import net.minecraft.server.commands.PlaceFeatureCommand;
+import net.minecraft.server.commands.PlaceCommand;
 import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.commands.PublishCommand;
 import net.minecraft.server.commands.RecipeCommand;
@@ -148,7 +148,7 @@ public class Commands {
 		LootCommand.register(this.dispatcher, commandBuildContext);
 		MsgCommand.register(this.dispatcher);
 		ParticleCommand.register(this.dispatcher);
-		PlaceFeatureCommand.register(this.dispatcher);
+		PlaceCommand.register(this.dispatcher);
 		PlaySoundCommand.register(this.dispatcher);
 		ReloadCommand.register(this.dispatcher);
 		RecipeCommand.register(this.dispatcher);

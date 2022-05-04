@@ -11,7 +11,7 @@ public record ProfileKeyPair(PrivateKey privateKey, ProfilePublicKey publicKey, 
 	public static final Codec<ProfileKeyPair> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Crypt.PRIVATE_KEY_CODEC.fieldOf("private_key").forGetter(ProfileKeyPair::privateKey),
-					ProfilePublicKey.CODEC.fieldOf("public_key").forGetter(ProfileKeyPair::publicKey),
+					ProfilePublicKey.TRUSTED_CODEC.fieldOf("public_key").forGetter(ProfileKeyPair::publicKey),
 					ExtraCodecs.INSTANT_ISO8601.fieldOf("refreshed_after").forGetter(ProfileKeyPair::refreshedAfter)
 				)
 				.apply(instance, ProfileKeyPair::new)

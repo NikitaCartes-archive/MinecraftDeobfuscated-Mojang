@@ -7,6 +7,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -388,7 +389,7 @@ public interface Aquifer {
 			DensityFunction.SinglePointContext singlePointContext = new DensityFunction.SinglePointContext(i, j, k);
 			double d;
 			double e;
-			if (isDeepDarkRegion(this.erosion.compute(singlePointContext), this.depth.compute(singlePointContext))) {
+			if (OverworldBiomeBuilder.isDeepDarkRegion(this.erosion.compute(singlePointContext), this.depth.compute(singlePointContext))) {
 				d = -1.0;
 				e = -1.0;
 			} else {
@@ -412,10 +413,6 @@ public interface Aquifer {
 			}
 
 			return m;
-		}
-
-		private static boolean isDeepDarkRegion(double d, double e) {
-			return d > -0.375 ? false : e > 0.9;
 		}
 
 		private int computeRandomizedFluidSurfaceLevel(int i, int j, int k, int l) {

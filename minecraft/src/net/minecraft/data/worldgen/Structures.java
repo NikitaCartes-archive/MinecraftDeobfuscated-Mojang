@@ -9,6 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.WeightedRandomList;
@@ -300,12 +301,12 @@ public class Structures {
 				TerrainAdjustment.BEARD_BOX
 			),
 			AncientCityStructurePieces.START,
-			Optional.empty(),
+			Optional.of(new ResourceLocation("city_anchor")),
 			7,
-			ConstantHeight.of(VerticalAnchor.absolute(-51)),
+			ConstantHeight.of(VerticalAnchor.absolute(-27)),
 			false,
 			Optional.empty(),
-			100
+			116
 		)
 	);
 

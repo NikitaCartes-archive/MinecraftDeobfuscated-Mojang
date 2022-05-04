@@ -4,6 +4,8 @@ import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BannerPatternTags;
+import net.minecraft.tags.InstrumentTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -11,7 +13,6 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.food.Foods;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.material.Fluids;
 
 public class Items {
@@ -1653,25 +1654,29 @@ public class Items {
 	);
 	public static final Item LOOM = registerBlock(Blocks.LOOM, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item FLOWER_BANNER_PATTERN = registerItem(
-		"flower_banner_pattern", new BannerPatternItem(BannerPattern.FLOWER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"flower_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_FLOWER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item CREEPER_BANNER_PATTERN = registerItem(
 		"creeper_banner_pattern",
-		new BannerPatternItem(BannerPattern.CREEPER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON))
+		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_CREEPER, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item SKULL_BANNER_PATTERN = registerItem(
-		"skull_banner_pattern", new BannerPatternItem(BannerPattern.SKULL, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON))
+		"skull_banner_pattern",
+		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_SKULL, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item MOJANG_BANNER_PATTERN = registerItem(
-		"mojang_banner_pattern", new BannerPatternItem(BannerPattern.MOJANG, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.EPIC))
+		"mojang_banner_pattern",
+		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_MOJANG, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.EPIC))
 	);
 	public static final Item GLOBE_BANNER_PATTERN = registerItem(
-		"globe_banner_pattern", new BannerPatternItem(BannerPattern.GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"globe_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item PIGLIN_BANNER_PATTERN = registerItem(
-		"piglin_banner_pattern", new BannerPatternItem(BannerPattern.PIGLIN, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
+		"piglin_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_PIGLIN, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item GOAT_HORN = registerItem("goat_horn", new GoatHornItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).stacksTo(1)));
+	public static final Item GOAT_HORN = registerItem(
+		"goat_horn", new InstrumentItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).stacksTo(1), InstrumentTags.GOAT_HORNS)
+	);
 	public static final Item COMPOSTER = registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BARREL = registerBlock(Blocks.BARREL, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item SMOKER = registerBlock(Blocks.SMOKER, CreativeModeTab.TAB_DECORATIONS);

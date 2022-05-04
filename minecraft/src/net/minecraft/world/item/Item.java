@@ -313,12 +313,12 @@ public class Item implements ItemLike {
 	}
 
 	public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-		if (this.allowdedIn(creativeModeTab)) {
+		if (this.allowedIn(creativeModeTab)) {
 			nonNullList.add(new ItemStack(this));
 		}
 	}
 
-	protected boolean allowdedIn(CreativeModeTab creativeModeTab) {
+	protected boolean allowedIn(CreativeModeTab creativeModeTab) {
 		CreativeModeTab creativeModeTab2 = this.getItemCategory();
 		return creativeModeTab2 != null && (creativeModeTab == CreativeModeTab.TAB_SEARCH || creativeModeTab == creativeModeTab2);
 	}

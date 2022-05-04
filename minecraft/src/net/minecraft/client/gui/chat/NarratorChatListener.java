@@ -30,22 +30,16 @@ public class NarratorChatListener implements ChatListener {
 			if (!this.narrator.active()) {
 				this.logNarratedMessage(component.getString());
 			} else {
-				if (narratorStatus == NarratorStatus.ALL
-					|| narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT
-					|| narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
-					Component component2 = this.decorateMessage(chatType, component, chatSender);
-					String string = component2.getString();
-					this.logNarratedMessage(string);
-					this.narrator.say(string, chatType.shouldInterrupt());
-				}
+				chatType.narration().ifPresent(narration -> {
+					if (narratorStatus.shouldNarrate(narration.priority())) {
+						Component component2 = narration.decorate(component, chatSender);
+						String string = component2.getString();
+						this.logNarratedMessage(string);
+						this.narrator.say(string, narration.priority().interrupts());
+					}
+				});
 			}
 		}
-	}
-
-	private Component decorateMessage(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
-		return (Component)(chatSender != null && chatType == ChatType.CHAT
-			? Component.translatable("chat.type.text.narrate", chatSender.name(), component)
-			: component);
 	}
 
 	public void sayNow(Component component) {

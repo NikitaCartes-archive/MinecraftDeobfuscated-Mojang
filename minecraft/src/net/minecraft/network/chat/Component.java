@@ -386,6 +386,10 @@ public interface Component extends Message, FormattedText {
 			return GSON.toJson(component);
 		}
 
+		public static String toStableJson(Component component) {
+			return GsonHelper.toStableString(toJsonTree(component));
+		}
+
 		public static JsonElement toJsonTree(Component component) {
 			return GSON.toJsonTree(component);
 		}

@@ -8,9 +8,12 @@ import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
+import net.minecraft.network.chat.ChatSender;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.SignedMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -27,30 +30,27 @@ public class TeamMsgCommand {
 			Commands.literal("teammsg")
 				.then(
 					Commands.argument("message", MessageArgument.message())
-						.executes(commandContext -> sendMessage(commandContext.getSource(), MessageArgument.getMessage(commandContext, "message")))
+						.executes(commandContext -> sendMessage(commandContext.getSource(), MessageArgument.getSignedMessage(commandContext, "message")))
 				)
 		);
 		commandDispatcher.register(Commands.literal("tm").redirect(literalCommandNode));
 	}
 
-	private static int sendMessage(CommandSourceStack commandSourceStack, Component component) throws CommandSyntaxException {
+	private static int sendMessage(CommandSourceStack commandSourceStack, SignedMessage signedMessage) throws CommandSyntaxException {
 		Entity entity = commandSourceStack.getEntityOrException();
 		PlayerTeam playerTeam = (PlayerTeam)entity.getTeam();
 		if (playerTeam == null) {
 			throw ERROR_NOT_ON_TEAM.create();
 		} else {
-			Component component2 = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
+			Component component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
+			ChatSender chatSender = commandSourceStack.asChatSender().withTeamName(component);
 			List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers();
 
 			for (ServerPlayer serverPlayer : list) {
 				if (serverPlayer == entity) {
-					serverPlayer.sendUnsignedMessageFrom(
-						Component.translatable("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component), entity.getUUID()
-					);
+					serverPlayer.sendSystemMessage(Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), signedMessage.content()));
 				} else if (serverPlayer.getTeam() == playerTeam) {
-					serverPlayer.sendUnsignedMessageFrom(
-						Component.translatable("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component), entity.getUUID()
-					);
+					serverPlayer.sendChatMessage(signedMessage, chatSender, ChatType.TEAM_MSG_COMMAND);
 				}
 			}
 

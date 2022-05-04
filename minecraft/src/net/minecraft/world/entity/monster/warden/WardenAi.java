@@ -146,9 +146,7 @@ public class WardenAi {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.INVESTIGATE,
 			5,
-			ImmutableList.of(
-				new SetRoarTarget<>(Warden::getEntityAngryAt), new GoToTargetLocation(MemoryModuleType.DISTURBANCE_LOCATION, 2, 0.7F), new DoNothing(10, 20)
-			),
+			ImmutableList.of(new SetRoarTarget<>(Warden::getEntityAngryAt), new GoToTargetLocation(MemoryModuleType.DISTURBANCE_LOCATION, 2, 0.7F)),
 			MemoryModuleType.DISTURBANCE_LOCATION
 		);
 	}
@@ -170,7 +168,7 @@ public class WardenAi {
 			ImmutableList.of(
 				DIG_COOLDOWN_SETTER,
 				new StopAttackingIfTargetInvalid<>(
-					livingEntity -> warden.getAngerLevel() != AngerLevel.ANGRY || !warden.canTargetEntity(livingEntity), WardenAi::onTargetInvalid, false
+					livingEntity -> !warden.getAngerLevel().isAngry() || !warden.canTargetEntity(livingEntity), WardenAi::onTargetInvalid, false
 				),
 				new SetEntityLookTarget(livingEntity -> isTarget(warden, livingEntity), (float)warden.getAttributeValue(Attributes.FOLLOW_RANGE)),
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.2F),

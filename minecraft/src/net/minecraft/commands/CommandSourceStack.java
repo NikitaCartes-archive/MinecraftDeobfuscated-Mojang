@@ -18,6 +18,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -49,6 +50,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	private final ResultConsumer<CommandSourceStack> consumer;
 	private final EntityAnchorArgument.Anchor anchor;
 	private final Vec2 rotation;
+	private final CommandSigningContext signingContext;
 
 	public CommandSourceStack(
 		CommandSource commandSource,
@@ -62,7 +64,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		@Nullable Entity entity
 	) {
 		this(commandSource, vec3, vec2, serverLevel, i, string, component, minecraftServer, entity, false, (commandContext, bl, ix) -> {
-		}, EntityAnchorArgument.Anchor.FEET);
+		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.NONE);
 	}
 
 	protected CommandSourceStack(
@@ -77,7 +79,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		@Nullable Entity entity,
 		boolean bl,
 		@Nullable ResultConsumer<CommandSourceStack> resultConsumer,
-		EntityAnchorArgument.Anchor anchor
+		EntityAnchorArgument.Anchor anchor,
+		CommandSigningContext commandSigningContext
 	) {
 		this.source = commandSource;
 		this.worldPosition = vec3;
@@ -91,6 +94,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		this.consumer = resultConsumer;
 		this.anchor = anchor;
 		this.rotation = vec2;
+		this.signingContext = commandSigningContext;
 	}
 
 	public CommandSourceStack withSource(CommandSource commandSource) {
@@ -108,7 +112,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -127,7 +132,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -146,7 +152,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -165,7 +172,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -184,7 +192,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				resultConsumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -207,7 +216,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				true,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			)
 			: this;
 	}
@@ -227,7 +237,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -246,7 +257,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 	}
 
@@ -265,7 +277,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				anchor
+				anchor,
+				this.signingContext
 			);
 	}
 
@@ -287,7 +300,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.entity,
 				this.silent,
 				this.consumer,
-				this.anchor
+				this.anchor,
+				this.signingContext
 			);
 		}
 	}
@@ -307,12 +321,36 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		return this.withRotation(new Vec2(h, i));
 	}
 
+	public CommandSourceStack withSigningContext(CommandSigningContext commandSigningContext) {
+		return commandSigningContext == this.signingContext
+			? this
+			: new CommandSourceStack(
+				this.source,
+				this.worldPosition,
+				this.rotation,
+				this.level,
+				this.permissionLevel,
+				this.textName,
+				this.displayName,
+				this.server,
+				this.entity,
+				this.silent,
+				this.consumer,
+				this.anchor,
+				commandSigningContext
+			);
+	}
+
 	public Component getDisplayName() {
 		return this.displayName;
 	}
 
 	public String getTextName() {
 		return this.textName;
+	}
+
+	public ChatSender asChatSender() {
+		return this.entity != null ? this.entity.asChatSender() : ChatSender.system(this.getDisplayName());
 	}
 
 	@Override
@@ -342,11 +380,16 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	public ServerPlayer getPlayerOrException() throws CommandSyntaxException {
-		if (!(this.entity instanceof ServerPlayer)) {
-			throw ERROR_NOT_PLAYER.create();
+		Entity var2 = this.entity;
+		if (var2 instanceof ServerPlayer) {
+			return (ServerPlayer)var2;
 		} else {
-			return (ServerPlayer)this.entity;
+			throw ERROR_NOT_PLAYER.create();
 		}
+	}
+
+	public boolean isPlayer() {
+		return this.entity instanceof ServerPlayer;
 	}
 
 	public Vec2 getRotation() {
@@ -359,6 +402,10 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 
 	public EntityAnchorArgument.Anchor getAnchor() {
 		return this.anchor;
+	}
+
+	public CommandSigningContext getSigningContext() {
+		return this.signingContext;
 	}
 
 	public void sendSuccess(Component component, boolean bl) {

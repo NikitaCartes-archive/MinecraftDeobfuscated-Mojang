@@ -101,24 +101,29 @@ public class VibrationListener implements GameEventListener {
 	}
 
 	@Override
-	public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+	public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
 		if (this.receivingEvent != null) {
 			return false;
-		} else if (!this.config.isValidVibration(gameEvent, context)) {
-			return false;
 		} else {
-			Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
-			if (optional.isEmpty()) {
+			GameEvent gameEvent = message.gameEvent();
+			GameEvent.Context context = message.context();
+			if (!this.config.isValidVibration(gameEvent, context)) {
 				return false;
 			} else {
-				Vec3 vec32 = (Vec3)optional.get();
-				if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
-					return false;
-				} else if (isOccluded(serverLevel, vec3, vec32)) {
+				Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
+				if (optional.isEmpty()) {
 					return false;
 				} else {
-					this.scheduleSignal(serverLevel, gameEvent, context, vec3, vec32);
-					return true;
+					Vec3 vec3 = message.source();
+					Vec3 vec32 = (Vec3)optional.get();
+					if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
+						return false;
+					} else if (isOccluded(serverLevel, vec3, vec32)) {
+						return false;
+					} else {
+						this.scheduleSignal(serverLevel, gameEvent, context, vec3, vec32);
+						return true;
+					}
 				}
 			}
 		}
@@ -201,6 +206,10 @@ public class VibrationListener implements GameEventListener {
 			return GameEventTags.VIBRATIONS;
 		}
 
+		default boolean canTriggerAvoidVibration() {
+			return false;
+		}
+
 		default boolean isValidVibration(GameEvent gameEvent, GameEvent.Context context) {
 			if (!gameEvent.is(this.getListenableEvents())) {
 				return false;
@@ -212,7 +221,7 @@ public class VibrationListener implements GameEventListener {
 					}
 
 					if (entity.isSteppingCarefully() && gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
-						if (entity instanceof ServerPlayer serverPlayer) {
+						if (this.canTriggerAvoidVibration() && entity instanceof ServerPlayer serverPlayer) {
 							CriteriaTriggers.AVOID_VIBRATION.trigger(serverPlayer);
 						}
 

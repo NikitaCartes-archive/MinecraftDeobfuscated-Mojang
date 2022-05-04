@@ -28,11 +28,7 @@ public class ClientboundResourcePackPacket implements Packet<ClientGamePacketLis
 		this.url = friendlyByteBuf.readUtf();
 		this.hash = friendlyByteBuf.readUtf(40);
 		this.required = friendlyByteBuf.readBoolean();
-		if (friendlyByteBuf.readBoolean()) {
-			this.prompt = friendlyByteBuf.readComponent();
-		} else {
-			this.prompt = null;
-		}
+		this.prompt = friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent);
 	}
 
 	@Override
@@ -40,12 +36,7 @@ public class ClientboundResourcePackPacket implements Packet<ClientGamePacketLis
 		friendlyByteBuf.writeUtf(this.url);
 		friendlyByteBuf.writeUtf(this.hash);
 		friendlyByteBuf.writeBoolean(this.required);
-		if (this.prompt != null) {
-			friendlyByteBuf.writeBoolean(true);
-			friendlyByteBuf.writeComponent(this.prompt);
-		} else {
-			friendlyByteBuf.writeBoolean(false);
-		}
+		friendlyByteBuf.writeNullable(this.prompt, FriendlyByteBuf::writeComponent);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

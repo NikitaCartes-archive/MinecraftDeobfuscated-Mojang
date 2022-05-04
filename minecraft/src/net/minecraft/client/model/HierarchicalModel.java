@@ -2,17 +2,24 @@ package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
 public abstract class HierarchicalModel<E extends Entity> extends EntityModel<E> {
+	private static final Vector3f ANIMATION_VECTOR_CACHE = new Vector3f();
+
 	public HierarchicalModel() {
 		this(RenderType::entityCutoutNoCull);
 	}
@@ -30,5 +37,16 @@ public abstract class HierarchicalModel<E extends Entity> extends EntityModel<E>
 
 	public Optional<ModelPart> getAnyDescendantWithName(String string) {
 		return this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
+	}
+
+	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition) {
+		this.animate(animationState, animationDefinition, 1.0F);
+	}
+
+	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f) {
+		animationState.updateTime(Minecraft.getInstance().isPaused(), f);
+		animationState.ifStarted(
+			animationStatex -> KeyframeAnimations.animate(this, animationDefinition, animationStatex.getAccumulatedTime(), 1.0F, ANIMATION_VECTOR_CACHE)
+		);
 	}
 }

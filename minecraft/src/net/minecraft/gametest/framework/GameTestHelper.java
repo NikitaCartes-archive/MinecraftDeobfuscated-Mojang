@@ -156,7 +156,7 @@ public class GameTestHelper {
 	}
 
 	public Player makeMockPlayer() {
-		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
+		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player"), null) {
 			@Override
 			public boolean isSpectator() {
 				return false;

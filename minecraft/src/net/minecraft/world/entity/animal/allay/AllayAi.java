@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
@@ -37,6 +38,7 @@ public class AllayAi {
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_DEPOSIT_TARGET = 2.25F;
 	private static final float SPEED_MULTIPLIER_WHEN_RETRIEVING_ITEM = 1.75F;
+	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.5F;
 	private static final int CLOSE_ENOUGH_TO_TARGET = 4;
 	private static final int TOO_FAR_FROM_TARGET = 16;
 	private static final int MAX_LOOK_DISTANCE = 6;
@@ -60,6 +62,7 @@ public class AllayAi {
 			0,
 			ImmutableList.of(
 				new Swim(0.8F),
+				new AnimalPanic(2.5F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),
 				new CountDownCooldownTicks(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS),
@@ -133,7 +136,13 @@ public class AllayAi {
 		if (!level.isClientSide() && level instanceof ServerLevel serverLevel) {
 			Optional<UUID> optional = livingEntity.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
 			if (optional.isPresent()) {
-				return serverLevel.getEntity((UUID)optional.get()) instanceof ServerPlayer serverPlayer ? Optional.of(serverPlayer) : Optional.empty();
+				if (serverLevel.getEntity((UUID)optional.get()) instanceof ServerPlayer serverPlayer
+					&& (serverPlayer.gameMode.isSurvival() || serverPlayer.gameMode.isCreative())
+					&& serverPlayer.closerThan(livingEntity, 64.0)) {
+					return Optional.of(serverPlayer);
+				}
+
+				return Optional.empty();
 			}
 		}
 

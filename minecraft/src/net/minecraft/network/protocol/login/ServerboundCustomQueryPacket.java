@@ -17,27 +17,20 @@ public class ServerboundCustomQueryPacket implements Packet<ServerLoginPacketLis
 
 	public ServerboundCustomQueryPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.transactionId = friendlyByteBuf.readVarInt();
-		if (friendlyByteBuf.readBoolean()) {
-			int i = friendlyByteBuf.readableBytes();
-			if (i < 0 || i > 1048576) {
+		this.data = friendlyByteBuf.readNullable(friendlyByteBufx -> {
+			int i = friendlyByteBufx.readableBytes();
+			if (i >= 0 && i <= 1048576) {
+				return new FriendlyByteBuf(friendlyByteBufx.readBytes(i));
+			} else {
 				throw new IllegalArgumentException("Payload may not be larger than 1048576 bytes");
 			}
-
-			this.data = new FriendlyByteBuf(friendlyByteBuf.readBytes(i));
-		} else {
-			this.data = null;
-		}
+		});
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.transactionId);
-		if (this.data != null) {
-			friendlyByteBuf.writeBoolean(true);
-			friendlyByteBuf.writeBytes(this.data.copy());
-		} else {
-			friendlyByteBuf.writeBoolean(false);
-		}
+		friendlyByteBuf.writeNullable(this.data, (friendlyByteBufx, friendlyByteBuf2) -> friendlyByteBufx.writeBytes(friendlyByteBuf2.slice()));
 	}
 
 	public void handle(ServerLoginPacketListener serverLoginPacketListener) {

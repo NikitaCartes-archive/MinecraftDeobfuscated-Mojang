@@ -2,7 +2,6 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -15,7 +14,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3f;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -133,7 +131,7 @@ public class Gui extends GuiComponent {
 	private int screenHeight;
 	private float autosaveIndicatorValue;
 	private float lastAutosaveIndicatorValue;
-	private final Map<ChatType, List<ChatListener>> chatListeners = Maps.<ChatType, List<ChatListener>>newHashMap();
+	private final List<ChatListener> chatListeners;
 	private float scopeScale;
 
 	public Gui(Minecraft minecraft, ItemRenderer itemRenderer) {
@@ -145,17 +143,7 @@ public class Gui extends GuiComponent {
 		this.tabList = new PlayerTabOverlay(minecraft, this);
 		this.bossOverlay = new BossHealthOverlay(minecraft);
 		this.subtitleOverlay = new SubtitleOverlay(minecraft);
-
-		for (ChatType chatType : ChatType.values()) {
-			this.chatListeners.put(chatType, Lists.newArrayList());
-		}
-
-		ChatListener chatListener = NarratorChatListener.INSTANCE;
-		((List)this.chatListeners.get(ChatType.CHAT)).add(new StandardChatListener(minecraft));
-		((List)this.chatListeners.get(ChatType.CHAT)).add(chatListener);
-		((List)this.chatListeners.get(ChatType.SYSTEM)).add(new StandardChatListener(minecraft));
-		((List)this.chatListeners.get(ChatType.SYSTEM)).add(chatListener);
-		((List)this.chatListeners.get(ChatType.GAME_INFO)).add(new OverlayChatListener(minecraft));
+		this.chatListeners = List.of(new StandardChatListener(minecraft), NarratorChatListener.INSTANCE, new OverlayChatListener(minecraft));
 		this.resetTitleTimes();
 	}
 
@@ -1223,7 +1211,7 @@ public class Gui extends GuiComponent {
 	public void handlePlayerChat(ChatType chatType, Component component, ChatSender chatSender) {
 		if (!this.minecraft.isBlocked(chatSender.uuid())) {
 			if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
-				for (ChatListener chatListener : (List)this.chatListeners.get(chatType)) {
+				for (ChatListener chatListener : this.chatListeners) {
 					chatListener.handle(chatType, component, chatSender);
 				}
 			}
@@ -1232,7 +1220,7 @@ public class Gui extends GuiComponent {
 
 	public void handleSystemChat(ChatType chatType, Component component) {
 		if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
-			for (ChatListener chatListener : (List)this.chatListeners.get(chatType)) {
+			for (ChatListener chatListener : this.chatListeners) {
 				chatListener.handle(chatType, component, null);
 			}
 		}

@@ -11,6 +11,10 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 	public MerchantOffers() {
 	}
 
+	private MerchantOffers(int i) {
+		super(i);
+	}
+
 	public MerchantOffers(CompoundTag compoundTag) {
 		ListTag listTag = compoundTag.getList("Recipes", 10);
 
@@ -37,57 +41,40 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 	}
 
 	public void writeToStream(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeByte((byte)(this.size() & 0xFF));
-
-		for (int i = 0; i < this.size(); i++) {
-			MerchantOffer merchantOffer = (MerchantOffer)this.get(i);
-			friendlyByteBuf.writeItem(merchantOffer.getBaseCostA());
-			friendlyByteBuf.writeItem(merchantOffer.getResult());
-			ItemStack itemStack = merchantOffer.getCostB();
-			friendlyByteBuf.writeBoolean(!itemStack.isEmpty());
-			if (!itemStack.isEmpty()) {
-				friendlyByteBuf.writeItem(itemStack);
-			}
-
-			friendlyByteBuf.writeBoolean(merchantOffer.isOutOfStock());
-			friendlyByteBuf.writeInt(merchantOffer.getUses());
-			friendlyByteBuf.writeInt(merchantOffer.getMaxUses());
-			friendlyByteBuf.writeInt(merchantOffer.getXp());
-			friendlyByteBuf.writeInt(merchantOffer.getSpecialPriceDiff());
-			friendlyByteBuf.writeFloat(merchantOffer.getPriceMultiplier());
-			friendlyByteBuf.writeInt(merchantOffer.getDemand());
-		}
+		friendlyByteBuf.writeCollection(this, (friendlyByteBufx, merchantOffer) -> {
+			friendlyByteBufx.writeItem(merchantOffer.getBaseCostA());
+			friendlyByteBufx.writeItem(merchantOffer.getResult());
+			friendlyByteBufx.writeItem(merchantOffer.getCostB());
+			friendlyByteBufx.writeBoolean(merchantOffer.isOutOfStock());
+			friendlyByteBufx.writeInt(merchantOffer.getUses());
+			friendlyByteBufx.writeInt(merchantOffer.getMaxUses());
+			friendlyByteBufx.writeInt(merchantOffer.getXp());
+			friendlyByteBufx.writeInt(merchantOffer.getSpecialPriceDiff());
+			friendlyByteBufx.writeFloat(merchantOffer.getPriceMultiplier());
+			friendlyByteBufx.writeInt(merchantOffer.getDemand());
+		});
 	}
 
 	public static MerchantOffers createFromStream(FriendlyByteBuf friendlyByteBuf) {
-		MerchantOffers merchantOffers = new MerchantOffers();
-		int i = friendlyByteBuf.readByte() & 255;
-
-		for (int j = 0; j < i; j++) {
-			ItemStack itemStack = friendlyByteBuf.readItem();
-			ItemStack itemStack2 = friendlyByteBuf.readItem();
-			ItemStack itemStack3 = ItemStack.EMPTY;
-			if (friendlyByteBuf.readBoolean()) {
-				itemStack3 = friendlyByteBuf.readItem();
-			}
-
-			boolean bl = friendlyByteBuf.readBoolean();
-			int k = friendlyByteBuf.readInt();
-			int l = friendlyByteBuf.readInt();
-			int m = friendlyByteBuf.readInt();
-			int n = friendlyByteBuf.readInt();
-			float f = friendlyByteBuf.readFloat();
-			int o = friendlyByteBuf.readInt();
-			MerchantOffer merchantOffer = new MerchantOffer(itemStack, itemStack3, itemStack2, k, l, m, f, o);
+		return friendlyByteBuf.readCollection(MerchantOffers::new, friendlyByteBufx -> {
+			ItemStack itemStack = friendlyByteBufx.readItem();
+			ItemStack itemStack2 = friendlyByteBufx.readItem();
+			ItemStack itemStack3 = friendlyByteBufx.readItem();
+			boolean bl = friendlyByteBufx.readBoolean();
+			int i = friendlyByteBufx.readInt();
+			int j = friendlyByteBufx.readInt();
+			int k = friendlyByteBufx.readInt();
+			int l = friendlyByteBufx.readInt();
+			float f = friendlyByteBufx.readFloat();
+			int m = friendlyByteBufx.readInt();
+			MerchantOffer merchantOffer = new MerchantOffer(itemStack, itemStack3, itemStack2, i, j, k, f, m);
 			if (bl) {
 				merchantOffer.setToOutOfStock();
 			}
 
-			merchantOffer.setSpecialPriceDiff(n);
-			merchantOffers.add(merchantOffer);
-		}
-
-		return merchantOffers;
+			merchantOffer.setSpecialPriceDiff(l);
+			return merchantOffer;
+		});
 	}
 
 	public CompoundTag createTag() {

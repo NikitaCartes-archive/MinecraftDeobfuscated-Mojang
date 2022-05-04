@@ -98,7 +98,7 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 		int k,
 		int l
 	) {
-		int m = 0;
+		int m = j + k;
 		int n = mutableBlockPos.getX();
 		int o = mutableBlockPos.getZ();
 		int p = k;
@@ -108,6 +108,7 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 				int q = j + p;
 				n += direction.getStepX();
 				o += direction.getStepZ();
+				m = q;
 				if (this.placeLog(levelSimulatedReader, biConsumer, randomSource, mutableBlockPos.set(n, q, o), treeConfiguration)) {
 					m = q + 1;
 				}

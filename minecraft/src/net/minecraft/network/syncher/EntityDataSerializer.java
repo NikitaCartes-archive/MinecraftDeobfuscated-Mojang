@@ -1,8 +1,6 @@
 package net.minecraft.network.syncher;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -17,35 +15,22 @@ public interface EntityDataSerializer<T> {
 
 	T copy(T object);
 
-	static <T> EntityDataSerializer<T> simple(BiConsumer<FriendlyByteBuf, T> biConsumer, Function<FriendlyByteBuf, T> function) {
+	static <T> EntityDataSerializer<T> simple(FriendlyByteBuf.Writer<T> writer, FriendlyByteBuf.Reader<T> reader) {
 		return new EntityDataSerializer.ForValueType<T>() {
 			@Override
 			public void write(FriendlyByteBuf friendlyByteBuf, T object) {
-				biConsumer.accept(friendlyByteBuf, object);
+				writer.accept(friendlyByteBuf, object);
 			}
 
 			@Override
 			public T read(FriendlyByteBuf friendlyByteBuf) {
-				return (T)function.apply(friendlyByteBuf);
+				return (T)reader.apply(friendlyByteBuf);
 			}
 		};
 	}
 
-	static <T> EntityDataSerializer<Optional<T>> optional(BiConsumer<FriendlyByteBuf, T> biConsumer, Function<FriendlyByteBuf, T> function) {
-		return new EntityDataSerializer.ForValueType<Optional<T>>() {
-			public void write(FriendlyByteBuf friendlyByteBuf, Optional<T> optional) {
-				if (optional.isPresent()) {
-					friendlyByteBuf.writeBoolean(true);
-					biConsumer.accept(friendlyByteBuf, optional.get());
-				} else {
-					friendlyByteBuf.writeBoolean(false);
-				}
-			}
-
-			public Optional<T> read(FriendlyByteBuf friendlyByteBuf) {
-				return friendlyByteBuf.readBoolean() ? Optional.of(function.apply(friendlyByteBuf)) : Optional.empty();
-			}
-		};
+	static <T> EntityDataSerializer<Optional<T>> optional(FriendlyByteBuf.Writer<T> writer, FriendlyByteBuf.Reader<T> reader) {
+		return simple(writer.asOptional(), reader.asOptional());
 	}
 
 	static <T extends Enum<T>> EntityDataSerializer<T> simpleEnum(Class<T> class_) {

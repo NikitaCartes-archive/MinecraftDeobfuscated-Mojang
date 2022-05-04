@@ -41,6 +41,7 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -1042,6 +1043,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public boolean isUnderWater() {
 		return this.wasEyeInWater && this.isInWater();
+	}
+
+	public ChatSender asChatSender() {
+		return new ChatSender(this.getUUID(), this.getDisplayName());
 	}
 
 	public void updateSwimming() {

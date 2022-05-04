@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
@@ -29,7 +27,6 @@ import org.slf4j.Logger;
 
 public class LootTableProvider implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	private final DataGenerator generator;
 	private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> subProviders = ImmutableList.of(
 		Pair.of(FishingLoot::new, LootContextParamSets.FISHING),
@@ -69,7 +66,7 @@ public class LootTableProvider implements DataProvider {
 				Path path2 = createPath(path, resourceLocationx);
 
 				try {
-					DataProvider.save(GSON, cachedOutput, LootTables.serialize(lootTable), path2);
+					DataProvider.saveStable(cachedOutput, LootTables.serialize(lootTable), path2);
 				} catch (IOException var6) {
 					LOGGER.error("Couldn't save loot table {}", path2, var6);
 				}

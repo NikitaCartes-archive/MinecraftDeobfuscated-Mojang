@@ -223,9 +223,11 @@ public class ChunkRenderDispatcher {
 
 	public CompletableFuture<Void> uploadChunkLayer(BufferBuilder.RenderedBuffer renderedBuffer, VertexBuffer vertexBuffer) {
 		return CompletableFuture.runAsync(() -> {
-			vertexBuffer.bind();
-			vertexBuffer.upload(renderedBuffer);
-			VertexBuffer.unbind();
+			if (!vertexBuffer.isInvalid()) {
+				vertexBuffer.bind();
+				vertexBuffer.upload(renderedBuffer);
+				VertexBuffer.unbind();
+			}
 		}, this.toUpload::add);
 	}
 

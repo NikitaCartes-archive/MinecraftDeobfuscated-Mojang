@@ -1,52 +1,30 @@
 package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.chat.SignedMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.players.PlayerList;
 
 public class EmoteCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-		commandDispatcher.register(
-			Commands.literal("me")
-				.then(
-					Commands.argument("action", StringArgumentType.greedyString())
-						.executes(
-							commandContext -> {
-								String string = StringArgumentType.getString(commandContext, "action");
-								Entity entity = commandContext.getSource().getEntity();
-								MinecraftServer minecraftServer = commandContext.getSource().getServer();
-								if (entity instanceof ServerPlayer serverPlayer) {
-									serverPlayer.getTextFilter()
-										.processStreamMessage(string)
-										.thenAcceptAsync(
-											filteredText -> {
-												String stringx = filteredText.getFiltered();
-												Component component = stringx.isEmpty() ? null : createMessage(commandContext, stringx);
-												Component component2 = createMessage(commandContext, filteredText.getRaw());
-												minecraftServer.getPlayerList()
-													.broadcastSystemMessage(component2, serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? component : component2, ChatType.SYSTEM);
-											},
-											minecraftServer
-										);
-									return 1;
-								} else {
-									minecraftServer.getPlayerList().broadcastSystemMessage(createMessage(commandContext, string), ChatType.SYSTEM);
-									return 1;
-								}
-							}
-						)
-				)
-		);
-	}
+		commandDispatcher.register(Commands.literal("me").then(Commands.argument("action", MessageArgument.message()).executes(commandContext -> {
+			SignedMessage signedMessage = MessageArgument.getSignedMessage(commandContext, "action");
+			CommandSourceStack commandSourceStack = commandContext.getSource();
+			if (commandSourceStack.isPlayer()) {
+				ServerPlayer serverPlayer = commandSourceStack.getPlayerOrException();
+				serverPlayer.getTextFilter().processStreamMessage(signedMessage.content().getString()).thenAcceptAsync(filteredText -> {
+					PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+					playerList.broadcastChatMessage(signedMessage, filteredText, serverPlayer, ChatType.EMOTE_COMMAND);
+				}, commandSourceStack.getServer());
+			} else {
+				commandSourceStack.getServer().getPlayerList().broadcastChatMessage(signedMessage, commandSourceStack.asChatSender(), ChatType.EMOTE_COMMAND);
+			}
 
-	private static Component createMessage(CommandContext<CommandSourceStack> commandContext, String string) {
-		return Component.translatable("chat.type.emote", commandContext.getSource().getDisplayName(), string);
+			return 1;
+		})));
 	}
 }

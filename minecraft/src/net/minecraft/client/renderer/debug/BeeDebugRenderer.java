@@ -337,7 +337,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		public final List<String> goals = Lists.<String>newArrayList();
 		public final Set<BlockPos> blacklistedHives = Sets.<BlockPos>newHashSet();
 
-		public BeeInfo(UUID uUID, int i, Position position, Path path, BlockPos blockPos, BlockPos blockPos2, int j) {
+		public BeeInfo(UUID uUID, int i, Position position, @Nullable Path path, @Nullable BlockPos blockPos, @Nullable BlockPos blockPos2, int j) {
 			this.uuid = uUID;
 			this.id = i;
 			this.pos = position;

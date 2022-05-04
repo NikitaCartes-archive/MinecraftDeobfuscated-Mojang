@@ -2,38 +2,35 @@ package net.minecraft.network.protocol.game;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Crypt;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.util.StringUtil;
 
 public class ServerboundChatPacket implements Packet<ServerGamePacketListener> {
-	private static final int MAX_MESSAGE_LENGTH = 256;
 	public static final Duration MESSAGE_EXPIRES_AFTER = Duration.ofMinutes(2L);
-	private final Instant timeStamp;
 	private final String message;
+	private final Instant timeStamp;
 	private final Crypt.SaltSignaturePair saltSignature;
 
-	public ServerboundChatPacket(Instant instant, String string, Crypt.SaltSignaturePair saltSignaturePair) {
-		this.timeStamp = instant;
-		this.message = trimMessage(string);
-		this.saltSignature = saltSignaturePair;
+	public ServerboundChatPacket(String string, MessageSignature messageSignature) {
+		this.message = StringUtil.trimChatMessage(string);
+		this.timeStamp = messageSignature.timeStamp();
+		this.saltSignature = messageSignature.saltSignature();
 	}
 
 	public ServerboundChatPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.timeStamp = Instant.ofEpochSecond(friendlyByteBuf.readLong());
 		this.message = friendlyByteBuf.readUtf(256);
+		this.timeStamp = Instant.ofEpochSecond(friendlyByteBuf.readLong());
 		this.saltSignature = new Crypt.SaltSignaturePair(friendlyByteBuf);
-	}
-
-	private static String trimMessage(String string) {
-		return string.length() > 256 ? string.substring(0, 256) : string;
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeLong(this.timeStamp.getEpochSecond());
 		friendlyByteBuf.writeUtf(this.message);
+		friendlyByteBuf.writeLong(this.timeStamp.getEpochSecond());
 		this.saltSignature.write(friendlyByteBuf);
 	}
 
@@ -41,20 +38,12 @@ public class ServerboundChatPacket implements Packet<ServerGamePacketListener> {
 		serverGamePacketListener.handleChat(this);
 	}
 
-	public Instant getTimeStamp() {
-		return this.timeStamp;
-	}
-
 	public String getMessage() {
 		return this.message;
 	}
 
-	public String getMessageNormalized() {
-		return StringUtils.normalizeSpace(this.message);
-	}
-
-	public Crypt.SaltSignaturePair getSaltSignature() {
-		return this.saltSignature;
+	public MessageSignature getSignature(UUID uUID) {
+		return new MessageSignature(uUID, this.timeStamp, this.saltSignature);
 	}
 
 	private Instant getExpiresAt() {

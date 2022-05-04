@@ -24,7 +24,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -78,13 +77,11 @@ public class ConnectScreen extends Screen {
 					}
 
 					inetSocketAddress = (InetSocketAddress)optional.get();
-					String string = minecraft.getUser().getName();
-					ProfilePublicKey profilePublicKey = minecraft.getProfileKeyPairManager().profilePublicKey();
 					ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
 					ConnectScreen.this.connection
 						.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
 					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-					ConnectScreen.this.connection.send(new ServerboundHelloPacket(string, Optional.ofNullable(profilePublicKey)));
+					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getProfileKeyPairManager().profilePublicKeyData()));
 				} catch (Exception var6) {
 					if (ConnectScreen.this.aborted) {
 						return;
@@ -98,14 +95,14 @@ public class ConnectScreen extends Screen {
 					}
 
 					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var6);
-					String string2 = inetSocketAddress == null
+					String string = inetSocketAddress == null
 						? exception3.getMessage()
 						: exception3.getMessage()
 							.replaceAll(inetSocketAddress.getHostName() + ":" + inetSocketAddress.getPort(), "")
 							.replaceAll(inetSocketAddress.toString(), "");
 					minecraft.execute(
 						() -> minecraft.setScreen(
-								new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string2))
+								new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string))
 							)
 					);
 				}

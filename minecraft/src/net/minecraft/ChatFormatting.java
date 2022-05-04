@@ -1,6 +1,7 @@
 package net.minecraft;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -9,8 +10,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.minecraft.util.StringRepresentable;
 
-public enum ChatFormatting {
+public enum ChatFormatting implements StringRepresentable {
 	BLACK("BLACK", '0', 0, 0),
 	DARK_BLUE("DARK_BLUE", '1', 1, 170),
 	DARK_GREEN("DARK_GREEN", '2', 2, 43520),
@@ -34,6 +36,7 @@ public enum ChatFormatting {
 	ITALIC("ITALIC", 'o', true),
 	RESET("RESET", 'r', -1, null);
 
+	public static final Codec<ChatFormatting> CODEC = StringRepresentable.fromEnum(ChatFormatting::values);
 	public static final char PREFIX_CODE = '§';
 	private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = (Map<String, ChatFormatting>)Arrays.stream(values())
 		.collect(Collectors.toMap(chatFormatting -> cleanName(chatFormatting.name), chatFormatting -> chatFormatting));
@@ -144,5 +147,10 @@ public enum ChatFormatting {
 		}
 
 		return list;
+	}
+
+	@Override
+	public String getSerializedName() {
+		return this.getName();
 	}
 }

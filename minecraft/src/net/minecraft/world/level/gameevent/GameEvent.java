@@ -6,6 +6,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class GameEvent {
 	public static final GameEvent BLOCK_ACTIVATE = register("block_activate");
@@ -100,6 +101,42 @@ public class GameEvent {
 
 		public static GameEvent.Context of(@Nullable Entity entity, @Nullable BlockState blockState) {
 			return new GameEvent.Context(entity, blockState);
+		}
+	}
+
+	public static final class Message implements Comparable<GameEvent.Message> {
+		private final GameEvent gameEvent;
+		private final Vec3 source;
+		private final GameEvent.Context context;
+		private final GameEventListener recipient;
+		private final double distanceToRecipient;
+
+		public Message(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context, GameEventListener gameEventListener, Vec3 vec32) {
+			this.gameEvent = gameEvent;
+			this.source = vec3;
+			this.context = context;
+			this.recipient = gameEventListener;
+			this.distanceToRecipient = vec3.distanceToSqr(vec32);
+		}
+
+		public int compareTo(GameEvent.Message message) {
+			return Double.compare(this.distanceToRecipient, message.distanceToRecipient);
+		}
+
+		public GameEvent gameEvent() {
+			return this.gameEvent;
+		}
+
+		public Vec3 source() {
+			return this.source;
+		}
+
+		public GameEvent.Context context() {
+			return this.context;
+		}
+
+		public GameEventListener recipient() {
+			return this.recipient;
 		}
 	}
 }

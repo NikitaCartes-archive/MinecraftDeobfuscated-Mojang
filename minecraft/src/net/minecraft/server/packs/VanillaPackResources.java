@@ -169,10 +169,15 @@ public class VanillaPackResources implements PackResources {
 		Stream<Path> stream = Files.walk(path2.resolve(string2));
 
 		try {
-			stream.filter(pathx -> !pathx.endsWith(".mcmeta") && Files.isRegularFile(pathx, new LinkOption[0]))
-				.map(path2x -> new ResourceLocation(string, path2.relativize(path2x).toString().replaceAll("\\\\", "/")))
-				.filter(predicate)
-				.forEach(collection::add);
+			stream.filter(pathx -> !pathx.endsWith(".mcmeta") && Files.isRegularFile(pathx, new LinkOption[0])).mapMulti((path2x, consumer) -> {
+				String string2x = path2.relativize(path2x).toString().replaceAll("\\\\", "/");
+				ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string2x);
+				if (resourceLocation == null) {
+					Util.logAndPauseIfInIde("Invalid path in datapack: %s:%s, ignoring".formatted(string, string2x));
+				} else {
+					consumer.accept(resourceLocation);
+				}
+			}).filter(predicate).forEach(collection::add);
 		} catch (Throwable var10) {
 			if (stream != null) {
 				try {

@@ -135,14 +135,10 @@ public class DebugPackets {
 			friendlyByteBuf.writeUtf("");
 		}
 
-		if (brain.hasMemoryValue(MemoryModuleType.PATH)) {
-			friendlyByteBuf.writeBoolean(true);
-			Path path = (Path)brain.getMemory(MemoryModuleType.PATH).get();
-			path.writeToStream(friendlyByteBuf);
-		} else {
-			friendlyByteBuf.writeBoolean(false);
-		}
-
+		friendlyByteBuf.writeOptional(
+			brain.hasMemoryValue(MemoryModuleType.PATH) ? brain.getMemory(MemoryModuleType.PATH) : Optional.empty(),
+			(friendlyByteBufx, path) -> path.writeToStream(friendlyByteBufx)
+		);
 		if (livingEntity instanceof Villager villager) {
 			boolean bl = villager.wantsToSpawnGolem(l);
 			friendlyByteBuf.writeBoolean(bl);

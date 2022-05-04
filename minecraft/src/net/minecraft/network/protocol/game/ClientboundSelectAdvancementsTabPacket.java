@@ -18,19 +18,12 @@ public class ClientboundSelectAdvancementsTabPacket implements Packet<ClientGame
 	}
 
 	public ClientboundSelectAdvancementsTabPacket(FriendlyByteBuf friendlyByteBuf) {
-		if (friendlyByteBuf.readBoolean()) {
-			this.tab = friendlyByteBuf.readResourceLocation();
-		} else {
-			this.tab = null;
-		}
+		this.tab = friendlyByteBuf.readNullable(FriendlyByteBuf::readResourceLocation);
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeBoolean(this.tab != null);
-		if (this.tab != null) {
-			friendlyByteBuf.writeResourceLocation(this.tab);
-		}
+		friendlyByteBuf.writeNullable(this.tab, FriendlyByteBuf::writeResourceLocation);
 	}
 
 	@Nullable

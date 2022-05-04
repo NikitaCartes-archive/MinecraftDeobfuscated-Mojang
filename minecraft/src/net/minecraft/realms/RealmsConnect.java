@@ -3,7 +3,6 @@ package net.minecraft.realms;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.RealmsServer;
 import java.net.InetSocketAddress;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,7 +17,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -68,8 +66,7 @@ public class RealmsConnect {
 						}
 
 						String string = minecraft.getUser().getName();
-						ProfilePublicKey profilePublicKey = minecraft.getProfileKeyPairManager().profilePublicKey();
-						RealmsConnect.this.connection.send(new ServerboundHelloPacket(string, Optional.ofNullable(profilePublicKey)));
+						RealmsConnect.this.connection.send(new ServerboundHelloPacket(string, minecraft.getProfileKeyPairManager().profilePublicKeyData()));
 						minecraft.setCurrentServer(realmsServer.toServerData(string));
 					} catch (Exception var5) {
 						minecraft.getClientPackSource().clearServerPack();

@@ -11,11 +11,18 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -477,7 +484,72 @@ public class GsonHelper {
 		return parse(reader, false);
 	}
 
+	public static JsonArray parseArray(String string) {
+		return parseArray(new StringReader(string));
+	}
+
 	public static JsonArray parseArray(Reader reader) {
 		return fromJson(GSON, reader, JsonArray.class, false);
+	}
+
+	public static String toStableString(JsonElement jsonElement) {
+		StringWriter stringWriter = new StringWriter();
+		JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+		try {
+			writeValue(jsonWriter, jsonElement, Comparator.naturalOrder());
+		} catch (IOException var4) {
+			throw new AssertionError(var4);
+		}
+
+		return stringWriter.toString();
+	}
+
+	public static void writeValue(JsonWriter jsonWriter, @Nullable JsonElement jsonElement, @Nullable Comparator<String> comparator) throws IOException {
+		if (jsonElement == null || jsonElement.isJsonNull()) {
+			jsonWriter.nullValue();
+		} else if (jsonElement.isJsonPrimitive()) {
+			JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+			if (jsonPrimitive.isNumber()) {
+				jsonWriter.value(jsonPrimitive.getAsNumber());
+			} else if (jsonPrimitive.isBoolean()) {
+				jsonWriter.value(jsonPrimitive.getAsBoolean());
+			} else {
+				jsonWriter.value(jsonPrimitive.getAsString());
+			}
+		} else if (jsonElement.isJsonArray()) {
+			jsonWriter.beginArray();
+
+			for (JsonElement jsonElement2 : jsonElement.getAsJsonArray()) {
+				writeValue(jsonWriter, jsonElement2, comparator);
+			}
+
+			jsonWriter.endArray();
+		} else {
+			if (!jsonElement.isJsonObject()) {
+				throw new IllegalArgumentException("Couldn't write " + jsonElement.getClass());
+			}
+
+			jsonWriter.beginObject();
+
+			for (Entry<String, JsonElement> entry : sortByKeyIfNeeded(jsonElement.getAsJsonObject().entrySet(), comparator)) {
+				jsonWriter.name((String)entry.getKey());
+				writeValue(jsonWriter, (JsonElement)entry.getValue(), comparator);
+			}
+
+			jsonWriter.endObject();
+		}
+	}
+
+	private static Collection<Entry<String, JsonElement>> sortByKeyIfNeeded(
+		Collection<Entry<String, JsonElement>> collection, @Nullable Comparator<String> comparator
+	) {
+		if (comparator == null) {
+			return collection;
+		} else {
+			List<Entry<String, JsonElement>> list = new ArrayList(collection);
+			list.sort(Entry.comparingByKey(comparator));
+			return list;
+		}
 	}
 }

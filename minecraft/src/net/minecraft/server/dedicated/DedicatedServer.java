@@ -1,6 +1,5 @@
 package net.minecraft.server.dedicated;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -19,9 +18,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
@@ -31,7 +30,6 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
@@ -64,7 +62,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int CONVERSION_RETRY_DELAY_MS = 5000;
 	private static final int CONVERSION_RETRIES = 2;
-	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
 	private final List<ConsoleInput> consoleInput = Collections.synchronizedList(Lists.newArrayList());
 	@Nullable
 	private QueryThreadGs4 queryThreadGs4;
@@ -76,8 +73,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	private MinecraftServerGui gui;
 	@Nullable
 	private final TextFilterClient textFilterClient;
-	@Nullable
-	private final Component resourcePackPrompt;
 
 	public DedicatedServer(
 		Thread thread,
@@ -106,7 +101,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
 		this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
-		this.resourcePackPrompt = parseResourcePackPrompt(dedicatedServerSettings);
 	}
 
 	@Override
@@ -145,7 +139,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 		this.setPvpAllowed(dedicatedServerProperties.pvp);
 		this.setFlightAllowed(dedicatedServerProperties.allowFlight);
-		this.setResourcePack(dedicatedServerProperties.resourcePack, this.getPackHash());
 		this.setMotd(dedicatedServerProperties.motd);
 		super.setPlayerIdleTimeout(dedicatedServerProperties.playerIdleTimeout.get());
 		this.setEnforceWhitelist(dedicatedServerProperties.enforceWhitelist);
@@ -242,32 +235,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean areNpcsEnabled() {
 		return this.settings.getProperties().spawnNpcs && super.areNpcsEnabled();
-	}
-
-	public String getPackHash() {
-		DedicatedServerProperties dedicatedServerProperties = this.settings.getProperties();
-		String string;
-		if (!dedicatedServerProperties.resourcePackSha1.isEmpty()) {
-			string = dedicatedServerProperties.resourcePackSha1;
-			if (!Strings.isNullOrEmpty(dedicatedServerProperties.resourcePackHash)) {
-				LOGGER.warn("resource-pack-hash is deprecated and found along side resource-pack-sha1. resource-pack-hash will be ignored.");
-			}
-		} else if (!Strings.isNullOrEmpty(dedicatedServerProperties.resourcePackHash)) {
-			LOGGER.warn("resource-pack-hash is deprecated. Please use resource-pack-sha1 instead.");
-			string = dedicatedServerProperties.resourcePackHash;
-		} else {
-			string = "";
-		}
-
-		if (!string.isEmpty() && !SHA1.matcher(string).matches()) {
-			LOGGER.warn("Invalid sha1 for ressource-pack-sha1");
-		}
-
-		if (!dedicatedServerProperties.resourcePack.isEmpty() && string.isEmpty()) {
-			LOGGER.warn("You specified a resource pack without providing a sha1 hash. Pack will be updated on the client only if you change the name of the pack.");
-		}
-
-		return string;
 	}
 
 	@Override
@@ -621,34 +588,14 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		return this.textFilterClient != null ? this.textFilterClient.createContext(serverPlayer.getGameProfile()) : TextFilter.DUMMY;
 	}
 
-	@Override
-	public boolean isResourcePackRequired() {
-		return this.settings.getProperties().requireResourcePack;
-	}
-
 	@Nullable
 	@Override
 	public GameType getForcedGameType() {
 		return this.settings.getProperties().forceGameMode ? this.worldData.getGameType() : null;
 	}
 
-	@Nullable
-	private static Component parseResourcePackPrompt(DedicatedServerSettings dedicatedServerSettings) {
-		String string = dedicatedServerSettings.getProperties().resourcePackPrompt;
-		if (!Strings.isNullOrEmpty(string)) {
-			try {
-				return Component.Serializer.fromJson(string);
-			} catch (Exception var3) {
-				LOGGER.warn("Failed to parse resource pack prompt '{}'", string, var3);
-			}
-		}
-
-		return null;
-	}
-
-	@Nullable
 	@Override
-	public Component getResourcePackPrompt() {
-		return this.resourcePackPrompt;
+	public Optional<MinecraftServer.ServerResourcePackInfo> getServerResourcePack() {
+		return this.settings.getProperties().serverResourcePackInfo;
 	}
 }

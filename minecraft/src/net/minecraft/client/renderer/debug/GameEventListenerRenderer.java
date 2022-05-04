@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -191,7 +190,7 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 		}
 
 		@Override
-		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, @Nullable GameEvent.Context context, Vec3 vec3) {
+		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
 			return false;
 		}
 	}

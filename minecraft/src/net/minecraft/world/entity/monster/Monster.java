@@ -117,7 +117,7 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 	}
 
 	@Override
-	protected boolean shouldDropExperience() {
+	public boolean shouldDropExperience() {
 		return true;
 	}
 

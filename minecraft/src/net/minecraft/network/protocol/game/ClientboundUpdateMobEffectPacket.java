@@ -52,12 +52,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		this.effectAmplifier = friendlyByteBuf.readByte();
 		this.effectDurationTicks = friendlyByteBuf.readVarInt();
 		this.flags = friendlyByteBuf.readByte();
-		boolean bl = friendlyByteBuf.readBoolean();
-		if (bl) {
-			this.factorData = friendlyByteBuf.readWithCodec(MobEffectInstance.FactorData.CODEC);
-		} else {
-			this.factorData = null;
-		}
+		this.factorData = friendlyByteBuf.readNullable(friendlyByteBufx -> friendlyByteBufx.readWithCodec(MobEffectInstance.FactorData.CODEC));
 	}
 
 	@Override
@@ -67,11 +62,9 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		friendlyByteBuf.writeByte(this.effectAmplifier);
 		friendlyByteBuf.writeVarInt(this.effectDurationTicks);
 		friendlyByteBuf.writeByte(this.flags);
-		boolean bl = this.factorData != null;
-		friendlyByteBuf.writeBoolean(bl);
-		if (bl) {
-			friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, this.factorData);
-		}
+		friendlyByteBuf.writeNullable(
+			this.factorData, (friendlyByteBufx, factorData) -> friendlyByteBufx.writeWithCodec(MobEffectInstance.FactorData.CODEC, factorData)
+		);
 	}
 
 	public boolean isSuperLongDuration() {

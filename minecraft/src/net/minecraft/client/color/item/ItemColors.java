@@ -14,6 +14,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
@@ -86,9 +87,9 @@ public class ItemColors {
 			Blocks.JUNGLE_LEAVES,
 			Blocks.ACACIA_LEAVES,
 			Blocks.DARK_OAK_LEAVES,
-			Blocks.LILY_PAD,
-			Blocks.MANGROVE_LEAVES
+			Blocks.LILY_PAD
 		);
+		itemColors.register((itemStack, i) -> FoliageColor.getMangroveColor(), Blocks.MANGROVE_LEAVES);
 		itemColors.register((itemStack, i) -> i == 0 ? PotionUtils.getColor(itemStack) : -1, Items.TIPPED_ARROW);
 		itemColors.register((itemStack, i) -> i == 0 ? -1 : MapItem.getColor(itemStack), Items.FILLED_MAP);
 		return itemColors;

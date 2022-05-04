@@ -8,8 +8,13 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
@@ -20,10 +25,10 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetBannerPatternFunction extends LootItemConditionalFunction {
-	final List<Pair<BannerPattern, DyeColor>> patterns;
+	final List<Pair<Holder<BannerPattern>, DyeColor>> patterns;
 	final boolean append;
 
-	SetBannerPatternFunction(LootItemCondition[] lootItemConditions, List<Pair<BannerPattern, DyeColor>> list, boolean bl) {
+	SetBannerPatternFunction(LootItemCondition[] lootItemConditions, List<Pair<Holder<BannerPattern>, DyeColor>> list, boolean bl) {
 		super(lootItemConditions);
 		this.patterns = list;
 		this.append = bl;
@@ -62,7 +67,7 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetBannerPatternFunction.Builder> {
-		private final ImmutableList.Builder<Pair<BannerPattern, DyeColor>> patterns = ImmutableList.builder();
+		private final ImmutableList.Builder<Pair<Holder<BannerPattern>, DyeColor>> patterns = ImmutableList.builder();
 		private final boolean append;
 
 		Builder(boolean bl) {
@@ -78,8 +83,12 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 			return new SetBannerPatternFunction(this.getConditions(), this.patterns.build(), this.append);
 		}
 
-		public SetBannerPatternFunction.Builder addPattern(BannerPattern bannerPattern, DyeColor dyeColor) {
-			this.patterns.add(Pair.of(bannerPattern, dyeColor));
+		public SetBannerPatternFunction.Builder addPattern(ResourceKey<BannerPattern> resourceKey, DyeColor dyeColor) {
+			return this.addPattern(Registry.BANNER_PATTERN.getHolderOrThrow(resourceKey), dyeColor);
+		}
+
+		public SetBannerPatternFunction.Builder addPattern(Holder<BannerPattern> holder, DyeColor dyeColor) {
+			this.patterns.add(Pair.of(holder, dyeColor));
 			return this;
 		}
 	}
@@ -88,12 +97,20 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 		public void serialize(JsonObject jsonObject, SetBannerPatternFunction setBannerPatternFunction, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, setBannerPatternFunction, jsonSerializationContext);
 			JsonArray jsonArray = new JsonArray();
-			setBannerPatternFunction.patterns.forEach(pair -> {
-				JsonObject jsonObjectx = new JsonObject();
-				jsonObjectx.addProperty("pattern", ((BannerPattern)pair.getFirst()).getFilename());
-				jsonObjectx.addProperty("color", ((DyeColor)pair.getSecond()).getName());
-				jsonArray.add(jsonObjectx);
-			});
+			setBannerPatternFunction.patterns
+				.forEach(
+					pair -> {
+						JsonObject jsonObjectx = new JsonObject();
+						jsonObjectx.addProperty(
+							"pattern",
+							((ResourceKey)((Holder)pair.getFirst()).unwrapKey().orElseThrow(() -> new JsonSyntaxException("Unknown pattern: " + pair.getFirst())))
+								.location()
+								.toString()
+						);
+						jsonObjectx.addProperty("color", ((DyeColor)pair.getSecond()).getName());
+						jsonArray.add(jsonObjectx);
+					}
+				);
 			jsonObject.add("patterns", jsonArray);
 			jsonObject.addProperty("append", setBannerPatternFunction.append);
 		}
@@ -101,14 +118,15 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 		public SetBannerPatternFunction deserialize(
 			JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions
 		) {
-			ImmutableList.Builder<Pair<BannerPattern, DyeColor>> builder = ImmutableList.builder();
+			ImmutableList.Builder<Pair<Holder<BannerPattern>, DyeColor>> builder = ImmutableList.builder();
 			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "patterns");
 
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonArray.get(i), "pattern[" + i + "]");
 				String string = GsonHelper.getAsString(jsonObject2, "pattern");
-				BannerPattern bannerPattern = BannerPattern.byFilename(string);
-				if (bannerPattern == null) {
+				Optional<Holder<BannerPattern>> optional = Registry.BANNER_PATTERN
+					.getHolder(ResourceKey.create(Registry.BANNER_PATTERN_REGISTRY, new ResourceLocation(string)));
+				if (optional.isEmpty()) {
 					throw new JsonSyntaxException("Unknown pattern: " + string);
 				}
 
@@ -118,7 +136,7 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 					throw new JsonSyntaxException("Unknown color: " + string2);
 				}
 
-				builder.add(Pair.of(bannerPattern, dyeColor));
+				builder.add(Pair.of((Holder<BannerPattern>)optional.get(), dyeColor));
 			}
 
 			boolean bl = GsonHelper.getAsBoolean(jsonObject, "append");

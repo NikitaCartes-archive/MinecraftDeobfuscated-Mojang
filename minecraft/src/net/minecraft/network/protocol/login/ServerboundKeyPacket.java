@@ -49,10 +49,10 @@ public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 		return Crypt.decryptByteToSecretKey(privateKey, this.keybytes);
 	}
 
-	public boolean isChallengeSignatureValid(byte[] bs, ProfilePublicKey.Trusted trusted) {
+	public boolean isChallengeSignatureValid(byte[] bs, ProfilePublicKey profilePublicKey) {
 		return this.nonceOrSaltSignature.<Boolean>map(bsx -> false, saltSignaturePair -> {
 			try {
-				Signature signature = trusted.verifySignature();
+				Signature signature = profilePublicKey.verifySignature();
 				signature.update(bs);
 				signature.update(saltSignaturePair.saltAsBytes());
 				return signature.verify(saltSignaturePair.signature());

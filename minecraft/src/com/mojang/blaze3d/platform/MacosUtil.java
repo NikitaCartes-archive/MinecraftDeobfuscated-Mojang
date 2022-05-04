@@ -29,7 +29,7 @@ public class MacosUtil {
 	}
 
 	private static void toggleFullscreen(NSObject nSObject) {
-		nSObject.send("toggleFullScreen:", new Object[0]);
+		nSObject.send("toggleFullScreen:", new Object[]{Pointer.NULL});
 	}
 
 	public static void loadIcon(InputStream inputStream) throws IOException {

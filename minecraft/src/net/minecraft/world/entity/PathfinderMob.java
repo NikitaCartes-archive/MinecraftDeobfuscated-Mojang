@@ -55,7 +55,7 @@ public abstract class PathfinderMob extends Mob {
 				double e = (entity.getY() - this.getY()) / (double)f;
 				double g = (entity.getZ() - this.getZ()) / (double)f;
 				this.setDeltaMovement(this.getDeltaMovement().add(Math.copySign(d * d * 0.4, d), Math.copySign(e * e * 0.4, e), Math.copySign(g * g * 0.4, g)));
-			} else {
+			} else if (this.shouldStayCloseToLeashHolder()) {
 				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
 				float h = 2.0F;
 				Vec3 vec3 = new Vec3(entity.getX() - this.getX(), entity.getY() - this.getY(), entity.getZ() - this.getZ())
@@ -64,6 +64,10 @@ public abstract class PathfinderMob extends Mob {
 				this.getNavigation().moveTo(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z, this.followLeashSpeed());
 			}
 		}
+	}
+
+	protected boolean shouldStayCloseToLeashHolder() {
+		return true;
 	}
 
 	protected double followLeashSpeed() {

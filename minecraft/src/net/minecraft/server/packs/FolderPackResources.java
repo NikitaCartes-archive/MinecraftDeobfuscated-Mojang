@@ -105,12 +105,15 @@ public class FolderPackResources extends AbstractPackResources {
 					this.listResources(file2, string, list, string2 + file2.getName() + "/", predicate);
 				} else if (!file2.getName().endsWith(".mcmeta")) {
 					try {
-						ResourceLocation resourceLocation = new ResourceLocation(string, string2 + file2.getName());
-						if (predicate.test(resourceLocation)) {
+						String string3 = string2 + file2.getName();
+						ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string3);
+						if (resourceLocation == null) {
+							LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", string, string3);
+						} else if (predicate.test(resourceLocation)) {
 							list.add(resourceLocation);
 						}
-					} catch (ResourceLocationException var12) {
-						LOGGER.error(var12.getMessage());
+					} catch (ResourceLocationException var13) {
+						LOGGER.error(var13.getMessage());
 					}
 				}
 			}

@@ -326,6 +326,7 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		public static final Codec<MobEffectInstance.FactorData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						ExtraCodecs.NON_NEGATIVE_INT.fieldOf("padding_duration").forGetter(factorData -> factorData.paddingDuration),
+						Codec.FLOAT.fieldOf("factor_start").orElse(0.0F).forGetter(factorData -> factorData.factorStart),
 						Codec.FLOAT.fieldOf("factor_target").orElse(1.0F).forGetter(factorData -> factorData.factorTarget),
 						Codec.FLOAT.fieldOf("factor_current").orElse(0.0F).forGetter(factorData -> factorData.factorCurrent),
 						ExtraCodecs.NON_NEGATIVE_INT.fieldOf("effect_changed_timestamp").orElse(0).forGetter(factorData -> factorData.effectChangedTimestamp),
@@ -334,43 +335,40 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 					)
 					.apply(instance, MobEffectInstance.FactorData::new)
 		);
-		private int paddingDuration;
+		private final int paddingDuration;
+		private float factorStart;
 		private float factorTarget;
 		private float factorCurrent;
 		int effectChangedTimestamp;
 		private float factorPreviousFrame;
 		private boolean hadEffectLastTick;
 
-		public FactorData(int i, float f, float g, int j, float h, boolean bl) {
+		public FactorData(int i, float f, float g, float h, int j, float k, boolean bl) {
 			this.paddingDuration = i;
-			this.factorTarget = f;
-			this.factorCurrent = g;
+			this.factorStart = f;
+			this.factorTarget = g;
+			this.factorCurrent = h;
 			this.effectChangedTimestamp = j;
-			this.factorPreviousFrame = h;
+			this.factorPreviousFrame = k;
 			this.hadEffectLastTick = bl;
 		}
 
 		public FactorData(int i) {
-			this(i, 1.0F, 0.0F, 0, 0.0F, false);
+			this(i, 0.0F, 1.0F, 0.0F, 0, 0.0F, false);
 		}
 
 		public void update(MobEffectInstance mobEffectInstance) {
 			this.factorPreviousFrame = this.factorCurrent;
 			boolean bl = mobEffectInstance.duration > this.paddingDuration;
-			if (this.hadEffectLastTick) {
-				if (!bl) {
-					this.effectChangedTimestamp = mobEffectInstance.duration;
-					this.hadEffectLastTick = false;
-					this.factorTarget = 0.0F;
-				}
-			} else if (bl) {
+			if (this.hadEffectLastTick != bl) {
+				this.hadEffectLastTick = bl;
 				this.effectChangedTimestamp = mobEffectInstance.duration;
-				this.hadEffectLastTick = true;
-				this.factorTarget = 1.0F;
+				this.factorStart = this.factorCurrent;
+				this.factorTarget = bl ? 1.0F : 0.0F;
 			}
 
 			float f = Mth.clamp(((float)this.effectChangedTimestamp - (float)mobEffectInstance.duration) / (float)this.paddingDuration, 0.0F, 1.0F);
-			this.factorCurrent = Mth.lerp(f, this.factorCurrent, this.factorTarget);
+			this.factorCurrent = Mth.lerp(f, this.factorStart, this.factorTarget);
 		}
 
 		public float getFactor(float f) {

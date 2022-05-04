@@ -44,4 +44,8 @@ public enum AngerLevel {
 
 		return CALM;
 	}
+
+	public boolean isAngry() {
+		return this == ANGRY;
+	}
 }

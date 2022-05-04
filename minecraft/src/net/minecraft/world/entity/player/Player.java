@@ -27,7 +27,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -172,16 +171,19 @@ public abstract class Player extends LivingEntity {
 	protected final float defaultFlySpeed = 0.02F;
 	private int lastLevelUpTime;
 	private final GameProfile gameProfile;
+	@Nullable
+	private final ProfilePublicKey profilePublicKey;
 	private boolean reducedDebugInfo;
 	private ItemStack lastItemInMainHand = ItemStack.EMPTY;
 	private final ItemCooldowns cooldowns = this.createItemCooldowns();
 	@Nullable
 	public FishingHook fishing;
 
-	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
 		super(EntityType.PLAYER, level);
 		this.setUUID(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
 		this.gameProfile = gameProfile;
+		this.profilePublicKey = profilePublicKey;
 		this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
 		this.containerMenu = this.inventoryMenu;
 		this.moveTo((double)blockPos.getX() + 0.5, (double)(blockPos.getY() + 1), (double)blockPos.getZ() + 0.5, f, 0.0F);
@@ -1328,6 +1330,11 @@ public abstract class Player extends LivingEntity {
 		return this.gameProfile;
 	}
 
+	@Nullable
+	public ProfilePublicKey getProfilePublicKey() {
+		return this.profilePublicKey;
+	}
+
 	public Inventory getInventory() {
 		return this.inventory;
 	}
@@ -1337,10 +1344,6 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
-	}
-
-	public ChatSender asChatSender() {
-		return new ChatSender(this.getUUID(), this.getDisplayName());
 	}
 
 	public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {

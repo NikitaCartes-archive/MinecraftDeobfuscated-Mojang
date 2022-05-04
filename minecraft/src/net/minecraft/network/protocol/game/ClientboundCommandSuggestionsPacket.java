@@ -25,7 +25,7 @@ public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePac
 		StringRange stringRange = StringRange.between(i, i + j);
 		List<Suggestion> list = friendlyByteBuf.readList(friendlyByteBufx -> {
 			String string = friendlyByteBufx.readUtf();
-			Component component = friendlyByteBufx.readBoolean() ? friendlyByteBufx.readComponent() : null;
+			Component component = friendlyByteBufx.readNullable(FriendlyByteBuf::readComponent);
 			return new Suggestion(stringRange, string, component);
 		});
 		this.suggestions = new Suggestions(stringRange, list);
@@ -36,13 +36,15 @@ public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePac
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeVarInt(this.suggestions.getRange().getStart());
 		friendlyByteBuf.writeVarInt(this.suggestions.getRange().getLength());
-		friendlyByteBuf.writeCollection(this.suggestions.getList(), (friendlyByteBufx, suggestion) -> {
-			friendlyByteBufx.writeUtf(suggestion.getText());
-			friendlyByteBufx.writeBoolean(suggestion.getTooltip() != null);
-			if (suggestion.getTooltip() != null) {
-				friendlyByteBufx.writeComponent(ComponentUtils.fromMessage(suggestion.getTooltip()));
+		friendlyByteBuf.writeCollection(
+			this.suggestions.getList(),
+			(friendlyByteBufx, suggestion) -> {
+				friendlyByteBufx.writeUtf(suggestion.getText());
+				friendlyByteBufx.writeNullable(
+					suggestion.getTooltip(), (friendlyByteBufxx, message) -> friendlyByteBufxx.writeComponent(ComponentUtils.fromMessage(message))
+				);
 			}
-		});
+		);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

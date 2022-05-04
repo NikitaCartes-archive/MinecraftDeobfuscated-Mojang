@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -30,23 +31,14 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		this.mapId = friendlyByteBuf.readVarInt();
 		this.scale = friendlyByteBuf.readByte();
 		this.locked = friendlyByteBuf.readBoolean();
-		if (friendlyByteBuf.readBoolean()) {
-			this.decorations = friendlyByteBuf.readList(
-				friendlyByteBufx -> {
-					MapDecoration.Type type = friendlyByteBufx.readEnum(MapDecoration.Type.class);
-					return new MapDecoration(
-						type,
-						friendlyByteBufx.readByte(),
-						friendlyByteBufx.readByte(),
-						(byte)(friendlyByteBufx.readByte() & 15),
-						friendlyByteBufx.readBoolean() ? friendlyByteBufx.readComponent() : null
-					);
-				}
-			);
-		} else {
-			this.decorations = null;
-		}
-
+		this.decorations = friendlyByteBuf.readNullable(friendlyByteBufx -> friendlyByteBufx.readList(friendlyByteBufxx -> {
+				MapDecoration.Type type = friendlyByteBufxx.readEnum(MapDecoration.Type.class);
+				byte b = friendlyByteBufxx.readByte();
+				byte c = friendlyByteBufxx.readByte();
+				byte d = (byte)(friendlyByteBufxx.readByte() & 15);
+				Component component = friendlyByteBufxx.readNullable(FriendlyByteBuf::readComponent);
+				return new MapDecoration(type, b, c, d, component);
+			}));
 		int i = friendlyByteBuf.readUnsignedByte();
 		if (i > 0) {
 			int j = friendlyByteBuf.readUnsignedByte();
@@ -64,24 +56,13 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		friendlyByteBuf.writeVarInt(this.mapId);
 		friendlyByteBuf.writeByte(this.scale);
 		friendlyByteBuf.writeBoolean(this.locked);
-		if (this.decorations != null) {
-			friendlyByteBuf.writeBoolean(true);
-			friendlyByteBuf.writeCollection(this.decorations, (friendlyByteBufx, mapDecoration) -> {
-				friendlyByteBufx.writeEnum(mapDecoration.getType());
-				friendlyByteBufx.writeByte(mapDecoration.getX());
-				friendlyByteBufx.writeByte(mapDecoration.getY());
-				friendlyByteBufx.writeByte(mapDecoration.getRot() & 15);
-				if (mapDecoration.getName() != null) {
-					friendlyByteBufx.writeBoolean(true);
-					friendlyByteBufx.writeComponent(mapDecoration.getName());
-				} else {
-					friendlyByteBufx.writeBoolean(false);
-				}
-			});
-		} else {
-			friendlyByteBuf.writeBoolean(false);
-		}
-
+		friendlyByteBuf.writeNullable(this.decorations, (friendlyByteBufx, list) -> friendlyByteBufx.writeCollection(list, (friendlyByteBufxx, mapDecoration) -> {
+				friendlyByteBufxx.writeEnum(mapDecoration.getType());
+				friendlyByteBufxx.writeByte(mapDecoration.getX());
+				friendlyByteBufxx.writeByte(mapDecoration.getY());
+				friendlyByteBufxx.writeByte(mapDecoration.getRot() & 15);
+				friendlyByteBufxx.writeNullable(mapDecoration.getName(), FriendlyByteBuf::writeComponent);
+			}));
 		if (this.colorPatch != null) {
 			friendlyByteBuf.writeByte(this.colorPatch.width);
 			friendlyByteBuf.writeByte(this.colorPatch.height);

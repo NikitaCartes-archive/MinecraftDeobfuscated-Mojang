@@ -5,6 +5,8 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -28,7 +30,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	@Nullable
 	private ListTag itemPatterns;
 	@Nullable
-	private List<Pair<BannerPattern, DyeColor>> patterns;
+	private List<Pair<Holder<BannerPattern>, DyeColor>> patterns;
 
 	public BannerBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.BANNER, blockPos, blockState);
@@ -114,7 +116,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		return compoundTag != null && compoundTag.contains("Patterns") ? compoundTag.getList("Patterns", 10).size() : 0;
 	}
 
-	public List<Pair<BannerPattern, DyeColor>> getPatterns() {
+	public List<Pair<Holder<BannerPattern>, DyeColor>> getPatterns() {
 		if (this.patterns == null) {
 			this.patterns = createPatterns(this.baseColor, this.itemPatterns);
 		}
@@ -122,16 +124,16 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		return this.patterns;
 	}
 
-	public static List<Pair<BannerPattern, DyeColor>> createPatterns(DyeColor dyeColor, @Nullable ListTag listTag) {
-		List<Pair<BannerPattern, DyeColor>> list = Lists.<Pair<BannerPattern, DyeColor>>newArrayList();
-		list.add(Pair.of(BannerPattern.BASE, dyeColor));
+	public static List<Pair<Holder<BannerPattern>, DyeColor>> createPatterns(DyeColor dyeColor, @Nullable ListTag listTag) {
+		List<Pair<Holder<BannerPattern>, DyeColor>> list = Lists.<Pair<Holder<BannerPattern>, DyeColor>>newArrayList();
+		list.add(Pair.of(Registry.BANNER_PATTERN.getHolderOrThrow(BannerPatterns.BASE), dyeColor));
 		if (listTag != null) {
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag = listTag.getCompound(i);
-				BannerPattern bannerPattern = BannerPattern.byHash(compoundTag.getString("Pattern"));
-				if (bannerPattern != null) {
+				Holder<BannerPattern> holder = BannerPattern.byHash(compoundTag.getString("Pattern"));
+				if (holder != null) {
 					int j = compoundTag.getInt("Color");
-					list.add(Pair.of(bannerPattern, DyeColor.byId(j)));
+					list.add(Pair.of(holder, DyeColor.byId(j)));
 				}
 			}
 		}

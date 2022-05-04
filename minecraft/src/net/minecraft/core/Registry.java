@@ -26,6 +26,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
@@ -55,6 +56,8 @@ import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.Instruments;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -68,6 +71,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -314,10 +319,16 @@ public abstract class Registry<T> implements Keyable, IdMap<T> {
 	public static final Registry<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT = registerSimple(
 		STRUCTURE_POOL_ELEMENT_REGISTRY, registry -> StructurePoolElementType.EMPTY
 	);
+	public static final ResourceKey<Registry<ChatType>> CHAT_TYPE_REGISTRY = createRegistryKey("chat_type");
+	public static final Registry<ChatType> CHAT_TYPE = registerSimple(CHAT_TYPE_REGISTRY, ChatType::bootstrap);
 	public static final ResourceKey<Registry<CatVariant>> CAT_VARIANT_REGISTRY = createRegistryKey("cat_variant");
 	public static final Registry<CatVariant> CAT_VARIANT = registerSimple(CAT_VARIANT_REGISTRY, registry -> CatVariant.BLACK);
 	public static final ResourceKey<Registry<FrogVariant>> FROG_VARIANT_REGISTRY = createRegistryKey("frog_variant");
 	public static final Registry<FrogVariant> FROG_VARIANT = registerSimple(FROG_VARIANT_REGISTRY, registry -> FrogVariant.TEMPERATE);
+	public static final ResourceKey<Registry<BannerPattern>> BANNER_PATTERN_REGISTRY = createRegistryKey("banner_pattern");
+	public static final Registry<BannerPattern> BANNER_PATTERN = registerSimple(BANNER_PATTERN_REGISTRY, BannerPatterns::bootstrap);
+	public static final ResourceKey<Registry<Instrument>> INSTRUMENT_REGISTRY = createRegistryKey("instrument");
+	public static final Registry<Instrument> INSTRUMENT = registerSimple(INSTRUMENT_REGISTRY, Instruments::bootstrap);
 	private final ResourceKey<? extends Registry<T>> key;
 	private final Lifecycle lifecycle;
 

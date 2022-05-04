@@ -6,7 +6,7 @@ import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class GameEventTagsProvider extends TagsProvider<GameEvent> {
-	private static final GameEvent[] MOST_VIBRATIONS = new GameEvent[]{
+	private static final GameEvent[] VIBRATIONS_EXCEPT_FLAP = new GameEvent[]{
 		GameEvent.BLOCK_ATTACH,
 		GameEvent.BLOCK_CHANGE,
 		GameEvent.BLOCK_CLOSE,
@@ -30,7 +30,6 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.ENTITY_SHAKE,
 		GameEvent.EQUIP,
 		GameEvent.EXPLODE,
-		GameEvent.FLAP,
 		GameEvent.FLUID_PICKUP,
 		GameEvent.FLUID_PLACE,
 		GameEvent.HIT_GROUND,
@@ -55,9 +54,9 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 
 	@Override
 	protected void addTags() {
-		this.tag(GameEventTags.VIBRATIONS).add(MOST_VIBRATIONS).add(GameEvent.FLAP);
+		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.FLAP);
 		this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
-		this.tag(GameEventTags.WARDEN_CAN_LISTEN).add(MOST_VIBRATIONS).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
+		this.tag(GameEventTags.WARDEN_CAN_LISTEN).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM);
 		this.tag(GameEventTags.ALLAY_CAN_LISTEN).add(GameEvent.NOTE_BLOCK_PLAY);
 	}

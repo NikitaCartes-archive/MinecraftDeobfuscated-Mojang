@@ -37,10 +37,7 @@ public class CriterionProgress {
 	}
 
 	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeBoolean(this.obtained != null);
-		if (this.obtained != null) {
-			friendlyByteBuf.writeDate(this.obtained);
-		}
+		friendlyByteBuf.writeNullable(this.obtained, FriendlyByteBuf::writeDate);
 	}
 
 	public JsonElement serializeToJson() {
@@ -49,10 +46,7 @@ public class CriterionProgress {
 
 	public static CriterionProgress fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 		CriterionProgress criterionProgress = new CriterionProgress();
-		if (friendlyByteBuf.readBoolean()) {
-			criterionProgress.obtained = friendlyByteBuf.readDate();
-		}
-
+		criterionProgress.obtained = friendlyByteBuf.readNullable(FriendlyByteBuf::readDate);
 		return criterionProgress;
 	}
 

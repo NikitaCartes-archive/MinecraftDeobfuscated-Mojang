@@ -19,6 +19,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -43,8 +44,8 @@ public abstract class AbstractClientPlayer extends Player {
 	public float elytraRotZ;
 	public final ClientLevel clientLevel;
 
-	public AbstractClientPlayer(ClientLevel clientLevel, GameProfile gameProfile) {
-		super(clientLevel, clientLevel.getSharedSpawnPos(), clientLevel.getSharedSpawnAngle(), gameProfile);
+	public AbstractClientPlayer(ClientLevel clientLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+		super(clientLevel, clientLevel.getSharedSpawnPos(), clientLevel.getSharedSpawnAngle(), gameProfile, profilePublicKey);
 		this.clientLevel = clientLevel;
 	}
 

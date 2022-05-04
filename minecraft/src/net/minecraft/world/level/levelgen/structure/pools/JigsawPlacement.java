@@ -16,8 +16,11 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -27,6 +30,8 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
@@ -169,6 +174,41 @@ public class JigsawPlacement {
 		while (!placer.placing.isEmpty()) {
 			JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
 			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor, randomState);
+		}
+	}
+
+	public static boolean generateJigsaw(
+		ServerLevel serverLevel, Holder<StructureTemplatePool> holder, ResourceLocation resourceLocation, int i, BlockPos blockPos, boolean bl
+	) {
+		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
+		StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+		StructureManager structureManager = serverLevel.structureManager();
+		RandomSource randomSource = serverLevel.getRandom();
+		Structure.GenerationContext generationContext = new Structure.GenerationContext(
+			serverLevel.registryAccess(),
+			chunkGenerator,
+			chunkGenerator.getBiomeSource(),
+			serverLevel.getChunkSource().randomState(),
+			structureTemplateManager,
+			serverLevel.getSeed(),
+			new ChunkPos(blockPos),
+			serverLevel,
+			holderx -> true
+		);
+		Optional<Structure.GenerationStub> optional = addPieces(generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128);
+		if (optional.isPresent()) {
+			StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+			((Structure.GenerationStub)optional.get()).generator().accept(structurePiecesBuilder);
+
+			for (StructurePiece structurePiece : structurePiecesBuilder.build().pieces()) {
+				if (structurePiece instanceof PoolElementStructurePiece poolElementStructurePiece) {
+					poolElementStructurePiece.place(serverLevel, structureManager, chunkGenerator, randomSource, BoundingBox.infinite(), blockPos, bl);
+				}
+			}
+
+			return true;
+		} else {
+			return false;
 		}
 	}
 

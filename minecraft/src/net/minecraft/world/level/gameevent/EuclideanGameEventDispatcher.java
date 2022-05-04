@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
+import java.util.function.BiConsumer;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
@@ -48,9 +48,9 @@ public class EuclideanGameEventDispatcher implements GameEventDispatcher {
 	}
 
 	@Override
-	public void post(GameEvent gameEvent, Vec3 vec3, @Nullable GameEvent.Context context) {
-		boolean bl = false;
+	public boolean walkListeners(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context, BiConsumer<GameEventListener, Vec3> biConsumer) {
 		this.processing = true;
+		boolean bl = false;
 
 		try {
 			Iterator<GameEventListener> iterator = this.listeners.iterator();
@@ -59,8 +59,12 @@ public class EuclideanGameEventDispatcher implements GameEventDispatcher {
 				GameEventListener gameEventListener = (GameEventListener)iterator.next();
 				if (this.listenersToRemove.remove(gameEventListener)) {
 					iterator.remove();
-				} else if (postToListener(this.level, gameEvent, context, vec3, gameEventListener)) {
-					bl = true;
+				} else {
+					Optional<Vec3> optional = getPostableListenerPosition(this.level, vec3, gameEventListener);
+					if (optional.isPresent()) {
+						biConsumer.accept(gameEventListener, (Vec3)optional.get());
+						bl = true;
+					}
 				}
 			}
 		} finally {
@@ -77,19 +81,17 @@ public class EuclideanGameEventDispatcher implements GameEventDispatcher {
 			this.listenersToRemove.clear();
 		}
 
-		if (bl) {
-			DebugPackets.sendGameEventInfo(this.level, gameEvent, vec3);
-		}
+		return bl;
 	}
 
-	private static boolean postToListener(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, GameEventListener gameEventListener) {
+	private static Optional<Vec3> getPostableListenerPosition(ServerLevel serverLevel, Vec3 vec3, GameEventListener gameEventListener) {
 		Optional<Vec3> optional = gameEventListener.getListenerSource().getPosition(serverLevel);
 		if (optional.isEmpty()) {
-			return false;
+			return Optional.empty();
 		} else {
 			double d = ((Vec3)optional.get()).distanceToSqr(vec3);
 			int i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius();
-			return d <= (double)i && gameEventListener.handleGameEvent(serverLevel, gameEvent, context, vec3);
+			return d > (double)i ? Optional.empty() : optional;
 		}
 	}
 }

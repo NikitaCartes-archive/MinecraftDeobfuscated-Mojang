@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.InstrumentTags;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.EnchantRandomlyFunction;
 import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction;
 import net.minecraft.world.level.storage.loot.functions.ExplorationMapFunction;
-import net.minecraft.world.level.storage.loot.functions.SetGoatHornSoundFunction;
+import net.minecraft.world.level.storage.loot.functions.SetInstrumentFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.functions.SetNameFunction;
@@ -642,7 +643,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 					LootPool.lootPool()
 						.setRolls(UniformGenerator.between(0.0F, 1.0F))
 						.add(LootItem.lootTableItem(Items.GOAT_HORN))
-						.apply(SetGoatHornSoundFunction.setGoatHornSounds())
+						.apply(SetInstrumentFunction.setInstrumentOptions(InstrumentTags.REGULAR_GOAT_HORNS))
 				)
 		);
 		biConsumer.accept(

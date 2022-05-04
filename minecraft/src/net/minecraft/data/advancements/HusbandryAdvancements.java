@@ -1,6 +1,8 @@
 package net.minecraft.data.advancements;
 
 import com.google.common.collect.BiMap;
+import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
@@ -562,6 +564,8 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 	private Advancement.Builder addCatVariants(Advancement.Builder builder) {
 		Registry.CAT_VARIANT
 			.entrySet()
+			.stream()
+			.sorted(Entry.comparingByKey(Comparator.comparing(ResourceKey::location)))
 			.forEach(
 				entry -> builder.addCriterion(
 						((ResourceKey)entry.getKey()).location().toString(),

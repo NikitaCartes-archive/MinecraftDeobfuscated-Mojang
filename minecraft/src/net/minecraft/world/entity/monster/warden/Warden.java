@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -82,6 +81,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	private static final int ANGERMANAGEMENT_TICK_DELAY = 20;
 	private static final int DEFAULT_ANGER = 35;
 	private static final int PROJECTILE_ANGER = 10;
+	private static final int ON_HURT_ANGER_BOOST = 20;
 	private static final int RECENT_PROJECTILE_TICK_THRESHOLD = 100;
 	private static final int TOUCH_COOLDOWN_TICKS = 20;
 	private static final int DIGGING_PARTICLES_AMOUNT = 30;
@@ -98,7 +98,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	public AnimationState attackAnimationState = new AnimationState();
 	public AnimationState sonicBoomAnimationState = new AnimationState();
 	private final DynamicGameEventListener<VibrationListener> dynamicGameEventListener;
-	private AngerManagement angerManagement = new AngerManagement(Collections.emptyList());
+	private AngerManagement angerManagement = new AngerManagement(this::canTargetEntity, Collections.emptyList());
 
 	public Warden(EntityType<? extends Monster> entityType, Level level) {
 		super(entityType, level);
@@ -308,7 +308,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	}
 
 	private void clientDiggingParticles(AnimationState animationState) {
-		if ((float)(Util.getMillis() - animationState.startTime()) < 4500.0F) {
+		if ((float)animationState.getAccumulatedTime() < 4500.0F) {
 			RandomSource randomSource = this.getRandom();
 			BlockState blockState = this.level.getBlockState(this.blockPosition().below());
 			if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
@@ -371,8 +371,14 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 		return GameEventTags.WARDEN_CAN_LISTEN;
 	}
 
+	@Override
+	public boolean canTriggerAvoidVibration() {
+		return true;
+	}
+
 	public boolean canTargetEntity(@Nullable Entity entity) {
 		if (entity instanceof LivingEntity livingEntity
+			&& this.level == entity.level
 			&& EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)
 			&& !this.isAlliedTo(entity)
 			&& livingEntity.getType() != EntityType.ARMOR_STAND
@@ -394,7 +400,10 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		AngerManagement.CODEC.encodeStart(NbtOps.INSTANCE, this.angerManagement).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("anger", tag));
+		AngerManagement.codec(this::canTargetEntity)
+			.encodeStart(NbtOps.INSTANCE, this.angerManagement)
+			.resultOrPartial(LOGGER::error)
+			.ifPresent(tag -> compoundTag.put("anger", tag));
 		VibrationListener.codec(this)
 			.encodeStart(NbtOps.INSTANCE, this.dynamicGameEventListener.getListener())
 			.resultOrPartial(LOGGER::error)
@@ -405,7 +414,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("anger")) {
-			AngerManagement.CODEC
+			AngerManagement.codec(this::canTargetEntity)
 				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("anger")))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(angerManagement -> this.angerManagement = angerManagement);
@@ -442,9 +451,9 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	public void increaseAngerAt(@Nullable Entity entity, int i, boolean bl) {
 		if (!this.isNoAi() && this.canTargetEntity(entity)) {
 			WardenAi.setDigCooldown(this);
-			boolean bl2 = this.getEntityAngryAt().filter(livingEntity -> !(livingEntity instanceof Player)).isPresent();
+			boolean bl2 = !(this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) instanceof Player);
 			int j = this.angerManagement.increaseAnger(entity, i);
-			if (entity instanceof Player && bl2 && AngerLevel.byAnger(j) == AngerLevel.ANGRY) {
+			if (entity instanceof Player && bl2 && AngerLevel.byAnger(j).isAngry()) {
 				this.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
 			}
 
@@ -455,7 +464,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	}
 
 	public Optional<LivingEntity> getEntityAngryAt() {
-		return this.getAngerLevel() == AngerLevel.ANGRY ? this.angerManagement.getActiveEntity() : Optional.empty();
+		return this.getAngerLevel().isAngry() ? this.angerManagement.getActiveEntity() : Optional.empty();
 	}
 
 	@Nullable
@@ -538,9 +547,12 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	@Override
 	public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
 		if (!this.isNoAi()
+			&& !this.isDeadOrDying()
 			&& !this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN)
 			&& !this.isDiggingOrEmerging()
-			&& serverLevel.getWorldBorder().isWithinBounds(blockPos)) {
+			&& serverLevel.getWorldBorder().isWithinBounds(blockPos)
+			&& !this.isRemoved()
+			&& this.level == serverLevel) {
 			if (context.sourceEntity() instanceof LivingEntity livingEntity && !this.canTargetEntity(livingEntity)) {
 				return false;
 			}
@@ -583,9 +595,11 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 			this.increaseAngerAt(entity);
 		}
 
-		if (this.getAngerLevel() != AngerLevel.ANGRY
-			&& (entity2 != null || (Boolean)this.angerManagement.getActiveEntity().map(livingEntity -> livingEntity == entity).orElse(true))) {
-			WardenAi.setDisturbanceLocation(this, blockPos2);
+		if (!this.getAngerLevel().isAngry()) {
+			Optional<LivingEntity> optional = this.angerManagement.getActiveEntity();
+			if (entity2 != null || optional.isEmpty() || optional.get() == entity) {
+				WardenAi.setDisturbanceLocation(this, blockPos2);
+			}
 		}
 	}
 

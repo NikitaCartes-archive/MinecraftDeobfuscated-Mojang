@@ -1,11 +1,7 @@
 package net.minecraft.client.model;
 
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
-import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.animation.definitions.FrogAnimation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -14,12 +10,12 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.animal.frog.Frog;
 
 @Environment(EnvType.CLIENT)
 public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
-	private static final Vector3f ANIMATION_VECTOR_CACHE = new Vector3f();
+	private static final float WALK_ANIMATION_SPEED_FACTOR = 200.0F;
+	public static final float MAX_WALK_ANIMATION_SPEED = 8.0F;
 	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart head;
@@ -102,20 +98,14 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 
 	public void setupAnim(T frog, float f, float g, float h, float i, float j) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		long l = Util.getMillis();
-		this.animate(frog.jumpAnimationState, FrogAnimation.FROG_JUMP, l);
-		this.animate(frog.croakAnimationState, FrogAnimation.FROG_CROAK, l);
-		this.animate(frog.tongueAnimationState, FrogAnimation.FROG_TONGUE, l);
-		this.animate(frog.walkAnimationState, FrogAnimation.FROG_WALK, l);
-		this.animate(frog.swimAnimationState, FrogAnimation.FROG_SWIM, l);
-		this.animate(frog.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, l);
+		float k = Math.min((float)frog.getDeltaMovement().lengthSqr() * 200.0F, 8.0F);
+		this.animate(frog.jumpAnimationState, FrogAnimation.FROG_JUMP);
+		this.animate(frog.croakAnimationState, FrogAnimation.FROG_CROAK);
+		this.animate(frog.tongueAnimationState, FrogAnimation.FROG_TONGUE);
+		this.animate(frog.walkAnimationState, FrogAnimation.FROG_WALK, k);
+		this.animate(frog.swimAnimationState, FrogAnimation.FROG_SWIM);
+		this.animate(frog.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER);
 		this.croakingBody.visible = frog.croakAnimationState.isStarted();
-	}
-
-	private void animate(AnimationState animationState, AnimationDefinition animationDefinition, long l) {
-		animationState.ifStarted(
-			animationStatex -> KeyframeAnimations.animate(this, animationDefinition, l - animationStatex.startTime(), 1.0F, ANIMATION_VECTOR_CACHE)
-		);
 	}
 
 	@Override

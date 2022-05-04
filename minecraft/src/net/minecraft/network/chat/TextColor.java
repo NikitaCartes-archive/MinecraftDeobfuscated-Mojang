@@ -1,6 +1,8 @@
 package net.minecraft.network.chat;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -10,6 +12,10 @@ import net.minecraft.ChatFormatting;
 
 public final class TextColor {
 	private static final String CUSTOM_COLOR_PREFIX = "#";
+	public static final Codec<TextColor> CODEC = Codec.STRING.comapFlatMap(string -> {
+		TextColor textColor = parseColor(string);
+		return textColor != null ? DataResult.success(textColor) : DataResult.error("String is not a valid color name or hex color code");
+	}, TextColor::serialize);
 	private static final Map<ChatFormatting, TextColor> LEGACY_FORMAT_TO_COLOR = (Map<ChatFormatting, TextColor>)Stream.of(ChatFormatting.values())
 		.filter(ChatFormatting::isColor)
 		.collect(ImmutableMap.toImmutableMap(Function.identity(), chatFormatting -> new TextColor(chatFormatting.getColor(), chatFormatting.getName())));

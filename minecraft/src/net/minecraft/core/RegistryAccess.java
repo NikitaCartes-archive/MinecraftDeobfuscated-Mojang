@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.RegistryLoader;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.RegistryResourceAccess;
@@ -60,6 +61,7 @@ public interface RegistryAccess {
 		put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC);
 		put(builder, Registry.NOISE_REGISTRY, NormalNoise.NoiseParameters.DIRECT_CODEC);
 		put(builder, Registry.DENSITY_FUNCTION_REGISTRY, DensityFunction.DIRECT_CODEC);
+		put(builder, Registry.CHAT_TYPE_REGISTRY, ChatType.CODEC, ChatType.CODEC);
 		put(builder, Registry.WORLD_PRESET_REGISTRY, WorldPreset.DIRECT_CODEC);
 		put(builder, Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY, FlatLevelGeneratorPreset.DIRECT_CODEC);
 		return builder.build();

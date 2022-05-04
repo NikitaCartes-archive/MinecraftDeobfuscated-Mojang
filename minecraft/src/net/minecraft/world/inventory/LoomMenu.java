@@ -1,9 +1,14 @@
 package net.minecraft.world.inventory;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BannerPatternTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,12 +24,14 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class LoomMenu extends AbstractContainerMenu {
+	private static final int PATTERN_NOT_SET = -1;
 	private static final int INV_SLOT_START = 4;
 	private static final int INV_SLOT_END = 31;
 	private static final int USE_ROW_SLOT_START = 31;
 	private static final int USE_ROW_SLOT_END = 40;
 	private final ContainerLevelAccess access;
 	final DataSlot selectedBannerPatternIndex = DataSlot.standalone();
+	private List<Holder<BannerPattern>> selectablePatterns = List.of();
 	Runnable slotUpdateListener = () -> {
 	};
 	final Slot bannerSlot;
@@ -84,7 +91,7 @@ public class LoomMenu extends AbstractContainerMenu {
 				LoomMenu.this.bannerSlot.remove(1);
 				LoomMenu.this.dyeSlot.remove(1);
 				if (!LoomMenu.this.bannerSlot.hasItem() || !LoomMenu.this.dyeSlot.hasItem()) {
-					LoomMenu.this.selectedBannerPatternIndex.set(0);
+					LoomMenu.this.selectedBannerPatternIndex.set(-1);
 				}
 
 				containerLevelAccess.execute((level, blockPos) -> {
@@ -111,10 +118,6 @@ public class LoomMenu extends AbstractContainerMenu {
 		this.addDataSlot(this.selectedBannerPatternIndex);
 	}
 
-	public int getSelectedBannerPatternIndex() {
-		return this.selectedBannerPatternIndex.get();
-	}
-
 	@Override
 	public boolean stillValid(Player player) {
 		return stillValid(this.access, player, Blocks.LOOM);
@@ -122,12 +125,22 @@ public class LoomMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean clickMenuButton(Player player, int i) {
-		if (i > 0 && i <= BannerPattern.AVAILABLE_PATTERNS) {
+		if (i >= 0 && i < this.selectablePatterns.size()) {
 			this.selectedBannerPatternIndex.set(i);
-			this.setupResultSlot();
+			this.setupResultSlot((Holder<BannerPattern>)this.selectablePatterns.get(i));
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	private List<Holder<BannerPattern>> getSelectablePatterns(ItemStack itemStack) {
+		if (itemStack.isEmpty()) {
+			return (List<Holder<BannerPattern>>)Registry.BANNER_PATTERN.getTag(BannerPatternTags.NO_ITEM_REQUIRED).map(ImmutableList::copyOf).orElse(ImmutableList.of());
+		} else {
+			return itemStack.getItem() instanceof BannerPatternItem bannerPatternItem
+				? (List)Registry.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of())
+				: List.of();
 		}
 	}
 
@@ -136,28 +149,56 @@ public class LoomMenu extends AbstractContainerMenu {
 		ItemStack itemStack = this.bannerSlot.getItem();
 		ItemStack itemStack2 = this.dyeSlot.getItem();
 		ItemStack itemStack3 = this.patternSlot.getItem();
-		ItemStack itemStack4 = this.resultSlot.getItem();
-		if (itemStack4.isEmpty()
-			|| !itemStack.isEmpty()
-				&& !itemStack2.isEmpty()
-				&& this.selectedBannerPatternIndex.get() > 0
-				&& (this.selectedBannerPatternIndex.get() < BannerPattern.COUNT - BannerPattern.PATTERN_ITEM_COUNT || !itemStack3.isEmpty())) {
-			if (!itemStack3.isEmpty() && itemStack3.getItem() instanceof BannerPatternItem) {
+		if (!itemStack.isEmpty() && !itemStack2.isEmpty()) {
+			int i = this.selectedBannerPatternIndex.get();
+			List<Holder<BannerPattern>> list = this.selectablePatterns;
+			this.selectablePatterns = this.getSelectablePatterns(itemStack3);
+			Holder<BannerPattern> holder;
+			if (this.selectablePatterns.size() == 1) {
+				this.selectedBannerPatternIndex.set(0);
+				holder = (Holder<BannerPattern>)this.selectablePatterns.get(0);
+			} else if (i == -1) {
+				this.selectedBannerPatternIndex.set(-1);
+				holder = null;
+			} else {
+				Holder<BannerPattern> holder2 = (Holder<BannerPattern>)list.get(i);
+				int j = this.selectablePatterns.indexOf(holder2);
+				if (j != -1) {
+					holder = holder2;
+					this.selectedBannerPatternIndex.set(j);
+				} else {
+					holder = null;
+					this.selectedBannerPatternIndex.set(-1);
+				}
+			}
+
+			if (holder != null) {
 				CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 				boolean bl = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
 				if (bl) {
-					this.selectedBannerPatternIndex.set(0);
+					this.selectedBannerPatternIndex.set(-1);
+					this.resultSlot.set(ItemStack.EMPTY);
 				} else {
-					this.selectedBannerPatternIndex.set(((BannerPatternItem)itemStack3.getItem()).getBannerPattern().ordinal());
+					this.setupResultSlot(holder);
 				}
+			} else {
+				this.resultSlot.set(ItemStack.EMPTY);
 			}
+
+			this.broadcastChanges();
 		} else {
 			this.resultSlot.set(ItemStack.EMPTY);
-			this.selectedBannerPatternIndex.set(0);
+			this.selectablePatterns = List.of();
+			this.selectedBannerPatternIndex.set(-1);
 		}
+	}
 
-		this.setupResultSlot();
-		this.broadcastChanges();
+	public List<Holder<BannerPattern>> getSelectablePatterns() {
+		return this.selectablePatterns;
+	}
+
+	public int getSelectedBannerPatternIndex() {
+		return this.selectedBannerPatternIndex.get();
 	}
 
 	public void registerUpdateListener(Runnable runnable) {
@@ -223,39 +264,36 @@ public class LoomMenu extends AbstractContainerMenu {
 		this.access.execute((level, blockPos) -> this.clearContainer(player, this.inputContainer));
 	}
 
-	private void setupResultSlot() {
-		if (this.selectedBannerPatternIndex.get() > 0) {
-			ItemStack itemStack = this.bannerSlot.getItem();
-			ItemStack itemStack2 = this.dyeSlot.getItem();
-			ItemStack itemStack3 = ItemStack.EMPTY;
-			if (!itemStack.isEmpty() && !itemStack2.isEmpty()) {
-				itemStack3 = itemStack.copy();
-				itemStack3.setCount(1);
-				BannerPattern bannerPattern = BannerPattern.values()[this.selectedBannerPatternIndex.get()];
-				DyeColor dyeColor = ((DyeItem)itemStack2.getItem()).getDyeColor();
-				CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack3);
-				ListTag listTag;
-				if (compoundTag != null && compoundTag.contains("Patterns", 9)) {
-					listTag = compoundTag.getList("Patterns", 10);
-				} else {
-					listTag = new ListTag();
-					if (compoundTag == null) {
-						compoundTag = new CompoundTag();
-					}
-
-					compoundTag.put("Patterns", listTag);
+	private void setupResultSlot(Holder<BannerPattern> holder) {
+		ItemStack itemStack = this.bannerSlot.getItem();
+		ItemStack itemStack2 = this.dyeSlot.getItem();
+		ItemStack itemStack3 = ItemStack.EMPTY;
+		if (!itemStack.isEmpty() && !itemStack2.isEmpty()) {
+			itemStack3 = itemStack.copy();
+			itemStack3.setCount(1);
+			DyeColor dyeColor = ((DyeItem)itemStack2.getItem()).getDyeColor();
+			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack3);
+			ListTag listTag;
+			if (compoundTag != null && compoundTag.contains("Patterns", 9)) {
+				listTag = compoundTag.getList("Patterns", 10);
+			} else {
+				listTag = new ListTag();
+				if (compoundTag == null) {
+					compoundTag = new CompoundTag();
 				}
 
-				CompoundTag compoundTag2 = new CompoundTag();
-				compoundTag2.putString("Pattern", bannerPattern.getHashname());
-				compoundTag2.putInt("Color", dyeColor.getId());
-				listTag.add(compoundTag2);
-				BlockItem.setBlockEntityData(itemStack3, BlockEntityType.BANNER, compoundTag);
+				compoundTag.put("Patterns", listTag);
 			}
 
-			if (!ItemStack.matches(itemStack3, this.resultSlot.getItem())) {
-				this.resultSlot.set(itemStack3);
-			}
+			CompoundTag compoundTag2 = new CompoundTag();
+			compoundTag2.putString("Pattern", holder.value().getHashname());
+			compoundTag2.putInt("Color", dyeColor.getId());
+			listTag.add(compoundTag2);
+			BlockItem.setBlockEntityData(itemStack3, BlockEntityType.BANNER, compoundTag);
+		}
+
+		if (!ItemStack.matches(itemStack3, this.resultSlot.getItem())) {
+			this.resultSlot.set(itemStack3);
 		}
 	}
 

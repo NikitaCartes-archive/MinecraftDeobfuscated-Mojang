@@ -13,6 +13,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -48,9 +50,13 @@ public class Sheets {
 		.collect(ImmutableList.toImmutableList());
 	public static final Map<WoodType, Material> SIGN_MATERIALS = (Map<WoodType, Material>)WoodType.values()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createSignMaterial));
-	public static final Map<BannerPattern, Material> BANNER_MATERIALS = (Map<BannerPattern, Material>)Arrays.stream(BannerPattern.values())
+	public static final Map<ResourceKey<BannerPattern>, Material> BANNER_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)Registry.BANNER_PATTERN
+		.registryKeySet()
+		.stream()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
-	public static final Map<BannerPattern, Material> SHIELD_MATERIALS = (Map<BannerPattern, Material>)Arrays.stream(BannerPattern.values())
+	public static final Map<ResourceKey<BannerPattern>, Material> SHIELD_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)Registry.BANNER_PATTERN
+		.registryKeySet()
+		.stream()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
 	public static final Material[] BED_TEXTURES = (Material[])Arrays.stream(DyeColor.values())
 		.sorted(Comparator.comparingInt(DyeColor::getId))
@@ -138,20 +144,20 @@ public class Sheets {
 		return (Material)SIGN_MATERIALS.get(woodType);
 	}
 
-	private static Material createBannerMaterial(BannerPattern bannerPattern) {
-		return new Material(BANNER_SHEET, bannerPattern.location(true));
+	private static Material createBannerMaterial(ResourceKey<BannerPattern> resourceKey) {
+		return new Material(BANNER_SHEET, BannerPattern.location(resourceKey, true));
 	}
 
-	public static Material getBannerMaterial(BannerPattern bannerPattern) {
-		return (Material)BANNER_MATERIALS.get(bannerPattern);
+	public static Material getBannerMaterial(ResourceKey<BannerPattern> resourceKey) {
+		return (Material)BANNER_MATERIALS.get(resourceKey);
 	}
 
-	private static Material createShieldMaterial(BannerPattern bannerPattern) {
-		return new Material(SHIELD_SHEET, bannerPattern.location(false));
+	private static Material createShieldMaterial(ResourceKey<BannerPattern> resourceKey) {
+		return new Material(SHIELD_SHEET, BannerPattern.location(resourceKey, false));
 	}
 
-	public static Material getShieldMaterial(BannerPattern bannerPattern) {
-		return (Material)SHIELD_MATERIALS.get(bannerPattern);
+	public static Material getShieldMaterial(ResourceKey<BannerPattern> resourceKey) {
+		return (Material)SHIELD_MATERIALS.get(resourceKey);
 	}
 
 	private static Material chestMaterial(String string) {
