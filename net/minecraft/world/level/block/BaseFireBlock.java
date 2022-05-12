@@ -130,8 +130,8 @@ extends Block {
             if (entity.getRemainingFireTicks() == 0) {
                 entity.setSecondsOnFire(8);
             }
-            entity.hurt(DamageSource.IN_FIRE, this.fireDamage);
         }
+        entity.hurt(DamageSource.IN_FIRE, this.fireDamage);
         super.entityInside(blockState, level, blockPos, entity);
     }
 

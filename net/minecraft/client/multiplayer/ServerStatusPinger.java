@@ -22,6 +22,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -108,13 +109,12 @@ public class ServerStatusPinger {
                 } else {
                     serverData.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
                 }
-                String string = null;
-                if (serverStatus.getFavicon() != null) {
-                    String string2 = serverStatus.getFavicon();
-                    if (string2.startsWith("data:image/png;base64,")) {
-                        string = string2.substring("data:image/png;base64,".length());
-                    } else {
-                        LOGGER.error("Invalid server icon (unknown format)");
+                String string = serverStatus.getFavicon();
+                if (string != null) {
+                    try {
+                        string = ServerData.parseFavicon(string);
+                    } catch (ParseException parseException) {
+                        LOGGER.error("Invalid server icon", parseException);
                     }
                 }
                 if (!Objects.equals(string, serverData.getIconB64())) {

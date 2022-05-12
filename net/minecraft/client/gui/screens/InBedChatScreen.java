@@ -30,17 +30,20 @@ extends ChatScreen {
     }
 
     @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (i == 256) {
-            this.sendWakeUp();
-        } else if (i == 257 || i == 335) {
-            String string = this.input.getValue().trim();
-            if (!string.isEmpty()) {
-                this.sendMessage(string);
-            }
+    public boolean keyReleased(int i, int j, int k) {
+        if (i == 257 || i == 335) {
+            this.handleChatInput(this.input.getValue(), true);
             this.input.setValue("");
             this.minecraft.gui.getChat().resetChatScroll();
             return true;
+        }
+        return super.keyReleased(i, j, k);
+    }
+
+    @Override
+    public boolean keyPressed(int i, int j, int k) {
+        if (i == 256) {
+            this.sendWakeUp();
         }
         return super.keyPressed(i, j, k);
     }

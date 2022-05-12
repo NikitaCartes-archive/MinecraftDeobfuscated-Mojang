@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,23 +40,23 @@ extends Behavior<Villager> {
     @Override
     protected void start(ServerLevel serverLevel, Villager villager3, long l) {
         BlockPos blockPos = villager3.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get().pos();
-        Optional<PoiType> optional = serverLevel.getPoiManager().getType(blockPos);
+        Optional<Holder<PoiType>> optional = serverLevel.getPoiManager().getType(blockPos);
         if (!optional.isPresent()) {
             return;
         }
-        BehaviorUtils.getNearbyVillagersWithCondition(villager3, villager -> this.nearbyWantsJobsite((PoiType)optional.get(), (Villager)villager, blockPos)).findFirst().ifPresent(villager2 -> this.yieldJobSite(serverLevel, villager3, (Villager)villager2, blockPos, villager2.getBrain().getMemory(MemoryModuleType.JOB_SITE).isPresent()));
+        BehaviorUtils.getNearbyVillagersWithCondition(villager3, villager -> this.nearbyWantsJobsite((Holder)optional.get(), (Villager)villager, blockPos)).findFirst().ifPresent(villager2 -> this.yieldJobSite(serverLevel, villager3, (Villager)villager2, blockPos, villager2.getBrain().getMemory(MemoryModuleType.JOB_SITE).isPresent()));
     }
 
-    private boolean nearbyWantsJobsite(PoiType poiType, Villager villager, BlockPos blockPos) {
+    private boolean nearbyWantsJobsite(Holder<PoiType> holder, Villager villager, BlockPos blockPos) {
         boolean bl = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).isPresent();
         if (bl) {
             return false;
         }
         Optional<GlobalPos> optional = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
         VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
-        if (villager.getVillagerData().getProfession() != VillagerProfession.NONE && villagerProfession.getJobPoiType().getPredicate().test(poiType)) {
+        if (villagerProfession.heldJobSite().test(holder)) {
             if (!optional.isPresent()) {
-                return this.canReachPos(villager, blockPos, poiType);
+                return this.canReachPos(villager, blockPos, holder.value());
             }
             return optional.get().pos().equals(blockPos);
         }
@@ -72,7 +73,7 @@ extends Behavior<Villager> {
     }
 
     private boolean canReachPos(Villager villager, BlockPos blockPos, PoiType poiType) {
-        Path path = villager.getNavigation().createPath(blockPos, poiType.getValidRange());
+        Path path = villager.getNavigation().createPath(blockPos, poiType.validRange());
         return path != null && path.canReach();
     }
 

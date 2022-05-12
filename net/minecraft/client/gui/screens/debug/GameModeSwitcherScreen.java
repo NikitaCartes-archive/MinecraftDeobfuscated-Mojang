@@ -112,7 +112,7 @@ extends Screen {
         Optional<GameModeIcon> optional2 = GameModeIcon.getFromGameType(minecraft.gameMode.getPlayerMode());
         GameModeIcon gameModeIcon = optional.get();
         if (optional2.isPresent() && minecraft.player.hasPermissions(2) && gameModeIcon != optional2.get()) {
-            minecraft.player.chat(gameModeIcon.getCommand());
+            minecraft.player.command(gameModeIcon.getCommand());
         }
     }
 
@@ -142,10 +142,10 @@ extends Screen {
 
     @Environment(value=EnvType.CLIENT)
     static enum GameModeIcon {
-        CREATIVE(Component.translatable("gameMode.creative"), "/gamemode creative", new ItemStack(Blocks.GRASS_BLOCK)),
-        SURVIVAL(Component.translatable("gameMode.survival"), "/gamemode survival", new ItemStack(Items.IRON_SWORD)),
-        ADVENTURE(Component.translatable("gameMode.adventure"), "/gamemode adventure", new ItemStack(Items.MAP)),
-        SPECTATOR(Component.translatable("gameMode.spectator"), "/gamemode spectator", new ItemStack(Items.ENDER_EYE));
+        CREATIVE(Component.translatable("gameMode.creative"), "gamemode creative", new ItemStack(Blocks.GRASS_BLOCK)),
+        SURVIVAL(Component.translatable("gameMode.survival"), "gamemode survival", new ItemStack(Items.IRON_SWORD)),
+        ADVENTURE(Component.translatable("gameMode.adventure"), "gamemode adventure", new ItemStack(Items.MAP)),
+        SPECTATOR(Component.translatable("gameMode.spectator"), "gamemode spectator", new ItemStack(Items.ENDER_EYE));
 
         protected static final GameModeIcon[] VALUES;
         private static final int ICON_AREA = 16;

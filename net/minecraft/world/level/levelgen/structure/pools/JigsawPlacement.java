@@ -128,8 +128,7 @@ public class JigsawPlacement {
         Structure.GenerationContext generationContext = new Structure.GenerationContext(serverLevel.registryAccess(), chunkGenerator, chunkGenerator.getBiomeSource(), serverLevel.getChunkSource().randomState(), structureTemplateManager, serverLevel.getSeed(), new ChunkPos(blockPos), serverLevel, holder -> true);
         Optional<Structure.GenerationStub> optional = JigsawPlacement.addPieces(generationContext, holder2, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128);
         if (optional.isPresent()) {
-            StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            optional.get().generator().accept(structurePiecesBuilder);
+            StructurePiecesBuilder structurePiecesBuilder = optional.get().getPiecesBuilder();
             for (StructurePiece structurePiece : structurePiecesBuilder.build().pieces()) {
                 if (!(structurePiece instanceof PoolElementStructurePiece)) continue;
                 PoolElementStructurePiece poolElementStructurePiece = (PoolElementStructurePiece)structurePiece;

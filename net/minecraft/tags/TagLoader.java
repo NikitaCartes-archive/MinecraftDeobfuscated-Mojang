@@ -4,14 +4,19 @@
 package net.minecraft.tags;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 import java.io.BufferedReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,16 +31,16 @@ import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.Tag;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.tags.TagEntry;
+import net.minecraft.tags.TagFile;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class TagLoader<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Gson GSON = new Gson();
     private static final String PATH_SUFFIX = ".json";
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
-    private final Function<ResourceLocation, Optional<T>> idToValue;
+    final Function<ResourceLocation, Optional<T>> idToValue;
     private final String directory;
 
     public TagLoader(Function<ResourceLocation, Optional<T>> function, String string) {
@@ -43,8 +48,8 @@ public class TagLoader<T> {
         this.directory = string;
     }
 
-    public Map<ResourceLocation, Tag.Builder> load(ResourceManager resourceManager) {
-        HashMap<ResourceLocation, Tag.Builder> map = Maps.newHashMap();
+    public Map<ResourceLocation, List<EntryWithSource>> load(ResourceManager resourceManager) {
+        HashMap<ResourceLocation, List<EntryWithSource>> map = Maps.newHashMap();
         for (Map.Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
             ResourceLocation resourceLocation2 = entry.getKey();
             String string = resourceLocation2.getPath();
@@ -53,11 +58,14 @@ public class TagLoader<T> {
                 try {
                     BufferedReader reader = resource.openAsReader();
                     try {
-                        JsonObject jsonObject = GsonHelper.fromJson(GSON, (Reader)reader, JsonObject.class);
-                        if (jsonObject == null) {
-                            throw new NullPointerException("Invalid JSON contents");
+                        JsonElement jsonElement = JsonParser.parseReader(reader);
+                        List list = map.computeIfAbsent(resourceLocation22, resourceLocation -> new ArrayList());
+                        TagFile tagFile = (TagFile)TagFile.CODEC.parse(new Dynamic<JsonElement>(JsonOps.INSTANCE, jsonElement)).getOrThrow(false, LOGGER::error);
+                        if (tagFile.replace()) {
+                            list.clear();
                         }
-                        map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resource.sourcePackId());
+                        String string2 = resource.sourcePackId();
+                        tagFile.entries().forEach(tagEntry -> list.add(new EntryWithSource((TagEntry)tagEntry, string2)));
                     } finally {
                         if (reader == null) continue;
                         ((Reader)reader).close();
@@ -70,14 +78,14 @@ public class TagLoader<T> {
         return map;
     }
 
-    private static void visitDependenciesAndElement(Map<ResourceLocation, Tag.Builder> map, Multimap<ResourceLocation, ResourceLocation> multimap, Set<ResourceLocation> set, ResourceLocation resourceLocation2, BiConsumer<ResourceLocation, Tag.Builder> biConsumer) {
+    private static void visitDependenciesAndElement(Map<ResourceLocation, List<EntryWithSource>> map, Multimap<ResourceLocation, ResourceLocation> multimap, Set<ResourceLocation> set, ResourceLocation resourceLocation2, BiConsumer<ResourceLocation, List<EntryWithSource>> biConsumer) {
         if (!set.add(resourceLocation2)) {
             return;
         }
         multimap.get(resourceLocation2).forEach(resourceLocation -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation, biConsumer));
-        Tag.Builder builder = map.get(resourceLocation2);
-        if (builder != null) {
-            biConsumer.accept(resourceLocation2, builder);
+        List<EntryWithSource> list = map.get(resourceLocation2);
+        if (list != null) {
+            biConsumer.accept(resourceLocation2, list);
         }
     }
 
@@ -95,20 +103,49 @@ public class TagLoader<T> {
         }
     }
 
-    public Map<ResourceLocation, Tag<T>> build(Map<ResourceLocation, Tag.Builder> map) {
-        HashMap map2 = Maps.newHashMap();
-        Function<ResourceLocation, Tag> function = map2::get;
-        Function<ResourceLocation, Object> function2 = resourceLocation -> this.idToValue.apply((ResourceLocation)resourceLocation).orElse(null);
+    private Either<Collection<EntryWithSource>, Collection<T>> build(TagEntry.Lookup<T> lookup, List<EntryWithSource> list) {
+        ImmutableSet.Builder builder = ImmutableSet.builder();
+        ArrayList<EntryWithSource> list2 = new ArrayList<EntryWithSource>();
+        for (EntryWithSource entryWithSource : list) {
+            if (entryWithSource.entry().build(lookup, builder::add)) continue;
+            list2.add(entryWithSource);
+        }
+        return list2.isEmpty() ? Either.right(builder.build()) : Either.left(list2);
+    }
+
+    public Map<ResourceLocation, Collection<T>> build(Map<ResourceLocation, List<EntryWithSource>> map) {
+        final HashMap map2 = Maps.newHashMap();
+        TagEntry.Lookup lookup = new TagEntry.Lookup<T>(){
+
+            @Override
+            @Nullable
+            public T element(ResourceLocation resourceLocation) {
+                return TagLoader.this.idToValue.apply(resourceLocation).orElse(null);
+            }
+
+            @Override
+            @Nullable
+            public Collection<T> tag(ResourceLocation resourceLocation) {
+                return (Collection)map2.get(resourceLocation);
+            }
+        };
         HashMultimap multimap = HashMultimap.create();
-        map.forEach((resourceLocation, builder) -> builder.visitRequiredDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
-        map.forEach((resourceLocation, builder) -> builder.visitOptionalDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2)));
+        map.forEach((resourceLocation, list) -> list.forEach(entryWithSource -> entryWithSource.entry.visitRequiredDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2))));
+        map.forEach((resourceLocation, list) -> list.forEach(entryWithSource -> entryWithSource.entry.visitOptionalDependencies(resourceLocation2 -> TagLoader.addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2))));
         HashSet set = Sets.newHashSet();
-        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, builder) -> builder.build(function, function2).ifLeft(collection -> LOGGER.error("Couldn't load tag {} as it is missing following references: {}", resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(", ")))).ifRight(tag -> map2.put((ResourceLocation)resourceLocation, (Tag)tag))));
+        map.keySet().forEach(resourceLocation2 -> TagLoader.visitDependenciesAndElement(map, multimap, set, resourceLocation2, (resourceLocation, list) -> this.build(lookup, (List<EntryWithSource>)list).ifLeft(collection -> LOGGER.error("Couldn't load tag {} as it is missing following references: {}", resourceLocation, (Object)collection.stream().map(Objects::toString).collect(Collectors.joining(", ")))).ifRight(collection -> map2.put((ResourceLocation)resourceLocation, (Collection)collection))));
         return map2;
     }
 
-    public Map<ResourceLocation, Tag<T>> loadAndBuild(ResourceManager resourceManager) {
+    public Map<ResourceLocation, Collection<T>> loadAndBuild(ResourceManager resourceManager) {
         return this.build(this.load(resourceManager));
+    }
+
+    public record EntryWithSource(TagEntry entry, String source) {
+        @Override
+        public String toString() {
+            return this.entry + " (from " + this.source + ")";
+        }
     }
 }
 

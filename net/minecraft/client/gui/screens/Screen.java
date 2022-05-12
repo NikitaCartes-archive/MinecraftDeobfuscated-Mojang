@@ -220,6 +220,9 @@ implements Widget {
         if (o + p + 6 > this.height) {
             o = this.height - p - 6;
         }
+        if (j - p - 8 < 0) {
+            o = j + 8;
+        }
         poseStack.pushPose();
         int q = -267386864;
         int r = 0x505000FF;
@@ -332,7 +335,7 @@ implements Widget {
                 } else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
                     this.insertText(clickEvent.getValue(), true);
                 } else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-                    this.sendMessage(clickEvent.getValue(), false);
+                    this.minecraft.player.command(clickEvent.getValue());
                 } else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
                     this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
                 } else {
@@ -342,17 +345,6 @@ implements Widget {
             return true;
         }
         return false;
-    }
-
-    public void sendMessage(String string) {
-        this.sendMessage(string, true);
-    }
-
-    public void sendMessage(String string, boolean bl) {
-        if (bl) {
-            this.minecraft.gui.getChat().addRecentChat(string);
-        }
-        this.minecraft.player.chat(string);
     }
 
     public final void init(Minecraft minecraft, int i, int j) {

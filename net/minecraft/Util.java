@@ -355,6 +355,21 @@ public class Util {
         return object;
     }
 
+    @Nullable
+    public static <T, R> R mapNullable(@Nullable T object, Function<T, R> function) {
+        if (object == null) {
+            return null;
+        }
+        return function.apply(object);
+    }
+
+    public static <T, R> R mapNullable(@Nullable T object, Function<T, R> function, R object2) {
+        if (object == null) {
+            return object2;
+        }
+        return function.apply(object);
+    }
+
     public static <K> Hash.Strategy<K> identityStrategy() {
         return IdentityStrategy.INSTANCE;
     }

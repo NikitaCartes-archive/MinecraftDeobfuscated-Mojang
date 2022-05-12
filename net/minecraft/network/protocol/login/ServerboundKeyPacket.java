@@ -39,9 +39,9 @@ implements Packet<ServerLoginPacketListener> {
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeByteArray(this.keybytes);
-        friendlyByteBuf2.writeEither(this.nonceOrSaltSignature, FriendlyByteBuf::writeByteArray, (friendlyByteBuf, saltSignaturePair) -> saltSignaturePair.write((FriendlyByteBuf)friendlyByteBuf));
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeByteArray(this.keybytes);
+        friendlyByteBuf.writeEither(this.nonceOrSaltSignature, FriendlyByteBuf::writeByteArray, Crypt.SaltSignaturePair::write);
     }
 
     @Override

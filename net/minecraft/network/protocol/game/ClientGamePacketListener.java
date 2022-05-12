@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -64,6 +65,7 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
+import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
@@ -134,6 +136,8 @@ extends PacketListener {
     public void handleSystemChat(ClientboundSystemChatPacket var1);
 
     public void handlePlayerChat(ClientboundPlayerChatPacket var1);
+
+    public void handleChatPreview(ClientboundChatPreviewPacket var1);
 
     public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket var1);
 
@@ -306,5 +310,7 @@ extends PacketListener {
     public void setTitlesAnimation(ClientboundSetTitlesAnimationPacket var1);
 
     public void handleTitlesClear(ClientboundClearTitlesPacket var1);
+
+    public void handleServerData(ClientboundServerDataPacket var1);
 }
 

@@ -86,12 +86,12 @@ extends HierarchicalModel<T> {
         this.animateWalk(f, g);
         this.animateIdlePose(h);
         this.animateTendrils(warden, h, k);
-        this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK);
-        this.animate(((Warden)warden).sonicBoomAnimationState, WardenAnimation.WARDEN_SONIC_BOOM);
-        this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG);
-        this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE);
-        this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR);
-        this.animate(((Warden)warden).sniffAnimationState, WardenAnimation.WARDEN_SNIFF);
+        this.animate(((Warden)warden).attackAnimationState, WardenAnimation.WARDEN_ATTACK, h);
+        this.animate(((Warden)warden).sonicBoomAnimationState, WardenAnimation.WARDEN_SONIC_BOOM, h);
+        this.animate(((Warden)warden).diggingAnimationState, WardenAnimation.WARDEN_DIG, h);
+        this.animate(((Warden)warden).emergeAnimationState, WardenAnimation.WARDEN_EMERGE, h);
+        this.animate(((Warden)warden).roarAnimationState, WardenAnimation.WARDEN_ROAR, h);
+        this.animate(((Warden)warden).sniffAnimationState, WardenAnimation.WARDEN_SNIFF, h);
     }
 
     private void animateHeadLookTarget(float f, float g) {

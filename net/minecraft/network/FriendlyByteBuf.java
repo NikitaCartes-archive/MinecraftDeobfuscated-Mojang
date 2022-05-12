@@ -31,6 +31,8 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.time.Instant;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Date;
@@ -44,6 +46,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
@@ -54,10 +57,14 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -70,6 +77,9 @@ extends ByteBuf {
     private final ByteBuf source;
     public static final short MAX_STRING_LENGTH = Short.MAX_VALUE;
     public static final int MAX_COMPONENT_STRING_LENGTH = 262144;
+    private static final int PUBLIC_KEY_SIZE = 256;
+    private static final int MAX_PUBLIC_KEY_HEADER_SIZE = 256;
+    private static final int MAX_PUBLIC_KEY_LENGTH = 512;
 
     public FriendlyByteBuf(ByteBuf byteBuf) {
         this.source = byteBuf;
@@ -354,6 +364,17 @@ extends ByteBuf {
         return this;
     }
 
+    public GlobalPos readGlobalPos() {
+        ResourceKey<Level> resourceKey = this.readResourceKey(Registry.DIMENSION_REGISTRY);
+        BlockPos blockPos = this.readBlockPos();
+        return GlobalPos.of(resourceKey, blockPos);
+    }
+
+    public void writeGlobalPos(GlobalPos globalPos) {
+        this.writeResourceKey(globalPos.dimension());
+        this.writeBlockPos(globalPos.pos());
+    }
+
     public Component readComponent() {
         MutableComponent component = Component.Serializer.fromJson(this.readUtf(262144));
         if (component == null) {
@@ -541,12 +562,42 @@ extends ByteBuf {
         return this;
     }
 
+    public <T> ResourceKey<T> readResourceKey(ResourceKey<? extends Registry<T>> resourceKey) {
+        ResourceLocation resourceLocation = this.readResourceLocation();
+        return ResourceKey.create(resourceKey, resourceLocation);
+    }
+
+    public void writeResourceKey(ResourceKey<?> resourceKey) {
+        this.writeResourceLocation(resourceKey.location());
+    }
+
     public Date readDate() {
         return new Date(this.readLong());
     }
 
     public FriendlyByteBuf writeDate(Date date) {
         this.writeLong(date.getTime());
+        return this;
+    }
+
+    public Instant readInstant() {
+        return Instant.ofEpochMilli(this.readLong());
+    }
+
+    public void writeInstant(Instant instant) {
+        this.writeLong(instant.toEpochMilli());
+    }
+
+    public PublicKey readPublicKey() {
+        try {
+            return Crypt.byteToPublicKey(this.readByteArray(512));
+        } catch (CryptException cryptException) {
+            throw new DecoderException("Malformed public key bytes", cryptException);
+        }
+    }
+
+    public FriendlyByteBuf writePublicKey(PublicKey publicKey) {
+        this.writeByteArray(publicKey.getEncoded());
         return this;
     }
 

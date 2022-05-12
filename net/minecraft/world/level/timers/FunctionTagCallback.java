@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.timers;
 
+import java.util.Collection;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerFunctionManager;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.timers.TimerCallback;
 import net.minecraft.world.level.timers.TimerQueue;
 
@@ -23,8 +23,8 @@ implements TimerCallback<MinecraftServer> {
     @Override
     public void handle(MinecraftServer minecraftServer, TimerQueue<MinecraftServer> timerQueue, long l) {
         ServerFunctionManager serverFunctionManager = minecraftServer.getFunctions();
-        Tag<CommandFunction> tag = serverFunctionManager.getTag(this.tagId);
-        for (CommandFunction commandFunction : tag.getValues()) {
+        Collection<CommandFunction> collection = serverFunctionManager.getTag(this.tagId);
+        for (CommandFunction commandFunction : collection) {
             serverFunctionManager.execute(commandFunction, serverFunctionManager.getGameLoopSender());
         }
     }

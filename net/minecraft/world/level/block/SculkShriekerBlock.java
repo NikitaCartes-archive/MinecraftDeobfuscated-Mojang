@@ -6,10 +6,10 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -58,11 +58,11 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
-        Entity entity2 = entity instanceof Player ? entity : (entity.getControllingPassenger() instanceof Player ? entity.getControllingPassenger() : null);
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            if (entity2 != null) {
-                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.shriek(serverLevel, entity2));
+            ServerPlayer serverPlayer = SculkShriekerBlockEntity.tryGetPlayer(entity);
+            if (serverPlayer != null) {
+                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryShriek(serverLevel, serverPlayer));
             }
         }
         super.stepOn(level, blockPos, blockState, entity);
@@ -73,7 +73,7 @@ implements SimpleWaterloggedBlock {
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
             if (blockState.getValue(SHRIEKING).booleanValue() && !blockState.is(blockState2.getBlock())) {
-                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.replyOrSummon(serverLevel));
+                serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryRespond(serverLevel));
             }
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);
@@ -83,7 +83,7 @@ implements SimpleWaterloggedBlock {
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
         if (blockState.getValue(SHRIEKING).booleanValue()) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SHRIEKING, false), 3);
-            serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.replyOrSummon(serverLevel));
+            serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryRespond(serverLevel));
         }
     }
 

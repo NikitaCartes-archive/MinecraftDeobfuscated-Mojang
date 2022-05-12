@@ -12,8 +12,7 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class DimensionTypes {
-    public static Holder<DimensionType> bootstrap() {
-        Registry<DimensionType> registry = BuiltinRegistries.DIMENSION_TYPE;
+    public static Holder<DimensionType> bootstrap(Registry<DimensionType> registry) {
         BuiltinRegistries.register(registry, BuiltinDimensionTypes.OVERWORLD, new DimensionType(OptionalLong.empty(), true, false, false, true, 1.0, false, true, false, true, -64, 384, 384, BlockTags.INFINIBURN_OVERWORLD, BuiltinDimensionTypes.OVERWORLD_EFFECTS, 0.0f));
         BuiltinRegistries.register(registry, BuiltinDimensionTypes.NETHER, new DimensionType(OptionalLong.of(18000L), false, true, true, false, 8.0, true, false, true, false, 0, 256, 128, BlockTags.INFINIBURN_NETHER, BuiltinDimensionTypes.NETHER_EFFECTS, 0.1f));
         BuiltinRegistries.register(registry, BuiltinDimensionTypes.END, new DimensionType(OptionalLong.of(6000L), false, false, false, false, 1.0, false, false, false, true, 0, 256, 256, BlockTags.INFINIBURN_END, BuiltinDimensionTypes.END_EFFECTS, 0.0f));

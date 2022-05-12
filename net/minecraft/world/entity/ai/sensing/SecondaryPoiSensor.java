@@ -35,7 +35,7 @@ extends Sensor<Villager> {
             for (int k = -2; k <= 2; ++k) {
                 for (int l = -4; l <= 4; ++l) {
                     BlockPos blockPos2 = blockPos.offset(j, k, l);
-                    if (!villager.getVillagerData().getProfession().getSecondaryPoi().contains(serverLevel.getBlockState(blockPos2).getBlock())) continue;
+                    if (!villager.getVillagerData().getProfession().secondaryPoi().contains(serverLevel.getBlockState(blockPos2).getBlock())) continue;
                     list.add(GlobalPos.of(resourceKey, blockPos2));
                 }
             }

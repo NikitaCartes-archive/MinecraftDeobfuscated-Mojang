@@ -7,13 +7,14 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.Optional;
+import java.util.OptionalInt;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,13 +22,13 @@ import net.minecraft.tags.GameEventTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SpawnUtil;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -55,6 +56,7 @@ implements VibrationListener.VibrationListenerConfig {
         int2ObjectOpenHashMap.put(1, SoundEvents.WARDEN_NEARBY_CLOSE);
         int2ObjectOpenHashMap.put(2, SoundEvents.WARDEN_NEARBY_CLOSER);
         int2ObjectOpenHashMap.put(3, SoundEvents.WARDEN_NEARBY_CLOSEST);
+        int2ObjectOpenHashMap.put(4, SoundEvents.WARDEN_LISTENING_ANGRY);
     });
     private static final int SHRIEKING_TICKS = 90;
     private int warningLevel;
@@ -95,64 +97,78 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable GameEvent.Context context) {
-        return !this.isRemoved() && this.canShriek(serverLevel);
+    public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
+        return !this.isRemoved() && this.getBlockState().getValue(SculkShriekerBlock.SHRIEKING) == false && SculkShriekerBlockEntity.tryGetPlayer(context.sourceEntity()) != null;
+    }
+
+    @Nullable
+    public static ServerPlayer tryGetPlayer(@Nullable Entity entity) {
+        Projectile projectile;
+        Entity entity2;
+        Entity entity3;
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)entity;
+            return serverPlayer;
+        }
+        if (entity != null && (entity3 = entity.getControllingPassenger()) instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)entity3;
+            return serverPlayer;
+        }
+        if (entity instanceof Projectile && (entity2 = (projectile = (Projectile)entity).getOwner()) instanceof ServerPlayer) {
+            ServerPlayer serverPlayer2 = (ServerPlayer)entity2;
+            return serverPlayer2;
+        }
+        return null;
     }
 
     @Override
     public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, int i) {
-        this.shriek(serverLevel, entity2 != null ? entity2 : entity);
+        this.tryShriek(serverLevel, SculkShriekerBlockEntity.tryGetPlayer(entity2 != null ? entity2 : entity));
     }
 
-    private boolean canShriek(ServerLevel serverLevel) {
+    public void tryShriek(ServerLevel serverLevel, @Nullable ServerPlayer serverPlayer) {
+        if (serverPlayer == null) {
+            return;
+        }
         BlockState blockState = this.getBlockState();
         if (blockState.getValue(SculkShriekerBlock.SHRIEKING).booleanValue()) {
-            return false;
+            return;
         }
-        if (!blockState.getValue(SculkShriekerBlock.CAN_SUMMON).booleanValue()) {
-            return true;
+        this.warningLevel = 0;
+        if (this.canRespond(serverLevel) && !this.tryToWarn(serverLevel, serverPlayer)) {
+            return;
         }
+        this.shriek(serverLevel, serverPlayer);
+    }
+
+    private boolean tryToWarn(ServerLevel serverLevel, ServerPlayer serverPlayer) {
+        OptionalInt optionalInt = WardenSpawnTracker.tryWarn(serverLevel, this.getBlockPos(), serverPlayer);
+        optionalInt.ifPresent(i -> {
+            this.warningLevel = i;
+        });
+        return optionalInt.isPresent();
+    }
+
+    private void shriek(ServerLevel serverLevel, @Nullable Entity entity) {
         BlockPos blockPos = this.getBlockPos();
-        return SculkShriekerBlockEntity.tryGetSpawnTracker(serverLevel, blockPos).map(wardenSpawnTracker -> wardenSpawnTracker.canWarn(serverLevel, blockPos)).orElse(false);
-    }
-
-    public void shriek(ServerLevel serverLevel, @Nullable Entity entity) {
         BlockState blockState = this.getBlockState();
-        if (this.canShriek(serverLevel) && this.tryToWarn(serverLevel, blockState)) {
-            BlockPos blockPos = this.getBlockPos();
-            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SculkShriekerBlock.SHRIEKING, true), 2);
-            serverLevel.scheduleTick(blockPos, blockState.getBlock(), 90);
-            serverLevel.levelEvent(3007, blockPos, 0);
-            serverLevel.gameEvent(GameEvent.SHRIEK, blockPos, GameEvent.Context.of(entity));
-        }
+        serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(SculkShriekerBlock.SHRIEKING, true), 2);
+        serverLevel.scheduleTick(blockPos, blockState.getBlock(), 90);
+        serverLevel.levelEvent(3007, blockPos, 0);
+        serverLevel.gameEvent(GameEvent.SHRIEK, blockPos, GameEvent.Context.of(entity));
     }
 
-    private boolean tryToWarn(ServerLevel serverLevel, BlockState blockState) {
-        if (blockState.getValue(SculkShriekerBlock.CAN_SUMMON).booleanValue()) {
-            BlockPos blockPos = this.getBlockPos();
-            Optional<WardenSpawnTracker> optional = SculkShriekerBlockEntity.tryGetSpawnTracker(serverLevel, blockPos).filter(wardenSpawnTracker -> wardenSpawnTracker.warn(serverLevel, blockPos));
-            if (optional.isEmpty()) {
-                return false;
+    private boolean canRespond(ServerLevel serverLevel) {
+        return this.getBlockState().getValue(SculkShriekerBlock.CAN_SUMMON) != false && serverLevel.getDifficulty() != Difficulty.PEACEFUL && serverLevel.getGameRules().getBoolean(GameRules.RULE_DO_WARDEN_SPAWNING);
+    }
+
+    public void tryRespond(ServerLevel serverLevel) {
+        if (this.canRespond(serverLevel) && this.warningLevel > 0) {
+            if (!this.trySummonWarden(serverLevel)) {
+                this.playWardenReplySound();
             }
-            this.warningLevel = optional.get().getWarningLevel();
-        }
-        return true;
-    }
-
-    private static Optional<WardenSpawnTracker> tryGetSpawnTracker(ServerLevel serverLevel, BlockPos blockPos) {
-        Player player = serverLevel.getNearestPlayer((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 16.0, EntitySelector.NO_SPECTATORS.and(Entity::isAlive));
-        return player == null ? Optional.empty() : Optional.of(player.getWardenSpawnTracker());
-    }
-
-    public void replyOrSummon(ServerLevel serverLevel) {
-        if (this.getBlockState().getValue(SculkShriekerBlock.CAN_SUMMON).booleanValue()) {
             Warden.applyDarknessAround(serverLevel, Vec3.atCenterOf(this.getBlockPos()), null, 40);
-            if (this.warningLevel >= 3) {
-                SculkShriekerBlockEntity.trySummonWarden(serverLevel, this.getBlockPos());
-                return;
-            }
         }
-        this.playWardenReplySound();
     }
 
     private void playWardenReplySound() {
@@ -166,10 +182,11 @@ implements VibrationListener.VibrationListenerConfig {
         }
     }
 
-    private static void trySummonWarden(ServerLevel serverLevel, BlockPos blockPos) {
-        if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DO_WARDEN_SPAWNING)) {
-            SpawnUtil.trySpawnMob(EntityType.WARDEN, MobSpawnType.TRIGGERED, serverLevel, blockPos, 20, 5, 6).ifPresent(warden -> warden.playSound(SoundEvents.WARDEN_AGITATED, 5.0f, 1.0f));
+    private boolean trySummonWarden(ServerLevel serverLevel) {
+        if (this.warningLevel < 4) {
+            return false;
         }
+        return SpawnUtil.trySpawnMob(EntityType.WARDEN, MobSpawnType.TRIGGERED, serverLevel, this.getBlockPos(), 20, 5, 6).isPresent();
     }
 
     @Override

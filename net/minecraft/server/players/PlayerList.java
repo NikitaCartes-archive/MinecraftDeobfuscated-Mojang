@@ -35,9 +35,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -174,7 +173,7 @@ public abstract class PlayerList {
         GameRules gameRules = serverLevel2.getGameRules();
         boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
         boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
-        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), levelData.isHardcore(), serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer(), this.server.levelKeys(), this.registryHolder, serverLevel2.dimensionTypeRegistration(), serverLevel2.dimension(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), this.getMaxPlayers(), this.viewDistance, this.simulationDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat()));
+        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), levelData.isHardcore(), serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer(), this.server.levelKeys(), this.registryHolder, serverLevel2.dimensionTypeId(), serverLevel2.dimension(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), this.getMaxPlayers(), this.viewDistance, this.simulationDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat()));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
@@ -199,6 +198,7 @@ public abstract class PlayerList {
         this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
         this.sendLevelInfo(serverPlayer, serverLevel2);
         this.server.getServerResourcePack().ifPresent(serverResourcePackInfo -> serverPlayer.sendTexturePack(serverResourcePackInfo.url(), serverResourcePackInfo.hash(), serverResourcePackInfo.isRequired(), serverResourcePackInfo.prompt()));
+        serverPlayer.sendServerStatus(this.server.getStatus());
         for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
             serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));
         }
@@ -418,7 +418,7 @@ public abstract class PlayerList {
             serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
-        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.level.dimensionTypeRegistration(), serverPlayer2.level.dimension(), BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()), serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.gameMode.getPreviousGameModeForPlayer(), serverPlayer2.getLevel().isDebug(), serverPlayer2.getLevel().isFlat(), bl));
+        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.level.dimensionTypeId(), serverPlayer2.level.dimension(), BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()), serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.gameMode.getPreviousGameModeForPlayer(), serverPlayer2.getLevel().isDebug(), serverPlayer2.getLevel().isFlat(), bl));
         serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.getYRot(), serverPlayer2.getXRot());
         serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel2.getSharedSpawnPos(), serverLevel2.getSharedSpawnAngle()));
         serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
@@ -664,27 +664,33 @@ public abstract class PlayerList {
         }
     }
 
-    public void broadcastChatMessage(SignedMessage signedMessage, TextFilter.FilteredText filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey) {
-        SignedMessage signedMessage2;
-        if (!filteredText.getFiltered().isEmpty()) {
-            MutableComponent component = Component.literal(filteredText.getFiltered());
-            signedMessage2 = new SignedMessage(component, MessageSignature.unsigned());
-        } else {
-            signedMessage2 = null;
+    public void broadcastChatMessage(PlayerChatMessage playerChatMessage, TextFilter.FilteredText filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey) {
+        PlayerChatMessage playerChatMessage2 = this.getFilteredMessage(serverPlayer, playerChatMessage, filteredText);
+        this.broadcastChatMessage(playerChatMessage, (ServerPlayer serverPlayer2) -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? playerChatMessage2 : playerChatMessage, serverPlayer.asChatSender(), resourceKey);
+    }
+
+    @Nullable
+    private PlayerChatMessage getFilteredMessage(ServerPlayer serverPlayer, PlayerChatMessage playerChatMessage, TextFilter.FilteredText filteredText) {
+        if (!filteredText.isFiltered()) {
+            return playerChatMessage;
         }
-        this.broadcastChatMessage(signedMessage, (ServerPlayer serverPlayer2) -> serverPlayer.shouldFilterMessageTo((ServerPlayer)serverPlayer2) ? signedMessage2 : signedMessage, serverPlayer.asChatSender(), resourceKey);
+        if (filteredText.getFiltered().isEmpty()) {
+            return null;
+        }
+        MutableComponent component = Component.literal(filteredText.getFiltered());
+        return PlayerChatMessage.unsigned(this.server.getChatDecorator().decorate(serverPlayer, component));
     }
 
-    public void broadcastChatMessage(SignedMessage signedMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
-        this.broadcastChatMessage(signedMessage, (ServerPlayer serverPlayer) -> signedMessage, chatSender, resourceKey);
+    public void broadcastChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+        this.broadcastChatMessage(playerChatMessage, (ServerPlayer serverPlayer) -> playerChatMessage, chatSender, resourceKey);
     }
 
-    public void broadcastChatMessage(SignedMessage signedMessage, Function<ServerPlayer, SignedMessage> function, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
-        this.server.logMessageFrom(chatSender, signedMessage.content());
+    public void broadcastChatMessage(PlayerChatMessage playerChatMessage, Function<ServerPlayer, PlayerChatMessage> function, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+        this.server.logMessageFrom(chatSender, playerChatMessage.serverContent());
         for (ServerPlayer serverPlayer : this.players) {
-            SignedMessage signedMessage2 = function.apply(serverPlayer);
-            if (signedMessage2 == null) continue;
-            serverPlayer.sendChatMessage(signedMessage2, chatSender, resourceKey);
+            PlayerChatMessage playerChatMessage2 = function.apply(serverPlayer);
+            if (playerChatMessage2 == null) continue;
+            serverPlayer.sendChatMessage(playerChatMessage2, chatSender, resourceKey);
         }
     }
 

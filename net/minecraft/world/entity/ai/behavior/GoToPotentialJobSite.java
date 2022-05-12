@@ -53,7 +53,7 @@ extends Behavior<Villager> {
                 return;
             }
             PoiManager poiManager = serverLevel2.getPoiManager();
-            if (poiManager.exists(blockPos, poiType -> true)) {
+            if (poiManager.exists(blockPos, holder -> true)) {
                 poiManager.release(blockPos);
             }
             DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);

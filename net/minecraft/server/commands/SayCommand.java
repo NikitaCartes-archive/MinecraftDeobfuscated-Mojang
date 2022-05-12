@@ -10,7 +10,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
@@ -18,14 +18,17 @@ import net.minecraft.server.players.PlayerList;
 public class SayCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("say").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
-            SignedMessage signedMessage = MessageArgument.getSignedMessage(commandContext, "message");
+            PlayerChatMessage playerChatMessage = MessageArgument.getSignedMessage(commandContext, "message");
             CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
             PlayerList playerList = commandSourceStack.getServer().getPlayerList();
             if (commandSourceStack.isPlayer()) {
                 ServerPlayer serverPlayer = commandSourceStack.getPlayerOrException();
-                serverPlayer.getTextFilter().processStreamMessage(signedMessage.content().getString()).thenAcceptAsync(filteredText -> playerList.broadcastChatMessage(signedMessage, (TextFilter.FilteredText)filteredText, serverPlayer, ChatType.SAY_COMMAND), (Executor)commandSourceStack.getServer());
+                serverPlayer.getTextFilter().processStreamMessage(playerChatMessage.signedContent().getString()).thenAcceptAsync(filteredText -> {
+                    PlayerChatMessage playerChatMessage2 = commandSourceStack.getServer().getChatDecorator().decorate(serverPlayer, playerChatMessage);
+                    playerList.broadcastChatMessage(playerChatMessage2, (TextFilter.FilteredText)filteredText, serverPlayer, ChatType.SAY_COMMAND);
+                }, (Executor)commandSourceStack.getServer());
             } else {
-                playerList.broadcastChatMessage(signedMessage, commandSourceStack.asChatSender(), ChatType.SAY_COMMAND);
+                playerList.broadcastChatMessage(playerChatMessage, commandSourceStack.asChatSender(), ChatType.SAY_COMMAND);
             }
             return 1;
         })));

@@ -38,16 +38,13 @@ extends Fireball {
             return;
         }
         Entity entity = entityHitResult.getEntity();
-        if (!entity.fireImmune()) {
-            Entity entity2 = this.getOwner();
-            int i = entity.getRemainingFireTicks();
-            entity.setSecondsOnFire(5);
-            boolean bl = entity.hurt(DamageSource.fireball(this, entity2), 5.0f);
-            if (!bl) {
-                entity.setRemainingFireTicks(i);
-            } else if (entity2 instanceof LivingEntity) {
-                this.doEnchantDamageEffects((LivingEntity)entity2, entity);
-            }
+        Entity entity2 = this.getOwner();
+        int i = entity.getRemainingFireTicks();
+        entity.setSecondsOnFire(5);
+        if (!entity.hurt(DamageSource.fireball(this, entity2), 5.0f)) {
+            entity.setRemainingFireTicks(i);
+        } else if (entity2 instanceof LivingEntity) {
+            this.doEnchantDamageEffects((LivingEntity)entity2, entity);
         }
     }
 

@@ -7,12 +7,14 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 
@@ -38,7 +40,7 @@ extends Behavior<Villager> {
             return;
         }
         MinecraftServer minecraftServer = serverLevel2.getServer();
-        Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension())).flatMap(serverLevel -> serverLevel.getPoiManager().getType(globalPos.pos())).flatMap(poiType -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.getJobPoiType() == poiType).findFirst()).ifPresent(villagerProfession -> {
+        Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension())).flatMap(serverLevel -> serverLevel.getPoiManager().getType(globalPos.pos())).flatMap(holder -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.heldJobSite().test((Holder<PoiType>)holder)).findFirst()).ifPresent(villagerProfession -> {
             villager.setVillagerData(villager.getVillagerData().setProfession((VillagerProfession)villagerProfession));
             villager.refreshBrain(serverLevel2);
         });

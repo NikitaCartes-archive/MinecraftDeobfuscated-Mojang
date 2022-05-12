@@ -67,6 +67,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
+import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
@@ -593,6 +594,7 @@ AutoCloseable {
                     this.nextTickTime = Util.getMillis();
                     this.status.setDescription(Component.literal(this.motd));
                     this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
+                    this.status.setPreviewsChat(this.previewsChat());
                     this.updateStatusIcon(this.status);
                     while (this.running) {
                         long l = Util.getMillis() - this.nextTickTime;
@@ -1050,6 +1052,10 @@ AutoCloseable {
 
     public void setMotd(String string) {
         this.motd = string;
+    }
+
+    public boolean previewsChat() {
+        return false;
     }
 
     public boolean isStopped() {
@@ -1576,6 +1582,10 @@ AutoCloseable {
 
     public void logMessageFrom(ChatSender chatSender, Component component) {
         LOGGER.info(Component.translatable("chat.type.text", chatSender.name(), component).getString());
+    }
+
+    public ChatDecorator getChatDecorator() {
+        return ChatDecorator.PLAIN;
     }
 
     @Override

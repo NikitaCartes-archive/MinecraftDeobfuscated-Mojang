@@ -35,8 +35,8 @@ public class FlatLevelGeneratorPresets {
     public static final ResourceKey<FlatLevelGeneratorPreset> REDSTONE_READY = FlatLevelGeneratorPresets.register("redstone_ready");
     public static final ResourceKey<FlatLevelGeneratorPreset> THE_VOID = FlatLevelGeneratorPresets.register("the_void");
 
-    public static Holder<FlatLevelGeneratorPreset> bootstrap() {
-        return new Bootstrap().run();
+    public static Holder<FlatLevelGeneratorPreset> bootstrap(Registry<FlatLevelGeneratorPreset> registry) {
+        return new Bootstrap(registry).run();
     }
 
     private static ResourceKey<FlatLevelGeneratorPreset> register(String string) {
@@ -44,11 +44,12 @@ public class FlatLevelGeneratorPresets {
     }
 
     static class Bootstrap {
-        private final Registry<FlatLevelGeneratorPreset> presets = BuiltinRegistries.FLAT_LEVEL_GENERATOR_PRESET;
+        private final Registry<FlatLevelGeneratorPreset> presets;
         private final Registry<Biome> biomes = BuiltinRegistries.BIOME;
         private final Registry<StructureSet> structureSets = BuiltinRegistries.STRUCTURE_SETS;
 
-        Bootstrap() {
+        Bootstrap(Registry<FlatLevelGeneratorPreset> registry) {
+            this.presets = registry;
         }
 
         private Holder<FlatLevelGeneratorPreset> register(ResourceKey<FlatLevelGeneratorPreset> resourceKey2, ItemLike itemLike, ResourceKey<Biome> resourceKey22, Set<ResourceKey<StructureSet>> set, boolean bl, boolean bl2, FlatLayerInfo ... flatLayerInfos) {

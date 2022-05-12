@@ -6,6 +6,7 @@ package net.minecraft.data.worldgen;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.Structures;
@@ -39,8 +40,8 @@ public interface StructureSets {
     public static final Holder<StructureSet> END_CITIES = StructureSets.register(BuiltinStructureSets.END_CITIES, Structures.END_CITY, new RandomSpreadStructurePlacement(20, 11, RandomSpreadType.TRIANGULAR, 10387313));
     public static final Holder<StructureSet> STRONGHOLDS = StructureSets.register(BuiltinStructureSets.STRONGHOLDS, Structures.STRONGHOLD, new ConcentricRingsStructurePlacement(32, 3, 128, BuiltinRegistries.BIOME.getOrCreateTag(BiomeTags.STRONGHOLD_BIASED_TO)));
 
-    public static Holder<StructureSet> bootstrap() {
-        return (Holder)BuiltinRegistries.STRUCTURE_SETS.holders().iterator().next();
+    public static Holder<StructureSet> bootstrap(Registry<StructureSet> registry) {
+        return (Holder)registry.holders().iterator().next();
     }
 
     public static Holder<StructureSet> register(ResourceKey<StructureSet> resourceKey, StructureSet structureSet) {

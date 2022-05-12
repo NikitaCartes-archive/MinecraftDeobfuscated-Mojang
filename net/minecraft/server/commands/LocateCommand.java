@@ -4,10 +4,12 @@
 package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.datafixers.util.Pair;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -24,26 +26,61 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class LocateCommand {
-    private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.failed", object));
-    private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.invalid", object));
+    private static final DynamicCommandExceptionType ERROR_STRUCTURE_NOT_FOUND = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.structure.not_found", object));
+    private static final DynamicCommandExceptionType ERROR_STRUCTURE_INVALID = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.structure.invalid", object));
+    private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.biome.not_found", object));
+    private static final DynamicCommandExceptionType ERROR_BIOME_INVALID = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.biome.invalid", object));
+    private static final DynamicCommandExceptionType ERROR_POI_NOT_FOUND = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.poi.not_found", object));
+    private static final DynamicCommandExceptionType ERROR_POI_INVALID = new DynamicCommandExceptionType(object -> Component.translatable("commands.locate.poi.invalid", object));
+    private static final int MAX_STRUCTURE_SEARCH_RADIUS = 100;
+    private static final int MAX_BIOME_SEARCH_RADIUS = 6400;
+    private static final int BIOME_SAMPLE_RESOLUTION_HORIZONTAL = 32;
+    private static final int BIOME_SAMPLE_RESOLUTION_VERTICAL = 64;
+    private static final int POI_SEARCH_RADIUS = 256;
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locate").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("structure", ResourceOrTagLocationArgument.resourceOrTag(Registry.STRUCTURE_REGISTRY)).executes(commandContext -> LocateCommand.locate((CommandSourceStack)commandContext.getSource(), ResourceOrTagLocationArgument.getStructure(commandContext, "structure")))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locate").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.literal("structure").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("structure", ResourceOrTagLocationArgument.resourceOrTag(Registry.STRUCTURE_REGISTRY)).executes(commandContext -> LocateCommand.locateStructure((CommandSourceStack)commandContext.getSource(), ResourceOrTagLocationArgument.getRegistryType(commandContext, "structure", Registry.STRUCTURE_REGISTRY, ERROR_STRUCTURE_INVALID)))))).then(Commands.literal("biome").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("biome", ResourceOrTagLocationArgument.resourceOrTag(Registry.BIOME_REGISTRY)).executes(commandContext -> LocateCommand.locateBiome((CommandSourceStack)commandContext.getSource(), ResourceOrTagLocationArgument.getRegistryType(commandContext, "biome", Registry.BIOME_REGISTRY, ERROR_BIOME_INVALID)))))).then(Commands.literal("poi").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("poi", ResourceOrTagLocationArgument.resourceOrTag(Registry.POINT_OF_INTEREST_TYPE_REGISTRY)).executes(commandContext -> LocateCommand.locatePoi((CommandSourceStack)commandContext.getSource(), ResourceOrTagLocationArgument.getRegistryType(commandContext, "poi", Registry.POINT_OF_INTEREST_TYPE_REGISTRY, ERROR_POI_INVALID))))));
     }
 
-    private static int locate(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Structure> result) throws CommandSyntaxException {
+    private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(ResourceOrTagLocationArgument.Result<Structure> result, Registry<Structure> registry) {
+        return result.unwrap().map(resourceKey -> registry.getHolder((ResourceKey<Structure>)resourceKey).map(holder -> HolderSet.direct(holder)), registry::getTag);
+    }
+
+    private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Structure> result) throws CommandSyntaxException {
         Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
-        HolderSet holderSet = (HolderSet)result.unwrap().map(resourceKey -> registry.getHolder((ResourceKey<Structure>)resourceKey).map(holder -> HolderSet.direct(holder)), registry::getTag).orElseThrow(() -> ERROR_INVALID.create(result.asPrintable()));
+        HolderSet holderSet = LocateCommand.getHolders(result, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(result.asPrintable()));
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
         ServerLevel serverLevel = commandSourceStack.getLevel();
         Pair<BlockPos, Holder<Structure>> pair = serverLevel.getChunkSource().getGenerator().findNearestMapStructure(serverLevel, holderSet, blockPos, 100, false);
         if (pair == null) {
-            throw ERROR_FAILED.create(result.asPrintable());
+            throw ERROR_STRUCTURE_NOT_FOUND.create(result.asPrintable());
         }
-        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locate.success", false);
+        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locate.structure.success", false);
+    }
+
+    private static int locateBiome(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Biome> result) throws CommandSyntaxException {
+        BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+        Pair<BlockPos, Holder<Biome>> pair = commandSourceStack.getLevel().findClosestBiome3d(result, blockPos, 6400, 32, 64);
+        if (pair == null) {
+            throw ERROR_BIOME_NOT_FOUND.create(result.asPrintable());
+        }
+        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, pair, "commands.locate.biome.success", true);
+    }
+
+    private static int locatePoi(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<PoiType> result) throws CommandSyntaxException {
+        BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+        ServerLevel serverLevel = commandSourceStack.getLevel();
+        Optional<Pair<Holder<PoiType>, BlockPos>> optional = serverLevel.getPoiManager().findClosestWithType(result, blockPos, 256, PoiManager.Occupancy.ANY);
+        if (optional.isEmpty()) {
+            throw ERROR_POI_NOT_FOUND.create(result.asPrintable());
+        }
+        return LocateCommand.showLocateResult(commandSourceStack, result, blockPos, optional.get().swap(), "commands.locate.poi.success", false);
     }
 
     public static int showLocateResult(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<?> result, BlockPos blockPos, Pair<BlockPos, ? extends Holder<?>> pair, String string, boolean bl) {

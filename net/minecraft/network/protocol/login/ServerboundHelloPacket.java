@@ -11,14 +11,14 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 
 public record ServerboundHelloPacket(String name, Optional<ProfilePublicKey.Data> publicKey) implements Packet<ServerLoginPacketListener>
 {
-    public ServerboundHelloPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this(friendlyByteBuf2.readUtf(16), friendlyByteBuf2.readOptional(friendlyByteBuf -> friendlyByteBuf.readWithCodec(ProfilePublicKey.Data.CODEC)));
+    public ServerboundHelloPacket(FriendlyByteBuf friendlyByteBuf) {
+        this(friendlyByteBuf.readUtf(16), friendlyByteBuf.readOptional(ProfilePublicKey.Data::new));
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeUtf(this.name, 16);
-        friendlyByteBuf2.writeOptional(this.publicKey, (friendlyByteBuf, data) -> friendlyByteBuf.writeWithCodec(ProfilePublicKey.Data.CODEC, data));
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeUtf(this.name, 16);
+        friendlyByteBuf.writeOptional(this.publicKey, (friendlyByteBuf2, data) -> data.write(friendlyByteBuf));
     }
 
     @Override

@@ -21,7 +21,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -434,8 +433,8 @@ implements Enemy {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (damageSource instanceof EntityDamageSource && ((EntityDamageSource)damageSource).isThorns() && !this.level.isClientSide) {
-            this.hurt(this.body, damageSource, f);
+        if (!this.level.isClientSide) {
+            return this.hurt(this.body, damageSource, f);
         }
         return false;
     }

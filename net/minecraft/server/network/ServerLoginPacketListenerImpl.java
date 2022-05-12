@@ -159,7 +159,7 @@ implements ServerLoginPacketListener {
                 }
                 return null;
             }
-            return ProfilePublicKey.parseAndValidate(minecraftSessionService, optional.get());
+            return ProfilePublicKey.createValidated(minecraftSessionService, optional.get());
         } catch (InsecurePublicKeyException.MissingException missingException) {
             if (bl) {
                 throw new PublicKeyParseException(INVALID_SIGNATURE, (Throwable)missingException);
@@ -174,14 +174,17 @@ implements ServerLoginPacketListener {
 
     @Override
     public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
-        Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
-        Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
-        try {
-            this.playerProfilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(serverboundHelloPacket, this.server.getSessionService(), this.server.enforceSecureProfile());
-        } catch (PublicKeyParseException publicKeyParseException) {
-            LOGGER.error(publicKeyParseException.getMessage(), publicKeyParseException.getCause());
-            this.disconnect(publicKeyParseException.getComponent());
-            return;
+        block5: {
+            Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
+            Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
+            try {
+                this.playerProfilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(serverboundHelloPacket, this.server.getSessionService(), this.server.enforceSecureProfile());
+            } catch (PublicKeyParseException publicKeyParseException) {
+                LOGGER.error(publicKeyParseException.getMessage(), publicKeyParseException.getCause());
+                if (this.connection.isMemoryConnection()) break block5;
+                this.disconnect(publicKeyParseException.getComponent());
+                return;
+            }
         }
         GameProfile gameProfile = this.server.getSingleplayerProfile();
         if (gameProfile != null && serverboundHelloPacket.name().equalsIgnoreCase(gameProfile.getName())) {

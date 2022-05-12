@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.AncientCityStructurePieces;
 import net.minecraft.data.worldgen.BastionPieces;
@@ -90,7 +91,7 @@ public class Structures {
     public static final Holder<Structure> RUINED_PORTAL_NETHER = Structures.register(BuiltinStructures.RUINED_PORTAL_NETHER, new RuinedPortalStructure(Structures.structure(BiomeTags.HAS_RUINED_PORTAL_NETHER, TerrainAdjustment.NONE), new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_NETHER, 0.5f, 0.0f, false, false, false, true, 1.0f)));
     public static final Holder<Structure> ANCIENT_CITY = Structures.register(BuiltinStructures.ANCIENT_CITY, new JigsawStructure(Structures.structure(BiomeTags.HAS_ANCIENT_CITY, Arrays.stream(MobCategory.values()).collect(Collectors.toMap(mobCategory -> mobCategory, mobCategory -> new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create()))), GenerationStep.Decoration.UNDERGROUND_DECORATION, TerrainAdjustment.BEARD_BOX), AncientCityStructurePieces.START, Optional.of(new ResourceLocation("city_anchor")), 7, ConstantHeight.of(VerticalAnchor.absolute(-27)), false, Optional.empty(), 116));
 
-    public static Holder<? extends Structure> bootstrap() {
+    public static Holder<? extends Structure> bootstrap(Registry<Structure> registry) {
         return MINESHAFT;
     }
 

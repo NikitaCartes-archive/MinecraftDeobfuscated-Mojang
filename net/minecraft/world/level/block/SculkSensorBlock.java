@@ -17,7 +17,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -244,16 +243,10 @@ implements SimpleWaterloggedBlock {
     }
 
     public static void activate(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
-        Entity entity2;
         level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(PHASE, SculkSensorPhase.ACTIVE)).setValue(POWER, i), 3);
         level.scheduleTick(blockPos, blockState.getBlock(), 40);
         SculkSensorBlock.updateNeighbours(level, blockPos);
-        if (entity instanceof Player) {
-            level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
-        } else if (entity != null && (entity2 = entity.getControllingPassenger()) instanceof Player) {
-            Player player = (Player)entity2;
-            level.gameEvent((Entity)player, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
-        }
+        level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
         if (!blockState.getValue(WATERLOGGED).booleanValue()) {
             level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.SCULK_CLICKING, SoundSource.BLOCKS, 1.0f, level.random.nextFloat() * 0.2f + 0.8f);
         }

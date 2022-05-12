@@ -10,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec2;
@@ -41,7 +41,7 @@ implements PreparableReloadListener {
     private static final int PATH_SUFFIX_LENGTH = ".mcfunction".length();
     private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();
     private final TagLoader<CommandFunction> tagsLoader = new TagLoader(this::getFunction, "tags/functions");
-    private volatile Map<ResourceLocation, Tag<CommandFunction>> tags = Map.of();
+    private volatile Map<ResourceLocation, Collection<CommandFunction>> tags = Map.of();
     private final int functionCompilationLevel;
     private final CommandDispatcher<CommandSourceStack> dispatcher;
 
@@ -53,8 +53,8 @@ implements PreparableReloadListener {
         return this.functions;
     }
 
-    public Tag<CommandFunction> getTag(ResourceLocation resourceLocation) {
-        return this.tags.getOrDefault(resourceLocation, Tag.empty());
+    public Collection<CommandFunction> getTag(ResourceLocation resourceLocation) {
+        return this.tags.getOrDefault(resourceLocation, List.of());
     }
 
     public Iterable<ResourceLocation> getAvailableTags() {

@@ -63,28 +63,29 @@ implements DataProvider {
     private static final ImmutableList<ItemLike> LAPIS_SMELTABLES = ImmutableList.of(Items.LAPIS_ORE, Items.DEEPSLATE_LAPIS_ORE);
     private static final ImmutableList<ItemLike> REDSTONE_SMELTABLES = ImmutableList.of(Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE);
     private static final ImmutableList<ItemLike> EMERALD_SMELTABLES = ImmutableList.of(Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE);
-    private final DataGenerator generator;
+    private final DataGenerator.PathProvider recipePathProvider;
+    private final DataGenerator.PathProvider advancementPathProvider;
     private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> shapeBuilders = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, (itemLike, itemLike2) -> RecipeProvider.buttonBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.CHISELED, (itemLike, itemLike2) -> RecipeProvider.chiseledBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.CUT, (itemLike, itemLike2) -> RecipeProvider.cutBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.DOOR, (itemLike, itemLike2) -> RecipeProvider.doorBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.FENCE, (itemLike, itemLike2) -> RecipeProvider.fenceBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.FENCE_GATE, (itemLike, itemLike2) -> RecipeProvider.fenceGateBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.SIGN, (itemLike, itemLike2) -> RecipeProvider.signBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.SLAB, (itemLike, itemLike2) -> RecipeProvider.slabBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.STAIRS, (itemLike, itemLike2) -> RecipeProvider.stairBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.PRESSURE_PLATE, (itemLike, itemLike2) -> RecipeProvider.pressurePlateBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.POLISHED, (itemLike, itemLike2) -> RecipeProvider.polishedBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.TRAPDOOR, (itemLike, itemLike2) -> RecipeProvider.trapdoorBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.WALL, (itemLike, itemLike2) -> RecipeProvider.wallBuilder(itemLike, Ingredient.of(itemLike2))).build();
 
     public RecipeProvider(DataGenerator dataGenerator) {
-        this.generator = dataGenerator;
+        this.recipePathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "recipes");
+        this.advancementPathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "advancements");
     }
 
     @Override
     public void run(CachedOutput cachedOutput) {
-        Path path = this.generator.getOutputFolder();
         HashSet set = Sets.newHashSet();
         RecipeProvider.buildCraftingRecipes(finishedRecipe -> {
             if (!set.add(finishedRecipe.getId())) {
                 throw new IllegalStateException("Duplicate recipe " + finishedRecipe.getId());
             }
-            RecipeProvider.saveRecipe(cachedOutput, finishedRecipe.serializeRecipe(), path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/recipes/" + finishedRecipe.getId().getPath() + ".json"));
+            RecipeProvider.saveRecipe(cachedOutput, finishedRecipe.serializeRecipe(), this.recipePathProvider.json(finishedRecipe.getId()));
             JsonObject jsonObject = finishedRecipe.serializeAdvancement();
             if (jsonObject != null) {
-                RecipeProvider.saveAdvancement(cachedOutput, jsonObject, path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/advancements/" + finishedRecipe.getAdvancementId().getPath() + ".json"));
+                RecipeProvider.saveAdvancement(cachedOutput, jsonObject, this.advancementPathProvider.json(finishedRecipe.getAdvancementId()));
             }
         });
-        RecipeProvider.saveAdvancement(cachedOutput, Advancement.Builder.advancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance()).serializeToJson(), path.resolve("data/minecraft/advancements/recipes/root.json"));
+        RecipeProvider.saveAdvancement(cachedOutput, Advancement.Builder.advancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance()).serializeToJson(), this.advancementPathProvider.json(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT));
     }
 
     private static void saveRecipe(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {

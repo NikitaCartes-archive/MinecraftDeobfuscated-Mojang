@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
 public class PoiSection {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Short2ObjectMap<PoiRecord> records = new Short2ObjectOpenHashMap<PoiRecord>();
-    private final Map<PoiType, Set<PoiRecord>> byType = Maps.newHashMap();
+    private final Map<Holder<PoiType>, Set<PoiRecord>> byType = Maps.newHashMap();
     private final Runnable setDirty;
     private boolean isValid;
 
@@ -51,30 +52,30 @@ public class PoiSection {
         list.forEach(this::add);
     }
 
-    public Stream<PoiRecord> getRecords(Predicate<PoiType> predicate, PoiManager.Occupancy occupancy) {
-        return this.byType.entrySet().stream().filter(entry -> predicate.test((PoiType)entry.getKey())).flatMap(entry -> ((Set)entry.getValue()).stream()).filter(occupancy.getTest());
+    public Stream<PoiRecord> getRecords(Predicate<Holder<PoiType>> predicate, PoiManager.Occupancy occupancy) {
+        return this.byType.entrySet().stream().filter(entry -> predicate.test((Holder)entry.getKey())).flatMap(entry -> ((Set)entry.getValue()).stream()).filter(occupancy.getTest());
     }
 
-    public void add(BlockPos blockPos, PoiType poiType) {
-        if (this.add(new PoiRecord(blockPos, poiType, this.setDirty))) {
-            LOGGER.debug("Added POI of type {} @ {}", (Object)poiType, (Object)blockPos);
+    public void add(BlockPos blockPos, Holder<PoiType> holder) {
+        if (this.add(new PoiRecord(blockPos, holder, this.setDirty))) {
+            LOGGER.debug("Added POI of type {} @ {}", (Object)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]"), (Object)blockPos);
             this.setDirty.run();
         }
     }
 
     private boolean add(PoiRecord poiRecord) {
         BlockPos blockPos = poiRecord.getPos();
-        PoiType poiType2 = poiRecord.getPoiType();
+        Holder<PoiType> holder2 = poiRecord.getPoiType();
         short s = SectionPos.sectionRelativePos(blockPos);
         PoiRecord poiRecord2 = (PoiRecord)this.records.get(s);
         if (poiRecord2 != null) {
-            if (poiType2.equals(poiRecord2.getPoiType())) {
+            if (holder2.equals(poiRecord2.getPoiType())) {
                 return false;
             }
             Util.logAndPauseIfInIde("POI data mismatch: already registered at " + blockPos);
         }
         this.records.put(s, poiRecord);
-        this.byType.computeIfAbsent(poiType2, poiType -> Sets.newHashSet()).add(poiRecord);
+        this.byType.computeIfAbsent(holder2, holder -> Sets.newHashSet()).add(poiRecord);
         return true;
     }
 
@@ -105,11 +106,11 @@ public class PoiSection {
         return bl;
     }
 
-    public boolean exists(BlockPos blockPos, Predicate<PoiType> predicate) {
+    public boolean exists(BlockPos blockPos, Predicate<Holder<PoiType>> predicate) {
         return this.getType(blockPos).filter(predicate).isPresent();
     }
 
-    public Optional<PoiType> getType(BlockPos blockPos) {
+    public Optional<Holder<PoiType>> getType(BlockPos blockPos) {
         return this.getPoiRecord(blockPos).map(PoiRecord::getPoiType);
     }
 
@@ -117,13 +118,13 @@ public class PoiSection {
         return Optional.ofNullable((PoiRecord)this.records.get(SectionPos.sectionRelativePos(blockPos)));
     }
 
-    public void refresh(Consumer<BiConsumer<BlockPos, PoiType>> consumer) {
+    public void refresh(Consumer<BiConsumer<BlockPos, Holder<PoiType>>> consumer) {
         if (!this.isValid) {
             Short2ObjectOpenHashMap<PoiRecord> short2ObjectMap = new Short2ObjectOpenHashMap<PoiRecord>(this.records);
             this.clear();
-            consumer.accept((blockPos, poiType) -> {
+            consumer.accept((blockPos, holder) -> {
                 short s2 = SectionPos.sectionRelativePos(blockPos);
-                PoiRecord poiRecord = short2ObjectMap.computeIfAbsent(s2, s -> new PoiRecord((BlockPos)blockPos, (PoiType)poiType, this.setDirty));
+                PoiRecord poiRecord = short2ObjectMap.computeIfAbsent(s2, s -> new PoiRecord((BlockPos)blockPos, (Holder<PoiType>)holder, this.setDirty));
                 this.add(poiRecord);
             });
             this.isValid = true;

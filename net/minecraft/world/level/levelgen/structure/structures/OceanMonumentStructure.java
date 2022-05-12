@@ -59,7 +59,7 @@ extends Structure {
         if (piecesContainer.isEmpty()) {
             return piecesContainer;
         }
-        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
+        WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
         worldgenRandom.setLargeFeatureSeed(l, chunkPos.x, chunkPos.z);
         StructurePiece structurePiece = piecesContainer.pieces().get(0);
         BoundingBox boundingBox = structurePiece.getBoundingBox();

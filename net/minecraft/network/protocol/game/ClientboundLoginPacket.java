@@ -5,7 +5,6 @@ package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,30 +16,30 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-public record ClientboundLoginPacket(int playerId, boolean hardcore, GameType gameType, @Nullable GameType previousGameType, Set<ResourceKey<Level>> levels, RegistryAccess.Frozen registryHolder, Holder<DimensionType> dimensionType, ResourceKey<Level> dimension, long seed, int maxPlayers, int chunkRadius, int simulationDistance, boolean reducedDebugInfo, boolean showDeathScreen, boolean isDebug, boolean isFlat) implements Packet<ClientGamePacketListener>
+public record ClientboundLoginPacket(int playerId, boolean hardcore, GameType gameType, @Nullable GameType previousGameType, Set<ResourceKey<Level>> levels, RegistryAccess.Frozen registryHolder, ResourceKey<DimensionType> dimensionType, ResourceKey<Level> dimension, long seed, int maxPlayers, int chunkRadius, int simulationDistance, boolean reducedDebugInfo, boolean showDeathScreen, boolean isDebug, boolean isFlat) implements Packet<ClientGamePacketListener>
 {
     public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation())), friendlyByteBuf2.readWithCodec(RegistryAccess.NETWORK_CODEC).freeze(), friendlyByteBuf2.readWithCodec(DimensionType.CODEC), ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf2.readResourceLocation()), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean());
+        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> friendlyByteBuf.readResourceKey(Registry.DIMENSION_REGISTRY)), friendlyByteBuf2.readWithCodec(RegistryAccess.NETWORK_CODEC).freeze(), friendlyByteBuf2.readResourceKey(Registry.DIMENSION_TYPE_REGISTRY), friendlyByteBuf2.readResourceKey(Registry.DIMENSION_REGISTRY), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean());
     }
 
     @Override
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeInt(this.playerId);
-        friendlyByteBuf2.writeBoolean(this.hardcore);
-        friendlyByteBuf2.writeByte(this.gameType.getId());
-        friendlyByteBuf2.writeByte(GameType.getNullableId(this.previousGameType));
-        friendlyByteBuf2.writeCollection(this.levels, (friendlyByteBuf, resourceKey) -> friendlyByteBuf.writeResourceLocation(resourceKey.location()));
-        friendlyByteBuf2.writeWithCodec(RegistryAccess.NETWORK_CODEC, this.registryHolder);
-        friendlyByteBuf2.writeWithCodec(DimensionType.CODEC, this.dimensionType);
-        friendlyByteBuf2.writeResourceLocation(this.dimension.location());
-        friendlyByteBuf2.writeLong(this.seed);
-        friendlyByteBuf2.writeVarInt(this.maxPlayers);
-        friendlyByteBuf2.writeVarInt(this.chunkRadius);
-        friendlyByteBuf2.writeVarInt(this.simulationDistance);
-        friendlyByteBuf2.writeBoolean(this.reducedDebugInfo);
-        friendlyByteBuf2.writeBoolean(this.showDeathScreen);
-        friendlyByteBuf2.writeBoolean(this.isDebug);
-        friendlyByteBuf2.writeBoolean(this.isFlat);
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        friendlyByteBuf.writeInt(this.playerId);
+        friendlyByteBuf.writeBoolean(this.hardcore);
+        friendlyByteBuf.writeByte(this.gameType.getId());
+        friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
+        friendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
+        friendlyByteBuf.writeWithCodec(RegistryAccess.NETWORK_CODEC, this.registryHolder);
+        friendlyByteBuf.writeResourceKey(this.dimensionType);
+        friendlyByteBuf.writeResourceKey(this.dimension);
+        friendlyByteBuf.writeLong(this.seed);
+        friendlyByteBuf.writeVarInt(this.maxPlayers);
+        friendlyByteBuf.writeVarInt(this.chunkRadius);
+        friendlyByteBuf.writeVarInt(this.simulationDistance);
+        friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
+        friendlyByteBuf.writeBoolean(this.showDeathScreen);
+        friendlyByteBuf.writeBoolean(this.isDebug);
+        friendlyByteBuf.writeBoolean(this.isFlat);
     }
 
     @Override

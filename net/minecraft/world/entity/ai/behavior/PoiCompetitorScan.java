@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
@@ -26,7 +27,7 @@ extends Behavior<Villager> {
     @Override
     protected void start(ServerLevel serverLevel, Villager villager, long l) {
         GlobalPos globalPos = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE).get();
-        serverLevel.getPoiManager().getType(globalPos.pos()).ifPresent(poiType -> BehaviorUtils.getNearbyVillagersWithCondition(villager, villager -> this.competesForSameJobsite(globalPos, (PoiType)poiType, (Villager)villager)).reduce(villager, PoiCompetitorScan::selectWinner));
+        serverLevel.getPoiManager().getType(globalPos.pos()).ifPresent(holder -> BehaviorUtils.getNearbyVillagersWithCondition(villager, villager -> this.competesForSameJobsite(globalPos, (Holder<PoiType>)holder, (Villager)villager)).reduce(villager, PoiCompetitorScan::selectWinner));
     }
 
     private static Villager selectWinner(Villager villager, Villager villager2) {
@@ -43,12 +44,12 @@ extends Behavior<Villager> {
         return villager3;
     }
 
-    private boolean competesForSameJobsite(GlobalPos globalPos, PoiType poiType, Villager villager) {
-        return this.hasJobSite(villager) && globalPos.equals(villager.getBrain().getMemory(MemoryModuleType.JOB_SITE).get()) && this.hasMatchingProfession(poiType, villager.getVillagerData().getProfession());
+    private boolean competesForSameJobsite(GlobalPos globalPos, Holder<PoiType> holder, Villager villager) {
+        return this.hasJobSite(villager) && globalPos.equals(villager.getBrain().getMemory(MemoryModuleType.JOB_SITE).get()) && this.hasMatchingProfession(holder, villager.getVillagerData().getProfession());
     }
 
-    private boolean hasMatchingProfession(PoiType poiType, VillagerProfession villagerProfession) {
-        return villagerProfession.getJobPoiType().getPredicate().test(poiType);
+    private boolean hasMatchingProfession(Holder<PoiType> holder, VillagerProfession villagerProfession) {
+        return villagerProfession.heldJobSite().test(holder);
     }
 
     private boolean hasJobSite(Villager villager) {

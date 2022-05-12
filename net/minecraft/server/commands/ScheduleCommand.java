@@ -15,6 +15,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import java.util.Collection;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -25,7 +26,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.FunctionCommand;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.timers.FunctionCallback;
 import net.minecraft.world.level.timers.FunctionTagCallback;
 import net.minecraft.world.level.timers.TimerQueue;
@@ -39,7 +39,7 @@ public class ScheduleCommand {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("schedule").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.literal("function").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("function", FunctionArgument.functions()).suggests(FunctionCommand.SUGGEST_FUNCTION).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("time", TimeArgument.time()).executes(commandContext -> ScheduleCommand.schedule((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctionOrTag(commandContext, "function"), IntegerArgumentType.getInteger(commandContext, "time"), true))).then(Commands.literal("append").executes(commandContext -> ScheduleCommand.schedule((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctionOrTag(commandContext, "function"), IntegerArgumentType.getInteger(commandContext, "time"), false)))).then(Commands.literal("replace").executes(commandContext -> ScheduleCommand.schedule((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctionOrTag(commandContext, "function"), IntegerArgumentType.getInteger(commandContext, "time"), true))))))).then(Commands.literal("clear").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("function", StringArgumentType.greedyString()).suggests(SUGGEST_SCHEDULE).executes(commandContext -> ScheduleCommand.remove((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "function"))))));
     }
 
-    private static int schedule(CommandSourceStack commandSourceStack, Pair<ResourceLocation, Either<CommandFunction, Tag<CommandFunction>>> pair, int i, boolean bl) throws CommandSyntaxException {
+    private static int schedule(CommandSourceStack commandSourceStack, Pair<ResourceLocation, Either<CommandFunction, Collection<CommandFunction>>> pair, int i, boolean bl) throws CommandSyntaxException {
         if (i == 0) {
             throw ERROR_SAME_TICK.create();
         }
@@ -53,7 +53,7 @@ public class ScheduleCommand {
             }
             timerQueue.schedule(string, l, new FunctionCallback(resourceLocation));
             commandSourceStack.sendSuccess(Component.translatable("commands.schedule.created.function", resourceLocation, i, l), true);
-        }).ifRight(tag -> {
+        }).ifRight(collection -> {
             String string = "#" + resourceLocation;
             if (bl) {
                 timerQueue.remove(string);

@@ -62,6 +62,10 @@ public interface TextFilter {
         public static FilteredText fullyFiltered(String string) {
             return new FilteredText(string, "");
         }
+
+        public boolean isFiltered() {
+            return !this.raw.equals(this.filtered);
+        }
     }
 }
 

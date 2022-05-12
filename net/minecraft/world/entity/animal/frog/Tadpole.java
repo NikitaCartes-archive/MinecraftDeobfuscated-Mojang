@@ -43,6 +43,8 @@ public class Tadpole
 extends AbstractFish {
     @VisibleForTesting
     public static int ticksToBeFrog = Math.abs(-24000);
+    public static float HITBOX_WIDTH = 0.4f;
+    public static float HITBOX_HEIGHT = 0.3f;
     private int age;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Tadpole>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.NEAREST_VISIBLE_ADULT);

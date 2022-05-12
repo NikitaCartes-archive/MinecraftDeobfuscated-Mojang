@@ -21,7 +21,7 @@ extends Behavior<E> {
     private static final double ANGER_FROM_SNIFFING_MAX_DISTANCE_Y = 20.0;
 
     public Sniffing(int i) {
-        super(ImmutableMap.of(MemoryModuleType.IS_SNIFFING, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.NEAREST_ATTACKABLE, MemoryStatus.REGISTERED), i);
+        super(ImmutableMap.of(MemoryModuleType.IS_SNIFFING, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.NEAREST_ATTACKABLE, MemoryStatus.REGISTERED, MemoryModuleType.DISTURBANCE_LOCATION, MemoryStatus.REGISTERED, MemoryModuleType.SNIFF_COOLDOWN, MemoryStatus.REGISTERED), i);
     }
 
     @Override
@@ -44,7 +44,9 @@ extends Behavior<E> {
             if (warden.closerThan((Entity)livingEntity, 6.0, 20.0)) {
                 warden.increaseAngerAt((Entity)livingEntity);
             }
-            WardenAi.setDisturbanceLocation(warden, livingEntity.blockPosition());
+            if (!warden.getBrain().hasMemoryValue(MemoryModuleType.DISTURBANCE_LOCATION)) {
+                WardenAi.setDisturbanceLocation(warden, livingEntity.blockPosition());
+            }
         });
     }
 

@@ -20,6 +20,7 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -72,6 +73,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -131,7 +133,7 @@ VillagerDataHolder {
     private boolean assignProfessionWhenSpawned;
     private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.WALK_TARGET, new MemoryModuleType[]{MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, MemoryModuleType.PATH, MemoryModuleType.DOORS_TO_CLOSE, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WOKEN, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_DETECTED_RECENTLY});
     private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.NEAREST_BED, SensorType.HURT_BY, SensorType.VILLAGER_HOSTILES, SensorType.VILLAGER_BABIES, SensorType.SECONDARY_POIS, SensorType.GOLEM_DETECTED);
-    public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, PoiType>> POI_MEMORIES = ImmutableMap.of(MemoryModuleType.HOME, (villager, poiType) -> poiType == PoiType.HOME, MemoryModuleType.JOB_SITE, (villager, poiType) -> villager.getVillagerData().getProfession().getJobPoiType() == poiType, MemoryModuleType.POTENTIAL_JOB_SITE, (villager, poiType) -> PoiType.ALL_JOBS.test((PoiType)poiType), MemoryModuleType.MEETING_POINT, (villager, poiType) -> poiType == PoiType.MEETING);
+    public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, Holder<PoiType>>> POI_MEMORIES = ImmutableMap.of(MemoryModuleType.HOME, (villager, holder) -> holder.is(PoiTypes.HOME), MemoryModuleType.JOB_SITE, (villager, holder) -> villager.getVillagerData().getProfession().heldJobSite().test((Holder<PoiType>)holder), MemoryModuleType.POTENTIAL_JOB_SITE, (villager, holder) -> VillagerProfession.ALL_ACQUIRABLE_JOBS.test((Holder<PoiType>)holder), MemoryModuleType.MEETING_POINT, (villager, holder) -> holder.is(PoiTypes.MEETING));
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
         this(entityType, level, VillagerType.PLAINS);
@@ -472,7 +474,7 @@ VillagerDataHolder {
     }
 
     public void playWorkSound() {
-        SoundEvent soundEvent = this.getVillagerData().getProfession().getWorkSound();
+        SoundEvent soundEvent = this.getVillagerData().getProfession().workSound();
         if (soundEvent != null) {
             this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
         }
@@ -568,8 +570,8 @@ VillagerDataHolder {
                 return;
             }
             PoiManager poiManager = serverLevel.getPoiManager();
-            Optional<PoiType> optional = poiManager.getType(globalPos.pos());
-            BiPredicate<Villager, PoiType> biPredicate = POI_MEMORIES.get(memoryModuleType);
+            Optional<Holder<PoiType>> optional = poiManager.getType(globalPos.pos());
+            BiPredicate<Villager, Holder<PoiType>> biPredicate = POI_MEMORIES.get(memoryModuleType);
             if (optional.isPresent() && biPredicate.test(this, optional.get())) {
                 poiManager.release(globalPos.pos());
                 DebugPackets.sendPoiTicketCountPacket(serverLevel, globalPos.pos());
@@ -704,7 +706,7 @@ VillagerDataHolder {
     @Override
     public boolean wantsToPickUp(ItemStack itemStack) {
         Item item = itemStack.getItem();
-        return (WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().getRequestedItems().contains(item)) && this.getInventory().canAddItem(itemStack);
+        return (WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().requestedItems().contains(item)) && this.getInventory().canAddItem(itemStack);
     }
 
     public boolean hasExcessFood() {

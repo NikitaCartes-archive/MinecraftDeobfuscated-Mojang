@@ -177,7 +177,7 @@ implements ChunkHolder.PlayerProvider {
         this.lightEngine = new ThreadedLevelLightEngine(lightChunkGetter, this, this.level.dimensionType().hasSkyLight(), processorMailbox2, this.queueSorter.getProcessor(processorMailbox2, false));
         this.distanceManager = new DistanceManager(executor, blockableEventLoop);
         this.overworldDataStorage = supplier;
-        this.poiManager = new PoiManager(path.resolve("poi"), dataFixer, bl, serverLevel);
+        this.poiManager = new PoiManager(path.resolve("poi"), dataFixer, bl, serverLevel.registryAccess(), serverLevel);
         this.setViewDistance(i);
     }
 

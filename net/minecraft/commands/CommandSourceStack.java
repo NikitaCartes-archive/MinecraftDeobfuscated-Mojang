@@ -228,6 +228,13 @@ implements SharedSuggestionProvider {
         throw ERROR_NOT_PLAYER.create();
     }
 
+    @Nullable
+    public ServerPlayer getPlayer() {
+        ServerPlayer serverPlayer;
+        Entity entity = this.entity;
+        return entity instanceof ServerPlayer ? (serverPlayer = (ServerPlayer)entity) : null;
+    }
+
     public boolean isPlayer() {
         return this.entity instanceof ServerPlayer;
     }

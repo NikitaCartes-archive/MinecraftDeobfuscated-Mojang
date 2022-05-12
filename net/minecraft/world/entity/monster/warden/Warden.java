@@ -50,6 +50,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.warden.SonicBoom;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.warden.AngerLevel;
 import net.minecraft.world.entity.monster.warden.AngerManagement;
@@ -66,7 +68,11 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -96,6 +102,7 @@ implements VibrationListener.VibrationListenerConfig {
     private static final int DIGGING_PARTICLES_AMOUNT = 30;
     private static final float DIGGING_PARTICLES_DURATION = 4.5f;
     private static final float DIGGING_PARTICLES_OFFSET = 0.7f;
+    private static final int PROJECTILE_ANGER_DISTANCE = 30;
     private int tendrilAnimation;
     private int tendrilAnimationO;
     private int heartAnimation;
@@ -229,7 +236,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     private void syncClientAngerLevel() {
-        this.entityData.set(CLIENT_ANGER_LEVEL, this.angerManagement.getActiveAnger());
+        this.entityData.set(CLIENT_ANGER_LEVEL, this.getActiveAnger());
     }
 
     @Override
@@ -282,14 +289,15 @@ implements VibrationListener.VibrationListenerConfig {
         }
         if (this.tickCount % 20 == 0) {
             this.angerManagement.tick(serverLevel, this::canTargetEntity);
+            this.syncClientAngerLevel();
         }
-        this.syncClientAngerLevel();
         WardenAi.updateActivity(this);
     }
 
     @Override
     public void handleEntityEvent(byte b) {
         if (b == 4) {
+            this.roarAnimationState.stop();
             this.attackAnimationState.start();
         } else if (b == 61) {
             this.tendrilAnimation = 10;
@@ -353,6 +361,11 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
+    public boolean ignoreExplosion() {
+        return this.isDiggingOrEmerging();
+    }
+
+    @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
         return WardenAi.makeBrain(this, dynamic);
     }
@@ -390,6 +403,7 @@ implements VibrationListener.VibrationListenerConfig {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
+    @Contract(value="null->false")
     public boolean canTargetEntity(@Nullable Entity entity) {
         if (!(entity instanceof LivingEntity)) return false;
         LivingEntity livingEntity = (LivingEntity)entity;
@@ -437,7 +451,11 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     public AngerLevel getAngerLevel() {
-        return AngerLevel.byAnger(this.angerManagement.getActiveAnger());
+        return AngerLevel.byAnger(this.getActiveAnger());
+    }
+
+    private int getActiveAnger() {
+        return this.angerManagement.getActiveAnger(this.getTarget());
     }
 
     public void clearAnger(Entity entity) {
@@ -488,18 +506,16 @@ implements VibrationListener.VibrationListenerConfig {
         if (mobSpawnType == MobSpawnType.TRIGGERED) {
             this.setPose(Pose.EMERGING);
             this.getBrain().setMemoryWithExpiry(MemoryModuleType.IS_EMERGING, Unit.INSTANCE, WardenAi.EMERGE_DURATION);
-            this.setPersistenceRequired();
+            this.playSound(SoundEvents.WARDEN_AGITATED, 5.0f, 1.0f);
         }
+        this.setPersistenceRequired();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         boolean bl = super.hurt(damageSource, f);
-        if (this.level.isClientSide) {
-            return false;
-        }
-        if (bl && !this.isNoAi()) {
+        if (!this.level.isClientSide && !this.isNoAi() && f > 0.0f) {
             Entity entity = damageSource.getEntity();
             this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
             if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {
@@ -513,6 +529,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     public void setAttackTarget(LivingEntity livingEntity) {
+        this.getBrain().eraseMemory(MemoryModuleType.ROAR_TARGET);
         StartAttacking.setAttackTarget(this, livingEntity);
         SonicBoom.setCooldown(this, 200);
     }
@@ -583,6 +600,25 @@ implements VibrationListener.VibrationListenerConfig {
     @VisibleForTesting
     public AngerManagement getAngerManagement() {
         return this.angerManagement;
+    }
+
+    @Override
+    protected PathNavigation createNavigation(Level level) {
+        return new GroundPathNavigation(this, level){
+
+            @Override
+            protected PathFinder createPathFinder(int i) {
+                this.nodeEvaluator = new WalkNodeEvaluator();
+                this.nodeEvaluator.setCanPassDoors(true);
+                return new PathFinder(this.nodeEvaluator, i){
+
+                    @Override
+                    protected float distance(Node node, Node node2) {
+                        return node.distanceToXZ(node2);
+                    }
+                };
+            }
+        };
     }
 }
 

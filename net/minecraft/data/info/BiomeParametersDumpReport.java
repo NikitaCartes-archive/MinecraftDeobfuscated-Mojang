@@ -25,21 +25,20 @@ import org.slf4j.Logger;
 public class BiomeParametersDumpReport
 implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final DataGenerator generator;
+    private final Path topPath;
 
     public BiomeParametersDumpReport(DataGenerator dataGenerator) {
-        this.generator = dataGenerator;
+        this.topPath = dataGenerator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("biome_parameters");
     }
 
     @Override
     public void run(CachedOutput cachedOutput) {
-        Path path = this.generator.getOutputFolder();
         RegistryAccess.Frozen frozen = RegistryAccess.BUILTIN.get();
         RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, frozen);
         Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
         MultiNoiseBiomeSource.Preset.getPresets().forEach(pair -> {
             MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(registry, false);
-            BiomeParametersDumpReport.dumpValue(BiomeParametersDumpReport.createPath(path, (ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
+            BiomeParametersDumpReport.dumpValue(this.createPath((ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
         });
     }
 
@@ -54,12 +53,8 @@ implements DataProvider {
         }
     }
 
-    private static Path createPath(Path path, ResourceLocation resourceLocation) {
-        return BiomeParametersDumpReport.resolveTopPath(path).resolve(resourceLocation.getNamespace()).resolve(resourceLocation.getPath() + ".json");
-    }
-
-    private static Path resolveTopPath(Path path) {
-        return path.resolve("reports").resolve("biome_parameters");
+    private Path createPath(ResourceLocation resourceLocation) {
+        return this.topPath.resolve(resourceLocation.getNamespace()).resolve(resourceLocation.getPath() + ".json");
     }
 
     @Override

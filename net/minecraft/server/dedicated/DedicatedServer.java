@@ -32,6 +32,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
@@ -83,12 +84,14 @@ implements ServerInterface {
     private MinecraftServerGui gui;
     @Nullable
     private final TextFilterClient textFilterClient;
+    private final ChatDecorator chatDecorator;
 
     public DedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super(thread, levelStorageAccess, packRepository, worldStem, Proxy.NO_PROXY, dataFixer, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
         this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
+        this.chatDecorator = this.getProperties().testRainbowChat ? ChatDecorator.testRainbowChat() : ChatDecorator.PLAIN;
     }
 
     @Override
@@ -302,6 +305,16 @@ implements ServerInterface {
     @Override
     public boolean isEpollEnabled() {
         return this.getProperties().useNativeTransport;
+    }
+
+    @Override
+    public boolean previewsChat() {
+        return this.getProperties().previewsChat;
+    }
+
+    @Override
+    public ChatDecorator getChatDecorator() {
+        return this.chatDecorator;
     }
 
     @Override

@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -58,6 +59,8 @@ extends ServerPacketListener {
     public void handleChat(ServerboundChatPacket var1);
 
     public void handleChatCommand(ServerboundChatCommandPacket var1);
+
+    public void handleChatPreview(ServerboundChatPreviewPacket var1);
 
     public void handleClientCommand(ServerboundClientCommandPacket var1);
 

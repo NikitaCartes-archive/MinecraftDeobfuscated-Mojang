@@ -53,6 +53,7 @@ extends Behavior<Warden> {
 
     @Override
     protected void tick(ServerLevel serverLevel, Warden warden, long l) {
+        warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(livingEntity -> warden.getLookControl().setLookAt(livingEntity.position()));
         if (warden.getBrain().hasMemoryValue(MemoryModuleType.SONIC_BOOM_SOUND_DELAY) || warden.getBrain().hasMemoryValue(MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN)) {
             return;
         }
@@ -66,7 +67,7 @@ extends Behavior<Warden> {
                 serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, vec34.x, vec34.y, vec34.z, 1, 0.0, 0.0, 0.0, 0.0);
             }
             warden.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0f, 1.0f);
-            livingEntity.hurt(DamageSource.SONIC_BOOM, 10.0f);
+            livingEntity.hurt(DamageSource.sonicBoom(warden), 10.0f);
             double d = 0.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             double e = 2.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             livingEntity.push(vec33.x() * e, vec33.y() * d, vec33.z() * e);

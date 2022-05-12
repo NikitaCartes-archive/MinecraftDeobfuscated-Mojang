@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -86,14 +87,11 @@ public abstract class Structure {
     }
 
     public StructureStart generate(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, BiomeSource biomeSource, RandomState randomState, StructureTemplateManager structureTemplateManager, long l, ChunkPos chunkPos, int i, LevelHeightAccessor levelHeightAccessor, Predicate<Holder<Biome>> predicate) {
+        StructurePiecesBuilder structurePiecesBuilder;
+        StructureStart structureStart;
         Optional<GenerationStub> optional = this.findGenerationPoint(new GenerationContext(registryAccess, chunkGenerator, biomeSource, randomState, structureTemplateManager, l, chunkPos, levelHeightAccessor, predicate));
-        if (optional.isPresent() && Structure.isValidBiome(optional.get(), chunkGenerator, randomState, predicate)) {
-            StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-            optional.get().generator().accept(structurePiecesBuilder);
-            StructureStart structureStart = new StructureStart(this, chunkPos, i, structurePiecesBuilder.build());
-            if (structureStart.isValid()) {
-                return structureStart;
-            }
+        if (optional.isPresent() && Structure.isValidBiome(optional.get(), chunkGenerator, randomState, predicate) && (structureStart = new StructureStart(this, chunkPos, i, (structurePiecesBuilder = optional.get().getPiecesBuilder()).build())).isValid()) {
+            return structureStart;
         }
         return StructureStart.INVALID_START;
     }
@@ -171,7 +169,18 @@ public abstract class Structure {
         }
     }
 
-    public record GenerationStub(BlockPos position, Consumer<StructurePiecesBuilder> generator) {
+    public record GenerationStub(BlockPos position, Either<Consumer<StructurePiecesBuilder>, StructurePiecesBuilder> generator) {
+        public GenerationStub(BlockPos blockPos, Consumer<StructurePiecesBuilder> consumer) {
+            this(blockPos, Either.left(consumer));
+        }
+
+        public StructurePiecesBuilder getPiecesBuilder() {
+            return this.generator.map(consumer -> {
+                StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+                consumer.accept(structurePiecesBuilder);
+                return structurePiecesBuilder;
+            }, structurePiecesBuilder -> structurePiecesBuilder);
+        }
     }
 }
 

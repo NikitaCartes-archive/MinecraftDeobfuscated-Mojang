@@ -2130,7 +2130,7 @@ CommandSource {
     }
 
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        return this.isRemoved() || this.invulnerable && damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer();
+        return this.isRemoved() || this.invulnerable && damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer() || damageSource.isFire() && this.fireImmune();
     }
 
     public boolean isInvulnerable() {

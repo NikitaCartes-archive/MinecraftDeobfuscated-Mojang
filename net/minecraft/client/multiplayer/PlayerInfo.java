@@ -54,7 +54,7 @@ public class PlayerInfo {
         try {
             ProfilePublicKey.Data data = playerUpdate.getProfilePublicKey();
             if (data != null) {
-                profilePublicKey = ProfilePublicKey.parseAndValidate(minecraftSessionService, data);
+                profilePublicKey = ProfilePublicKey.createValidated(minecraftSessionService, data);
             }
         } catch (InsecurePublicKeyException | CryptException exception) {
             LOGGER.error("Failed to retrieve publicKey property for profile {}", (Object)this.profile.getId(), (Object)exception);

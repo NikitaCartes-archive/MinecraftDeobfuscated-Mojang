@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import net.minecraft.WorldVersion;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import org.slf4j.Logger;
 
@@ -39,6 +40,10 @@ public class DataGenerator {
 
     public Path getOutputFolder() {
         return this.outputFolder;
+    }
+
+    public Path getOutputFolder(Target target) {
+        return this.getOutputFolder().resolve(target.directory);
     }
 
     public void run() throws IOException {
@@ -68,8 +73,42 @@ public class DataGenerator {
         this.allProviders.add(dataProvider);
     }
 
+    public PathProvider createPathProvider(Target target, String string) {
+        return new PathProvider(this, target, string);
+    }
+
     static {
         Bootstrap.bootStrap();
+    }
+
+    public static enum Target {
+        DATA_PACK("data"),
+        RESOURCE_PACK("assets"),
+        REPORTS("reports");
+
+        final String directory;
+
+        private Target(String string2) {
+            this.directory = string2;
+        }
+    }
+
+    public static class PathProvider {
+        private final Path root;
+        private final String kind;
+
+        PathProvider(DataGenerator dataGenerator, Target target, String string) {
+            this.root = dataGenerator.getOutputFolder(target);
+            this.kind = string;
+        }
+
+        public Path file(ResourceLocation resourceLocation, String string) {
+            return this.root.resolve(resourceLocation.getNamespace()).resolve(this.kind).resolve(resourceLocation.getPath() + "." + string);
+        }
+
+        public Path json(ResourceLocation resourceLocation) {
+            return this.root.resolve(resourceLocation.getNamespace()).resolve(this.kind).resolve(resourceLocation.getPath() + ".json");
+        }
     }
 }
 

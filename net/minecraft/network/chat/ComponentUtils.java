@@ -17,6 +17,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -138,8 +139,9 @@ public class ComponentUtils {
     }
 
     public static boolean isTranslationResolvable(@Nullable Component component) {
-        if (component instanceof TranslatableContents) {
-            TranslatableContents translatableContents = (TranslatableContents)((Object)component);
+        ComponentContents componentContents;
+        if (component != null && (componentContents = component.getContents()) instanceof TranslatableContents) {
+            TranslatableContents translatableContents = (TranslatableContents)componentContents;
             String string = translatableContents.getKey();
             return Language.getInstance().has(string);
         }

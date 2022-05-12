@@ -81,6 +81,7 @@ import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Options;
 import net.minecraft.client.PeriodicNotificationManager;
+import net.minecraft.client.Realms32BitWarningStatus;
 import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.Timer;
@@ -387,6 +388,7 @@ implements WindowEventHandler {
     private double gpuUtilization;
     @Nullable
     private TimerQuery.FrameProfile currentFrameProfile;
+    private final Realms32BitWarningStatus realms32BitWarningStatus;
     private String debugPath = "root";
 
     public Minecraft(GameConfig gameConfig) {
@@ -532,6 +534,7 @@ implements WindowEventHandler {
         this.resizeDisplay();
         this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
         this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
+        this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
         LoadingOverlay.registerTextures(this);
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
         this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
@@ -2395,6 +2398,10 @@ implements WindowEventHandler {
 
     public void prepareForMultiplayer() {
         this.playerSocialManager.startOnlineMode();
+    }
+
+    public Realms32BitWarningStatus getRealms32BitWarningStatus() {
+        return this.realms32BitWarningStatus;
     }
 
     static {

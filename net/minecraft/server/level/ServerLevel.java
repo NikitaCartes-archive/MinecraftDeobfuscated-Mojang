@@ -92,6 +92,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
@@ -328,7 +329,7 @@ implements WorldGenLevel {
         }
         profilerFiller.push("entityManagement");
         this.entityManager.tick();
-        profilerFiller.push("gameEvents");
+        profilerFiller.popPush("gameEvents");
         this.sendGameEvents();
         profilerFiller.pop();
     }
@@ -440,7 +441,7 @@ implements WorldGenLevel {
     }
 
     private Optional<BlockPos> findLightningRod(BlockPos blockPos2) {
-        Optional<BlockPos> optional = this.getPoiManager().findClosest(poiType -> poiType == PoiType.LIGHTNING_ROD, blockPos -> blockPos.getY() == this.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX(), blockPos.getZ()) - 1, blockPos2, 128, PoiManager.Occupancy.ANY);
+        Optional<BlockPos> optional = this.getPoiManager().findClosest(holder -> holder.is(PoiTypes.LIGHTNING_ROD), blockPos -> blockPos.getY() == this.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX(), blockPos.getZ()) - 1, blockPos2, 128, PoiManager.Occupancy.ANY);
         return optional.map(blockPos -> blockPos.above(1));
     }
 
@@ -1088,18 +1089,18 @@ implements WorldGenLevel {
 
     @Override
     public void onBlockStateChange(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
-        Optional<PoiType> optional2;
-        Optional<PoiType> optional = PoiType.forState(blockState);
-        if (Objects.equals(optional, optional2 = PoiType.forState(blockState2))) {
+        Optional<Holder<PoiType>> optional2;
+        Optional<Holder<PoiType>> optional = PoiTypes.forState(blockState);
+        if (Objects.equals(optional, optional2 = PoiTypes.forState(blockState2))) {
             return;
         }
         BlockPos blockPos2 = blockPos.immutable();
-        optional.ifPresent(poiType -> this.getServer().execute(() -> {
+        optional.ifPresent(holder -> this.getServer().execute(() -> {
             this.getPoiManager().remove(blockPos2);
             DebugPackets.sendPoiRemovedPacket(this, blockPos2);
         }));
-        optional2.ifPresent(poiType -> this.getServer().execute(() -> {
-            this.getPoiManager().add(blockPos2, (PoiType)poiType);
+        optional2.ifPresent(holder -> this.getServer().execute(() -> {
+            this.getPoiManager().add(blockPos2, (Holder<PoiType>)holder);
             DebugPackets.sendPoiAddedPacket(this, blockPos2);
         }));
     }

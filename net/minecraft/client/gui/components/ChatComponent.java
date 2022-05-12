@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -244,8 +245,18 @@ extends GuiComponent {
         return null;
     }
 
+    @Nullable
+    public ChatScreen getFocusedChat() {
+        Screen screen = this.minecraft.screen;
+        if (screen instanceof ChatScreen) {
+            ChatScreen chatScreen = (ChatScreen)screen;
+            return chatScreen;
+        }
+        return null;
+    }
+
     private boolean isChatFocused() {
-        return this.minecraft.screen instanceof ChatScreen;
+        return this.getFocusedChat() != null;
     }
 
     private void removeById(int i) {

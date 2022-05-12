@@ -85,7 +85,7 @@ extends BlockEntity {
         super.saveAdditional(compoundTag);
         compoundTag.putString(NAME, this.name.toString());
         compoundTag.putString(TARGET, this.target.toString());
-        compoundTag.putString(POOL, this.pool.toString());
+        compoundTag.putString(POOL, this.pool.location().toString());
         compoundTag.putString(FINAL_STATE, this.finalState);
         compoundTag.putString(JOINT, this.joint.getSerializedName());
     }

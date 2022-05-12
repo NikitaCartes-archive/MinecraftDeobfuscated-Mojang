@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.model.EntityModel;
@@ -44,12 +43,12 @@ extends EntityModel<E> {
         return this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
     }
 
-    protected void animate(AnimationState animationState, AnimationDefinition animationDefinition) {
-        this.animate(animationState, animationDefinition, 1.0f);
+    protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f) {
+        this.animate(animationState, animationDefinition, f, 1.0f);
     }
 
-    protected void animate(AnimationState animationState2, AnimationDefinition animationDefinition, float f) {
-        animationState2.updateTime(Minecraft.getInstance().isPaused(), f);
+    protected void animate(AnimationState animationState2, AnimationDefinition animationDefinition, float f, float g) {
+        animationState2.updateTime(f, g);
         animationState2.ifStarted(animationState -> KeyframeAnimations.animate(this, animationDefinition, animationState.getAccumulatedTime(), 1.0f, ANIMATION_VECTOR_CACHE));
     }
 }

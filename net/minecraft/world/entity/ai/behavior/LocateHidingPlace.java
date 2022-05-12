@@ -15,7 +15,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 
 public class LocateHidingPlace
 extends Behavior<LivingEntity> {
@@ -33,7 +33,7 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-        Optional<BlockPos> optional = serverLevel.getPoiManager().find(poiType -> poiType == PoiType.HOME, blockPos -> true, livingEntity.blockPosition(), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
+        Optional<BlockPos> optional = serverLevel.getPoiManager().find(holder -> holder.is(PoiTypes.HOME), blockPos -> true, livingEntity.blockPosition(), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
         this.currentPos = optional.isPresent() && optional.get().closerToCenterThan(livingEntity.position(), this.closeEnoughDist) ? optional : Optional.empty();
         return true;
     }
@@ -43,7 +43,7 @@ extends Behavior<LivingEntity> {
         Optional<GlobalPos> optional2;
         Brain<?> brain = livingEntity.getBrain();
         Optional<BlockPos> optional = this.currentPos;
-        if (!optional.isPresent() && !(optional = serverLevel.getPoiManager().getRandom(poiType -> poiType == PoiType.HOME, blockPos -> true, PoiManager.Occupancy.ANY, livingEntity.blockPosition(), this.radius, livingEntity.getRandom())).isPresent() && (optional2 = brain.getMemory(MemoryModuleType.HOME)).isPresent()) {
+        if (optional.isEmpty() && (optional = serverLevel.getPoiManager().getRandom(holder -> holder.is(PoiTypes.HOME), blockPos -> true, PoiManager.Occupancy.ANY, livingEntity.blockPosition(), this.radius, livingEntity.getRandom())).isEmpty() && (optional2 = brain.getMemory(MemoryModuleType.HOME)).isPresent()) {
             optional = Optional.of(optional2.get().pos());
         }
         if (optional.isPresent()) {

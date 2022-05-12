@@ -63,7 +63,7 @@ implements DataProvider {
             jsonObject2.add("states", jsonArray2);
             jsonObject.add(resourceLocation.toString(), jsonObject2);
         }
-        Path path = this.generator.getOutputFolder().resolve("reports/blocks.json");
+        Path path = this.generator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("blocks.json");
         DataProvider.saveStable(cachedOutput, jsonObject, path);
     }
 

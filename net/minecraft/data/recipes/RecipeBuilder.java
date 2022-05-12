@@ -13,6 +13,8 @@ import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
 public interface RecipeBuilder {
+    public static final ResourceLocation ROOT_RECIPE_ADVANCEMENT = new ResourceLocation("recipes/root");
+
     public RecipeBuilder unlockedBy(String var1, CriterionTriggerInstance var2);
 
     public RecipeBuilder group(@Nullable String var1);

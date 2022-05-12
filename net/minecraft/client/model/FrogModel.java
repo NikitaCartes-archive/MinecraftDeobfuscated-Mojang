@@ -72,12 +72,12 @@ extends HierarchicalModel<T> {
     public void setupAnim(T frog, float f, float g, float h, float i, float j) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
         float k = Math.min((float)((Entity)frog).getDeltaMovement().lengthSqr() * 200.0f, 8.0f);
-        this.animate(((Frog)frog).jumpAnimationState, FrogAnimation.FROG_JUMP);
-        this.animate(((Frog)frog).croakAnimationState, FrogAnimation.FROG_CROAK);
-        this.animate(((Frog)frog).tongueAnimationState, FrogAnimation.FROG_TONGUE);
-        this.animate(((Frog)frog).walkAnimationState, FrogAnimation.FROG_WALK, k);
-        this.animate(((Frog)frog).swimAnimationState, FrogAnimation.FROG_SWIM);
-        this.animate(((Frog)frog).swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER);
+        this.animate(((Frog)frog).jumpAnimationState, FrogAnimation.FROG_JUMP, h);
+        this.animate(((Frog)frog).croakAnimationState, FrogAnimation.FROG_CROAK, h);
+        this.animate(((Frog)frog).tongueAnimationState, FrogAnimation.FROG_TONGUE, h);
+        this.animate(((Frog)frog).walkAnimationState, FrogAnimation.FROG_WALK, h, k);
+        this.animate(((Frog)frog).swimAnimationState, FrogAnimation.FROG_SWIM, h);
+        this.animate(((Frog)frog).swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, h);
         this.croakingBody.visible = ((Frog)frog).croakAnimationState.isStarted();
     }
 

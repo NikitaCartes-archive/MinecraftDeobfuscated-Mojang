@@ -35,7 +35,7 @@ implements StructurePieceAccessor {
     }
 
     @Deprecated
-    public void moveBelowSeaLevel(int i, int j, RandomSource randomSource, int k) {
+    public int moveBelowSeaLevel(int i, int j, RandomSource randomSource, int k) {
         int l = i - k;
         BoundingBox boundingBox = this.getBoundingBox();
         int m = boundingBox.getYSpan() + j + 1;
@@ -44,6 +44,7 @@ implements StructurePieceAccessor {
         }
         int n = m - boundingBox.maxY();
         this.offsetPiecesVertically(n);
+        return n;
     }
 
     public void moveInsideHeights(RandomSource randomSource, int i, int j) {

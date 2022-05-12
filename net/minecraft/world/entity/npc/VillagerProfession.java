@@ -4,79 +4,64 @@
 package net.minecraft.world.entity.npc;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.function.Predicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
-public class VillagerProfession {
-    public static final VillagerProfession NONE = VillagerProfession.register("none", PoiType.UNEMPLOYED, null);
-    public static final VillagerProfession ARMORER = VillagerProfession.register("armorer", PoiType.ARMORER, SoundEvents.VILLAGER_WORK_ARMORER);
-    public static final VillagerProfession BUTCHER = VillagerProfession.register("butcher", PoiType.BUTCHER, SoundEvents.VILLAGER_WORK_BUTCHER);
-    public static final VillagerProfession CARTOGRAPHER = VillagerProfession.register("cartographer", PoiType.CARTOGRAPHER, SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
-    public static final VillagerProfession CLERIC = VillagerProfession.register("cleric", PoiType.CLERIC, SoundEvents.VILLAGER_WORK_CLERIC);
-    public static final VillagerProfession FARMER = VillagerProfession.register("farmer", PoiType.FARMER, ImmutableSet.of(Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.BONE_MEAL), ImmutableSet.of(Blocks.FARMLAND), SoundEvents.VILLAGER_WORK_FARMER);
-    public static final VillagerProfession FISHERMAN = VillagerProfession.register("fisherman", PoiType.FISHERMAN, SoundEvents.VILLAGER_WORK_FISHERMAN);
-    public static final VillagerProfession FLETCHER = VillagerProfession.register("fletcher", PoiType.FLETCHER, SoundEvents.VILLAGER_WORK_FLETCHER);
-    public static final VillagerProfession LEATHERWORKER = VillagerProfession.register("leatherworker", PoiType.LEATHERWORKER, SoundEvents.VILLAGER_WORK_LEATHERWORKER);
-    public static final VillagerProfession LIBRARIAN = VillagerProfession.register("librarian", PoiType.LIBRARIAN, SoundEvents.VILLAGER_WORK_LIBRARIAN);
-    public static final VillagerProfession MASON = VillagerProfession.register("mason", PoiType.MASON, SoundEvents.VILLAGER_WORK_MASON);
-    public static final VillagerProfession NITWIT = VillagerProfession.register("nitwit", PoiType.NITWIT, null);
-    public static final VillagerProfession SHEPHERD = VillagerProfession.register("shepherd", PoiType.SHEPHERD, SoundEvents.VILLAGER_WORK_SHEPHERD);
-    public static final VillagerProfession TOOLSMITH = VillagerProfession.register("toolsmith", PoiType.TOOLSMITH, SoundEvents.VILLAGER_WORK_TOOLSMITH);
-    public static final VillagerProfession WEAPONSMITH = VillagerProfession.register("weaponsmith", PoiType.WEAPONSMITH, SoundEvents.VILLAGER_WORK_WEAPONSMITH);
-    private final String name;
-    private final PoiType jobPoiType;
-    private final ImmutableSet<Item> requestedItems;
-    private final ImmutableSet<Block> secondaryPoi;
-    @Nullable
-    private final SoundEvent workSound;
+public record VillagerProfession(String name, Predicate<Holder<PoiType>> heldJobSite, Predicate<Holder<PoiType>> acquirableJobSite, ImmutableSet<Item> requestedItems, ImmutableSet<Block> secondaryPoi, @Nullable SoundEvent workSound) {
+    public static final Predicate<Holder<PoiType>> ALL_ACQUIRABLE_JOBS = holder -> holder.is(PoiTypeTags.ACQUIRABLE_JOB_SITE);
+    public static final VillagerProfession NONE = VillagerProfession.register("none", PoiType.NONE, ALL_ACQUIRABLE_JOBS, null);
+    public static final VillagerProfession ARMORER = VillagerProfession.register("armorer", PoiTypes.ARMORER, SoundEvents.VILLAGER_WORK_ARMORER);
+    public static final VillagerProfession BUTCHER = VillagerProfession.register("butcher", PoiTypes.BUTCHER, SoundEvents.VILLAGER_WORK_BUTCHER);
+    public static final VillagerProfession CARTOGRAPHER = VillagerProfession.register("cartographer", PoiTypes.CARTOGRAPHER, SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
+    public static final VillagerProfession CLERIC = VillagerProfession.register("cleric", PoiTypes.CLERIC, SoundEvents.VILLAGER_WORK_CLERIC);
+    public static final VillagerProfession FARMER = VillagerProfession.register("farmer", PoiTypes.FARMER, ImmutableSet.of(Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.BONE_MEAL), ImmutableSet.of(Blocks.FARMLAND), SoundEvents.VILLAGER_WORK_FARMER);
+    public static final VillagerProfession FISHERMAN = VillagerProfession.register("fisherman", PoiTypes.FISHERMAN, SoundEvents.VILLAGER_WORK_FISHERMAN);
+    public static final VillagerProfession FLETCHER = VillagerProfession.register("fletcher", PoiTypes.FLETCHER, SoundEvents.VILLAGER_WORK_FLETCHER);
+    public static final VillagerProfession LEATHERWORKER = VillagerProfession.register("leatherworker", PoiTypes.LEATHERWORKER, SoundEvents.VILLAGER_WORK_LEATHERWORKER);
+    public static final VillagerProfession LIBRARIAN = VillagerProfession.register("librarian", PoiTypes.LIBRARIAN, SoundEvents.VILLAGER_WORK_LIBRARIAN);
+    public static final VillagerProfession MASON = VillagerProfession.register("mason", PoiTypes.MASON, SoundEvents.VILLAGER_WORK_MASON);
+    public static final VillagerProfession NITWIT = VillagerProfession.register("nitwit", PoiType.NONE, PoiType.NONE, null);
+    public static final VillagerProfession SHEPHERD = VillagerProfession.register("shepherd", PoiTypes.SHEPHERD, SoundEvents.VILLAGER_WORK_SHEPHERD);
+    public static final VillagerProfession TOOLSMITH = VillagerProfession.register("toolsmith", PoiTypes.TOOLSMITH, SoundEvents.VILLAGER_WORK_TOOLSMITH);
+    public static final VillagerProfession WEAPONSMITH = VillagerProfession.register("weaponsmith", PoiTypes.WEAPONSMITH, SoundEvents.VILLAGER_WORK_WEAPONSMITH);
 
-    private VillagerProfession(String string, PoiType poiType, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {
-        this.name = string;
-        this.jobPoiType = poiType;
-        this.requestedItems = immutableSet;
-        this.secondaryPoi = immutableSet2;
-        this.workSound = soundEvent;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public PoiType getJobPoiType() {
-        return this.jobPoiType;
-    }
-
-    public ImmutableSet<Item> getRequestedItems() {
-        return this.requestedItems;
-    }
-
-    public ImmutableSet<Block> getSecondaryPoi() {
-        return this.secondaryPoi;
-    }
-
-    @Nullable
-    public SoundEvent getWorkSound() {
-        return this.workSound;
-    }
-
+    @Override
     public String toString() {
         return this.name;
     }
 
-    static VillagerProfession register(String string, PoiType poiType, @Nullable SoundEvent soundEvent) {
-        return VillagerProfession.register(string, poiType, ImmutableSet.of(), ImmutableSet.of(), soundEvent);
+    private static VillagerProfession register(String string, ResourceKey<PoiType> resourceKey, @Nullable SoundEvent soundEvent) {
+        return VillagerProfession.register(string, holder -> holder.is(resourceKey), PoiType.NONE, soundEvent);
     }
 
-    static VillagerProfession register(String string, PoiType poiType, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {
-        return Registry.register(Registry.VILLAGER_PROFESSION, new ResourceLocation(string), new VillagerProfession(string, poiType, immutableSet, immutableSet2, soundEvent));
+    private static VillagerProfession register(String string, Predicate<Holder<PoiType>> predicate, Predicate<Holder<PoiType>> predicate2, @Nullable SoundEvent soundEvent) {
+        return VillagerProfession.register(string, predicate, predicate2, ImmutableSet.of(), ImmutableSet.of(), soundEvent);
+    }
+
+    private static VillagerProfession register(String string, ResourceKey<PoiType> resourceKey, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {
+        return VillagerProfession.register(string, holder -> holder.is(resourceKey), PoiType.NONE, immutableSet, immutableSet2, soundEvent);
+    }
+
+    private static VillagerProfession register(String string, Predicate<Holder<PoiType>> predicate, Predicate<Holder<PoiType>> predicate2, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {
+        return Registry.register(Registry.VILLAGER_PROFESSION, new ResourceLocation(string), new VillagerProfession(string, predicate, predicate2, immutableSet, immutableSet2, soundEvent));
+    }
+
+    @Nullable
+    public SoundEvent workSound() {
+        return this.workSound;
     }
 }
 

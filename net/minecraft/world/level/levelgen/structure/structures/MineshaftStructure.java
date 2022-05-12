@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -38,10 +39,12 @@ extends Structure {
         generationContext.random().nextDouble();
         ChunkPos chunkPos = generationContext.chunkPos();
         BlockPos blockPos = new BlockPos(chunkPos.getMiddleBlockX(), 50, chunkPos.getMinBlockZ());
-        return Optional.of(new Structure.GenerationStub(blockPos, structurePiecesBuilder -> this.generatePieces((StructurePiecesBuilder)structurePiecesBuilder, blockPos, generationContext)));
+        StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+        int i = this.generatePiecesAndAdjust(structurePiecesBuilder, generationContext);
+        return Optional.of(new Structure.GenerationStub(blockPos.offset(0, i, 0), Either.right(structurePiecesBuilder)));
     }
 
-    private void generatePieces(StructurePiecesBuilder structurePiecesBuilder, BlockPos blockPos, Structure.GenerationContext generationContext) {
+    private int generatePiecesAndAdjust(StructurePiecesBuilder structurePiecesBuilder, Structure.GenerationContext generationContext) {
         ChunkPos chunkPos = generationContext.chunkPos();
         WorldgenRandom worldgenRandom = generationContext.random();
         ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
@@ -50,14 +53,14 @@ extends Structure {
         mineShaftRoom.addChildren(mineShaftRoom, structurePiecesBuilder, worldgenRandom);
         int i = chunkGenerator.getSeaLevel();
         if (this.type == Type.MESA) {
-            BlockPos blockPos2 = structurePiecesBuilder.getBoundingBox().getCenter();
-            int j = chunkGenerator.getBaseHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, generationContext.heightAccessor(), generationContext.randomState());
+            BlockPos blockPos = structurePiecesBuilder.getBoundingBox().getCenter();
+            int j = chunkGenerator.getBaseHeight(blockPos.getX(), blockPos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, generationContext.heightAccessor(), generationContext.randomState());
             int k = j <= i ? i : Mth.randomBetweenInclusive(worldgenRandom, i, j);
-            int l = k - blockPos2.getY();
+            int l = k - blockPos.getY();
             structurePiecesBuilder.offsetPiecesVertically(l);
-        } else {
-            structurePiecesBuilder.moveBelowSeaLevel(i, chunkGenerator.getMinY(), worldgenRandom, 10);
+            return l;
         }
+        return structurePiecesBuilder.moveBelowSeaLevel(i, chunkGenerator.getMinY(), worldgenRandom, 10);
     }
 
     @Override

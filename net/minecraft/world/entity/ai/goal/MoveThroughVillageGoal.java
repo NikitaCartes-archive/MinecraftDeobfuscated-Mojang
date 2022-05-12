@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -18,7 +19,6 @@ import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -63,21 +63,18 @@ extends Goal {
         if (!serverLevel.isCloseToVillage(blockPos, 6)) {
             return false;
         }
-        Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7, blockPos2 -> {
-            if (!serverLevel.isVillage((BlockPos)blockPos2)) {
+        Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7, blockPos22 -> {
+            if (!serverLevel.isVillage((BlockPos)blockPos22)) {
                 return Double.NEGATIVE_INFINITY;
             }
-            Optional<BlockPos> optional = serverLevel.getPoiManager().find(PoiType.ALL, this::hasNotVisited, (BlockPos)blockPos2, 10, PoiManager.Occupancy.IS_OCCUPIED);
-            if (!optional.isPresent()) {
-                return Double.NEGATIVE_INFINITY;
-            }
-            return -optional.get().distSqr(blockPos);
+            Optional<BlockPos> optional = serverLevel.getPoiManager().find(holder -> holder.is(PoiTypeTags.VILLAGE), this::hasNotVisited, (BlockPos)blockPos22, 10, PoiManager.Occupancy.IS_OCCUPIED);
+            return optional.map(blockPos2 -> -blockPos2.distSqr(blockPos)).orElse(Double.NEGATIVE_INFINITY);
         });
         if (vec3 == null) {
             return false;
         }
-        Optional<BlockPos> optional = serverLevel.getPoiManager().find(PoiType.ALL, this::hasNotVisited, new BlockPos(vec3), 10, PoiManager.Occupancy.IS_OCCUPIED);
-        if (!optional.isPresent()) {
+        Optional<BlockPos> optional = serverLevel.getPoiManager().find(holder -> holder.is(PoiTypeTags.VILLAGE), this::hasNotVisited, new BlockPos(vec3), 10, PoiManager.Occupancy.IS_OCCUPIED);
+        if (optional.isEmpty()) {
             return false;
         }
         this.poiPos = optional.get().immutable();
@@ -100,8 +97,8 @@ extends Goal {
         }
         for (int i = 0; i < this.path.getNodeCount(); ++i) {
             Node node = this.path.getNode(i);
-            BlockPos blockPos22 = new BlockPos(node.x, node.y + 1, node.z);
-            if (!DoorBlock.isWoodenDoor(this.mob.level, blockPos22)) continue;
+            BlockPos blockPos2 = new BlockPos(node.x, node.y + 1, node.z);
+            if (!DoorBlock.isWoodenDoor(this.mob.level, blockPos2)) continue;
             this.path = this.mob.getNavigation().createPath(node.x, (double)node.y, node.z, 0);
             break;
         }

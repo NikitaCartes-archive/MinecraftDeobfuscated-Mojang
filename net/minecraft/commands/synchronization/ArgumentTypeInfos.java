@@ -39,6 +39,8 @@ import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.commands.arguments.TeamArgument;
+import net.minecraft.commands.arguments.TemplateMirrorArgument;
+import net.minecraft.commands.arguments.TemplateRotationArgument;
 import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
@@ -117,6 +119,8 @@ public class ArgumentTypeInfos {
         ArgumentTypeInfos.register(registry, "time", TimeArgument.class, SingletonArgumentInfo.contextFree(TimeArgument::time));
         ArgumentTypeInfos.register(registry, "resource_or_tag", ArgumentTypeInfos.fixClassType(ResourceOrTagLocationArgument.class), new ResourceOrTagLocationArgument.Info());
         ArgumentTypeInfos.register(registry, "resource", ArgumentTypeInfos.fixClassType(ResourceKeyArgument.class), new ResourceKeyArgument.Info());
+        ArgumentTypeInfos.register(registry, "template_mirror", TemplateMirrorArgument.class, SingletonArgumentInfo.contextFree(TemplateMirrorArgument::templateMirror));
+        ArgumentTypeInfos.register(registry, "template_rotation", TemplateRotationArgument.class, SingletonArgumentInfo.contextFree(TemplateRotationArgument::templateRotation));
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             ArgumentTypeInfos.register(registry, "test_argument", TestFunctionArgument.class, SingletonArgumentInfo.contextFree(TestFunctionArgument::testFunctionArgument));
             ArgumentTypeInfos.register(registry, "test_class", TestClassNameArgument.class, SingletonArgumentInfo.contextFree(TestClassNameArgument::testClassName));

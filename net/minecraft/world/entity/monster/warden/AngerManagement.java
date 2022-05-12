@@ -38,6 +38,7 @@ public class AngerManagement {
     protected static final int MAX_ANGER = 150;
     private static final int DEFAULT_ANGER_DECREASE = 1;
     private int conversionDelay = Mth.randomBetweenInclusive(RandomSource.create(), 0, 2);
+    int highestAnger;
     private static final Codec<Pair<UUID, Integer>> SUSPECT_ANGER_PAIR = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.UUID.fieldOf("uuid")).forGetter(Pair::getFirst), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("anger")).forGetter(Pair::getSecond)).apply((Applicative<Pair, ?>)instance, Pair::of));
     private final Predicate<Entity> filter;
     @VisibleForTesting
@@ -102,7 +103,15 @@ public class AngerManagement {
             }
             entry2.setValue(j - 1);
         }
+        this.sortAndUpdateHighestAnger();
+    }
+
+    private void sortAndUpdateHighestAnger() {
+        this.highestAnger = 0;
         this.suspects.sort(this.suspectSorter);
+        if (this.suspects.size() == 1) {
+            this.highestAnger = this.angerBySuspect.getInt(this.suspects.get(0));
+        }
     }
 
     private void convertFromUuids(ServerLevel serverLevel) {
@@ -116,7 +125,6 @@ public class AngerManagement {
             this.suspects.add(entity);
             objectIterator.remove();
         }
-        this.suspects.sort(this.suspectSorter);
     }
 
     public int increaseAnger(Entity entity2, int i) {
@@ -127,13 +135,14 @@ public class AngerManagement {
             this.angerBySuspect.put(entity2, j += k);
             this.suspects.add(entity2);
         }
-        this.suspects.sort(this.suspectSorter);
+        this.sortAndUpdateHighestAnger();
         return j;
     }
 
     public void clearAnger(Entity entity) {
         this.angerBySuspect.removeInt(entity);
         this.suspects.remove(entity);
+        this.sortAndUpdateHighestAnger();
     }
 
     @Nullable
@@ -141,8 +150,8 @@ public class AngerManagement {
         return this.suspects.stream().filter(this.filter).findFirst().orElse(null);
     }
 
-    public int getActiveAnger() {
-        return this.angerBySuspect.getInt(this.getTopSuspect());
+    public int getActiveAnger(@Nullable Entity entity) {
+        return entity == null ? this.highestAnger : this.angerBySuspect.getInt(entity);
     }
 
     public Optional<LivingEntity> getActiveEntity() {
@@ -154,19 +163,20 @@ public class AngerManagement {
     {
         @Override
         public int compare(Entity entity, Entity entity2) {
-            boolean bl4;
-            boolean bl3;
             boolean bl2;
             if (entity.equals(entity2)) {
                 return 0;
             }
             int i = this.angerManagement.angerBySuspect.getOrDefault((Object)entity, 0);
             int j = this.angerManagement.angerBySuspect.getOrDefault((Object)entity2, 0);
+            this.angerManagement.highestAnger = Math.max(this.angerManagement.highestAnger, Math.max(i, j));
             boolean bl = AngerLevel.byAnger(i).isAngry();
             if (bl != (bl2 = AngerLevel.byAnger(j).isAngry())) {
                 return bl ? -1 : 1;
             }
-            if (bl && (bl3 = entity instanceof Player) != (bl4 = entity2 instanceof Player)) {
+            boolean bl3 = entity instanceof Player;
+            boolean bl4 = entity2 instanceof Player;
+            if (bl3 != bl4) {
                 return bl3 ? -1 : 1;
             }
             return i > j ? -1 : 1;

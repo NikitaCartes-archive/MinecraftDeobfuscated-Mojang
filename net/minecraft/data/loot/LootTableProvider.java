@@ -37,16 +37,15 @@ import org.slf4j.Logger;
 public class LootTableProvider
 implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final DataGenerator generator;
+    private final DataGenerator.PathProvider pathProvider;
     private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> subProviders = ImmutableList.of(Pair.of(FishingLoot::new, LootContextParamSets.FISHING), Pair.of(ChestLoot::new, LootContextParamSets.CHEST), Pair.of(EntityLoot::new, LootContextParamSets.ENTITY), Pair.of(BlockLoot::new, LootContextParamSets.BLOCK), Pair.of(PiglinBarterLoot::new, LootContextParamSets.PIGLIN_BARTER), Pair.of(GiftLoot::new, LootContextParamSets.GIFT));
 
     public LootTableProvider(DataGenerator dataGenerator) {
-        this.generator = dataGenerator;
+        this.pathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "loot_tables");
     }
 
     @Override
     public void run(CachedOutput cachedOutput) {
-        Path path = this.generator.getOutputFolder();
         HashMap<ResourceLocation, LootTable> map = Maps.newHashMap();
         this.subProviders.forEach(pair -> ((Consumer)((Supplier)pair.getFirst()).get()).accept((resourceLocation, builder) -> {
             if (map.put((ResourceLocation)resourceLocation, builder.setParamSet((LootContextParamSet)pair.getSecond()).build()) != null) {
@@ -65,17 +64,13 @@ implements DataProvider {
             throw new IllegalStateException("Failed to validate loot tables, see logs");
         }
         map.forEach((resourceLocation, lootTable) -> {
-            Path path2 = LootTableProvider.createPath(path, resourceLocation);
+            Path path = this.pathProvider.json((ResourceLocation)resourceLocation);
             try {
-                DataProvider.saveStable(cachedOutput, LootTables.serialize(lootTable), path2);
+                DataProvider.saveStable(cachedOutput, LootTables.serialize(lootTable), path);
             } catch (IOException iOException) {
-                LOGGER.error("Couldn't save loot table {}", (Object)path2, (Object)iOException);
+                LOGGER.error("Couldn't save loot table {}", (Object)path, (Object)iOException);
             }
         });
-    }
-
-    private static Path createPath(Path path, ResourceLocation resourceLocation) {
-        return path.resolve("data/" + resourceLocation.getNamespace() + "/loot_tables/" + resourceLocation.getPath() + ".json");
     }
 
     @Override

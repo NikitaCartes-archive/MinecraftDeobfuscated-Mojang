@@ -16,7 +16,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import org.jetbrains.annotations.Nullable;
 
 public class MessageArgument
@@ -32,7 +32,7 @@ implements SignedArgument<Message> {
         return MessageArgument.resolveComponent(commandContext.getSource(), message);
     }
 
-    public static SignedMessage getSignedMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+    public static PlayerChatMessage getSignedMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
         Message message = commandContext.getArgument(string, Message.class);
         MutableComponent component = Component.literal(message.getText());
         return commandContext.getSource().getSigningContext().signArgument(commandContext, string, component);

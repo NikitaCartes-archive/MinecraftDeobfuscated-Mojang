@@ -25,7 +25,7 @@ implements DataProvider {
 
     @Override
     public void run(CachedOutput cachedOutput) throws IOException {
-        Path path = this.generator.getOutputFolder().resolve("reports/commands.json");
+        Path path = this.generator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("commands.json");
         CommandDispatcher<CommandSourceStack> commandDispatcher = new Commands(Commands.CommandSelection.ALL, new CommandBuildContext(RegistryAccess.BUILTIN.get())).getDispatcher();
         DataProvider.saveStable(cachedOutput, ArgumentUtils.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
     }

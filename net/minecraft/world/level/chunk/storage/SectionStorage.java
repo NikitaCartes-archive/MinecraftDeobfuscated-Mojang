@@ -25,10 +25,12 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -47,13 +49,15 @@ implements AutoCloseable {
     private final Function<Runnable, R> factory;
     private final DataFixer fixerUpper;
     private final DataFixTypes type;
+    private final RegistryAccess registryAccess;
     protected final LevelHeightAccessor levelHeightAccessor;
 
-    public SectionStorage(Path path, Function<Runnable, Codec<R>> function, Function<Runnable, R> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl, LevelHeightAccessor levelHeightAccessor) {
+    public SectionStorage(Path path, Function<Runnable, Codec<R>> function, Function<Runnable, R> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl, RegistryAccess registryAccess, LevelHeightAccessor levelHeightAccessor) {
         this.codec = function;
         this.factory = function2;
         this.fixerUpper = dataFixer;
         this.type = dataFixTypes;
+        this.registryAccess = registryAccess;
         this.levelHeightAccessor = levelHeightAccessor;
         this.worker = new IOWorker(path, bl, path.getFileName().toString());
     }
@@ -110,7 +114,8 @@ implements AutoCloseable {
 
     private void readColumn(ChunkPos chunkPos) {
         Optional<CompoundTag> optional = this.tryRead(chunkPos).join();
-        this.readColumn(chunkPos, NbtOps.INSTANCE, optional.orElse(null));
+        RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, this.registryAccess);
+        this.readColumn(chunkPos, registryOps, optional.orElse(null));
     }
 
     private CompletableFuture<Optional<CompoundTag>> tryRead(ChunkPos chunkPos) {
@@ -151,7 +156,8 @@ implements AutoCloseable {
     }
 
     private void writeColumn(ChunkPos chunkPos) {
-        Dynamic<Tag> dynamic = this.writeColumn(chunkPos, NbtOps.INSTANCE);
+        RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, this.registryAccess);
+        Dynamic<Tag> dynamic = this.writeColumn(chunkPos, registryOps);
         Tag tag = dynamic.getValue();
         if (tag instanceof CompoundTag) {
             this.worker.store(chunkPos, (CompoundTag)tag);

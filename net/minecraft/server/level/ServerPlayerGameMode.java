@@ -262,7 +262,9 @@ public class ServerPlayerGameMode {
         if (interactionResultHolder.getResult() == InteractionResult.FAIL && itemStack2.getUseDuration() > 0 && !serverPlayer.isUsingItem()) {
             return interactionResultHolder.getResult();
         }
-        serverPlayer.setItemInHand(interactionHand, itemStack2);
+        if (itemStack != itemStack2) {
+            serverPlayer.setItemInHand(interactionHand, itemStack2);
+        }
         if (this.isCreative()) {
             itemStack2.setCount(i);
             if (itemStack2.isDamageableItem() && itemStack2.getDamageValue() != j) {

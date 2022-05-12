@@ -79,12 +79,12 @@ implements Packet<ClientGamePacketListener> {
         ADD_PLAYER{
 
             @Override
-            protected PlayerUpdate read(FriendlyByteBuf friendlyByteBuf2) {
-                GameProfile gameProfile = friendlyByteBuf2.readGameProfile();
-                GameType gameType = GameType.byId(friendlyByteBuf2.readVarInt());
-                int i = friendlyByteBuf2.readVarInt();
-                Component component = (Component)friendlyByteBuf2.readNullable(FriendlyByteBuf::readComponent);
-                ProfilePublicKey.Data data = (ProfilePublicKey.Data)friendlyByteBuf2.readNullable(friendlyByteBuf -> friendlyByteBuf.readWithCodec(ProfilePublicKey.Data.CODEC));
+            protected PlayerUpdate read(FriendlyByteBuf friendlyByteBuf) {
+                GameProfile gameProfile = friendlyByteBuf.readGameProfile();
+                GameType gameType = GameType.byId(friendlyByteBuf.readVarInt());
+                int i = friendlyByteBuf.readVarInt();
+                Component component = (Component)friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent);
+                ProfilePublicKey.Data data = (ProfilePublicKey.Data)friendlyByteBuf.readNullable(ProfilePublicKey.Data::new);
                 return new PlayerUpdate(gameProfile, i, gameType, component, data);
             }
 
@@ -94,7 +94,7 @@ implements Packet<ClientGamePacketListener> {
                 friendlyByteBuf2.writeVarInt(playerUpdate.getGameMode().getId());
                 friendlyByteBuf2.writeVarInt(playerUpdate.getLatency());
                 friendlyByteBuf2.writeNullable(playerUpdate.getDisplayName(), FriendlyByteBuf::writeComponent);
-                friendlyByteBuf2.writeNullable(playerUpdate.getProfilePublicKey(), (friendlyByteBuf, data) -> friendlyByteBuf.writeWithCodec(ProfilePublicKey.Data.CODEC, data));
+                friendlyByteBuf2.writeNullable(playerUpdate.getProfilePublicKey(), (friendlyByteBuf, data) -> data.write((FriendlyByteBuf)friendlyByteBuf));
             }
         }
         ,

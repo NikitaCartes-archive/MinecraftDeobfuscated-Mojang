@@ -35,7 +35,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -64,6 +64,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
@@ -71,6 +72,7 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -682,7 +684,7 @@ extends Player {
             return this;
         }
         LevelData levelData = serverLevel.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeRegistration(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
+        this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeId(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         PlayerList playerList = this.server.getPlayerList();
         playerList.sendPlayerPermissionLevel(this);
@@ -1212,9 +1214,9 @@ extends Player {
         }
     }
 
-    public void sendChatMessage(SignedMessage signedMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+    public void sendChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
         if (this.acceptsChat(resourceKey)) {
-            this.connection.send(new ClientboundPlayerChatPacket(signedMessage.content(), this.resolveChatTypeId(resourceKey), chatSender, signedMessage.signature().timeStamp(), signedMessage.signature().saltSignature()));
+            this.connection.send(new ClientboundPlayerChatPacket(playerChatMessage.signedContent(), playerChatMessage.unsignedContent(), this.resolveChatTypeId(resourceKey), chatSender, playerChatMessage.signature().timeStamp(), playerChatMessage.signature().saltSignature()));
         }
     }
 
@@ -1261,6 +1263,10 @@ extends Player {
 
     public void sendTexturePack(String string, String string2, boolean bl, @Nullable Component component) {
         this.connection.send(new ClientboundResourcePackPacket(string, string2, bl, component));
+    }
+
+    public void sendServerStatus(ServerStatus serverStatus) {
+        this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.previewsChat()));
     }
 
     @Override
@@ -1354,7 +1360,7 @@ extends Player {
         } else {
             ServerLevel serverLevel2 = this.getLevel();
             LevelData levelData = serverLevel.getLevelData();
-            this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeRegistration(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
+            this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeId(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
             this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
             this.server.getPlayerList().sendPlayerPermissionLevel(this);
             serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);

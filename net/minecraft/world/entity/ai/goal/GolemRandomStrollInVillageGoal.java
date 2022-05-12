@@ -95,7 +95,7 @@ extends RandomStrollGoal {
     private BlockPos getRandomPoiWithinSection(SectionPos sectionPos) {
         ServerLevel serverLevel = (ServerLevel)this.mob.level;
         PoiManager poiManager = serverLevel.getPoiManager();
-        List list = poiManager.getInRange(poiType -> true, sectionPos.center(), 8, PoiManager.Occupancy.IS_OCCUPIED).map(PoiRecord::getPos).collect(Collectors.toList());
+        List list = poiManager.getInRange(holder -> true, sectionPos.center(), 8, PoiManager.Occupancy.IS_OCCUPIED).map(PoiRecord::getPos).collect(Collectors.toList());
         if (list.isEmpty()) {
             return null;
         }

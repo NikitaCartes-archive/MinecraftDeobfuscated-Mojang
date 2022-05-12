@@ -18,10 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,7 +46,6 @@ import net.minecraft.world.entity.ai.memory.ExpirableValue;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.InventoryCarrier;
@@ -273,11 +274,15 @@ public class DebugPackets {
         friendlyByteBuf.writeUtf(wrappedGoal.getGoal().getClass().getSimpleName());
     }
 
+    private static /* synthetic */ String method_44135(ResourceKey resourceKey) {
+        return resourceKey.location().toString();
+    }
+
     private static /* synthetic */ void method_36155(ServerLevel serverLevel, PoiRecord poiRecord) {
         DebugPackets.sendPoiAddedPacket(serverLevel, poiRecord.getPos());
     }
 
-    private static /* synthetic */ boolean method_36159(PoiType poiType) {
+    private static /* synthetic */ boolean method_36159(Holder holder) {
         return true;
     }
 }

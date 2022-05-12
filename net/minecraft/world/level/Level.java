@@ -106,7 +106,7 @@ AutoCloseable {
     public final RandomSource random = RandomSource.create();
     @Deprecated
     private final RandomSource threadSafeRandom = RandomSource.createThreadSafe();
-    final DimensionType dimensionType;
+    private final ResourceKey<DimensionType> dimensionTypeId;
     private final Holder<DimensionType> dimensionTypeRegistration;
     protected final WritableLevelData levelData;
     private final Supplier<ProfilerFiller> profiler;
@@ -120,19 +120,20 @@ AutoCloseable {
         this.profiler = supplier;
         this.levelData = writableLevelData;
         this.dimensionTypeRegistration = holder;
-        this.dimensionType = holder.value();
+        this.dimensionTypeId = holder.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Dimensions must be registered"));
+        final DimensionType dimensionType = holder.value();
         this.dimension = resourceKey;
         this.isClientSide = bl;
-        this.worldBorder = this.dimensionType.coordinateScale() != 1.0 ? new WorldBorder(){
+        this.worldBorder = dimensionType.coordinateScale() != 1.0 ? new WorldBorder(){
 
             @Override
             public double getCenterX() {
-                return super.getCenterX() / Level.this.dimensionType.coordinateScale();
+                return super.getCenterX() / dimensionType.coordinateScale();
             }
 
             @Override
             public double getCenterZ() {
-                return super.getCenterZ() / Level.this.dimensionType.coordinateScale();
+                return super.getCenterZ() / dimensionType.coordinateScale();
             }
         } : new WorldBorder();
         this.thread = Thread.currentThread();
@@ -803,7 +804,11 @@ AutoCloseable {
 
     @Override
     public DimensionType dimensionType() {
-        return this.dimensionType;
+        return this.dimensionTypeRegistration.value();
+    }
+
+    public ResourceKey<DimensionType> dimensionTypeId() {
+        return this.dimensionTypeId;
     }
 
     public Holder<DimensionType> dimensionTypeRegistration() {

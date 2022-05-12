@@ -94,7 +94,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-        if (!entity.fireImmune() && blockState.getValue(LIT).booleanValue() && entity instanceof LivingEntity && !EnchantmentHelper.hasFrostWalker((LivingEntity)entity)) {
+        if (blockState.getValue(LIT).booleanValue() && entity instanceof LivingEntity && !EnchantmentHelper.hasFrostWalker((LivingEntity)entity)) {
             entity.hurt(DamageSource.IN_FIRE, this.fireDamage);
         }
         super.entityInside(blockState, level, blockPos, entity);

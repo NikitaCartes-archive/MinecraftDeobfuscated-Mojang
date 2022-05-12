@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -103,15 +104,18 @@ extends Block {
         int i = randomSource.nextInt(2, 6);
         for (int j = 1; j <= i; ++j) {
             Tadpole tadpole = EntityType.TADPOLE.create(serverLevel);
-            double d = randomSource.nextDouble();
-            double e = randomSource.nextDouble();
-            double f = (double)blockPos.getX() + d;
-            double g = (double)blockPos.getZ() + e;
+            double d = (double)blockPos.getX() + this.getRandomTadpolePositionOffset(randomSource);
+            double e = (double)blockPos.getZ() + this.getRandomTadpolePositionOffset(randomSource);
             int k = randomSource.nextInt(1, 361);
-            tadpole.moveTo(f, (double)blockPos.getY() - 0.5, g, k, 0.0f);
+            tadpole.moveTo(d, (double)blockPos.getY() - 0.5, e, k, 0.0f);
             tadpole.setPersistenceRequired();
             serverLevel.addFreshEntity(tadpole);
         }
+    }
+
+    private double getRandomTadpolePositionOffset(RandomSource randomSource) {
+        double d = Tadpole.HITBOX_WIDTH / 2.0f;
+        return Mth.clamp(randomSource.nextDouble(), d, 1.0 - d);
     }
 
     @VisibleForTesting

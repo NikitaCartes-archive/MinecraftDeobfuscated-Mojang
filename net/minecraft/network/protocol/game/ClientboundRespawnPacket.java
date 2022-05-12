@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundRespawnPacket
 implements Packet<ClientGamePacketListener> {
-    private final Holder<DimensionType> dimensionType;
+    private final ResourceKey<DimensionType> dimensionType;
     private final ResourceKey<Level> dimension;
     private final long seed;
     private final GameType playerGameType;
@@ -26,9 +25,9 @@ implements Packet<ClientGamePacketListener> {
     private final boolean isFlat;
     private final boolean keepAllPlayerData;
 
-    public ClientboundRespawnPacket(Holder<DimensionType> holder, ResourceKey<Level> resourceKey, long l, GameType gameType, @Nullable GameType gameType2, boolean bl, boolean bl2, boolean bl3) {
-        this.dimensionType = holder;
-        this.dimension = resourceKey;
+    public ClientboundRespawnPacket(ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, long l, GameType gameType, @Nullable GameType gameType2, boolean bl, boolean bl2, boolean bl3) {
+        this.dimensionType = resourceKey;
+        this.dimension = resourceKey2;
         this.seed = l;
         this.playerGameType = gameType;
         this.previousPlayerGameType = gameType2;
@@ -38,8 +37,8 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundRespawnPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.dimensionType = friendlyByteBuf.readWithCodec(DimensionType.CODEC);
-        this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
+        this.dimensionType = friendlyByteBuf.readResourceKey(Registry.DIMENSION_TYPE_REGISTRY);
+        this.dimension = friendlyByteBuf.readResourceKey(Registry.DIMENSION_REGISTRY);
         this.seed = friendlyByteBuf.readLong();
         this.playerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
         this.previousPlayerGameType = GameType.byNullableId(friendlyByteBuf.readByte());
@@ -50,8 +49,8 @@ implements Packet<ClientGamePacketListener> {
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeWithCodec(DimensionType.CODEC, this.dimensionType);
-        friendlyByteBuf.writeResourceLocation(this.dimension.location());
+        friendlyByteBuf.writeResourceKey(this.dimensionType);
+        friendlyByteBuf.writeResourceKey(this.dimension);
         friendlyByteBuf.writeLong(this.seed);
         friendlyByteBuf.writeByte(this.playerGameType.getId());
         friendlyByteBuf.writeByte(GameType.getNullableId(this.previousPlayerGameType));
@@ -65,7 +64,7 @@ implements Packet<ClientGamePacketListener> {
         clientGamePacketListener.handleRespawn(this);
     }
 
-    public Holder<DimensionType> getDimensionType() {
+    public ResourceKey<DimensionType> getDimensionType() {
         return this.dimensionType;
     }
 

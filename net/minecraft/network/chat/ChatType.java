@@ -8,7 +8,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.chat.ChatDecoration;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
@@ -32,16 +34,15 @@ public record ChatType(Optional<TextDisplay> chat, Optional<TextDisplay> overlay
         return ResourceKey.create(Registry.CHAT_TYPE_REGISTRY, new ResourceLocation(string));
     }
 
-    public static ChatType bootstrap(Registry<ChatType> registry) {
-        ChatType chatType = Registry.register(registry, CHAT, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.withSender("chat.type.text"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
-        Registry.register(registry, SYSTEM, new ChatType(Optional.of(TextDisplay.undecorated()), Optional.empty(), Optional.of(Narration.undecorated(Narration.Priority.SYSTEM))));
-        Registry.register(registry, GAME_INFO, new ChatType(Optional.empty(), Optional.of(TextDisplay.undecorated()), Optional.empty()));
-        Registry.register(registry, SAY_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.withSender("chat.type.announcement"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
-        Registry.register(registry, MSG_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.directMessage("commands.message.display.incoming"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
-        Registry.register(registry, TEAM_MSG_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.teamMessage("chat.type.team.text"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
-        Registry.register(registry, EMOTE_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.withSender("chat.type.emote"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.emote"), Narration.Priority.CHAT))));
-        Registry.register(registry, TELLRAW_COMMAND, new ChatType(Optional.of(TextDisplay.undecorated()), Optional.empty(), Optional.of(Narration.undecorated(Narration.Priority.CHAT))));
-        return chatType;
+    public static Holder<ChatType> bootstrap(Registry<ChatType> registry) {
+        BuiltinRegistries.register(registry, CHAT, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.withSender("chat.type.text"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
+        BuiltinRegistries.register(registry, SYSTEM, new ChatType(Optional.of(TextDisplay.undecorated()), Optional.empty(), Optional.of(Narration.undecorated(Narration.Priority.SYSTEM))));
+        BuiltinRegistries.register(registry, GAME_INFO, new ChatType(Optional.empty(), Optional.of(TextDisplay.undecorated()), Optional.empty()));
+        BuiltinRegistries.register(registry, SAY_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.withSender("chat.type.announcement"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
+        BuiltinRegistries.register(registry, MSG_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.directMessage("commands.message.display.incoming"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
+        BuiltinRegistries.register(registry, TEAM_MSG_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.teamMessage("chat.type.team.text"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.text.narrate"), Narration.Priority.CHAT))));
+        BuiltinRegistries.register(registry, EMOTE_COMMAND, new ChatType(Optional.of(TextDisplay.decorated(ChatDecoration.withSender("chat.type.emote"))), Optional.empty(), Optional.of(Narration.decorated(ChatDecoration.withSender("chat.type.emote"), Narration.Priority.CHAT))));
+        return BuiltinRegistries.register(registry, TELLRAW_COMMAND, new ChatType(Optional.of(TextDisplay.undecorated()), Optional.empty(), Optional.of(Narration.undecorated(Narration.Priority.CHAT))));
     }
 
     public record TextDisplay(Optional<ChatDecoration> decoration) {
