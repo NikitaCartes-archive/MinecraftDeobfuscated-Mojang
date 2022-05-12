@@ -54,6 +54,12 @@ public class Node {
 		return Mth.sqrt(f * f + g * g + h * h);
 	}
 
+	public float distanceToXZ(Node node) {
+		float f = (float)(node.x - this.x);
+		float g = (float)(node.z - this.z);
+		return Mth.sqrt(f * f + g * g);
+	}
+
 	public float distanceTo(BlockPos blockPos) {
 		float f = (float)(blockPos.getX() - this.x);
 		float g = (float)(blockPos.getY() - this.y);

@@ -22,7 +22,7 @@ public class RegistryDumpReport implements DataProvider {
 	public void run(CachedOutput cachedOutput) throws IOException {
 		JsonObject jsonObject = new JsonObject();
 		Registry.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), dumpRegistry((Registry)reference.value())));
-		Path path = this.generator.getOutputFolder().resolve("reports/registries.json");
+		Path path = this.generator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("registries.json");
 		DataProvider.saveStable(cachedOutput, jsonObject, path);
 	}
 

@@ -358,6 +358,15 @@ public class Util {
 		return object;
 	}
 
+	@Nullable
+	public static <T, R> R mapNullable(@Nullable T object, Function<T, R> function) {
+		return (R)(object == null ? null : function.apply(object));
+	}
+
+	public static <T, R> R mapNullable(@Nullable T object, Function<T, R> function, R object2) {
+		return (R)(object == null ? object2 : function.apply(object));
+	}
+
 	public static <K> Strategy<K> identityStrategy() {
 		return Util.IdentityStrategy.INSTANCE;
 	}

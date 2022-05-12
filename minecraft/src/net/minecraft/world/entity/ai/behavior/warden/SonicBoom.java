@@ -57,6 +57,7 @@ public class SonicBoom extends Behavior<Warden> {
 	}
 
 	protected void tick(ServerLevel serverLevel, Warden warden, long l) {
+		warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(livingEntity -> warden.getLookControl().setLookAt(livingEntity.position()));
 		if (!warden.getBrain().hasMemoryValue(MemoryModuleType.SONIC_BOOM_SOUND_DELAY)
 			&& !warden.getBrain().hasMemoryValue(MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN)) {
 			warden.getBrain().setMemoryWithExpiry(MemoryModuleType.SONIC_BOOM_SOUND_COOLDOWN, Unit.INSTANCE, (long)(DURATION - TICKS_BEFORE_PLAYING_SOUND));
@@ -75,7 +76,7 @@ public class SonicBoom extends Behavior<Warden> {
 					}
 
 					warden.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
-					livingEntity.hurt(DamageSource.SONIC_BOOM, 10.0F);
+					livingEntity.hurt(DamageSource.sonicBoom(warden), 10.0F);
 					double d = 0.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 					double e = 2.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 					livingEntity.push(vec33.x() * e, vec33.y() * d, vec33.z() * e);

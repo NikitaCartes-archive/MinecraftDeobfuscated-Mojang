@@ -1,15 +1,16 @@
 package net.minecraft.world.entity;
 
 import java.util.function.Consumer;
-import net.minecraft.Util;
+import net.minecraft.util.Mth;
 
 public class AnimationState {
+	private static final long STARTED = Long.MIN_VALUE;
 	private static final long STOPPED = Long.MAX_VALUE;
 	private long lastTime = Long.MAX_VALUE;
 	private long accumulatedTime;
 
 	public void start() {
-		this.lastTime = Util.getMillis();
+		this.lastTime = Long.MIN_VALUE;
 		this.accumulatedTime = 0L;
 	}
 
@@ -29,13 +30,14 @@ public class AnimationState {
 		}
 	}
 
-	public void updateTime(boolean bl, float f) {
+	public void updateTime(float f, float g) {
 		if (this.isStarted()) {
-			long l = Util.getMillis();
-			if (!bl) {
-				this.accumulatedTime = this.accumulatedTime + (long)((float)(l - this.lastTime) * f);
+			long l = Mth.lfloor((double)(f * 1000.0F / 20.0F));
+			if (this.lastTime == Long.MIN_VALUE) {
+				this.lastTime = l;
 			}
 
+			this.accumulatedTime = this.accumulatedTime + (long)((float)(l - this.lastTime) * g);
 			this.lastTime = l;
 		}
 	}

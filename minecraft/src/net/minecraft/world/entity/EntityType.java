@@ -430,7 +430,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		"strider", EntityType.Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9F, 1.7F).clientTrackingRange(10)
 	);
 	public static final EntityType<Tadpole> TADPOLE = register(
-		"tadpole", EntityType.Builder.of(Tadpole::new, MobCategory.CREATURE).sized(0.5F, 0.4F).clientTrackingRange(10)
+		"tadpole", EntityType.Builder.of(Tadpole::new, MobCategory.CREATURE).sized(Tadpole.HITBOX_WIDTH, Tadpole.HITBOX_HEIGHT).clientTrackingRange(10)
 	);
 	public static final EntityType<ThrownEgg> EGG = register(
 		"egg", EntityType.Builder.<ThrownEgg>of(ThrownEgg::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)

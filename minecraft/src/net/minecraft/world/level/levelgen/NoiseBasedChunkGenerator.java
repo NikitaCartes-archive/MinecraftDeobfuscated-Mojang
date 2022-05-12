@@ -286,7 +286,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		GenerationStep.Carving carving
 	) {
 		BiomeManager biomeManager2 = biomeManager.withDifferentSource((ix, jx, kx) -> this.biomeSource.getNoiseBiome(ix, jx, kx, randomState.sampler()));
-		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
+		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
 		int i = 8;
 		ChunkPos chunkPos = chunkAccess.getPos();
 		NoiseChunk noiseChunk = chunkAccess.getOrCreateNoiseChunk(
@@ -460,7 +460,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		if (!this.settings.value().disableMobGeneration()) {
 			ChunkPos chunkPos = worldGenRegion.getCenter();
 			Holder<Biome> holder = worldGenRegion.getBiome(chunkPos.getWorldPosition().atY(worldGenRegion.getMaxBuildHeight() - 1));
-			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.seedUniquifier()));
+			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
 			worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
 			NaturalSpawner.spawnMobsForChunkGeneration(worldGenRegion, holder, chunkPos, worldgenRandom);
 		}

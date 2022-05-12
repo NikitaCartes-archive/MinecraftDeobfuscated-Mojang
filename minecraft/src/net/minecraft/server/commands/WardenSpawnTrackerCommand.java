@@ -21,7 +21,7 @@ public class WardenSpawnTrackerCommand {
 				.then(
 					Commands.literal("set")
 						.then(
-							Commands.argument("warning_level", IntegerArgumentType.integer(0, 3))
+							Commands.argument("warning_level", IntegerArgumentType.integer(0, 4))
 								.executes(
 									commandContext -> setWarningLevel(
 											commandContext.getSource(),

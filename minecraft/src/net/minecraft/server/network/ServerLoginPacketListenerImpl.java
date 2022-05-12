@@ -162,7 +162,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 					return null;
 				}
 			} else {
-				return ProfilePublicKey.parseAndValidate(minecraftSessionService, (ProfilePublicKey.Data)optional.get());
+				return ProfilePublicKey.createValidated(minecraftSessionService, (ProfilePublicKey.Data)optional.get());
 			}
 		} catch (MissingException var4) {
 			if (bl) {
@@ -186,8 +186,10 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener 
 			this.playerProfilePublicKey = validatePublicKey(serverboundHelloPacket, this.server.getSessionService(), this.server.enforceSecureProfile());
 		} catch (ServerLoginPacketListenerImpl.PublicKeyParseException var3) {
 			LOGGER.error(var3.getMessage(), var3.getCause());
-			this.disconnect(var3.getComponent());
-			return;
+			if (!this.connection.isMemoryConnection()) {
+				this.disconnect(var3.getComponent());
+				return;
+			}
 		}
 
 		GameProfile gameProfile = this.server.getSingleplayerProfile();

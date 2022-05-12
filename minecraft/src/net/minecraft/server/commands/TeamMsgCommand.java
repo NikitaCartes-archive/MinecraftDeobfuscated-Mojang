@@ -13,8 +13,9 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
@@ -36,7 +37,7 @@ public class TeamMsgCommand {
 		commandDispatcher.register(Commands.literal("tm").redirect(literalCommandNode));
 	}
 
-	private static int sendMessage(CommandSourceStack commandSourceStack, SignedMessage signedMessage) throws CommandSyntaxException {
+	private static int sendMessage(CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) throws CommandSyntaxException {
 		Entity entity = commandSourceStack.getEntityOrException();
 		PlayerTeam playerTeam = (PlayerTeam)entity.getTeam();
 		if (playerTeam == null) {
@@ -44,13 +45,17 @@ public class TeamMsgCommand {
 		} else {
 			Component component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
 			ChatSender chatSender = commandSourceStack.asChatSender().withTeamName(component);
-			List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers();
+			MinecraftServer minecraftServer = commandSourceStack.getServer();
+			List<ServerPlayer> list = minecraftServer.getPlayerList().getPlayers();
+			PlayerChatMessage playerChatMessage2 = minecraftServer.getChatDecorator().decorate(commandSourceStack.getPlayer(), playerChatMessage);
 
 			for (ServerPlayer serverPlayer : list) {
 				if (serverPlayer == entity) {
-					serverPlayer.sendSystemMessage(Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), signedMessage.content()));
+					serverPlayer.sendSystemMessage(
+						Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), playerChatMessage2.serverContent())
+					);
 				} else if (serverPlayer.getTeam() == playerTeam) {
-					serverPlayer.sendChatMessage(signedMessage, chatSender, ChatType.TEAM_MSG_COMMAND);
+					serverPlayer.sendChatMessage(playerChatMessage2, chatSender, ChatType.TEAM_MSG_COMMAND);
 				}
 			}
 

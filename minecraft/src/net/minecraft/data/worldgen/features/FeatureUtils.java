@@ -4,6 +4,7 @@ import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.util.RandomSource;
@@ -17,7 +18,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class FeatureUtils {
-	public static Holder<? extends ConfiguredFeature<?, ?>> bootstrap() {
+	public static Holder<? extends ConfiguredFeature<?, ?>> bootstrap(Registry<ConfiguredFeature<?, ?>> registry) {
 		List<Holder<? extends ConfiguredFeature<?, ?>>> list = List.of(
 			AquaticFeatures.KELP,
 			CaveFeatures.MOSS_PATCH_BONEMEAL,

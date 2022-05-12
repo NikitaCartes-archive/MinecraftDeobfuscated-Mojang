@@ -97,7 +97,7 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<Direction> DIRECTION = EntityDataSerializer.simpleEnum(Direction.class);
 	public static final EntityDataSerializer<Optional<UUID>> OPTIONAL_UUID = EntityDataSerializer.optional(FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID);
 	public static final EntityDataSerializer<Optional<GlobalPos>> OPTIONAL_GLOBAL_POS = EntityDataSerializer.optional(
-		(friendlyByteBuf, globalPos) -> friendlyByteBuf.writeWithCodec(GlobalPos.CODEC, globalPos), friendlyByteBuf -> friendlyByteBuf.readWithCodec(GlobalPos.CODEC)
+		FriendlyByteBuf::writeGlobalPos, FriendlyByteBuf::readGlobalPos
 	);
 	public static final EntityDataSerializer<CompoundTag> COMPOUND_TAG = new EntityDataSerializer<CompoundTag>() {
 		public void write(FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag) {

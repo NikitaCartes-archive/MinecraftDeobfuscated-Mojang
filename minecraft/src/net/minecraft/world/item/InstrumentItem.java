@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -34,8 +35,11 @@ public class InstrumentItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, level, list, tooltipFlag);
-		MutableComponent mutableComponent = Component.translatable(Util.makeDescriptionId("instrument", getInstrumentLocation(itemStack)));
-		list.add(mutableComponent.withStyle(ChatFormatting.GRAY));
+		Optional<ResourceKey<Instrument>> optional = this.getInstrument(itemStack).flatMap(Holder::unwrapKey);
+		if (optional.isPresent()) {
+			MutableComponent mutableComponent = Component.translatable(Util.makeDescriptionId("instrument", ((ResourceKey)optional.get()).location()));
+			list.add(mutableComponent.withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	public static ItemStack create(Item item, Holder<Instrument> holder) {
@@ -70,8 +74,9 @@ public class InstrumentItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		Instrument instrument = getInstrument(itemStack);
-		if (instrument != null) {
+		Optional<Holder<Instrument>> optional = this.getInstrument(itemStack);
+		if (optional.isPresent()) {
+			Instrument instrument = (Instrument)((Holder)optional.get()).value();
 			player.startUsingItem(interactionHand);
 			play(level, player, instrument);
 			player.getCooldowns().addCooldown(this, instrument.useDuration());
@@ -83,19 +88,21 @@ public class InstrumentItem extends Item {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
-		Instrument instrument = getInstrument(itemStack);
-		return instrument != null ? instrument.useDuration() : 0;
+		Optional<Holder<Instrument>> optional = this.getInstrument(itemStack);
+		return optional.isPresent() ? ((Instrument)((Holder)optional.get()).value()).useDuration() : 0;
 	}
 
-	@Nullable
-	private static Instrument getInstrument(ItemStack itemStack) {
-		return Registry.INSTRUMENT.get(getInstrumentLocation(itemStack));
-	}
-
-	@Nullable
-	private static ResourceLocation getInstrumentLocation(ItemStack itemStack) {
+	private Optional<Holder<Instrument>> getInstrument(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTag();
-		return compoundTag != null ? ResourceLocation.tryParse(compoundTag.getString("instrument")) : null;
+		if (compoundTag != null) {
+			ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("instrument"));
+			if (resourceLocation != null) {
+				return Registry.INSTRUMENT.getHolder(ResourceKey.create(Registry.INSTRUMENT_REGISTRY, resourceLocation));
+			}
+		}
+
+		Iterator<Holder<Instrument>> iterator = Registry.INSTRUMENT.getTagOrEmpty(this.instruments).iterator();
+		return iterator.hasNext() ? Optional.of((Holder)iterator.next()) : Optional.empty();
 	}
 
 	@Override

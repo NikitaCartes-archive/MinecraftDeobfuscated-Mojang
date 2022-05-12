@@ -17,29 +17,28 @@ import org.slf4j.Logger;
 
 public class AdvancementProvider implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final DataGenerator generator;
+	private final DataGenerator.PathProvider pathProvider;
 	private final List<Consumer<Consumer<Advancement>>> tabs = ImmutableList.of(
 		new TheEndAdvancements(), new HusbandryAdvancements(), new AdventureAdvancements(), new NetherAdvancements(), new StoryAdvancements()
 	);
 
 	public AdvancementProvider(DataGenerator dataGenerator) {
-		this.generator = dataGenerator;
+		this.pathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "advancements");
 	}
 
 	@Override
 	public void run(CachedOutput cachedOutput) {
-		Path path = this.generator.getOutputFolder();
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		Consumer<Advancement> consumer = advancement -> {
 			if (!set.add(advancement.getId())) {
 				throw new IllegalStateException("Duplicate advancement " + advancement.getId());
 			} else {
-				Path path2 = createPath(path, advancement);
+				Path path = this.pathProvider.json(advancement.getId());
 
 				try {
-					DataProvider.saveStable(cachedOutput, advancement.deconstruct().serializeToJson(), path2);
-				} catch (IOException var6x) {
-					LOGGER.error("Couldn't save advancement {}", path2, var6x);
+					DataProvider.saveStable(cachedOutput, advancement.deconstruct().serializeToJson(), path);
+				} catch (IOException var6) {
+					LOGGER.error("Couldn't save advancement {}", path, var6);
 				}
 			}
 		};
@@ -47,10 +46,6 @@ public class AdvancementProvider implements DataProvider {
 		for (Consumer<Consumer<Advancement>> consumer2 : this.tabs) {
 			consumer2.accept(consumer);
 		}
-	}
-
-	private static Path createPath(Path path, Advancement advancement) {
-		return path.resolve("data/" + advancement.getId().getNamespace() + "/advancements/" + advancement.getId().getPath() + ".json");
 	}
 
 	@Override

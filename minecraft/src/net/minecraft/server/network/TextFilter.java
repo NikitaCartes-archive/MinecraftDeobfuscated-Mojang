@@ -58,5 +58,9 @@ public interface TextFilter {
 		public static TextFilter.FilteredText fullyFiltered(String string) {
 			return new TextFilter.FilteredText(string, "");
 		}
+
+		public boolean isFiltered() {
+			return !this.raw.equals(this.filtered);
+		}
 	}
 }

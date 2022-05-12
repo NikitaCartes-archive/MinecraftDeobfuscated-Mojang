@@ -391,7 +391,7 @@ public abstract class ChunkGenerator {
 			Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
 			Map<Integer, List<Structure>> map = (Map<Integer, List<Structure>>)registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
 			List<BiomeSource.StepFeatureData> list = this.biomeSource.featuresPerStep();
-			WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.seedUniquifier()));
+			WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
 			long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
 			Set<Biome> set = new ObjectArraySet<>();
 			if (this instanceof FlatLevelSource) {

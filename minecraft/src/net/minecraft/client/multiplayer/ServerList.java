@@ -11,11 +11,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.util.thread.ProcessorMailbox;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerList {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final ProcessorMailbox<Runnable> IO_MAILBOX = ProcessorMailbox.create(Util.backgroundExecutor(), "server-list-io");
 	private final Minecraft minecraft;
 	private final List<ServerData> serverList = Lists.<ServerData>newArrayList();
 
@@ -90,17 +92,19 @@ public class ServerList {
 	}
 
 	public static void saveSingleServer(ServerData serverData) {
-		ServerList serverList = new ServerList(Minecraft.getInstance());
-		serverList.load();
+		IO_MAILBOX.tell(() -> {
+			ServerList serverList = new ServerList(Minecraft.getInstance());
+			serverList.load();
 
-		for (int i = 0; i < serverList.size(); i++) {
-			ServerData serverData2 = serverList.get(i);
-			if (serverData2.name.equals(serverData.name) && serverData2.ip.equals(serverData.ip)) {
-				serverList.replace(i, serverData);
-				break;
+			for (int i = 0; i < serverList.size(); i++) {
+				ServerData serverData2 = serverList.get(i);
+				if (serverData2.name.equals(serverData.name) && serverData2.ip.equals(serverData.ip)) {
+					serverList.replace(i, serverData);
+					break;
+				}
 			}
-		}
 
-		serverList.save();
+			serverList.save();
+		});
 	}
 }

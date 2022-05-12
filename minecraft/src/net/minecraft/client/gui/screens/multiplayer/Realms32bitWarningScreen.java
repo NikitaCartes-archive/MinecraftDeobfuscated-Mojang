@@ -14,9 +14,11 @@ public class Realms32bitWarningScreen extends WarningScreen {
 	private static final Component CONTENT = Component.translatable("title.32bit.deprecation.realms");
 	private static final Component CHECK = Component.translatable("title.32bit.deprecation.realms.check");
 	private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
+	private final Screen previous;
 
 	public Realms32bitWarningScreen(Screen screen) {
-		super(TITLE, CONTENT, CHECK, NARRATION, screen);
+		super(TITLE, CONTENT, CHECK, NARRATION);
+		this.previous = screen;
 	}
 
 	@Override

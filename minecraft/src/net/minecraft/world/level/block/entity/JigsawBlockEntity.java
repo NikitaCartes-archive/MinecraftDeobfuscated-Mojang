@@ -79,7 +79,7 @@ public class JigsawBlockEntity extends BlockEntity {
 		super.saveAdditional(compoundTag);
 		compoundTag.putString("name", this.name.toString());
 		compoundTag.putString("target", this.target.toString());
-		compoundTag.putString("pool", this.pool.toString());
+		compoundTag.putString("pool", this.pool.location().toString());
 		compoundTag.putString("final_state", this.finalState);
 		compoundTag.putString("joint", this.joint.getSerializedName());
 	}

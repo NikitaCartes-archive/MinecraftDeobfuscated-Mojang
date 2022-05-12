@@ -3,6 +3,7 @@ package net.minecraft.data.worldgen;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -128,8 +129,8 @@ public interface StructureSets {
 		new ConcentricRingsStructurePlacement(32, 3, 128, BuiltinRegistries.BIOME.getOrCreateTag(BiomeTags.STRONGHOLD_BIASED_TO))
 	);
 
-	static Holder<StructureSet> bootstrap() {
-		return (Holder<StructureSet>)BuiltinRegistries.STRUCTURE_SETS.holders().iterator().next();
+	static Holder<StructureSet> bootstrap(Registry<StructureSet> registry) {
+		return (Holder<StructureSet>)registry.holders().iterator().next();
 	}
 
 	static Holder<StructureSet> register(ResourceKey<StructureSet> resourceKey, StructureSet structureSet) {

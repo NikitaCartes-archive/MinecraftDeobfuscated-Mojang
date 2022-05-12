@@ -14,24 +14,28 @@ public class ServerboundChatPacket implements Packet<ServerGamePacketListener> {
 	private final String message;
 	private final Instant timeStamp;
 	private final Crypt.SaltSignaturePair saltSignature;
+	private final boolean signedPreview;
 
-	public ServerboundChatPacket(String string, MessageSignature messageSignature) {
+	public ServerboundChatPacket(String string, MessageSignature messageSignature, boolean bl) {
 		this.message = StringUtil.trimChatMessage(string);
 		this.timeStamp = messageSignature.timeStamp();
 		this.saltSignature = messageSignature.saltSignature();
+		this.signedPreview = bl;
 	}
 
 	public ServerboundChatPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.message = friendlyByteBuf.readUtf(256);
-		this.timeStamp = Instant.ofEpochSecond(friendlyByteBuf.readLong());
+		this.timeStamp = friendlyByteBuf.readInstant();
 		this.saltSignature = new Crypt.SaltSignaturePair(friendlyByteBuf);
+		this.signedPreview = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.message);
-		friendlyByteBuf.writeLong(this.timeStamp.getEpochSecond());
-		this.saltSignature.write(friendlyByteBuf);
+		friendlyByteBuf.writeInstant(this.timeStamp);
+		Crypt.SaltSignaturePair.write(friendlyByteBuf, this.saltSignature);
+		friendlyByteBuf.writeBoolean(this.signedPreview);
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
@@ -52,5 +56,9 @@ public class ServerboundChatPacket implements Packet<ServerGamePacketListener> {
 
 	public boolean hasExpired(Instant instant) {
 		return instant.isAfter(this.getExpiresAt());
+	}
+
+	public boolean signedPreview() {
+		return this.signedPreview;
 	}
 }

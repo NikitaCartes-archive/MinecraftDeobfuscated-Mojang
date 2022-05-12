@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
@@ -64,7 +65,6 @@ import net.minecraft.world.entity.ai.util.AirRandomPos;
 import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -1032,9 +1032,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		private List<BlockPos> findNearbyHivesWithSpace() {
 			BlockPos blockPos = Bee.this.blockPosition();
 			PoiManager poiManager = ((ServerLevel)Bee.this.level).getPoiManager();
-			Stream<PoiRecord> stream = poiManager.getInRange(
-				poiType -> poiType == PoiType.BEEHIVE || poiType == PoiType.BEE_NEST, blockPos, 20, PoiManager.Occupancy.ANY
-			);
+			Stream<PoiRecord> stream = poiManager.getInRange(holder -> holder.is(PoiTypeTags.BEE_HOME), blockPos, 20, PoiManager.Occupancy.ANY);
 			return (List<BlockPos>)stream.map(PoiRecord::getPos)
 				.filter(Bee.this::doesHiveHaveSpace)
 				.sorted(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos)))

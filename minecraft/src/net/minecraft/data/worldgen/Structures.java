@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -310,7 +311,7 @@ public class Structures {
 		)
 	);
 
-	public static Holder<? extends Structure> bootstrap() {
+	public static Holder<? extends Structure> bootstrap(Registry<Structure> registry) {
 		return MINESHAFT;
 	}
 

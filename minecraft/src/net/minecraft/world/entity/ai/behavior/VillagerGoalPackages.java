@@ -11,7 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 
@@ -27,17 +27,17 @@ public class VillagerGoalPackages {
 			Pair.of(0, new WakeUp()),
 			Pair.of(0, new ReactToBell()),
 			Pair.of(0, new SetRaidStatus()),
-			Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE)),
-			Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.POTENTIAL_JOB_SITE)),
+			Pair.of(0, new ValidateNearbyPoi(villagerProfession.heldJobSite(), MemoryModuleType.JOB_SITE)),
+			Pair.of(0, new ValidateNearbyPoi(villagerProfession.acquirableJobSite(), MemoryModuleType.POTENTIAL_JOB_SITE)),
 			Pair.of(1, new MoveToTargetSink()),
 			Pair.of(2, new PoiCompetitorScan(villagerProfession)),
 			Pair.of(3, new LookAndFollowTradingPlayerSink(f)),
 			Pair.of(5, new GoToWantedItem(f, false, 4)),
-			Pair.of(6, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true, Optional.empty())),
+			Pair.of(6, new AcquirePoi(villagerProfession.acquirableJobSite(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true, Optional.empty())),
 			Pair.of(7, new GoToPotentialJobSite(f)),
 			Pair.of(8, new YieldJobSite(f)),
-			Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false, Optional.of((byte)14))),
-			Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true, Optional.of((byte)14))),
+			Pair.of(10, new AcquirePoi(holder -> holder.is(PoiTypes.HOME), MemoryModuleType.HOME, false, Optional.of((byte)14))),
+			Pair.of(10, new AcquirePoi(holder -> holder.is(PoiTypes.MEETING), MemoryModuleType.MEETING_POINT, true, Optional.of((byte)14))),
 			Pair.of(10, new AssignProfessionFromJobSite()),
 			Pair.of(10, new ResetProfession())
 		);
@@ -100,7 +100,7 @@ public class VillagerGoalPackages {
 	public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getRestPackage(VillagerProfession villagerProfession, float f) {
 		return ImmutableList.of(
 			Pair.of(2, new SetWalkTargetFromBlockMemory(MemoryModuleType.HOME, f, 1, 150, 1200)),
-			Pair.of(3, new ValidateNearbyPoi(PoiType.HOME, MemoryModuleType.HOME)),
+			Pair.of(3, new ValidateNearbyPoi(holder -> holder.is(PoiTypes.HOME), MemoryModuleType.HOME)),
 			Pair.of(3, new SleepInBed()),
 			Pair.of(
 				5,
@@ -126,7 +126,7 @@ public class VillagerGoalPackages {
 			Pair.of(10, new SetLookAndInteract(EntityType.PLAYER, 4)),
 			Pair.of(2, new SetWalkTargetFromBlockMemory(MemoryModuleType.MEETING_POINT, f, 6, 100, 200)),
 			Pair.of(3, new GiveGiftToHero(100)),
-			Pair.of(3, new ValidateNearbyPoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT)),
+			Pair.of(3, new ValidateNearbyPoi(holder -> holder.is(PoiTypes.MEETING), MemoryModuleType.MEETING_POINT)),
 			Pair.of(
 				3,
 				new GateBehavior<>(

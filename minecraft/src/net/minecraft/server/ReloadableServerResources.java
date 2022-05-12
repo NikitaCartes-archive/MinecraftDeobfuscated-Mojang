@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import com.mojang.logging.LogUtils;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -16,7 +17,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadInstance;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Unit;
@@ -102,7 +102,9 @@ public class ReloadableServerResources {
 		Map<TagKey<T>, List<Holder<T>>> map = (Map<TagKey<T>, List<Holder<T>>>)loadResult.tags()
 			.entrySet()
 			.stream()
-			.collect(Collectors.toUnmodifiableMap(entry -> TagKey.create(resourceKey, (ResourceLocation)entry.getKey()), entry -> ((Tag)entry.getValue()).getValues()));
+			.collect(
+				Collectors.toUnmodifiableMap(entry -> TagKey.create(resourceKey, (ResourceLocation)entry.getKey()), entry -> List.copyOf((Collection)entry.getValue()))
+			);
 		registryAccess.registryOrThrow(resourceKey).bindTags(map);
 	}
 }

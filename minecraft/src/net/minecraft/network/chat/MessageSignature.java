@@ -16,8 +16,12 @@ public record MessageSignature(UUID sender, Instant timeStamp, Crypt.SaltSignatu
 	}
 
 	public boolean verify(Signature signature, Component component) throws SignatureException {
-		updateSignature(signature, component, this.sender, this.timeStamp, this.saltSignature.salt());
-		return signature.verify(this.saltSignature.signature());
+		if (this.isValid()) {
+			updateSignature(signature, component, this.sender, this.timeStamp, this.saltSignature.salt());
+			return signature.verify(this.saltSignature.signature());
+		} else {
+			return false;
+		}
 	}
 
 	public boolean verify(Signature signature, String string) throws SignatureException {
@@ -38,5 +42,9 @@ public record MessageSignature(UUID sender, Instant timeStamp, Crypt.SaltSignatu
 	private static byte[] encodeContent(Component component) {
 		String string = Component.Serializer.toStableJson(component);
 		return string.getBytes(StandardCharsets.UTF_8);
+	}
+
+	public boolean isValid() {
+		return this.sender != Util.NIL_UUID && this.saltSignature.isValid();
 	}
 }

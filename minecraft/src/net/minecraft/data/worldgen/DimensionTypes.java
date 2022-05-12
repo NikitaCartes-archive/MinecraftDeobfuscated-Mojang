@@ -9,8 +9,7 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class DimensionTypes {
-	public static Holder<DimensionType> bootstrap() {
-		Registry<DimensionType> registry = BuiltinRegistries.DIMENSION_TYPE;
+	public static Holder<DimensionType> bootstrap(Registry<DimensionType> registry) {
 		BuiltinRegistries.register(
 			registry,
 			BuiltinDimensionTypes.OVERWORLD,

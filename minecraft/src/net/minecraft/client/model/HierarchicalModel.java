@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.client.model.geom.ModelPart;
@@ -39,12 +38,12 @@ public abstract class HierarchicalModel<E extends Entity> extends EntityModel<E>
 		return this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
 	}
 
-	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition) {
-		this.animate(animationState, animationDefinition, 1.0F);
+	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f) {
+		this.animate(animationState, animationDefinition, f, 1.0F);
 	}
 
-	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f) {
-		animationState.updateTime(Minecraft.getInstance().isPaused(), f);
+	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f, float g) {
+		animationState.updateTime(f, g);
 		animationState.ifStarted(
 			animationStatex -> KeyframeAnimations.animate(this, animationDefinition, animationStatex.getAccumulatedTime(), 1.0F, ANIMATION_VECTOR_CACHE)
 		);

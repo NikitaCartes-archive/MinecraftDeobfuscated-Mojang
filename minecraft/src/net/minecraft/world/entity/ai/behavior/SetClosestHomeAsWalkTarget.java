@@ -1,12 +1,15 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
@@ -40,7 +44,7 @@ public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
 		} else {
 			PathfinderMob pathfinderMob = (PathfinderMob)livingEntity;
 			PoiManager poiManager = serverLevel.getPoiManager();
-			Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
+			Optional<BlockPos> optional = poiManager.findClosest(holder -> holder.is(PoiTypes.HOME), livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
 			return optional.isPresent() && !(((BlockPos)optional.get()).distSqr(pathfinderMob.blockPosition()) <= 4.0);
 		}
 	}
@@ -62,11 +66,14 @@ public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
 				return true;
 			}
 		};
-		Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
-		Path path = pathfinderMob.getNavigation().createPath(stream, PoiType.HOME.getValidRange());
+		Set<Pair<Holder<PoiType>, BlockPos>> set = (Set<Pair<Holder<PoiType>, BlockPos>>)poiManager.findAllWithType(
+				holder -> holder.is(PoiTypes.HOME), predicate, livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY
+			)
+			.collect(Collectors.toSet());
+		Path path = AcquirePoi.findPathToPois(pathfinderMob, set);
 		if (path != null && path.canReach()) {
 			BlockPos blockPos = path.getTarget();
-			Optional<PoiType> optional = poiManager.getType(blockPos);
+			Optional<Holder<PoiType>> optional = poiManager.getType(blockPos);
 			if (optional.isPresent()) {
 				livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, this.speedModifier, 1));
 				DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);

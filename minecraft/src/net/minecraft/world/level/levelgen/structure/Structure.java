@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.structure;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -92,8 +93,7 @@ public abstract class Structure {
 			)
 		);
 		if (optional.isPresent() && isValidBiome((Structure.GenerationStub)optional.get(), chunkGenerator, randomState, predicate)) {
-			StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-			((Structure.GenerationStub)optional.get()).generator().accept(structurePiecesBuilder);
+			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();
 			StructureStart structureStart = new StructureStart(this, chunkPos, i, structurePiecesBuilder.build());
 			if (structureStart.isValid()) {
 				return structureStart;
@@ -216,7 +216,18 @@ public abstract class Structure {
 		}
 	}
 
-	public static record GenerationStub(BlockPos position, Consumer<StructurePiecesBuilder> generator) {
+	public static record GenerationStub(BlockPos position, Either<Consumer<StructurePiecesBuilder>, StructurePiecesBuilder> generator) {
+		public GenerationStub(BlockPos blockPos, Consumer<StructurePiecesBuilder> consumer) {
+			this(blockPos, Either.left(consumer));
+		}
+
+		public StructurePiecesBuilder getPiecesBuilder() {
+			return this.generator.map(consumer -> {
+				StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
+				consumer.accept(structurePiecesBuilder);
+				return structurePiecesBuilder;
+			}, structurePiecesBuilder -> structurePiecesBuilder);
+		}
 	}
 
 	public static record StructureSettings(

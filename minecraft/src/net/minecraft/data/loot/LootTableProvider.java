@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 
 public class LootTableProvider implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final DataGenerator generator;
+	private final DataGenerator.PathProvider pathProvider;
 	private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> subProviders = ImmutableList.of(
 		Pair.of(FishingLoot::new, LootContextParamSets.FISHING),
 		Pair.of(ChestLoot::new, LootContextParamSets.CHEST),
@@ -38,12 +38,11 @@ public class LootTableProvider implements DataProvider {
 	);
 
 	public LootTableProvider(DataGenerator dataGenerator) {
-		this.generator = dataGenerator;
+		this.pathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "loot_tables");
 	}
 
 	@Override
 	public void run(CachedOutput cachedOutput) {
-		Path path = this.generator.getOutputFolder();
 		Map<ResourceLocation, LootTable> map = Maps.<ResourceLocation, LootTable>newHashMap();
 		this.subProviders.forEach(pair -> ((Consumer)((Supplier)pair.getFirst()).get()).accept((BiConsumer)(resourceLocationx, builder) -> {
 				if (map.put(resourceLocationx, builder.setParamSet((LootContextParamSet)pair.getSecond()).build()) != null) {
@@ -63,19 +62,15 @@ public class LootTableProvider implements DataProvider {
 			throw new IllegalStateException("Failed to validate loot tables, see logs");
 		} else {
 			map.forEach((resourceLocationx, lootTable) -> {
-				Path path2 = createPath(path, resourceLocationx);
+				Path path = this.pathProvider.json(resourceLocationx);
 
 				try {
-					DataProvider.saveStable(cachedOutput, LootTables.serialize(lootTable), path2);
-				} catch (IOException var6) {
-					LOGGER.error("Couldn't save loot table {}", path2, var6);
+					DataProvider.saveStable(cachedOutput, LootTables.serialize(lootTable), path);
+				} catch (IOException var6x) {
+					LOGGER.error("Couldn't save loot table {}", path, var6x);
 				}
 			});
 		}
-	}
-
-	private static Path createPath(Path path, ResourceLocation resourceLocation) {
-		return path.resolve("data/" + resourceLocation.getNamespace() + "/loot_tables/" + resourceLocation.getPath() + ".json");
 	}
 
 	@Override

@@ -30,7 +30,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -59,6 +59,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
@@ -66,6 +67,7 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -729,7 +731,7 @@ public class ServerPlayer extends Player {
 			this.connection
 				.send(
 					new ClientboundRespawnPacket(
-						serverLevel.dimensionTypeRegistration(),
+						serverLevel.dimensionTypeId(),
 						serverLevel.dimension(),
 						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 						this.gameMode.getGameModeForPlayer(),
@@ -1300,16 +1302,17 @@ public class ServerPlayer extends Player {
 		}
 	}
 
-	public void sendChatMessage(SignedMessage signedMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+	public void sendChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
 		if (this.acceptsChat(resourceKey)) {
 			this.connection
 				.send(
 					new ClientboundPlayerChatPacket(
-						signedMessage.content(),
+						playerChatMessage.signedContent(),
+						playerChatMessage.unsignedContent(),
 						this.resolveChatTypeId(resourceKey),
 						chatSender,
-						signedMessage.signature().timeStamp(),
-						signedMessage.signature().saltSignature()
+						playerChatMessage.signature().timeStamp(),
+						playerChatMessage.signature().saltSignature()
 					)
 				);
 		}
@@ -1357,6 +1360,10 @@ public class ServerPlayer extends Player {
 
 	public void sendTexturePack(String string, String string2, boolean bl, @Nullable Component component) {
 		this.connection.send(new ClientboundResourcePackPacket(string, string2, bl, component));
+	}
+
+	public void sendServerStatus(ServerStatus serverStatus) {
+		this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.previewsChat()));
 	}
 
 	@Override
@@ -1453,7 +1460,7 @@ public class ServerPlayer extends Player {
 			this.connection
 				.send(
 					new ClientboundRespawnPacket(
-						serverLevel.dimensionTypeRegistration(),
+						serverLevel.dimensionTypeId(),
 						serverLevel.dimension(),
 						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 						this.gameMode.getGameModeForPlayer(),

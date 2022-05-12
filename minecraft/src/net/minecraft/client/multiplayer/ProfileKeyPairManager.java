@@ -1,8 +1,10 @@
 package net.minecraft.client.multiplayer;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.exceptions.MinecraftClientException;
 import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.minecraft.InsecurePublicKeyException.MissingException;
 import com.mojang.authlib.yggdrasil.response.KeyPairResponse;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
@@ -13,8 +15,11 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
+import java.time.DateTimeException;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -115,14 +120,27 @@ public class ProfileKeyPairManager {
 	private ProfileKeyPair fetchProfileKeyPair(UserApiService userApiService) throws CryptException, IOException {
 		KeyPairResponse keyPairResponse = userApiService.getKeyPair();
 		if (keyPairResponse != null) {
-			ProfilePublicKey.Data data = new ProfilePublicKey.Data(
-				Instant.parse(keyPairResponse.getExpiresAt()), keyPairResponse.getPublicKey(), keyPairResponse.getPublicKeySignature()
-			);
+			ProfilePublicKey.Data data = parsePublicKey(keyPairResponse);
 			return new ProfileKeyPair(
-				Crypt.stringToPemRsaPrivateKey(keyPairResponse.getPrivateKey()), ProfilePublicKey.parseTrusted(data), Instant.parse(keyPairResponse.getRefreshedAfter())
+				Crypt.stringToPemRsaPrivateKey(keyPairResponse.getPrivateKey()), ProfilePublicKey.createTrusted(data), Instant.parse(keyPairResponse.getRefreshedAfter())
 			);
 		} else {
 			throw new IOException("Could not retrieve profile key pair");
+		}
+	}
+
+	private static ProfilePublicKey.Data parsePublicKey(KeyPairResponse keyPairResponse) throws CryptException {
+		if (!Strings.isNullOrEmpty(keyPairResponse.getPublicKey()) && !Strings.isNullOrEmpty(keyPairResponse.getPublicKeySignature())) {
+			try {
+				Instant instant = Instant.parse(keyPairResponse.getExpiresAt());
+				PublicKey publicKey = Crypt.stringToRsaPublicKey(keyPairResponse.getPublicKey());
+				byte[] bs = Base64.getDecoder().decode(keyPairResponse.getPublicKeySignature());
+				return new ProfilePublicKey.Data(instant, publicKey, bs);
+			} catch (IllegalArgumentException | DateTimeException var4) {
+				throw new CryptException(var4);
+			}
+		} else {
+			throw new CryptException(new MissingException());
 		}
 	}
 

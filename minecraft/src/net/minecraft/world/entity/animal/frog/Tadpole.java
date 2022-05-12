@@ -37,6 +37,8 @@ import net.minecraft.world.level.Level;
 public class Tadpole extends AbstractFish {
 	@VisibleForTesting
 	public static int ticksToBeFrog = Math.abs(-24000);
+	public static float HITBOX_WIDTH = 0.4F;
+	public static float HITBOX_HEIGHT = 0.3F;
 	private int age;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Tadpole>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY

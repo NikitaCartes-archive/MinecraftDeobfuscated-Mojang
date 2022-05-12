@@ -93,7 +93,7 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
 	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
 		this.ensureValid(resourceLocation);
 		this.advancement
-			.parent(new ResourceLocation("recipes/root"))
+			.parent(ROOT_RECIPE_ADVANCEMENT)
 			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(RequirementsStrategy.OR);

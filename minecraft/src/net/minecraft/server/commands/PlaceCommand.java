@@ -1,13 +1,19 @@
 package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import java.util.Optional;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.TemplateMirrorArgument;
+import net.minecraft.commands.arguments.TemplateRotationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -17,6 +23,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -24,12 +33,22 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class PlaceCommand {
 	private static final SimpleCommandExceptionType ERROR_FEATURE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.place.feature.failed"));
 	private static final SimpleCommandExceptionType ERROR_JIGSAW_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.place.jigsaw.failed"));
 	private static final SimpleCommandExceptionType ERROR_STRUCTURE_FAILED = new SimpleCommandExceptionType(
 		Component.translatable("commands.place.structure.failed")
+	);
+	private static final DynamicCommandExceptionType ERROR_TEMPLATE_INVALID = new DynamicCommandExceptionType(
+		object -> Component.translatable("commands.place.template.invalid", object)
+	);
+	private static final SimpleCommandExceptionType ERROR_TEMPLATE_FAILED = new SimpleCommandExceptionType(
+		Component.translatable("commands.place.template.failed")
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -113,6 +132,93 @@ public class PlaceCommand {
 								)
 						)
 				)
+				.then(
+					Commands.literal("template")
+						.then(
+							Commands.argument("template", ResourceLocationArgument.id())
+								.executes(
+									commandContext -> placeTemplate(
+											commandContext.getSource(),
+											ResourceLocationArgument.getId(commandContext, "template"),
+											new BlockPos(commandContext.getSource().getPosition()),
+											Rotation.NONE,
+											Mirror.NONE,
+											1.0F,
+											0
+										)
+								)
+								.then(
+									Commands.argument("pos", BlockPosArgument.blockPos())
+										.executes(
+											commandContext -> placeTemplate(
+													commandContext.getSource(),
+													ResourceLocationArgument.getId(commandContext, "template"),
+													BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+													Rotation.NONE,
+													Mirror.NONE,
+													1.0F,
+													0
+												)
+										)
+										.then(
+											Commands.argument("rotation", TemplateRotationArgument.templateRotation())
+												.executes(
+													commandContext -> placeTemplate(
+															commandContext.getSource(),
+															ResourceLocationArgument.getId(commandContext, "template"),
+															BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+															TemplateRotationArgument.getRotation(commandContext, "rotation"),
+															Mirror.NONE,
+															1.0F,
+															0
+														)
+												)
+												.then(
+													Commands.argument("mirror", TemplateMirrorArgument.templateMirror())
+														.executes(
+															commandContext -> placeTemplate(
+																	commandContext.getSource(),
+																	ResourceLocationArgument.getId(commandContext, "template"),
+																	BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																	TemplateRotationArgument.getRotation(commandContext, "rotation"),
+																	TemplateMirrorArgument.getMirror(commandContext, "mirror"),
+																	1.0F,
+																	0
+																)
+														)
+														.then(
+															Commands.argument("integrity", FloatArgumentType.floatArg(0.0F, 1.0F))
+																.executes(
+																	commandContext -> placeTemplate(
+																			commandContext.getSource(),
+																			ResourceLocationArgument.getId(commandContext, "template"),
+																			BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																			TemplateRotationArgument.getRotation(commandContext, "rotation"),
+																			TemplateMirrorArgument.getMirror(commandContext, "mirror"),
+																			FloatArgumentType.getFloat(commandContext, "integrity"),
+																			0
+																		)
+																)
+																.then(
+																	Commands.argument("seed", IntegerArgumentType.integer())
+																		.executes(
+																			commandContext -> placeTemplate(
+																					commandContext.getSource(),
+																					ResourceLocationArgument.getId(commandContext, "template"),
+																					BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																					TemplateRotationArgument.getRotation(commandContext, "rotation"),
+																					TemplateMirrorArgument.getMirror(commandContext, "mirror"),
+																					FloatArgumentType.getFloat(commandContext, "integrity"),
+																					IntegerArgumentType.getInteger(commandContext, "seed")
+																				)
+																		)
+																)
+														)
+												)
+										)
+								)
+						)
+				)
 		);
 	}
 
@@ -186,6 +292,41 @@ public class PlaceCommand {
 			String string = (String)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]");
 			commandSourceStack.sendSuccess(Component.translatable("commands.place.structure.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
 			return 1;
+		}
+	}
+
+	public static int placeTemplate(
+		CommandSourceStack commandSourceStack, ResourceLocation resourceLocation, BlockPos blockPos, Rotation rotation, Mirror mirror, float f, int i
+	) throws CommandSyntaxException {
+		ServerLevel serverLevel = commandSourceStack.getLevel();
+		StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
+
+		Optional<StructureTemplate> optional;
+		try {
+			optional = structureTemplateManager.get(resourceLocation);
+		} catch (ResourceLocationException var13) {
+			throw ERROR_TEMPLATE_INVALID.create(resourceLocation);
+		}
+
+		if (optional.isEmpty()) {
+			throw ERROR_TEMPLATE_INVALID.create(resourceLocation);
+		} else {
+			StructureTemplate structureTemplate = (StructureTemplate)optional.get();
+			checkLoaded(serverLevel, new ChunkPos(blockPos), new ChunkPos(blockPos.offset(structureTemplate.getSize())));
+			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setMirror(mirror).setRotation(rotation);
+			if (f < 1.0F) {
+				structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(f)).setRandom(StructureBlockEntity.createRandom((long)i));
+			}
+
+			boolean bl = structureTemplate.placeInWorld(serverLevel, blockPos, blockPos, structurePlaceSettings, StructureBlockEntity.createRandom((long)i), 2);
+			if (!bl) {
+				throw ERROR_TEMPLATE_FAILED.create();
+			} else {
+				commandSourceStack.sendSuccess(
+					Component.translatable("commands.place.template.success", resourceLocation, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true
+				);
+				return 1;
+			}
 		}
 	}
 

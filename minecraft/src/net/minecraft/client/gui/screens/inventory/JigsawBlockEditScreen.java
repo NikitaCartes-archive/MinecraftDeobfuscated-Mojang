@@ -90,7 +90,7 @@ public class JigsawBlockEditScreen extends Screen {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.poolEdit = new EditBox(this.font, this.width / 2 - 152, 20, 300, 20, Component.translatable("jigsaw_block.pool"));
 		this.poolEdit.setMaxLength(128);
-		this.poolEdit.setValue(this.jigsawEntity.getPool().toString());
+		this.poolEdit.setValue(this.jigsawEntity.getPool().location().toString());
 		this.poolEdit.setResponder(string -> this.updateValidity());
 		this.addWidget(this.poolEdit);
 		this.nameEdit = new EditBox(this.font, this.width / 2 - 152, 55, 300, 20, Component.translatable("jigsaw_block.name"));

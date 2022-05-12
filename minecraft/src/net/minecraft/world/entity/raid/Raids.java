@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -16,10 +15,10 @@ import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -86,10 +85,10 @@ public class Raids extends SavedData {
 				return null;
 			} else {
 				BlockPos blockPos = serverPlayer.blockPosition();
-				List<PoiRecord> list = (List<PoiRecord>)this.level
+				List<PoiRecord> list = this.level
 					.getPoiManager()
-					.getInRange(PoiType.ALL, blockPos, 64, PoiManager.Occupancy.IS_OCCUPIED)
-					.collect(Collectors.toList());
+					.getInRange(holder -> holder.is(PoiTypeTags.VILLAGE), blockPos, 64, PoiManager.Occupancy.IS_OCCUPIED)
+					.toList();
 				int i = 0;
 				Vec3 vec3 = Vec3.ZERO;
 

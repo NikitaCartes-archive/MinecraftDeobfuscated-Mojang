@@ -15,7 +15,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -241,12 +240,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 		level.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.ACTIVE).setValue(POWER, Integer.valueOf(i)), 3);
 		level.scheduleTick(blockPos, blockState.getBlock(), 40);
 		updateNeighbours(level, blockPos);
-		if (entity instanceof Player) {
-			level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
-		} else if (entity != null && entity.getControllingPassenger() instanceof Player player) {
-			level.gameEvent(player, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
-		}
-
+		level.gameEvent(entity, GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, blockPos);
 		if (!(Boolean)blockState.getValue(WATERLOGGED)) {
 			level.playSound(
 				null,

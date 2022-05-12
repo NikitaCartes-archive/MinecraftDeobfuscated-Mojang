@@ -30,6 +30,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
@@ -73,6 +74,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	private MinecraftServerGui gui;
 	@Nullable
 	private final TextFilterClient textFilterClient;
+	private final ChatDecorator chatDecorator;
 
 	public DedicatedServer(
 		Thread thread,
@@ -101,6 +103,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
 		this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
+		this.chatDecorator = this.getProperties().testRainbowChat ? ChatDecorator.testRainbowChat() : ChatDecorator.PLAIN;
 	}
 
 	@Override
@@ -348,6 +351,16 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean isEpollEnabled() {
 		return this.getProperties().useNativeTransport;
+	}
+
+	@Override
+	public boolean previewsChat() {
+		return this.getProperties().previewsChat;
+	}
+
+	@Override
+	public ChatDecorator getChatDecorator() {
+		return this.chatDecorator;
 	}
 
 	public DedicatedPlayerList getPlayerList() {

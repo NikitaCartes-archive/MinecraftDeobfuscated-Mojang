@@ -90,7 +90,7 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 	private BlockPos getRandomPoiWithinSection(SectionPos sectionPos) {
 		ServerLevel serverLevel = (ServerLevel)this.mob.level;
 		PoiManager poiManager = serverLevel.getPoiManager();
-		List<BlockPos> list = (List<BlockPos>)poiManager.getInRange(poiType -> true, sectionPos.center(), 8, PoiManager.Occupancy.IS_OCCUPIED)
+		List<BlockPos> list = (List<BlockPos>)poiManager.getInRange(holder -> true, sectionPos.center(), 8, PoiManager.Occupancy.IS_OCCUPIED)
 			.map(PoiRecord::getPos)
 			.collect(Collectors.toList());
 		return list.isEmpty() ? null : (BlockPos)list.get(serverLevel.random.nextInt(list.size()));

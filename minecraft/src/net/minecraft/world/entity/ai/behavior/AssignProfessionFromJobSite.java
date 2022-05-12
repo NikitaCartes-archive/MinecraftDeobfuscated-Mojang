@@ -31,7 +31,7 @@ public class AssignProfessionFromJobSite extends Behavior<Villager> {
 			MinecraftServer minecraftServer = serverLevel.getServer();
 			Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension()))
 				.flatMap(serverLevelx -> serverLevelx.getPoiManager().getType(globalPos.pos()))
-				.flatMap(poiType -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.getJobPoiType() == poiType).findFirst())
+				.flatMap(holder -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.heldJobSite().test(holder)).findFirst())
 				.ifPresent(villagerProfession -> {
 					villager.setVillagerData(villager.getVillagerData().setProfession(villagerProfession));
 					villager.refreshBrain(serverLevel);

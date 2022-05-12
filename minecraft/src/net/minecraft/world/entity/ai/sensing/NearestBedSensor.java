@@ -1,18 +1,22 @@
 package net.minecraft.world.entity.ai.sensing;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.AcquirePoi;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class NearestBedSensor extends Sensor<Mob> {
@@ -48,11 +52,14 @@ public class NearestBedSensor extends Sensor<Mob> {
 					return true;
 				}
 			};
-			Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, mob.blockPosition(), 48, PoiManager.Occupancy.ANY);
-			Path path = mob.getNavigation().createPath(stream, PoiType.HOME.getValidRange());
+			Set<Pair<Holder<PoiType>, BlockPos>> set = (Set<Pair<Holder<PoiType>, BlockPos>>)poiManager.findAllWithType(
+					holder -> holder.is(PoiTypes.HOME), predicate, mob.blockPosition(), 48, PoiManager.Occupancy.ANY
+				)
+				.collect(Collectors.toSet());
+			Path path = AcquirePoi.findPathToPois(mob, set);
 			if (path != null && path.canReach()) {
 				BlockPos blockPos = path.getTarget();
-				Optional<PoiType> optional = poiManager.getType(blockPos);
+				Optional<Holder<PoiType>> optional = poiManager.getType(blockPos);
 				if (optional.isPresent()) {
 					mob.getBrain().setMemory(MemoryModuleType.NEAREST_BED, blockPos);
 				}

@@ -14,7 +14,6 @@ import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
-	private static final long DISPLAY_TIME = 5000L;
 	private static final int MAX_LINE_SIZE = 200;
 	private final SystemToast.SystemToastIds id;
 	private Component title;
@@ -91,7 +90,7 @@ public class SystemToast implements Toast {
 			}
 		}
 
-		return l - this.lastChanged < 5000L ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
+		return l - this.lastChanged < this.id.displayTime ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
 	}
 
 	private void renderBackgroundRow(PoseStack poseStack, ToastComponent toastComponent, int i, int j, int k, int l) {
@@ -150,6 +149,17 @@ public class SystemToast implements Toast {
 		PACK_LOAD_FAILURE,
 		WORLD_ACCESS_FAILURE,
 		PACK_COPY_FAILURE,
-		PERIODIC_NOTIFICATION;
+		PERIODIC_NOTIFICATION,
+		CHAT_PREVIEW_WARNING(10000L);
+
+		final long displayTime;
+
+		private SystemToastIds(long l) {
+			this.displayTime = l;
+		}
+
+		private SystemToastIds() {
+			this(5000L);
+		}
 	}
 }

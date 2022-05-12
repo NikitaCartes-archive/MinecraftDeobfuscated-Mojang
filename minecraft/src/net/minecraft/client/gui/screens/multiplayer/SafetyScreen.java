@@ -14,9 +14,11 @@ public class SafetyScreen extends WarningScreen {
 	private static final Component CONTENT = Component.translatable("multiplayerWarning.message");
 	private static final Component CHECK = Component.translatable("multiplayerWarning.check");
 	private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
+	private final Screen previous;
 
 	public SafetyScreen(Screen screen) {
-		super(TITLE, CONTENT, CHECK, NARRATION, screen);
+		super(TITLE, CONTENT, CHECK, NARRATION);
+		this.previous = screen;
 	}
 
 	@Override

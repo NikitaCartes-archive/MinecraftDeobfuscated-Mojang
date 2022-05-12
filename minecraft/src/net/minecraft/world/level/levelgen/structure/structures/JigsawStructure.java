@@ -91,7 +91,7 @@ public final class JigsawStructure extends Structure {
 		int i = this.startHeight
 			.sample(generationContext.random(), new WorldGenerationContext(generationContext.chunkGenerator(), generationContext.heightAccessor()));
 		BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), i, chunkPos.getMinBlockZ());
-		Pools.bootstrap();
+		Pools.forceBootstrap();
 		return JigsawPlacement.addPieces(
 			generationContext,
 			this.startPool,

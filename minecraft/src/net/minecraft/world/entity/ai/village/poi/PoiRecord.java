@@ -4,12 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Objects;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.util.VisibleForDebug;
 
 public class PoiRecord {
 	private final BlockPos pos;
-	private final PoiType poiType;
+	private final Holder<PoiType> poiType;
 	private int freeTickets;
 	private final Runnable setDirty;
 
@@ -17,7 +19,7 @@ public class PoiRecord {
 		return RecordCodecBuilder.create(
 			instance -> instance.group(
 						BlockPos.CODEC.fieldOf("pos").forGetter(poiRecord -> poiRecord.pos),
-						Registry.POINT_OF_INTEREST_TYPE.byNameCodec().fieldOf("type").forGetter(poiRecord -> poiRecord.poiType),
+						RegistryFixedCodec.create(Registry.POINT_OF_INTEREST_TYPE_REGISTRY).fieldOf("type").forGetter(poiRecord -> poiRecord.poiType),
 						Codec.INT.fieldOf("free_tickets").orElse(0).forGetter(poiRecord -> poiRecord.freeTickets),
 						RecordCodecBuilder.point(runnable)
 					)
@@ -25,15 +27,15 @@ public class PoiRecord {
 		);
 	}
 
-	private PoiRecord(BlockPos blockPos, PoiType poiType, int i, Runnable runnable) {
+	private PoiRecord(BlockPos blockPos, Holder<PoiType> holder, int i, Runnable runnable) {
 		this.pos = blockPos.immutable();
-		this.poiType = poiType;
+		this.poiType = holder;
 		this.freeTickets = i;
 		this.setDirty = runnable;
 	}
 
-	public PoiRecord(BlockPos blockPos, PoiType poiType, Runnable runnable) {
-		this(blockPos, poiType, poiType.getMaxTickets(), runnable);
+	public PoiRecord(BlockPos blockPos, Holder<PoiType> holder, Runnable runnable) {
+		this(blockPos, holder, holder.value().maxTickets(), runnable);
 	}
 
 	@Deprecated
@@ -53,7 +55,7 @@ public class PoiRecord {
 	}
 
 	protected boolean releaseTicket() {
-		if (this.freeTickets >= this.poiType.getMaxTickets()) {
+		if (this.freeTickets >= this.poiType.value().maxTickets()) {
 			return false;
 		} else {
 			this.freeTickets++;
@@ -67,14 +69,14 @@ public class PoiRecord {
 	}
 
 	public boolean isOccupied() {
-		return this.freeTickets != this.poiType.getMaxTickets();
+		return this.freeTickets != this.poiType.value().maxTickets();
 	}
 
 	public BlockPos getPos() {
 		return this.pos;
 	}
 
-	public PoiType getPoiType() {
+	public Holder<PoiType> getPoiType() {
 		return this.poiType;
 	}
 

@@ -10,7 +10,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 
 public class MsgCommand {
@@ -33,14 +33,16 @@ public class MsgCommand {
 		commandDispatcher.register(Commands.literal("w").redirect(literalCommandNode));
 	}
 
-	private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, SignedMessage signedMessage) {
+	private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, PlayerChatMessage playerChatMessage) {
+		PlayerChatMessage playerChatMessage2 = commandSourceStack.getServer().getChatDecorator().decorate(commandSourceStack.getPlayer(), playerChatMessage);
+
 		for (ServerPlayer serverPlayer : collection) {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.message.display.outgoing", serverPlayer.getDisplayName(), signedMessage.content())
+				Component.translatable("commands.message.display.outgoing", serverPlayer.getDisplayName(), playerChatMessage2.serverContent())
 					.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
 				false
 			);
-			serverPlayer.sendChatMessage(signedMessage, commandSourceStack.asChatSender(), ChatType.MSG_COMMAND);
+			serverPlayer.sendChatMessage(playerChatMessage2, commandSourceStack.asChatSender(), ChatType.MSG_COMMAND);
 		}
 
 		return collection.size();

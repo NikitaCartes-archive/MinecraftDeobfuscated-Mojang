@@ -28,6 +28,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -76,6 +77,7 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
+import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
@@ -121,6 +123,7 @@ import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -200,6 +203,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundBlockUpdatePacket.class, ClientboundBlockUpdatePacket::new)
 					.addPacket(ClientboundBossEventPacket.class, ClientboundBossEventPacket::new)
 					.addPacket(ClientboundChangeDifficultyPacket.class, ClientboundChangeDifficultyPacket::new)
+					.addPacket(ClientboundChatPreviewPacket.class, ClientboundChatPreviewPacket::new)
 					.addPacket(ClientboundClearTitlesPacket.class, ClientboundClearTitlesPacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
 					.addPacket(ClientboundCommandsPacket.class, ClientboundCommandsPacket::new)
@@ -250,6 +254,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundRotateHeadPacket.class, ClientboundRotateHeadPacket::new)
 					.addPacket(ClientboundSectionBlocksUpdatePacket.class, ClientboundSectionBlocksUpdatePacket::new)
 					.addPacket(ClientboundSelectAdvancementsTabPacket.class, ClientboundSelectAdvancementsTabPacket::new)
+					.addPacket(ClientboundServerDataPacket.class, ClientboundServerDataPacket::new)
 					.addPacket(ClientboundSetActionBarTextPacket.class, ClientboundSetActionBarTextPacket::new)
 					.addPacket(ClientboundSetBorderCenterPacket.class, ClientboundSetBorderCenterPacket::new)
 					.addPacket(ClientboundSetBorderLerpSizePacket.class, ClientboundSetBorderLerpSizePacket::new)
@@ -299,6 +304,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundChangeDifficultyPacket.class, ServerboundChangeDifficultyPacket::new)
 					.addPacket(ServerboundChatCommandPacket.class, ServerboundChatCommandPacket::new)
 					.addPacket(ServerboundChatPacket.class, ServerboundChatPacket::new)
+					.addPacket(ServerboundChatPreviewPacket.class, ServerboundChatPreviewPacket::new)
 					.addPacket(ServerboundClientCommandPacket.class, ServerboundClientCommandPacket::new)
 					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)
 					.addPacket(ServerboundCommandSuggestionPacket.class, ServerboundCommandSuggestionPacket::new)

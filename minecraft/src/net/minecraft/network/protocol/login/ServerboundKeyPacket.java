@@ -36,9 +36,7 @@ public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByteArray(this.keybytes);
-		friendlyByteBuf.writeEither(
-			this.nonceOrSaltSignature, FriendlyByteBuf::writeByteArray, (friendlyByteBufx, saltSignaturePair) -> saltSignaturePair.write(friendlyByteBufx)
-		);
+		friendlyByteBuf.writeEither(this.nonceOrSaltSignature, FriendlyByteBuf::writeByteArray, Crypt.SaltSignaturePair::write);
 	}
 
 	public void handle(ServerLoginPacketListener serverLoginPacketListener) {

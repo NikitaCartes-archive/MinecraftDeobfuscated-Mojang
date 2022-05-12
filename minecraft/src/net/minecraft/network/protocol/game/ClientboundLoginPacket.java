@@ -3,7 +3,6 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,7 +19,7 @@ public record ClientboundLoginPacket(
 	@Nullable GameType previousGameType,
 	Set<ResourceKey<Level>> levels,
 	RegistryAccess.Frozen registryHolder,
-	Holder<DimensionType> dimensionType,
+	ResourceKey<DimensionType> dimensionType,
 	ResourceKey<Level> dimension,
 	long seed,
 	int maxPlayers,
@@ -37,12 +36,10 @@ public record ClientboundLoginPacket(
 			friendlyByteBuf.readBoolean(),
 			GameType.byId(friendlyByteBuf.readByte()),
 			GameType.byNullableId(friendlyByteBuf.readByte()),
-			friendlyByteBuf.readCollection(
-				Sets::newHashSetWithExpectedSize, friendlyByteBufx -> ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBufx.readResourceLocation())
-			),
+			friendlyByteBuf.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBufx -> friendlyByteBufx.readResourceKey(Registry.DIMENSION_REGISTRY)),
 			friendlyByteBuf.readWithCodec(RegistryAccess.NETWORK_CODEC).freeze(),
-			friendlyByteBuf.readWithCodec(DimensionType.CODEC),
-			ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()),
+			friendlyByteBuf.readResourceKey(Registry.DIMENSION_TYPE_REGISTRY),
+			friendlyByteBuf.readResourceKey(Registry.DIMENSION_REGISTRY),
 			friendlyByteBuf.readLong(),
 			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readVarInt(),
@@ -60,10 +57,10 @@ public record ClientboundLoginPacket(
 		friendlyByteBuf.writeBoolean(this.hardcore);
 		friendlyByteBuf.writeByte(this.gameType.getId());
 		friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
-		friendlyByteBuf.writeCollection(this.levels, (friendlyByteBufx, resourceKey) -> friendlyByteBufx.writeResourceLocation(resourceKey.location()));
+		friendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
 		friendlyByteBuf.writeWithCodec(RegistryAccess.NETWORK_CODEC, this.registryHolder);
-		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, this.dimensionType);
-		friendlyByteBuf.writeResourceLocation(this.dimension.location());
+		friendlyByteBuf.writeResourceKey(this.dimensionType);
+		friendlyByteBuf.writeResourceKey(this.dimension);
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeVarInt(this.maxPlayers);
 		friendlyByteBuf.writeVarInt(this.chunkRadius);

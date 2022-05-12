@@ -61,7 +61,6 @@ import net.minecraft.server.commands.JfrCommand;
 import net.minecraft.server.commands.KickCommand;
 import net.minecraft.server.commands.KillCommand;
 import net.minecraft.server.commands.ListPlayersCommand;
-import net.minecraft.server.commands.LocateBiomeCommand;
 import net.minecraft.server.commands.LocateCommand;
 import net.minecraft.server.commands.LootCommand;
 import net.minecraft.server.commands.MsgCommand;
@@ -144,7 +143,6 @@ public class Commands {
 		KillCommand.register(this.dispatcher);
 		ListPlayersCommand.register(this.dispatcher);
 		LocateCommand.register(this.dispatcher);
-		LocateBiomeCommand.register(this.dispatcher);
 		LootCommand.register(this.dispatcher, commandBuildContext);
 		MsgCommand.register(this.dispatcher);
 		ParticleCommand.register(this.dispatcher);

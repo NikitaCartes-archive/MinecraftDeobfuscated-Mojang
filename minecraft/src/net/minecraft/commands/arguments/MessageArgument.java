@@ -13,7 +13,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 
 public class MessageArgument implements SignedArgument<MessageArgument.Message> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("Hello world!", "foo", "@e", "Hello @p :)");
@@ -27,7 +27,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		return resolveComponent(commandContext.getSource(), message);
 	}
 
-	public static SignedMessage getSignedMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+	public static PlayerChatMessage getSignedMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		MessageArgument.Message message = commandContext.getArgument(string, MessageArgument.Message.class);
 		Component component = Component.literal(message.getText());
 		return commandContext.getSource().getSigningContext().signArgument(commandContext, string, component);

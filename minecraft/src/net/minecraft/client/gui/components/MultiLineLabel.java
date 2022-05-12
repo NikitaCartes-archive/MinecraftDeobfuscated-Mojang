@@ -43,6 +43,11 @@ public interface MultiLineLabel {
 		public int getLineCount() {
 			return 0;
 		}
+
+		@Override
+		public int getWidth() {
+			return 0;
+		}
 	};
 
 	static MultiLineLabel create(Font font, FormattedText formattedText, int i) {
@@ -88,6 +93,8 @@ public interface MultiLineLabel {
 
 	static MultiLineLabel createFixed(Font font, List<MultiLineLabel.TextWithWidth> list) {
 		return list.isEmpty() ? EMPTY : new MultiLineLabel() {
+			private final int width = list.stream().mapToInt(textWithWidth -> textWithWidth.width).max().orElse(0);
+
 			@Override
 			public int renderCentered(PoseStack poseStack, int i, int j) {
 				return this.renderCentered(poseStack, i, j, 9, 16777215);
@@ -141,6 +148,11 @@ public interface MultiLineLabel {
 			public int getLineCount() {
 				return list.size();
 			}
+
+			@Override
+			public int getWidth() {
+				return this.width;
+			}
 		};
 	}
 
@@ -155,6 +167,8 @@ public interface MultiLineLabel {
 	void renderBackgroundCentered(PoseStack poseStack, int i, int j, int k, int l, int m);
 
 	int getLineCount();
+
+	int getWidth();
 
 	@Environment(EnvType.CLIENT)
 	public static class TextWithWidth {

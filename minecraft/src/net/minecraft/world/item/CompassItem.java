@@ -14,7 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -77,7 +77,7 @@ public class CompassItem extends Item implements Vanishable {
 				Optional<ResourceKey<Level>> optional = getLodestoneDimension(compoundTag);
 				if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos")) {
 					BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
-					if (!level.isInWorldBounds(blockPos) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, blockPos)) {
+					if (!level.isInWorldBounds(blockPos) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiTypes.LODESTONE, blockPos)) {
 						compoundTag.remove("LodestonePos");
 					}
 				}

@@ -2,18 +2,23 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -25,7 +30,7 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 	private static final int BATCH_SIZE = 5;
 	private static final int RATE = 20;
 	public static final int SCAN_RANGE = 48;
-	private final PoiType poiType;
+	private final Predicate<Holder<PoiType>> poiType;
 	private final MemoryModuleType<GlobalPos> memoryToAcquire;
 	private final boolean onlyIfAdult;
 	private final Optional<Byte> onPoiAcquisitionEvent;
@@ -33,17 +38,21 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 	private final Long2ObjectMap<AcquirePoi.JitteredLinearRetry> batchCache = new Long2ObjectOpenHashMap<>();
 
 	public AcquirePoi(
-		PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl, Optional<Byte> optional
+		Predicate<Holder<PoiType>> predicate,
+		MemoryModuleType<GlobalPos> memoryModuleType,
+		MemoryModuleType<GlobalPos> memoryModuleType2,
+		boolean bl,
+		Optional<Byte> optional
 	) {
 		super(constructEntryConditionMap(memoryModuleType, memoryModuleType2));
-		this.poiType = poiType;
+		this.poiType = predicate;
 		this.memoryToAcquire = memoryModuleType2;
 		this.onlyIfAdult = bl;
 		this.onPoiAcquisitionEvent = optional;
 	}
 
-	public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl, Optional<Byte> optional) {
-		this(poiType, memoryModuleType, memoryModuleType, bl, optional);
+	public AcquirePoi(Predicate<Holder<PoiType>> predicate, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl, Optional<Byte> optional) {
+		this(predicate, memoryModuleType, memoryModuleType, bl, optional);
 	}
 
 	private static ImmutableMap<MemoryModuleType<?>, MemoryStatus> constructEntryConditionMap(
@@ -84,29 +93,46 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 				return true;
 			}
 		};
-		Set<BlockPos> set = (Set<BlockPos>)poiManager.findAllClosestFirst(
-				this.poiType.getPredicate(), predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE
+		Set<Pair<Holder<PoiType>, BlockPos>> set = (Set<Pair<Holder<PoiType>, BlockPos>>)poiManager.findAllClosestFirstWithType(
+				this.poiType, predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE
 			)
 			.limit(5L)
 			.collect(Collectors.toSet());
-		Path path = pathfinderMob.getNavigation().createPath(set, this.poiType.getValidRange());
+		Path path = findPathToPois(pathfinderMob, set);
 		if (path != null && path.canReach()) {
 			BlockPos blockPos = path.getTarget();
-			poiManager.getType(blockPos).ifPresent(poiType -> {
-				poiManager.take(this.poiType.getPredicate(), blockPos2x -> blockPos2x.equals(blockPos), blockPos, 1);
+			poiManager.getType(blockPos).ifPresent(holder -> {
+				poiManager.take(this.poiType, (holderx, blockPos2) -> blockPos2.equals(blockPos), blockPos, 1);
 				pathfinderMob.getBrain().setMemory(this.memoryToAcquire, GlobalPos.of(serverLevel.dimension(), blockPos));
 				this.onPoiAcquisitionEvent.ifPresent(byte_ -> serverLevel.broadcastEntityEvent(pathfinderMob, byte_));
 				this.batchCache.clear();
 				DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
 			});
 		} else {
-			for (BlockPos blockPos2 : set) {
+			for (Pair<Holder<PoiType>, BlockPos> pair : set) {
 				this.batchCache
 					.computeIfAbsent(
-						blockPos2.asLong(),
+						pair.getSecond().asLong(),
 						(Long2ObjectFunction<? extends AcquirePoi.JitteredLinearRetry>)(m -> new AcquirePoi.JitteredLinearRetry(pathfinderMob.level.random, l))
 					);
 			}
+		}
+	}
+
+	@Nullable
+	public static Path findPathToPois(Mob mob, Set<Pair<Holder<PoiType>, BlockPos>> set) {
+		if (set.isEmpty()) {
+			return null;
+		} else {
+			Set<BlockPos> set2 = new HashSet();
+			int i = 1;
+
+			for (Pair<Holder<PoiType>, BlockPos> pair : set) {
+				i = Math.max(i, pair.getFirst().value().validRange());
+				set2.add(pair.getSecond());
+			}
+
+			return mob.getNavigation().createPath(set2, i);
 		}
 	}
 

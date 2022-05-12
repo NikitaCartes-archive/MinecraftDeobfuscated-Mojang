@@ -30,7 +30,7 @@ import net.minecraft.world.entity.ai.goal.PathfindToRaidGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -467,7 +467,7 @@ public abstract class Raider extends PatrollingMonster {
 			ServerLevel serverLevel = (ServerLevel)this.raider.level;
 			BlockPos blockPos = this.raider.blockPosition();
 			Optional<BlockPos> optional = serverLevel.getPoiManager()
-				.getRandom(poiType -> poiType == PoiType.HOME, this::hasNotVisited, PoiManager.Occupancy.ANY, blockPos, 48, this.raider.random);
+				.getRandom(holder -> holder.is(PoiTypes.HOME), this::hasNotVisited, PoiManager.Occupancy.ANY, blockPos, 48, this.raider.random);
 			if (!optional.isPresent()) {
 				return false;
 			} else {

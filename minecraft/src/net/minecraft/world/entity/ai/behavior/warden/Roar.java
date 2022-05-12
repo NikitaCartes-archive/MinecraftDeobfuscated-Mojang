@@ -16,6 +16,7 @@ import net.minecraft.world.entity.monster.warden.WardenAi;
 
 public class Roar extends Behavior<Warden> {
 	private static final int TICKS_BEFORE_PLAYING_ROAR_SOUND = 25;
+	private static final int ROAR_ANGER_INCREASE = 20;
 
 	public Roar() {
 		super(
@@ -37,8 +38,10 @@ public class Roar extends Behavior<Warden> {
 		Brain<Warden> brain = warden.getBrain();
 		brain.setMemoryWithExpiry(MemoryModuleType.ROAR_SOUND_DELAY, Unit.INSTANCE, 25L);
 		brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-		BehaviorUtils.lookAtEntity(warden, (LivingEntity)warden.getBrain().getMemory(MemoryModuleType.ROAR_TARGET).get());
+		LivingEntity livingEntity = (LivingEntity)warden.getBrain().getMemory(MemoryModuleType.ROAR_TARGET).get();
+		BehaviorUtils.lookAtEntity(warden, livingEntity);
 		warden.setPose(Pose.ROARING);
+		warden.increaseAngerAt(livingEntity, 20, false);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Warden warden, long l) {

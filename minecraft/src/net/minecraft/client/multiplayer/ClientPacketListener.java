@@ -9,6 +9,7 @@ import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.BitSet;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.DemoIntroScreen;
@@ -49,6 +51,7 @@ import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.CommandBlockEditScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
+import net.minecraft.client.gui.screens.multiplayer.ChatPreviewWarningScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
@@ -83,9 +86,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -101,6 +106,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -151,6 +157,7 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
+import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
@@ -336,7 +343,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		Collections.shuffle(list);
 		this.levels = Sets.<ResourceKey<Level>>newLinkedHashSet(list);
 		ResourceKey<Level> resourceKey = clientboundLoginPacket.dimension();
-		Holder<DimensionType> holder = clientboundLoginPacket.dimensionType();
+		Holder<DimensionType> holder = this.registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getHolderOrThrow(clientboundLoginPacket.dimensionType());
 		this.serverChunkRadius = clientboundLoginPacket.chunkRadius();
 		this.serverSimulationDistance = clientboundLoginPacket.simulationDistance();
 		boolean bl = clientboundLoginPacket.isDebug();
@@ -610,6 +617,15 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	}
 
 	@Override
+	public void handleChatPreview(ClientboundChatPreviewPacket clientboundChatPreviewPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundChatPreviewPacket, this, this.minecraft);
+		ChatScreen chatScreen = this.minecraft.gui.getChat().getFocusedChat();
+		if (chatScreen != null) {
+			chatScreen.getChatPreview().handleResponse(clientboundChatPreviewPacket.queryId(), clientboundChatPreviewPacket.preview());
+		}
+	}
+
+	@Override
 	public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSectionBlocksUpdatePacket, this, this.minecraft);
 		int i = 19 | (clientboundSectionBlocksUpdatePacket.shouldSuppressLightUpdates() ? 128 : 0);
@@ -780,26 +796,34 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
+		ChatSender chatSender = clientboundPlayerChatPacket.sender();
 		if (clientboundPlayerChatPacket.hasExpired(Instant.now())) {
-			LOGGER.warn("Received expired chat packet from {}", clientboundPlayerChatPacket.sender().name().getString());
-		}
-
-		if (!this.hasValidSignature(clientboundPlayerChatPacket)) {
-			LOGGER.warn("Received unsigned chat packet from {}", clientboundPlayerChatPacket.sender().name().getString());
+			LOGGER.warn("Received expired chat packet from {}", chatSender.name().getString());
 		}
 
 		Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
 		ChatType chatType = clientboundPlayerChatPacket.resolveType(registry);
-		this.minecraft.gui.handlePlayerChat(chatType, clientboundPlayerChatPacket.content(), clientboundPlayerChatPacket.sender());
+		PlayerChatMessage playerChatMessage = clientboundPlayerChatPacket.getMessage();
+		this.handlePlayerChat(chatType, playerChatMessage, chatSender);
 	}
 
-	private boolean hasValidSignature(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
-		PlayerInfo playerInfo = this.getPlayerInfo(clientboundPlayerChatPacket.sender().uuid());
+	private void handlePlayerChat(ChatType chatType, PlayerChatMessage playerChatMessage, ChatSender chatSender) {
+		if (!this.hasValidSignature(playerChatMessage)) {
+			LOGGER.warn("Received chat packet without valid signature from {}", chatSender.name().getString());
+		}
+
+		boolean bl = this.minecraft.options.onlyShowSignedChat().get();
+		Component component = bl ? playerChatMessage.signedContent() : playerChatMessage.serverContent();
+		this.minecraft.gui.handlePlayerChat(chatType, component, chatSender);
+	}
+
+	private boolean hasValidSignature(PlayerChatMessage playerChatMessage) {
+		PlayerInfo playerInfo = this.getPlayerInfo(playerChatMessage.signature().sender());
 		if (playerInfo == null) {
 			return false;
 		} else {
 			ProfilePublicKey profilePublicKey = playerInfo.getProfilePublicKey();
-			return profilePublicKey != null && clientboundPlayerChatPacket.getSignedMessage().verify(profilePublicKey);
+			return profilePublicKey != null && playerChatMessage.verify(profilePublicKey);
 		}
 	}
 
@@ -935,7 +959,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
 		ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
-		Holder<DimensionType> holder = clientboundRespawnPacket.getDimensionType();
+		Holder<DimensionType> holder = this.registryAccess
+			.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
+			.getHolderOrThrow(clientboundRespawnPacket.getDimensionType());
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
 		if (resourceKey != localPlayer.level.dimension()) {
@@ -1525,6 +1551,28 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.gui.clear();
 		if (clientboundClearTitlesPacket.shouldResetTimes()) {
 			this.minecraft.gui.resetTitleTimes();
+		}
+	}
+
+	@Override
+	public void handleServerData(ClientboundServerDataPacket clientboundServerDataPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundServerDataPacket, this, this.minecraft);
+		ServerData serverData = this.minecraft.getCurrentServer();
+		if (serverData != null) {
+			clientboundServerDataPacket.getMotd().ifPresent(component -> serverData.motd = component);
+			clientboundServerDataPacket.getIconBase64().ifPresent(string -> {
+				try {
+					serverData.setIconB64(ServerData.parseFavicon(string));
+				} catch (ParseException var3x) {
+					LOGGER.error("Invalid server icon", (Throwable)var3x);
+				}
+			});
+			serverData.setPreviewsChat(clientboundServerDataPacket.previewsChat());
+			ServerList.saveSingleServer(serverData);
+			ServerData.ChatPreview chatPreview = serverData.getChatPreview();
+			if (chatPreview != null && !chatPreview.isAcknowledged()) {
+				this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(serverData)));
+			}
 		}
 	}
 

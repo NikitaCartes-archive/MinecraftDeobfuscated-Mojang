@@ -16,6 +16,7 @@ import com.mojang.serialization.Codec.ResultFunction;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ExtraCodecs {
@@ -48,6 +50,20 @@ public class ExtraCodecs {
 		}
 	}, Pattern::pattern);
 	public static final Codec<Instant> INSTANT_ISO8601 = instantCodec(DateTimeFormatter.ISO_INSTANT);
+	public static final Codec<byte[]> BASE64_STRING = Codec.STRING.comapFlatMap(string -> {
+		try {
+			return DataResult.success(Base64.getDecoder().decode(string));
+		} catch (IllegalArgumentException var2) {
+			return DataResult.error("Malformed base64 string");
+		}
+	}, bs -> Base64.getEncoder().encodeToString(bs));
+	public static final Codec<ExtraCodecs.TagOrElementLocation> TAG_OR_ELEMENT_ID = Codec.STRING
+		.comapFlatMap(
+			string -> string.startsWith("#")
+					? ResourceLocation.read(string.substring(1)).map(resourceLocation -> new ExtraCodecs.TagOrElementLocation(resourceLocation, true))
+					: ResourceLocation.read(string).map(resourceLocation -> new ExtraCodecs.TagOrElementLocation(resourceLocation, false)),
+			ExtraCodecs.TagOrElementLocation::decoratedId
+		);
 
 	public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
 		return new ExtraCodecs.XorCodec<>(codec, codec2);
@@ -326,6 +342,16 @@ public class ExtraCodecs {
 		@Override
 		public <T> DataResult<T> encode(A object, DynamicOps<T> dynamicOps, T object2) {
 			return ((Codec)this.delegate.get()).encode(object, dynamicOps, object2);
+		}
+	}
+
+	public static record TagOrElementLocation(ResourceLocation id, boolean tag) {
+		public String toString() {
+			return this.decoratedId();
+		}
+
+		private String decoratedId() {
+			return this.tag ? "#" + this.id : this.id.toString();
 		}
 	}
 

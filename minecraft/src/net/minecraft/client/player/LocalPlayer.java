@@ -94,7 +94,6 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -305,17 +304,34 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	public void chat(String string) {
+		this.chat(string, null);
+	}
+
+	public void chat(String string, @Nullable Component component) {
 		MessageSigner messageSigner = MessageSigner.create(this.getUUID());
-		string = StringUtils.normalizeSpace(string);
-		if (string.startsWith("/")) {
-			this.sendCommand(messageSigner, string.substring(1));
+		this.sendChat(messageSigner, string, component);
+	}
+
+	public void command(String string) {
+		this.command(string, null);
+	}
+
+	public void command(String string, @Nullable Component component) {
+		MessageSigner messageSigner = MessageSigner.create(this.getUUID());
+		this.sendCommand(messageSigner, string, component);
+	}
+
+	private void sendChat(MessageSigner messageSigner, String string, @Nullable Component component) {
+		if (component != null) {
+			MessageSignature messageSignature = this.signMessage(messageSigner, component);
+			this.connection.send(new ServerboundChatPacket(string, messageSignature, true));
 		} else {
-			MessageSignature messageSignature = this.signChatMessage(messageSigner, Component.literal(string));
-			this.connection.send(new ServerboundChatPacket(string, messageSignature));
+			MessageSignature messageSignature = this.signMessage(messageSigner, Component.literal(string));
+			this.connection.send(new ServerboundChatPacket(string, messageSignature, false));
 		}
 	}
 
-	private MessageSignature signChatMessage(MessageSigner messageSigner, Component component) {
+	private MessageSignature signMessage(MessageSigner messageSigner, Component component) {
 		try {
 			Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
 			if (signature != null) {
@@ -328,7 +344,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		return MessageSignature.unsigned();
 	}
 
-	private void sendCommand(MessageSigner messageSigner, String string) {
+	private void sendCommand(MessageSigner messageSigner, String string, @Nullable Component component) {
 		ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, this.connection.getSuggestionsProvider());
 		ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults);
 		this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures));

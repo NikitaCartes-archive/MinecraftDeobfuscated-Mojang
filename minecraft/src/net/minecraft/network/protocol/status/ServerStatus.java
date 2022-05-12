@@ -26,6 +26,7 @@ public class ServerStatus {
 	private ServerStatus.Version version;
 	@Nullable
 	private String favicon;
+	private boolean previewsChat;
 
 	@Nullable
 	public Component getDescription() {
@@ -61,6 +62,14 @@ public class ServerStatus {
 	@Nullable
 	public String getFavicon() {
 		return this.favicon;
+	}
+
+	public void setPreviewsChat(boolean bl) {
+		this.previewsChat = bl;
+	}
+
+	public boolean previewsChat() {
+		return this.previewsChat;
 	}
 
 	public static class Players {
@@ -157,11 +166,16 @@ public class ServerStatus {
 				serverStatus.setFavicon(GsonHelper.getAsString(jsonObject, "favicon"));
 			}
 
+			if (jsonObject.has("previewsChat")) {
+				serverStatus.setPreviewsChat(GsonHelper.getAsBoolean(jsonObject, "previewsChat"));
+			}
+
 			return serverStatus;
 		}
 
 		public JsonElement serialize(ServerStatus serverStatus, Type type, JsonSerializationContext jsonSerializationContext) {
 			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("previewsChat", serverStatus.previewsChat());
 			if (serverStatus.getDescription() != null) {
 				jsonObject.add("description", jsonSerializationContext.serialize(serverStatus.getDescription()));
 			}

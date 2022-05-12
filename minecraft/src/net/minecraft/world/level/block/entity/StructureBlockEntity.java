@@ -353,7 +353,7 @@ public class StructureBlockEntity extends BlockEntity {
 		return this.loadStructure(serverLevel, true);
 	}
 
-	private static RandomSource createRandom(long l) {
+	public static RandomSource createRandom(long l) {
 		return l == 0L ? RandomSource.create(Util.getMillis()) : RandomSource.create(l);
 	}
 

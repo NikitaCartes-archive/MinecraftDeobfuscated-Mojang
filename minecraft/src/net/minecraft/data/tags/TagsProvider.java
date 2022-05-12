@@ -1,8 +1,9 @@
 package net.minecraft.data.tags;
 
 import com.google.common.collect.Maps;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.JsonOps;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -16,19 +17,21 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagBuilder;
+import net.minecraft.tags.TagEntry;
+import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagManager;
 import org.slf4j.Logger;
 
 public abstract class TagsProvider<T> implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	protected final DataGenerator generator;
+	protected final DataGenerator.PathProvider pathProvider;
 	protected final Registry<T> registry;
-	private final Map<ResourceLocation, Tag.Builder> builders = Maps.<ResourceLocation, Tag.Builder>newLinkedHashMap();
+	private final Map<ResourceLocation, TagBuilder> builders = Maps.<ResourceLocation, TagBuilder>newLinkedHashMap();
 
 	protected TagsProvider(DataGenerator dataGenerator, Registry<T> registry) {
-		this.generator = dataGenerator;
+		this.pathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, TagManager.getTagDir(registry.key()));
 		this.registry = registry;
 	}
 
@@ -45,91 +48,81 @@ public abstract class TagsProvider<T> implements DataProvider {
 		this.addTags();
 		this.builders
 			.forEach(
-				(resourceLocation, builder) -> {
-					List<Tag.BuilderEntry> list = builder.getEntries()
-						.filter(builderEntry -> !builderEntry.entry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey))
-						.toList();
-					if (!list.isEmpty()) {
+				(resourceLocation, tagBuilder) -> {
+					List<TagEntry> list = tagBuilder.build();
+					List<TagEntry> list2 = list.stream().filter(tagEntry -> !tagEntry.verifyIfPresent(this.registry::containsKey, this.builders::containsKey)).toList();
+					if (!list2.isEmpty()) {
 						throw new IllegalArgumentException(
 							String.format(
 								"Couldn't define tag %s as it is missing following references: %s",
 								resourceLocation,
-								list.stream().map(Objects::toString).collect(Collectors.joining(","))
+								list2.stream().map(Objects::toString).collect(Collectors.joining(","))
 							)
 						);
 					} else {
-						JsonObject jsonObject = builder.serializeToJson();
-						Path path = this.getPath(resourceLocation);
+						JsonElement jsonElement = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(list, false)).getOrThrow(false, LOGGER::error);
+						Path path = this.pathProvider.json(resourceLocation);
 
 						try {
-							DataProvider.saveStable(cachedOutput, jsonObject, path);
-						} catch (IOException var8) {
-							LOGGER.error("Couldn't save tags to {}", path, var8);
+							DataProvider.saveStable(cachedOutput, jsonElement, path);
+						} catch (IOException var9) {
+							LOGGER.error("Couldn't save tags to {}", path, var9);
 						}
 					}
 				}
 			);
 	}
 
-	private Path getPath(ResourceLocation resourceLocation) {
-		ResourceKey<? extends Registry<T>> resourceKey = this.registry.key();
-		return this.generator
-			.getOutputFolder()
-			.resolve("data/" + resourceLocation.getNamespace() + "/" + TagManager.getTagDir(resourceKey) + "/" + resourceLocation.getPath() + ".json");
-	}
-
 	protected TagsProvider.TagAppender<T> tag(TagKey<T> tagKey) {
-		Tag.Builder builder = this.getOrCreateRawBuilder(tagKey);
-		return new TagsProvider.TagAppender<>(builder, this.registry, "vanilla");
+		TagBuilder tagBuilder = this.getOrCreateRawBuilder(tagKey);
+		return new TagsProvider.TagAppender<>(tagBuilder, this.registry);
 	}
 
-	protected Tag.Builder getOrCreateRawBuilder(TagKey<T> tagKey) {
-		return (Tag.Builder)this.builders.computeIfAbsent(tagKey.location(), resourceLocation -> new Tag.Builder());
+	protected TagBuilder getOrCreateRawBuilder(TagKey<T> tagKey) {
+		return (TagBuilder)this.builders.computeIfAbsent(tagKey.location(), resourceLocation -> TagBuilder.create());
 	}
 
 	protected static class TagAppender<T> {
-		private final Tag.Builder builder;
+		private final TagBuilder builder;
 		private final Registry<T> registry;
-		private final String source;
 
-		TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
-			this.builder = builder;
+		TagAppender(TagBuilder tagBuilder, Registry<T> registry) {
+			this.builder = tagBuilder;
 			this.registry = registry;
-			this.source = string;
 		}
 
 		public TagsProvider.TagAppender<T> add(T object) {
-			this.builder.addElement(this.registry.getKey(object), this.source);
+			this.builder.addElement(this.registry.getKey(object));
 			return this;
 		}
 
 		@SafeVarargs
 		public final TagsProvider.TagAppender<T> add(ResourceKey<T>... resourceKeys) {
 			for (ResourceKey<T> resourceKey : resourceKeys) {
-				this.builder.addElement(resourceKey.location(), this.source);
+				this.builder.addElement(resourceKey.location());
 			}
 
 			return this;
 		}
 
 		public TagsProvider.TagAppender<T> addOptional(ResourceLocation resourceLocation) {
-			this.builder.addOptionalElement(resourceLocation, this.source);
+			this.builder.addOptionalElement(resourceLocation);
 			return this;
 		}
 
 		public TagsProvider.TagAppender<T> addTag(TagKey<T> tagKey) {
-			this.builder.addTag(tagKey.location(), this.source);
+			this.builder.addTag(tagKey.location());
 			return this;
 		}
 
 		public TagsProvider.TagAppender<T> addOptionalTag(ResourceLocation resourceLocation) {
-			this.builder.addOptionalTag(resourceLocation, this.source);
+			this.builder.addOptionalTag(resourceLocation);
 			return this;
 		}
 
 		@SafeVarargs
 		public final TagsProvider.TagAppender<T> add(T... objects) {
-			Stream.of(objects).map(this.registry::getKey).forEach(resourceLocation -> this.builder.addElement(resourceLocation, this.source));
+			Stream.of(objects).map(this.registry::getKey).forEach(resourceLocation -> this.builder.addElement(resourceLocation));
 			return this;
 		}
 	}

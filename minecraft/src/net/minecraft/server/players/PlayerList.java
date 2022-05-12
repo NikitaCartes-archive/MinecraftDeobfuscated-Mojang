@@ -30,9 +30,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.SignedMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -180,7 +179,7 @@ public abstract class PlayerList {
 				serverPlayer.gameMode.getPreviousGameModeForPlayer(),
 				this.server.levelKeys(),
 				this.registryHolder,
-				serverLevel2.dimensionTypeRegistration(),
+				serverLevel2.dimensionTypeId(),
 				serverLevel2.dimension(),
 				BiomeManager.obfuscateSeed(serverLevel2.getSeed()),
 				this.getMaxPlayers(),
@@ -234,6 +233,7 @@ public abstract class PlayerList {
 						serverResourcePackInfo.url(), serverResourcePackInfo.hash(), serverResourcePackInfo.isRequired(), serverResourcePackInfo.prompt()
 					)
 			);
+		serverPlayer.sendServerStatus(this.server.getStatus());
 
 		for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
 			serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));
@@ -493,7 +493,7 @@ public abstract class PlayerList {
 		serverPlayer2.connection
 			.send(
 				new ClientboundRespawnPacket(
-					serverPlayer2.level.dimensionTypeRegistration(),
+					serverPlayer2.level.dimensionTypeId(),
 					serverPlayer2.level.dimension(),
 					BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()),
 					serverPlayer2.gameMode.getGameModeForPlayer(),
@@ -788,34 +788,42 @@ public abstract class PlayerList {
 	}
 
 	public void broadcastChatMessage(
-		SignedMessage signedMessage, TextFilter.FilteredText filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey
+		PlayerChatMessage playerChatMessage, TextFilter.FilteredText filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey
 	) {
-		SignedMessage signedMessage2;
-		if (!filteredText.getFiltered().isEmpty()) {
-			Component component = Component.literal(filteredText.getFiltered());
-			signedMessage2 = new SignedMessage(component, MessageSignature.unsigned());
-		} else {
-			signedMessage2 = null;
-		}
-
+		PlayerChatMessage playerChatMessage2 = this.getFilteredMessage(serverPlayer, playerChatMessage, filteredText);
 		this.broadcastChatMessage(
-			signedMessage, serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? signedMessage2 : signedMessage, serverPlayer.asChatSender(), resourceKey
+			playerChatMessage,
+			serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? playerChatMessage2 : playerChatMessage,
+			serverPlayer.asChatSender(),
+			resourceKey
 		);
 	}
 
-	public void broadcastChatMessage(SignedMessage signedMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
-		this.broadcastChatMessage(signedMessage, serverPlayer -> signedMessage, chatSender, resourceKey);
+	@Nullable
+	private PlayerChatMessage getFilteredMessage(ServerPlayer serverPlayer, PlayerChatMessage playerChatMessage, TextFilter.FilteredText filteredText) {
+		if (!filteredText.isFiltered()) {
+			return playerChatMessage;
+		} else if (filteredText.getFiltered().isEmpty()) {
+			return null;
+		} else {
+			Component component = Component.literal(filteredText.getFiltered());
+			return PlayerChatMessage.unsigned(this.server.getChatDecorator().decorate(serverPlayer, component));
+		}
+	}
+
+	public void broadcastChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+		this.broadcastChatMessage(playerChatMessage, serverPlayer -> playerChatMessage, chatSender, resourceKey);
 	}
 
 	public void broadcastChatMessage(
-		SignedMessage signedMessage, Function<ServerPlayer, SignedMessage> function, ChatSender chatSender, ResourceKey<ChatType> resourceKey
+		PlayerChatMessage playerChatMessage, Function<ServerPlayer, PlayerChatMessage> function, ChatSender chatSender, ResourceKey<ChatType> resourceKey
 	) {
-		this.server.logMessageFrom(chatSender, signedMessage.content());
+		this.server.logMessageFrom(chatSender, playerChatMessage.serverContent());
 
 		for (ServerPlayer serverPlayer : this.players) {
-			SignedMessage signedMessage2 = (SignedMessage)function.apply(serverPlayer);
-			if (signedMessage2 != null) {
-				serverPlayer.sendChatMessage(signedMessage2, chatSender, resourceKey);
+			PlayerChatMessage playerChatMessage2 = (PlayerChatMessage)function.apply(serverPlayer);
+			if (playerChatMessage2 != null) {
+				serverPlayer.sendChatMessage(playerChatMessage2, chatSender, resourceKey);
 			}
 		}
 	}

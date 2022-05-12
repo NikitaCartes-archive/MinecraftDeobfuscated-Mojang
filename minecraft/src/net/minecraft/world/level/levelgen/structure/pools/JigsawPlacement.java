@@ -197,8 +197,7 @@ public class JigsawPlacement {
 		);
 		Optional<Structure.GenerationStub> optional = addPieces(generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128);
 		if (optional.isPresent()) {
-			StructurePiecesBuilder structurePiecesBuilder = new StructurePiecesBuilder();
-			((Structure.GenerationStub)optional.get()).generator().accept(structurePiecesBuilder);
+			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();
 
 			for (StructurePiece structurePiece : structurePiecesBuilder.build().pieces()) {
 				if (structurePiece instanceof PoolElementStructurePiece poolElementStructurePiece) {

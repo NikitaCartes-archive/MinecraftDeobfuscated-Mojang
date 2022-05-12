@@ -87,7 +87,7 @@ public class PathFinder {
 
 				for (int m = 0; m < l; m++) {
 					Node node3 = this.neighbors[m];
-					float h = node2.distanceTo(node3);
+					float h = this.distance(node2, node3);
 					node3.walkedDistance = node2.walkedDistance + h;
 					float n = node2.g + h + node3.costMalus;
 					if (node3.walkedDistance < f && (!node3.inOpenSet() || n < node3.g)) {
@@ -114,6 +114,10 @@ public class PathFinder {
 				.min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getNodeCount));
 		profilerFiller.pop();
 		return !optional.isPresent() ? null : (Path)optional.get();
+	}
+
+	protected float distance(Node node, Node node2) {
+		return node.distanceTo(node2);
 	}
 
 	private float getBestH(Node node, Set<Target> set) {

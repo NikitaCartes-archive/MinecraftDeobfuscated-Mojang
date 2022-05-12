@@ -84,6 +84,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
@@ -362,7 +363,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		profilerFiller.push("entityManagement");
 		this.entityManager.tick();
-		profilerFiller.push("gameEvents");
+		profilerFiller.popPush("gameEvents");
 		this.sendGameEvents();
 		profilerFiller.pop();
 	}
@@ -489,7 +490,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private Optional<BlockPos> findLightningRod(BlockPos blockPos) {
 		Optional<BlockPos> optional = this.getPoiManager()
 			.findClosest(
-				poiType -> poiType == PoiType.LIGHTNING_ROD,
+				holder -> holder.is(PoiTypes.LIGHTNING_ROD),
 				blockPosx -> blockPosx.getY() == this.getHeight(Heightmap.Types.WORLD_SURFACE, blockPosx.getX(), blockPosx.getZ()) - 1,
 				blockPos,
 				128,
@@ -1252,16 +1253,16 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Override
 	public void onBlockStateChange(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
-		Optional<PoiType> optional = PoiType.forState(blockState);
-		Optional<PoiType> optional2 = PoiType.forState(blockState2);
+		Optional<Holder<PoiType>> optional = PoiTypes.forState(blockState);
+		Optional<Holder<PoiType>> optional2 = PoiTypes.forState(blockState2);
 		if (!Objects.equals(optional, optional2)) {
 			BlockPos blockPos2 = blockPos.immutable();
-			optional.ifPresent(poiType -> this.getServer().execute(() -> {
+			optional.ifPresent(holder -> this.getServer().execute(() -> {
 					this.getPoiManager().remove(blockPos2);
 					DebugPackets.sendPoiRemovedPacket(this, blockPos2);
 				}));
-			optional2.ifPresent(poiType -> this.getServer().execute(() -> {
-					this.getPoiManager().add(blockPos2, poiType);
+			optional2.ifPresent(holder -> this.getServer().execute(() -> {
+					this.getPoiManager().add(blockPos2, holder);
 					DebugPackets.sendPoiAddedPacket(this, blockPos2);
 				}));
 		}
