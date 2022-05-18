@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -44,7 +45,11 @@ implements Codec<Holder<E>> {
         RegistryOps registryOps;
         Optional optional;
         if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
-            return ResourceLocation.CODEC.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(resourceLocation -> ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation))));
+            return ResourceLocation.CODEC.decode(dynamicOps, object).flatMap((? super R pair) -> {
+                ResourceLocation resourceLocation = (ResourceLocation)pair.getFirst();
+                DataResult<Holder<Pair>> dataResult = ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation));
+                return dataResult.map((? super R holder) -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
+            });
         }
         return DataResult.error("Can't access registry " + this.registryKey);
     }

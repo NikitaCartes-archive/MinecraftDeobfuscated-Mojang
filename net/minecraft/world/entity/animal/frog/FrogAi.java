@@ -93,11 +93,11 @@ public class FrogAi {
     }
 
     private static void initJumpActivity(Brain<Frog> brain) {
-        brain.addActivityWithConditions(Activity.LONG_JUMP, ImmutableList.of(Pair.of(0, new LongJumpMidJump(TIME_BETWEEN_LONG_JUMPS, SoundEvents.FROG_STEP)), Pair.of(1, new LongJumpToPreferredBlock<Frog>(TIME_BETWEEN_LONG_JUMPS, 2, 4, 1.5f, frog -> SoundEvents.FROG_LONG_JUMP, BlockTags.FROG_PREFER_JUMP_TO, 0.5f, blockState -> blockState.is(Blocks.LILY_PAD)))), ImmutableSet.of(Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.IS_IN_WATER, MemoryStatus.VALUE_ABSENT)));
+        brain.addActivityWithConditions(Activity.LONG_JUMP, ImmutableList.of(Pair.of(0, new LongJumpMidJump(TIME_BETWEEN_LONG_JUMPS, SoundEvents.FROG_STEP)), Pair.of(1, new LongJumpToPreferredBlock<Frog>(TIME_BETWEEN_LONG_JUMPS, 2, 4, 1.5f, frog -> SoundEvents.FROG_LONG_JUMP, BlockTags.FROG_PREFER_JUMP_TO, 0.5f, blockState -> blockState.is(Blocks.LILY_PAD)))), ImmutableSet.of(Pair.of(MemoryModuleType.TEMPTING_PLAYER, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.IS_IN_WATER, MemoryStatus.VALUE_ABSENT)));
     }
 
     private static void initTongueActivity(Brain<Frog> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.TONGUE, 0, ImmutableList.of(new StopAttackingIfTargetInvalid(), new ShootTongue(SoundEvents.FROG_TOUNGE, SoundEvents.FROG_EAT)), MemoryModuleType.ATTACK_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.TONGUE, 0, ImmutableList.of(new StopAttackingIfTargetInvalid(), new ShootTongue(SoundEvents.FROG_TONGUE, SoundEvents.FROG_EAT)), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static boolean canAttack(Frog frog) {

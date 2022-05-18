@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +22,7 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.nbt.CompoundTag;
@@ -97,10 +97,10 @@ public class StructureUtils {
         Bootstrap.bootStrap();
         Files.walk(Paths.get(testStructuresDir, new String[0]), new FileVisitOption[0]).filter(path -> path.toString().endsWith(".snbt")).forEach(path -> {
             try {
-                String string = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                String string = Files.readString(path);
                 CompoundTag compoundTag = NbtUtils.snbtToStructure(string);
                 CompoundTag compoundTag2 = StructureUpdater.update(path.toString(), compoundTag);
-                NbtToSnbt.writeSnbt(path, NbtUtils.structureToSnbt(compoundTag2));
+                NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, path, NbtUtils.structureToSnbt(compoundTag2));
             } catch (CommandSyntaxException | IOException exception) {
                 LOGGER.error("Something went wrong upgrading: {}", path, (Object)exception);
             }

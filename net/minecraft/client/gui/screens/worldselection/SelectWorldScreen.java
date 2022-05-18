@@ -137,7 +137,7 @@ extends Screen {
             if (!this.list.children().isEmpty() && (entry = (WorldSelectionList.Entry)this.list.children().get(0)) instanceof WorldSelectionList.WorldListEntry && (worldListEntry = (WorldSelectionList.WorldListEntry)entry).getLevelName().equals("DEBUG world")) {
                 worldListEntry.doDeleteWorld();
             }
-            RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
+            RegistryAccess.Frozen registryAccess = RegistryAccess.builtinCopy().freeze();
             WorldGenSettings worldGenSettings = WorldPresets.createNormalWorldFromPreset(registryAccess, "test1".hashCode());
             LevelSettings levelSettings = new LevelSettings("DEBUG world", GameType.SPECTATOR, false, Difficulty.NORMAL, true, new GameRules(), DataPackConfig.DEFAULT);
             String string2 = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), "DEBUG world", "");

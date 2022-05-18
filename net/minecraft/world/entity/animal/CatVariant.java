@@ -11,7 +11,7 @@ public record CatVariant(ResourceLocation texture) {
     public static final CatVariant BLACK = CatVariant.register("black", "textures/entity/cat/black.png");
     public static final CatVariant RED = CatVariant.register("red", "textures/entity/cat/red.png");
     public static final CatVariant SIAMESE = CatVariant.register("siamese", "textures/entity/cat/siamese.png");
-    public static final CatVariant BRITISH = CatVariant.register("british", "textures/entity/cat/british_shorthair.png");
+    public static final CatVariant BRITISH_SHORTHAIR = CatVariant.register("british_shorthair", "textures/entity/cat/british_shorthair.png");
     public static final CatVariant CALICO = CatVariant.register("calico", "textures/entity/cat/calico.png");
     public static final CatVariant PERSIAN = CatVariant.register("persian", "textures/entity/cat/persian.png");
     public static final CatVariant RAGDOLL = CatVariant.register("ragdoll", "textures/entity/cat/ragdoll.png");

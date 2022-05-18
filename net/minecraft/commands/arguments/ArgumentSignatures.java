@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.commands.arguments.SignedArgument;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,10 +18,11 @@ import net.minecraft.util.Crypt;
 import org.jetbrains.annotations.Nullable;
 
 public record ArgumentSignatures(long salt, Map<String, byte[]> signatures) {
+    private static final int MAX_ARGUMENT_COUNT = 8;
     private static final int MAX_ARGUMENT_NAME_LENGTH = 16;
 
     public ArgumentSignatures(FriendlyByteBuf friendlyByteBuf2) {
-        this(friendlyByteBuf2.readLong(), friendlyByteBuf2.readMap(friendlyByteBuf -> friendlyByteBuf.readUtf(16), FriendlyByteBuf::readByteArray));
+        this(friendlyByteBuf2.readLong(), friendlyByteBuf2.readMap(FriendlyByteBuf.limitValue(HashMap::new, 8), friendlyByteBuf -> friendlyByteBuf.readUtf(16), FriendlyByteBuf::readByteArray));
     }
 
     public static ArgumentSignatures empty() {

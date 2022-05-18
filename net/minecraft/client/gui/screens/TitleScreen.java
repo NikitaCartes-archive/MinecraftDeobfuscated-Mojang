@@ -174,7 +174,7 @@ extends Screen {
             if (bl) {
                 this.minecraft.createWorldOpenFlows().loadLevel(this, DEMO_LEVEL_ID);
             } else {
-                RegistryAccess registryAccess = RegistryAccess.BUILTIN.get();
+                RegistryAccess.Frozen registryAccess = RegistryAccess.builtinCopy().freeze();
                 this.minecraft.createWorldOpenFlows().createFreshLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, registryAccess, WorldPresets.demoSettings(registryAccess));
             }
         }));

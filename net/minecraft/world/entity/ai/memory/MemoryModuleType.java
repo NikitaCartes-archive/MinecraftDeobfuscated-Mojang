@@ -81,6 +81,7 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Vec3> RAM_TARGET = MemoryModuleType.register("ram_target");
     public static final MemoryModuleType<Unit> IS_IN_WATER = MemoryModuleType.register("is_in_water", Codec.unit(Unit.INSTANCE));
     public static final MemoryModuleType<Unit> IS_PREGNANT = MemoryModuleType.register("is_pregnant", Codec.unit(Unit.INSTANCE));
+    public static final MemoryModuleType<Boolean> IS_PANICKING = MemoryModuleType.register("is_panicking", Codec.BOOL);
     public static final MemoryModuleType<UUID> ANGRY_AT = MemoryModuleType.register("angry_at", UUIDUtil.CODEC);
     public static final MemoryModuleType<Boolean> UNIVERSAL_ANGER = MemoryModuleType.register("universal_anger", Codec.BOOL);
     public static final MemoryModuleType<Boolean> ADMIRING_ITEM = MemoryModuleType.register("admiring_item", Codec.BOOL);

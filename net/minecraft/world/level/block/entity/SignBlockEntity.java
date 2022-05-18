@@ -172,7 +172,7 @@ extends BlockEntity {
             Style style = component.getStyle();
             ClickEvent clickEvent = style.getClickEvent();
             if (clickEvent == null || clickEvent.getAction() != ClickEvent.Action.RUN_COMMAND) continue;
-            serverPlayer.getServer().getCommands().performCommand(this.createCommandSourceStack(serverPlayer), clickEvent.getValue());
+            serverPlayer.getServer().getCommands().performPrefixedCommand(this.createCommandSourceStack(serverPlayer), clickEvent.getValue());
         }
         return true;
     }

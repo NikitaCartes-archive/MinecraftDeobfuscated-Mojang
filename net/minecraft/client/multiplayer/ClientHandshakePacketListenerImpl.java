@@ -12,9 +12,7 @@ import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.util.function.Consumer;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -39,8 +37,8 @@ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Crypt;
-import net.minecraft.util.CryptException;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.util.Signer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -75,16 +73,18 @@ implements ClientLoginPacketListener {
             cipher = Crypt.getCipher(2, secretKey);
             cipher2 = Crypt.getCipher(1, secretKey);
             byte[] bs = clientboundHelloPacket.getNonce();
-            Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
-            if (signature == null) {
+            Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+            if (signer == null) {
                 serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, bs);
             } else {
                 long l = Crypt.SaltSupplier.getLong();
-                signature.update(bs);
-                signature.update(Longs.toByteArray(l));
-                serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, l, signature.sign());
+                byte[] cs = signer.sign(output -> {
+                    output.update(bs);
+                    output.update(Longs.toByteArray(l));
+                });
+                serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, l, cs);
             }
-        } catch (GeneralSecurityException | CryptException exception) {
+        } catch (Exception exception) {
             throw new IllegalStateException("Protocol error", exception);
         }
         this.updateStatus.accept(Component.translatable("connect.authorizing"));

@@ -71,8 +71,8 @@ implements Codec<Holder<E>> {
             if (optional2.isPresent()) {
                 return optional2.get().overrideElementFromResources(this.registryKey, this.elementCodec, resourceKey, registryOps.getAsJson()).map((? super R holder) -> Pair.of(holder, pair2.getSecond()));
             }
-            Holder holder2 = registry.getOrCreateHolder(resourceKey);
-            return DataResult.success(Pair.of(holder2, pair2.getSecond()), Lifecycle.stable());
+            DataResult dataResult2 = registry.getOrCreateHolder(resourceKey);
+            return dataResult2.map((? super R holder) -> Pair.of(holder, pair2.getSecond())).setLifecycle(Lifecycle.stable());
         }
         return this.elementCodec.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(Holder::direct));
     }

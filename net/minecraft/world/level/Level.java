@@ -120,7 +120,7 @@ AutoCloseable {
         this.profiler = supplier;
         this.levelData = writableLevelData;
         this.dimensionTypeRegistration = holder;
-        this.dimensionTypeId = holder.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Dimensions must be registered"));
+        this.dimensionTypeId = holder.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Dimension must be registered, got " + holder));
         final DimensionType dimensionType = holder.value();
         this.dimension = resourceKey;
         this.isClientSide = bl;

@@ -178,6 +178,7 @@ import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSetDisplayChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
@@ -601,6 +602,16 @@ implements ClientGamePacketListener {
     }
 
     @Override
+    public void handleSetDisplayChatPreview(ClientboundSetDisplayChatPreviewPacket clientboundSetDisplayChatPreviewPacket) {
+        PacketUtils.ensureRunningOnSameThread(clientboundSetDisplayChatPreviewPacket, this, this.minecraft);
+        ServerData serverData = this.minecraft.getCurrentServer();
+        if (serverData == null) {
+            return;
+        }
+        serverData.setChatPreviewEnabled(clientboundSetDisplayChatPreviewPacket.enabled());
+    }
+
+    @Override
     public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundSectionBlocksUpdatePacket, this, this.minecraft);
         int i = 0x13 | (clientboundSectionBlocksUpdatePacket.shouldSuppressLightUpdates() ? 128 : 0);
@@ -747,7 +758,7 @@ implements ClientGamePacketListener {
         if (!this.hasValidSignature(playerChatMessage)) {
             LOGGER.warn("Received chat packet without valid signature from {}", (Object)chatSender.name().getString());
         }
-        Component component = (bl = this.minecraft.options.onlyShowSignedChat().get().booleanValue()) ? playerChatMessage.signedContent() : playerChatMessage.serverContent();
+        Component component = (bl = this.minecraft.options.onlyShowSecureChat().get().booleanValue()) ? playerChatMessage.signedContent() : playerChatMessage.serverContent();
         this.minecraft.gui.handlePlayerChat(chatType, component, chatSender);
     }
 
@@ -1390,6 +1401,7 @@ implements ClientGamePacketListener {
 
     @Override
     public void handleServerData(ClientboundServerDataPacket clientboundServerDataPacket) {
+        ServerData.ChatPreview chatPreview;
         PacketUtils.ensureRunningOnSameThread(clientboundServerDataPacket, this, this.minecraft);
         ServerData serverData = this.minecraft.getCurrentServer();
         if (serverData == null) {
@@ -1407,9 +1419,8 @@ implements ClientGamePacketListener {
         });
         serverData.setPreviewsChat(clientboundServerDataPacket.previewsChat());
         ServerList.saveSingleServer(serverData);
-        ServerData.ChatPreview chatPreview = serverData.getChatPreview();
-        if (chatPreview != null && !chatPreview.isAcknowledged()) {
-            this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(serverData)));
+        if (this.minecraft.options.chatPreview().get().booleanValue() && (chatPreview = serverData.getChatPreview()) != null && !chatPreview.isAcknowledged()) {
+            this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(this.minecraft.screen, serverData)));
         }
     }
 
@@ -1464,7 +1475,7 @@ implements ClientGamePacketListener {
             }
             PlayerInfo playerInfo = this.playerInfoMap.get(playerUpdate.getProfile().getId());
             if (clientboundPlayerInfoPacket.getAction() == ClientboundPlayerInfoPacket.Action.ADD_PLAYER) {
-                playerInfo = new PlayerInfo(playerUpdate, this.minecraft.getMinecraftSessionService());
+                playerInfo = new PlayerInfo(playerUpdate, this.minecraft.getServiceSignatureValidator());
                 this.playerInfoMap.put(playerInfo.getProfile().getId(), playerInfo);
                 this.minecraft.getPlayerSocialManager().addPlayer(playerInfo);
             }

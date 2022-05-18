@@ -83,7 +83,7 @@ VibrationListener.VibrationListenerConfig {
         super((EntityType<? extends PathfinderMob>)entityType, level);
         this.moveControl = new FlyingMoveControl(this, 20, true);
         this.setCanPickUpLoot(this.canPickUpLoot());
-        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0, 0));
+        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0.0f, 0));
     }
 
     protected Brain.Provider<Allay> brainProvider() {
@@ -338,7 +338,7 @@ VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, int i) {
+    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
         if (gameEvent == GameEvent.NOTE_BLOCK_PLAY) {
             AllayAi.hearNoteblock(this, new BlockPos(blockPos));
         }

@@ -6,9 +6,14 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.util.StringUtil;
 
 public record ServerboundChatPreviewPacket(int queryId, String query) implements Packet<ServerGamePacketListener>
 {
+    public ServerboundChatPreviewPacket {
+        string = StringUtil.trimChatMessage(string);
+    }
+
     public ServerboundChatPreviewPacket(FriendlyByteBuf friendlyByteBuf) {
         this(friendlyByteBuf.readInt(), friendlyByteBuf.readUtf(256));
     }

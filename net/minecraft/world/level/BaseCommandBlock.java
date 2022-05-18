@@ -115,7 +115,7 @@ implements CommandSource {
                         ++this.successCount;
                     }
                 });
-                minecraftServer.getCommands().performCommand(commandSourceStack, this.command);
+                minecraftServer.getCommands().performPrefixedCommand(commandSourceStack, this.command);
             } catch (Throwable throwable) {
                 CrashReport crashReport = CrashReport.forThrowable(throwable, "Executing command block");
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Command to be executed");

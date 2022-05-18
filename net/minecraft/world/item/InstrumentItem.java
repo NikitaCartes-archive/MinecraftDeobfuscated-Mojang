@@ -31,6 +31,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class InstrumentItem
@@ -125,6 +126,7 @@ extends Item {
         SoundEvent soundEvent = instrument.soundEvent();
         float f = instrument.range() / 16.0f;
         level.playSound(player, player, soundEvent, SoundSource.RECORDS, f, 1.0f);
+        level.gameEvent(GameEvent.INSTRUMENT_PLAY, player.position(), GameEvent.Context.of(player));
     }
 }
 

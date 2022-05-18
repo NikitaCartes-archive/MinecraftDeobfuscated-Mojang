@@ -118,7 +118,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     public Warden(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
-        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0, 0));
+        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0.0f, 0));
         this.xpReward = 5;
         this.getNavigation().setCanFloat(true);
         this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0f);
@@ -298,11 +298,11 @@ implements VibrationListener.VibrationListenerConfig {
     public void handleEntityEvent(byte b) {
         if (b == 4) {
             this.roarAnimationState.stop();
-            this.attackAnimationState.start();
+            this.attackAnimationState.start(this.tickCount);
         } else if (b == 61) {
             this.tendrilAnimation = 10;
         } else if (b == 62) {
-            this.sonicBoomAnimationState.start();
+            this.sonicBoomAnimationState.start(this.tickCount);
         } else {
             super.handleEntityEvent(b);
         }
@@ -341,19 +341,19 @@ implements VibrationListener.VibrationListenerConfig {
         if (DATA_POSE.equals(entityDataAccessor)) {
             switch (this.getPose()) {
                 case ROARING: {
-                    this.roarAnimationState.start();
+                    this.roarAnimationState.start(this.tickCount);
                     break;
                 }
                 case SNIFFING: {
-                    this.sniffAnimationState.start();
+                    this.sniffAnimationState.start(this.tickCount);
                     break;
                 }
                 case EMERGING: {
-                    this.emergeAnimationState.start();
+                    this.emergeAnimationState.start(this.tickCount);
                     break;
                 }
                 case DIGGING: {
-                    this.diggingAnimationState.start();
+                    this.diggingAnimationState.start(this.tickCount);
                 }
             }
         }
@@ -569,7 +569,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, int i) {
+    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
         this.brain.setMemoryWithExpiry(MemoryModuleType.VIBRATION_COOLDOWN, Unit.INSTANCE, 40L);
         serverLevel.broadcastEntityEvent(this, (byte)61);
         this.playSound(SoundEvents.WARDEN_TENDRIL_CLICKS, 5.0f, this.getVoicePitch());

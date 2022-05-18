@@ -383,11 +383,11 @@ extends Monster {
     }
 
     @Override
-    public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
-        super.killed(serverLevel, livingEntity);
+    public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
+        boolean bl = super.wasKilled(serverLevel, livingEntity);
         if ((serverLevel.getDifficulty() == Difficulty.NORMAL || serverLevel.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
             if (serverLevel.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
-                return;
+                return bl;
             }
             Villager villager = (Villager)livingEntity;
             ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
@@ -399,7 +399,9 @@ extends Monster {
             if (!this.isSilent()) {
                 serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
             }
+            bl = false;
         }
+        return bl;
     }
 
     @Override

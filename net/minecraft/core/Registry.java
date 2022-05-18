@@ -77,12 +77,14 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.BiomeSources;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGenerators;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -273,8 +275,8 @@ IdMap<T> {
     public static final Registry<RootPlacerType<?>> ROOT_PLACER_TYPES = Registry.registerSimple(ROOT_PLACER_TYPE_REGISTRY, registry -> RootPlacerType.MANGROVE_ROOT_PLACER);
     public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPES = Registry.registerSimple(TREE_DECORATOR_TYPE_REGISTRY, registry -> TreeDecoratorType.LEAVE_VINE);
     public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPES = Registry.registerSimple(FEATURE_SIZE_TYPE_REGISTRY, registry -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE);
-    public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = Registry.registerSimple(BIOME_SOURCE_REGISTRY, Lifecycle.stable(), registry -> BiomeSource.CODEC);
-    public static final Registry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = Registry.registerSimple(CHUNK_GENERATOR_REGISTRY, Lifecycle.stable(), registry -> ChunkGenerator.CODEC);
+    public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = Registry.registerSimple(BIOME_SOURCE_REGISTRY, Lifecycle.stable(), BiomeSources::bootstrap);
+    public static final Registry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = Registry.registerSimple(CHUNK_GENERATOR_REGISTRY, Lifecycle.stable(), ChunkGenerators::bootstrap);
     public static final Registry<Codec<? extends SurfaceRules.ConditionSource>> CONDITION = Registry.registerSimple(CONDITION_REGISTRY, SurfaceRules.ConditionSource::bootstrap);
     public static final Registry<Codec<? extends SurfaceRules.RuleSource>> RULE = Registry.registerSimple(RULE_REGISTRY, SurfaceRules.RuleSource::bootstrap);
     public static final Registry<Codec<? extends DensityFunction>> DENSITY_FUNCTION_TYPES = Registry.registerSimple(DENSITY_FUNCTION_TYPE_REGISTRY, DensityFunctions::bootstrap);
@@ -452,7 +454,9 @@ IdMap<T> {
 
     public abstract Registry<T> freeze();
 
-    public abstract Holder<T> getOrCreateHolder(ResourceKey<T> var1);
+    public abstract Holder<T> getOrCreateHolderOrThrow(ResourceKey<T> var1);
+
+    public abstract DataResult<Holder<T>> getOrCreateHolder(ResourceKey<T> var1);
 
     public abstract Holder.Reference<T> createIntrusiveHolder(T var1);
 

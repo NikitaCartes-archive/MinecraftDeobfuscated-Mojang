@@ -75,12 +75,12 @@ implements Enemy {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (this.isInvulnerableTo(damageSource)) {
-            return false;
-        }
         if (damageSource.getDirectEntity() instanceof LargeFireball && damageSource.getEntity() instanceof Player) {
             super.hurt(damageSource, 1000.0f);
             return true;
+        }
+        if (this.isInvulnerableTo(damageSource)) {
+            return false;
         }
         return super.hurt(damageSource, f);
     }

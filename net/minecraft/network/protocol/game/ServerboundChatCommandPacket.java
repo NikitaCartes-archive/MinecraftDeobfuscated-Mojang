@@ -10,28 +10,27 @@ import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.util.StringUtil;
 
-public record ServerboundChatCommandPacket(String command, Instant timeStamp, ArgumentSignatures argumentSignatures) implements Packet<ServerGamePacketListener>
+public record ServerboundChatCommandPacket(String command, Instant timeStamp, ArgumentSignatures argumentSignatures, boolean signedPreview) implements Packet<ServerGamePacketListener>
 {
-    private static final int MAX_MESSAGE_LENGTH = 256;
-
-    public ServerboundChatCommandPacket(String string, Instant instant, ArgumentSignatures argumentSignatures) {
-        this.command = StringUtil.trimChatMessage(string);
+    public ServerboundChatCommandPacket(String string, Instant instant, ArgumentSignatures argumentSignatures, boolean bl) {
+        this.command = string = StringUtil.trimChatMessage(string);
         this.timeStamp = instant;
         this.argumentSignatures = argumentSignatures;
+        this.signedPreview = bl;
     }
 
     public ServerboundChatCommandPacket(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readUtf(256), friendlyByteBuf.readInstant(), new ArgumentSignatures(friendlyByteBuf));
+        this(friendlyByteBuf.readUtf(256), friendlyByteBuf.readInstant(), new ArgumentSignatures(friendlyByteBuf), friendlyByteBuf.readBoolean());
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeUtf(this.command);
+        friendlyByteBuf.writeUtf(this.command, 256);
         friendlyByteBuf.writeInstant(this.timeStamp);
         this.argumentSignatures.write(friendlyByteBuf);
+        friendlyByteBuf.writeBoolean(this.signedPreview);
     }
 
     @Override
@@ -39,16 +38,8 @@ public record ServerboundChatCommandPacket(String command, Instant timeStamp, Ar
         serverGamePacketListener.handleChatCommand(this);
     }
 
-    private Instant getExpiresAt() {
-        return this.timeStamp.plus(ServerboundChatPacket.MESSAGE_EXPIRES_AFTER);
-    }
-
-    public boolean hasExpired(Instant instant) {
-        return instant.isAfter(this.getExpiresAt());
-    }
-
     public CommandSigningContext signingContext(UUID uUID) {
-        return new CommandSigningContext.PlainArguments(uUID, this.timeStamp, this.argumentSignatures);
+        return new CommandSigningContext.SignedArguments(uUID, this.timeStamp, this.argumentSignatures, this.signedPreview);
     }
 }
 

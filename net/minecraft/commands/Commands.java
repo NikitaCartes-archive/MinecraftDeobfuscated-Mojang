@@ -207,15 +207,16 @@ public class Commands {
         this.dispatcher.setConsumer((commandContext, bl, i) -> ((CommandSourceStack)commandContext.getSource()).onCommandComplete(commandContext, bl, i));
     }
 
+    public int performPrefixedCommand(CommandSourceStack commandSourceStack, String string) {
+        return this.performCommand(commandSourceStack, string.startsWith("/") ? string.substring(1) : string);
+    }
+
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public int performCommand(CommandSourceStack commandSourceStack, String string) {
         StringReader stringReader = new StringReader(string);
-        if (stringReader.canRead() && stringReader.peek() == '/') {
-            stringReader.skip();
-        }
-        commandSourceStack.getServer().getProfiler().push(string);
+        commandSourceStack.getServer().getProfiler().push(() -> "/" + string);
         try {
             int n = this.dispatcher.execute(stringReader, commandSourceStack);
             return n;
@@ -228,7 +229,7 @@ public class Commands {
             commandSourceStack.sendFailure(ComponentUtils.fromMessage(commandSyntaxException.getRawMessage()));
             if (commandSyntaxException.getInput() != null && commandSyntaxException.getCursor() >= 0) {
                 i = Math.min(commandSyntaxException.getInput().length(), commandSyntaxException.getCursor());
-                MutableComponent mutableComponent = Component.empty().withStyle(ChatFormatting.GRAY).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
+                MutableComponent mutableComponent = Component.empty().withStyle(ChatFormatting.GRAY).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + string)));
                 if (i > 10) {
                     mutableComponent.append("...");
                 }
@@ -245,7 +246,7 @@ public class Commands {
         } catch (Exception exception) {
             MutableComponent mutableComponent2 = Component.literal(exception.getMessage() == null ? exception.getClass().getName() : exception.getMessage());
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.error("Command exception: {}", (Object)string, (Object)exception);
+                LOGGER.error("Command exception: /{}", (Object)string, (Object)exception);
                 StackTraceElement[] stackTraceElements = exception.getStackTrace();
                 for (int j = 0; j < Math.min(stackTraceElements.length, 3); ++j) {
                     mutableComponent2.append("\n\n").append(stackTraceElements[j].getMethodName()).append("\n ").append(stackTraceElements[j].getFileName()).append(":").append(String.valueOf(stackTraceElements[j].getLineNumber()));
@@ -254,7 +255,7 @@ public class Commands {
             commandSourceStack.sendFailure(Component.translatable("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2))));
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 commandSourceStack.sendFailure(Component.literal(Util.describeError(exception)));
-                LOGGER.error("'{}' threw an exception", (Object)string, (Object)exception);
+                LOGGER.error("'/{}' threw an exception", (Object)string, (Object)exception);
             }
             int n = 0;
             return n;

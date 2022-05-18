@@ -39,20 +39,20 @@ implements GameEventListener {
     protected final VibrationListenerConfig config;
     @Nullable
     protected ReceivingEvent receivingEvent;
-    protected int receivingDistance;
+    protected float receivingDistance;
     protected int travelTimeInTicks;
 
     public static Codec<VibrationListener> codec(VibrationListenerConfig vibrationListenerConfig) {
-        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)PositionSource.CODEC.fieldOf("source")).forGetter(vibrationListener -> vibrationListener.listenerSource), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range")).forGetter(vibrationListener -> vibrationListener.listenerRange), ReceivingEvent.CODEC.optionalFieldOf("event").forGetter(vibrationListener -> Optional.ofNullable(vibrationListener.receivingEvent)), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_distance")).orElse(0).forGetter(vibrationListener -> vibrationListener.receivingDistance), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay")).orElse(0).forGetter(vibrationListener -> vibrationListener.travelTimeInTicks)).apply((Applicative<VibrationListener, ?>)instance, (positionSource, integer, optional, integer2, integer3) -> new VibrationListener((PositionSource)positionSource, (int)integer, vibrationListenerConfig, optional.orElse(null), (int)integer2, (int)integer3)));
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)PositionSource.CODEC.fieldOf("source")).forGetter(vibrationListener -> vibrationListener.listenerSource), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range")).forGetter(vibrationListener -> vibrationListener.listenerRange), ReceivingEvent.CODEC.optionalFieldOf("event").forGetter(vibrationListener -> Optional.ofNullable(vibrationListener.receivingEvent)), ((MapCodec)Codec.floatRange(0.0f, Float.MAX_VALUE).fieldOf("event_distance")).orElse(Float.valueOf(0.0f)).forGetter(vibrationListener -> Float.valueOf(vibrationListener.receivingDistance)), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay")).orElse(0).forGetter(vibrationListener -> vibrationListener.travelTimeInTicks)).apply((Applicative<VibrationListener, ?>)instance, (positionSource, integer, optional, float_, integer2) -> new VibrationListener((PositionSource)positionSource, (int)integer, vibrationListenerConfig, optional.orElse(null), float_.floatValue(), (int)integer2)));
     }
 
-    public VibrationListener(PositionSource positionSource, int i, VibrationListenerConfig vibrationListenerConfig, @Nullable ReceivingEvent receivingEvent, int j, int k) {
+    public VibrationListener(PositionSource positionSource, int i, VibrationListenerConfig vibrationListenerConfig, @Nullable ReceivingEvent receivingEvent, float f, int j) {
         this.listenerSource = positionSource;
         this.listenerRange = i;
         this.config = vibrationListenerConfig;
         this.receivingEvent = receivingEvent;
-        this.receivingDistance = j;
-        this.travelTimeInTicks = k;
+        this.receivingDistance = f;
+        this.travelTimeInTicks = j;
     }
 
     public void tick(Level level) {
@@ -106,9 +106,9 @@ implements GameEventListener {
     }
 
     private void scheduleSignal(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
-        this.receivingDistance = Mth.floor(vec3.distanceTo(vec32));
+        this.receivingDistance = (float)vec3.distanceTo(vec32);
         this.receivingEvent = new ReceivingEvent(gameEvent, this.receivingDistance, vec3, context.sourceEntity());
-        this.travelTimeInTicks = this.receivingDistance;
+        this.travelTimeInTicks = Mth.floor(this.receivingDistance);
         serverLevel.sendParticles(new VibrationParticleOption(this.listenerSource, this.travelTimeInTicks), vec3.x, vec3.y, vec3.z, 1, 0.0, 0.0, 0.0, 0.0);
         this.config.onSignalSchedule();
     }
@@ -161,21 +161,21 @@ implements GameEventListener {
 
         public boolean shouldListen(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, GameEvent.Context var5);
 
-        public void onSignalReceive(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, @Nullable Entity var5, @Nullable Entity var6, int var7);
+        public void onSignalReceive(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, @Nullable Entity var5, @Nullable Entity var6, float var7);
 
         default public void onSignalSchedule() {
         }
     }
 
-    public record ReceivingEvent(GameEvent gameEvent, int distance, Vec3 pos, @Nullable UUID uuid, @Nullable UUID projectileOwnerUuid, @Nullable Entity entity) {
-        public static final Codec<ReceivingEvent> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.GAME_EVENT.byNameCodec().fieldOf("game_event")).forGetter(ReceivingEvent::gameEvent), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("distance")).forGetter(ReceivingEvent::distance), ((MapCodec)Vec3.CODEC.fieldOf("pos")).forGetter(ReceivingEvent::pos), ExtraCodecs.UUID.optionalFieldOf("source").forGetter(receivingEvent -> Optional.ofNullable(receivingEvent.uuid())), ExtraCodecs.UUID.optionalFieldOf("projectile_owner").forGetter(receivingEvent -> Optional.ofNullable(receivingEvent.projectileOwnerUuid()))).apply((Applicative<ReceivingEvent, ?>)instance, (gameEvent, integer, vec3, optional, optional2) -> new ReceivingEvent((GameEvent)gameEvent, (int)integer, (Vec3)vec3, optional.orElse(null), optional2.orElse(null))));
+    public record ReceivingEvent(GameEvent gameEvent, float distance, Vec3 pos, @Nullable UUID uuid, @Nullable UUID projectileOwnerUuid, @Nullable Entity entity) {
+        public static final Codec<ReceivingEvent> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.GAME_EVENT.byNameCodec().fieldOf("game_event")).forGetter(ReceivingEvent::gameEvent), ((MapCodec)Codec.floatRange(0.0f, Float.MAX_VALUE).fieldOf("distance")).forGetter(ReceivingEvent::distance), ((MapCodec)Vec3.CODEC.fieldOf("pos")).forGetter(ReceivingEvent::pos), ExtraCodecs.UUID.optionalFieldOf("source").forGetter(receivingEvent -> Optional.ofNullable(receivingEvent.uuid())), ExtraCodecs.UUID.optionalFieldOf("projectile_owner").forGetter(receivingEvent -> Optional.ofNullable(receivingEvent.projectileOwnerUuid()))).apply((Applicative<ReceivingEvent, ?>)instance, (gameEvent, float_, vec3, optional, optional2) -> new ReceivingEvent((GameEvent)gameEvent, float_.floatValue(), (Vec3)vec3, optional.orElse(null), optional2.orElse(null))));
 
-        public ReceivingEvent(GameEvent gameEvent, int i, Vec3 vec3, @Nullable UUID uUID, @Nullable UUID uUID2) {
-            this(gameEvent, i, vec3, uUID, uUID2, null);
+        public ReceivingEvent(GameEvent gameEvent, float f, Vec3 vec3, @Nullable UUID uUID, @Nullable UUID uUID2) {
+            this(gameEvent, f, vec3, uUID, uUID2, null);
         }
 
-        public ReceivingEvent(GameEvent gameEvent, int i, Vec3 vec3, @Nullable Entity entity) {
-            this(gameEvent, i, vec3, entity == null ? null : entity.getUUID(), ReceivingEvent.getProjectileOwner(entity), entity);
+        public ReceivingEvent(GameEvent gameEvent, float f, Vec3 vec3, @Nullable Entity entity) {
+            this(gameEvent, f, vec3, entity == null ? null : entity.getUUID(), ReceivingEvent.getProjectileOwner(entity), entity);
         }
 
         @Nullable

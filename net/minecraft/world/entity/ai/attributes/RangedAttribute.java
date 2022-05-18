@@ -36,8 +36,10 @@ extends Attribute {
 
     @Override
     public double sanitizeValue(double d) {
-        d = Mth.clamp(d, this.minValue, this.maxValue);
-        return d;
+        if (Double.isNaN(d)) {
+            return this.minValue;
+        }
+        return Mth.clamp(d, this.minValue, this.maxValue);
     }
 }
 

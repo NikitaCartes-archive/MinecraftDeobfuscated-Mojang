@@ -37,7 +37,7 @@ implements Packet<ServerGamePacketListener> {
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeUtf(this.message);
+        friendlyByteBuf.writeUtf(this.message, 256);
         friendlyByteBuf.writeInstant(this.timeStamp);
         Crypt.SaltSignaturePair.write(friendlyByteBuf, this.saltSignature);
         friendlyByteBuf.writeBoolean(this.signedPreview);
@@ -56,12 +56,8 @@ implements Packet<ServerGamePacketListener> {
         return new MessageSignature(uUID, this.timeStamp, this.saltSignature);
     }
 
-    private Instant getExpiresAt() {
-        return this.timeStamp.plus(MESSAGE_EXPIRES_AFTER);
-    }
-
-    public boolean hasExpired(Instant instant) {
-        return instant.isAfter(this.getExpiresAt());
+    public Instant getTimeStamp() {
+        return this.timeStamp;
     }
 
     public boolean signedPreview() {

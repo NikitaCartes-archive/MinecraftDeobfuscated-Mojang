@@ -87,8 +87,7 @@ implements ComponentContents {
     }
 
     public int hashCode() {
-        int i = super.hashCode();
-        i = 31 * i + (this.interpreting ? 1 : 0);
+        int i = this.interpreting ? 1 : 0;
         i = 31 * i + this.separator.hashCode();
         i = 31 * i + this.nbtPathPattern.hashCode();
         i = 31 * i + this.dataSource.hashCode();

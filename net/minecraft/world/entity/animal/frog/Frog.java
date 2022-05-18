@@ -77,7 +77,7 @@ public class Frog
 extends Animal {
     public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.SLIME_BALL);
     protected static final ImmutableList<SensorType<? extends Sensor<? super Frog>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY, SensorType.FROG_ATTACKABLES, SensorType.FROG_TEMPTATIONS, SensorType.IS_IN_WATER);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, new MemoryModuleType[]{MemoryModuleType.IS_TEMPTED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.IS_IN_WATER, MemoryModuleType.IS_PREGNANT});
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.BREED_TARGET, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, new MemoryModuleType[]{MemoryModuleType.IS_TEMPTED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.IS_IN_WATER, MemoryModuleType.IS_PREGNANT, MemoryModuleType.IS_PANICKING});
     private static final EntityDataAccessor<FrogVariant> DATA_VARIANT_ID = SynchedEntityData.defineId(Frog.class, EntityDataSerializers.FROG_VARIANT);
     private static final EntityDataAccessor<OptionalInt> DATA_TONGUE_TARGET_ID = SynchedEntityData.defineId(Frog.class, EntityDataSerializers.OPTIONAL_UNSIGNED_INT);
     private static final int FROG_FALL_DAMAGE_REDUCTION = 5;
@@ -191,16 +191,16 @@ extends Animal {
     public void tick() {
         if (this.level.isClientSide()) {
             if (this.isMovingOnLand()) {
-                this.walkAnimationState.startIfStopped();
+                this.walkAnimationState.startIfStopped(this.tickCount);
             } else {
                 this.walkAnimationState.stop();
             }
             if (this.isMovingInWater()) {
                 this.swimIdleAnimationState.stop();
-                this.swimAnimationState.startIfStopped();
+                this.swimAnimationState.startIfStopped(this.tickCount);
             } else if (this.isInWaterOrBubble()) {
                 this.swimAnimationState.stop();
-                this.swimIdleAnimationState.startIfStopped();
+                this.swimIdleAnimationState.startIfStopped(this.tickCount);
             } else {
                 this.swimAnimationState.stop();
                 this.swimIdleAnimationState.stop();
@@ -214,17 +214,17 @@ extends Animal {
         if (DATA_POSE.equals(entityDataAccessor)) {
             Pose pose = this.getPose();
             if (pose == Pose.LONG_JUMPING) {
-                this.jumpAnimationState.start();
+                this.jumpAnimationState.start(this.tickCount);
             } else {
                 this.jumpAnimationState.stop();
             }
             if (pose == Pose.CROAKING) {
-                this.croakAnimationState.start();
+                this.croakAnimationState.start(this.tickCount);
             } else {
                 this.croakAnimationState.stop();
             }
             if (pose == Pose.USING_TONGUE) {
-                this.tongueAnimationState.start();
+                this.tongueAnimationState.start(this.tickCount);
             } else {
                 this.tongueAnimationState.stop();
             }

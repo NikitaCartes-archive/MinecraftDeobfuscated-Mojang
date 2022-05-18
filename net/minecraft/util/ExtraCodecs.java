@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -61,6 +62,8 @@ public class ExtraCodecs {
         }
     }, bs -> Base64.getEncoder().encodeToString((byte[])bs));
     public static final Codec<TagOrElementLocation> TAG_OR_ELEMENT_ID = Codec.STRING.comapFlatMap(string -> string.startsWith("#") ? ResourceLocation.read(string.substring(1)).map(resourceLocation -> new TagOrElementLocation((ResourceLocation)resourceLocation, true)) : ResourceLocation.read(string).map(resourceLocation -> new TagOrElementLocation((ResourceLocation)resourceLocation, false)), TagOrElementLocation::decoratedId);
+    public static final Function<Optional<Long>, OptionalLong> toOptionalLong = optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty);
+    public static final Function<OptionalLong, Optional<Long>> fromOptionalLong = optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty();
 
     public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
         return new XorCodec<F, S>(codec, codec2);
@@ -290,6 +293,10 @@ public class ExtraCodecs {
                 return DataResult.error(exception.getMessage());
             }
         }, dateTimeFormatter::format);
+    }
+
+    public static MapCodec<OptionalLong> asOptionalLong(MapCodec<Optional<Long>> mapCodec) {
+        return mapCodec.xmap(toOptionalLong, fromOptionalLong);
     }
 
     static final class XorCodec<F, S>

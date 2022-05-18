@@ -48,7 +48,7 @@ extends RecipeBookMenu<CraftingContainer> {
     public final boolean active;
     private final Player owner;
 
-    public InventoryMenu(Inventory inventory, boolean bl, Player player) {
+    public InventoryMenu(Inventory inventory, boolean bl, final Player player) {
         super(null, 0);
         int i;
         this.active = bl;
@@ -64,6 +64,12 @@ extends RecipeBookMenu<CraftingContainer> {
             this.addSlot(new Slot(inventory, 39 - i, 8, 8 + i * 18){
 
                 @Override
+                public void set(ItemStack itemStack) {
+                    super.set(itemStack);
+                    player.onEquipItem(equipmentSlot, itemStack);
+                }
+
+                @Override
                 public int getMaxStackSize() {
                     return 1;
                 }
@@ -74,12 +80,12 @@ extends RecipeBookMenu<CraftingContainer> {
                 }
 
                 @Override
-                public boolean mayPickup(Player player) {
+                public boolean mayPickup(Player player2) {
                     ItemStack itemStack = this.getItem();
-                    if (!itemStack.isEmpty() && !player.isCreative() && EnchantmentHelper.hasBindingCurse(itemStack)) {
+                    if (!itemStack.isEmpty() && !player2.isCreative() && EnchantmentHelper.hasBindingCurse(itemStack)) {
                         return false;
                     }
-                    return super.mayPickup(player);
+                    return super.mayPickup(player2);
                 }
 
                 @Override

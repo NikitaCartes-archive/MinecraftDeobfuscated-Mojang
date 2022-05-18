@@ -28,12 +28,14 @@ import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.gametest.framework.GlobalTestReporter;
 import net.minecraft.gametest.framework.MultipleTestTracker;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.DataPackConfig;
@@ -52,6 +54,7 @@ public class GameTestServer
 extends MinecraftServer {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int PROGRESS_REPORT_INTERVAL = 20;
+    private static final Services NO_SERVICES = new Services(null, SignatureValidator.NO_VALIDATION, null, null);
     private final List<GameTestBatch> testBatches;
     private final BlockPos spawnPos;
     private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(), gameRules -> {
@@ -88,7 +91,7 @@ extends MinecraftServer {
     }
 
     private GameTestServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, Collection<GameTestBatch> collection, BlockPos blockPos) {
-        super(thread, levelStorageAccess, packRepository, worldStem, Proxy.NO_PROXY, DataFixers.getDataFixer(), null, null, null, LoggerChunkProgressListener::new);
+        super(thread, levelStorageAccess, packRepository, worldStem, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES, LoggerChunkProgressListener::new);
         this.testBatches = Lists.newArrayList(collection);
         this.spawnPos = blockPos;
     }
@@ -143,11 +146,14 @@ extends MinecraftServer {
     @Override
     public void onServerExit() {
         super.onServerExit();
+        LOGGER.info("Game test server shutting down");
         System.exit(this.testTracker.getFailedRequiredCount());
     }
 
     @Override
     public void onServerCrash(CrashReport crashReport) {
+        super.onServerCrash(crashReport);
+        LOGGER.error("Game test server crashed\n{}", (Object)crashReport.getFriendlyReport());
         System.exit(1);
     }
 

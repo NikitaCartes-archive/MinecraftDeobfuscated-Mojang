@@ -58,7 +58,7 @@ extends Particle {
         float g = ((float)this.life + f) / 3.0f;
         g *= g;
         double d = Mth.lerp((double)f, this.target.xOld, this.target.getX());
-        double e = Mth.lerp((double)f, this.target.yOld, this.target.getY()) + 0.5;
+        double e = Mth.lerp((double)f, this.target.yOld, (this.target.getY() + this.target.getEyeY()) / 2.0);
         double h = Mth.lerp((double)f, this.target.zOld, this.target.getZ());
         double i = Mth.lerp((double)g, this.itemEntity.getX(), d);
         double j = Mth.lerp((double)g, this.itemEntity.getY(), e);

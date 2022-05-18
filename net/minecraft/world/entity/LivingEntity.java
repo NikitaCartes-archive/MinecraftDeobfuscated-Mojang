@@ -608,15 +608,23 @@ extends Entity {
         this.discardFriction = bl;
     }
 
-    protected void equipEventAndSound(ItemStack itemStack, boolean bl) {
-        SoundEvent soundEvent;
+    protected boolean doesEmitEquipEvent(EquipmentSlot equipmentSlot) {
+        return true;
+    }
+
+    public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+        this.playEquipSound(itemStack);
+        if (this.doesEmitEquipEvent(equipmentSlot)) {
+            this.gameEvent(GameEvent.EQUIP);
+        }
+    }
+
+    protected void playEquipSound(ItemStack itemStack) {
         if (itemStack.isEmpty() || this.isSpectator()) {
             return;
         }
-        if (bl) {
-            this.gameEvent(GameEvent.EQUIP);
-        }
-        if ((soundEvent = itemStack.getEquipSound()) != null) {
+        SoundEvent soundEvent = itemStack.getEquipSound();
+        if (soundEvent != null) {
             this.playSound(soundEvent, 1.0f, 1.0f);
         }
     }
@@ -1146,20 +1154,19 @@ extends Entity {
         if (this.isSleeping()) {
             this.stopSleeping();
         }
-        this.gameEvent(GameEvent.ENTITY_DIE);
         if (!this.level.isClientSide && this.hasCustomName()) {
             LOGGER.info("Named entity {} died: {}", (Object)this, (Object)this.getCombatTracker().getDeathMessage().getString());
         }
         this.dead = true;
         this.getCombatTracker().recheckStatus();
         if (this.level instanceof ServerLevel) {
-            if (entity != null) {
-                entity.killed((ServerLevel)this.level, this);
+            if (entity == null || entity.wasKilled((ServerLevel)this.level, this)) {
+                this.gameEvent(GameEvent.ENTITY_DIE);
+                this.dropAllDeathLoot(damageSource);
+                this.createWitherRose(livingEntity);
             }
-            this.dropAllDeathLoot(damageSource);
-            this.createWitherRose(livingEntity);
+            this.level.broadcastEntityEvent(this, (byte)3);
         }
-        this.level.broadcastEntityEvent(this, (byte)3);
         this.setPose(Pose.DYING);
     }
 
@@ -2575,6 +2582,7 @@ extends Entity {
         if (!this.level.isClientSide) {
             this.setLivingEntityFlag(1, true);
             this.setLivingEntityFlag(2, interactionHand == InteractionHand.OFF_HAND);
+            this.gameEvent(GameEvent.ITEM_INTERACT_START);
         }
     }
 
@@ -2678,7 +2686,11 @@ extends Entity {
 
     public void stopUsingItem() {
         if (!this.level.isClientSide) {
+            boolean bl = this.isUsingItem();
             this.setLivingEntityFlag(1, false);
+            if (bl) {
+                this.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+            }
         }
         this.useItem = ItemStack.EMPTY;
         this.useItemRemaining = 0;

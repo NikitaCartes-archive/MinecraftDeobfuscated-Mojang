@@ -7,7 +7,6 @@ import com.google.common.primitives.Ints;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.minecraft.InsecurePublicKeyException;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -39,6 +38,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
@@ -113,7 +113,6 @@ implements ServerLoginPacketListener {
             if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
                 this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
             }
-            this.gameProfile = this.server.getSessionService().fillProfileProperties(this.gameProfile, true);
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
             ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
             try {
@@ -150,7 +149,7 @@ implements ServerLoginPacketListener {
     }
 
     @Nullable
-    private static ProfilePublicKey validatePublicKey(ServerboundHelloPacket serverboundHelloPacket, MinecraftSessionService minecraftSessionService, boolean bl) throws PublicKeyParseException {
+    private static ProfilePublicKey validatePublicKey(ServerboundHelloPacket serverboundHelloPacket, SignatureValidator signatureValidator, boolean bl) throws PublicKeyParseException {
         try {
             Optional<ProfilePublicKey.Data> optional = serverboundHelloPacket.publicKey();
             if (optional.isEmpty()) {
@@ -159,7 +158,7 @@ implements ServerLoginPacketListener {
                 }
                 return null;
             }
-            return ProfilePublicKey.createValidated(minecraftSessionService, optional.get());
+            return ProfilePublicKey.createValidated(signatureValidator, optional.get());
         } catch (InsecurePublicKeyException.MissingException missingException) {
             if (bl) {
                 throw new PublicKeyParseException(INVALID_SIGNATURE, (Throwable)missingException);
@@ -178,7 +177,7 @@ implements ServerLoginPacketListener {
             Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
             Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
             try {
-                this.playerProfilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(serverboundHelloPacket, this.server.getSessionService(), this.server.enforceSecureProfile());
+                this.playerProfilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(serverboundHelloPacket, this.server.getServiceSignatureValidator(), this.server.enforceSecureProfile());
             } catch (PublicKeyParseException publicKeyParseException) {
                 LOGGER.error(publicKeyParseException.getMessage(), publicKeyParseException.getCause());
                 if (this.connection.isMemoryConnection()) break block5;
@@ -210,7 +209,6 @@ implements ServerLoginPacketListener {
         String string;
         Validate.validState(this.state == State.KEY, "Unexpected key packet", new Object[0]);
         try {
-            this.gameProfile = this.server.getSessionService().fillProfileProperties(this.gameProfile, true);
             PrivateKey privateKey = this.server.getKeyPair().getPrivate();
             if (this.playerProfilePublicKey != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, this.playerProfilePublicKey) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
                 throw new IllegalStateException("Protocol error");

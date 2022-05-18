@@ -12,13 +12,16 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.stream.Stream;
 import net.minecraft.util.datafix.fixes.References;
 
-public abstract class PoiTypeRename
+public abstract class AbstractPoiSectionFix
 extends DataFix {
-    public PoiTypeRename(Schema schema, boolean bl) {
-        super(schema, bl);
+    private final String name;
+
+    public AbstractPoiSectionFix(Schema schema, String string) {
+        super(schema, false);
+        this.name = string;
     }
 
     @Override
@@ -27,17 +30,21 @@ extends DataFix {
         if (!Objects.equals(type, this.getInputSchema().getType(References.POI_CHUNK))) {
             throw new IllegalStateException("Poi type is not what was expected.");
         }
-        return this.fixTypeEverywhere("POI rename", type, dynamicOps -> pair -> pair.mapSecond(this::cap));
+        return this.fixTypeEverywhere(this.name, type, dynamicOps -> pair -> pair.mapSecond(this::cap));
     }
 
     private <T> Dynamic<T> cap(Dynamic<T> dynamic2) {
-        return dynamic2.update("Sections", dynamic -> dynamic.updateMapValues(pair -> pair.mapSecond(dynamic2 -> dynamic2.update("Records", dynamic -> DataFixUtils.orElse(this.renameRecords((Dynamic)dynamic), dynamic)))));
+        return dynamic2.update("Sections", dynamic -> dynamic.updateMapValues(pair -> pair.mapSecond(this::processSection)));
     }
 
-    private <T> Optional<Dynamic<T>> renameRecords(Dynamic<T> dynamic) {
-        return dynamic.asStreamOpt().map(stream -> dynamic.createList(stream.map(dynamic2 -> dynamic2.update("type", dynamic -> DataFixUtils.orElse(dynamic.asString().map(this::rename).map(dynamic::createString).result(), dynamic))))).result();
+    private Dynamic<?> processSection(Dynamic<?> dynamic) {
+        return dynamic.update("Records", this::processSectionRecords);
     }
 
-    protected abstract String rename(String var1);
+    private <T> Dynamic<T> processSectionRecords(Dynamic<T> dynamic) {
+        return DataFixUtils.orElse(dynamic.asStreamOpt().result().map(stream -> dynamic.createList(this.processRecords((Stream)stream))), dynamic);
+    }
+
+    protected abstract <T> Stream<Dynamic<T>> processRecords(Stream<Dynamic<T>> var1);
 }
 

@@ -100,13 +100,18 @@ AutoCloseable {
             ChunkPos chunkPos22 = ChunkPos.maxFromRegion(i, j);
             BitSet bitSet = new BitSet();
             ChunkPos.rangeClosed(chunkPos2, chunkPos22).forEach(chunkPos -> {
+                CompoundTag compoundTag;
                 CollectFields collectFields = new CollectFields(new FieldSelector(IntTag.TYPE, "DataVersion"), new FieldSelector(CompoundTag.TYPE, "blending_data"));
-                this.scanChunk((ChunkPos)chunkPos, collectFields).join();
+                try {
+                    this.scanChunk((ChunkPos)chunkPos, collectFields).join();
+                } catch (Exception exception) {
+                    LOGGER.warn("Failed to scan chunk {}", chunkPos, (Object)exception);
+                    return;
+                }
                 Tag tag = collectFields.getResult();
-                if (tag instanceof CompoundTag) {
-                    CompoundTag compoundTag = (CompoundTag)tag;
+                if (tag instanceof CompoundTag && this.isOldChunk(compoundTag = (CompoundTag)tag)) {
                     int i = chunkPos.getRegionLocalZ() * 32 + chunkPos.getRegionLocalX();
-                    bitSet.set(i, this.isOldChunk(compoundTag));
+                    bitSet.set(i);
                 }
             });
             return bitSet;

@@ -3,31 +3,35 @@
  */
 package net.minecraft.commands;
 
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.time.Instant;
 import java.util.UUID;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ArgumentSignatures;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.util.Crypt;
 
 public interface CommandSigningContext {
-    public static final CommandSigningContext NONE = (commandContext, string, component) -> PlayerChatMessage.unsigned(component);
+    public static final CommandSigningContext NONE = string -> MessageSignature.unsigned();
 
-    public PlayerChatMessage signArgument(CommandContext<CommandSourceStack> var1, String var2, Component var3) throws CommandSyntaxException;
+    public MessageSignature getArgumentSignature(String var1);
 
-    public record PlainArguments(UUID sender, Instant timeStamp, ArgumentSignatures argumentSignatures) implements CommandSigningContext
+    default public boolean signedArgumentPreview(String string) {
+        return false;
+    }
+
+    public record SignedArguments(UUID sender, Instant timeStamp, ArgumentSignatures argumentSignatures, boolean signedPreview) implements CommandSigningContext
     {
         @Override
-        public PlayerChatMessage signArgument(CommandContext<CommandSourceStack> commandContext, String string, Component component) {
+        public MessageSignature getArgumentSignature(String string) {
             Crypt.SaltSignaturePair saltSignaturePair = this.argumentSignatures.get(string);
             if (saltSignaturePair != null) {
-                return PlayerChatMessage.signed(component, new MessageSignature(this.sender, this.timeStamp, saltSignaturePair));
+                return new MessageSignature(this.sender, this.timeStamp, saltSignaturePair);
             }
-            return PlayerChatMessage.unsigned(component);
+            return MessageSignature.unsigned();
+        }
+
+        @Override
+        public boolean signedArgumentPreview(String string) {
+            return this.signedPreview;
         }
     }
 }

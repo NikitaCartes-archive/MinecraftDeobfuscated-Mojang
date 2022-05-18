@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 public class ChatOptionsScreen
 extends SimpleOptionsSubScreen {
     public ChatOptionsScreen(Screen screen, Options options) {
-        super(screen, options, Component.translatable("options.chat.title"), new OptionInstance[]{options.chatVisibility(), options.chatColors(), options.chatLinks(), options.chatLinksPrompt(), options.chatOpacity(), options.textBackgroundOpacity(), options.chatScale(), options.chatLineSpacing(), options.chatDelay(), options.chatWidth(), options.chatHeightFocused(), options.chatHeightUnfocused(), options.narrator(), options.autoSuggestions(), options.hideMatchedNames(), options.reducedDebugInfo(), options.chatPreview(), options.onlyShowSignedChat()});
+        super(screen, options, Component.translatable("options.chat.title"), new OptionInstance[]{options.chatVisibility(), options.chatColors(), options.chatLinks(), options.chatLinksPrompt(), options.chatOpacity(), options.textBackgroundOpacity(), options.chatScale(), options.chatLineSpacing(), options.chatDelay(), options.chatWidth(), options.chatHeightFocused(), options.chatHeightUnfocused(), options.narrator(), options.autoSuggestions(), options.hideMatchedNames(), options.reducedDebugInfo(), options.chatPreview(), options.onlyShowSecureChat()});
     }
 }
 

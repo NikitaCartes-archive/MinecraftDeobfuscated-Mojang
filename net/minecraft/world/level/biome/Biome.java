@@ -193,11 +193,11 @@ public final class Biome {
         return FoliageColor.get(d, e);
     }
 
-    public final float getDownfall() {
+    public float getDownfall() {
         return this.climateSettings.downfall;
     }
 
-    public final float getBaseTemperature() {
+    public float getBaseTemperature() {
         return this.climateSettings.temperature;
     }
 
@@ -205,11 +205,11 @@ public final class Biome {
         return this.specialEffects;
     }
 
-    public final int getWaterColor() {
+    public int getWaterColor() {
         return this.specialEffects.getWaterColor();
     }
 
-    public final int getWaterFogColor() {
+    public int getWaterFogColor() {
         return this.specialEffects.getWaterFogColor();
     }
 
@@ -233,19 +233,8 @@ public final class Biome {
         return this.specialEffects.getBackgroundMusic();
     }
 
-    static class ClimateSettings {
+    record ClimateSettings(Precipitation precipitation, float temperature, TemperatureModifier temperatureModifier, float downfall) {
         public static final MapCodec<ClimateSettings> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)Precipitation.CODEC.fieldOf("precipitation")).forGetter(climateSettings -> climateSettings.precipitation), ((MapCodec)Codec.FLOAT.fieldOf("temperature")).forGetter(climateSettings -> Float.valueOf(climateSettings.temperature)), TemperatureModifier.CODEC.optionalFieldOf("temperature_modifier", TemperatureModifier.NONE).forGetter(climateSettings -> climateSettings.temperatureModifier), ((MapCodec)Codec.FLOAT.fieldOf("downfall")).forGetter(climateSettings -> Float.valueOf(climateSettings.downfall))).apply((Applicative<ClimateSettings, ?>)instance, ClimateSettings::new));
-        final Precipitation precipitation;
-        final float temperature;
-        final TemperatureModifier temperatureModifier;
-        final float downfall;
-
-        ClimateSettings(Precipitation precipitation, float f, TemperatureModifier temperatureModifier, float g) {
-            this.precipitation = precipitation;
-            this.temperature = f;
-            this.temperatureModifier = temperatureModifier;
-            this.downfall = g;
-        }
     }
 
     public static enum Precipitation implements StringRepresentable
@@ -340,10 +329,6 @@ public final class Biome {
         private MobSpawnSettings mobSpawnSettings;
         @Nullable
         private BiomeGenerationSettings generationSettings;
-
-        public static BiomeBuilder from(Biome biome) {
-            return new BiomeBuilder().precipitation(biome.getPrecipitation()).temperature(biome.getBaseTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).generationSettings(biome.getGenerationSettings()).mobSpawnSettings(biome.getMobSettings());
-        }
 
         public BiomeBuilder precipitation(Precipitation precipitation) {
             this.precipitation = precipitation;

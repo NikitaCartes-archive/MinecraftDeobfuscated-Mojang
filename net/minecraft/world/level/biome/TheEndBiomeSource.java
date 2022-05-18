@@ -28,7 +28,7 @@ extends BiomeSource {
     private final Holder<Biome> barrens;
 
     public TheEndBiomeSource(Registry<Biome> registry) {
-        this(registry.getOrCreateHolder(Biomes.THE_END), registry.getOrCreateHolder(Biomes.END_HIGHLANDS), registry.getOrCreateHolder(Biomes.END_MIDLANDS), registry.getOrCreateHolder(Biomes.SMALL_END_ISLANDS), registry.getOrCreateHolder(Biomes.END_BARRENS));
+        this(registry.getOrCreateHolderOrThrow(Biomes.THE_END), registry.getOrCreateHolderOrThrow(Biomes.END_HIGHLANDS), registry.getOrCreateHolderOrThrow(Biomes.END_MIDLANDS), registry.getOrCreateHolderOrThrow(Biomes.SMALL_END_ISLANDS), registry.getOrCreateHolderOrThrow(Biomes.END_BARRENS));
     }
 
     private TheEndBiomeSource(Holder<Biome> holder, Holder<Biome> holder2, Holder<Biome> holder3, Holder<Biome> holder4, Holder<Biome> holder5) {

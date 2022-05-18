@@ -135,7 +135,7 @@ extends Screen {
                 resourceKey = DEFAULT_BIOME;
             }
         }
-        flatLevelGeneratorSettings2.setBiome(registry.getOrCreateHolder(resourceKey));
+        flatLevelGeneratorSettings2.setBiome(registry.getOrCreateHolderOrThrow(resourceKey));
         return flatLevelGeneratorSettings2;
     }
 

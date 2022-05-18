@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
+import net.minecraft.world.entity.ai.behavior.FollowTemptation;
 import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
@@ -31,6 +32,7 @@ import net.minecraft.world.entity.schedule.Activity;
 public class TadpoleAi {
     private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0f;
     private static final float SPEED_MULTIPLIER_WHEN_IDLING_IN_WATER = 0.5f;
+    private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25f;
 
     protected static Brain<?> makeBrain(Brain<Tadpole> brain) {
         TadpoleAi.initCoreActivity(brain);
@@ -46,7 +48,7 @@ public class TadpoleAi {
     }
 
     private static void initIdleActivity(Brain<Tadpole> brain) {
-        brain.addActivity(Activity.IDLE, ImmutableList.of(Pair.of(0, new RunSometimes<LivingEntity>(new SetEntityLookTarget(EntityType.PLAYER, 6.0f), UniformInt.of(30, 60))), Pair.of(1, new GateBehavior(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT), ImmutableSet.of(), GateBehavior.OrderPolicy.ORDERED, GateBehavior.RunningPolicy.TRY_ALL, ImmutableList.of(Pair.of(new RandomSwim(0.5f), 2), Pair.of(new SetWalkTargetFromLookTarget(0.5f, 3), 3), Pair.of(new RunIf<LivingEntity>(Entity::isInWaterOrBubble, new DoNothing(30, 60)), 5))))));
+        brain.addActivity(Activity.IDLE, ImmutableList.of(Pair.of(0, new RunSometimes<LivingEntity>(new SetEntityLookTarget(EntityType.PLAYER, 6.0f), UniformInt.of(30, 60))), Pair.of(1, new FollowTemptation(livingEntity -> Float.valueOf(1.25f))), Pair.of(2, new GateBehavior(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT), ImmutableSet.of(), GateBehavior.OrderPolicy.ORDERED, GateBehavior.RunningPolicy.TRY_ALL, ImmutableList.of(Pair.of(new RandomSwim(0.5f), 2), Pair.of(new SetWalkTargetFromLookTarget(0.5f, 3), 3), Pair.of(new RunIf<LivingEntity>(Entity::isInWaterOrBubble, new DoNothing(30, 60)), 5))))));
     }
 
     public static void updateActivity(Tadpole tadpole) {

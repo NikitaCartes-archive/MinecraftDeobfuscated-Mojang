@@ -40,6 +40,7 @@ public class GameEvent {
     public static final GameEvent FLUID_PICKUP = GameEvent.register("fluid_pickup");
     public static final GameEvent FLUID_PLACE = GameEvent.register("fluid_place");
     public static final GameEvent HIT_GROUND = GameEvent.register("hit_ground");
+    public static final GameEvent INSTRUMENT_PLAY = GameEvent.register("instrument_play");
     public static final GameEvent ITEM_INTERACT_FINISH = GameEvent.register("item_interact_finish");
     public static final GameEvent ITEM_INTERACT_START = GameEvent.register("item_interact_start");
     public static final GameEvent LIGHTNING_STRIKE = GameEvent.register("lightning_strike");

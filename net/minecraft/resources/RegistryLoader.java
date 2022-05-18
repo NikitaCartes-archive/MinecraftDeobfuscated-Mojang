@@ -48,7 +48,7 @@ public class RegistryLoader {
         if (dataResult != null) {
             return dataResult;
         }
-        Holder holder = writableRegistry.getOrCreateHolder(resourceKey2);
+        Holder holder = writableRegistry.getOrCreateHolderOrThrow(resourceKey2);
         readCache.values.put(resourceKey2, DataResult.success(holder));
         if (optional.isEmpty()) {
             dataResult2 = writableRegistry.containsKey(resourceKey2) ? DataResult.success(holder, Lifecycle.stable()) : DataResult.error("Missing referenced custom/removed registry entry for registry " + resourceKey + " named " + resourceKey2.location());

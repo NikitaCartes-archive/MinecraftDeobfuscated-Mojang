@@ -80,11 +80,7 @@ extends ChunkGenerator {
     private final Aquifer.FluidPicker globalFluidPicker;
 
     public NoiseBasedChunkGenerator(Registry<StructureSet> registry, Registry<NormalNoise.NoiseParameters> registry2, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> holder) {
-        this(registry, registry2, biomeSource, biomeSource, holder);
-    }
-
-    private NoiseBasedChunkGenerator(Registry<StructureSet> registry, Registry<NormalNoise.NoiseParameters> registry2, BiomeSource biomeSource, BiomeSource biomeSource2, Holder<NoiseGeneratorSettings> holder) {
-        super(registry, Optional.empty(), biomeSource, biomeSource2);
+        super(registry, Optional.empty(), biomeSource);
         this.noises = registry2;
         this.settings = holder;
         NoiseGeneratorSettings noiseGeneratorSettings = this.settings.value();
@@ -111,7 +107,7 @@ extends ChunkGenerator {
 
     private void doCreateBiomes(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess2) {
         NoiseChunk noiseChunk = chunkAccess2.getOrCreateNoiseChunk(chunkAccess -> this.createNoiseChunk((ChunkAccess)chunkAccess, structureManager, blender, randomState));
-        BiomeResolver biomeResolver = BelowZeroRetrogen.getBiomeResolver(blender.getBiomeResolver(this.runtimeBiomeSource), chunkAccess2);
+        BiomeResolver biomeResolver = BelowZeroRetrogen.getBiomeResolver(blender.getBiomeResolver(this.biomeSource), chunkAccess2);
         chunkAccess2.fillBiomesFromNoise(biomeResolver, noiseChunk.cachedClimateSampler(randomState.router(), this.settings.value().spawnTarget()));
     }
 
@@ -235,7 +231,7 @@ extends ChunkGenerator {
             for (int k2 = -8; k2 <= 8; ++k2) {
                 ChunkPos chunkPos2 = new ChunkPos(chunkPos.x + j2, chunkPos.z + k2);
                 ChunkAccess chunkAccess22 = worldGenRegion.getChunk(chunkPos2.x, chunkPos2.z);
-                BiomeGenerationSettings biomeGenerationSettings = chunkAccess22.carverBiome(() -> this.biomeSource.getNoiseBiome(QuartPos.fromBlock(chunkPos2.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos2.getMinBlockZ()), randomState.sampler())).value().getGenerationSettings();
+                BiomeGenerationSettings biomeGenerationSettings = chunkAccess22.carverBiome(() -> this.getBiomeGenerationSettings(this.biomeSource.getNoiseBiome(QuartPos.fromBlock(chunkPos2.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos2.getMinBlockZ()), randomState.sampler())));
                 Iterable<Holder<ConfiguredWorldCarver<?>>> iterable = biomeGenerationSettings.getCarvers(carving);
                 int m = 0;
                 for (Holder<ConfiguredWorldCarver<?>> holder : iterable) {

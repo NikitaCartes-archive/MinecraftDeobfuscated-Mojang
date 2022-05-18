@@ -24,6 +24,7 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -127,6 +128,7 @@ public abstract class BaseSpawner {
                 return;
             }
             serverLevel.levelEvent(2004, blockPos, 0);
+            serverLevel.gameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos2);
             if (entity2 instanceof Mob) {
                 ((Mob)entity2).spawnAnim();
             }

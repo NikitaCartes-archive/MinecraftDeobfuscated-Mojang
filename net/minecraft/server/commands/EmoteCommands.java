@@ -12,25 +12,16 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.TextFilter;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.players.PlayerList;
 
 public class EmoteCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("me").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("action", MessageArgument.message()).executes(commandContext -> {
-            PlayerChatMessage playerChatMessage = MessageArgument.getSignedMessage(commandContext, "action");
+            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "action");
             CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
-            if (commandSourceStack.isPlayer()) {
-                ServerPlayer serverPlayer = commandSourceStack.getPlayerOrException();
-                serverPlayer.getTextFilter().processStreamMessage(playerChatMessage.signedContent().getString()).thenAcceptAsync(filteredText -> {
-                    PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-                    PlayerChatMessage playerChatMessage2 = commandSourceStack.getServer().getChatDecorator().decorate(serverPlayer, playerChatMessage);
-                    playerList.broadcastChatMessage(playerChatMessage2, (TextFilter.FilteredText)filteredText, serverPlayer, ChatType.EMOTE_COMMAND);
-                }, (Executor)commandSourceStack.getServer());
-            } else {
-                commandSourceStack.getServer().getPlayerList().broadcastChatMessage(playerChatMessage, commandSourceStack.asChatSender(), ChatType.EMOTE_COMMAND);
-            }
+            PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+            chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> playerList.broadcastChatMessage((FilteredText<PlayerChatMessage>)filteredText, commandSourceStack, ChatType.EMOTE_COMMAND), (Executor)commandSourceStack.getServer());
             return 1;
         })));
     }

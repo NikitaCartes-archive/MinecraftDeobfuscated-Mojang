@@ -6,7 +6,6 @@ package net.minecraft.network.chat.contents;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.commands.CommandSourceStack;
@@ -64,7 +63,7 @@ public record EntityDataSource(String selectorPattern, @Nullable EntitySelector 
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.selectorPattern);
+        return this.selectorPattern.hashCode();
     }
 
     @Nullable

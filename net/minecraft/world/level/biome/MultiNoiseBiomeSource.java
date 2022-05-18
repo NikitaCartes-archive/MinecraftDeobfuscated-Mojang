@@ -101,10 +101,10 @@ extends BiomeSource {
 
     public static class Preset {
         static final Map<ResourceLocation, Preset> BY_NAME = Maps.newHashMap();
-        public static final Preset NETHER = new Preset(new ResourceLocation("nether"), registry -> new Climate.ParameterList(ImmutableList.of(Pair.of(Climate.parameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolder(Biomes.NETHER_WASTES)), Pair.of(Climate.parameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolder(Biomes.SOUL_SAND_VALLEY)), Pair.of(Climate.parameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolder(Biomes.CRIMSON_FOREST)), Pair.of(Climate.parameters(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.375f), registry.getOrCreateHolder(Biomes.WARPED_FOREST)), Pair.of(Climate.parameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.175f), registry.getOrCreateHolder(Biomes.BASALT_DELTAS)))));
+        public static final Preset NETHER = new Preset(new ResourceLocation("nether"), registry -> new Climate.ParameterList(ImmutableList.of(Pair.of(Climate.parameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolderOrThrow(Biomes.NETHER_WASTES)), Pair.of(Climate.parameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolderOrThrow(Biomes.SOUL_SAND_VALLEY)), Pair.of(Climate.parameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolderOrThrow(Biomes.CRIMSON_FOREST)), Pair.of(Climate.parameters(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.375f), registry.getOrCreateHolderOrThrow(Biomes.WARPED_FOREST)), Pair.of(Climate.parameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.175f), registry.getOrCreateHolderOrThrow(Biomes.BASALT_DELTAS)))));
         public static final Preset OVERWORLD = new Preset(new ResourceLocation("overworld"), registry -> {
             ImmutableList.Builder builder = ImmutableList.builder();
-            new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(registry::getOrCreateHolder)));
+            new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(registry::getOrCreateHolderOrThrow)));
             return new Climate.ParameterList(builder.build());
         });
         final ResourceLocation name;

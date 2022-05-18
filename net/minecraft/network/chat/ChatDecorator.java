@@ -3,48 +3,34 @@
  */
 package net.minecraft.network.chat;
 
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
+import net.minecraft.server.network.FilteredText;
 import org.jetbrains.annotations.Nullable;
 
 @FunctionalInterface
 public interface ChatDecorator {
-    public static final ChatDecorator PLAIN = (serverPlayer, component) -> component;
+    public static final ChatDecorator PLAIN = (serverPlayer, component) -> CompletableFuture.completedFuture(component);
 
-    @Deprecated
-    public static ChatDecorator testRainbowChat() {
-        return (serverPlayer, component) -> {
-            String string = component.getString().trim();
-            int i = string.length();
-            float f = Math.nextDown(1.0f) * (float)i;
-            MutableComponent mutableComponent = Component.literal(String.valueOf(string.charAt(0))).withStyle(Style.EMPTY.withColor(Mth.hsvToRgb(Math.nextDown(1.0f), 1.0f, 1.0f)));
-            for (int j = 1; j < i; ++j) {
-                mutableComponent.append(Component.literal(String.valueOf(string.charAt(j))).withStyle(Style.EMPTY.withColor(Mth.hsvToRgb((float)j / f, 1.0f, 1.0f))));
-            }
-            return mutableComponent;
-        };
+    public CompletableFuture<Component> decorate(@Nullable ServerPlayer var1, Component var2);
+
+    default public CompletableFuture<FilteredText<Component>> decorateFiltered(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText) {
+        CompletableFuture<Component> completableFuture = this.decorate(serverPlayer, filteredText.raw());
+        if (!filteredText.isFiltered()) {
+            return completableFuture.thenApply(FilteredText::passThrough);
+        }
+        if (filteredText.filtered() == null) {
+            return completableFuture.thenApply(FilteredText::fullyFiltered);
+        }
+        CompletableFuture<Component> completableFuture2 = this.decorate(serverPlayer, filteredText.filtered());
+        return CompletableFuture.allOf(completableFuture, completableFuture2).thenApply(void_ -> new FilteredText<Component>((Component)completableFuture.join(), (Component)completableFuture2.join()));
     }
 
-    public Component decorate(@Nullable ServerPlayer var1, Component var2);
-
-    default public PlayerChatMessage decorate(@Nullable ServerPlayer serverPlayer, Component component, MessageSignature messageSignature, boolean bl) {
-        Component component2 = this.decorate(serverPlayer, component);
-        if (component.equals(component2)) {
-            return PlayerChatMessage.signed(component, messageSignature);
-        }
-        if (!bl) {
-            return PlayerChatMessage.signed(component, messageSignature).withUnsignedContent(component2);
-        }
-        return PlayerChatMessage.signed(component2, messageSignature);
-    }
-
-    default public PlayerChatMessage decorate(@Nullable ServerPlayer serverPlayer, PlayerChatMessage playerChatMessage) {
-        return this.decorate(serverPlayer, playerChatMessage.signedContent(), playerChatMessage.signature(), false);
+    default public CompletableFuture<FilteredText<PlayerChatMessage>> decorateChat(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText, MessageSignature messageSignature, boolean bl) {
+        return this.decorateFiltered(serverPlayer, filteredText).thenApply(filteredText2 -> PlayerChatMessage.filteredSigned(filteredText, filteredText2, messageSignature, bl));
     }
 }
 

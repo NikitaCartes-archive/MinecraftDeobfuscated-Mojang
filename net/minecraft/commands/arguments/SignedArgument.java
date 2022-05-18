@@ -3,11 +3,11 @@
  */
 package net.minecraft.commands.arguments;
 
-import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.commands.arguments.PreviewedArgument;
 import net.minecraft.network.chat.Component;
 
 public interface SignedArgument<T>
-extends ArgumentType<T> {
+extends PreviewedArgument<T> {
     public Component getPlainSignableComponent(T var1);
 }
 

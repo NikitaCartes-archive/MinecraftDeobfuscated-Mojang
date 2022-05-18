@@ -7,19 +7,18 @@ import java.util.function.Consumer;
 import net.minecraft.util.Mth;
 
 public class AnimationState {
-    private static final long STARTED = Long.MIN_VALUE;
     private static final long STOPPED = Long.MAX_VALUE;
     private long lastTime = Long.MAX_VALUE;
     private long accumulatedTime;
 
-    public void start() {
-        this.lastTime = Long.MIN_VALUE;
+    public void start(int i) {
+        this.lastTime = (long)i * 1000L / 20L;
         this.accumulatedTime = 0L;
     }
 
-    public void startIfStopped() {
+    public void startIfStopped(int i) {
         if (!this.isStarted()) {
-            this.start();
+            this.start(i);
         }
     }
 
@@ -38,9 +37,6 @@ public class AnimationState {
             return;
         }
         long l = Mth.lfloor(f * 1000.0f / 20.0f);
-        if (this.lastTime == Long.MIN_VALUE) {
-            this.lastTime = l;
-        }
         this.accumulatedTime += (long)((float)(l - this.lastTime) * g);
         this.lastTime = l;
     }

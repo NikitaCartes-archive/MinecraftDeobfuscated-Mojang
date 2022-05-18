@@ -6,6 +6,9 @@ package net.minecraft.server.network;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.network.FilteredText;
 
 public interface TextFilter {
     public static final TextFilter DUMMY = new TextFilter(){
@@ -19,12 +22,12 @@ public interface TextFilter {
         }
 
         @Override
-        public CompletableFuture<FilteredText> processStreamMessage(String string) {
+        public CompletableFuture<FilteredText<String>> processStreamMessage(String string) {
             return CompletableFuture.completedFuture(FilteredText.passThrough(string));
         }
 
         @Override
-        public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> list) {
+        public CompletableFuture<List<FilteredText<String>>> processMessageBundle(List<String> list) {
             return CompletableFuture.completedFuture((List)list.stream().map(FilteredText::passThrough).collect(ImmutableList.toImmutableList()));
         }
     };
@@ -33,39 +36,15 @@ public interface TextFilter {
 
     public void leave();
 
-    public CompletableFuture<FilteredText> processStreamMessage(String var1);
+    public CompletableFuture<FilteredText<String>> processStreamMessage(String var1);
 
-    public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> var1);
+    public CompletableFuture<List<FilteredText<String>>> processMessageBundle(List<String> var1);
 
-    public static class FilteredText {
-        public static final FilteredText EMPTY = new FilteredText("", "");
-        private final String raw;
-        private final String filtered;
-
-        public FilteredText(String string, String string2) {
-            this.raw = string;
-            this.filtered = string2;
-        }
-
-        public String getRaw() {
-            return this.raw;
-        }
-
-        public String getFiltered() {
-            return this.filtered;
-        }
-
-        public static FilteredText passThrough(String string) {
-            return new FilteredText(string, string);
-        }
-
-        public static FilteredText fullyFiltered(String string) {
-            return new FilteredText(string, "");
-        }
-
-        public boolean isFiltered() {
-            return !this.raw.equals(this.filtered);
-        }
+    default public CompletableFuture<FilteredText<Component>> processStreamComponent(Component component) {
+        return this.processStreamMessage(component.getString()).thenApply(filteredText -> {
+            Component component2 = Util.mapNullable((String)filteredText.filtered(), Component::literal);
+            return new FilteredText<Component>(component, component2);
+        });
     }
 }
 

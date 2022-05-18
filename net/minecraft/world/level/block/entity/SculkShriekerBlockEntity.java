@@ -64,7 +64,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     public SculkShriekerBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(BlockEntityType.SCULK_SHRIEKER, blockPos, blockState);
-        this.listener = new VibrationListener(new BlockPositionSource(this.worldPosition), 8, this, null, 0, 0);
+        this.listener = new VibrationListener(new BlockPositionSource(this.worldPosition), 8, this, null, 0.0f, 0);
     }
 
     public VibrationListener getListener() {
@@ -122,7 +122,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, int i) {
+    public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
         this.tryShriek(serverLevel, SculkShriekerBlockEntity.tryGetPlayer(entity2 != null ? entity2 : entity));
     }
 
@@ -186,7 +186,7 @@ implements VibrationListener.VibrationListenerConfig {
         if (this.warningLevel < 4) {
             return false;
         }
-        return SpawnUtil.trySpawnMob(EntityType.WARDEN, MobSpawnType.TRIGGERED, serverLevel, this.getBlockPos(), 20, 5, 6).isPresent();
+        return SpawnUtil.trySpawnMob(EntityType.WARDEN, MobSpawnType.TRIGGERED, serverLevel, this.getBlockPos(), 20, 5, 6, SpawnUtil.Strategy.ON_TOP_OF_COLLIDER).isPresent();
     }
 
     @Override

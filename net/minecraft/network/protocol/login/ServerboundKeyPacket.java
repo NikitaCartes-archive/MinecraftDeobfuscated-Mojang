@@ -4,10 +4,8 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.datafixers.util.Either;
-import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.util.Arrays;
 import java.util.Optional;
 import javax.crypto.SecretKey;
@@ -54,16 +52,10 @@ implements Packet<ServerLoginPacketListener> {
     }
 
     public boolean isChallengeSignatureValid(byte[] bs2, ProfilePublicKey profilePublicKey) {
-        return this.nonceOrSaltSignature.map(bs -> false, saltSignaturePair -> {
-            try {
-                Signature signature = profilePublicKey.verifySignature();
-                signature.update(bs2);
-                signature.update(saltSignaturePair.saltAsBytes());
-                return signature.verify(saltSignaturePair.signature());
-            } catch (GeneralSecurityException | CryptException exception) {
-                return false;
-            }
-        });
+        return this.nonceOrSaltSignature.map(bs -> false, saltSignaturePair -> profilePublicKey.createSignatureValidator().validate(output -> {
+            output.update(bs2);
+            output.update(saltSignaturePair.saltAsBytes());
+        }, saltSignaturePair.signature()));
     }
 
     public boolean isNonceValid(byte[] bs, PrivateKey privateKey) {

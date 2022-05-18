@@ -1044,7 +1044,7 @@ extends Player {
 
     @Override
     public void displayClientMessage(Component component, boolean bl) {
-        this.sendSystemMessage(component, bl ? ChatType.GAME_INFO : ChatType.CHAT);
+        this.sendSystemMessage(component, bl ? ChatType.GAME_INFO : ChatType.SYSTEM);
     }
 
     @Override

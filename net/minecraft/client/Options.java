@@ -297,8 +297,8 @@ public class Options {
     private final OptionInstance<Boolean> showAutosaveIndicator = OptionInstance.createBoolean("options.autosaveIndicator", true);
     private static final Component CHAT_TOOLTIP_PREVIEW = Component.translatable("options.chatPreview.tooltip");
     private final OptionInstance<Boolean> chatPreview = OptionInstance.createBoolean("options.chatPreview", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_PREVIEW), true);
-    private static final Component CHAT_TOOLTIP_ONLY_SHOW_SIGNED = Component.translatable("options.onlyShowSignedChat.tooltip");
-    private final OptionInstance<Boolean> onlyShowSignedChat = OptionInstance.createBoolean("options.onlyShowSignedChat", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_ONLY_SHOW_SIGNED), false);
+    private static final Component CHAT_TOOLTIP_ONLY_SHOW_SECURE = Component.translatable("options.onlyShowSecureChat.tooltip");
+    private final OptionInstance<Boolean> onlyShowSecureChat = OptionInstance.createBoolean("options.onlyShowSecureChat", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_ONLY_SHOW_SECURE), false);
     public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
     public final KeyMapping keyLeft = new KeyMapping("key.left", 65, "key.categories.movement");
     public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
@@ -617,8 +617,8 @@ public class Options {
         return this.chatPreview;
     }
 
-    public OptionInstance<Boolean> onlyShowSignedChat() {
-        return this.onlyShowSignedChat;
+    public OptionInstance<Boolean> onlyShowSecureChat() {
+        return this.onlyShowSecureChat;
     }
 
     public OptionInstance<Integer> fov() {
@@ -763,7 +763,7 @@ public class Options {
         fieldAccess.process("showAutosaveIndicator", this.showAutosaveIndicator);
         fieldAccess.process("allowServerListing", this.allowServerListing);
         fieldAccess.process("chatPreview", this.chatPreview);
-        fieldAccess.process("onlyShowSignedChat", this.onlyShowSignedChat);
+        fieldAccess.process("onlyShowSecureChat", this.onlyShowSecureChat);
         for (KeyMapping keyMapping : this.keyMappings) {
             String string2;
             String string = keyMapping.saveString();

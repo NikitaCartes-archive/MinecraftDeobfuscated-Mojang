@@ -450,32 +450,26 @@ extends RealmsScreen {
                     RealmsClient realmsClient = RealmsClient.create();
                     try {
                         RealmsClient.CompatibleVersionResponse compatibleVersionResponse = realmsClient.clientCompatible();
-                        if (compatibleVersionResponse == RealmsClient.CompatibleVersionResponse.OUTDATED) {
-                            realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen, true);
-                            RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(realmsGenericErrorScreen));
-                            return;
-                        }
-                        if (compatibleVersionResponse == RealmsClient.CompatibleVersionResponse.OTHER) {
-                            realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen, false);
-                            RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(realmsGenericErrorScreen));
-                            return;
-                        }
-                        RealmsMainScreen.this.checkParentalConsent();
+                        realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen);
+                        RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(realmsGenericErrorScreen));
+                        return;
                     } catch (RealmsServiceException realmsServiceException) {
                         checkedClientCompatability = false;
                         LOGGER.error("Couldn't connect to realms", realmsServiceException);
                         if (realmsServiceException.httpResultCode == 401) {
                             realmsGenericErrorScreen = new RealmsGenericErrorScreen(Component.translatable("mco.error.invalid.session.title"), Component.translatable("mco.error.invalid.session.message"), RealmsMainScreen.this.lastScreen);
                             RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(realmsGenericErrorScreen));
+                        } else {
+                            RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(new RealmsGenericErrorScreen(realmsServiceException, RealmsMainScreen.this.lastScreen)));
                         }
-                        RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(new RealmsGenericErrorScreen(realmsServiceException, RealmsMainScreen.this.lastScreen)));
+                        return;
                     }
                 }
             }.start();
         }
     }
 
-    void checkParentalConsent() {
+    private void checkParentalConsent() {
         new Thread("MCO Compatability Checker #1"){
 
             @Override

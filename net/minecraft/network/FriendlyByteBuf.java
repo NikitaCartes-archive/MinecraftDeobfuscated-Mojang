@@ -524,17 +524,18 @@ extends ByteBuf {
     }
 
     public String readUtf(int i) {
-        int j = this.readVarInt();
-        if (j > i * 4) {
-            throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + j + " > " + i * 4 + ")");
+        int j = FriendlyByteBuf.getMaxEncodedUtfLength(i);
+        int k = this.readVarInt();
+        if (k > j) {
+            throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + k + " > " + j + ")");
         }
-        if (j < 0) {
+        if (k < 0) {
             throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
         }
-        String string = this.toString(this.readerIndex(), j, StandardCharsets.UTF_8);
-        this.readerIndex(this.readerIndex() + j);
+        String string = this.toString(this.readerIndex(), k, StandardCharsets.UTF_8);
+        this.readerIndex(this.readerIndex() + k);
         if (string.length() > i) {
-            throw new DecoderException("The received string length is longer than maximum allowed (" + j + " > " + i + ")");
+            throw new DecoderException("The received string length is longer than maximum allowed (" + string.length() + " > " + i + ")");
         }
         return string;
     }
@@ -544,13 +545,21 @@ extends ByteBuf {
     }
 
     public FriendlyByteBuf writeUtf(String string, int i) {
+        int j;
+        if (string.length() > i) {
+            throw new EncoderException("String too big (was " + string.length() + " characters, max " + i + ")");
+        }
         byte[] bs = string.getBytes(StandardCharsets.UTF_8);
-        if (bs.length > i) {
-            throw new EncoderException("String too big (was " + bs.length + " bytes encoded, max " + i + ")");
+        if (bs.length > (j = FriendlyByteBuf.getMaxEncodedUtfLength(i))) {
+            throw new EncoderException("String too big (was " + bs.length + " bytes encoded, max " + j + ")");
         }
         this.writeVarInt(bs.length);
         this.writeBytes(bs);
         return this;
+    }
+
+    private static int getMaxEncodedUtfLength(int i) {
+        return i * 3;
     }
 
     public ResourceLocation readResourceLocation() {

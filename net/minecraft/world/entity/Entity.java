@@ -2037,7 +2037,8 @@ CommandSource {
         this.resetFallDistance();
     }
 
-    public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
+    public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
+        return true;
     }
 
     public void resetFallDistance() {

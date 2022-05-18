@@ -77,6 +77,7 @@ import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSetDisplayChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
@@ -138,6 +139,8 @@ extends PacketListener {
     public void handlePlayerChat(ClientboundPlayerChatPacket var1);
 
     public void handleChatPreview(ClientboundChatPreviewPacket var1);
+
+    public void handleSetDisplayChatPreview(ClientboundSetDisplayChatPreviewPacket var1);
 
     public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket var1);
 

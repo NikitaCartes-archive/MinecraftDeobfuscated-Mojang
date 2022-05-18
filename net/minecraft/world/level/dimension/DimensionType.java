@@ -21,11 +21,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 
-public record DimensionType(OptionalLong fixedTime, boolean hasSkyLight, boolean hasCeiling, boolean ultraWarm, boolean natural, double coordinateScale, boolean piglinSafe, boolean bedWorks, boolean respawnAnchorWorks, boolean hasRaids, int minY, int height, int logicalHeight, TagKey<Block> infiniburn, ResourceLocation effectsLocation, float ambientLight) {
+public record DimensionType(OptionalLong fixedTime, boolean hasSkyLight, boolean hasCeiling, boolean ultraWarm, boolean natural, double coordinateScale, boolean bedWorks, boolean respawnAnchorWorks, int minY, int height, int logicalHeight, TagKey<Block> infiniburn, ResourceLocation effectsLocation, float ambientLight, MonsterSettings monsterSettings) {
     public static final int BITS_FOR_Y = BlockPos.PACKED_Y_LENGTH;
     public static final int MIN_HEIGHT = 16;
     public static final int Y_SIZE = (1 << BITS_FOR_Y) - 32;
@@ -33,7 +34,7 @@ public record DimensionType(OptionalLong fixedTime, boolean hasSkyLight, boolean
     public static final int MIN_Y = MAX_Y - Y_SIZE + 1;
     public static final int WAY_ABOVE_MAX_Y = MAX_Y << 4;
     public static final int WAY_BELOW_MIN_Y = MIN_Y << 4;
-    public static final Codec<DimensionType> DIRECT_CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(Codec.LONG.optionalFieldOf("fixed_time").xmap(optional -> optional.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isPresent() ? Optional.of(optionalLong.getAsLong()) : Optional.empty()).forGetter(dimensionType -> dimensionType.fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(DimensionType::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(DimensionType::hasRaids), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(16, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("infiniburn")).forGetter(dimensionType -> dimensionType.infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(BuiltinDimensionTypes.OVERWORLD_EFFECTS).forGetter(dimensionType -> dimensionType.effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(dimensionType -> Float.valueOf(dimensionType.ambientLight))).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)));
+    public static final Codec<DimensionType> DIRECT_CODEC = ExtraCodecs.catchDecoderException(RecordCodecBuilder.create(instance -> instance.group(ExtraCodecs.asOptionalLong(Codec.LONG.optionalFieldOf("fixed_time")).forGetter(DimensionType::fixedTime), ((MapCodec)Codec.BOOL.fieldOf("has_skylight")).forGetter(DimensionType::hasSkyLight), ((MapCodec)Codec.BOOL.fieldOf("has_ceiling")).forGetter(DimensionType::hasCeiling), ((MapCodec)Codec.BOOL.fieldOf("ultrawarm")).forGetter(DimensionType::ultraWarm), ((MapCodec)Codec.BOOL.fieldOf("natural")).forGetter(DimensionType::natural), ((MapCodec)Codec.doubleRange(1.0E-5f, 3.0E7).fieldOf("coordinate_scale")).forGetter(DimensionType::coordinateScale), ((MapCodec)Codec.BOOL.fieldOf("bed_works")).forGetter(DimensionType::bedWorks), ((MapCodec)Codec.BOOL.fieldOf("respawn_anchor_works")).forGetter(DimensionType::respawnAnchorWorks), ((MapCodec)Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y")).forGetter(DimensionType::minY), ((MapCodec)Codec.intRange(16, Y_SIZE).fieldOf("height")).forGetter(DimensionType::height), ((MapCodec)Codec.intRange(0, Y_SIZE).fieldOf("logical_height")).forGetter(DimensionType::logicalHeight), ((MapCodec)TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("infiniburn")).forGetter(DimensionType::infiniburn), ((MapCodec)ResourceLocation.CODEC.fieldOf("effects")).orElse(BuiltinDimensionTypes.OVERWORLD_EFFECTS).forGetter(DimensionType::effectsLocation), ((MapCodec)Codec.FLOAT.fieldOf("ambient_light")).forGetter(DimensionType::ambientLight), MonsterSettings.CODEC.forGetter(DimensionType::monsterSettings)).apply((Applicative<DimensionType, ?>)instance, DimensionType::new)));
     private static final int MOON_PHASES = 8;
     public static final float[] MOON_BRIGHTNESS_PER_PHASE = new float[]{1.0f, 0.75f, 0.5f, 0.25f, 0.0f, 0.25f, 0.5f, 0.75f};
     public static final Codec<Holder<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, DIRECT_CODEC);
@@ -105,6 +106,26 @@ public record DimensionType(OptionalLong fixedTime, boolean hasSkyLight, boolean
 
     public int moonPhase(long l) {
         return (int)(l / 24000L % 8L + 8L) % 8;
+    }
+
+    public boolean piglinSafe() {
+        return this.monsterSettings.piglinSafe();
+    }
+
+    public boolean hasRaids() {
+        return this.monsterSettings.hasRaids();
+    }
+
+    public IntProvider monsterSpawnLightTest() {
+        return this.monsterSettings.monsterSpawnLightTest();
+    }
+
+    public int monsterSpawnBlockLightLimit() {
+        return this.monsterSettings.monsterSpawnBlockLightLimit();
+    }
+
+    public record MonsterSettings(boolean piglinSafe, boolean hasRaids, IntProvider monsterSpawnLightTest, int monsterSpawnBlockLightLimit) {
+        public static final MapCodec<MonsterSettings> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)Codec.BOOL.fieldOf("piglin_safe")).forGetter(MonsterSettings::piglinSafe), ((MapCodec)Codec.BOOL.fieldOf("has_raids")).forGetter(MonsterSettings::hasRaids), ((MapCodec)IntProvider.codec(0, 15).fieldOf("monster_spawn_light_level")).forGetter(MonsterSettings::monsterSpawnLightTest), ((MapCodec)Codec.intRange(0, 15).fieldOf("monster_spawn_block_light_limit")).forGetter(MonsterSettings::monsterSpawnBlockLightLimit)).apply((Applicative<MonsterSettings, ?>)instance, MonsterSettings::new));
     }
 }
 

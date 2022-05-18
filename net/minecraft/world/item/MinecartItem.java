@@ -11,7 +11,6 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -92,7 +91,7 @@ extends Item {
                 abstractMinecart.setCustomName(itemStack.getHoverName());
             }
             level.addFreshEntity(abstractMinecart);
-            level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
+            level.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(useOnContext.getPlayer(), level.getBlockState(blockPos.below())));
         }
         itemStack.shrink(1);
         return InteractionResult.sidedSuccess(level.isClientSide);

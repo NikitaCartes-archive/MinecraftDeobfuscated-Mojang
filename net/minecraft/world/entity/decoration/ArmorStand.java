@@ -153,7 +153,6 @@ extends LivingEntity {
     @Override
     public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
         this.verifyEquippedItem(itemStack);
-        this.equipEventAndSound(itemStack, true);
         switch (equipmentSlot.getType()) {
             case HAND: {
                 this.handItems.set(equipmentSlot.getIndex(), itemStack);
@@ -163,6 +162,7 @@ extends LivingEntity {
                 this.armorItems.set(equipmentSlot.getIndex(), itemStack);
             }
         }
+        this.onEquipItem(equipmentSlot, itemStack);
     }
 
     @Override

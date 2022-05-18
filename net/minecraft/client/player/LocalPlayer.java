@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.logging.LogUtils;
-import java.security.GeneralSecurityException;
-import java.security.Signature;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +64,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Signer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -151,7 +150,7 @@ extends AbstractClientPlayer {
     private boolean showDeathScreen = true;
 
     public LocalPlayer(Minecraft minecraft, ClientLevel clientLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook, boolean bl, boolean bl2) {
-        super(clientLevel, clientPacketListener.getLocalGameProfile(), minecraft.getProfileKeyPairManager().profilePublicKey());
+        super(clientLevel, clientPacketListener.getLocalGameProfile(), minecraft.getProfileKeyPairManager().profilePublicKey().orElse(null));
         this.minecraft = minecraft;
         this.connection = clientPacketListener;
         this.stats = statsCounter;
@@ -320,39 +319,41 @@ extends AbstractClientPlayer {
 
     private MessageSignature signMessage(MessageSigner messageSigner, Component component) {
         try {
-            Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
-            if (signature != null) {
-                return messageSigner.sign(signature, component);
+            Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+            if (signer != null) {
+                return messageSigner.sign(signer, component);
             }
-        } catch (GeneralSecurityException generalSecurityException) {
-            LOGGER.error("Failed to sign chat message: '{}'", (Object)component.getString(), (Object)generalSecurityException);
+        } catch (Exception exception) {
+            LOGGER.error("Failed to sign chat message: '{}'", (Object)component.getString(), (Object)exception);
         }
         return MessageSignature.unsigned();
     }
 
     private void sendCommand(MessageSigner messageSigner, String string, @Nullable Component component) {
         ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, (SharedSuggestionProvider)this.connection.getSuggestionsProvider());
-        ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults);
-        this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures));
+        ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults, component);
+        this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures, component != null));
     }
 
-    private ArgumentSignatures signCommandArguments(MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults) {
+    private ArgumentSignatures signCommandArguments(MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults, @Nullable Component component) {
         Map<String, Component> map = ArgumentSignatures.collectLastChildPlainSignableComponents(parseResults.getContext());
         if (map.isEmpty()) {
             return ArgumentSignatures.empty();
         }
+        Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+        if (signer == null) {
+            return ArgumentSignatures.empty();
+        }
         try {
-            ImmutableMap.Builder<String, byte[]> builder = ImmutableMap.builder();
-            for (Map.Entry<String, Component> entry : map.entrySet()) {
-                Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
-                if (signature == null) continue;
-                Component component = entry.getValue();
-                MessageSignature messageSignature = messageSigner.sign(signature, component);
-                builder.put(entry.getKey(), messageSignature.saltSignature().signature());
-            }
+            ImmutableMap.Builder builder = ImmutableMap.builder();
+            map.forEach((string, component2) -> {
+                Component component3 = component != null ? component : component2;
+                MessageSignature messageSignature = messageSigner.sign(signer, component3);
+                builder.put(string, messageSignature.saltSignature().signature());
+            });
             return new ArgumentSignatures(messageSigner.salt(), builder.build());
-        } catch (GeneralSecurityException generalSecurityException) {
-            LOGGER.error("Failed to sign command arguments", generalSecurityException);
+        } catch (Exception exception) {
+            LOGGER.error("Failed to sign command arguments", exception);
             return ArgumentSignatures.empty();
         }
     }
