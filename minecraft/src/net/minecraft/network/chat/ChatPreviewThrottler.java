@@ -1,29 +1,37 @@
 package net.minecraft.network.chat;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 public class ChatPreviewThrottler {
-	private boolean sentRequestThisTick;
+	private final AtomicReference<ChatPreviewThrottler.Request> scheduledRequest = new AtomicReference();
 	@Nullable
-	private Runnable pendingRequest;
+	private CompletableFuture<?> runningRequest;
 
 	public void tick() {
-		Runnable runnable = this.pendingRequest;
-		if (runnable != null) {
-			runnable.run();
-			this.pendingRequest = null;
+		if (this.runningRequest != null && this.runningRequest.isDone()) {
+			this.runningRequest = null;
 		}
 
-		this.sentRequestThisTick = false;
+		if (this.runningRequest == null) {
+			this.tickIdle();
+		}
 	}
 
-	public void execute(Runnable runnable) {
-		if (this.sentRequestThisTick) {
-			this.pendingRequest = runnable;
-		} else {
-			runnable.run();
-			this.sentRequestThisTick = true;
-			this.pendingRequest = null;
+	private void tickIdle() {
+		ChatPreviewThrottler.Request request = (ChatPreviewThrottler.Request)this.scheduledRequest.getAndSet(null);
+		if (request != null) {
+			this.runningRequest = request.run();
 		}
+	}
+
+	public void schedule(ChatPreviewThrottler.Request request) {
+		this.scheduledRequest.set(request);
+	}
+
+	@FunctionalInterface
+	public interface Request {
+		CompletableFuture<?> run();
 	}
 }

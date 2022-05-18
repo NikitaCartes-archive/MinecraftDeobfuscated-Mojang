@@ -120,17 +120,17 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 			new ResourceLocation("nether"),
 			registry -> new Climate.ParameterList(
 					ImmutableList.of(
-						Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), registry.getOrCreateHolder(Biomes.NETHER_WASTES)),
-						Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), registry.getOrCreateHolder(Biomes.SOUL_SAND_VALLEY)),
-						Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), registry.getOrCreateHolder(Biomes.CRIMSON_FOREST)),
-						Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), registry.getOrCreateHolder(Biomes.WARPED_FOREST)),
-						Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), registry.getOrCreateHolder(Biomes.BASALT_DELTAS))
+						Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), registry.getOrCreateHolderOrThrow(Biomes.NETHER_WASTES)),
+						Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), registry.getOrCreateHolderOrThrow(Biomes.SOUL_SAND_VALLEY)),
+						Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), registry.getOrCreateHolderOrThrow(Biomes.CRIMSON_FOREST)),
+						Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), registry.getOrCreateHolderOrThrow(Biomes.WARPED_FOREST)),
+						Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), registry.getOrCreateHolderOrThrow(Biomes.BASALT_DELTAS))
 					)
 				)
 		);
 		public static final MultiNoiseBiomeSource.Preset OVERWORLD = new MultiNoiseBiomeSource.Preset(new ResourceLocation("overworld"), registry -> {
 			Builder<Pair<Climate.ParameterPoint, Holder<Biome>>> builder = ImmutableList.builder();
-			new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(registry::getOrCreateHolder)));
+			new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(registry::getOrCreateHolderOrThrow)));
 			return new Climate.ParameterList(builder.build());
 		});
 		final ResourceLocation name;

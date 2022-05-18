@@ -1,21 +1,18 @@
 package net.minecraft.world.entity.player;
 
 import com.mojang.authlib.minecraft.InsecurePublicKeyException;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.InsecurePublicKeyException.InvalidException;
-import com.mojang.authlib.properties.Property;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.security.GeneralSecurityException;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.time.Instant;
-import java.util.Base64;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.SignatureValidator;
 
 public record ProfilePublicKey(ProfilePublicKey.Data data) {
 	public static final Codec<ProfilePublicKey> TRUSTED_CODEC = ProfilePublicKey.Data.CODEC.comapFlatMap(data -> {
@@ -25,33 +22,23 @@ public record ProfilePublicKey(ProfilePublicKey.Data data) {
 			return DataResult.error("Malformed public key");
 		}
 	}, ProfilePublicKey::data);
-	private static final String PROFILE_PROPERTY_KEY = "publicKey";
 
 	public static ProfilePublicKey createTrusted(ProfilePublicKey.Data data) throws CryptException {
 		return new ProfilePublicKey(data);
 	}
 
-	public static ProfilePublicKey createValidated(MinecraftSessionService minecraftSessionService, ProfilePublicKey.Data data) throws InsecurePublicKeyException, CryptException {
+	public static ProfilePublicKey createValidated(SignatureValidator signatureValidator, ProfilePublicKey.Data data) throws InsecurePublicKeyException, CryptException {
 		if (data.hasExpired()) {
 			throw new InvalidException("Expired profile public key");
+		} else if (!data.validateSignature(signatureValidator)) {
+			throw new InvalidException("Invalid profile public key signature");
 		} else {
-			String string = minecraftSessionService.getSecurePropertyValue(data.signedKeyProperty());
-			if (!data.signedKeyPropertyValue().equals(string)) {
-				throw new InvalidException("Invalid profile public key signature");
-			} else {
-				return createTrusted(data);
-			}
+			return createTrusted(data);
 		}
 	}
 
-	public Signature verifySignature() throws CryptException {
-		try {
-			Signature signature = Signature.getInstance("SHA256withRSA");
-			signature.initVerify(this.data.key());
-			return signature;
-		} catch (GeneralSecurityException var2) {
-			throw new CryptException(var2);
-		}
+	public SignatureValidator createSignatureValidator() {
+		return SignatureValidator.from(this.data.key, "SHA256withRSA");
 	}
 
 	public static record Data(Instant expiresAt, PublicKey key, byte[] keySignature) {
@@ -75,12 +62,11 @@ public record ProfilePublicKey(ProfilePublicKey.Data data) {
 			friendlyByteBuf.writeByteArray(this.keySignature);
 		}
 
-		Property signedKeyProperty() {
-			String string = Base64.getEncoder().encodeToString(this.keySignature);
-			return new Property("publicKey", this.signedKeyPropertyValue(), string);
+		boolean validateSignature(SignatureValidator signatureValidator) {
+			return signatureValidator.validate(this.signedPayload().getBytes(StandardCharsets.US_ASCII), this.keySignature);
 		}
 
-		String signedKeyPropertyValue() {
+		private String signedPayload() {
 			String string = Crypt.rsaPublicKeyToString(this.key);
 			return this.expiresAt.toEpochMilli() + string;
 		}

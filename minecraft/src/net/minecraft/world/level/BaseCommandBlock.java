@@ -119,7 +119,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 							this.successCount++;
 						}
 					});
-					minecraftServer.getCommands().performCommand(commandSourceStack, this.command);
+					minecraftServer.getCommands().performPrefixedCommand(commandSourceStack, this.command);
 				} catch (Throwable var6) {
 					CrashReport crashReport = CrashReport.forThrowable(var6, "Executing command block");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Command to be executed");

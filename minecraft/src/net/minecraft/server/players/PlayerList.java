@@ -20,6 +20,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.FileUtil;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
@@ -64,8 +65,8 @@ import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.TextFilter;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
@@ -787,28 +788,17 @@ public abstract class PlayerList {
 		}
 	}
 
-	public void broadcastChatMessage(
-		PlayerChatMessage playerChatMessage, TextFilter.FilteredText filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey
-	) {
-		PlayerChatMessage playerChatMessage2 = this.getFilteredMessage(serverPlayer, playerChatMessage, filteredText);
-		this.broadcastChatMessage(
-			playerChatMessage,
-			serverPlayer2 -> serverPlayer.shouldFilterMessageTo(serverPlayer2) ? playerChatMessage2 : playerChatMessage,
-			serverPlayer.asChatSender(),
-			resourceKey
-		);
+	public void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText, CommandSourceStack commandSourceStack, ResourceKey<ChatType> resourceKey) {
+		ServerPlayer serverPlayer = commandSourceStack.getPlayer();
+		if (serverPlayer != null) {
+			this.broadcastChatMessage(filteredText, serverPlayer, resourceKey);
+		} else {
+			this.broadcastChatMessage(filteredText.raw(), commandSourceStack.asChatSender(), resourceKey);
+		}
 	}
 
-	@Nullable
-	private PlayerChatMessage getFilteredMessage(ServerPlayer serverPlayer, PlayerChatMessage playerChatMessage, TextFilter.FilteredText filteredText) {
-		if (!filteredText.isFiltered()) {
-			return playerChatMessage;
-		} else if (filteredText.getFiltered().isEmpty()) {
-			return null;
-		} else {
-			Component component = Component.literal(filteredText.getFiltered());
-			return PlayerChatMessage.unsigned(this.server.getChatDecorator().decorate(serverPlayer, component));
-		}
+	public void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText, ServerPlayer serverPlayer, ResourceKey<ChatType> resourceKey) {
+		this.broadcastChatMessage(filteredText.raw(), serverPlayer2 -> filteredText.filter(serverPlayer, serverPlayer2), serverPlayer.asChatSender(), resourceKey);
 	}
 
 	public void broadcastChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {

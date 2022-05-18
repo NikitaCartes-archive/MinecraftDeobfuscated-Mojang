@@ -13,10 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.Base64;
@@ -29,6 +26,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
+import net.minecraft.util.Signer;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
@@ -38,27 +36,30 @@ public class ProfileKeyPairManager {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Path PROFILE_KEY_PAIR_DIR = Path.of("profilekeys");
 	private final Path profileKeyPairPath;
-	private final CompletableFuture<ProfileKeyPair> profileKeyPair;
+	private final CompletableFuture<Optional<ProfilePublicKey>> publicKey;
+	private final CompletableFuture<Optional<Signer>> signer;
 
 	public ProfileKeyPairManager(UserApiService userApiService, UUID uUID, Path path) {
 		this.profileKeyPairPath = path.resolve(PROFILE_KEY_PAIR_DIR).resolve(uUID + ".json");
-		this.profileKeyPair = this.readOrFetchProfileKeyPair(userApiService);
+		CompletableFuture<Optional<ProfileKeyPair>> completableFuture = this.readOrFetchProfileKeyPair(userApiService);
+		this.publicKey = completableFuture.thenApply(optional -> optional.map(ProfileKeyPair::publicKey));
+		this.signer = completableFuture.thenApply(optional -> optional.map(profileKeyPair -> Signer.from(profileKeyPair.privateKey(), "SHA256withRSA")));
 	}
 
-	private CompletableFuture<ProfileKeyPair> readOrFetchProfileKeyPair(UserApiService userApiService) {
+	private CompletableFuture<Optional<ProfileKeyPair>> readOrFetchProfileKeyPair(UserApiService userApiService) {
 		return CompletableFuture.supplyAsync(() -> {
 			Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired());
 			if (optional.isPresent() && !((ProfileKeyPair)optional.get()).dueRefresh()) {
-				return (ProfileKeyPair)optional.get();
+				return optional;
 			} else {
 				try {
 					ProfileKeyPair profileKeyPair = this.fetchProfileKeyPair(userApiService);
 					this.writeProfileKeyPair(profileKeyPair);
-					return profileKeyPair;
+					return Optional.of(profileKeyPair);
 				} catch (CryptException | MinecraftClientException | IOException var4) {
 					LOGGER.error("Failed to retrieve profile key pair", (Throwable)var4);
 					this.writeProfileKeyPair(null);
-					return (ProfileKeyPair)optional.orElse(null);
+					return optional;
 				}
 			}
 		}, Util.backgroundExecutor());
@@ -145,31 +146,15 @@ public class ProfileKeyPairManager {
 	}
 
 	@Nullable
-	public Signature createSignature() throws GeneralSecurityException {
-		PrivateKey privateKey = this.profilePrivateKey();
-		if (privateKey == null) {
-			return null;
-		} else {
-			Signature signature = Signature.getInstance("SHA256withRSA");
-			signature.initSign(privateKey);
-			return signature;
-		}
+	public Signer signer() {
+		return (Signer)((Optional)this.signer.join()).orElse(null);
+	}
+
+	public Optional<ProfilePublicKey> profilePublicKey() {
+		return (Optional<ProfilePublicKey>)this.publicKey.join();
 	}
 
 	public Optional<ProfilePublicKey.Data> profilePublicKeyData() {
-		ProfilePublicKey profilePublicKey = this.profilePublicKey();
-		return Optional.ofNullable(profilePublicKey).map(ProfilePublicKey::data);
-	}
-
-	@Nullable
-	public ProfilePublicKey profilePublicKey() {
-		ProfileKeyPair profileKeyPair = (ProfileKeyPair)this.profileKeyPair.join();
-		return profileKeyPair != null ? profileKeyPair.publicKey() : null;
-	}
-
-	@Nullable
-	private PrivateKey profilePrivateKey() {
-		ProfileKeyPair profileKeyPair = (ProfileKeyPair)this.profileKeyPair.join();
-		return profileKeyPair != null ? profileKeyPair.privateKey() : null;
+		return this.profilePublicKey().map(ProfilePublicKey::data);
 	}
 }

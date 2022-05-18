@@ -175,7 +175,7 @@ public class SignBlockEntity extends BlockEntity {
 			Style style = component.getStyle();
 			ClickEvent clickEvent = style.getClickEvent();
 			if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-				serverPlayer.getServer().getCommands().performCommand(this.createCommandSourceStack(serverPlayer), clickEvent.getValue());
+				serverPlayer.getServer().getCommands().performPrefixedCommand(this.createCommandSourceStack(serverPlayer), clickEvent.getValue());
 			}
 		}
 

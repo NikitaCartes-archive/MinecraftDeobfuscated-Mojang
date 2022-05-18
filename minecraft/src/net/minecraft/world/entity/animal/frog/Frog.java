@@ -92,7 +92,8 @@ public class Frog extends Animal {
 		MemoryModuleType.HURT_BY_ENTITY,
 		MemoryModuleType.NEAREST_ATTACKABLE,
 		MemoryModuleType.IS_IN_WATER,
-		MemoryModuleType.IS_PREGNANT
+		MemoryModuleType.IS_PREGNANT,
+		MemoryModuleType.IS_PANICKING
 	);
 	private static final EntityDataAccessor<FrogVariant> DATA_VARIANT_ID = SynchedEntityData.defineId(Frog.class, EntityDataSerializers.FROG_VARIANT);
 	private static final EntityDataAccessor<OptionalInt> DATA_TONGUE_TARGET_ID = SynchedEntityData.defineId(
@@ -211,17 +212,17 @@ public class Frog extends Animal {
 	public void tick() {
 		if (this.level.isClientSide()) {
 			if (this.isMovingOnLand()) {
-				this.walkAnimationState.startIfStopped();
+				this.walkAnimationState.startIfStopped(this.tickCount);
 			} else {
 				this.walkAnimationState.stop();
 			}
 
 			if (this.isMovingInWater()) {
 				this.swimIdleAnimationState.stop();
-				this.swimAnimationState.startIfStopped();
+				this.swimAnimationState.startIfStopped(this.tickCount);
 			} else if (this.isInWaterOrBubble()) {
 				this.swimAnimationState.stop();
-				this.swimIdleAnimationState.startIfStopped();
+				this.swimIdleAnimationState.startIfStopped(this.tickCount);
 			} else {
 				this.swimAnimationState.stop();
 				this.swimIdleAnimationState.stop();
@@ -236,19 +237,19 @@ public class Frog extends Animal {
 		if (DATA_POSE.equals(entityDataAccessor)) {
 			Pose pose = this.getPose();
 			if (pose == Pose.LONG_JUMPING) {
-				this.jumpAnimationState.start();
+				this.jumpAnimationState.start(this.tickCount);
 			} else {
 				this.jumpAnimationState.stop();
 			}
 
 			if (pose == Pose.CROAKING) {
-				this.croakAnimationState.start();
+				this.croakAnimationState.start(this.tickCount);
 			} else {
 				this.croakAnimationState.stop();
 			}
 
 			if (pose == Pose.USING_TONGUE) {
-				this.tongueAnimationState.start();
+				this.tongueAnimationState.start(this.tickCount);
 			} else {
 				this.tongueAnimationState.stop();
 			}

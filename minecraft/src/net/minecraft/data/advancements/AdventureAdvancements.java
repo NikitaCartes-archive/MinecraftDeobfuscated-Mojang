@@ -562,7 +562,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.save(consumer, "adventure/fall_from_world_height");
 		Advancement.Builder.advancement()
-			.parent(advancement)
+			.parent(advancement4)
 			.display(
 				Blocks.SCULK_CATALYST,
 				Component.translatable("advancements.adventure.kill_mob_near_sculk_catalyst.title"),

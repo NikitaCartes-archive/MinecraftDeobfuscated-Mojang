@@ -10,6 +10,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import net.minecraft.SharedConstants;
@@ -21,7 +22,6 @@ import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
 import net.minecraft.util.datafix.fixes.AttributesRename;
 import net.minecraft.util.datafix.fixes.BedItemColorFix;
-import net.minecraft.util.datafix.fixes.BeehivePoiRenameFix;
 import net.minecraft.util.datafix.fixes.BiomeFix;
 import net.minecraft.util.datafix.fixes.BitStorageAlignFix;
 import net.minecraft.util.datafix.fixes.BlendingDataFix;
@@ -89,6 +89,8 @@ import net.minecraft.util.datafix.fixes.EntityWolfColorFix;
 import net.minecraft.util.datafix.fixes.EntityZombieSplitFix;
 import net.minecraft.util.datafix.fixes.EntityZombieVillagerTypeFix;
 import net.minecraft.util.datafix.fixes.EntityZombifiedPiglinRenameFix;
+import net.minecraft.util.datafix.fixes.FilteredBooksFix;
+import net.minecraft.util.datafix.fixes.FilteredSignsFix;
 import net.minecraft.util.datafix.fixes.ForcePoiRebuild;
 import net.minecraft.util.datafix.fixes.FurnaceRecipeFix;
 import net.minecraft.util.datafix.fixes.GoatHornIdFix;
@@ -134,6 +136,8 @@ import net.minecraft.util.datafix.fixes.OptionsLowerCaseLanguageFix;
 import net.minecraft.util.datafix.fixes.OptionsRenameFieldFix;
 import net.minecraft.util.datafix.fixes.OverreachingTickFix;
 import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
+import net.minecraft.util.datafix.fixes.PoiTypeRemoveFix;
+import net.minecraft.util.datafix.fixes.PoiTypeRenameFix;
 import net.minecraft.util.datafix.fixes.RecipesFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameningFix;
@@ -157,6 +161,7 @@ import net.minecraft.util.datafix.fixes.StructureSettingsFlattenFix;
 import net.minecraft.util.datafix.fixes.StructuresBecomeConfiguredFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
 import net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix;
+import net.minecraft.util.datafix.fixes.VariantRenameFix;
 import net.minecraft.util.datafix.fixes.VillagerDataFix;
 import net.minecraft.util.datafix.fixes.VillagerFollowRangeFix;
 import net.minecraft.util.datafix.fixes.VillagerRebuildLevelAndXpFix;
@@ -589,7 +594,7 @@ public class DataFixers {
 		Schema schema91 = dataFixerBuilder.addSchema(1946, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ReorganizePoi(schema91, false));
 		Schema schema92 = dataFixerBuilder.addSchema(1948, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new OminousBannerRenameFix(schema92, false));
+		dataFixerBuilder.addFixer(new OminousBannerRenameFix(schema92));
 		Schema schema93 = dataFixerBuilder.addSchema(1953, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new OminousBannerBlockEntityRenameFix(schema93, false));
 		Schema schema94 = dataFixerBuilder.addSchema(1955, SAME_NAMESPACED);
@@ -611,9 +616,10 @@ public class DataFixers {
 		Schema schema98 = dataFixerBuilder.addSchema(2202, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ChunkBiomeFix(schema98, false));
 		Schema schema99 = dataFixerBuilder.addSchema(2209, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(ItemRenameFix.create(schema99, "Rename bee_hive item to beehive", createRenamer("minecraft:bee_hive", "minecraft:beehive")));
-		dataFixerBuilder.addFixer(new BeehivePoiRenameFix(schema99));
-		dataFixerBuilder.addFixer(BlockRenameFix.create(schema99, "Rename bee_hive block to beehive", createRenamer("minecraft:bee_hive", "minecraft:beehive")));
+		UnaryOperator<String> unaryOperator = createRenamer("minecraft:bee_hive", "minecraft:beehive");
+		dataFixerBuilder.addFixer(ItemRenameFix.create(schema99, "Rename bee_hive item to beehive", unaryOperator));
+		dataFixerBuilder.addFixer(new PoiTypeRenameFix(schema99, "Rename bee_hive poi to beehive", unaryOperator));
+		dataFixerBuilder.addFixer(BlockRenameFix.create(schema99, "Rename bee_hive block to beehive", unaryOperator));
 		Schema schema100 = dataFixerBuilder.addSchema(2211, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new StructureReferenceCountFix(schema100, false));
 		Schema schema101 = dataFixerBuilder.addSchema(2218, SAME_NAMESPACED);
@@ -959,6 +965,22 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new EntityPaintingFieldsRenameFix(schema166));
 		Schema schema167 = dataFixerBuilder.addSchema(3094, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new GoatHornIdFix(schema167));
+		Schema schema168 = dataFixerBuilder.addSchema(3097, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new FilteredBooksFix(schema168));
+		dataFixerBuilder.addFixer(new FilteredSignsFix(schema168));
+		Map<String, String> map = Map.of("minecraft:british", "minecraft:british_shorthair");
+		dataFixerBuilder.addFixer(new VariantRenameFix(schema168, "Rename british shorthair", References.ENTITY, "minecraft:cat", map));
+		dataFixerBuilder.addFixer(
+			new CriteriaRenameFix(
+				schema168,
+				"Migrate cat variant advancement for british shorthair",
+				"minecraft:husbandry/complete_catalogue",
+				string -> (String)map.getOrDefault(string, string)
+			)
+		);
+		dataFixerBuilder.addFixer(
+			new PoiTypeRemoveFix(schema168, "Remove unpopulated villager PoI types", Set.of("minecraft:unemployed", "minecraft:nitwit")::contains)
+		);
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

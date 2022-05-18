@@ -34,6 +34,7 @@ public class ServerData {
 	private boolean lan;
 	@Nullable
 	private ServerData.ChatPreview chatPreview;
+	private boolean chatPreviewEnabled = true;
 
 	public ServerData(String string, String string2, boolean bl) {
 		this.name = string;
@@ -130,15 +131,23 @@ public class ServerData {
 		return this.chatPreview;
 	}
 
+	public void setChatPreviewEnabled(boolean bl) {
+		this.chatPreviewEnabled = bl;
+	}
+
 	public boolean previewsChat() {
-		return this.chatPreview != null;
+		return this.chatPreviewEnabled && this.chatPreview != null;
+	}
+
+	public void copyNameIconFrom(ServerData serverData) {
+		this.ip = serverData.ip;
+		this.name = serverData.name;
+		this.iconB64 = serverData.iconB64;
 	}
 
 	public void copyFrom(ServerData serverData) {
-		this.ip = serverData.ip;
-		this.name = serverData.name;
+		this.copyNameIconFrom(serverData);
 		this.setResourcePackStatus(serverData.getResourcePackStatus());
-		this.iconB64 = serverData.iconB64;
 		this.lan = serverData.lan;
 		this.chatPreview = Util.mapNullable(serverData.chatPreview, ServerData.ChatPreview::copy);
 	}

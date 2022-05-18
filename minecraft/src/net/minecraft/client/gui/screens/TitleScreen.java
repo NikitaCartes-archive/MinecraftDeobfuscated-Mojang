@@ -230,7 +230,7 @@ public class TitleScreen extends Screen {
 					if (bl) {
 						this.minecraft.createWorldOpenFlows().loadLevel(this, "Demo_World");
 					} else {
-						RegistryAccess registryAccess = (RegistryAccess)RegistryAccess.BUILTIN.get();
+						RegistryAccess registryAccess = RegistryAccess.builtinCopy().freeze();
 						this.minecraft
 							.createWorldOpenFlows()
 							.createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryAccess, WorldPresets.demoSettings(registryAccess));

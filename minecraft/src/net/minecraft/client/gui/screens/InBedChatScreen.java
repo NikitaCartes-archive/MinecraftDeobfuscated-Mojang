@@ -27,21 +27,14 @@ public class InBedChatScreen extends ChatScreen {
 	}
 
 	@Override
-	public boolean keyReleased(int i, int j, int k) {
-		if (i != 257 && i != 335) {
-			return super.keyReleased(i, j, k);
-		} else {
+	public boolean keyPressed(int i, int j, int k) {
+		if (i == 256) {
+			this.sendWakeUp();
+		} else if (i == 257 || i == 335) {
 			this.handleChatInput(this.input.getValue(), true);
 			this.input.setValue("");
 			this.minecraft.gui.getChat().resetChatScroll();
 			return true;
-		}
-	}
-
-	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.sendWakeUp();
 		}
 
 		return super.keyPressed(i, j, k);

@@ -138,7 +138,7 @@ public class PresetFlatWorldScreen extends Screen {
 					}
 				}
 
-				flatLevelGeneratorSettings2.setBiome(registry.getOrCreateHolder(resourceKey));
+				flatLevelGeneratorSettings2.setBiome(registry.getOrCreateHolderOrThrow(resourceKey));
 				return flatLevelGeneratorSettings2;
 			}
 		}

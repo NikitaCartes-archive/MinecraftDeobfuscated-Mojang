@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.brigadier.tree.CommandNode;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -17,6 +18,8 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.PreviewedArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -37,7 +40,7 @@ public class ChatScreen extends Screen {
 	private String historyBuffer = "";
 	private int historyPos = -1;
 	protected EditBox input;
-	private final String initial;
+	private String initial;
 	CommandSuggestions commandSuggestions;
 	private ClientChatPreview chatPreview;
 
@@ -67,9 +70,9 @@ public class ChatScreen extends Screen {
 		this.chatPreview = new ClientChatPreview(this.minecraft);
 		this.updateChatPreview(this.input.getValue());
 		ServerData serverData = this.minecraft.getCurrentServer();
-		if (serverData != null) {
+		if (serverData != null && this.minecraft.options.chatPreview().get()) {
 			ServerData.ChatPreview chatPreview = serverData.getChatPreview();
-			if (chatPreview != null && chatPreview.showToast()) {
+			if (chatPreview != null && serverData.previewsChat() && chatPreview.showToast()) {
 				ServerList.saveSingleServer(serverData);
 				SystemToast systemToast = SystemToast.multiline(
 					this.minecraft, SystemToast.SystemToastIds.CHAT_PREVIEW_WARNING, PREVIEW_WARNING_TITLE, PREVIEW_WARNING_TOAST
@@ -108,10 +111,31 @@ public class ChatScreen extends Screen {
 
 	private void updateChatPreview(String string) {
 		String string2 = this.normalizeChatMessage(string);
-		if (this.sendsChatPreviewRequests() && !string2.startsWith("/")) {
-			this.chatPreview.request(string2);
+		if (this.sendsChatPreviewRequests()) {
+			this.requestPreview(string2);
 		} else {
-			this.chatPreview.clear();
+			this.chatPreview.disable();
+		}
+	}
+
+	private void requestPreview(String string) {
+		if (string.startsWith("/")) {
+			this.requestCommandArgumentPreview(string);
+		} else {
+			this.requestChatMessagePreview(string);
+		}
+	}
+
+	private void requestChatMessagePreview(String string) {
+		this.chatPreview.update(string);
+	}
+
+	private void requestCommandArgumentPreview(String string) {
+		CommandNode<SharedSuggestionProvider> commandNode = this.commandSuggestions.getNodeAt(this.input.getCursorPosition());
+		if (commandNode != null && PreviewedArgument.isPreviewed(commandNode)) {
+			this.chatPreview.update(string);
+		} else {
+			this.chatPreview.disable();
 		}
 	}
 
@@ -127,25 +151,16 @@ public class ChatScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyReleased(int i, int j, int k) {
-		if (super.keyReleased(i, j, k)) {
-			return true;
-		} else if (i != 257 && i != 335) {
-			return false;
-		} else {
-			this.handleChatInput(this.input.getValue(), true);
-			this.minecraft.setScreen(null);
-			return true;
-		}
-	}
-
-	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		if (this.commandSuggestions.keyPressed(i, j, k)) {
 			return true;
 		} else if (super.keyPressed(i, j, k)) {
 			return true;
 		} else if (i == 256) {
+			this.minecraft.setScreen(null);
+			return true;
+		} else if (i == 257 || i == 335) {
+			this.handleChatInput(this.input.getValue(), true);
 			this.minecraft.setScreen(null);
 			return true;
 		} else if (i == 265) {
@@ -193,6 +208,7 @@ public class ChatScreen extends Screen {
 
 				Style style = this.getComponentStyleAt(d, e);
 				if (style != null && this.handleComponentClicked(style)) {
+					this.initial = this.input.getValue();
 					return true;
 				}
 			}
@@ -236,11 +252,12 @@ public class ChatScreen extends Screen {
 		this.input.setFocus(true);
 		fill(poseStack, 2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
 		this.input.render(poseStack, i, j, f);
-		if (this.chatPreview.isActive()) {
+		if (this.chatPreview.isEnabled()) {
 			this.renderChatPreview(poseStack);
+		} else {
+			this.commandSuggestions.render(poseStack, i, j);
 		}
 
-		this.commandSuggestions.render(poseStack, i, j);
 		Style style = this.getComponentStyleAt((double)i, (double)j);
 		if (style != null && style.getHoverEvent() != null) {
 			this.renderComponentHoverEffect(poseStack, style, i, j);

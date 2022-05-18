@@ -15,6 +15,7 @@ import com.mojang.logging.LogUtils;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -203,13 +204,13 @@ public class Commands {
 		this.dispatcher.setConsumer((commandContext, bl, i) -> commandContext.getSource().onCommandComplete(commandContext, bl, i));
 	}
 
+	public int performPrefixedCommand(CommandSourceStack commandSourceStack, String string) {
+		return this.performCommand(commandSourceStack, string.startsWith("/") ? string.substring(1) : string);
+	}
+
 	public int performCommand(CommandSourceStack commandSourceStack, String string) {
 		StringReader stringReader = new StringReader(string);
-		if (stringReader.canRead() && stringReader.peek() == '/') {
-			stringReader.skip();
-		}
-
-		commandSourceStack.getServer().getProfiler().push(string);
+		commandSourceStack.getServer().getProfiler().push((Supplier<String>)(() -> "/" + string));
 
 		byte var20;
 		try {
@@ -223,7 +224,7 @@ public class Commands {
 				int i = Math.min(var14.getInput().length(), var14.getCursor());
 				MutableComponent mutableComponent = Component.empty()
 					.withStyle(ChatFormatting.GRAY)
-					.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
+					.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + string)));
 				if (i > 10) {
 					mutableComponent.append("...");
 				}
@@ -242,7 +243,7 @@ public class Commands {
 		} catch (Exception var15) {
 			MutableComponent mutableComponent2 = Component.literal(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.error("Command exception: {}", string, var15);
+				LOGGER.error("Command exception: /{}", string, var15);
 				StackTraceElement[] stackTraceElements = var15.getStackTrace();
 
 				for (int j = 0; j < Math.min(stackTraceElements.length, 3); j++) {
@@ -260,7 +261,7 @@ public class Commands {
 			);
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
 				commandSourceStack.sendFailure(Component.literal(Util.describeError(var15)));
-				LOGGER.error("'{}' threw an exception", string, var15);
+				LOGGER.error("'/{}' threw an exception", string, var15);
 			}
 
 			var20 = 0;

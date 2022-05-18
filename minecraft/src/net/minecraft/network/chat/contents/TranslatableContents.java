@@ -180,8 +180,7 @@ public class TranslatableContents implements ComponentContents {
 	}
 
 	public int hashCode() {
-		int i = super.hashCode();
-		i = 31 * i + this.key.hashCode();
+		int i = this.key.hashCode();
 		return 31 * i + Arrays.hashCode(this.args);
 	}
 

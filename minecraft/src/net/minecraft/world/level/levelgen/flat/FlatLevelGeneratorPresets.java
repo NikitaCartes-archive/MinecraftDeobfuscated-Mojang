@@ -74,7 +74,7 @@ public class FlatLevelGeneratorPresets {
 				flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
 			}
 
-			flatLevelGeneratorSettings.setBiome(this.biomes.getOrCreateHolder(resourceKey2));
+			flatLevelGeneratorSettings.setBiome(this.biomes.getOrCreateHolderOrThrow(resourceKey2));
 			return BuiltinRegistries.register(
 				this.presets, resourceKey, new FlatLevelGeneratorPreset(itemLike.asItem().builtInRegistryHolder(), flatLevelGeneratorSettings)
 			);

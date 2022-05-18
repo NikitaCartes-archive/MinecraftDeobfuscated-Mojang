@@ -70,17 +70,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	public NoiseBasedChunkGenerator(
 		Registry<StructureSet> registry, Registry<NormalNoise.NoiseParameters> registry2, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> holder
 	) {
-		this(registry, registry2, biomeSource, biomeSource, holder);
-	}
-
-	private NoiseBasedChunkGenerator(
-		Registry<StructureSet> registry,
-		Registry<NormalNoise.NoiseParameters> registry2,
-		BiomeSource biomeSource,
-		BiomeSource biomeSource2,
-		Holder<NoiseGeneratorSettings> holder
-	) {
-		super(registry, Optional.empty(), biomeSource, biomeSource2);
+		super(registry, Optional.empty(), biomeSource);
 		this.noises = registry2;
 		this.settings = holder;
 		NoiseGeneratorSettings noiseGeneratorSettings = this.settings.value();
@@ -104,7 +94,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	private void doCreateBiomes(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess) {
 		NoiseChunk noiseChunk = chunkAccess.getOrCreateNoiseChunk(chunkAccessx -> this.createNoiseChunk(chunkAccessx, structureManager, blender, randomState));
-		BiomeResolver biomeResolver = BelowZeroRetrogen.getBiomeResolver(blender.getBiomeResolver(this.runtimeBiomeSource), chunkAccess);
+		BiomeResolver biomeResolver = BelowZeroRetrogen.getBiomeResolver(blender.getBiomeResolver(this.biomeSource), chunkAccess);
 		chunkAccess.fillBiomesFromNoise(biomeResolver, noiseChunk.cachedClimateSampler(randomState.router(), this.settings.value().spawnTarget()));
 	}
 
@@ -303,11 +293,10 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				ChunkPos chunkPos2 = new ChunkPos(chunkPos.x + j, chunkPos.z + k);
 				ChunkAccess chunkAccess2 = worldGenRegion.getChunk(chunkPos2.x, chunkPos2.z);
 				BiomeGenerationSettings biomeGenerationSettings = chunkAccess2.carverBiome(
-						() -> this.biomeSource
-								.getNoiseBiome(QuartPos.fromBlock(chunkPos2.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos2.getMinBlockZ()), randomState.sampler())
-					)
-					.value()
-					.getGenerationSettings();
+					() -> this.getBiomeGenerationSettings(
+							this.biomeSource.getNoiseBiome(QuartPos.fromBlock(chunkPos2.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos2.getMinBlockZ()), randomState.sampler())
+						)
+				);
 				Iterable<Holder<ConfiguredWorldCarver<?>>> iterable = biomeGenerationSettings.getCarvers(carving);
 				int m = 0;
 

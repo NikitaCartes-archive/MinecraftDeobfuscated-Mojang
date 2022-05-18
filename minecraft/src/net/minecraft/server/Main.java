@@ -1,8 +1,6 @@
 package net.minecraft.server;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Pair;
@@ -40,7 +38,6 @@ import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.profiling.jfr.Environment;
@@ -112,10 +109,7 @@ public class Main {
 			}
 
 			File file = new File(optionSet.valueOf(optionSpec10));
-			YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(Proxy.NO_PROXY);
-			MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
-			GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
-			GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(file, MinecraftServer.USERID_CACHE_FILE.getName()));
+			Services services = Services.create(new YggdrasilAuthenticationService(Proxy.NO_PROXY), file);
 			String string = (String)Optional.ofNullable(optionSet.valueOf(optionSpec11)).orElse(dedicatedServerSettings.getProperties().levelName);
 			LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
 			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
@@ -190,9 +184,9 @@ public class Main {
 							)
 					)
 					.get();
-			} catch (Exception var38) {
+			} catch (Exception var35) {
 				LOGGER.warn(
-					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var38
+					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var35
 				);
 				return;
 			}
@@ -208,16 +202,7 @@ public class Main {
 			final DedicatedServer dedicatedServer = MinecraftServer.spin(
 				threadx -> {
 					DedicatedServer dedicatedServerx = new DedicatedServer(
-						threadx,
-						levelStorageAccess,
-						packRepository,
-						worldStem,
-						dedicatedServerSettings,
-						DataFixers.getDataFixer(),
-						minecraftSessionService,
-						gameProfileRepository,
-						gameProfileCache,
-						LoggerChunkProgressListener::new
+						threadx, levelStorageAccess, packRepository, worldStem, dedicatedServerSettings, DataFixers.getDataFixer(), services, LoggerChunkProgressListener::new
 					);
 					dedicatedServerx.setSingleplayerProfile(optionSet.has(optionSpec9) ? new GameProfile(null, optionSet.valueOf(optionSpec9)) : null);
 					dedicatedServerx.setPort(optionSet.valueOf(optionSpec12));
@@ -238,8 +223,8 @@ public class Main {
 			};
 			thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 			Runtime.getRuntime().addShutdownHook(thread);
-		} catch (Exception var39) {
-			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var39);
+		} catch (Exception var36) {
+			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var36);
 		}
 	}
 

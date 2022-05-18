@@ -65,7 +65,7 @@ public class RegistryLoader {
 		if (dataResult != null) {
 			return dataResult;
 		} else {
-			Holder<E> holder = writableRegistry.getOrCreateHolder(resourceKey2);
+			Holder<E> holder = writableRegistry.getOrCreateHolderOrThrow(resourceKey2);
 			readCache.values.put(resourceKey2, DataResult.success(holder));
 			DataResult<Holder<E>> dataResult2;
 			if (optional.isEmpty()) {

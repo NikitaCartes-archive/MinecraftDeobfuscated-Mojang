@@ -99,6 +99,7 @@ import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileResults;
@@ -164,7 +165,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private static final int OVERLOADED_WARNING_INTERVAL = 15000;
 	private static final long STATUS_EXPIRE_TIME_NS = 5000000000L;
 	private static final int MAX_STATUS_PLAYER_SAMPLE = 12;
-	public static final File USERID_CACHE_FILE = new File("usercache.json");
 	public static final int START_CHUNK_RADIUS = 11;
 	private static final int START_TICKING_CHUNK_COUNT = 441;
 	private static final int AUTOSAVE_INTERVAL = 6000;
@@ -216,11 +216,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private boolean isDemo;
 	private volatile boolean isReady;
 	private long lastOverloadWarning;
-	private final MinecraftSessionService sessionService;
-	@Nullable
-	private final GameProfileRepository profileRepository;
-	@Nullable
-	private final GameProfileCache profileCache;
+	protected final Services services;
 	private long lastServerStatus;
 	private final Thread serverThread;
 	private long nextTickTime = Util.getMillis();
@@ -264,9 +260,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		WorldStem worldStem,
 		Proxy proxy,
 		DataFixer dataFixer,
-		@Nullable MinecraftSessionService minecraftSessionService,
-		@Nullable GameProfileRepository gameProfileRepository,
-		@Nullable GameProfileCache gameProfileCache,
+		Services services,
 		ChunkProgressListenerFactory chunkProgressListenerFactory
 	) {
 		super("Server");
@@ -278,11 +272,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.proxy = proxy;
 			this.packRepository = packRepository;
 			this.resources = new MinecraftServer.ReloadableResources(worldStem.resourceManager(), worldStem.dataPackResources());
-			this.sessionService = minecraftSessionService;
-			this.profileRepository = gameProfileRepository;
-			this.profileCache = gameProfileCache;
-			if (gameProfileCache != null) {
-				gameProfileCache.setExecutor(this);
+			this.services = services;
+			if (services.profileCache() != null) {
+				services.profileCache().setExecutor(this);
 			}
 
 			this.connection = new ServerConnectionListener(this);
@@ -701,8 +693,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			} catch (Throwable var42) {
 				LOGGER.error("Exception stopping the server", var42);
 			} finally {
-				if (this.profileCache != null) {
-					this.profileCache.clearExecutor();
+				if (this.services.profileCache() != null) {
+					this.services.profileCache().clearExecutor();
 				}
 
 				this.onServerExit();
@@ -806,12 +798,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return new File(".");
 	}
 
-	protected void onServerCrash(CrashReport crashReport) {
-		LOGGER.error("Game test server crashed\n{}", crashReport.getFriendlyReport());
+	public void onServerCrash(CrashReport crashReport) {
 	}
 
 	public void onServerExit() {
-		LOGGER.info("Game test server shutting down");
 	}
 
 	public void tickServer(BooleanSupplier booleanSupplier) {
@@ -1215,15 +1205,19 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public MinecraftSessionService getSessionService() {
-		return this.sessionService;
+		return this.services.sessionService();
+	}
+
+	public SignatureValidator getServiceSignatureValidator() {
+		return this.services.serviceSignatureValidator();
 	}
 
 	public GameProfileRepository getProfileRepository() {
-		return this.profileRepository;
+		return this.services.profileRepository();
 	}
 
 	public GameProfileCache getProfileCache() {
-		return this.profileCache;
+		return this.services.profileCache();
 	}
 
 	public ServerStatus getStatus() {

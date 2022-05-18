@@ -55,6 +55,7 @@ import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -771,7 +772,11 @@ public class Util {
 	}
 
 	public static <T> ToIntFunction<T> createIndexLookup(List<T> list) {
-		Object2IntMap<T> object2IntMap = new Object2IntOpenHashMap<>();
+		return createIndexLookup(list, Object2IntOpenHashMap::new);
+	}
+
+	public static <T> ToIntFunction<T> createIndexLookup(List<T> list, IntFunction<Object2IntMap<T>> intFunction) {
+		Object2IntMap<T> object2IntMap = (Object2IntMap<T>)intFunction.apply(list.size());
 
 		for (int i = 0; i < list.size(); i++) {
 			object2IntMap.put((T)list.get(i), i);

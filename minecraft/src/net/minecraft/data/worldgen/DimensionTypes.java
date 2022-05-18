@@ -5,6 +5,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 
@@ -20,16 +22,15 @@ public class DimensionTypes {
 				false,
 				true,
 				1.0,
-				false,
 				true,
 				false,
-				true,
 				-64,
 				384,
 				384,
 				BlockTags.INFINIBURN_OVERWORLD,
 				BuiltinDimensionTypes.OVERWORLD_EFFECTS,
-				0.0F
+				0.0F,
+				new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
 			)
 		);
 		BuiltinRegistries.register(
@@ -42,16 +43,15 @@ public class DimensionTypes {
 				true,
 				false,
 				8.0,
-				true,
 				false,
 				true,
-				false,
 				0,
 				256,
 				128,
 				BlockTags.INFINIBURN_NETHER,
 				BuiltinDimensionTypes.NETHER_EFFECTS,
-				0.1F
+				0.1F,
+				new DimensionType.MonsterSettings(true, false, ConstantInt.of(11), 15)
 			)
 		);
 		BuiltinRegistries.register(
@@ -66,14 +66,13 @@ public class DimensionTypes {
 				1.0,
 				false,
 				false,
-				false,
-				true,
 				0,
 				256,
 				256,
 				BlockTags.INFINIBURN_END,
 				BuiltinDimensionTypes.END_EFFECTS,
-				0.0F
+				0.0F,
+				new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
 			)
 		);
 		return BuiltinRegistries.register(
@@ -86,16 +85,15 @@ public class DimensionTypes {
 				false,
 				true,
 				1.0,
-				false,
 				true,
 				false,
-				true,
 				-64,
 				384,
 				384,
 				BlockTags.INFINIBURN_OVERWORLD,
 				BuiltinDimensionTypes.OVERWORLD_EFFECTS,
-				0.0F
+				0.0F,
+				new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
 			)
 		);
 	}

@@ -11,23 +11,20 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsClientOutdatedScreen extends RealmsScreen {
-	private static final Component OUTDATED_TITLE = Component.translatable("mco.client.outdated.title");
-	private static final Component[] OUTDATED_MESSAGES = new Component[]{
-		Component.translatable("mco.client.outdated.msg.line1"), Component.translatable("mco.client.outdated.msg.line2")
-	};
 	private static final Component INCOMPATIBLE_TITLE = Component.translatable("mco.client.incompatible.title");
-	private static final Component[] INCOMPATIBLE_MESSAGES = new Component[]{
+	private static final Component[] INCOMPATIBLE_MESSAGES_SNAPSHOT = new Component[]{
 		Component.translatable("mco.client.incompatible.msg.line1"),
 		Component.translatable("mco.client.incompatible.msg.line2"),
 		Component.translatable("mco.client.incompatible.msg.line3")
 	};
+	private static final Component[] INCOMPATIBLE_MESSAGES = new Component[]{
+		Component.translatable("mco.client.incompatible.msg.line1"), Component.translatable("mco.client.incompatible.msg.line2")
+	};
 	private final Screen lastScreen;
-	private final boolean outdated;
 
-	public RealmsClientOutdatedScreen(Screen screen, boolean bl) {
-		super(bl ? OUTDATED_TITLE : INCOMPATIBLE_TITLE);
+	public RealmsClientOutdatedScreen(Screen screen) {
+		super(INCOMPATIBLE_TITLE);
 		this.lastScreen = screen;
-		this.outdated = bl;
 	}
 
 	@Override
@@ -39,13 +36,17 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, row(3), 16711680);
-		Component[] components = this.outdated ? INCOMPATIBLE_MESSAGES : OUTDATED_MESSAGES;
+		Component[] components = this.getMessages();
 
 		for (int k = 0; k < components.length; k++) {
 			drawCenteredString(poseStack, this.font, components[k], this.width / 2, row(5) + k * 12, 16777215);
 		}
 
 		super.render(poseStack, i, j, f);
+	}
+
+	private Component[] getMessages() {
+		return this.minecraft.getGame().getVersion().isStable() ? INCOMPATIBLE_MESSAGES : INCOMPATIBLE_MESSAGES_SNAPSHOT;
 	}
 
 	@Override

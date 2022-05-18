@@ -371,7 +371,7 @@ public class Item implements ItemLike {
 
 	@Nullable
 	public SoundEvent getEquipSound() {
-		return null;
+		return SoundEvents.ARMOR_EQUIP_GENERIC;
 	}
 
 	public boolean canFitInsideContainerItems() {

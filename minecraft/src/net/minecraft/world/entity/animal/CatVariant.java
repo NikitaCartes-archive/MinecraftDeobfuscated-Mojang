@@ -8,7 +8,7 @@ public record CatVariant(ResourceLocation texture) {
 	public static final CatVariant BLACK = register("black", "textures/entity/cat/black.png");
 	public static final CatVariant RED = register("red", "textures/entity/cat/red.png");
 	public static final CatVariant SIAMESE = register("siamese", "textures/entity/cat/siamese.png");
-	public static final CatVariant BRITISH = register("british", "textures/entity/cat/british_shorthair.png");
+	public static final CatVariant BRITISH_SHORTHAIR = register("british_shorthair", "textures/entity/cat/british_shorthair.png");
 	public static final CatVariant CALICO = register("calico", "textures/entity/cat/calico.png");
 	public static final CatVariant PERSIAN = register("persian", "textures/entity/cat/persian.png");
 	public static final CatVariant RAGDOLL = register("ragdoll", "textures/entity/cat/ragdoll.png");

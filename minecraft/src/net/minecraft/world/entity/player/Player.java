@@ -1610,8 +1610,9 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
+	public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
 		this.awardStat(Stats.ENTITY_KILLED.get(livingEntity.getType()));
+		return true;
 	}
 
 	@Override
@@ -1769,18 +1770,22 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
+	protected boolean doesEmitEquipEvent(EquipmentSlot equipmentSlot) {
+		return equipmentSlot.getType() == EquipmentSlot.Type.ARMOR;
+	}
+
+	@Override
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
 		this.verifyEquippedItem(itemStack);
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			this.equipEventAndSound(itemStack, false);
 			this.inventory.items.set(this.inventory.selected, itemStack);
 		} else if (equipmentSlot == EquipmentSlot.OFFHAND) {
-			this.equipEventAndSound(itemStack, true);
 			this.inventory.offhand.set(0, itemStack);
 		} else if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
-			this.equipEventAndSound(itemStack, true);
 			this.inventory.armor.set(equipmentSlot.getIndex(), itemStack);
 		}
+
+		this.onEquipItem(equipmentSlot, itemStack);
 	}
 
 	public boolean addItem(ItemStack itemStack) {

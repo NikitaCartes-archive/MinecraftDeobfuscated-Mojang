@@ -4,7 +4,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.InsecurePublicKeyException;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.logging.LogUtils;
 import java.util.Map;
@@ -17,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CryptException;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
@@ -42,7 +42,7 @@ public class PlayerInfo {
 	@Nullable
 	private final ProfilePublicKey profilePublicKey;
 
-	public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, MinecraftSessionService minecraftSessionService) {
+	public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, SignatureValidator signatureValidator) {
 		this.profile = playerUpdate.getProfile();
 		this.gameMode = playerUpdate.getGameMode();
 		this.latency = playerUpdate.getLatency();
@@ -52,7 +52,7 @@ public class PlayerInfo {
 		try {
 			ProfilePublicKey.Data data = playerUpdate.getProfilePublicKey();
 			if (data != null) {
-				profilePublicKey = ProfilePublicKey.createValidated(minecraftSessionService, data);
+				profilePublicKey = ProfilePublicKey.createValidated(signatureValidator, data);
 			}
 		} catch (InsecurePublicKeyException | CryptException var5) {
 			LOGGER.error("Failed to retrieve publicKey property for profile {}", this.profile.getId(), var5);

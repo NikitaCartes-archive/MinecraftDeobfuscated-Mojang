@@ -55,6 +55,12 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 			final EquipmentSlot equipmentSlot = SLOT_IDS[i];
 			this.addSlot(new Slot(inventory, 39 - i, 8, 8 + i * 18) {
 				@Override
+				public void set(ItemStack itemStack) {
+					super.set(itemStack);
+					player.onEquipItem(equipmentSlot, itemStack);
+				}
+
+				@Override
 				public int getMaxStackSize() {
 					return 1;
 				}

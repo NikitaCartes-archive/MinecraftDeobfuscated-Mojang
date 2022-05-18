@@ -41,7 +41,7 @@ public class Tadpole extends AbstractFish {
 	public static float HITBOX_HEIGHT = 0.3F;
 	private int age;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Tadpole>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY
+		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.FROG_TEMPTATIONS
 	);
 	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.LOOK_TARGET,
@@ -49,7 +49,12 @@ public class Tadpole extends AbstractFish {
 		MemoryModuleType.WALK_TARGET,
 		MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
 		MemoryModuleType.PATH,
-		MemoryModuleType.NEAREST_VISIBLE_ADULT
+		MemoryModuleType.NEAREST_VISIBLE_ADULT,
+		MemoryModuleType.TEMPTATION_COOLDOWN_TICKS,
+		MemoryModuleType.IS_TEMPTED,
+		MemoryModuleType.TEMPTING_PLAYER,
+		MemoryModuleType.BREED_TARGET,
+		MemoryModuleType.IS_PANICKING
 	);
 
 	public Tadpole(EntityType<? extends AbstractFish> entityType, Level level) {
@@ -238,5 +243,10 @@ public class Tadpole extends AbstractFish {
 
 	private int getTicksLeftUntilAdult() {
 		return Math.max(0, ticksToBeFrog - this.age);
+	}
+
+	@Override
+	public boolean shouldDropExperience() {
+		return false;
 	}
 }

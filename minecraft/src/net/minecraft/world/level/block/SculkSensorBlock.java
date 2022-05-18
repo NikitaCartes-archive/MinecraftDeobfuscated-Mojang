@@ -85,6 +85,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 			object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_START, 15);
 			object2IntOpenHashMap.put(GameEvent.EXPLODE, 15);
 			object2IntOpenHashMap.put(GameEvent.LIGHTNING_STRIKE, 15);
+			object2IntOpenHashMap.put(GameEvent.INSTRUMENT_PLAY, 15);
 		})
 	);
 	public static final EnumProperty<SculkSensorPhase> PHASE = BlockStateProperties.SCULK_SENSOR_PHASE;
@@ -132,7 +133,11 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 	@Override
 	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
 		if (!level.isClientSide() && canActivate(blockState) && entity.getType() != EntityType.WARDEN) {
-			activate(entity, level, blockPos, blockState, 1);
+			if (level.getBlockEntity(blockPos) instanceof SculkSensorBlockEntity sculkSensorBlockEntity) {
+				sculkSensorBlockEntity.setLastVibrationFrequency(VIBRATION_FREQUENCY_FOR_EVENT.get(GameEvent.STEP));
+			}
+
+			activate(entity, level, blockPos, blockState, 15);
 		}
 
 		super.stepOn(level, blockPos, blockState, entity);

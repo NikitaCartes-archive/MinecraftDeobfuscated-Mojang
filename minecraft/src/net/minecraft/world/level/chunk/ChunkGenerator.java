@@ -1,6 +1,7 @@
 package net.minecraft.world.level.chunk;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Suppliers;
 import com.mojang.datafixers.Products.P1;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
@@ -15,7 +16,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -58,15 +58,15 @@ import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -91,8 +91,9 @@ public abstract class ChunkGenerator {
 	public static final Codec<ChunkGenerator> CODEC = Registry.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
 	protected final Registry<StructureSet> structureSets;
 	protected final BiomeSource biomeSource;
-	protected final BiomeSource runtimeBiomeSource;
+	private final Supplier<List<FeatureSorter.StepFeatureData>> featuresPerStep;
 	protected final Optional<HolderSet<StructureSet>> structureOverrides;
+	private final Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter;
 	private final Map<Structure, List<StructurePlacement>> placementsForStructure = new Object2ObjectOpenHashMap<>();
 	private final Map<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>> ringPositions = new Object2ObjectArrayMap<>();
 	private boolean hasGeneratedPositions;
@@ -102,14 +103,24 @@ public abstract class ChunkGenerator {
 	}
 
 	public ChunkGenerator(Registry<StructureSet> registry, Optional<HolderSet<StructureSet>> optional, BiomeSource biomeSource) {
-		this(registry, optional, biomeSource, biomeSource);
+		this(registry, optional, biomeSource, holder -> ((Biome)holder.value()).getGenerationSettings());
 	}
 
-	public ChunkGenerator(Registry<StructureSet> registry, Optional<HolderSet<StructureSet>> optional, BiomeSource biomeSource, BiomeSource biomeSource2) {
+	public ChunkGenerator(
+		Registry<StructureSet> registry,
+		Optional<HolderSet<StructureSet>> optional,
+		BiomeSource biomeSource,
+		Function<Holder<Biome>, BiomeGenerationSettings> function
+	) {
 		this.structureSets = registry;
 		this.biomeSource = biomeSource;
-		this.runtimeBiomeSource = biomeSource2;
+		this.generationSettingsGetter = function;
 		this.structureOverrides = optional;
+		this.featuresPerStep = Suppliers.memoize(
+			() -> FeatureSorter.buildFeaturesPerStep(
+					List.copyOf(biomeSource.possibleBiomes()), holder -> ((BiomeGenerationSettings)function.apply(holder)).features(), true
+				)
+		);
 	}
 
 	public Stream<Holder<StructureSet>> possibleStructureSets() {
@@ -117,7 +128,7 @@ public abstract class ChunkGenerator {
 	}
 
 	private void generatePositions(RandomState randomState) {
-		Set<Holder<Biome>> set = this.runtimeBiomeSource.possibleBiomes();
+		Set<Holder<Biome>> set = this.biomeSource.possibleBiomes();
 		this.possibleStructureSets().forEach(holder -> {
 			StructureSet structureSet = (StructureSet)holder.value();
 			boolean bl = false;
@@ -201,7 +212,7 @@ public abstract class ChunkGenerator {
 		Registry<Biome> registry, Executor executor, RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunkAccess
 	) {
 		return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", (Supplier)(() -> {
-			chunkAccess.fillBiomesFromNoise(this.runtimeBiomeSource, randomState.sampler());
+			chunkAccess.fillBiomesFromNoise(this.biomeSource, randomState.sampler());
 			return chunkAccess;
 		})), Util.backgroundExecutor());
 	}
@@ -390,23 +401,18 @@ public abstract class ChunkGenerator {
 			BlockPos blockPos = sectionPos.origin();
 			Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
 			Map<Integer, List<Structure>> map = (Map<Integer, List<Structure>>)registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
-			List<BiomeSource.StepFeatureData> list = this.biomeSource.featuresPerStep();
+			List<FeatureSorter.StepFeatureData> list = (List<FeatureSorter.StepFeatureData>)this.featuresPerStep.get();
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
 			long l = worldgenRandom.setDecorationSeed(worldGenLevel.getSeed(), blockPos.getX(), blockPos.getZ());
-			Set<Biome> set = new ObjectArraySet<>();
-			if (this instanceof FlatLevelSource) {
-				this.biomeSource.possibleBiomes().stream().map(Holder::value).forEach(set::add);
-			} else {
-				ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPosx -> {
-					ChunkAccess chunkAccessx = worldGenLevel.getChunk(chunkPosx.x, chunkPosx.z);
+			Set<Holder<Biome>> set = new ObjectArraySet<>();
+			ChunkPos.rangeClosed(sectionPos.chunk(), 1).forEach(chunkPosx -> {
+				ChunkAccess chunkAccessx = worldGenLevel.getChunk(chunkPosx.x, chunkPosx.z);
 
-					for (LevelChunkSection levelChunkSection : chunkAccessx.getSections()) {
-						levelChunkSection.getBiomes().getAll(holder -> set.add((Biome)holder.value()));
-					}
-				});
-				set.retainAll((Collection)this.biomeSource.possibleBiomes().stream().map(Holder::value).collect(Collectors.toSet()));
-			}
-
+				for (LevelChunkSection levelChunkSection : chunkAccessx.getSections()) {
+					levelChunkSection.getBiomes().getAll(set::add);
+				}
+			});
+			set.retainAll(this.biomeSource.possibleBiomes());
 			int i = list.size();
 
 			try {
@@ -437,11 +443,11 @@ public abstract class ChunkGenerator {
 					if (k < i) {
 						IntSet intSet = new IntArraySet();
 
-						for (Biome biome : set) {
-							List<HolderSet<PlacedFeature>> list3 = biome.getGenerationSettings().features();
+						for (Holder<Biome> holder : set) {
+							List<HolderSet<PlacedFeature>> list3 = ((BiomeGenerationSettings)this.generationSettingsGetter.apply(holder)).features();
 							if (k < list3.size()) {
 								HolderSet<PlacedFeature> holderSet = (HolderSet<PlacedFeature>)list3.get(k);
-								BiomeSource.StepFeatureData stepFeatureData = (BiomeSource.StepFeatureData)list.get(k);
+								FeatureSorter.StepFeatureData stepFeatureData = (FeatureSorter.StepFeatureData)list.get(k);
 								holderSet.stream().map(Holder::value).forEach(placedFeaturex -> intSet.add(stepFeatureData.indexMapping().applyAsInt(placedFeaturex)));
 							}
 						}
@@ -449,7 +455,7 @@ public abstract class ChunkGenerator {
 						int n = intSet.size();
 						int[] is = intSet.toIntArray();
 						Arrays.sort(is);
-						BiomeSource.StepFeatureData stepFeatureData2 = (BiomeSource.StepFeatureData)list.get(k);
+						FeatureSorter.StepFeatureData stepFeatureData2 = (FeatureSorter.StepFeatureData)list.get(k);
 
 						for (int o = 0; o < n; o++) {
 							int p = is[o];
@@ -516,7 +522,7 @@ public abstract class ChunkGenerator {
 	}
 
 	public BiomeSource getBiomeSource() {
-		return this.runtimeBiomeSource;
+		return this.biomeSource;
 	}
 
 	public abstract int getGenDepth();
@@ -638,7 +644,7 @@ public abstract class ChunkGenerator {
 		Structure structure = structureSelectionEntry.structure().value();
 		int i = fetchReferences(structureManager, chunkAccess, sectionPos, structure);
 		HolderSet<Biome> holderSet = structure.biomes();
-		Predicate<Holder<Biome>> predicate = holder -> holderSet.contains(this.adjustBiome(holder));
+		Predicate<Holder<Biome>> predicate = holderSet::contains;
 		StructureStart structureStart = structure.generate(
 			registryAccess, this, this.biomeSource, randomState, structureTemplateManager, l, chunkPos, i, chunkAccess, predicate
 		);
@@ -653,10 +659,6 @@ public abstract class ChunkGenerator {
 	private static int fetchReferences(StructureManager structureManager, ChunkAccess chunkAccess, SectionPos sectionPos, Structure structure) {
 		StructureStart structureStart = structureManager.getStartForStructure(sectionPos, structure, chunkAccess);
 		return structureStart != null ? structureStart.getReferences() : 0;
-	}
-
-	protected Holder<Biome> adjustBiome(Holder<Biome> holder) {
-		return holder;
 	}
 
 	public void createReferences(WorldGenLevel worldGenLevel, StructureManager structureManager, ChunkAccess chunkAccess) {
@@ -735,9 +737,8 @@ public abstract class ChunkGenerator {
 
 	public abstract void addDebugScreenInfo(List<String> list, RandomState randomState, BlockPos blockPos);
 
-	static {
-		Registry.register(Registry.CHUNK_GENERATOR, "noise", NoiseBasedChunkGenerator.CODEC);
-		Registry.register(Registry.CHUNK_GENERATOR, "flat", FlatLevelSource.CODEC);
-		Registry.register(Registry.CHUNK_GENERATOR, "debug", DebugLevelSource.CODEC);
+	@Deprecated
+	public BiomeGenerationSettings getBiomeGenerationSettings(Holder<Biome> holder) {
+		return (BiomeGenerationSettings)this.generationSettingsGetter.apply(holder);
 	}
 }

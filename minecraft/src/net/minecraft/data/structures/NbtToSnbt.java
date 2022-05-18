@@ -1,8 +1,12 @@
 package net.minecraft.data.structures;
 
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingOutputStream;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.annotation.Nullable;
@@ -26,7 +30,9 @@ public class NbtToSnbt implements DataProvider {
 		Path path = this.generator.getOutputFolder();
 
 		for (Path path2 : this.generator.getInputFolders()) {
-			Files.walk(path2).filter(pathx -> pathx.toString().endsWith(".nbt")).forEach(path3 -> convertStructure(path3, this.getName(path2, path3), path));
+			Files.walk(path2)
+				.filter(pathx -> pathx.toString().endsWith(".nbt"))
+				.forEach(path3 -> convertStructure(cachedOutput, path3, this.getName(path2, path3), path));
 		}
 	}
 
@@ -41,38 +47,44 @@ public class NbtToSnbt implements DataProvider {
 	}
 
 	@Nullable
-	public static Path convertStructure(Path path, String string, Path path2) {
+	public static Path convertStructure(CachedOutput cachedOutput, Path path, String string, Path path2) {
 		try {
-			writeSnbt(path2.resolve(string + ".snbt"), NbtUtils.structureToSnbt(NbtIo.readCompressed(Files.newInputStream(path))));
-			LOGGER.info("Converted {} from NBT to SNBT", string);
-			return path2.resolve(string + ".snbt");
-		} catch (IOException var4) {
-			LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", string, path, var4);
+			InputStream inputStream = Files.newInputStream(path);
+
+			Path var6;
+			try {
+				Path path3 = path2.resolve(string + ".snbt");
+				writeSnbt(cachedOutput, path3, NbtUtils.structureToSnbt(NbtIo.readCompressed(inputStream)));
+				LOGGER.info("Converted {} from NBT to SNBT", string);
+				var6 = path3;
+			} catch (Throwable var8) {
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (Throwable var7) {
+						var8.addSuppressed(var7);
+					}
+				}
+
+				throw var8;
+			}
+
+			if (inputStream != null) {
+				inputStream.close();
+			}
+
+			return var6;
+		} catch (IOException var9) {
+			LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", string, path, var9);
 			return null;
 		}
 	}
 
-	public static void writeSnbt(Path path, String string) throws IOException {
-		Files.createDirectories(path.getParent());
-		BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-
-		try {
-			bufferedWriter.write(string);
-			bufferedWriter.write(10);
-		} catch (Throwable var6) {
-			if (bufferedWriter != null) {
-				try {
-					bufferedWriter.close();
-				} catch (Throwable var5) {
-					var6.addSuppressed(var5);
-				}
-			}
-
-			throw var6;
-		}
-
-		if (bufferedWriter != null) {
-			bufferedWriter.close();
-		}
+	public static void writeSnbt(CachedOutput cachedOutput, Path path, String string) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		HashingOutputStream hashingOutputStream = new HashingOutputStream(Hashing.sha1(), byteArrayOutputStream);
+		hashingOutputStream.write(string.getBytes(StandardCharsets.UTF_8));
+		hashingOutputStream.write(10);
+		cachedOutput.writeIfNeeded(path, byteArrayOutputStream.toByteArray(), hashingOutputStream.hash());
 	}
 }

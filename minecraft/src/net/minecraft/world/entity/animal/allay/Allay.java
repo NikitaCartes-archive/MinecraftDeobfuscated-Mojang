@@ -92,7 +92,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		this.moveControl = new FlyingMoveControl(this, 20, true);
 		this.setCanPickUpLoot(this.canPickUpLoot());
 		this.dynamicGameEventListener = new DynamicGameEventListener<>(
-			new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0, 0)
+			new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0.0F, 0)
 		);
 	}
 
@@ -367,7 +367,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		GameEvent gameEvent,
 		@Nullable Entity entity,
 		@Nullable Entity entity2,
-		int i
+		float f
 	) {
 		if (gameEvent == GameEvent.NOTE_BLOCK_PLAY) {
 			AllayAi.hearNoteblock(this, new BlockPos(blockPos));

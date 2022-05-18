@@ -113,7 +113,7 @@ public class CreateWorldScreen extends Screen {
 		PackRepository packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource());
 		WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, DataPackConfig.DEFAULT);
 		CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(initConfig, (resourceManager, dataPackConfig) -> {
-			RegistryAccess.Frozen frozen = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
+			RegistryAccess.Frozen frozen = RegistryAccess.builtinCopy().freeze();
 			WorldGenSettings worldGenSettings = WorldPresets.createNormalWorldFromPreset(frozen);
 			return Pair.of(worldGenSettings, frozen);
 		}, (closeableResourceManager, reloadableServerResources, frozen, worldGenSettings) -> {

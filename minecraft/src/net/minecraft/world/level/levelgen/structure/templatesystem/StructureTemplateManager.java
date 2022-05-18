@@ -1,8 +1,13 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList.Builder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,11 +17,19 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.FileUtil;
 import net.minecraft.ResourceLocationException;
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -25,22 +38,33 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class StructureTemplateManager {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String STRUCTURE_DIRECTORY_NAME = "structures";
+	private static final String TEST_STRUCTURES_DIR = "gameteststructures";
 	private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
 	private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
 	private final Map<ResourceLocation, Optional<StructureTemplate>> structureRepository = Maps.<ResourceLocation, Optional<StructureTemplate>>newConcurrentMap();
 	private final DataFixer fixerUpper;
 	private ResourceManager resourceManager;
 	private final Path generatedDir;
+	private final List<StructureTemplateManager.Source> sources;
 
 	public StructureTemplateManager(ResourceManager resourceManager, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer) {
 		this.resourceManager = resourceManager;
 		this.fixerUpper = dataFixer;
 		this.generatedDir = levelStorageAccess.getLevelPath(LevelResource.GENERATED_DIR).normalize();
+		Builder<StructureTemplateManager.Source> builder = ImmutableList.builder();
+		builder.add(new StructureTemplateManager.Source(this::loadFromGenerated, this::listGenerated));
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
+			builder.add(new StructureTemplateManager.Source(this::loadFromTestStructures, this::listTestStructures));
+		}
+
+		builder.add(new StructureTemplateManager.Source(this::loadFromResource, this::listResources));
+		this.sources = builder.build();
 	}
 
 	public StructureTemplate getOrCreate(ResourceLocation resourceLocation) {
@@ -55,10 +79,25 @@ public class StructureTemplateManager {
 	}
 
 	public Optional<StructureTemplate> get(ResourceLocation resourceLocation) {
-		return (Optional<StructureTemplate>)this.structureRepository.computeIfAbsent(resourceLocation, resourceLocationx -> {
-			Optional<StructureTemplate> optional = this.loadFromGenerated(resourceLocationx);
-			return optional.isPresent() ? optional : this.loadFromResource(resourceLocationx);
-		});
+		return (Optional<StructureTemplate>)this.structureRepository.computeIfAbsent(resourceLocation, this::tryLoad);
+	}
+
+	public Stream<ResourceLocation> listTemplates() {
+		return this.sources.stream().flatMap(source -> (Stream)source.lister().get()).distinct();
+	}
+
+	private Optional<StructureTemplate> tryLoad(ResourceLocation resourceLocation) {
+		for (StructureTemplateManager.Source source : this.sources) {
+			try {
+				Optional<StructureTemplate> optional = (Optional<StructureTemplate>)source.loader().apply(resourceLocation);
+				if (optional.isPresent()) {
+					return optional;
+				}
+			} catch (Exception var5) {
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	public void onResourceManagerReload(ResourceManager resourceManager) {
@@ -68,9 +107,123 @@ public class StructureTemplateManager {
 
 	private Optional<StructureTemplate> loadFromResource(ResourceLocation resourceLocation) {
 		ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + ".nbt");
+		return this.load(() -> this.resourceManager.open(resourceLocation2), throwable -> LOGGER.error("Couldn't load structure {}", resourceLocation, throwable));
+	}
 
+	private Stream<ResourceLocation> listResources() {
+		return this.resourceManager
+			.listResources("structures", resourceLocation -> true)
+			.keySet()
+			.stream()
+			.map(
+				resourceLocation -> new ResourceLocation(
+						resourceLocation.getNamespace(), resourceLocation.getPath().substring("structures".length() + 1, resourceLocation.getPath().length() - ".nbt".length())
+					)
+			);
+	}
+
+	private Optional<StructureTemplate> loadFromTestStructures(ResourceLocation resourceLocation) {
+		return this.loadFromSnbt(resourceLocation, Paths.get("gameteststructures"));
+	}
+
+	private Stream<ResourceLocation> listTestStructures() {
+		return this.listFolderContents(Paths.get("gameteststructures"), "minecraft", ".snbt");
+	}
+
+	private Optional<StructureTemplate> loadFromGenerated(ResourceLocation resourceLocation) {
+		if (!Files.isDirectory(this.generatedDir, new LinkOption[0])) {
+			return Optional.empty();
+		} else {
+			Path path = createAndValidatePathToStructure(this.generatedDir, resourceLocation, ".nbt");
+			return this.load(() -> new FileInputStream(path.toFile()), throwable -> LOGGER.error("Couldn't load structure from {}", path, throwable));
+		}
+	}
+
+	private Stream<ResourceLocation> listGenerated() {
+		if (!Files.isDirectory(this.generatedDir, new LinkOption[0])) {
+			return Stream.empty();
+		} else {
+			try {
+				return Files.list(this.generatedDir).filter(path -> Files.isDirectory(path, new LinkOption[0])).flatMap(path -> this.listGeneratedInNamespace(path));
+			} catch (IOException var2) {
+				return Stream.empty();
+			}
+		}
+	}
+
+	private Stream<ResourceLocation> listGeneratedInNamespace(Path path) {
+		Path path2 = path.resolve("structures");
+		return this.listFolderContents(path2, path.getFileName().toString(), ".nbt");
+	}
+
+	private Stream<ResourceLocation> listFolderContents(Path path, String string, String string2) {
+		if (!Files.isDirectory(path, new LinkOption[0])) {
+			return Stream.empty();
+		} else {
+			int i = string2.length();
+			Function<String, String> function = stringx -> stringx.substring(0, stringx.length() - i);
+
+			try {
+				return Files.walk(path).filter(pathx -> pathx.toString().endsWith(string2)).mapMulti((path2, consumer) -> {
+					try {
+						consumer.accept(new ResourceLocation(string, (String)function.apply(this.relativize(path, path2))));
+					} catch (ResourceLocationException var7x) {
+						LOGGER.error("Invalid location while listing pack contents", (Throwable)var7x);
+					}
+				});
+			} catch (IOException var7) {
+				LOGGER.error("Failed to list folder contents", (Throwable)var7);
+				return Stream.empty();
+			}
+		}
+	}
+
+	private String relativize(Path path, Path path2) {
+		return path.relativize(path2).toString().replace(File.separator, "/");
+	}
+
+	private Optional<StructureTemplate> loadFromSnbt(ResourceLocation resourceLocation, Path path) {
+		if (!Files.isDirectory(path, new LinkOption[0])) {
+			return Optional.empty();
+		} else {
+			Path path2 = FileUtil.createPathToResource(path, resourceLocation.getPath(), ".snbt");
+
+			try {
+				BufferedReader bufferedReader = Files.newBufferedReader(path2);
+
+				Optional var6;
+				try {
+					String string = IOUtils.toString(bufferedReader);
+					var6 = Optional.of(this.readStructure(NbtUtils.snbtToStructure(string)));
+				} catch (Throwable var8) {
+					if (bufferedReader != null) {
+						try {
+							bufferedReader.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
+						}
+					}
+
+					throw var8;
+				}
+
+				if (bufferedReader != null) {
+					bufferedReader.close();
+				}
+
+				return var6;
+			} catch (NoSuchFileException var9) {
+				return Optional.empty();
+			} catch (CommandSyntaxException | IOException var10) {
+				LOGGER.error("Couldn't load structure from {}", path2, var10);
+				return Optional.empty();
+			}
+		}
+	}
+
+	private Optional<StructureTemplate> load(StructureTemplateManager.InputStreamOpener inputStreamOpener, Consumer<Throwable> consumer) {
 		try {
-			InputStream inputStream = this.resourceManager.open(resourceLocation2);
+			InputStream inputStream = inputStreamOpener.open();
 
 			Optional var4;
 			try {
@@ -95,41 +248,8 @@ public class StructureTemplateManager {
 		} catch (FileNotFoundException var8) {
 			return Optional.empty();
 		} catch (Throwable var9) {
-			LOGGER.error("Couldn't load structure {}: {}", resourceLocation, var9.toString());
+			consumer.accept(var9);
 			return Optional.empty();
-		}
-	}
-
-	private Optional<StructureTemplate> loadFromGenerated(ResourceLocation resourceLocation) {
-		if (!this.generatedDir.toFile().isDirectory()) {
-			return Optional.empty();
-		} else {
-			Path path = this.createAndValidatePathToStructure(resourceLocation, ".nbt");
-
-			try {
-				InputStream inputStream = new FileInputStream(path.toFile());
-
-				Optional var4;
-				try {
-					var4 = Optional.of(this.readStructure(inputStream));
-				} catch (Throwable var7) {
-					try {
-						inputStream.close();
-					} catch (Throwable var6) {
-						var7.addSuppressed(var6);
-					}
-
-					throw var7;
-				}
-
-				inputStream.close();
-				return var4;
-			} catch (FileNotFoundException var8) {
-				return Optional.empty();
-			} catch (IOException var9) {
-				LOGGER.error("Couldn't load structure from {}", path, var9);
-				return Optional.empty();
-			}
 		}
 	}
 
@@ -154,7 +274,7 @@ public class StructureTemplateManager {
 			return false;
 		} else {
 			StructureTemplate structureTemplate = (StructureTemplate)optional.get();
-			Path path = this.createAndValidatePathToStructure(resourceLocation, ".nbt");
+			Path path = createAndValidatePathToStructure(this.generatedDir, resourceLocation, ".nbt");
 			Path path2 = path.getParent();
 			if (path2 == null) {
 				return false;
@@ -192,30 +312,42 @@ public class StructureTemplateManager {
 		}
 	}
 
-	public Path createPathToStructure(ResourceLocation resourceLocation, String string) {
+	public Path getPathToGeneratedStructure(ResourceLocation resourceLocation, String string) {
+		return createPathToStructure(this.generatedDir, resourceLocation, string);
+	}
+
+	public static Path createPathToStructure(Path path, ResourceLocation resourceLocation, String string) {
 		try {
-			Path path = this.generatedDir.resolve(resourceLocation.getNamespace());
-			Path path2 = path.resolve("structures");
-			return FileUtil.createPathToResource(path2, resourceLocation.getPath(), string);
+			Path path2 = path.resolve(resourceLocation.getNamespace());
+			Path path3 = path2.resolve("structures");
+			return FileUtil.createPathToResource(path3, resourceLocation.getPath(), string);
 		} catch (InvalidPathException var5) {
 			throw new ResourceLocationException("Invalid resource path: " + resourceLocation, var5);
 		}
 	}
 
-	private Path createAndValidatePathToStructure(ResourceLocation resourceLocation, String string) {
+	private static Path createAndValidatePathToStructure(Path path, ResourceLocation resourceLocation, String string) {
 		if (resourceLocation.getPath().contains("//")) {
 			throw new ResourceLocationException("Invalid resource path: " + resourceLocation);
 		} else {
-			Path path = this.createPathToStructure(resourceLocation, string);
-			if (path.startsWith(this.generatedDir) && FileUtil.isPathNormalized(path) && FileUtil.isPathPortable(path)) {
-				return path;
+			Path path2 = createPathToStructure(path, resourceLocation, string);
+			if (path2.startsWith(path) && FileUtil.isPathNormalized(path2) && FileUtil.isPathPortable(path2)) {
+				return path2;
 			} else {
-				throw new ResourceLocationException("Invalid resource path: " + path);
+				throw new ResourceLocationException("Invalid resource path: " + path2);
 			}
 		}
 	}
 
 	public void remove(ResourceLocation resourceLocation) {
 		this.structureRepository.remove(resourceLocation);
+	}
+
+	@FunctionalInterface
+	interface InputStreamOpener {
+		InputStream open() throws IOException;
+	}
+
+	static record Source(Function<ResourceLocation, Optional<StructureTemplate>> loader, Supplier<Stream<ResourceLocation>> lister) {
 	}
 }

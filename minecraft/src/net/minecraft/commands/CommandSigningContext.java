@@ -1,27 +1,31 @@
 package net.minecraft.commands;
 
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.time.Instant;
 import java.util.UUID;
 import net.minecraft.commands.arguments.ArgumentSignatures;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.util.Crypt;
 
 public interface CommandSigningContext {
-	CommandSigningContext NONE = (commandContext, string, component) -> PlayerChatMessage.unsigned(component);
+	CommandSigningContext NONE = string -> MessageSignature.unsigned();
 
-	PlayerChatMessage signArgument(CommandContext<CommandSourceStack> commandContext, String string, Component component) throws CommandSyntaxException;
+	MessageSignature getArgumentSignature(String string);
 
-	public static record PlainArguments(UUID sender, Instant timeStamp, ArgumentSignatures argumentSignatures) implements CommandSigningContext {
+	default boolean signedArgumentPreview(String string) {
+		return false;
+	}
+
+	public static record SignedArguments(UUID sender, Instant timeStamp, ArgumentSignatures argumentSignatures, boolean signedPreview)
+		implements CommandSigningContext {
 		@Override
-		public PlayerChatMessage signArgument(CommandContext<CommandSourceStack> commandContext, String string, Component component) {
+		public MessageSignature getArgumentSignature(String string) {
 			Crypt.SaltSignaturePair saltSignaturePair = this.argumentSignatures.get(string);
-			return saltSignaturePair != null
-				? PlayerChatMessage.signed(component, new MessageSignature(this.sender, this.timeStamp, saltSignaturePair))
-				: PlayerChatMessage.unsigned(component);
+			return saltSignaturePair != null ? new MessageSignature(this.sender, this.timeStamp, saltSignaturePair) : MessageSignature.unsigned();
+		}
+
+		@Override
+		public boolean signedArgumentPreview(String string) {
+			return this.signedPreview;
 		}
 	}
 }

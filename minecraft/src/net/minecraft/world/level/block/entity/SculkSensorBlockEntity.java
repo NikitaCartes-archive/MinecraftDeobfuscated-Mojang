@@ -25,7 +25,7 @@ public class SculkSensorBlockEntity extends BlockEntity implements VibrationList
 	public SculkSensorBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.SCULK_SENSOR, blockPos, blockState);
 		this.listener = new VibrationListener(
-			new BlockPositionSource(this.worldPosition), ((SculkSensorBlock)blockState.getBlock()).getListenerRange(), this, null, 0, 0
+			new BlockPositionSource(this.worldPosition), ((SculkSensorBlock)blockState.getBlock()).getListenerRange(), this, null, 0.0F, 0
 		);
 	}
 
@@ -78,12 +78,12 @@ public class SculkSensorBlockEntity extends BlockEntity implements VibrationList
 		GameEvent gameEvent,
 		@Nullable Entity entity,
 		@Nullable Entity entity2,
-		int i
+		float f
 	) {
 		BlockState blockState = this.getBlockState();
 		if (SculkSensorBlock.canActivate(blockState)) {
 			this.lastVibrationFrequency = SculkSensorBlock.VIBRATION_FREQUENCY_FOR_EVENT.getInt(gameEvent);
-			SculkSensorBlock.activate(entity, serverLevel, this.worldPosition, blockState, getRedstoneStrengthForDistance(i, gameEventListener.getListenerRadius()));
+			SculkSensorBlock.activate(entity, serverLevel, this.worldPosition, blockState, getRedstoneStrengthForDistance(f, gameEventListener.getListenerRadius()));
 		}
 	}
 
@@ -92,8 +92,12 @@ public class SculkSensorBlockEntity extends BlockEntity implements VibrationList
 		this.setChanged();
 	}
 
-	public static int getRedstoneStrengthForDistance(int i, int j) {
-		double d = (double)i / (double)j;
+	public static int getRedstoneStrengthForDistance(float f, int i) {
+		double d = (double)f / (double)i;
 		return Math.max(1, 15 - Mth.floor(d * 15.0));
+	}
+
+	public void setLastVibrationFrequency(int i) {
+		this.lastVibrationFrequency = i;
 	}
 }

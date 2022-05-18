@@ -146,7 +146,7 @@ public class ChaseClient {
 				teleportTarget -> this.executeCommand(
 						String.format(
 							Locale.ROOT,
-							"/execute in %s run tp @s %.3f %.3f %.3f %.3f %.3f",
+							"execute in %s run tp @s %.3f %.3f %.3f %.3f %.3f",
 							teleportTarget.level.location(),
 							teleportTarget.pos.x,
 							teleportTarget.pos.y,

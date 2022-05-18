@@ -36,6 +36,7 @@ public class GameEvent {
 	public static final GameEvent FLUID_PICKUP = register("fluid_pickup");
 	public static final GameEvent FLUID_PLACE = register("fluid_place");
 	public static final GameEvent HIT_GROUND = register("hit_ground");
+	public static final GameEvent INSTRUMENT_PLAY = register("instrument_play");
 	public static final GameEvent ITEM_INTERACT_FINISH = register("item_interact_finish");
 	public static final GameEvent ITEM_INTERACT_START = register("item_interact_start");
 	public static final GameEvent LIGHTNING_STRIKE = register("lightning_strike");

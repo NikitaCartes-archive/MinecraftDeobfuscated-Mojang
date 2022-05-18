@@ -33,6 +33,8 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleChatPreview(ClientboundChatPreviewPacket clientboundChatPreviewPacket);
 
+	void handleSetDisplayChatPreview(ClientboundSetDisplayChatPreviewPacket clientboundSetDisplayChatPreviewPacket);
+
 	void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket);
 
 	void handleMapItemData(ClientboundMapItemDataPacket clientboundMapItemDataPacket);

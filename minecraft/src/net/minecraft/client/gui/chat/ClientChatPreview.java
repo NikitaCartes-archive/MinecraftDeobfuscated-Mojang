@@ -5,100 +5,70 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundChatPreviewPacket;
-import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class ClientChatPreview {
-	private static final long MIN_REQUEST_INTERVAL_MS = 100L;
-	private static final long MAX_REQUEST_INTERVAL_MS = 1000L;
 	private static final long PREVIEW_VALID_AFTER_MS = 200L;
-	private final Minecraft minecraft;
-	private final ClientChatPreview.QueryIdGenerator queryIdGenerator = new ClientChatPreview.QueryIdGenerator();
+	private boolean enabled;
 	@Nullable
-	private ClientChatPreview.PendingPreview scheduledPreview;
+	private String lastQuery;
 	@Nullable
-	private ClientChatPreview.PendingPreview pendingPreview;
-	private long lastRequestTime;
+	private String scheduledRequest;
+	private final ChatPreviewRequests requests;
 	@Nullable
 	private ClientChatPreview.Preview preview;
 
 	public ClientChatPreview(Minecraft minecraft) {
-		this.minecraft = minecraft;
+		this.requests = new ChatPreviewRequests(minecraft);
 	}
 
 	public void tick() {
-		ClientChatPreview.PendingPreview pendingPreview = this.scheduledPreview;
-		if (pendingPreview != null) {
-			long l = Util.getMillis();
-			if (this.isRequestReady(l)) {
-				this.sendRequest(pendingPreview, l);
-				this.scheduledPreview = null;
-			}
+		String string = this.scheduledRequest;
+		if (string != null && this.requests.trySendRequest(string, Util.getMillis())) {
+			this.scheduledRequest = null;
 		}
 	}
 
-	private void sendRequest(ClientChatPreview.PendingPreview pendingPreview, long l) {
-		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
-		if (clientPacketListener != null) {
-			clientPacketListener.send(new ServerboundChatPreviewPacket(pendingPreview.id(), pendingPreview.query()));
-			this.pendingPreview = pendingPreview;
-		} else {
-			this.pendingPreview = null;
-		}
-
-		this.lastRequestTime = l;
-	}
-
-	private boolean isRequestReady(long l) {
-		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
-		if (clientPacketListener == null) {
-			return true;
-		} else {
-			return l < this.getEarliestNextRequest() ? false : this.pendingPreview == null || l >= this.getLatestNextRequest();
-		}
-	}
-
-	private long getEarliestNextRequest() {
-		return this.lastRequestTime + 100L;
-	}
-
-	private long getLatestNextRequest() {
-		return this.lastRequestTime + 1000L;
-	}
-
-	public void clear() {
-		this.preview = null;
-		this.scheduledPreview = null;
-		this.pendingPreview = null;
-	}
-
-	public void request(String string) {
+	public void update(String string) {
+		this.enabled = true;
 		string = normalizeQuery(string);
-		if (string.isEmpty()) {
-			this.preview = new ClientChatPreview.Preview(Util.getMillis(), string, null);
-			this.scheduledPreview = null;
-			this.pendingPreview = null;
-		} else {
-			ClientChatPreview.PendingPreview pendingPreview = this.scheduledPreview != null ? this.scheduledPreview : this.pendingPreview;
-			if (pendingPreview == null || !pendingPreview.matches(string)) {
-				this.scheduledPreview = new ClientChatPreview.PendingPreview(this.queryIdGenerator.next(), string);
+		if (!string.isEmpty()) {
+			if (!string.equals(this.lastQuery)) {
+				this.lastQuery = string;
+				this.sendOrScheduleRequest(string);
 			}
+		} else {
+			this.clear();
 		}
+	}
+
+	private void sendOrScheduleRequest(String string) {
+		if (!this.requests.trySendRequest(string, Util.getMillis())) {
+			this.scheduledRequest = string;
+		} else {
+			this.scheduledRequest = null;
+		}
+	}
+
+	public void disable() {
+		this.enabled = false;
+		this.clear();
+	}
+
+	private void clear() {
+		this.lastQuery = null;
+		this.scheduledRequest = null;
+		this.preview = null;
+		this.requests.clear();
 	}
 
 	public void handleResponse(int i, @Nullable Component component) {
-		if (this.scheduledPreview != null || this.pendingPreview != null) {
-			if (this.pendingPreview != null && this.pendingPreview.matches(i)) {
-				Component component2 = (Component)(component != null ? component : Component.literal(this.pendingPreview.query()));
-				this.preview = new ClientChatPreview.Preview(Util.getMillis(), this.pendingPreview.query(), component2);
-				this.pendingPreview = null;
-			} else {
-				this.preview = null;
-			}
+		String string = this.requests.handleResponse(i);
+		if (string != null) {
+			Component component2 = (Component)(component != null ? component : Component.literal(string));
+			this.preview = new ClientChatPreview.Preview(Util.getMillis(), string, component2);
 		}
 	}
 
@@ -118,23 +88,12 @@ public class ClientChatPreview {
 		}
 	}
 
-	public boolean isActive() {
-		return this.preview != null || this.scheduledPreview != null || this.pendingPreview != null;
+	public boolean isEnabled() {
+		return this.enabled;
 	}
 
 	static String normalizeQuery(String string) {
 		return StringUtils.normalizeSpace(string.trim());
-	}
-
-	@Environment(EnvType.CLIENT)
-	static record PendingPreview(int id, String query) {
-		public boolean matches(int i) {
-			return this.id == i;
-		}
-
-		public boolean matches(String string) {
-			return this.query.equals(string);
-		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -153,19 +112,6 @@ public class ClientChatPreview {
 			} else {
 				return false;
 			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static class QueryIdGenerator {
-		private static final int MAX_STEP = 100;
-		private final RandomSource random = RandomSource.createNewThreadLocalInstance();
-		private int lastId;
-
-		public int next() {
-			int i = this.lastId + this.random.nextInt(100);
-			this.lastId = i;
-			return i;
 		}
 	}
 }

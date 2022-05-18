@@ -6,10 +6,12 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.Optional;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.TemplateMirrorArgument;
@@ -50,6 +52,10 @@ public class PlaceCommand {
 	private static final SimpleCommandExceptionType ERROR_TEMPLATE_FAILED = new SimpleCommandExceptionType(
 		Component.translatable("commands.place.template.failed")
 	);
+	private static final SuggestionProvider<CommandSourceStack> SUGGEST_TEMPLATES = (commandContext, suggestionsBuilder) -> {
+		StructureTemplateManager structureTemplateManager = commandContext.getSource().getLevel().getStructureManager();
+		return SharedSuggestionProvider.suggestResource(structureTemplateManager.listTemplates(), suggestionsBuilder);
+	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -136,6 +142,7 @@ public class PlaceCommand {
 					Commands.literal("template")
 						.then(
 							Commands.argument("template", ResourceLocationArgument.id())
+								.suggests(SUGGEST_TEMPLATES)
 								.executes(
 									commandContext -> placeTemplate(
 											commandContext.getSource(),

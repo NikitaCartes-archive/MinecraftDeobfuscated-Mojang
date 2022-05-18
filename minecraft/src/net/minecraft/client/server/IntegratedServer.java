@@ -3,8 +3,6 @@ package net.minecraft.client.server;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +17,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ModCheck;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -52,23 +50,10 @@ public class IntegratedServer extends MinecraftServer {
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		PackRepository packRepository,
 		WorldStem worldStem,
-		MinecraftSessionService minecraftSessionService,
-		GameProfileRepository gameProfileRepository,
-		GameProfileCache gameProfileCache,
+		Services services,
 		ChunkProgressListenerFactory chunkProgressListenerFactory
 	) {
-		super(
-			thread,
-			levelStorageAccess,
-			packRepository,
-			worldStem,
-			minecraft.getProxy(),
-			minecraft.getFixerUpper(),
-			minecraftSessionService,
-			gameProfileRepository,
-			gameProfileCache,
-			chunkProgressListenerFactory
-		);
+		super(thread, levelStorageAccess, packRepository, worldStem, minecraft.getProxy(), minecraft.getFixerUpper(), services, chunkProgressListenerFactory);
 		this.setSingleplayerProfile(minecraft.getUser().getGameProfile());
 		this.setDemo(minecraft.isDemo());
 		this.setPlayerList(new IntegratedPlayerList(this, this.registryAccess(), this.playerDataStorage));

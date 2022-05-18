@@ -6,10 +6,10 @@ import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -167,25 +167,7 @@ public class HashCache {
 			if (this.shouldWrite(path, hashCode)) {
 				this.writes++;
 				Files.createDirectories(path.getParent());
-				OutputStream outputStream = Files.newOutputStream(path);
-
-				try {
-					outputStream.write(bs);
-				} catch (Throwable var8) {
-					if (outputStream != null) {
-						try {
-							outputStream.close();
-						} catch (Throwable var7) {
-							var8.addSuppressed(var7);
-						}
-					}
-
-					throw var8;
-				}
-
-				if (outputStream != null) {
-					outputStream.close();
-				}
+				Files.write(path, bs, new OpenOption[0]);
 			}
 
 			this.newCache.put(path, hashCode);

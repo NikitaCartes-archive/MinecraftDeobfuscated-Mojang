@@ -104,7 +104,7 @@ public class MinecartItem extends Item {
 				}
 
 				level.addFreshEntity(abstractMinecart);
-				level.gameEvent(useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
+				level.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(useOnContext.getPlayer(), level.getBlockState(blockPos.below())));
 			}
 
 			itemStack.shrink(1);

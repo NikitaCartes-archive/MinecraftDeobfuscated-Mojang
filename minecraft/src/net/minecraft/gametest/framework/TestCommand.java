@@ -23,6 +23,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -440,8 +441,8 @@ public class TestCommand {
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir);
 		ResourceLocation resourceLocation = new ResourceLocation("minecraft", string);
-		Path path2 = commandSourceStack.getLevel().getStructureManager().createPathToStructure(resourceLocation, ".nbt");
-		Path path3 = NbtToSnbt.convertStructure(path2, string, path);
+		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
+		Path path3 = NbtToSnbt.convertStructure(CachedOutput.NO_CACHE, path2, string, path);
 		if (path3 == null) {
 			say(commandSourceStack, "Failed to export " + path2);
 			return 1;
@@ -462,7 +463,7 @@ public class TestCommand {
 	private static int importTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir, string + ".snbt");
 		ResourceLocation resourceLocation = new ResourceLocation("minecraft", string);
-		Path path2 = commandSourceStack.getLevel().getStructureManager().createPathToStructure(resourceLocation, ".nbt");
+		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
 
 		try {
 			BufferedReader bufferedReader = Files.newBufferedReader(path);

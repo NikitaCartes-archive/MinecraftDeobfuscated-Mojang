@@ -3,40 +3,39 @@ package net.minecraft.network.chat;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.time.Instant;
 import java.util.UUID;
 import net.minecraft.Util;
 import net.minecraft.util.Crypt;
+import net.minecraft.util.SignatureUpdater;
+import net.minecraft.util.SignatureValidator;
 
 public record MessageSignature(UUID sender, Instant timeStamp, Crypt.SaltSignaturePair saltSignature) {
 	public static MessageSignature unsigned() {
 		return new MessageSignature(Util.NIL_UUID, Instant.now(), Crypt.SaltSignaturePair.EMPTY);
 	}
 
-	public boolean verify(Signature signature, Component component) throws SignatureException {
-		if (this.isValid()) {
-			updateSignature(signature, component, this.sender, this.timeStamp, this.saltSignature.salt());
-			return signature.verify(this.saltSignature.signature());
-		} else {
-			return false;
-		}
+	public boolean verify(SignatureValidator signatureValidator, Component component) {
+		return this.isValid()
+			? signatureValidator.validate(
+				output -> updateSignature(output, component, this.sender, this.timeStamp, this.saltSignature.salt()), this.saltSignature.signature()
+			)
+			: false;
 	}
 
-	public boolean verify(Signature signature, String string) throws SignatureException {
-		return this.verify(signature, Component.literal(string));
+	public boolean verify(SignatureValidator signatureValidator, String string) throws SignatureException {
+		return this.verify(signatureValidator, Component.literal(string));
 	}
 
-	public static void updateSignature(Signature signature, Component component, UUID uUID, Instant instant, long l) throws SignatureException {
-		byte[] bs = encodeContent(component);
-		int i = 32 + bs.length;
-		ByteBuffer byteBuffer = ByteBuffer.allocate(i).order(ByteOrder.BIG_ENDIAN);
+	public static void updateSignature(SignatureUpdater.Output output, Component component, UUID uUID, Instant instant, long l) throws SignatureException {
+		byte[] bs = new byte[32];
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bs).order(ByteOrder.BIG_ENDIAN);
 		byteBuffer.putLong(l);
 		byteBuffer.putLong(uUID.getMostSignificantBits()).putLong(uUID.getLeastSignificantBits());
 		byteBuffer.putLong(instant.getEpochSecond());
-		byteBuffer.put(bs);
-		signature.update(byteBuffer.flip());
+		output.update(bs);
+		output.update(encodeContent(component));
 	}
 
 	private static byte[] encodeContent(Component component) {

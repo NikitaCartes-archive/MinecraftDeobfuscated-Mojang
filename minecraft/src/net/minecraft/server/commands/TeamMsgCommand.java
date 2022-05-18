@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
@@ -31,13 +30,13 @@ public class TeamMsgCommand {
 			Commands.literal("teammsg")
 				.then(
 					Commands.argument("message", MessageArgument.message())
-						.executes(commandContext -> sendMessage(commandContext.getSource(), MessageArgument.getSignedMessage(commandContext, "message")))
+						.executes(commandContext -> sendMessage(commandContext.getSource(), MessageArgument.getChatMessage(commandContext, "message")))
 				)
 		);
 		commandDispatcher.register(Commands.literal("tm").redirect(literalCommandNode));
 	}
 
-	private static int sendMessage(CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) throws CommandSyntaxException {
+	private static int sendMessage(CommandSourceStack commandSourceStack, MessageArgument.ChatMessage chatMessage) throws CommandSyntaxException {
 		Entity entity = commandSourceStack.getEntityOrException();
 		PlayerTeam playerTeam = (PlayerTeam)entity.getTeam();
 		if (playerTeam == null) {
@@ -45,21 +44,35 @@ public class TeamMsgCommand {
 		} else {
 			Component component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
 			ChatSender chatSender = commandSourceStack.asChatSender().withTeamName(component);
-			MinecraftServer minecraftServer = commandSourceStack.getServer();
-			List<ServerPlayer> list = minecraftServer.getPlayerList().getPlayers();
-			PlayerChatMessage playerChatMessage2 = minecraftServer.getChatDecorator().decorate(commandSourceStack.getPlayer(), playerChatMessage);
-
-			for (ServerPlayer serverPlayer : list) {
-				if (serverPlayer == entity) {
-					serverPlayer.sendSystemMessage(
-						Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), playerChatMessage2.serverContent())
+			List<ServerPlayer> list = commandSourceStack.getServer()
+				.getPlayerList()
+				.getPlayers()
+				.stream()
+				.filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam)
+				.toList();
+			if (list.isEmpty()) {
+				return 0;
+			} else {
+				chatMessage.resolve(commandSourceStack)
+					.thenAcceptAsync(
+						filteredText -> {
+							for (ServerPlayer serverPlayer : list) {
+								if (serverPlayer == entity) {
+									serverPlayer.sendSystemMessage(
+										Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), ((PlayerChatMessage)filteredText.raw()).serverContent())
+									);
+								} else {
+									PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.filter(commandSourceStack, serverPlayer);
+									if (playerChatMessage != null) {
+										serverPlayer.sendChatMessage(playerChatMessage, chatSender, ChatType.TEAM_MSG_COMMAND);
+									}
+								}
+							}
+						},
+						commandSourceStack.getServer()
 					);
-				} else if (serverPlayer.getTeam() == playerTeam) {
-					serverPlayer.sendChatMessage(playerChatMessage2, chatSender, ChatType.TEAM_MSG_COMMAND);
-				}
+				return list.size();
 			}
-
-			return list.size();
 		}
 	}
 }

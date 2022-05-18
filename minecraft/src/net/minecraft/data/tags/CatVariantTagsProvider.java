@@ -18,7 +18,7 @@ public class CatVariantTagsProvider extends TagsProvider<CatVariant> {
 				CatVariant.BLACK,
 				CatVariant.RED,
 				CatVariant.SIAMESE,
-				CatVariant.BRITISH,
+				CatVariant.BRITISH_SHORTHAIR,
 				CatVariant.CALICO,
 				CatVariant.PERSIAN,
 				CatVariant.RAGDOLL,

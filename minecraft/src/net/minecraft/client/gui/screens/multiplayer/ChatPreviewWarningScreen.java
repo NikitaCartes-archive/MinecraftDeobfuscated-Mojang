@@ -1,9 +1,11 @@
 package net.minecraft.client.gui.screens.multiplayer;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
@@ -17,10 +19,13 @@ public class ChatPreviewWarningScreen extends WarningScreen {
 	private static final Component CHECK = Component.translatable("chatPreview.warning.check");
 	private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
 	private final ServerData serverData;
+	@Nullable
+	private final Screen lastScreen;
 
-	public ChatPreviewWarningScreen(ServerData serverData) {
+	public ChatPreviewWarningScreen(@Nullable Screen screen, ServerData serverData) {
 		super(TITLE, CONTENT, CHECK, NARRATION);
 		this.serverData = serverData;
+		this.lastScreen = screen;
 	}
 
 	@Override
@@ -54,5 +59,10 @@ public class ChatPreviewWarningScreen extends WarningScreen {
 	@Override
 	protected int getLineHeight() {
 		return 9 * 3 / 2;
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 }

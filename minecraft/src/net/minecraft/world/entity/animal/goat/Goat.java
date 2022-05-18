@@ -80,7 +80,8 @@ public class Goat extends Animal {
 		MemoryModuleType.TEMPTATION_COOLDOWN_TICKS,
 		MemoryModuleType.IS_TEMPTED,
 		MemoryModuleType.RAM_COOLDOWN_TICKS,
-		MemoryModuleType.RAM_TARGET
+		MemoryModuleType.RAM_TARGET,
+		MemoryModuleType.IS_PANICKING
 	);
 	public static final int GOAT_FALL_DAMAGE_REDUCTION = 10;
 	public static final double GOAT_SCREAMING_CHANCE = 0.02;

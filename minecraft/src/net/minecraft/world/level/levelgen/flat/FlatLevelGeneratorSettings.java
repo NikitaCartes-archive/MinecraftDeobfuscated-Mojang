@@ -79,7 +79,7 @@ public class FlatLevelGeneratorSettings {
 		this.updateLayers();
 		if (optional2.isEmpty()) {
 			LOGGER.error("Unknown biome, defaulting to plains");
-			this.biome = registry.getOrCreateHolder(Biomes.PLAINS);
+			this.biome = registry.getOrCreateHolderOrThrow(Biomes.PLAINS);
 		} else {
 			this.biome = (Holder<Biome>)optional2.get();
 		}
@@ -88,7 +88,7 @@ public class FlatLevelGeneratorSettings {
 	public FlatLevelGeneratorSettings(Optional<HolderSet<StructureSet>> optional, Registry<Biome> registry) {
 		this.biomes = registry;
 		this.structureOverrides = optional;
-		this.biome = registry.getOrCreateHolder(Biomes.PLAINS);
+		this.biome = registry.getOrCreateHolderOrThrow(Biomes.PLAINS);
 		this.layers = Lists.<BlockState>newArrayList();
 	}
 
@@ -120,41 +120,44 @@ public class FlatLevelGeneratorSettings {
 		this.addLakes = true;
 	}
 
-	public Holder<Biome> getBiomeFromSettings() {
-		Biome biome = this.getBiome().value();
-		BiomeGenerationSettings biomeGenerationSettings = biome.getGenerationSettings();
-		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder();
-		if (this.addLakes) {
-			builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND);
-			builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_SURFACE);
-		}
+	public BiomeGenerationSettings adjustGenerationSettings(Holder<Biome> holder) {
+		if (!holder.equals(this.biome)) {
+			return holder.value().getGenerationSettings();
+		} else {
+			BiomeGenerationSettings biomeGenerationSettings = this.getBiome().value().getGenerationSettings();
+			BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder();
+			if (this.addLakes) {
+				builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND);
+				builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_SURFACE);
+			}
 
-		boolean bl = (!this.voidGen || this.biome.is(Biomes.THE_VOID)) && this.decoration;
-		if (bl) {
-			List<HolderSet<PlacedFeature>> list = biomeGenerationSettings.features();
+			boolean bl = (!this.voidGen || holder.is(Biomes.THE_VOID)) && this.decoration;
+			if (bl) {
+				List<HolderSet<PlacedFeature>> list = biomeGenerationSettings.features();
 
-			for (int i = 0; i < list.size(); i++) {
-				if (i != GenerationStep.Decoration.UNDERGROUND_STRUCTURES.ordinal() && i != GenerationStep.Decoration.SURFACE_STRUCTURES.ordinal()) {
-					for (Holder<PlacedFeature> holder : (HolderSet)list.get(i)) {
-						builder.addFeature(i, holder);
+				for (int i = 0; i < list.size(); i++) {
+					if (i != GenerationStep.Decoration.UNDERGROUND_STRUCTURES.ordinal() && i != GenerationStep.Decoration.SURFACE_STRUCTURES.ordinal()) {
+						for (Holder<PlacedFeature> holder2 : (HolderSet)list.get(i)) {
+							builder.addFeature(i, holder2);
+						}
 					}
 				}
 			}
-		}
 
-		List<BlockState> list = this.getLayers();
+			List<BlockState> list = this.getLayers();
 
-		for (int ix = 0; ix < list.size(); ix++) {
-			BlockState blockState = (BlockState)list.get(ix);
-			if (!Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
-				list.set(ix, null);
-				builder.addFeature(
-					GenerationStep.Decoration.TOP_LAYER_MODIFICATION, PlacementUtils.inlinePlaced(Feature.FILL_LAYER, new LayerConfiguration(ix, blockState))
-				);
+			for (int ix = 0; ix < list.size(); ix++) {
+				BlockState blockState = (BlockState)list.get(ix);
+				if (!Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
+					list.set(ix, null);
+					builder.addFeature(
+						GenerationStep.Decoration.TOP_LAYER_MODIFICATION, PlacementUtils.inlinePlaced(Feature.FILL_LAYER, new LayerConfiguration(ix, blockState))
+					);
+				}
 			}
-		}
 
-		return Holder.direct(Biome.BiomeBuilder.from(biome).generationSettings(builder.build()).build());
+			return builder.build();
+		}
 	}
 
 	public Optional<HolderSet<StructureSet>> structureOverrides() {
@@ -194,7 +197,7 @@ public class FlatLevelGeneratorSettings {
 			registry2.getHolderOrThrow(BuiltinStructureSets.STRONGHOLDS), registry2.getHolderOrThrow(BuiltinStructureSets.VILLAGES)
 		);
 		FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(Optional.of(holderSet), registry);
-		flatLevelGeneratorSettings.biome = registry.getOrCreateHolder(Biomes.PLAINS);
+		flatLevelGeneratorSettings.biome = registry.getOrCreateHolderOrThrow(Biomes.PLAINS);
 		flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.BEDROCK));
 		flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(2, Blocks.DIRT));
 		flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.GRASS_BLOCK));

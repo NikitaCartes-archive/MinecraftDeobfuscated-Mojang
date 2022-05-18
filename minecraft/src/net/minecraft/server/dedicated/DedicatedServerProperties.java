@@ -85,7 +85,6 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final String textFilteringConfig = this.get("text-filtering-config", "");
 	public Optional<MinecraftServer.ServerResourcePackInfo> serverResourcePackInfo;
 	public final boolean previewsChat = this.get("previews-chat", false);
-	public final boolean testRainbowChat = this.get("test-rainbow-chat", false);
 	public final Settings<DedicatedServerProperties>.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
 	public final Settings<DedicatedServerProperties>.MutableValue<Boolean> whiteList = this.getMutable("white-list", false);
 	public final boolean enforceSecureProfile = this.get("enforce-secure-profile", false);

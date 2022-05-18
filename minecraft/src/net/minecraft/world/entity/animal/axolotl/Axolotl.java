@@ -89,7 +89,8 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		MemoryModuleType.TEMPTING_PLAYER,
 		MemoryModuleType.TEMPTATION_COOLDOWN_TICKS,
 		MemoryModuleType.IS_TEMPTED,
-		MemoryModuleType.HAS_HUNTING_COOLDOWN
+		MemoryModuleType.HAS_HUNTING_COOLDOWN,
+		MemoryModuleType.IS_PANICKING
 	);
 	private static final EntityDataAccessor<Integer> DATA_VARIANT = SynchedEntityData.defineId(Axolotl.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_PLAYING_DEAD = SynchedEntityData.defineId(Axolotl.class, EntityDataSerializers.BOOLEAN);

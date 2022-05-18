@@ -93,7 +93,7 @@ public class WorldGenSettings {
 
 	public static Registry<LevelStem> withOverworld(Registry<DimensionType> registry, Registry<LevelStem> registry2, ChunkGenerator chunkGenerator) {
 		LevelStem levelStem = registry2.get(LevelStem.OVERWORLD);
-		Holder<DimensionType> holder = levelStem == null ? registry.getOrCreateHolder(BuiltinDimensionTypes.OVERWORLD) : levelStem.typeHolder();
+		Holder<DimensionType> holder = levelStem == null ? registry.getOrCreateHolderOrThrow(BuiltinDimensionTypes.OVERWORLD) : levelStem.typeHolder();
 		return withOverworld(registry2, holder, chunkGenerator);
 	}
 

@@ -649,12 +649,19 @@ public abstract class LivingEntity extends Entity {
 		this.discardFriction = bl;
 	}
 
-	protected void equipEventAndSound(ItemStack itemStack, boolean bl) {
-		if (!itemStack.isEmpty() && !this.isSpectator()) {
-			if (bl) {
-				this.gameEvent(GameEvent.EQUIP);
-			}
+	protected boolean doesEmitEquipEvent(EquipmentSlot equipmentSlot) {
+		return true;
+	}
 
+	public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+		this.playEquipSound(itemStack);
+		if (this.doesEmitEquipEvent(equipmentSlot)) {
+			this.gameEvent(GameEvent.EQUIP);
+		}
+	}
+
+	protected void playEquipSound(ItemStack itemStack) {
+		if (!itemStack.isEmpty() && !this.isSpectator()) {
 			SoundEvent soundEvent = itemStack.getEquipSound();
 			if (soundEvent != null) {
 				this.playSound(soundEvent, 1.0F, 1.0F);
@@ -1269,7 +1276,6 @@ public abstract class LivingEntity extends Entity {
 				this.stopSleeping();
 			}
 
-			this.gameEvent(GameEvent.ENTITY_DIE);
 			if (!this.level.isClientSide && this.hasCustomName()) {
 				LOGGER.info("Named entity {} died: {}", this, this.getCombatTracker().getDeathMessage().getString());
 			}
@@ -1277,15 +1283,15 @@ public abstract class LivingEntity extends Entity {
 			this.dead = true;
 			this.getCombatTracker().recheckStatus();
 			if (this.level instanceof ServerLevel) {
-				if (entity != null) {
-					entity.killed((ServerLevel)this.level, this);
+				if (entity == null || entity.wasKilled((ServerLevel)this.level, this)) {
+					this.gameEvent(GameEvent.ENTITY_DIE);
+					this.dropAllDeathLoot(damageSource);
+					this.createWitherRose(livingEntity);
 				}
 
-				this.dropAllDeathLoot(damageSource);
-				this.createWitherRose(livingEntity);
+				this.level.broadcastEntityEvent(this, (byte)3);
 			}
 
-			this.level.broadcastEntityEvent(this, (byte)3);
 			this.setPose(Pose.DYING);
 		}
 	}
@@ -2875,6 +2881,7 @@ public abstract class LivingEntity extends Entity {
 			if (!this.level.isClientSide) {
 				this.setLivingEntityFlag(1, true);
 				this.setLivingEntityFlag(2, interactionHand == InteractionHand.OFF_HAND);
+				this.gameEvent(GameEvent.ITEM_INTERACT_START);
 			}
 		}
 	}
@@ -2980,7 +2987,11 @@ public abstract class LivingEntity extends Entity {
 
 	public void stopUsingItem() {
 		if (!this.level.isClientSide) {
+			boolean bl = this.isUsingItem();
 			this.setLivingEntityFlag(1, false);
+			if (bl) {
+				this.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+			}
 		}
 
 		this.useItem = ItemStack.EMPTY;

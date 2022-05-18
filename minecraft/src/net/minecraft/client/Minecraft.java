@@ -3,9 +3,7 @@ package net.minecraft.client;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Queues;
-import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
@@ -170,6 +168,7 @@ import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ProcessorChunkProgressListener;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
@@ -192,6 +191,7 @@ import net.minecraft.util.FrameTimer;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Unit;
 import net.minecraft.util.datafix.DataFixers;
@@ -293,7 +293,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final SplashManager splashManager;
 	private final GpuWarnlistManager gpuWarnlistManager;
 	private final PeriodicNotificationManager regionalCompliancies = new PeriodicNotificationManager(REGIONAL_COMPLIANCIES, Minecraft::countryEqualsISO3);
+	private final YggdrasilAuthenticationService authenticationService;
 	private final MinecraftSessionService minecraftSessionService;
+	private final SignatureValidator serviceSignatureValidator;
 	private final UserApiService userApiService;
 	private final SkinManager skinManager;
 	private final ModelManager modelManager;
@@ -384,9 +386,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT)
 		);
 		this.proxy = gameConfig.user.proxy;
-		YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
-		this.minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
-		this.userApiService = this.createUserApiService(yggdrasilAuthenticationService, gameConfig);
+		this.authenticationService = new YggdrasilAuthenticationService(this.proxy);
+		this.minecraftSessionService = this.authenticationService.createMinecraftSessionService();
+		this.userApiService = this.createUserApiService(this.authenticationService, gameConfig);
+		this.serviceSignatureValidator = SignatureValidator.from(this.authenticationService.getServicesKey());
 		this.user = gameConfig.user.user;
 		LOGGER.info("Setting user: {}", this.user.getName());
 		LOGGER.debug("(Session ID is {})", this.user.getSessionId());
@@ -441,8 +444,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
 				this.window.setIcon(inputStream, inputStream2);
 			}
-		} catch (IOException var9) {
-			LOGGER.error("Couldn't set icon", (Throwable)var9);
+		} catch (IOException var8) {
+			LOGGER.error("Couldn't set icon", (Throwable)var8);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit().get());
@@ -1873,25 +1876,18 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		try {
 			levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldStem.worldData());
-			YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
-			MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
-			GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
-			GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
-			gameProfileCache.setExecutor(this);
-			SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
+			Services services = Services.create(this.authenticationService, this.gameDirectory);
+			services.profileCache().setExecutor(this);
+			SkullBlockEntity.setup(services, this);
 			GameProfileCache.setUsesAuthentication(false);
-			this.singleplayerServer = MinecraftServer.spin(
-				thread -> new IntegratedServer(
-						thread, this, levelStorageAccess, packRepository, worldStem, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
-							StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
-							this.progressListener.set(storingChunkProgressListener);
-							return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
-						}
-					)
-			);
+			this.singleplayerServer = MinecraftServer.spin(thread -> new IntegratedServer(thread, this, levelStorageAccess, packRepository, worldStem, services, i -> {
+					StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
+					this.progressListener.set(storingChunkProgressListener);
+					return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
+				}));
 			this.isLocalServer = true;
-		} catch (Throwable var10) {
-			CrashReport crashReport = CrashReport.forThrowable(var10, "Starting integrated server");
+		} catch (Throwable var9) {
+			CrashReport crashReport = CrashReport.forThrowable(var9, "Starting integrated server");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
 			crashReportCategory.setDetail("Level ID", string);
 			crashReportCategory.setDetail("Level Name", (CrashReportDetail<String>)(() -> worldStem.worldData().getLevelName()));
@@ -1912,7 +1908,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			try {
 				Thread.sleep(16L);
-			} catch (InterruptedException var9) {
+			} catch (InterruptedException var8) {
 			}
 
 			if (this.delayedCrash != null) {
@@ -1938,12 +1934,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.level = clientLevel;
 		this.updateLevelInEngines(clientLevel);
 		if (!this.isLocalServer) {
-			AuthenticationService authenticationService = new YggdrasilAuthenticationService(this.proxy);
-			MinecraftSessionService minecraftSessionService = authenticationService.createMinecraftSessionService();
-			GameProfileRepository gameProfileRepository = authenticationService.createProfileRepository();
-			GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
-			gameProfileCache.setExecutor(this);
-			SkullBlockEntity.setup(gameProfileCache, minecraftSessionService, this);
+			Services services = Services.create(this.authenticationService, this.gameDirectory);
+			services.profileCache().setExecutor(this);
+			SkullBlockEntity.setup(services, this);
 			GameProfileCache.setUsesAuthentication(false);
 		}
 	}
@@ -2667,6 +2660,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public Realms32BitWarningStatus getRealms32BitWarningStatus() {
 		return this.realms32BitWarningStatus;
+	}
+
+	public SignatureValidator getServiceSignatureValidator() {
+		return this.serviceSignatureValidator;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -33,6 +33,7 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.FLUID_PICKUP,
 		GameEvent.FLUID_PLACE,
 		GameEvent.HIT_GROUND,
+		GameEvent.INSTRUMENT_PLAY,
 		GameEvent.ITEM_INTERACT_FINISH,
 		GameEvent.ITEM_INTERACT_START,
 		GameEvent.LIGHTNING_STRIKE,
@@ -57,7 +58,8 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.FLAP);
 		this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
 		this.tag(GameEventTags.WARDEN_CAN_LISTEN).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
-		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM);
+		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)
+			.add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM, GameEvent.ITEM_INTERACT_START, GameEvent.ITEM_INTERACT_FINISH);
 		this.tag(GameEventTags.ALLAY_CAN_LISTEN).add(GameEvent.NOTE_BLOCK_PLAY);
 	}
 }

@@ -1,6 +1,7 @@
 package net.minecraft.client.player;
 
 import com.mojang.authlib.GameProfile;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -12,7 +13,7 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 
 @Environment(EnvType.CLIENT)
 public class RemotePlayer extends AbstractClientPlayer {
-	public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile, ProfilePublicKey profilePublicKey) {
+	public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
 		super(clientLevel, gameProfile, profilePublicKey);
 		this.maxUpStep = 1.0F;
 		this.noPhysics = true;

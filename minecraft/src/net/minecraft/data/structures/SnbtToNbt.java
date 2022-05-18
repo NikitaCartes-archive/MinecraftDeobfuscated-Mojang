@@ -134,7 +134,7 @@ public class SnbtToNbt implements DataProvider {
 			Path path2 = DUMP_SNBT_TO.resolve(taskResult.name + ".snbt");
 
 			try {
-				NbtToSnbt.writeSnbt(path2, taskResult.snbtPayload);
+				NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, path2, taskResult.snbtPayload);
 			} catch (IOException var7) {
 				LOGGER.error("Couldn't write structure SNBT {} at {}", taskResult.name, path2, var7);
 			}

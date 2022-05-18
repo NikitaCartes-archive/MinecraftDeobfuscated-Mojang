@@ -5,13 +5,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.logging.LogUtils;
-import java.security.GeneralSecurityException;
-import java.security.Signature;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Map.Entry;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -64,6 +61,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Signer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -75,6 +73,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.ClickAction;
@@ -155,7 +154,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		boolean bl,
 		boolean bl2
 	) {
-		super(clientLevel, clientPacketListener.getLocalGameProfile(), minecraft.getProfileKeyPairManager().profilePublicKey());
+		super(clientLevel, clientPacketListener.getLocalGameProfile(), (ProfilePublicKey)minecraft.getProfileKeyPairManager().profilePublicKey().orElse(null));
 		this.minecraft = minecraft;
 		this.connection = clientPacketListener;
 		this.stats = statsCounter;
@@ -333,11 +332,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	private MessageSignature signMessage(MessageSigner messageSigner, Component component) {
 		try {
-			Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
-			if (signature != null) {
-				return messageSigner.sign(signature, component);
+			Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+			if (signer != null) {
+				return messageSigner.sign(signer, component);
 			}
-		} catch (GeneralSecurityException var4) {
+		} catch (Exception var4) {
 			LOGGER.error("Failed to sign chat message: '{}'", component.getString(), var4);
 		}
 
@@ -346,31 +345,33 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	private void sendCommand(MessageSigner messageSigner, String string, @Nullable Component component) {
 		ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, this.connection.getSuggestionsProvider());
-		ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults);
-		this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures));
+		ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults, component);
+		this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures, component != null));
 	}
 
-	private ArgumentSignatures signCommandArguments(MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults) {
+	private ArgumentSignatures signCommandArguments(
+		MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults, @Nullable Component component
+	) {
 		Map<String, Component> map = ArgumentSignatures.collectLastChildPlainSignableComponents(parseResults.getContext());
 		if (map.isEmpty()) {
 			return ArgumentSignatures.empty();
 		} else {
-			try {
-				Builder<String, byte[]> builder = ImmutableMap.builder();
-
-				for (Entry<String, Component> entry : map.entrySet()) {
-					Signature signature = this.minecraft.getProfileKeyPairManager().createSignature();
-					if (signature != null) {
-						Component component = (Component)entry.getValue();
-						MessageSignature messageSignature = messageSigner.sign(signature, component);
-						builder.put((String)entry.getKey(), messageSignature.saltSignature().signature());
-					}
-				}
-
-				return new ArgumentSignatures(messageSigner.salt(), builder.build());
-			} catch (GeneralSecurityException var10) {
-				LOGGER.error("Failed to sign command arguments", (Throwable)var10);
+			Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+			if (signer == null) {
 				return ArgumentSignatures.empty();
+			} else {
+				try {
+					Builder<String, byte[]> builder = ImmutableMap.builder();
+					map.forEach((string, component2) -> {
+						Component component3 = component != null ? component : component2;
+						MessageSignature messageSignature = messageSigner.sign(signer, component3);
+						builder.put(string, messageSignature.saltSignature().signature());
+					});
+					return new ArgumentSignatures(messageSigner.salt(), builder.build());
+				} catch (Exception var7) {
+					LOGGER.error("Failed to sign command arguments", (Throwable)var7);
+					return ArgumentSignatures.empty();
+				}
 			}
 		}
 	}

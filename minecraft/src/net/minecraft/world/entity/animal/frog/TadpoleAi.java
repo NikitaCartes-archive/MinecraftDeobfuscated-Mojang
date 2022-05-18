@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
+import net.minecraft.world.entity.ai.behavior.FollowTemptation;
 import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
@@ -26,6 +27,7 @@ import net.minecraft.world.entity.schedule.Activity;
 public class TadpoleAi {
 	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING_IN_WATER = 0.5F;
+	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
 
 	protected static Brain<?> makeBrain(Brain<Tadpole> brain) {
 		initCoreActivity(brain);
@@ -51,8 +53,9 @@ public class TadpoleAi {
 			Activity.IDLE,
 			ImmutableList.of(
 				Pair.of(0, new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 6.0F), UniformInt.of(30, 60))),
+				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F)),
 				Pair.of(
-					1,
+					2,
 					new GateBehavior<>(
 						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT),
 						ImmutableSet.of(),

@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.placement;
 import com.mojang.serialization.Codec;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 
@@ -21,8 +22,8 @@ public class BiomeFilter extends PlacementFilter {
 	protected boolean shouldPlace(PlacementContext placementContext, RandomSource randomSource, BlockPos blockPos) {
 		PlacedFeature placedFeature = (PlacedFeature)placementContext.topFeature()
 			.orElseThrow(() -> new IllegalStateException("Tried to biome check an unregistered feature, or a feature that should not restrict the biome"));
-		Biome biome = placementContext.getLevel().getBiome(blockPos).value();
-		return biome.getGenerationSettings().hasFeature(placedFeature);
+		Holder<Biome> holder = placementContext.getLevel().getBiome(blockPos);
+		return placementContext.generator().getBiomeGenerationSettings(holder).hasFeature(placedFeature);
 	}
 
 	@Override
