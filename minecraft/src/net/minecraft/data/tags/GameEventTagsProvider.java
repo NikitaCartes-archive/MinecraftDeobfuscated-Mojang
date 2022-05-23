@@ -46,7 +46,8 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.SHEAR,
 		GameEvent.SPLASH,
 		GameEvent.STEP,
-		GameEvent.SWIM
+		GameEvent.SWIM,
+		GameEvent.TELEPORT
 	};
 
 	public GameEventTagsProvider(DataGenerator dataGenerator) {

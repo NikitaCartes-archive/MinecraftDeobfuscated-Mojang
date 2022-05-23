@@ -411,6 +411,26 @@ public class NoiseRouterData {
 		);
 	}
 
+	protected static NoiseRouter none() {
+		return new NoiseRouter(
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero()
+		);
+	}
+
 	private static DensityFunction splineWithBlending(DensityFunction densityFunction, DensityFunction densityFunction2) {
 		DensityFunction densityFunction3 = DensityFunctions.lerp(DensityFunctions.blendAlpha(), densityFunction2, densityFunction);
 		return DensityFunctions.flatCache(DensityFunctions.cache2d(densityFunction3));

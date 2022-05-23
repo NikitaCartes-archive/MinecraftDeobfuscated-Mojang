@@ -342,7 +342,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 				} else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
 					this.insertText(clickEvent.getValue(), true);
 				} else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-					this.minecraft.player.command(clickEvent.getValue());
+					String string2 = clickEvent.getValue();
+					if (string2.startsWith("/")) {
+						this.minecraft.player.command(string2.substring(1));
+					} else {
+						this.minecraft.player.chat(string2);
+					}
 				} else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
 					this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
 				} else {

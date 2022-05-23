@@ -53,7 +53,7 @@ public record VillagerProfession(
 	}
 
 	private static VillagerProfession register(String string, ResourceKey<PoiType> resourceKey, @Nullable SoundEvent soundEvent) {
-		return register(string, holder -> holder.is(resourceKey), PoiType.NONE, soundEvent);
+		return register(string, holder -> holder.is(resourceKey), holder -> holder.is(resourceKey), soundEvent);
 	}
 
 	private static VillagerProfession register(
@@ -65,7 +65,7 @@ public record VillagerProfession(
 	private static VillagerProfession register(
 		String string, ResourceKey<PoiType> resourceKey, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent
 	) {
-		return register(string, holder -> holder.is(resourceKey), PoiType.NONE, immutableSet, immutableSet2, soundEvent);
+		return register(string, holder -> holder.is(resourceKey), holder -> holder.is(resourceKey), immutableSet, immutableSet2, soundEvent);
 	}
 
 	private static VillagerProfession register(

@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -189,7 +190,9 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 						BlockPos blockPos2 = findTip(blockState, serverLevel, blockPos, 11, false);
 						if (blockPos2 != null) {
 							if (((PointedDripstoneBlock.FluidInfo)optional.get()).sourceState.is(Blocks.MUD) && fluid == Fluids.WATER) {
-								serverLevel.setBlockAndUpdate(((PointedDripstoneBlock.FluidInfo)optional.get()).pos, Blocks.CLAY.defaultBlockState());
+								BlockState blockState2 = Blocks.CLAY.defaultBlockState();
+								serverLevel.setBlockAndUpdate(((PointedDripstoneBlock.FluidInfo)optional.get()).pos, blockState2);
+								serverLevel.gameEvent(GameEvent.BLOCK_CHANGE, ((PointedDripstoneBlock.FluidInfo)optional.get()).pos, GameEvent.Context.of(blockState2));
 								serverLevel.levelEvent(1504, blockPos2, 0);
 							} else {
 								BlockPos blockPos3 = findFillableCauldronBelowStalactiteTip(serverLevel, blockPos2, fluid);
@@ -197,8 +200,8 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 									serverLevel.levelEvent(1504, blockPos2, 0);
 									int i = blockPos2.getY() - blockPos3.getY();
 									int j = 50 + i;
-									BlockState blockState2 = serverLevel.getBlockState(blockPos3);
-									serverLevel.scheduleTick(blockPos3, blockState2.getBlock(), j);
+									BlockState blockState3 = serverLevel.getBlockState(blockPos3);
+									serverLevel.scheduleTick(blockPos3, blockState3.getBlock(), j);
 								}
 							}
 						}

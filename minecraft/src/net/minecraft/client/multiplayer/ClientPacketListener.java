@@ -383,6 +383,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.setScreen(new ReceivingLevelScreen());
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.reducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.showDeathScreen());
+		this.minecraft.player.setLastDeathLocation(clientboundLoginPacket.lastDeathLocation());
 		this.minecraft.gameMode.setLocalMode(clientboundLoginPacket.gameType(), clientboundLoginPacket.previousGameType());
 		this.minecraft.options.setServerRenderDistance(clientboundLoginPacket.chunkRadius());
 		this.minecraft.options.broadcastOptions();
@@ -466,19 +467,23 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleAddPlayer(ClientboundAddPlayerPacket clientboundAddPlayerPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundAddPlayerPacket, this, this.minecraft);
-		double d = clientboundAddPlayerPacket.getX();
-		double e = clientboundAddPlayerPacket.getY();
-		double f = clientboundAddPlayerPacket.getZ();
-		float g = (float)(clientboundAddPlayerPacket.getyRot() * 360) / 256.0F;
-		float h = (float)(clientboundAddPlayerPacket.getxRot() * 360) / 256.0F;
-		int i = clientboundAddPlayerPacket.getEntityId();
 		PlayerInfo playerInfo = this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId());
-		RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, playerInfo.getProfile(), playerInfo.getProfilePublicKey());
-		remotePlayer.setId(i);
-		remotePlayer.syncPacketPositionCodec(d, e, f);
-		remotePlayer.absMoveTo(d, e, f, g, h);
-		remotePlayer.setOldPosAndRot();
-		this.level.addPlayer(i, remotePlayer);
+		if (playerInfo == null) {
+			LOGGER.warn("Server attempted to add player prior to sending player info (Player id {})", clientboundAddPlayerPacket.getPlayerId());
+		} else {
+			double d = clientboundAddPlayerPacket.getX();
+			double e = clientboundAddPlayerPacket.getY();
+			double f = clientboundAddPlayerPacket.getZ();
+			float g = (float)(clientboundAddPlayerPacket.getyRot() * 360) / 256.0F;
+			float h = (float)(clientboundAddPlayerPacket.getxRot() * 360) / 256.0F;
+			int i = clientboundAddPlayerPacket.getEntityId();
+			RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, playerInfo.getProfile(), playerInfo.getProfilePublicKey());
+			remotePlayer.setId(i);
+			remotePlayer.syncPacketPositionCodec(d, e, f);
+			remotePlayer.absMoveTo(d, e, f, g, h);
+			remotePlayer.setOldPosAndRot();
+			this.level.addPlayer(i, remotePlayer);
+		}
 	}
 
 	@Override
@@ -798,7 +803,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleSystemChat(ClientboundSystemChatPacket clientboundSystemChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSystemChatPacket, this, this.minecraft);
-		Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		Registry<ChatType> registry = this.registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
 		ChatType chatType = clientboundSystemChatPacket.resolveType(registry);
 		this.minecraft.gui.handleSystemChat(chatType, clientboundSystemChatPacket.content());
 	}
@@ -811,7 +816,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			LOGGER.warn("Received expired chat packet from {}", chatSender.name().getString());
 		}
 
-		Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		Registry<ChatType> registry = this.registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
 		ChatType chatType = clientboundPlayerChatPacket.resolveType(registry);
 		PlayerChatMessage playerChatMessage = clientboundPlayerChatPacket.getMessage();
 		this.handlePlayerChat(chatType, playerChatMessage, chatSender);
@@ -1024,6 +1029,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.gameMode.adjustPlayer(localPlayer2);
 		localPlayer2.setReducedDebugInfo(localPlayer.isReducedDebugInfo());
 		localPlayer2.setShowDeathScreen(localPlayer.shouldShowDeathScreen());
+		localPlayer2.setLastDeathLocation(clientboundRespawnPacket.getLastDeathLocation());
 		if (this.minecraft.screen instanceof DeathScreen) {
 			this.minecraft.setScreen(null);
 		}

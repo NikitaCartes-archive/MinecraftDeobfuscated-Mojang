@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class HoneycombItem extends Item {
 	public static final Supplier<BiMap<Block, Block>> WAXABLES = Suppliers.memoize(
@@ -57,6 +58,7 @@ public class HoneycombItem extends Item {
 
 			itemStack.shrink(1);
 			level.setBlock(blockPos, blockStatex, 11);
+			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockStatex));
 			level.levelEvent(player, 3003, blockPos, 0);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}).orElse(InteractionResult.PASS);

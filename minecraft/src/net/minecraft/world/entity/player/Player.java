@@ -139,9 +139,6 @@ public abstract class Player extends LivingEntity {
 	private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MAIN_HAND = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
-	protected static final EntityDataAccessor<Optional<GlobalPos>> DATA_LAST_DEATH_LOCATION = SynchedEntityData.defineId(
-		Player.class, EntityDataSerializers.OPTIONAL_GLOBAL_POS
-	);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_LEFT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_RIGHT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	private long timeEntitySatOnShoulder;
@@ -176,6 +173,7 @@ public abstract class Player extends LivingEntity {
 	private boolean reducedDebugInfo;
 	private ItemStack lastItemInMainHand = ItemStack.EMPTY;
 	private final ItemCooldowns cooldowns = this.createItemCooldowns();
+	private Optional<GlobalPos> lastDeathLocation = Optional.empty();
 	@Nullable
 	public FishingHook fishing;
 
@@ -221,7 +219,6 @@ public abstract class Player extends LivingEntity {
 		this.entityData.define(DATA_PLAYER_MAIN_HAND, (byte)1);
 		this.entityData.define(DATA_SHOULDER_LEFT, new CompoundTag());
 		this.entityData.define(DATA_SHOULDER_RIGHT, new CompoundTag());
-		this.entityData.define(DATA_LAST_DEATH_LOCATION, Optional.empty());
 	}
 
 	@Override
@@ -1778,14 +1775,12 @@ public abstract class Player extends LivingEntity {
 	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
 		this.verifyEquippedItem(itemStack);
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			this.inventory.items.set(this.inventory.selected, itemStack);
+			this.onEquipItem(equipmentSlot, this.inventory.items.set(this.inventory.selected, itemStack), itemStack);
 		} else if (equipmentSlot == EquipmentSlot.OFFHAND) {
-			this.inventory.offhand.set(0, itemStack);
+			this.onEquipItem(equipmentSlot, this.inventory.offhand.set(0, itemStack), itemStack);
 		} else if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
-			this.inventory.armor.set(equipmentSlot.getIndex(), itemStack);
+			this.onEquipItem(equipmentSlot, this.inventory.armor.set(equipmentSlot.getIndex(), itemStack), itemStack);
 		}
-
-		this.onEquipItem(equipmentSlot, itemStack);
 	}
 
 	public boolean addItem(ItemStack itemStack) {
@@ -2089,11 +2084,11 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public Optional<GlobalPos> getLastDeathLocation() {
-		return this.entityData.get(DATA_LAST_DEATH_LOCATION);
+		return this.lastDeathLocation;
 	}
 
 	public void setLastDeathLocation(Optional<GlobalPos> optional) {
-		this.entityData.set(DATA_LAST_DEATH_LOCATION, optional);
+		this.lastDeathLocation = optional;
 	}
 
 	public static enum BedSleepingProblem {

@@ -52,14 +52,13 @@ public class SculkCatalystBlockEntity extends BlockEntity implements GameEventLi
 					int i = livingEntity.getExperienceReward();
 					if (livingEntity.shouldDropExperience() && i > 0) {
 						this.sculkSpreader.addCursors(new BlockPos(message.source().relative(Direction.UP, 0.5)), i);
+						if (livingEntity.getLastHurtByMob() instanceof ServerPlayer serverPlayer) {
+							DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
+							CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, context.sourceEntity(), damageSource);
+						}
 					}
 
 					livingEntity.skipDropExperience();
-					if (livingEntity.getLastHurtByMob() instanceof ServerPlayer serverPlayer) {
-						DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
-						CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, context.sourceEntity(), damageSource);
-					}
-
 					SculkCatalystBlock.bloom(serverLevel, this.worldPosition, this.getBlockState(), serverLevel.getRandom());
 				}
 

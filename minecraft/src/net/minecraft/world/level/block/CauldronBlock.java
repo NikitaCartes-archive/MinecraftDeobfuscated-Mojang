@@ -36,10 +36,10 @@ public class CauldronBlock extends AbstractCauldronBlock {
 		if (shouldHandlePrecipitation(level, precipitation)) {
 			if (precipitation == Biome.Precipitation.RAIN) {
 				level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
-				level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
+				level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
 			} else if (precipitation == Biome.Precipitation.SNOW) {
 				level.setBlockAndUpdate(blockPos, Blocks.POWDER_SNOW_CAULDRON.defaultBlockState());
-				level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
+				level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
 			}
 		}
 	}
@@ -52,13 +52,15 @@ public class CauldronBlock extends AbstractCauldronBlock {
 	@Override
 	protected void receiveStalactiteDrip(BlockState blockState, Level level, BlockPos blockPos, Fluid fluid) {
 		if (fluid == Fluids.WATER) {
-			level.setBlockAndUpdate(blockPos, Blocks.WATER_CAULDRON.defaultBlockState());
+			BlockState blockState2 = Blocks.WATER_CAULDRON.defaultBlockState();
+			level.setBlockAndUpdate(blockPos, blockState2);
+			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState2));
 			level.levelEvent(1047, blockPos, 0);
-			level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 		} else if (fluid == Fluids.LAVA) {
-			level.setBlockAndUpdate(blockPos, Blocks.LAVA_CAULDRON.defaultBlockState());
+			BlockState blockState2 = Blocks.LAVA_CAULDRON.defaultBlockState();
+			level.setBlockAndUpdate(blockPos, blockState2);
+			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState2));
 			level.levelEvent(1046, blockPos, 0);
-			level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 		}
 	}
 }

@@ -164,4 +164,20 @@ public record NoiseGeneratorSettings(
 			true
 		);
 	}
+
+	public static NoiseGeneratorSettings dummy() {
+		return new NoiseGeneratorSettings(
+			NoiseSettings.OVERWORLD_NOISE_SETTINGS,
+			Blocks.STONE.defaultBlockState(),
+			Blocks.AIR.defaultBlockState(),
+			NoiseRouterData.none(),
+			SurfaceRuleData.air(),
+			List.of(),
+			63,
+			true,
+			false,
+			false,
+			false
+		);
+	}
 }

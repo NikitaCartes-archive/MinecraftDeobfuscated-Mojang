@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class HarvestFarmland extends Behavior<Villager> {
 	private static final int HARVEST_DURATION = 200;
@@ -116,16 +117,24 @@ public class HarvestFarmland extends Behavior<Villager> {
 						boolean bl = false;
 						if (!itemStack.isEmpty()) {
 							if (itemStack.is(Items.WHEAT_SEEDS)) {
-								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.WHEAT.defaultBlockState(), 3);
+								BlockState blockState2 = Blocks.WHEAT.defaultBlockState();
+								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
+								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
 								bl = true;
 							} else if (itemStack.is(Items.POTATO)) {
-								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.POTATOES.defaultBlockState(), 3);
+								BlockState blockState2 = Blocks.POTATOES.defaultBlockState();
+								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
+								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
 								bl = true;
 							} else if (itemStack.is(Items.CARROT)) {
-								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.CARROTS.defaultBlockState(), 3);
+								BlockState blockState2 = Blocks.CARROTS.defaultBlockState();
+								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
+								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
 								bl = true;
 							} else if (itemStack.is(Items.BEETROOT_SEEDS)) {
-								serverLevel.setBlock(this.aboveFarmlandPos, Blocks.BEETROOTS.defaultBlockState(), 3);
+								BlockState blockState2 = Blocks.BEETROOTS.defaultBlockState();
+								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
+								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
 								bl = true;
 							}
 						}

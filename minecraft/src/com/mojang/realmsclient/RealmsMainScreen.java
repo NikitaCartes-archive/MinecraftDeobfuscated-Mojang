@@ -522,8 +522,13 @@ public class RealmsMainScreen extends RealmsScreen {
 
 						try {
 							RealmsClient.CompatibleVersionResponse compatibleVersionResponse = realmsClient.clientCompatible();
-							RealmsMainScreen.realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen);
-							RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(RealmsMainScreen.realmsGenericErrorScreen));
+							if (compatibleVersionResponse != RealmsClient.CompatibleVersionResponse.COMPATIBLE) {
+								RealmsMainScreen.realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen);
+								RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(RealmsMainScreen.realmsGenericErrorScreen));
+								return;
+							}
+
+							RealmsMainScreen.this.checkParentalConsent();
 						} catch (RealmsServiceException var3) {
 							RealmsMainScreen.checkedClientCompatability = false;
 							RealmsMainScreen.LOGGER.error("Couldn't connect to realms", (Throwable)var3);
@@ -545,7 +550,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 	}
 
-	private void checkParentalConsent() {
+	void checkParentalConsent() {
 		(new Thread("MCO Compatability Checker #1") {
 				public void run() {
 					RealmsClient realmsClient = RealmsClient.create();

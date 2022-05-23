@@ -63,6 +63,7 @@ import net.minecraft.util.datafix.fixes.EntityCodSalmonFix;
 import net.minecraft.util.datafix.fixes.EntityCustomNameToComponentFix;
 import net.minecraft.util.datafix.fixes.EntityElderGuardianSplitFix;
 import net.minecraft.util.datafix.fixes.EntityEquipmentToArmorAndHandFix;
+import net.minecraft.util.datafix.fixes.EntityGoatMissingStateFix;
 import net.minecraft.util.datafix.fixes.EntityHealthFix;
 import net.minecraft.util.datafix.fixes.EntityHorseSaddleFix;
 import net.minecraft.util.datafix.fixes.EntityHorseSplitFix;
@@ -963,23 +964,25 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new BlendingDataFix(schema165));
 		Schema schema166 = dataFixerBuilder.addSchema(3090, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new EntityPaintingFieldsRenameFix(schema166));
-		Schema schema167 = dataFixerBuilder.addSchema(3094, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new GoatHornIdFix(schema167));
-		Schema schema168 = dataFixerBuilder.addSchema(3097, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new FilteredBooksFix(schema168));
-		dataFixerBuilder.addFixer(new FilteredSignsFix(schema168));
+		Schema schema167 = dataFixerBuilder.addSchema(3093, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new EntityGoatMissingStateFix(schema167));
+		Schema schema168 = dataFixerBuilder.addSchema(3094, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new GoatHornIdFix(schema168));
+		Schema schema169 = dataFixerBuilder.addSchema(3097, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new FilteredBooksFix(schema169));
+		dataFixerBuilder.addFixer(new FilteredSignsFix(schema169));
 		Map<String, String> map = Map.of("minecraft:british", "minecraft:british_shorthair");
-		dataFixerBuilder.addFixer(new VariantRenameFix(schema168, "Rename british shorthair", References.ENTITY, "minecraft:cat", map));
+		dataFixerBuilder.addFixer(new VariantRenameFix(schema169, "Rename british shorthair", References.ENTITY, "minecraft:cat", map));
 		dataFixerBuilder.addFixer(
 			new CriteriaRenameFix(
-				schema168,
+				schema169,
 				"Migrate cat variant advancement for british shorthair",
 				"minecraft:husbandry/complete_catalogue",
 				string -> (String)map.getOrDefault(string, string)
 			)
 		);
 		dataFixerBuilder.addFixer(
-			new PoiTypeRemoveFix(schema168, "Remove unpopulated villager PoI types", Set.of("minecraft:unemployed", "minecraft:nitwit")::contains)
+			new PoiTypeRemoveFix(schema169, "Remove unpopulated villager PoI types", Set.of("minecraft:unemployed", "minecraft:nitwit")::contains)
 		);
 	}
 

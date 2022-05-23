@@ -235,7 +235,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	public void tick() {
 		if (this.level instanceof ServerLevel serverLevel) {
 			this.dynamicGameEventListener.getListener().tick(serverLevel);
-			if (this.hasCustomName()) {
+			if (this.isPersistenceRequired() || this.requiresCustomPersistence()) {
 				WardenAi.setDigCooldown(this);
 			}
 		}
@@ -318,7 +318,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	private void clientDiggingParticles(AnimationState animationState) {
 		if ((float)animationState.getAccumulatedTime() < 4500.0F) {
 			RandomSource randomSource = this.getRandom();
-			BlockState blockState = this.level.getBlockState(this.blockPosition().below());
+			BlockState blockState = this.getBlockStateOn();
 			if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
 				for (int i = 0; i < 30; i++) {
 					double d = this.getX() + (double)Mth.randomBetween(randomSource, -0.7F, 0.7F);
@@ -492,8 +492,13 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	}
 
 	@Override
+	public boolean requiresCustomPersistence() {
+		return super.requiresCustomPersistence() || this.hasCustomName();
+	}
+
+	@Override
 	public boolean removeWhenFarAway(double d) {
-		return !this.isPersistenceRequired();
+		return false;
 	}
 
 	@Nullable
@@ -512,14 +517,13 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 			this.playSound(SoundEvents.WARDEN_AGITATED, 5.0F, 1.0F);
 		}
 
-		this.setPersistenceRequired();
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		boolean bl = super.hurt(damageSource, f);
-		if (!this.level.isClientSide && !this.isNoAi() && f > 0.0F) {
+		if (!this.level.isClientSide && !this.isNoAi()) {
 			Entity entity = damageSource.getEntity();
 			this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
 			if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty()

@@ -301,10 +301,14 @@ public class EnderMan extends Monster implements NeutralMob {
 		boolean bl = blockState.getMaterial().blocksMotion();
 		boolean bl2 = blockState.getFluidState().is(FluidTags.WATER);
 		if (bl && !bl2) {
+			Vec3 vec3 = this.position();
 			boolean bl3 = this.randomTeleport(d, e, f, true);
-			if (bl3 && !this.isSilent()) {
-				this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
-				this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+			if (bl3) {
+				this.level.gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(this));
+				if (!this.isSilent()) {
+					this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
+					this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+				}
 			}
 
 			return bl3;

@@ -53,6 +53,7 @@ public class BiomeTags {
 	public static final TagKey<Biome> HAS_RUINED_PORTAL_NETHER = create("has_structure/ruined_portal_nether");
 	public static final TagKey<Biome> HAS_END_CITY = create("has_structure/end_city");
 	public static final TagKey<Biome> REQUIRED_OCEAN_MONUMENT_SURROUNDING = create("required_ocean_monument_surrounding");
+	public static final TagKey<Biome> MINESHAFT_BLOCKING = create("mineshaft_blocking");
 	public static final TagKey<Biome> PLAYS_UNDERWATER_MUSIC = create("plays_underwater_music");
 	public static final TagKey<Biome> HAS_CLOSER_WATER_FOG = create("has_closer_water_fog");
 	public static final TagKey<Biome> WATER_ON_MAP_OUTLINES = create("water_on_map_outlines");

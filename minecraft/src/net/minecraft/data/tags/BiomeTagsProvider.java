@@ -70,6 +70,7 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.add(Biomes.DRIPSTONE_CAVES)
 			.add(Biomes.LUSH_CAVES);
 		this.tag(BiomeTags.HAS_MINESHAFT_MESA).addTag(BiomeTags.IS_BADLANDS);
+		this.tag(BiomeTags.MINESHAFT_BLOCKING).add(Biomes.DEEP_DARK);
 		this.tag(BiomeTags.HAS_OCEAN_MONUMENT).addTag(BiomeTags.IS_DEEP_OCEAN);
 		this.tag(BiomeTags.REQUIRED_OCEAN_MONUMENT_SURROUNDING).addTag(BiomeTags.IS_OCEAN).addTag(BiomeTags.IS_RIVER);
 		this.tag(BiomeTags.HAS_OCEAN_RUIN_COLD)

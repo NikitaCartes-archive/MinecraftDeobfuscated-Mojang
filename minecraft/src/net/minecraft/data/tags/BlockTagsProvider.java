@@ -1440,6 +1440,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.PACKED_ICE)
 			.add(Blocks.IRON_ORE)
 			.add(Blocks.COAL_ORE)
+			.add(Blocks.COPPER_ORE)
 			.add(Blocks.EMERALD_ORE);
 	}
 }

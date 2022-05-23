@@ -397,6 +397,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 						this.setAttachFace(direction);
 						this.playSound(SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
 						this.setPos((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5);
+						this.level.gameEvent(GameEvent.TELEPORT, blockPos, GameEvent.Context.of(this));
 						this.entityData.set(DATA_PEEK_ID, (byte)0);
 						this.setTarget(null);
 						return true;

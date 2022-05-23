@@ -189,7 +189,8 @@ public abstract class PlayerList {
 				bl2,
 				!bl,
 				serverLevel2.isDebug(),
-				serverLevel2.isFlat()
+				serverLevel2.isFlat(),
+				serverPlayer.getLastDeathLocation()
 			)
 		);
 		serverGamePacketListenerImpl.send(
@@ -501,7 +502,8 @@ public abstract class PlayerList {
 					serverPlayer2.gameMode.getPreviousGameModeForPlayer(),
 					serverPlayer2.getLevel().isDebug(),
 					serverPlayer2.getLevel().isFlat(),
-					bl
+					bl,
+					serverPlayer2.getLastDeathLocation()
 				)
 			);
 		serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.getYRot(), serverPlayer2.getXRot());

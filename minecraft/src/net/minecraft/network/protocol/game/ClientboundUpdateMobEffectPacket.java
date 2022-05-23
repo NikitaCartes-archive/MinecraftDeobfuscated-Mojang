@@ -8,6 +8,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacketListener> {
+	private static final short LONG_DURATION_THRESHOLD = 32767;
 	private static final int FLAG_AMBIENT = 1;
 	private static final int FLAG_VISIBLE = 2;
 	private static final int FLAG_SHOW_ICON = 4;
@@ -23,12 +24,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		this.entityId = i;
 		this.effect = mobEffectInstance.getEffect();
 		this.effectAmplifier = (byte)(mobEffectInstance.getAmplifier() & 0xFF);
-		if (mobEffectInstance.getDuration() > 32767) {
-			this.effectDurationTicks = 32767;
-		} else {
-			this.effectDurationTicks = mobEffectInstance.getDuration();
-		}
-
+		this.effectDurationTicks = mobEffectInstance.getDuration();
 		byte b = 0;
 		if (mobEffectInstance.isAmbient()) {
 			b = (byte)(b | 1);
@@ -68,7 +64,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 	}
 
 	public boolean isSuperLongDuration() {
-		return this.effectDurationTicks == 32767;
+		return this.effectDurationTicks >= 32767;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

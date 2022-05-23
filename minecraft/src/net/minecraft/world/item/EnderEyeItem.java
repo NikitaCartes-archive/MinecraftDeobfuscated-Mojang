@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EndPortalFrameBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -76,6 +77,7 @@ public class EnderEyeItem extends Item {
 					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
 					eyeOfEnder.setItem(itemStack);
 					eyeOfEnder.signalTo(blockPos);
+					level.gameEvent(GameEvent.PROJECTILE_SHOOT, eyeOfEnder.position(), GameEvent.Context.of(player));
 					level.addFreshEntity(eyeOfEnder);
 					if (player instanceof ServerPlayer) {
 						CriteriaTriggers.USED_ENDER_EYE.trigger((ServerPlayer)player, blockPos);

@@ -56,8 +56,9 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 			this.addSlot(new Slot(inventory, 39 - i, 8, 8 + i * 18) {
 				@Override
 				public void set(ItemStack itemStack) {
+					ItemStack itemStack2 = this.getItem();
 					super.set(itemStack);
-					player.onEquipItem(equipmentSlot, itemStack);
+					player.onEquipItem(equipmentSlot, itemStack2, itemStack);
 				}
 
 				@Override

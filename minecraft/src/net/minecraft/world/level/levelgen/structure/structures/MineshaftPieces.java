@@ -10,7 +10,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FallingBlock;
@@ -941,18 +939,15 @@ public class MineshaftPieces {
 
 	abstract static class MineShaftPiece extends StructurePiece {
 		protected MineshaftStructure.Type type;
-		private final TagKey<Biome> biomeTag;
 
 		public MineShaftPiece(StructurePieceType structurePieceType, int i, MineshaftStructure.Type type, BoundingBox boundingBox) {
 			super(structurePieceType, i, boundingBox);
 			this.type = type;
-			this.biomeTag = type == MineshaftStructure.Type.MESA ? BiomeTags.HAS_MINESHAFT_MESA : BiomeTags.HAS_MINESHAFT;
 		}
 
 		public MineShaftPiece(StructurePieceType structurePieceType, CompoundTag compoundTag) {
 			super(structurePieceType, compoundTag);
 			this.type = MineshaftStructure.Type.byId(compoundTag.getInt("MST"));
-			this.biomeTag = this.type == MineshaftStructure.Type.MESA ? BiomeTags.HAS_MINESHAFT_MESA : BiomeTags.HAS_MINESHAFT;
 		}
 
 		@Override
@@ -987,7 +982,7 @@ public class MineshaftPieces {
 			int m = Math.min(this.boundingBox.maxY() + 1, boundingBox.maxY());
 			int n = Math.min(this.boundingBox.maxZ() + 1, boundingBox.maxZ());
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos((i + l) / 2, (j + m) / 2, (k + n) / 2);
-			if (!levelAccessor.getBiome(mutableBlockPos).is(this.biomeTag)) {
+			if (levelAccessor.getBiome(mutableBlockPos).is(BiomeTags.MINESHAFT_BLOCKING)) {
 				return true;
 			} else {
 				for (int o = i; o <= l; o++) {

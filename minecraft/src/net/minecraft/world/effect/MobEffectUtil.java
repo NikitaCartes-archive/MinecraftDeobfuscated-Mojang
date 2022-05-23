@@ -48,6 +48,7 @@ public final class MobEffectUtil {
 		MobEffect mobEffect = mobEffectInstance.getEffect();
 		List<ServerPlayer> list = serverLevel.getPlayers(
 			serverPlayer -> serverPlayer.gameMode.isSurvival()
+					&& (entity == null || !entity.isAlliedTo(serverPlayer))
 					&& vec3.closerThan(serverPlayer.position(), d)
 					&& (
 						!serverPlayer.hasEffect(mobEffect)

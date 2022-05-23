@@ -1,6 +1,8 @@
 package net.minecraft.network.protocol.game;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -19,6 +21,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	private final boolean isDebug;
 	private final boolean isFlat;
 	private final boolean keepAllPlayerData;
+	private final Optional<GlobalPos> lastDeathLocation;
 
 	public ClientboundRespawnPacket(
 		ResourceKey<DimensionType> resourceKey,
@@ -28,7 +31,8 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		@Nullable GameType gameType2,
 		boolean bl,
 		boolean bl2,
-		boolean bl3
+		boolean bl3,
+		Optional<GlobalPos> optional
 	) {
 		this.dimensionType = resourceKey;
 		this.dimension = resourceKey2;
@@ -38,6 +42,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		this.isDebug = bl;
 		this.isFlat = bl2;
 		this.keepAllPlayerData = bl3;
+		this.lastDeathLocation = optional;
 	}
 
 	public ClientboundRespawnPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -49,6 +54,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		this.isDebug = friendlyByteBuf.readBoolean();
 		this.isFlat = friendlyByteBuf.readBoolean();
 		this.keepAllPlayerData = friendlyByteBuf.readBoolean();
+		this.lastDeathLocation = friendlyByteBuf.readOptional(FriendlyByteBuf::readGlobalPos);
 	}
 
 	@Override
@@ -61,6 +67,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		friendlyByteBuf.writeBoolean(this.isDebug);
 		friendlyByteBuf.writeBoolean(this.isFlat);
 		friendlyByteBuf.writeBoolean(this.keepAllPlayerData);
+		friendlyByteBuf.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -98,5 +105,9 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 
 	public boolean shouldKeepAllPlayerData() {
 		return this.keepAllPlayerData;
+	}
+
+	public Optional<GlobalPos> getLastDeathLocation() {
+		return this.lastDeathLocation;
 	}
 }
