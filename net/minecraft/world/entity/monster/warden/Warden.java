@@ -245,7 +245,7 @@ implements VibrationListener.VibrationListenerConfig {
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
             this.dynamicGameEventListener.getListener().tick(serverLevel);
-            if (this.hasCustomName()) {
+            if (this.isPersistenceRequired() || this.requiresCustomPersistence()) {
                 WardenAi.setDigCooldown(this);
             }
         }
@@ -324,7 +324,7 @@ implements VibrationListener.VibrationListenerConfig {
     private void clientDiggingParticles(AnimationState animationState) {
         if ((float)animationState.getAccumulatedTime() < 4500.0f) {
             RandomSource randomSource = this.getRandom();
-            BlockState blockState = this.level.getBlockState(this.blockPosition().below());
+            BlockState blockState = this.getBlockStateOn();
             if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
                 for (int i = 0; i < 30; ++i) {
                     double d = this.getX() + (double)Mth.randomBetween(randomSource, -0.7f, 0.7f);
@@ -495,8 +495,13 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
+    public boolean requiresCustomPersistence() {
+        return super.requiresCustomPersistence() || this.hasCustomName();
+    }
+
+    @Override
     public boolean removeWhenFarAway(double d) {
-        return !this.isPersistenceRequired();
+        return false;
     }
 
     @Override
@@ -508,14 +513,13 @@ implements VibrationListener.VibrationListenerConfig {
             this.getBrain().setMemoryWithExpiry(MemoryModuleType.IS_EMERGING, Unit.INSTANCE, WardenAi.EMERGE_DURATION);
             this.playSound(SoundEvents.WARDEN_AGITATED, 5.0f, 1.0f);
         }
-        this.setPersistenceRequired();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         boolean bl = super.hurt(damageSource, f);
-        if (!this.level.isClientSide && !this.isNoAi() && f > 0.0f) {
+        if (!this.level.isClientSide && !this.isNoAi()) {
             Entity entity = damageSource.getEntity();
             this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
             if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {

@@ -27,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class HoeItem
 extends DiggerItem {
@@ -61,12 +62,16 @@ extends DiggerItem {
     }
 
     public static Consumer<UseOnContext> changeIntoState(BlockState blockState) {
-        return useOnContext -> useOnContext.getLevel().setBlock(useOnContext.getClickedPos(), blockState, 11);
+        return useOnContext -> {
+            useOnContext.getLevel().setBlock(useOnContext.getClickedPos(), blockState, 11);
+            useOnContext.getLevel().gameEvent(GameEvent.BLOCK_CHANGE, useOnContext.getClickedPos(), GameEvent.Context.of(useOnContext.getPlayer(), blockState));
+        };
     }
 
     public static Consumer<UseOnContext> changeIntoStateAndDropItem(BlockState blockState, ItemLike itemLike) {
         return useOnContext -> {
             useOnContext.getLevel().setBlock(useOnContext.getClickedPos(), blockState, 11);
+            useOnContext.getLevel().gameEvent(GameEvent.BLOCK_CHANGE, useOnContext.getClickedPos(), GameEvent.Context.of(useOnContext.getPlayer(), blockState));
             Block.popResourceFromFace(useOnContext.getLevel(), useOnContext.getClickedPos(), useOnContext.getClickedFace(), new ItemStack(itemLike));
         };
     }

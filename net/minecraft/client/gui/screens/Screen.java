@@ -306,7 +306,7 @@ implements Widget {
                 this.insertText(style.getInsertion(), false);
             }
         } else if (clickEvent != null) {
-            block21: {
+            block23: {
                 if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
                     if (!this.minecraft.options.chatLinks().get().booleanValue()) {
                         return false;
@@ -323,7 +323,7 @@ implements Widget {
                         if (this.minecraft.options.chatLinksPrompt().get().booleanValue()) {
                             this.clickedLink = uRI;
                             this.minecraft.setScreen(new ConfirmLinkScreen(this::confirmLink, clickEvent.getValue(), false));
-                            break block21;
+                            break block23;
                         }
                         this.openLink(uRI);
                     } catch (URISyntaxException uRISyntaxException) {
@@ -335,7 +335,12 @@ implements Widget {
                 } else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
                     this.insertText(clickEvent.getValue(), true);
                 } else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-                    this.minecraft.player.command(clickEvent.getValue());
+                    String string2 = clickEvent.getValue();
+                    if (string2.startsWith("/")) {
+                        this.minecraft.player.command(string2.substring(1));
+                    } else {
+                        this.minecraft.player.chat(string2);
+                    }
                 } else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
                     this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
                 } else {

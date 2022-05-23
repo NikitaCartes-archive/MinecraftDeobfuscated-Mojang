@@ -281,6 +281,10 @@ public class NoiseRouterData {
         return new NoiseRouter(DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), densityFunction, DensityFunctions.zero(), DensityFunctions.zero(), NoiseRouterData.slideEnd(DensityFunctions.add(densityFunction, DensityFunctions.constant(-0.703125))), densityFunction2, DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
     }
 
+    protected static NoiseRouter none() {
+        return new NoiseRouter(DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero(), DensityFunctions.zero());
+    }
+
     private static DensityFunction splineWithBlending(DensityFunction densityFunction, DensityFunction densityFunction2) {
         DensityFunction densityFunction3 = DensityFunctions.lerp(DensityFunctions.blendAlpha(), densityFunction2, densityFunction);
         return DensityFunctions.flatCache(DensityFunctions.cache2d(densityFunction3));

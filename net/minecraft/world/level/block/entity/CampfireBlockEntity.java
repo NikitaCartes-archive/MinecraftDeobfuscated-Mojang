@@ -18,6 +18,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -27,6 +28,8 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class CampfireBlockEntity
 extends BlockEntity
@@ -56,6 +59,7 @@ implements Clearable {
             Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack2);
             campfireBlockEntity.items.set(i, ItemStack.EMPTY);
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState));
         }
         if (bl) {
             CampfireBlockEntity.setChanged(level, blockPos, blockState);
@@ -142,13 +146,14 @@ implements Clearable {
         return this.quickCheck.getRecipeFor(new SimpleContainer(itemStack), this.level);
     }
 
-    public boolean placeFood(ItemStack itemStack, int i) {
+    public boolean placeFood(@Nullable Entity entity, ItemStack itemStack, int i) {
         for (int j = 0; j < this.items.size(); ++j) {
             ItemStack itemStack2 = this.items.get(j);
             if (!itemStack2.isEmpty()) continue;
             this.cookingTime[j] = i;
             this.cookingProgress[j] = 0;
             this.items.set(j, itemStack.split(1));
+            this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.getBlockPos(), GameEvent.Context.of(entity, this.getBlockState()));
             this.markUpdated();
             return true;
         }

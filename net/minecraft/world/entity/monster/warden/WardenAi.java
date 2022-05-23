@@ -32,6 +32,7 @@ import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.behavior.warden.Digging;
 import net.minecraft.world.entity.ai.behavior.warden.Emerging;
+import net.minecraft.world.entity.ai.behavior.warden.ForceUnmount;
 import net.minecraft.world.entity.ai.behavior.warden.Roar;
 import net.minecraft.world.entity.ai.behavior.warden.SetRoarTarget;
 import net.minecraft.world.entity.ai.behavior.warden.SetWardenLookTarget;
@@ -96,7 +97,7 @@ public class WardenAi {
     }
 
     private static void initDiggingActivity(Brain<Warden> brain) {
-        brain.addActivityWithConditions(Activity.DIG, ImmutableList.of(Pair.of(0, new Digging(DIGGING_DURATION))), ImmutableSet.of(Pair.of(MemoryModuleType.ROAR_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.DIG_COOLDOWN, MemoryStatus.VALUE_ABSENT)));
+        brain.addActivityWithConditions(Activity.DIG, ImmutableList.of(Pair.of(0, new ForceUnmount()), Pair.of(1, new Digging(DIGGING_DURATION))), ImmutableSet.of(Pair.of(MemoryModuleType.ROAR_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.DIG_COOLDOWN, MemoryStatus.VALUE_ABSENT)));
     }
 
     private static void initIdleActivity(Brain<Warden> brain) {

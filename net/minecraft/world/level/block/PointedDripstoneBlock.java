@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -200,7 +201,9 @@ SimpleWaterloggedBlock {
             return;
         }
         if (optional.get().sourceState.is(Blocks.MUD) && fluid == Fluids.WATER) {
-            serverLevel.setBlockAndUpdate(optional.get().pos, Blocks.CLAY.defaultBlockState());
+            BlockState blockState2 = Blocks.CLAY.defaultBlockState();
+            serverLevel.setBlockAndUpdate(optional.get().pos, blockState2);
+            serverLevel.gameEvent(GameEvent.BLOCK_CHANGE, optional.get().pos, GameEvent.Context.of(blockState2));
             serverLevel.levelEvent(1504, blockPos2, 0);
             return;
         }
@@ -211,8 +214,8 @@ SimpleWaterloggedBlock {
         serverLevel.levelEvent(1504, blockPos2, 0);
         int i = blockPos2.getY() - blockPos3.getY();
         int j = 50 + i;
-        BlockState blockState2 = serverLevel.getBlockState(blockPos3);
-        serverLevel.scheduleTick(blockPos3, blockState2.getBlock(), j);
+        BlockState blockState3 = serverLevel.getBlockState(blockPos3);
+        serverLevel.scheduleTick(blockPos3, blockState3.getBlock(), j);
     }
 
     @Override

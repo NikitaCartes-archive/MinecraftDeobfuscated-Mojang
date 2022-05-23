@@ -47,7 +47,7 @@ extends Item {
         }
         ItemStack itemStack = useOnContext.getItemInHand();
         if (!level.isClientSide) {
-            ((JukeboxBlock)Blocks.JUKEBOX).setRecord(level, blockPos, blockState, itemStack);
+            ((JukeboxBlock)Blocks.JUKEBOX).setRecord(useOnContext.getPlayer(), level, blockPos, blockState, itemStack);
             level.levelEvent(null, 1010, blockPos, Item.getId(this));
             itemStack.shrink(1);
             Player player = useOnContext.getPlayer();

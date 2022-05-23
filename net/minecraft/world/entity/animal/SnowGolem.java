@@ -116,6 +116,7 @@ RangedAttackMob {
                 BlockPos blockPos2 = new BlockPos(i, j = Mth.floor(this.getY()), k = Mth.floor(this.getZ() + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25f)));
                 if (!this.level.getBlockState(blockPos2).isAir() || !blockState.canSurvive(this.level, blockPos2)) continue;
                 this.level.setBlockAndUpdate(blockPos2, blockState);
+                this.level.gameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Context.of(this, blockState));
             }
         }
     }

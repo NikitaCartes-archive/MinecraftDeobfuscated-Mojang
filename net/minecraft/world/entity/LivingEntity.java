@@ -612,8 +612,15 @@ extends Entity {
         return true;
     }
 
-    public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack) {
-        this.playEquipSound(itemStack);
+    public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack, ItemStack itemStack2) {
+        boolean bl;
+        boolean bl2 = bl = itemStack2.isEmpty() && itemStack.isEmpty();
+        if (bl || ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
+            return;
+        }
+        if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
+            this.playEquipSound(itemStack2);
+        }
         if (this.doesEmitEquipEvent(equipmentSlot)) {
             this.gameEvent(GameEvent.EQUIP);
         }

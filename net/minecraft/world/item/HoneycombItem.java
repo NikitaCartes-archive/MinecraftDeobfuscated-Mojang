@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class HoneycombItem
 extends Item {
@@ -43,6 +44,7 @@ extends Item {
             }
             itemStack.shrink(1);
             level.setBlock(blockPos, (BlockState)blockState, 11);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
             level.levelEvent(player, 3003, blockPos, 0);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }).orElse(InteractionResult.PASS);

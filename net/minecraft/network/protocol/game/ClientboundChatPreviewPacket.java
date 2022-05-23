@@ -22,6 +22,11 @@ public record ClientboundChatPreviewPacket(int queryId, @Nullable Component prev
     }
 
     @Override
+    public boolean isSkippable() {
+        return true;
+    }
+
+    @Override
     public void handle(ClientGamePacketListener clientGamePacketListener) {
         clientGamePacketListener.handleChatPreview(this);
     }

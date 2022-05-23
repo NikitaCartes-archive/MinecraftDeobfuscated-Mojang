@@ -47,7 +47,7 @@ public final class MobEffectUtil {
 
     public static List<ServerPlayer> addEffectToPlayersAround(ServerLevel serverLevel, @Nullable Entity entity, Vec3 vec3, double d, MobEffectInstance mobEffectInstance, int i) {
         MobEffect mobEffect = mobEffectInstance.getEffect();
-        List<ServerPlayer> list = serverLevel.getPlayers(serverPlayer -> serverPlayer.gameMode.isSurvival() && vec3.closerThan(serverPlayer.position(), d) && (!serverPlayer.hasEffect(mobEffect) || serverPlayer.getEffect(mobEffect).getAmplifier() < mobEffectInstance.getAmplifier() || serverPlayer.getEffect(mobEffect).getDuration() < i));
+        List<ServerPlayer> list = serverLevel.getPlayers(serverPlayer -> !(!serverPlayer.gameMode.isSurvival() || entity != null && entity.isAlliedTo((Entity)serverPlayer) || !vec3.closerThan(serverPlayer.position(), d) || serverPlayer.hasEffect(mobEffect) && serverPlayer.getEffect(mobEffect).getAmplifier() >= mobEffectInstance.getAmplifier() && serverPlayer.getEffect(mobEffect).getDuration() >= i));
         list.forEach(serverPlayer -> serverPlayer.addEffect(new MobEffectInstance(mobEffectInstance), entity));
         return list;
     }

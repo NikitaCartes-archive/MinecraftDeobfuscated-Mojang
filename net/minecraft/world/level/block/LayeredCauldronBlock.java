@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
@@ -71,7 +72,9 @@ extends AbstractCauldronBlock {
 
     public static void lowerFillLevel(BlockState blockState, Level level, BlockPos blockPos) {
         int i = blockState.getValue(LEVEL) - 1;
-        level.setBlockAndUpdate(blockPos, i == 0 ? Blocks.CAULDRON.defaultBlockState() : (BlockState)blockState.setValue(LEVEL, i));
+        BlockState blockState2 = i == 0 ? Blocks.CAULDRON.defaultBlockState() : (BlockState)blockState.setValue(LEVEL, i);
+        level.setBlockAndUpdate(blockPos, blockState2);
+        level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState2));
     }
 
     @Override
@@ -79,7 +82,9 @@ extends AbstractCauldronBlock {
         if (!CauldronBlock.shouldHandlePrecipitation(level, precipitation) || blockState.getValue(LEVEL) == 3 || !this.fillPredicate.test(precipitation)) {
             return;
         }
-        level.setBlockAndUpdate(blockPos, (BlockState)blockState.cycle(LEVEL));
+        BlockState blockState2 = (BlockState)blockState.cycle(LEVEL);
+        level.setBlockAndUpdate(blockPos, blockState2);
+        level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState2));
     }
 
     @Override
@@ -97,7 +102,9 @@ extends AbstractCauldronBlock {
         if (this.isFull(blockState)) {
             return;
         }
-        level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(LEVEL, blockState.getValue(LEVEL) + 1));
+        BlockState blockState2 = (BlockState)blockState.setValue(LEVEL, blockState.getValue(LEVEL) + 1);
+        level.setBlockAndUpdate(blockPos, blockState2);
+        level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState2));
         level.levelEvent(1047, blockPos, 0);
     }
 }

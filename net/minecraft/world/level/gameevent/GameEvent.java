@@ -56,6 +56,7 @@ public class GameEvent {
     public static final GameEvent SPLASH = GameEvent.register("splash");
     public static final GameEvent STEP = GameEvent.register("step");
     public static final GameEvent SWIM = GameEvent.register("swim");
+    public static final GameEvent TELEPORT = GameEvent.register("teleport");
     public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
     private final String name;
     private final int notificationRadius;

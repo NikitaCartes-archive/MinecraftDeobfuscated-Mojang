@@ -22,23 +22,30 @@ extends Behavior<E> {
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, E warden, long l) {
-        return true;
+        return ((Entity)warden).getRemovalReason() == null;
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E warden) {
-        return ((Entity)warden).isOnGround();
+        return ((Entity)warden).isOnGround() || ((Entity)warden).isInWater() || ((Entity)warden).isInLava();
     }
 
     @Override
     protected void start(ServerLevel serverLevel, E warden, long l) {
-        ((Entity)warden).setPose(Pose.DIGGING);
-        ((Entity)warden).playSound(SoundEvents.WARDEN_DIG, 5.0f, 1.0f);
+        if (((Entity)warden).isOnGround()) {
+            ((Entity)warden).setPose(Pose.DIGGING);
+            ((Entity)warden).playSound(SoundEvents.WARDEN_DIG, 5.0f, 1.0f);
+        } else {
+            ((Entity)warden).playSound(SoundEvents.WARDEN_AGITATED, 5.0f, 1.0f);
+            this.stop(serverLevel, warden, l);
+        }
     }
 
     @Override
     protected void stop(ServerLevel serverLevel, E warden, long l) {
-        ((Entity)warden).remove(Entity.RemovalReason.DISCARDED);
+        if (((Entity)warden).getRemovalReason() == null) {
+            ((Entity)warden).remove(Entity.RemovalReason.DISCARDED);
+        }
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundUpdateMobEffectPacket
 implements Packet<ClientGamePacketListener> {
+    private static final short LONG_DURATION_THRESHOLD = Short.MAX_VALUE;
     private static final int FLAG_AMBIENT = 1;
     private static final int FLAG_VISIBLE = 2;
     private static final int FLAG_SHOW_ICON = 4;
@@ -28,7 +29,7 @@ implements Packet<ClientGamePacketListener> {
         this.entityId = i;
         this.effect = mobEffectInstance.getEffect();
         this.effectAmplifier = (byte)(mobEffectInstance.getAmplifier() & 0xFF);
-        this.effectDurationTicks = mobEffectInstance.getDuration() > Short.MAX_VALUE ? Short.MAX_VALUE : mobEffectInstance.getDuration();
+        this.effectDurationTicks = mobEffectInstance.getDuration();
         byte b = 0;
         if (mobEffectInstance.isAmbient()) {
             b = (byte)(b | 1);
@@ -63,7 +64,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public boolean isSuperLongDuration() {
-        return this.effectDurationTicks == Short.MAX_VALUE;
+        return this.effectDurationTicks >= Short.MAX_VALUE;
     }
 
     @Override

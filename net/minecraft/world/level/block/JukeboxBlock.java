@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,18 +55,20 @@ extends BaseEntityBlock {
             this.dropRecording(level, blockPos);
             blockState = (BlockState)blockState.setValue(HAS_RECORD, false);
             level.setBlock(blockPos, blockState, 2);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }
 
-    public void setRecord(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+    public void setRecord(@Nullable Entity entity, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
         BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
         if (!(blockEntity instanceof JukeboxBlockEntity)) {
             return;
         }
         ((JukeboxBlockEntity)blockEntity).setRecord(itemStack.copy());
         levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(HAS_RECORD, true), 2);
+        levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState));
     }
 
     private void dropRecording(Level level, BlockPos blockPos) {

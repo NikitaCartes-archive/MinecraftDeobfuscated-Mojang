@@ -59,6 +59,7 @@ implements SimpleWaterloggedBlock {
         object2IntOpenHashMap.put(GameEvent.SWIM, 3);
         object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
         object2IntOpenHashMap.put(GameEvent.HIT_GROUND, 5);
+        object2IntOpenHashMap.put(GameEvent.TELEPORT, 5);
         object2IntOpenHashMap.put(GameEvent.SPLASH, 6);
         object2IntOpenHashMap.put(GameEvent.ENTITY_SHAKE, 6);
         object2IntOpenHashMap.put(GameEvent.BLOCK_CHANGE, 6);

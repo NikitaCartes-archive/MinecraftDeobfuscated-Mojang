@@ -64,14 +64,14 @@ implements GameEventListener {
                 int i = livingEntity.getExperienceReward();
                 if (livingEntity.shouldDropExperience() && i > 0) {
                     this.sculkSpreader.addCursors(new BlockPos(message.source().relative(Direction.UP, 0.5)), i);
+                    LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
+                    if (livingEntity2 instanceof ServerPlayer) {
+                        ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
+                        DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
+                        CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, context.sourceEntity(), damageSource);
+                    }
                 }
                 livingEntity.skipDropExperience();
-                LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
-                if (livingEntity2 instanceof ServerPlayer) {
-                    ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
-                    DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
-                    CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, context.sourceEntity(), damageSource);
-                }
                 SculkCatalystBlock.bloom(serverLevel, this.worldPosition, this.getBlockState(), serverLevel.getRandom());
             }
             return true;

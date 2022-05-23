@@ -284,10 +284,14 @@ implements NeutralMob {
         if (!bl || bl2) {
             return false;
         }
+        Vec3 vec3 = this.position();
         boolean bl3 = this.randomTeleport(d, e, f, true);
-        if (bl3 && !this.isSilent()) {
-            this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0f, 1.0f);
-            this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0f, 1.0f);
+        if (bl3) {
+            this.level.gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(this));
+            if (!this.isSilent()) {
+                this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0f, 1.0f);
+                this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0f, 1.0f);
+            }
         }
         return bl3;
     }

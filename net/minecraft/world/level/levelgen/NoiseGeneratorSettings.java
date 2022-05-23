@@ -87,5 +87,9 @@ public record NoiseGeneratorSettings(NoiseSettings noiseSettings, BlockState def
     private static NoiseGeneratorSettings floatingIslands() {
         return new NoiseGeneratorSettings(NoiseSettings.FLOATING_ISLANDS_NOISE_SETTINGS, Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), NoiseRouterData.floatingIslands(BuiltinRegistries.DENSITY_FUNCTION), SurfaceRuleData.overworldLike(false, false, false), List.of(), -64, false, false, false, true);
     }
+
+    public static NoiseGeneratorSettings dummy() {
+        return new NoiseGeneratorSettings(NoiseSettings.OVERWORLD_NOISE_SETTINGS, Blocks.STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), NoiseRouterData.none(), SurfaceRuleData.air(), List.of(), 63, true, false, false, false);
+    }
 }
 

@@ -3,6 +3,8 @@
  */
 package net.minecraft.network.protocol.game;
 
+import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -24,8 +26,9 @@ implements Packet<ClientGamePacketListener> {
     private final boolean isDebug;
     private final boolean isFlat;
     private final boolean keepAllPlayerData;
+    private final Optional<GlobalPos> lastDeathLocation;
 
-    public ClientboundRespawnPacket(ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, long l, GameType gameType, @Nullable GameType gameType2, boolean bl, boolean bl2, boolean bl3) {
+    public ClientboundRespawnPacket(ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, long l, GameType gameType, @Nullable GameType gameType2, boolean bl, boolean bl2, boolean bl3, Optional<GlobalPos> optional) {
         this.dimensionType = resourceKey;
         this.dimension = resourceKey2;
         this.seed = l;
@@ -34,6 +37,7 @@ implements Packet<ClientGamePacketListener> {
         this.isDebug = bl;
         this.isFlat = bl2;
         this.keepAllPlayerData = bl3;
+        this.lastDeathLocation = optional;
     }
 
     public ClientboundRespawnPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -45,6 +49,7 @@ implements Packet<ClientGamePacketListener> {
         this.isDebug = friendlyByteBuf.readBoolean();
         this.isFlat = friendlyByteBuf.readBoolean();
         this.keepAllPlayerData = friendlyByteBuf.readBoolean();
+        this.lastDeathLocation = friendlyByteBuf.readOptional(FriendlyByteBuf::readGlobalPos);
     }
 
     @Override
@@ -57,6 +62,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeBoolean(this.isDebug);
         friendlyByteBuf.writeBoolean(this.isFlat);
         friendlyByteBuf.writeBoolean(this.keepAllPlayerData);
+        friendlyByteBuf.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
     }
 
     @Override
@@ -95,6 +101,10 @@ implements Packet<ClientGamePacketListener> {
 
     public boolean shouldKeepAllPlayerData() {
         return this.keepAllPlayerData;
+    }
+
+    public Optional<GlobalPos> getLastDeathLocation() {
+        return this.lastDeathLocation;
     }
 }
 

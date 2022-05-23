@@ -286,6 +286,7 @@ extends DirectionalBlock {
             BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos4) : null;
             PistonBaseBlock.dropResources(blockState, level, blockPos4, blockEntity);
             level.setBlock(blockPos4, Blocks.AIR.defaultBlockState(), 18);
+            level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos4, GameEvent.Context.of(blockState));
             if (!blockState.is(BlockTags.FIRE)) {
                 level.addDestroyBlockEffect(blockPos4, blockState);
             }

@@ -65,8 +65,9 @@ extends RecipeBookMenu<CraftingContainer> {
 
                 @Override
                 public void set(ItemStack itemStack) {
+                    ItemStack itemStack2 = this.getItem();
                     super.set(itemStack);
-                    player.onEquipItem(equipmentSlot, itemStack);
+                    player.onEquipItem(equipmentSlot, itemStack2, itemStack);
                 }
 
                 @Override

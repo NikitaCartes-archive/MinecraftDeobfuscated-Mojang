@@ -801,14 +801,13 @@ extends LivingEntity {
         this.verifyEquippedItem(itemStack);
         switch (equipmentSlot.getType()) {
             case HAND: {
-                this.handItems.set(equipmentSlot.getIndex(), itemStack);
+                this.onEquipItem(equipmentSlot, this.handItems.set(equipmentSlot.getIndex(), itemStack), itemStack);
                 break;
             }
             case ARMOR: {
-                this.armorItems.set(equipmentSlot.getIndex(), itemStack);
+                this.onEquipItem(equipmentSlot, this.armorItems.set(equipmentSlot.getIndex(), itemStack), itemStack);
             }
         }
-        this.onEquipItem(equipmentSlot, itemStack);
     }
 
     @Override

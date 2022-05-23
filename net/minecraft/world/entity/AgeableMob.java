@@ -88,7 +88,7 @@ extends PathfinderMob {
     }
 
     public void setAge(int i) {
-        int j = this.age;
+        int j = this.getAge();
         this.age = i;
         if (j < 0 && i >= 0 || j >= 0 && i < 0) {
             this.entityData.set(DATA_BABY_ID, i < 0);

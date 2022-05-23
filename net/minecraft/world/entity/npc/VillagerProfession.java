@@ -44,7 +44,7 @@ public record VillagerProfession(String name, Predicate<Holder<PoiType>> heldJob
     }
 
     private static VillagerProfession register(String string, ResourceKey<PoiType> resourceKey, @Nullable SoundEvent soundEvent) {
-        return VillagerProfession.register(string, holder -> holder.is(resourceKey), PoiType.NONE, soundEvent);
+        return VillagerProfession.register(string, holder -> holder.is(resourceKey), holder -> holder.is(resourceKey), soundEvent);
     }
 
     private static VillagerProfession register(String string, Predicate<Holder<PoiType>> predicate, Predicate<Holder<PoiType>> predicate2, @Nullable SoundEvent soundEvent) {
@@ -52,7 +52,7 @@ public record VillagerProfession(String name, Predicate<Holder<PoiType>> heldJob
     }
 
     private static VillagerProfession register(String string, ResourceKey<PoiType> resourceKey, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {
-        return VillagerProfession.register(string, holder -> holder.is(resourceKey), PoiType.NONE, immutableSet, immutableSet2, soundEvent);
+        return VillagerProfession.register(string, holder -> holder.is(resourceKey), holder -> holder.is(resourceKey), immutableSet, immutableSet2, soundEvent);
     }
 
     private static VillagerProfession register(String string, Predicate<Holder<PoiType>> predicate, Predicate<Holder<PoiType>> predicate2, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {

@@ -1210,9 +1210,17 @@ ServerGamePacketListener {
             this.chatPreviewThrottler.schedule(() -> {
                 int i = serverboundChatPreviewPacket.queryId();
                 String string = serverboundChatPreviewPacket.query();
-                return this.queryPreview(string).thenAccept(component -> this.send(new ClientboundChatPreviewPacket(i, (Component)component)));
+                return this.queryPreview(string).thenAccept(component -> this.sendPreviewResponse(i, (Component)component));
             });
         }
+    }
+
+    private void sendPreviewResponse(int i, Component component) {
+        this.send(new ClientboundChatPreviewPacket(i, component), future -> {
+            if (!future.isSuccess()) {
+                this.send(new ClientboundChatPreviewPacket(i, null));
+            }
+        });
     }
 
     private CompletableFuture<Component> queryPreview(String string) {

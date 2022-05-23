@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 public class ShovelItem
 extends DiggerItem {
@@ -53,6 +54,7 @@ extends DiggerItem {
             if (blockState3 != null) {
                 if (!level.isClientSide) {
                     level.setBlock(blockPos, blockState3, 11);
+                    level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player2, blockState3));
                     if (player2 != null) {
                         useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
                     }

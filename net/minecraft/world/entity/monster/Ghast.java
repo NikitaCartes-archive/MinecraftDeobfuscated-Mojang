@@ -73,9 +73,18 @@ implements Enemy {
         return true;
     }
 
+    private static boolean isReflectedFireball(DamageSource damageSource) {
+        return damageSource.getDirectEntity() instanceof LargeFireball && damageSource.getEntity() instanceof Player;
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource damageSource) {
+        return !Ghast.isReflectedFireball(damageSource) && super.isInvulnerableTo(damageSource);
+    }
+
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (damageSource.getDirectEntity() instanceof LargeFireball && damageSource.getEntity() instanceof Player) {
+        if (Ghast.isReflectedFireball(damageSource)) {
             super.hurt(damageSource, 1000.0f);
             return true;
         }
