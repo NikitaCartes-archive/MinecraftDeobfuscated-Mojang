@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.List;
@@ -1345,6 +1346,10 @@ extends LivingEntity {
             return null;
         }
         return new ItemStack(spawnEggItem);
+    }
+
+    public Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions() {
+        return ImmutableSet.of(new BlockPos(this.getBoundingBox().minX, (double)this.getBlockY(), this.getBoundingBox().minZ), new BlockPos(this.getBoundingBox().minX, (double)this.getBlockY(), this.getBoundingBox().maxZ), new BlockPos(this.getBoundingBox().maxX, (double)this.getBlockY(), this.getBoundingBox().minZ), new BlockPos(this.getBoundingBox().maxX, (double)this.getBlockY(), this.getBoundingBox().maxZ));
     }
 }
 

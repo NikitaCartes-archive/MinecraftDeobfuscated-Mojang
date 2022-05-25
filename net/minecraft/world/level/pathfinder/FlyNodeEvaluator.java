@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.pathfinder;
 
-import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.EnumSet;
@@ -56,9 +55,8 @@ extends WalkNodeEvaluator {
             i = Mth.floor(this.mob.getY() + 0.5);
         }
         if (this.mob.getPathfindingMalus(blockPathTypes = this.getCachedBlockPathType((blockPos = this.mob.blockPosition()).getX(), i, blockPos.getZ())) < 0.0f) {
-            ImmutableSet<BlockPos> set = ImmutableSet.of(new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().minZ), new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().maxZ), new BlockPos(this.mob.getBoundingBox().maxX, (double)i, this.mob.getBoundingBox().minZ), new BlockPos(this.mob.getBoundingBox().maxX, (double)i, this.mob.getBoundingBox().maxZ));
-            for (BlockPos blockPos2 : set) {
-                BlockPathTypes blockPathTypes2 = this.getCachedBlockPathType(blockPos.getX(), i, blockPos.getZ());
+            for (BlockPos blockPos2 : this.mob.iteratePathfindingStartNodeCandidatePositions()) {
+                BlockPathTypes blockPathTypes2 = this.getCachedBlockPathType(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
                 if (!(this.mob.getPathfindingMalus(blockPathTypes2) >= 0.0f)) continue;
                 return super.getStartNode(blockPos2);
             }
@@ -247,7 +245,9 @@ extends WalkNodeEvaluator {
             } else if (blockPathTypes2 == BlockPathTypes.COCOA) {
                 blockPathTypes = BlockPathTypes.COCOA;
             } else if (blockPathTypes2 == BlockPathTypes.FENCE) {
-                blockPathTypes = BlockPathTypes.FENCE;
+                if (!mutableBlockPos.equals(this.mob.blockPosition())) {
+                    blockPathTypes = BlockPathTypes.FENCE;
+                }
             } else {
                 BlockPathTypes blockPathTypes3 = blockPathTypes = blockPathTypes2 == BlockPathTypes.WALKABLE || blockPathTypes2 == BlockPathTypes.OPEN || blockPathTypes2 == BlockPathTypes.WATER ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
             }

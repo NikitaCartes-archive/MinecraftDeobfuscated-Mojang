@@ -1404,6 +1404,9 @@ extends Entity {
         if (f <= 0.0f) {
             return 0.0f;
         }
+        if (damageSource.isBypassEnchantments()) {
+            return f;
+        }
         i = EnchantmentHelper.getDamageProtection(this.getArmorSlots(), damageSource);
         if (i > 0) {
             f = CombatRules.getDamageAfterMagicAbsorb(f, i);

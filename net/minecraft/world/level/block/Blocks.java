@@ -309,7 +309,7 @@ public class Blocks {
     public static final Block ACACIA_LOG = Blocks.register("acacia_log", Blocks.log(MaterialColor.COLOR_ORANGE, MaterialColor.STONE));
     public static final Block DARK_OAK_LOG = Blocks.register("dark_oak_log", Blocks.log(MaterialColor.COLOR_BROWN, MaterialColor.COLOR_BROWN));
     public static final Block MANGROVE_LOG = Blocks.register("mangrove_log", Blocks.log(MaterialColor.COLOR_RED, MaterialColor.PODZOL));
-    public static final Block MANGROVE_ROOTS = Blocks.register("mangrove_roots", new MangroveRootsBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(0.7f).randomTicks().sound(SoundType.MANGROVE_ROOTS).noOcclusion().isValidSpawn(Blocks::ocelotOrParrot).isSuffocating(Blocks::never).isViewBlocking(Blocks::never).noOcclusion()));
+    public static final Block MANGROVE_ROOTS = Blocks.register("mangrove_roots", new MangroveRootsBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(0.7f).randomTicks().sound(SoundType.MANGROVE_ROOTS).noOcclusion().isSuffocating(Blocks::never).isViewBlocking(Blocks::never).noOcclusion()));
     public static final Block MUDDY_MANGROVE_ROOTS = Blocks.register("muddy_mangrove_roots", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.DIRT, MaterialColor.PODZOL).strength(0.7f).sound(SoundType.MUDDY_MANGROVE_ROOTS)));
     public static final Block STRIPPED_SPRUCE_LOG = Blocks.register("stripped_spruce_log", Blocks.log(MaterialColor.PODZOL, MaterialColor.PODZOL));
     public static final Block STRIPPED_BIRCH_LOG = Blocks.register("stripped_birch_log", Blocks.log(MaterialColor.SAND, MaterialColor.SAND));

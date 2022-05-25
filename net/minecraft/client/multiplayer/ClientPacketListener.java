@@ -759,19 +759,19 @@ implements ClientGamePacketListener {
     }
 
     private void handlePlayerChat(ChatType chatType, PlayerChatMessage playerChatMessage, ChatSender chatSender) {
-        boolean bl;
-        if (!this.hasValidSignature(playerChatMessage)) {
-            LOGGER.warn("Received chat packet without valid signature from {}", (Object)chatSender.name().getString());
+        boolean bl = this.minecraft.options.onlyShowSecureChat().get();
+        PlayerInfo playerInfo = this.getPlayerInfo(playerChatMessage.signature().sender());
+        if (playerInfo != null && !this.hasValidSignature(playerChatMessage, playerInfo)) {
+            LOGGER.warn("Received chat packet without valid signature from {}", (Object)playerInfo.getProfile().getName());
+            if (bl) {
+                return;
+            }
         }
-        Component component = (bl = this.minecraft.options.onlyShowSecureChat().get().booleanValue()) ? playerChatMessage.signedContent() : playerChatMessage.serverContent();
+        Component component = bl ? playerChatMessage.signedContent() : playerChatMessage.serverContent();
         this.minecraft.gui.handlePlayerChat(chatType, component, chatSender);
     }
 
-    private boolean hasValidSignature(PlayerChatMessage playerChatMessage) {
-        PlayerInfo playerInfo = this.getPlayerInfo(playerChatMessage.signature().sender());
-        if (playerInfo == null) {
-            return false;
-        }
+    private boolean hasValidSignature(PlayerChatMessage playerChatMessage, PlayerInfo playerInfo) {
         ProfilePublicKey profilePublicKey = playerInfo.getProfilePublicKey();
         return profilePublicKey != null && playerChatMessage.verify(profilePublicKey);
     }

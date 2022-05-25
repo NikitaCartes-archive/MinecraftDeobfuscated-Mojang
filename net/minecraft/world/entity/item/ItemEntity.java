@@ -6,6 +6,7 @@ package net.minecraft.world.entity.item;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -76,6 +77,12 @@ extends Entity {
     @Override
     public boolean dampensVibrations() {
         return this.getItem().is(ItemTags.DAMPENS_VIBRATIONS);
+    }
+
+    @Override
+    @Nullable
+    public Entity getResponsibleEntity() {
+        return Util.mapNullable(this.getThrower(), this.level::getPlayerByUUID);
     }
 
     @Override

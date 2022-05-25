@@ -574,6 +574,9 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public void onSignalReceive(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
+        if (this.isDeadOrDying()) {
+            return;
+        }
         this.brain.setMemoryWithExpiry(MemoryModuleType.VIBRATION_COOLDOWN, Unit.INSTANCE, 40L);
         serverLevel.broadcastEntityEvent(this, (byte)61);
         this.playSound(SoundEvents.WARDEN_TENDRIL_CLICKS, 5.0f, this.getVoicePitch());

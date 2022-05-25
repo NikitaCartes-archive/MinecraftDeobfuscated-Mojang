@@ -440,6 +440,10 @@ ServerGamePacketListener {
     public void handleAcceptTeleportPacket(ServerboundAcceptTeleportationPacket serverboundAcceptTeleportationPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundAcceptTeleportationPacket, this, this.player.getLevel());
         if (serverboundAcceptTeleportationPacket.getId() == this.awaitingTeleport) {
+            if (this.awaitingPositionFromClient == null) {
+                this.disconnect(Component.translatable("multiplayer.disconnect.invalid_player_movement"));
+                return;
+            }
             this.player.absMoveTo(this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.getYRot(), this.player.getXRot());
             this.lastGoodX = this.awaitingPositionFromClient.x;
             this.lastGoodY = this.awaitingPositionFromClient.y;

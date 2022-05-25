@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class BeehiveBlockEntity
@@ -139,6 +140,7 @@ extends BlockEntity {
             }
             BlockPos blockPos = this.getBlockPos();
             this.level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BEEHIVE_ENTER, SoundSource.BLOCKS, 1.0f, 1.0f);
+            this.level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, this.getBlockState()));
         }
         entity.discard();
         super.setChanged();
@@ -197,6 +199,7 @@ extends BlockEntity {
                 entity2.moveTo(e, g, h, entity2.getYRot(), entity2.getXRot());
             }
             level.playSound(null, blockPos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0f, 1.0f);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity2, level.getBlockState(blockPos)));
             return level.addFreshEntity(entity2);
         }
         return false;

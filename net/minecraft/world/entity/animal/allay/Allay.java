@@ -59,6 +59,7 @@ import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -71,8 +72,9 @@ VibrationListener.VibrationListenerConfig {
     private static final int GAME_EVENT_LISTENER_RANGE = 16;
     private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 1, 1);
     private static final int ANIMATION_DURATION = 5;
+    private static final float PATHFINDING_BOUNDING_BOX_PADDING = 0.5f;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.HURT_BY, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.HURT_BY, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryModuleType.IS_PANICKING, new MemoryModuleType[0]);
     public static final ImmutableList<Float> THROW_SOUND_PITCHES = ImmutableList.of(Float.valueOf(0.5625f), Float.valueOf(0.625f), Float.valueOf(0.75f), Float.valueOf(0.9375f), Float.valueOf(1.0f), Float.valueOf(1.0f), Float.valueOf(1.125f), Float.valueOf(1.25f), Float.valueOf(1.5f), Float.valueOf(1.875f), Float.valueOf(2.0f), Float.valueOf(2.25f), new Float[]{Float.valueOf(2.5f), Float.valueOf(3.0f), Float.valueOf(3.75f), Float.valueOf(4.0f)});
     private final DynamicGameEventListener<VibrationListener> dynamicGameEventListener;
     private final SimpleContainer inventory = new SimpleContainer(1);
@@ -368,6 +370,18 @@ VibrationListener.VibrationListenerConfig {
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         return false;
+    }
+
+    @Override
+    public Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions() {
+        AABB aABB = this.getBoundingBox();
+        int i = Mth.floor(aABB.minX - 0.5);
+        int j = Mth.floor(aABB.maxX + 0.5);
+        int k = Mth.floor(aABB.minZ - 0.5);
+        int l = Mth.floor(aABB.maxZ + 0.5);
+        int m = Mth.floor(aABB.minY - 0.5);
+        int n = Mth.floor(aABB.maxY + 0.5);
+        return BlockPos.betweenClosed(i, m, k, j, n, l);
     }
 }
 
