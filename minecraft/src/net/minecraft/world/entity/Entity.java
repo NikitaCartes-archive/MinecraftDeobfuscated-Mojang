@@ -647,7 +647,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 							}
 
 							if (movementEmission.emitsEvents() && (this.onGround || vec3.y == 0.0 || this.isInPowderSnow || bl3)) {
-								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
+								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this.getResponsibleEntity(), this.getBlockStateOn()));
 							}
 						}
 					} else if (blockState.isAir()) {
@@ -993,13 +993,18 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (bl) {
 			if (this.fallDistance > 0.0F) {
 				blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
-				this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
+				this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this.getResponsibleEntity(), this.getBlockStateOn()));
 			}
 
 			this.resetFallDistance();
 		} else if (d < 0.0) {
 			this.fallDistance -= (float)d;
 		}
+	}
+
+	@Nullable
+	public Entity getResponsibleEntity() {
+		return this;
 	}
 
 	public boolean fireImmune() {

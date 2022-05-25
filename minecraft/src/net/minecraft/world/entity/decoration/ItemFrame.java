@@ -180,12 +180,12 @@ public class ItemFrame extends HangingEntity {
 
 	@Override
 	public int getWidth() {
-		return this.hasFramedMap() ? 16 : 12;
+		return 12;
 	}
 
 	@Override
 	public int getHeight() {
-		return this.hasFramedMap() ? 16 : 12;
+		return 12;
 	}
 
 	@Override

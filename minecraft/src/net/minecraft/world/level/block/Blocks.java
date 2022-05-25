@@ -189,7 +189,6 @@ public class Blocks {
 				.randomTicks()
 				.sound(SoundType.MANGROVE_ROOTS)
 				.noOcclusion()
-				.isValidSpawn(Blocks::ocelotOrParrot)
 				.isSuffocating(Blocks::never)
 				.isViewBlocking(Blocks::never)
 				.noOcclusion()

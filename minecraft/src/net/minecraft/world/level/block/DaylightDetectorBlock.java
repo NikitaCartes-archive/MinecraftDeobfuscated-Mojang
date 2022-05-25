@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -77,6 +78,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 			} else {
 				BlockState blockState2 = blockState.cycle(INVERTED);
 				level.setBlock(blockPos, blockState2, 4);
+				level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState2));
 				updateSignalStrength(blockState2, level, blockPos);
 				return InteractionResult.CONSUME;
 			}

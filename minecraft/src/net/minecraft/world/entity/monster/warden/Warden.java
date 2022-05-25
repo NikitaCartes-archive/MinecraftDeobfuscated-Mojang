@@ -593,32 +593,34 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 		@Nullable Entity entity2,
 		float f
 	) {
-		this.brain.setMemoryWithExpiry(MemoryModuleType.VIBRATION_COOLDOWN, Unit.INSTANCE, 40L);
-		serverLevel.broadcastEntityEvent(this, (byte)61);
-		this.playSound(SoundEvents.WARDEN_TENDRIL_CLICKS, 5.0F, this.getVoicePitch());
-		BlockPos blockPos2 = blockPos;
-		if (entity2 != null) {
-			if (this.closerThan(entity2, 30.0)) {
-				if (this.getBrain().hasMemoryValue(MemoryModuleType.RECENT_PROJECTILE)) {
-					if (this.canTargetEntity(entity2)) {
-						blockPos2 = entity2.blockPosition();
-					}
+		if (!this.isDeadOrDying()) {
+			this.brain.setMemoryWithExpiry(MemoryModuleType.VIBRATION_COOLDOWN, Unit.INSTANCE, 40L);
+			serverLevel.broadcastEntityEvent(this, (byte)61);
+			this.playSound(SoundEvents.WARDEN_TENDRIL_CLICKS, 5.0F, this.getVoicePitch());
+			BlockPos blockPos2 = blockPos;
+			if (entity2 != null) {
+				if (this.closerThan(entity2, 30.0)) {
+					if (this.getBrain().hasMemoryValue(MemoryModuleType.RECENT_PROJECTILE)) {
+						if (this.canTargetEntity(entity2)) {
+							blockPos2 = entity2.blockPosition();
+						}
 
-					this.increaseAngerAt(entity2);
-				} else {
-					this.increaseAngerAt(entity2, 10, true);
+						this.increaseAngerAt(entity2);
+					} else {
+						this.increaseAngerAt(entity2, 10, true);
+					}
 				}
+
+				this.getBrain().setMemoryWithExpiry(MemoryModuleType.RECENT_PROJECTILE, Unit.INSTANCE, 100L);
+			} else {
+				this.increaseAngerAt(entity);
 			}
 
-			this.getBrain().setMemoryWithExpiry(MemoryModuleType.RECENT_PROJECTILE, Unit.INSTANCE, 100L);
-		} else {
-			this.increaseAngerAt(entity);
-		}
-
-		if (!this.getAngerLevel().isAngry()) {
-			Optional<LivingEntity> optional = this.angerManagement.getActiveEntity();
-			if (entity2 != null || optional.isEmpty() || optional.get() == entity) {
-				WardenAi.setDisturbanceLocation(this, blockPos2);
+			if (!this.getAngerLevel().isAngry()) {
+				Optional<LivingEntity> optional = this.angerManagement.getActiveEntity();
+				if (entity2 != null || optional.isEmpty() || optional.get() == entity) {
+					WardenAi.setDisturbanceLocation(this, blockPos2);
+				}
 			}
 		}
 	}

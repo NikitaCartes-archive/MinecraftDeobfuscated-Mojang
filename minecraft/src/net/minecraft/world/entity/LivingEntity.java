@@ -1559,6 +1559,8 @@ public abstract class LivingEntity extends Entity {
 
 			if (f <= 0.0F) {
 				return 0.0F;
+			} else if (damageSource.isBypassEnchantments()) {
+				return f;
 			} else {
 				int i = EnchantmentHelper.getDamageProtection(this.getArmorSlots(), damageSource);
 				if (i > 0) {

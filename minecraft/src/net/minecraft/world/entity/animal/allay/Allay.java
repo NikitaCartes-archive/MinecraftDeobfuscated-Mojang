@@ -54,6 +54,7 @@ import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -63,6 +64,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	private static final int GAME_EVENT_LISTENER_RANGE = 16;
 	private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 1, 1);
 	private static final int ANIMATION_DURATION = 5;
+	private static final float PATHFINDING_BOUNDING_BOX_PADDING = 0.5F;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS
 	);
@@ -77,7 +79,8 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		MemoryModuleType.LIKED_PLAYER,
 		MemoryModuleType.LIKED_NOTEBLOCK_POSITION,
 		MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS,
-		MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS
+		MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS,
+		MemoryModuleType.IS_PANICKING
 	);
 	public static final ImmutableList<Float> THROW_SOUND_PITCHES = ImmutableList.of(
 		0.5625F, 0.625F, 0.75F, 0.9375F, 1.0F, 1.0F, 1.125F, 1.25F, 1.5F, 1.875F, 2.0F, 2.25F, 2.5F, 3.0F, 3.75F, 4.0F
@@ -404,5 +407,17 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	@Override
 	protected boolean shouldStayCloseToLeashHolder() {
 		return false;
+	}
+
+	@Override
+	public Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions() {
+		AABB aABB = this.getBoundingBox();
+		int i = Mth.floor(aABB.minX - 0.5);
+		int j = Mth.floor(aABB.maxX + 0.5);
+		int k = Mth.floor(aABB.minZ - 0.5);
+		int l = Mth.floor(aABB.maxZ + 0.5);
+		int m = Mth.floor(aABB.minY - 0.5);
+		int n = Mth.floor(aABB.maxY + 0.5);
+		return BlockPos.betweenClosed(i, m, k, j, n, l);
 	}
 }

@@ -1,7 +1,10 @@
 package net.minecraft.world.entity.animal.frog;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -13,6 +16,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class ShootTongue extends Behavior<Frog> {
@@ -21,6 +25,8 @@ public class ShootTongue extends Behavior<Frog> {
 	public static final int TONGUE_ANIMATION_DURATION = 10;
 	private static final float EATING_DISTANCE = 1.75F;
 	private static final float EATING_MOVEMENT_FACTOR = 0.75F;
+	public static final int UNREACHABLE_TONGUE_TARGETS_COOLDOWN_DURATION = 100;
+	public static final int MAX_UNREACHBLE_TONGUE_TARGETS_IN_MEMORY = 5;
 	private int eatAnimationTimer;
 	private int calculatePathCounter;
 	private final SoundEvent tongueSound;
@@ -36,7 +42,9 @@ public class ShootTongue extends Behavior<Frog> {
 				MemoryModuleType.LOOK_TARGET,
 				MemoryStatus.REGISTERED,
 				MemoryModuleType.ATTACK_TARGET,
-				MemoryStatus.VALUE_PRESENT
+				MemoryStatus.VALUE_PRESENT,
+				MemoryModuleType.IS_PANICKING,
+				MemoryStatus.VALUE_ABSENT
 			),
 			100
 		);
@@ -45,13 +53,20 @@ public class ShootTongue extends Behavior<Frog> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Frog frog) {
-		return super.checkExtraStartConditions(serverLevel, frog)
-			&& Frog.canEat((LivingEntity)frog.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get())
-			&& frog.getPose() != Pose.CROAKING;
+		LivingEntity livingEntity = (LivingEntity)frog.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
+		boolean bl = this.canPathfindToTarget(frog, livingEntity);
+		if (!bl) {
+			frog.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+			this.addUnreachableTargetToMemory(frog, livingEntity);
+		}
+
+		return bl && frog.getPose() != Pose.CROAKING && Frog.canEat(livingEntity);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Frog frog, long l) {
-		return frog.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET) && this.state != ShootTongue.State.DONE;
+		return frog.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+			&& this.state != ShootTongue.State.DONE
+			&& !frog.getBrain().hasMemoryValue(MemoryModuleType.IS_PANICKING);
 	}
 
 	protected void start(ServerLevel serverLevel, Frog frog, long l) {
@@ -64,6 +79,8 @@ public class ShootTongue extends Behavior<Frog> {
 	}
 
 	protected void stop(ServerLevel serverLevel, Frog frog, long l) {
+		frog.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+		frog.eraseTongueTarget();
 		frog.setPose(Pose.STANDING);
 	}
 
@@ -79,8 +96,6 @@ public class ShootTongue extends Behavior<Frog> {
 				}
 			}
 		}
-
-		frog.eraseTongueTarget();
 	}
 
 	protected void tick(ServerLevel serverLevel, Frog frog, long l) {
@@ -116,6 +131,25 @@ public class ShootTongue extends Behavior<Frog> {
 				}
 			case DONE:
 		}
+	}
+
+	private boolean canPathfindToTarget(Frog frog, LivingEntity livingEntity) {
+		Path path = frog.getNavigation().createPath(livingEntity, 0);
+		return path.getDistToTarget() < 1.75F;
+	}
+
+	private void addUnreachableTargetToMemory(Frog frog, LivingEntity livingEntity) {
+		List<UUID> list = (List<UUID>)frog.getBrain().getMemory(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS).orElseGet(ArrayList::new);
+		boolean bl = !list.contains(livingEntity.getUUID());
+		if (list.size() == 5 && bl) {
+			list.remove(0);
+		}
+
+		if (bl) {
+			list.add(livingEntity.getUUID());
+		}
+
+		frog.getBrain().setMemoryWithExpiry(MemoryModuleType.UNREACHABLE_TONGUE_TARGETS, list, 100L);
 	}
 
 	static enum State {

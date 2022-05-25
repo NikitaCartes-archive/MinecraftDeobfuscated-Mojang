@@ -823,23 +823,22 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	}
 
 	private void handlePlayerChat(ChatType chatType, PlayerChatMessage playerChatMessage, ChatSender chatSender) {
-		if (!this.hasValidSignature(playerChatMessage)) {
-			LOGGER.warn("Received chat packet without valid signature from {}", chatSender.name().getString());
+		boolean bl = this.minecraft.options.onlyShowSecureChat().get();
+		PlayerInfo playerInfo = this.getPlayerInfo(playerChatMessage.signature().sender());
+		if (playerInfo != null && !this.hasValidSignature(playerChatMessage, playerInfo)) {
+			LOGGER.warn("Received chat packet without valid signature from {}", playerInfo.getProfile().getName());
+			if (bl) {
+				return;
+			}
 		}
 
-		boolean bl = this.minecraft.options.onlyShowSecureChat().get();
 		Component component = bl ? playerChatMessage.signedContent() : playerChatMessage.serverContent();
 		this.minecraft.gui.handlePlayerChat(chatType, component, chatSender);
 	}
 
-	private boolean hasValidSignature(PlayerChatMessage playerChatMessage) {
-		PlayerInfo playerInfo = this.getPlayerInfo(playerChatMessage.signature().sender());
-		if (playerInfo == null) {
-			return false;
-		} else {
-			ProfilePublicKey profilePublicKey = playerInfo.getProfilePublicKey();
-			return profilePublicKey != null && playerChatMessage.verify(profilePublicKey);
-		}
+	private boolean hasValidSignature(PlayerChatMessage playerChatMessage, PlayerInfo playerInfo) {
+		ProfilePublicKey profilePublicKey = playerInfo.getProfilePublicKey();
+		return profilePublicKey != null && playerChatMessage.verify(profilePublicKey);
 	}
 
 	@Override

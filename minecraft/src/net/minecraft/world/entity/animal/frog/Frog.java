@@ -93,7 +93,8 @@ public class Frog extends Animal {
 		MemoryModuleType.NEAREST_ATTACKABLE,
 		MemoryModuleType.IS_IN_WATER,
 		MemoryModuleType.IS_PREGNANT,
-		MemoryModuleType.IS_PANICKING
+		MemoryModuleType.IS_PANICKING,
+		MemoryModuleType.UNREACHABLE_TONGUE_TARGETS
 	);
 	private static final EntityDataAccessor<FrogVariant> DATA_VARIANT_ID = SynchedEntityData.defineId(Frog.class, EntityDataSerializers.FROG_VARIANT);
 	private static final EntityDataAccessor<OptionalInt> DATA_TONGUE_TARGET_ID = SynchedEntityData.defineId(

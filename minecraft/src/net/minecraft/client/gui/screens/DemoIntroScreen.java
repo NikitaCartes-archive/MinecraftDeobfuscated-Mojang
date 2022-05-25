@@ -26,7 +26,7 @@ public class DemoIntroScreen extends Screen {
 		int i = -16;
 		this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20, Component.translatable("demo.help.buy"), button -> {
 			button.active = false;
-			Util.getPlatform().openUri("http://www.minecraft.net/store?source=demo");
+			Util.getPlatform().openUri("https://aka.ms/BuyMinecraftJava");
 		}));
 		this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, Component.translatable("demo.help.later"), button -> {
 			this.minecraft.setScreen(null);

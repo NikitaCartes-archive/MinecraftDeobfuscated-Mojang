@@ -15,6 +15,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.ChatDecorator;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,16 +34,19 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 
 	public static Component getMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		MessageArgument.Message message = commandContext.getArgument(string, MessageArgument.Message.class);
-		return message.resolvePlainChat(commandContext.getSource());
+		return message.resolveComponent(commandContext.getSource());
 	}
 
 	public static MessageArgument.ChatMessage getChatMessage(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		MessageArgument.Message message = commandContext.getArgument(string, MessageArgument.Message.class);
+		Component component = message.resolveComponent(commandContext.getSource());
 		CommandSigningContext commandSigningContext = commandContext.getSource().getSigningContext();
 		MessageSignature messageSignature = commandSigningContext.getArgumentSignature(string);
 		boolean bl = commandSigningContext.signedArgumentPreview(string);
-		Component component = message.resolvePlainChat(commandContext.getSource());
-		return new MessageArgument.ChatMessage(component, messageSignature, bl);
+		ChatSender chatSender = commandContext.getSource().asChatSender();
+		return messageSignature.isValid(chatSender.uuid())
+			? new MessageArgument.ChatMessage(message.text, component, messageSignature, bl)
+			: new MessageArgument.ChatMessage(message.text, component, MessageSignature.unsigned(), false);
 	}
 
 	public MessageArgument.Message parse(StringReader stringReader) throws CommandSyntaxException {
@@ -59,7 +63,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 	}
 
 	public CompletableFuture<Component> resolvePreview(CommandSourceStack commandSourceStack, MessageArgument.Message message) throws CommandSyntaxException {
-		return message.resolveComponent(commandSourceStack);
+		return message.resolveDecoratedComponent(commandSourceStack);
 	}
 
 	@Override
@@ -74,25 +78,39 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		});
 	}
 
-	public static record ChatMessage(Component plain, MessageSignature signature, boolean signedPreview) {
+	public static record ChatMessage(String plain, Component formatted, MessageSignature signature, boolean signedPreview) {
 		public CompletableFuture<FilteredText<PlayerChatMessage>> resolve(CommandSourceStack commandSourceStack) {
-			CompletableFuture<FilteredText<PlayerChatMessage>> completableFuture = this.filterComponent(commandSourceStack, this.plain)
+			CompletableFuture<FilteredText<PlayerChatMessage>> completableFuture = this.filterComponent(commandSourceStack, this.formatted)
 				.thenComposeAsync(filteredText -> {
 					ChatDecorator chatDecorator = commandSourceStack.getServer().getChatDecorator();
 					return chatDecorator.decorateChat(commandSourceStack.getPlayer(), filteredText, this.signature, this.signedPreview);
 				}, commandSourceStack.getServer())
-				.thenApply(filteredText -> this.verify(commandSourceStack, filteredText));
+				.thenApply(filteredText -> {
+					PlayerChatMessage playerChatMessage = this.getSignedMessage(filteredText);
+					if (playerChatMessage != null) {
+						this.verify(commandSourceStack, playerChatMessage);
+					}
+
+					return filteredText;
+				});
 			MessageArgument.logResolutionFailure(commandSourceStack, completableFuture);
 			return completableFuture;
 		}
 
-		private FilteredText<PlayerChatMessage> verify(CommandSourceStack commandSourceStack, FilteredText<PlayerChatMessage> filteredText) {
-			if (!filteredText.raw().verify(commandSourceStack)) {
-				MessageArgument.LOGGER
-					.warn("{} sent message with invalid signature: '{}'", commandSourceStack.getDisplayName().getString(), filteredText.raw().signedContent().getString());
+		@Nullable
+		private PlayerChatMessage getSignedMessage(FilteredText<PlayerChatMessage> filteredText) {
+			if (this.signature.isValid()) {
+				return this.signedPreview ? filteredText.raw() : PlayerChatMessage.signed(this.plain, this.signature);
+			} else {
+				return null;
 			}
+		}
 
-			return filteredText;
+		private void verify(CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) {
+			if (!playerChatMessage.verify(commandSourceStack)) {
+				MessageArgument.LOGGER
+					.warn("{} sent message with invalid signature: '{}'", commandSourceStack.getDisplayName().getString(), playerChatMessage.signedContent().getString());
+			}
 		}
 
 		private CompletableFuture<FilteredText<Component>> filterComponent(CommandSourceStack commandSourceStack, Component component) {
@@ -104,7 +122,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 	}
 
 	public static class Message {
-		private final String text;
+		final String text;
 		private final MessageArgument.Part[] parts;
 
 		public Message(String string, MessageArgument.Part[] parts) {
@@ -120,14 +138,14 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 			return this.parts;
 		}
 
-		CompletableFuture<Component> resolveComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-			Component component = this.resolvePlainChat(commandSourceStack);
+		CompletableFuture<Component> resolveDecoratedComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+			Component component = this.resolveComponent(commandSourceStack);
 			CompletableFuture<Component> completableFuture = commandSourceStack.getServer().getChatDecorator().decorate(commandSourceStack.getPlayer(), component);
 			MessageArgument.logResolutionFailure(commandSourceStack, completableFuture);
 			return completableFuture;
 		}
 
-		Component resolvePlainChat(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+		Component resolveComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
 			return this.toComponent(commandSourceStack, commandSourceStack.hasPermission(2));
 		}
 
