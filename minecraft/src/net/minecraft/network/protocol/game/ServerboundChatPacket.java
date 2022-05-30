@@ -10,7 +10,7 @@ import net.minecraft.util.Crypt;
 import net.minecraft.util.StringUtil;
 
 public class ServerboundChatPacket implements Packet<ServerGamePacketListener> {
-	public static final Duration MESSAGE_EXPIRES_AFTER = Duration.ofMinutes(2L);
+	public static final Duration MESSAGE_EXPIRES_AFTER = Duration.ofMinutes(5L);
 	private final String message;
 	private final Instant timeStamp;
 	private final Crypt.SaltSignaturePair saltSignature;

@@ -194,7 +194,9 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 	}
 
 	public int preliminarySurfaceLevel(int i, int j) {
-		return this.preliminarySurfaceLevel.computeIfAbsent(ColumnPos.asLong(i, j), this::computePreliminarySurfaceLevel);
+		int k = QuartPos.toBlock(QuartPos.fromBlock(i));
+		int l = QuartPos.toBlock(QuartPos.fromBlock(j));
+		return this.preliminarySurfaceLevel.computeIfAbsent(ColumnPos.asLong(k, l), this::computePreliminarySurfaceLevel);
 	}
 
 	private int computePreliminarySurfaceLevel(long l) {

@@ -426,6 +426,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		selectedTab = creativeModeTab.getId();
 		this.quickCraftSlots.clear();
 		this.menu.items.clear();
+		this.clearDraggingState();
 		if (creativeModeTab == CreativeModeTab.TAB_HOTBAR) {
 			HotbarManager hotbarManager = this.minecraft.getHotbarManager();
 

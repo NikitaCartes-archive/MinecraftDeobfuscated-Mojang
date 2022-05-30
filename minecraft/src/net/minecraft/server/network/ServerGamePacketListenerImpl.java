@@ -1195,11 +1195,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (isChatMessageIllegal(serverboundChatPacket.getMessage())) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
 		} else {
-			Instant instant = serverboundChatPacket.getTimeStamp();
-			if (!this.isChatExpired(instant) && !this.isChatOutOfOrder(instant)) {
+			if (this.tryHandleChat(serverboundChatPacket.getMessage(), serverboundChatPacket.getTimeStamp())) {
 				this.filterTextPacket(serverboundChatPacket.getMessage(), filteredText -> this.handleChat(serverboundChatPacket, filteredText));
-			} else {
-				LOGGER.warn("{} tried to send expired or out-of-order message: '{}'", this.player.getName().getString(), serverboundChatPacket.getMessage());
 			}
 		}
 	}
@@ -1209,19 +1206,28 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (isChatMessageIllegal(serverboundChatCommandPacket.command())) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
 		} else {
-			Instant instant = serverboundChatCommandPacket.timeStamp();
-			if (!this.isChatExpired(instant) && !this.isChatOutOfOrder(instant)) {
-				PacketUtils.ensureRunningOnSameThread(serverboundChatCommandPacket, this, this.player.getLevel());
-				if (this.resetLastActionTime()) {
-					CommandSourceStack commandSourceStack = this.player
-						.createCommandSourceStack()
-						.withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
-					this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
-					this.detectRateSpam();
-				}
-			} else {
-				LOGGER.warn("{} tried to send expired or out-of-order command: '{}'", this.player.getName().getString(), serverboundChatCommandPacket.command());
+			PacketUtils.ensureRunningOnSameThread(serverboundChatCommandPacket, this, this.player.getLevel());
+			if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp())) {
+				CommandSourceStack commandSourceStack = this.player
+					.createCommandSourceStack()
+					.withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
+				this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
+				this.detectRateSpam();
 			}
+		}
+	}
+
+	private boolean tryHandleChat(String string, Instant instant) {
+		if (!this.updateChatOrder(instant)) {
+			LOGGER.warn("{} sent out-of-order chat: '{}'", this.player.getName().getString(), string);
+			this.disconnect(Component.translatable("multiplayer.disconnect.out_of_order_chat"));
+			return false;
+		} else {
+			if (this.isChatExpired(instant)) {
+				LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", this.player.getName().getString(), string);
+			}
+
+			return this.resetLastActionTime();
 		}
 	}
 
@@ -1230,16 +1236,16 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		return Instant.now().isAfter(instant2);
 	}
 
-	private boolean isChatOutOfOrder(Instant instant) {
+	private boolean updateChatOrder(Instant instant) {
 		Instant instant2;
 		do {
 			instant2 = (Instant)this.lastChatTimeStamp.get();
 			if (instant.isBefore(instant2)) {
-				return true;
+				return false;
 			}
 		} while (!this.lastChatTimeStamp.compareAndSet(instant2, instant));
 
-		return false;
+		return true;
 	}
 
 	private static boolean isChatMessageIllegal(String string) {

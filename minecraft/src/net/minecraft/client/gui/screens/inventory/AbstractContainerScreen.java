@@ -502,8 +502,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 						this.snapbackTime = Util.getMillis();
 					}
 
-					this.draggingItem = ItemStack.EMPTY;
-					this.clickedSlot = null;
+					this.clearDraggingState();
 				}
 			} else if (this.isQuickCrafting && !this.quickCraftSlots.isEmpty()) {
 				this.slotClicked(null, -999, AbstractContainerMenu.getQuickcraftMask(0, this.quickCraftingType), ClickType.QUICK_CRAFT);
@@ -537,6 +536,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 		this.isQuickCrafting = false;
 		return true;
+	}
+
+	public void clearDraggingState() {
+		this.draggingItem = ItemStack.EMPTY;
+		this.clickedSlot = null;
 	}
 
 	private boolean isHovering(Slot slot, double d, double e) {
