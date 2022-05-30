@@ -409,6 +409,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         selectedTab = creativeModeTab.getId();
         this.quickCraftSlots.clear();
         ((ItemPickerMenu)this.menu).items.clear();
+        this.clearDraggingState();
         if (creativeModeTab == CreativeModeTab.TAB_HOTBAR) {
             HotbarManager hotbarManager = this.minecraft.getHotbarManager();
             for (j = 0; j < 9; ++j) {

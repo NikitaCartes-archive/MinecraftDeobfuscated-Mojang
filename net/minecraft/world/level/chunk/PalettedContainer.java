@@ -251,7 +251,7 @@ implements PaletteResize<T> {
     }
 
     public PalettedContainer<T> copy() {
-        return new PalettedContainer<T>(this.registry, this.strategy, new Data<T>(this.data.configuration(), this.data.storage().copy(), this.data.palette().copy()));
+        return new PalettedContainer<T>(this.registry, this.strategy, this.data.copy());
     }
 
     public void count(CountConsumer<T> countConsumer) {
@@ -331,6 +331,10 @@ implements PaletteResize<T> {
             friendlyByteBuf.writeByte(this.storage.getBits());
             this.palette.write(friendlyByteBuf);
             friendlyByteBuf.writeLongArray(this.storage.getRaw());
+        }
+
+        public Data<T> copy() {
+            return new Data<T>(this.configuration, this.storage.copy(), this.palette.copy());
         }
     }
 
