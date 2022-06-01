@@ -3223,7 +3223,7 @@ public abstract class LivingEntity extends Entity {
 				itemStack.shrink(1);
 			}
 
-			level.gameEvent(this, GameEvent.EAT, this.getEyePosition());
+			this.gameEvent(GameEvent.EAT);
 		}
 
 		return itemStack;

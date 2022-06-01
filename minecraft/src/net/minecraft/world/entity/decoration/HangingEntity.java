@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.decoration;
 
+import com.mojang.logging.LogUtils;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -23,8 +24,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
 
 public abstract class HangingEntity extends Entity {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	protected static final Predicate<Entity> HANGING_ENTITY = entity -> entity instanceof HangingEntity;
 	private int checkInterval;
 	protected BlockPos pos;
@@ -187,7 +190,12 @@ public abstract class HangingEntity extends Entity {
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		this.pos = new BlockPos(compoundTag.getInt("TileX"), compoundTag.getInt("TileY"), compoundTag.getInt("TileZ"));
+		BlockPos blockPos = new BlockPos(compoundTag.getInt("TileX"), compoundTag.getInt("TileY"), compoundTag.getInt("TileZ"));
+		if (!blockPos.closerThan(this.blockPosition(), 16.0)) {
+			LOGGER.error("Hanging entity at invalid position: {}", blockPos);
+		} else {
+			this.pos = blockPos;
+		}
 	}
 
 	public abstract int getWidth();

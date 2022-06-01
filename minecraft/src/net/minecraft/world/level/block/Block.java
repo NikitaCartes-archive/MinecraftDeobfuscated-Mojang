@@ -125,15 +125,15 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return item instanceof BlockItem ? ((BlockItem)item).getBlock() : Blocks.AIR;
 	}
 
-	public static BlockState pushEntitiesUp(BlockState blockState, BlockState blockState2, Level level, BlockPos blockPos) {
+	public static BlockState pushEntitiesUp(BlockState blockState, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos) {
 		VoxelShape voxelShape = Shapes.joinUnoptimized(
-				blockState.getCollisionShape(level, blockPos), blockState2.getCollisionShape(level, blockPos), BooleanOp.ONLY_SECOND
+				blockState.getCollisionShape(levelAccessor, blockPos), blockState2.getCollisionShape(levelAccessor, blockPos), BooleanOp.ONLY_SECOND
 			)
 			.move((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 		if (voxelShape.isEmpty()) {
 			return blockState2;
 		} else {
-			for (Entity entity : level.getEntities(null, voxelShape.bounds())) {
+			for (Entity entity : levelAccessor.getEntities(null, voxelShape.bounds())) {
 				double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), List.of(voxelShape), -1.0);
 				entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());
 			}

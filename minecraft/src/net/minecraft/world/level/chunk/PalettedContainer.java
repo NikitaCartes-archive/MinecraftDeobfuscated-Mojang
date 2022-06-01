@@ -23,7 +23,7 @@ import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.ThreadingDetector;
 import net.minecraft.util.ZeroBitStorage;
 
-public class PalettedContainer<T> implements PaletteResize<T> {
+public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainerRO<T> {
 	private static final int MIN_PALETTE_BITS = 0;
 	private final PaletteResize<T> dummyPaletteResize = (i, object) -> 0;
 	private final IdMap<T> registry;
@@ -39,15 +39,28 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		this.threadingDetector.checkAndUnlock();
 	}
 
-	public static <T> Codec<PalettedContainer<T>> codec(IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy, T object) {
+	public static <T> Codec<PalettedContainer<T>> codecRW(IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy, T object) {
+		PalettedContainerRO.Unpacker<T, PalettedContainer<T>> unpacker = PalettedContainer::unpack;
+		return codec(idMap, codec, strategy, object, unpacker);
+	}
+
+	public static <T> Codec<PalettedContainerRO<T>> codecRO(IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy, T object) {
+		PalettedContainerRO.Unpacker<T, PalettedContainerRO<T>> unpacker = (idMapx, strategyx, packedData) -> unpack(idMapx, strategyx, packedData)
+				.map(palettedContainer -> palettedContainer);
+		return codec(idMap, codec, strategy, object, unpacker);
+	}
+
+	private static <T, C extends PalettedContainerRO<T>> Codec<C> codec(
+		IdMap<T> idMap, Codec<T> codec, PalettedContainer.Strategy strategy, T object, PalettedContainerRO.Unpacker<T, C> unpacker
+	) {
 		return RecordCodecBuilder.create(
 				instance -> instance.group(
-							codec.mapResult(ExtraCodecs.orElsePartial(object)).listOf().fieldOf("palette").forGetter(PalettedContainer.DiscData::paletteEntries),
-							Codec.LONG_STREAM.optionalFieldOf("data").forGetter(PalettedContainer.DiscData::storage)
+							codec.mapResult(ExtraCodecs.orElsePartial(object)).listOf().fieldOf("palette").forGetter(PalettedContainerRO.PackedData::paletteEntries),
+							Codec.LONG_STREAM.optionalFieldOf("data").forGetter(PalettedContainerRO.PackedData::storage)
 						)
-						.apply(instance, PalettedContainer.DiscData::new)
+						.apply(instance, PalettedContainerRO.PackedData::new)
 			)
-			.comapFlatMap(discData -> read(idMap, strategy, discData), palettedContainer -> palettedContainer.write(idMap, strategy));
+			.comapFlatMap(packedData -> unpacker.read(idMap, strategy, packedData), palettedContainerRO -> palettedContainerRO.pack(idMap, strategy));
 	}
 
 	public PalettedContainer(
@@ -123,6 +136,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		this.data.storage.set(i, j);
 	}
 
+	@Override
 	public T get(int i, int j, int k) {
 		return this.get(this.strategy.getIndex(i, j, k));
 	}
@@ -132,6 +146,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		return data.palette.valueFor(data.storage.get(i));
 	}
 
+	@Override
 	public void getAll(Consumer<T> consumer) {
 		Palette<T> palette = this.data.palette();
 		IntSet intSet = new IntArraySet();
@@ -153,6 +168,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		}
 	}
 
+	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		this.acquire();
 
@@ -163,8 +179,8 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		}
 	}
 
-	private static <T> DataResult<PalettedContainer<T>> read(IdMap<T> idMap, PalettedContainer.Strategy strategy, PalettedContainer.DiscData<T> discData) {
-		List<T> list = discData.paletteEntries();
+	private static <T> DataResult<PalettedContainer<T>> unpack(IdMap<T> idMap, PalettedContainer.Strategy strategy, PalettedContainerRO.PackedData<T> packedData) {
+		List<T> list = packedData.paletteEntries();
 		int i = strategy.size();
 		int j = strategy.calculateBitsForSerialization(idMap, list.size());
 		PalettedContainer.Configuration<T> configuration = strategy.getConfiguration(idMap, j);
@@ -172,7 +188,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		if (j == 0) {
 			bitStorage = new ZeroBitStorage(i);
 		} else {
-			Optional<LongStream> optional = discData.storage();
+			Optional<LongStream> optional = packedData.storage();
 			if (optional.isEmpty()) {
 				return DataResult.error("Missing values for non-zero storage");
 			}
@@ -198,10 +214,11 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		return DataResult.success(new PalettedContainer<>(idMap, strategy, configuration, bitStorage, list));
 	}
 
-	private PalettedContainer.DiscData<T> write(IdMap<T> idMap, PalettedContainer.Strategy strategy) {
+	@Override
+	public PalettedContainerRO.PackedData<T> pack(IdMap<T> idMap, PalettedContainer.Strategy strategy) {
 		this.acquire();
 
-		PalettedContainer.DiscData var12;
+		PalettedContainerRO.PackedData var12;
 		try {
 			HashMapPalette<T> hashMapPalette = new HashMapPalette<>(idMap, this.data.storage.getBits(), this.dummyPaletteResize);
 			int i = strategy.size();
@@ -217,7 +234,7 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 				optional = Optional.empty();
 			}
 
-			var12 = new PalettedContainer.DiscData(hashMapPalette.getEntries(), optional);
+			var12 = new PalettedContainerRO.PackedData(hashMapPalette.getEntries(), optional);
 		} finally {
 			this.release();
 		}
@@ -240,10 +257,12 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		}
 	}
 
+	@Override
 	public int getSerializedSize() {
 		return this.data.getSerializedSize();
 	}
 
+	@Override
 	public boolean maybeHas(Predicate<T> predicate) {
 		return this.data.palette.maybeHas(predicate);
 	}
@@ -252,6 +271,12 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		return new PalettedContainer<>(this.registry, this.strategy, this.data.copy());
 	}
 
+	@Override
+	public PalettedContainer<T> recreate() {
+		return new PalettedContainer<>(this.registry, this.data.palette.valueFor(0), this.strategy);
+	}
+
+	@Override
 	public void count(PalettedContainer.CountConsumer<T> countConsumer) {
 		if (this.data.palette.getSize() == 1) {
 			countConsumer.accept(this.data.palette.valueFor(0), this.data.storage.getSize());
@@ -297,9 +322,6 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		public PalettedContainer.Data<T> copy() {
 			return new PalettedContainer.Data<>(this.configuration, this.storage.copy(), this.palette.copy());
 		}
-	}
-
-	static record DiscData<T>(List<T> paletteEntries, Optional<LongStream> storage) {
 	}
 
 	public abstract static class Strategy {

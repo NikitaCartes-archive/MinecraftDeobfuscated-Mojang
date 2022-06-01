@@ -19,6 +19,7 @@ import net.minecraft.world.entity.animal.allay.Allay;
 @Environment(EnvType.CLIENT)
 public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 	private final ModelPart root;
+	private final ModelPart head;
 	private final ModelPart body;
 	private final ModelPart right_arm;
 	private final ModelPart left_arm;
@@ -30,6 +31,7 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 
 	public AllayModel(ModelPart modelPart) {
 		this.root = modelPart.getChild("root");
+		this.head = this.root.getChild("head");
 		this.body = this.root.getChild("body");
 		this.right_arm = this.body.getChild("right_arm");
 		this.left_arm = this.body.getChild("left_arm");
@@ -83,6 +85,8 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 
 	public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
+		this.head.xRot = j * (float) (Math.PI / 180.0);
+		this.head.yRot = i * (float) (Math.PI / 180.0);
 		float k = h * 20.0F * (float) (Math.PI / 180.0) + g;
 		float l = Mth.cos(k) * (float) Math.PI * 0.15F;
 		float m = h - (float)allay.tickCount;

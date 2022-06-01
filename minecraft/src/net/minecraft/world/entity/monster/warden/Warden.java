@@ -492,11 +492,6 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	}
 
 	@Override
-	public boolean requiresCustomPersistence() {
-		return super.requiresCustomPersistence() || this.hasCustomName();
-	}
-
-	@Override
 	public boolean removeWhenFarAway(double d) {
 		return false;
 	}
@@ -523,7 +518,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		boolean bl = super.hurt(damageSource, f);
-		if (!this.level.isClientSide && !this.isNoAi()) {
+		if (!this.level.isClientSide && !this.isNoAi() && !this.isDiggingOrEmerging()) {
 			Entity entity = damageSource.getEntity();
 			this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
 			if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty()

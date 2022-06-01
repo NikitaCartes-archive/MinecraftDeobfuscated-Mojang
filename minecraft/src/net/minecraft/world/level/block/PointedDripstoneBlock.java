@@ -192,6 +192,9 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 							if (((PointedDripstoneBlock.FluidInfo)optional.get()).sourceState.is(Blocks.MUD) && fluid == Fluids.WATER) {
 								BlockState blockState2 = Blocks.CLAY.defaultBlockState();
 								serverLevel.setBlockAndUpdate(((PointedDripstoneBlock.FluidInfo)optional.get()).pos, blockState2);
+								Block.pushEntitiesUp(
+									((PointedDripstoneBlock.FluidInfo)optional.get()).sourceState, blockState2, serverLevel, ((PointedDripstoneBlock.FluidInfo)optional.get()).pos
+								);
 								serverLevel.gameEvent(GameEvent.BLOCK_CHANGE, ((PointedDripstoneBlock.FluidInfo)optional.get()).pos, GameEvent.Context.of(blockState2));
 								serverLevel.levelEvent(1504, blockPos2, 0);
 							} else {

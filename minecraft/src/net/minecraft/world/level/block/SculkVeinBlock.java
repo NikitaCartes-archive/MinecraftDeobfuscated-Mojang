@@ -106,19 +106,21 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 		for (Direction direction : Direction.allShuffled(randomSource)) {
 			if (hasFace(blockState, direction)) {
 				BlockPos blockPos2 = blockPos.relative(direction);
-				if (levelAccessor.getBlockState(blockPos2).is(tagKey)) {
-					BlockState blockState2 = Blocks.SCULK.defaultBlockState();
-					levelAccessor.setBlock(blockPos2, blockState2, 3);
+				BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
+				if (blockState2.is(tagKey)) {
+					BlockState blockState3 = Blocks.SCULK.defaultBlockState();
+					levelAccessor.setBlock(blockPos2, blockState3, 3);
+					Block.pushEntitiesUp(blockState2, blockState3, levelAccessor, blockPos2);
 					levelAccessor.playSound(null, blockPos2, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 1.0F);
-					this.veinSpreader.spreadAll(blockState2, levelAccessor, blockPos2, sculkSpreader.isWorldGeneration());
+					this.veinSpreader.spreadAll(blockState3, levelAccessor, blockPos2, sculkSpreader.isWorldGeneration());
 					Direction direction2 = direction.getOpposite();
 
 					for (Direction direction3 : DIRECTIONS) {
 						if (direction3 != direction2) {
 							BlockPos blockPos3 = blockPos2.relative(direction3);
-							BlockState blockState3 = levelAccessor.getBlockState(blockPos3);
-							if (blockState3.is(this)) {
-								this.onDischarged(levelAccessor, blockState3, blockPos3, randomSource);
+							BlockState blockState4 = levelAccessor.getBlockState(blockPos3);
+							if (blockState4.is(this)) {
+								this.onDischarged(levelAccessor, blockState4, blockPos3, randomSource);
 							}
 						}
 					}
