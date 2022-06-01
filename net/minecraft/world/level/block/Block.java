@@ -142,12 +142,12 @@ implements ItemLike {
         return Blocks.AIR;
     }
 
-    public static BlockState pushEntitiesUp(BlockState blockState, BlockState blockState2, Level level, BlockPos blockPos) {
-        VoxelShape voxelShape = Shapes.joinUnoptimized(blockState.getCollisionShape(level, blockPos), blockState2.getCollisionShape(level, blockPos), BooleanOp.ONLY_SECOND).move(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    public static BlockState pushEntitiesUp(BlockState blockState, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos) {
+        VoxelShape voxelShape = Shapes.joinUnoptimized(blockState.getCollisionShape(levelAccessor, blockPos), blockState2.getCollisionShape(levelAccessor, blockPos), BooleanOp.ONLY_SECOND).move(blockPos.getX(), blockPos.getY(), blockPos.getZ());
         if (voxelShape.isEmpty()) {
             return blockState2;
         }
-        List<Entity> list = level.getEntities(null, voxelShape.bounds());
+        List<Entity> list = levelAccessor.getEntities(null, voxelShape.bounds());
         for (Entity entity : list) {
             double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), List.of(voxelShape), -1.0);
             entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());

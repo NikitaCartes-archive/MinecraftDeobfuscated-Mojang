@@ -50,6 +50,7 @@ import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
@@ -67,7 +68,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class ChunkSerializer {
-    private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
+    private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codecRW(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String TAG_UPGRADE_DATA = "UpgradeData";
     private static final String BLOCK_TICKS_TAG = "block_ticks";
@@ -95,7 +96,7 @@ public class ChunkSerializer {
         ServerChunkCache chunkSource = serverLevel.getChunkSource();
         LevelLightEngine levelLightEngine = ((ChunkSource)chunkSource).getLightEngine();
         Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-        Codec<PalettedContainer<Holder<Biome>>> codec = ChunkSerializer.makeBiomeCodec(registry);
+        Codec<PalettedContainerRO<Holder<Biome>>> codec = ChunkSerializer.makeBiomeCodec(registry);
         boolean bl3 = false;
         for (int j = 0; j < listTag.size(); ++j) {
             boolean bl5;
@@ -105,8 +106,8 @@ public class ChunkSerializer {
             if (l >= 0 && l < levelChunkSections.length) {
                 LevelChunkSection levelChunkSection;
                 PalettedContainer palettedContainer = compoundTag2.contains("block_states", 10) ? (PalettedContainer)BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag2.getCompound("block_states")).promotePartial(string -> ChunkSerializer.logErrors(chunkPos, k, string)).getOrThrow(false, LOGGER::error) : new PalettedContainer(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
-                PalettedContainer palettedContainer2 = compoundTag2.contains("biomes", 10) ? (PalettedContainer)codec.parse(NbtOps.INSTANCE, compoundTag2.getCompound("biomes")).promotePartial(string -> ChunkSerializer.logErrors(chunkPos, k, string)).getOrThrow(false, LOGGER::error) : new PalettedContainer(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
-                levelChunkSections[l] = levelChunkSection = new LevelChunkSection(k, palettedContainer, palettedContainer2);
+                PalettedContainerRO<Holder<Biome>> palettedContainerRO = compoundTag2.contains("biomes", 10) ? (PalettedContainerRO)codec.parse(NbtOps.INSTANCE, compoundTag2.getCompound("biomes")).promotePartial(string -> ChunkSerializer.logErrors(chunkPos, k, string)).getOrThrow(false, LOGGER::error) : new PalettedContainer<Holder<Biome>>(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+                levelChunkSections[l] = levelChunkSection = new LevelChunkSection(k, palettedContainer, palettedContainerRO);
                 poiManager.checkConsistencyWithBlocks(chunkPos, levelChunkSection);
             }
             boolean bl4 = compoundTag2.contains(BLOCK_LIGHT_TAG, 7);
@@ -210,8 +211,8 @@ public class ChunkSerializer {
         LOGGER.error("Recoverable errors when loading section [" + chunkPos.x + ", " + i + ", " + chunkPos.z + "]: " + string);
     }
 
-    private static Codec<PalettedContainer<Holder<Biome>>> makeBiomeCodec(Registry<Biome> registry) {
-        return PalettedContainer.codec(registry.asHolderIdMap(), registry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, registry.getHolderOrThrow(Biomes.PLAINS));
+    private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> registry) {
+        return PalettedContainer.codecRO(registry.asHolderIdMap(), registry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, registry.getHolderOrThrow(Biomes.PLAINS));
     }
 
     public static CompoundTag write(ServerLevel serverLevel, ChunkAccess chunkAccess) {
@@ -241,7 +242,7 @@ public class ChunkSerializer {
         ListTag listTag = new ListTag();
         ThreadedLevelLightEngine levelLightEngine = serverLevel.getChunkSource().getLightEngine();
         Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-        Codec<PalettedContainer<Holder<Biome>>> codec = ChunkSerializer.makeBiomeCodec(registry);
+        Codec<PalettedContainerRO<Holder<Biome>>> codec = ChunkSerializer.makeBiomeCodec(registry);
         boolean bl = chunkAccess.isLightCorrect();
         for (int i = levelLightEngine.getMinLightSection(); i < levelLightEngine.getMaxLightSection(); ++i) {
             int j = chunkAccess.getSectionIndexFromSectionY(i);

@@ -26,6 +26,7 @@ public class AllayModel
 extends HierarchicalModel<Allay>
 implements ArmedModel {
     private final ModelPart root;
+    private final ModelPart head;
     private final ModelPart body;
     private final ModelPart right_arm;
     private final ModelPart left_arm;
@@ -37,6 +38,7 @@ implements ArmedModel {
 
     public AllayModel(ModelPart modelPart) {
         this.root = modelPart.getChild("root");
+        this.head = this.root.getChild("head");
         this.body = this.root.getChild("body");
         this.right_arm = this.body.getChild("right_arm");
         this.left_arm = this.body.getChild("left_arm");
@@ -66,6 +68,8 @@ implements ArmedModel {
     public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
         float r;
         this.root().getAllParts().forEach(ModelPart::resetPose);
+        this.head.xRot = j * ((float)Math.PI / 180);
+        this.head.yRot = i * ((float)Math.PI / 180);
         float k = h * 20.0f * ((float)Math.PI / 180) + g;
         float l = Mth.cos(k) * (float)Math.PI * 0.15f;
         float m = h - (float)allay.tickCount;

@@ -95,6 +95,7 @@ import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.font.FontManager;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
@@ -258,7 +259,7 @@ import org.slf4j.Logger;
 public class Minecraft
 extends ReentrantBlockableEventLoop<Runnable>
 implements WindowEventHandler {
-    private static Minecraft instance;
+    static Minecraft instance;
     private static final Logger LOGGER;
     public static final boolean ON_OSX;
     private static final int MAX_TICKS_PER_UPDATE = 10;
@@ -806,7 +807,20 @@ implements WindowEventHandler {
     private void openChatScreen(String string) {
         ChatStatus chatStatus = this.getChatStatus();
         if (!chatStatus.isChatAllowed(this.isLocalServer())) {
-            this.gui.setOverlayMessage(chatStatus.getMessage(), false);
+            if (this.gui.isShowingChatDisabledByPlayer()) {
+                this.gui.setChatDisabledByPlayerShown(false);
+                this.setScreen(new ConfirmLinkScreen(bl -> {
+                    if (bl) {
+                        Util.getPlatform().openUri("https://aka.ms/JavaAccountSettings");
+                    }
+                    this.setScreen(null);
+                }, ChatStatus.INFO_DISABLED_BY_PROFILE, "https://aka.ms/JavaAccountSettings", true));
+            } else {
+                Component component = chatStatus.getMessage();
+                this.gui.setOverlayMessage(component, false);
+                NarratorChatListener.INSTANCE.sayNow(component);
+                this.gui.setChatDisabledByPlayerShown(chatStatus == ChatStatus.DISABLED_BY_PROFILE);
+            }
         } else {
             this.setScreen(new ChatScreen(string));
         }
@@ -2446,7 +2460,7 @@ implements WindowEventHandler {
             }
         }
         ,
-        DISABLED_BY_PROFILE(Component.translatable("chat.disabled.profile").withStyle(ChatFormatting.RED)){
+        DISABLED_BY_PROFILE(Component.translatable("chat.disabled.profile", Component.keybind(Minecraft.instance.options.keyChat.getName())).withStyle(ChatFormatting.RED)){
 
             @Override
             public boolean isChatAllowed(boolean bl) {
@@ -2454,6 +2468,8 @@ implements WindowEventHandler {
             }
         };
 
+        static final Component INFO_DISABLED_BY_PROFILE;
+        private static final String URL_DISABLED_BY_PROFILE = "https://aka.ms/JavaAccountSettings";
         private final Component message;
 
         ChatStatus(Component component) {
@@ -2465,6 +2481,10 @@ implements WindowEventHandler {
         }
 
         public abstract boolean isChatAllowed(boolean var1);
+
+        static {
+            INFO_DISABLED_BY_PROFILE = Component.translatable("chat.disabled.profile.moreInfo");
+        }
     }
 }
 

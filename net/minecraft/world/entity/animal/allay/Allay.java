@@ -383,5 +383,10 @@ VibrationListener.VibrationListenerConfig {
         int n = Mth.floor(aABB.maxY + 0.5);
         return BlockPos.betweenClosed(i, m, k, j, n, l);
     }
+
+    @Override
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, (double)this.getEyeHeight() * 0.6, (double)this.getBbWidth() * 0.1);
+    }
 }
 

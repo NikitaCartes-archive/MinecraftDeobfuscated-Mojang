@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.presets;
 
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public class WorldPreset {
-    public static final Codec<WorldPreset> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.unboundedMap(ResourceKey.codec(Registry.LEVEL_STEM_REGISTRY), LevelStem.CODEC).fieldOf("dimensions")).forGetter(worldPreset -> worldPreset.dimensions)).apply((Applicative<WorldPreset, ?>)instance, WorldPreset::new));
+    public static final Codec<WorldPreset> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.unboundedMap(ResourceKey.codec(Registry.LEVEL_STEM_REGISTRY), LevelStem.CODEC).fieldOf("dimensions")).forGetter(worldPreset -> worldPreset.dimensions)).apply((Applicative<WorldPreset, ?>)instance, WorldPreset::new)).flatXmap(WorldPreset::requireOverworld, WorldPreset::requireOverworld);
     public static final Codec<Holder<WorldPreset>> CODEC = RegistryFileCodec.create(Registry.WORLD_PRESET_REGISTRY, DIRECT_CODEC);
     private final Map<ResourceKey<LevelStem>, LevelStem> dimensions;
 
@@ -52,6 +53,13 @@ public class WorldPreset {
 
     public LevelStem overworldOrThrow() {
         return this.overworld().orElseThrow(() -> new IllegalStateException("Can't find overworld in this preset"));
+    }
+
+    private static DataResult<WorldPreset> requireOverworld(WorldPreset worldPreset) {
+        if (worldPreset.overworld().isEmpty()) {
+            return DataResult.error("Missing overworld dimension");
+        }
+        return DataResult.success(worldPreset, Lifecycle.stable());
     }
 }
 

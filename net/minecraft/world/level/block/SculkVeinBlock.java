@@ -105,17 +105,19 @@ SimpleWaterloggedBlock {
         TagKey<Block> tagKey = sculkSpreader.replaceableBlocks();
         for (Direction direction : Direction.allShuffled(randomSource)) {
             BlockPos blockPos2;
-            if (!SculkVeinBlock.hasFace(blockState, direction) || !levelAccessor.getBlockState(blockPos2 = blockPos.relative(direction)).is(tagKey)) continue;
-            BlockState blockState2 = Blocks.SCULK.defaultBlockState();
-            levelAccessor.setBlock(blockPos2, blockState2, 3);
+            BlockState blockState2;
+            if (!SculkVeinBlock.hasFace(blockState, direction) || !(blockState2 = levelAccessor.getBlockState(blockPos2 = blockPos.relative(direction))).is(tagKey)) continue;
+            BlockState blockState3 = Blocks.SCULK.defaultBlockState();
+            levelAccessor.setBlock(blockPos2, blockState3, 3);
+            Block.pushEntitiesUp(blockState2, blockState3, levelAccessor, blockPos2);
             levelAccessor.playSound(null, blockPos2, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0f, 1.0f);
-            this.veinSpreader.spreadAll(blockState2, levelAccessor, blockPos2, sculkSpreader.isWorldGeneration());
+            this.veinSpreader.spreadAll(blockState3, levelAccessor, blockPos2, sculkSpreader.isWorldGeneration());
             Direction direction2 = direction.getOpposite();
             for (Direction direction3 : DIRECTIONS) {
                 BlockPos blockPos3;
-                BlockState blockState3;
-                if (direction3 == direction2 || !(blockState3 = levelAccessor.getBlockState(blockPos3 = blockPos2.relative(direction3))).is(this)) continue;
-                this.onDischarged(levelAccessor, blockState3, blockPos3, randomSource);
+                BlockState blockState4;
+                if (direction3 == direction2 || !(blockState4 = levelAccessor.getBlockState(blockPos3 = blockPos2.relative(direction3))).is(this)) continue;
+                this.onDischarged(levelAccessor, blockState4, blockPos3, randomSource);
             }
             return true;
         }

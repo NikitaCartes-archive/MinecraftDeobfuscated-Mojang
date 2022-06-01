@@ -203,6 +203,7 @@ SimpleWaterloggedBlock {
         if (optional.get().sourceState.is(Blocks.MUD) && fluid == Fluids.WATER) {
             BlockState blockState2 = Blocks.CLAY.defaultBlockState();
             serverLevel.setBlockAndUpdate(optional.get().pos, blockState2);
+            Block.pushEntitiesUp(optional.get().sourceState, blockState2, serverLevel, optional.get().pos);
             serverLevel.gameEvent(GameEvent.BLOCK_CHANGE, optional.get().pos, GameEvent.Context.of(blockState2));
             serverLevel.levelEvent(1504, blockPos2, 0);
             return;

@@ -21,7 +21,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
@@ -85,7 +84,7 @@ extends Item {
                 player.getInventory().add(new ItemStack(Items.GLASS_BOTTLE));
             }
         }
-        level.gameEvent((Entity)livingEntity, GameEvent.DRINK, livingEntity.getEyePosition());
+        livingEntity.gameEvent(GameEvent.DRINK);
         return itemStack;
     }
 

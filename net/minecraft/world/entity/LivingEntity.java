@@ -2900,7 +2900,7 @@ extends Entity {
             if (!(this instanceof Player) || !((Player)this).getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
-            level.gameEvent((Entity)this, GameEvent.EAT, this.getEyePosition());
+            this.gameEvent(GameEvent.EAT);
         }
         return itemStack;
     }

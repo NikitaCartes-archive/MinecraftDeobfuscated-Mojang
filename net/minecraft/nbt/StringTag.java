@@ -3,7 +3,6 @@
  */
 package net.minecraft.nbt;
 
-import com.mojang.logging.LogUtils;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -15,12 +14,10 @@ import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
-import org.slf4j.Logger;
 
 public class StringTag
 implements Tag {
     private static final int SELF_SIZE_IN_BITS = 288;
-    private static final Logger LOGGER = LogUtils.getLogger();
     public static final TagType<StringTag> TYPE = new TagType.VariableSize<StringTag>(){
 
         @Override

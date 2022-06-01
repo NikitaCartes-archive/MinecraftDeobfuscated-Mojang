@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.material.FluidState;
 
 public class LevelChunkSection {
@@ -28,12 +29,12 @@ public class LevelChunkSection {
     private short tickingBlockCount;
     private short tickingFluidCount;
     private final PalettedContainer<BlockState> states;
-    private final PalettedContainer<Holder<Biome>> biomes;
+    private PalettedContainerRO<Holder<Biome>> biomes;
 
-    public LevelChunkSection(int i, PalettedContainer<BlockState> palettedContainer, PalettedContainer<Holder<Biome>> palettedContainer2) {
+    public LevelChunkSection(int i, PalettedContainer<BlockState> palettedContainer, PalettedContainerRO<Holder<Biome>> palettedContainerRO) {
         this.bottomBlockY = LevelChunkSection.getBottomBlockY(i);
         this.states = palettedContainer;
-        this.biomes = palettedContainer2;
+        this.biomes = palettedContainerRO;
         this.recalcBlockCounts();
     }
 
@@ -155,14 +156,16 @@ public class LevelChunkSection {
         return this.states;
     }
 
-    public PalettedContainer<Holder<Biome>> getBiomes() {
+    public PalettedContainerRO<Holder<Biome>> getBiomes() {
         return this.biomes;
     }
 
     public void read(FriendlyByteBuf friendlyByteBuf) {
         this.nonEmptyBlockCount = friendlyByteBuf.readShort();
         this.states.read(friendlyByteBuf);
-        this.biomes.read(friendlyByteBuf);
+        PalettedContainer<Holder<Biome>> palettedContainer = this.biomes.recreate();
+        palettedContainer.read(friendlyByteBuf);
+        this.biomes = palettedContainer;
     }
 
     public void write(FriendlyByteBuf friendlyByteBuf) {
@@ -183,25 +186,18 @@ public class LevelChunkSection {
         return this.biomes.get(i, j, k);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public void fillBiomesFromNoise(BiomeResolver biomeResolver, Climate.Sampler sampler, int i, int j) {
-        PalettedContainer<Holder<Biome>> palettedContainer = this.getBiomes();
-        palettedContainer.acquire();
-        try {
-            int k = QuartPos.fromBlock(this.bottomBlockY());
-            int l = 4;
-            for (int m = 0; m < 4; ++m) {
-                for (int n = 0; n < 4; ++n) {
-                    for (int o = 0; o < 4; ++o) {
-                        palettedContainer.getAndSetUnchecked(m, n, o, biomeResolver.getNoiseBiome(i + m, k + n, j + o, sampler));
-                    }
+        PalettedContainer<Holder<Biome>> palettedContainer = this.biomes.recreate();
+        int k = QuartPos.fromBlock(this.bottomBlockY());
+        int l = 4;
+        for (int m = 0; m < 4; ++m) {
+            for (int n = 0; n < 4; ++n) {
+                for (int o = 0; o < 4; ++o) {
+                    palettedContainer.getAndSetUnchecked(m, n, o, biomeResolver.getNoiseBiome(i + m, k + n, j + o, sampler));
                 }
             }
-        } finally {
-            palettedContainer.release();
         }
+        this.biomes = palettedContainer;
     }
 }
 
