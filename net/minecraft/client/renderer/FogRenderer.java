@@ -327,7 +327,7 @@ public class FogRenderer {
             if (mobEffectInstance.getFactorData().isEmpty()) {
                 return;
             }
-            float h = Mth.lerp(mobEffectInstance.getFactorData().get().getFactor(g), f, 15.0f);
+            float h = Mth.lerp(mobEffectInstance.getFactorData().get().getFactor(livingEntity, g), f, 15.0f);
             fogData.start = fogData.mode == FogMode.FOG_SKY ? 0.0f : h * 0.75f;
             fogData.end = h;
         }
@@ -337,7 +337,7 @@ public class FogRenderer {
             if (mobEffectInstance.getFactorData().isEmpty()) {
                 return 0.0f;
             }
-            return 1.0f - mobEffectInstance.getFactorData().get().getFactor(g);
+            return 1.0f - mobEffectInstance.getFactorData().get().getFactor(livingEntity, g);
         }
     }
 }

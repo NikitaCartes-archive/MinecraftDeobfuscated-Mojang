@@ -73,7 +73,7 @@ implements AutoCloseable {
     private float getDarknessGamma(float f) {
         MobEffectInstance mobEffectInstance;
         if (this.minecraft.player.hasEffect(MobEffects.DARKNESS) && (mobEffectInstance = this.minecraft.player.getEffect(MobEffects.DARKNESS)) != null && mobEffectInstance.getFactorData().isPresent()) {
-            return mobEffectInstance.getFactorData().get().getFactor(f);
+            return mobEffectInstance.getFactorData().get().getFactor(this.minecraft.player, f);
         }
         return 0.0f;
     }
