@@ -300,7 +300,7 @@ public class FogRenderer {
 		@Override
 		public void setupFog(FogRenderer.FogData fogData, LivingEntity livingEntity, MobEffectInstance mobEffectInstance, float f, float g) {
 			if (!mobEffectInstance.getFactorData().isEmpty()) {
-				float h = Mth.lerp(((MobEffectInstance.FactorData)mobEffectInstance.getFactorData().get()).getFactor(g), f, 15.0F);
+				float h = Mth.lerp(((MobEffectInstance.FactorData)mobEffectInstance.getFactorData().get()).getFactor(livingEntity, g), f, 15.0F);
 				fogData.start = fogData.mode == FogRenderer.FogMode.FOG_SKY ? 0.0F : h * 0.75F;
 				fogData.end = h;
 			}
@@ -308,7 +308,9 @@ public class FogRenderer {
 
 		@Override
 		public float getModifiedVoidDarkness(LivingEntity livingEntity, MobEffectInstance mobEffectInstance, float f, float g) {
-			return mobEffectInstance.getFactorData().isEmpty() ? 0.0F : 1.0F - ((MobEffectInstance.FactorData)mobEffectInstance.getFactorData().get()).getFactor(g);
+			return mobEffectInstance.getFactorData().isEmpty()
+				? 0.0F
+				: 1.0F - ((MobEffectInstance.FactorData)mobEffectInstance.getFactorData().get()).getFactor(livingEntity, g);
 		}
 	}
 
