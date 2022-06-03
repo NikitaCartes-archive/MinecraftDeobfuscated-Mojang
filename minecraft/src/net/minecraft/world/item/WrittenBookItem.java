@@ -118,19 +118,34 @@ public class WrittenBookItem extends Item {
 				return false;
 			} else {
 				ListTag listTag = compoundTag.getList("pages", 8);
+				ListTag listTag2 = new ListTag();
 
 				for (int i = 0; i < listTag.size(); i++) {
-					listTag.set(i, (Tag)StringTag.valueOf(resolvePage(commandSourceStack, player, listTag.getString(i))));
+					String string = resolvePage(commandSourceStack, player, listTag.getString(i));
+					if (string.length() > 32767) {
+						return false;
+					}
+
+					listTag2.add(i, (Tag)StringTag.valueOf(string));
 				}
 
 				if (compoundTag.contains("filtered_pages", 10)) {
 					CompoundTag compoundTag2 = compoundTag.getCompound("filtered_pages");
+					CompoundTag compoundTag3 = new CompoundTag();
 
-					for (String string : compoundTag2.getAllKeys()) {
-						compoundTag2.putString(string, resolvePage(commandSourceStack, player, compoundTag2.getString(string)));
+					for (String string2 : compoundTag2.getAllKeys()) {
+						String string3 = resolvePage(commandSourceStack, player, compoundTag2.getString(string2));
+						if (string3.length() > 32767) {
+							return false;
+						}
+
+						compoundTag3.putString(string2, string3);
 					}
+
+					compoundTag.put("filtered_pages", compoundTag3);
 				}
 
+				compoundTag.put("pages", listTag2);
 				return true;
 			}
 		} else {
