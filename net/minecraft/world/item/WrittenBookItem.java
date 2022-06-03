@@ -125,15 +125,27 @@ extends Item {
             return false;
         }
         ListTag listTag = compoundTag.getList(TAG_PAGES, 8);
+        ListTag listTag2 = new ListTag();
         for (int i = 0; i < listTag.size(); ++i) {
-            listTag.set(i, StringTag.valueOf(WrittenBookItem.resolvePage(commandSourceStack, player, listTag.getString(i))));
+            String string = WrittenBookItem.resolvePage(commandSourceStack, player, listTag.getString(i));
+            if (string.length() > Short.MAX_VALUE) {
+                return false;
+            }
+            listTag2.add(i, StringTag.valueOf(string));
         }
         if (compoundTag.contains(TAG_FILTERED_PAGES, 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound(TAG_FILTERED_PAGES);
-            for (String string : compoundTag2.getAllKeys()) {
-                compoundTag2.putString(string, WrittenBookItem.resolvePage(commandSourceStack, player, compoundTag2.getString(string)));
+            CompoundTag compoundTag3 = new CompoundTag();
+            for (String string2 : compoundTag2.getAllKeys()) {
+                String string3 = WrittenBookItem.resolvePage(commandSourceStack, player, compoundTag2.getString(string2));
+                if (string3.length() > Short.MAX_VALUE) {
+                    return false;
+                }
+                compoundTag3.putString(string2, string3);
             }
+            compoundTag.put(TAG_FILTERED_PAGES, compoundTag3);
         }
+        compoundTag.put(TAG_PAGES, listTag2);
         return true;
     }
 
