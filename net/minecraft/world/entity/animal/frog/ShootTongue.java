@@ -131,7 +131,7 @@ extends Behavior<Frog> {
 
     private boolean canPathfindToTarget(Frog frog, LivingEntity livingEntity) {
         Path path = frog.getNavigation().createPath(livingEntity, 0);
-        return path.getDistToTarget() < 1.75f;
+        return path != null && path.getDistToTarget() < 1.75f;
     }
 
     private void addUnreachableTargetToMemory(Frog frog, LivingEntity livingEntity) {
