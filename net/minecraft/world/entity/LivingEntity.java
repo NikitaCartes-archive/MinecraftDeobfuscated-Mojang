@@ -615,7 +615,7 @@ extends Entity {
     public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack, ItemStack itemStack2) {
         boolean bl;
         boolean bl2 = bl = itemStack2.isEmpty() && itemStack.isEmpty();
-        if (bl || ItemStack.isSameIgnoreDurability(itemStack, itemStack2)) {
+        if (bl || ItemStack.isSameIgnoreDurability(itemStack, itemStack2) || this.firstTick) {
             return;
         }
         if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {

@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,6 +56,7 @@ extends BaseEntityBlock {
         if (blockState.getValue(HAS_RECORD).booleanValue()) {
             this.dropRecording(level, blockPos);
             blockState = (BlockState)blockState.setValue(HAS_RECORD, false);
+            level.gameEvent(GameEvent.JUKEBOX_STOP_PLAY, blockPos, GameEvent.Context.of(blockState));
             level.setBlock(blockPos, blockState, 2);
             level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
             return InteractionResult.sidedSuccess(level.isClientSide);
@@ -63,12 +66,13 @@ extends BaseEntityBlock {
 
     public void setRecord(@Nullable Entity entity, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
         BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
-        if (!(blockEntity instanceof JukeboxBlockEntity)) {
-            return;
+        if (blockEntity instanceof JukeboxBlockEntity) {
+            JukeboxBlockEntity jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity;
+            jukeboxBlockEntity.setRecord(itemStack.copy());
+            jukeboxBlockEntity.playRecord();
+            levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(HAS_RECORD, true), 2);
+            levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState));
         }
-        ((JukeboxBlockEntity)blockEntity).setRecord(itemStack.copy());
-        levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(HAS_RECORD, true), 2);
-        levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState));
     }
 
     private void dropRecording(Level level, BlockPos blockPos) {
@@ -133,6 +137,15 @@ extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(HAS_RECORD);
+    }
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+        if (blockState.getValue(HAS_RECORD).booleanValue()) {
+            return JukeboxBlock.createTickerHelper(blockEntityType, BlockEntityType.JUKEBOX, JukeboxBlockEntity::playRecordTick);
+        }
+        return null;
     }
 }
 

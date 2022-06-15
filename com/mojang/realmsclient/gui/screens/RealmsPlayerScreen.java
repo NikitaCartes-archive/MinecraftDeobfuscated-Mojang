@@ -24,6 +24,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -381,8 +382,7 @@ extends RealmsScreen {
             RealmsPlayerScreen.this.drawRemoveIcon(poseStack, RealmsPlayerScreen.this.column1X + RealmsPlayerScreen.this.columnWidth - 22, j + 2, k, l);
             RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> {
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 8.0f, 8.0f, 8, 8, 64, 64);
-                GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 40.0f, 8.0f, 8, 8, 64, 64);
+                PlayerFaceRenderer.draw(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8);
             });
         }
 

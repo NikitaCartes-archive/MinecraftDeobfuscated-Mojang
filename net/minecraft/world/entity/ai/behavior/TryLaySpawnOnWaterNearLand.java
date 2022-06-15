@@ -14,7 +14,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 
 public class TryLaySpawnOnWaterNearLand
 extends Behavior<Frog> {
@@ -38,7 +38,7 @@ extends Behavior<Frog> {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockPos3;
             BlockPos blockPos2 = blockPos.relative(direction);
-            if (!serverLevel.getBlockState(blockPos2).is(Blocks.WATER) || !serverLevel.getBlockState(blockPos3 = blockPos2.above()).isAir()) continue;
+            if (!serverLevel.getBlockState(blockPos2).getCollisionShape(serverLevel, blockPos2).getFaceShape(Direction.UP).isEmpty() || !serverLevel.getFluidState(blockPos2).is(Fluids.WATER) || !serverLevel.getBlockState(blockPos3 = blockPos2.above()).isAir()) continue;
             serverLevel.setBlock(blockPos3, this.spawnBlock.defaultBlockState(), 3);
             serverLevel.playSound(null, frog, SoundEvents.FROG_LAY_SPAWN, SoundSource.BLOCKS, 1.0f, 1.0f);
             frog.getBrain().eraseMemory(this.memoryModule);

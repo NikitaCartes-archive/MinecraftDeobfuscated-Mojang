@@ -683,7 +683,7 @@ public abstract class PlayerList {
     }
 
     public void broadcastChatMessage(PlayerChatMessage playerChatMessage, Function<ServerPlayer, PlayerChatMessage> function, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
-        this.server.logMessageFrom(chatSender, playerChatMessage.serverContent());
+        this.server.logChatMessage(chatSender, playerChatMessage.serverContent(), resourceKey);
         for (ServerPlayer serverPlayer : this.players) {
             PlayerChatMessage playerChatMessage2 = function.apply(serverPlayer);
             if (playerChatMessage2 == null) continue;

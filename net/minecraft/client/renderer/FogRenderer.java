@@ -44,6 +44,7 @@ public class FogRenderer {
     private static long biomeChangedTime;
 
     public static void setupColor(Camera camera, float f, ClientLevel clientLevel, int i2, float g) {
+        LivingEntity livingEntity2;
         FogType fogType = camera.getFluidInCamera();
         Entity entity = camera.getEntity();
         if (fogType == FogType.WATER) {
@@ -153,7 +154,7 @@ public class FogRenderer {
             fogGreen = fogGreen * (1.0f - g) + fogGreen * 0.6f * g;
             fogBlue = fogBlue * (1.0f - g) + fogBlue * 0.6f * g;
         }
-        float v = fogType == FogType.WATER ? (entity instanceof LocalPlayer ? ((LocalPlayer)entity).getWaterVision() : 1.0f) : (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION) ? GameRenderer.getNightVisionScale((LivingEntity)entity, f) : 0.0f);
+        float v = fogType == FogType.WATER ? (entity instanceof LocalPlayer ? ((LocalPlayer)entity).getWaterVision() : 1.0f) : (entity instanceof LivingEntity && (livingEntity2 = (LivingEntity)entity).hasEffect(MobEffects.NIGHT_VISION) && !livingEntity2.hasEffect(MobEffects.DARKNESS) ? GameRenderer.getNightVisionScale(livingEntity2, f) : 0.0f);
         if (fogRed != 0.0f && fogGreen != 0.0f && fogBlue != 0.0f) {
             float w = Math.min(1.0f / fogRed, Math.min(1.0f / fogGreen, 1.0f / fogBlue));
             fogRed = fogRed * (1.0f - v) + fogRed * w * v;

@@ -50,15 +50,21 @@ import org.slf4j.Logger;
 public class Main {
     static final Logger LOGGER = LogUtils.getLogger();
 
+    @DontObfuscate
+    public static void main(String[] strings) {
+        Main.run(strings, true);
+    }
+
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    @DontObfuscate
-    public static void main(String[] strings) {
+    public static void run(String[] strings, boolean bl) {
         Thread thread2;
         Minecraft minecraft;
         SharedConstants.tryDetectVersion();
-        SharedConstants.enableDataFixerOptimizations();
+        if (bl) {
+            SharedConstants.enableDataFixerOptimizations();
+        }
         OptionParser optionParser = new OptionParser();
         optionParser.allowsUnrecognizedOptions();
         optionParser.accepts("demo");
@@ -121,10 +127,10 @@ public class Main {
         int j = Main.parseArgument(optionSet, optionSpec18);
         OptionalInt optionalInt = Main.ofNullable(Main.parseArgument(optionSet, optionSpec19));
         OptionalInt optionalInt2 = Main.ofNullable(Main.parseArgument(optionSet, optionSpec20));
-        boolean bl = optionSet.has("fullscreen");
-        boolean bl2 = optionSet.has("demo");
-        boolean bl3 = optionSet.has("disableMultiplayer");
-        boolean bl4 = optionSet.has("disableChat");
+        boolean bl2 = optionSet.has("fullscreen");
+        boolean bl3 = optionSet.has("demo");
+        boolean bl4 = optionSet.has("disableMultiplayer");
+        boolean bl5 = optionSet.has("disableChat");
         String string4 = Main.parseArgument(optionSet, optionSpec16);
         Gson gson = new GsonBuilder().registerTypeAdapter((Type)((Object)PropertyMap.class), new PropertyMap.Serializer()).create();
         PropertyMap propertyMap = GsonHelper.fromJson(gson, Main.parseArgument(optionSet, optionSpec21), PropertyMap.class);
@@ -152,7 +158,7 @@ public class Main {
             LOGGER.warn("Unrecognized user type: {}", (Object)string11);
         }
         User user = new User((String)optionSpec11.value(optionSet), string6, (String)optionSpec15.value(optionSet), Main.emptyStringToEmptyOptional(string8), Main.emptyStringToEmptyOptional(string9), type);
-        GameConfig gameConfig = new GameConfig(new GameConfig.UserData(user, propertyMap, propertyMap2, proxy), new DisplayData(i, j, optionalInt, optionalInt2, bl), new GameConfig.FolderData(file, file3, file2, string7), new GameConfig.GameData(bl2, string4, string5, bl3, bl4), new GameConfig.ServerData(string10, integer));
+        GameConfig gameConfig = new GameConfig(new GameConfig.UserData(user, propertyMap, propertyMap2, proxy), new DisplayData(i, j, optionalInt, optionalInt2, bl2), new GameConfig.FolderData(file, file3, file2, string7), new GameConfig.GameData(bl3, string4, string5, bl4, bl5), new GameConfig.ServerData(string10, integer));
         Thread thread = new Thread("Client Shutdown Thread"){
 
             @Override

@@ -55,7 +55,7 @@ extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return this.canUse() || !this.mob.getNavigation().isDone();
+        return this.canUse() || this.target.isAlive() && !this.mob.getNavigation().isDone();
     }
 
     @Override

@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.social;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
@@ -18,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
@@ -74,6 +74,13 @@ extends Screen {
     public SocialInteractionsScreen() {
         super(Component.translatable("gui.socialInteractions.title"));
         this.updateServerLabel(Minecraft.getInstance());
+    }
+
+    public static Screen createWithWarning() {
+        Minecraft minecraft = Minecraft.getInstance();
+        MutableComponent component = Component.translatable("gui.abuseReport.under_construction.title").withStyle(ChatFormatting.BOLD);
+        MutableComponent component2 = Component.translatable("gui.abuseReport.under_construction");
+        return new AlertScreen(() -> minecraft.setScreen(new SocialInteractionsScreen()), component, component2, CommonComponents.GUI_PROCEED, true);
     }
 
     private int windowHeight() {
@@ -158,6 +165,7 @@ extends Screen {
         this.hiddenButton.setMessage(TAB_HIDDEN);
         this.blockedButton.setMessage(TAB_BLOCKED);
         Collection<UUID> collection = switch (page) {
+            default -> throw new IncompatibleClassChangeError();
             case Page.ALL -> {
                 this.allButton.setMessage(TAB_ALL_SELECTED);
                 yield this.minecraft.player.connection.getOnlinePlayerIds();
@@ -171,7 +179,6 @@ extends Screen {
                 PlayerSocialManager playerSocialManager = this.minecraft.getPlayerSocialManager();
                 yield this.minecraft.player.connection.getOnlinePlayerIds().stream().filter(playerSocialManager::isBlocked).collect(Collectors.toSet());
             }
-            default -> ImmutableList.of();
         };
         this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount());
         if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {

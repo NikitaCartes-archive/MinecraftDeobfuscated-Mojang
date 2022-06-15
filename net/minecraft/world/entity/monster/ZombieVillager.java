@@ -206,6 +206,7 @@ implements VillagerDataHolder {
         }
         villager.setVillagerXp(this.villagerXp);
         villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null, null);
+        villager.refreshBrain(serverLevel);
         if (this.conversionStarter != null && (player = serverLevel.getPlayerByUUID(this.conversionStarter)) instanceof ServerPlayer) {
             CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((ServerPlayer)player, this, villager);
             serverLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, villager);

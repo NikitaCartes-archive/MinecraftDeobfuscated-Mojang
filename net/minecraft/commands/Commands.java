@@ -33,6 +33,7 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.gametest.framework.TestCommand;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
@@ -231,7 +232,7 @@ public class Commands {
                 i = Math.min(commandSyntaxException.getInput().length(), commandSyntaxException.getCursor());
                 MutableComponent mutableComponent = Component.empty().withStyle(ChatFormatting.GRAY).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + string)));
                 if (i > 10) {
-                    mutableComponent.append("...");
+                    mutableComponent.append(CommonComponents.ELLIPSIS);
                 }
                 mutableComponent.append(commandSyntaxException.getInput().substring(Math.max(0, i - 10), i));
                 if (i < commandSyntaxException.getInput().length()) {

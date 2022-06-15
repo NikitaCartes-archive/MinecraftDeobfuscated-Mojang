@@ -66,10 +66,11 @@ implements ArmedModel {
 
     @Override
     public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
+        float u;
+        float t;
+        float s;
         float r;
         this.root().getAllParts().forEach(ModelPart::resetPose);
-        this.head.xRot = j * ((float)Math.PI / 180);
-        this.head.yRot = i * ((float)Math.PI / 180);
         float k = h * 20.0f * ((float)Math.PI / 180) + g;
         float l = Mth.cos(k) * (float)Math.PI * 0.15f;
         float m = h - (float)allay.tickCount;
@@ -77,17 +78,31 @@ implements ArmedModel {
         float o = Math.min(g / 0.3f, 1.0f);
         float p = 1.0f - o;
         float q = allay.getHoldingItemAnimationProgress(m);
+        if (allay.isDancing()) {
+            r = h * 8.0f * ((float)Math.PI / 180) + g;
+            s = Mth.cos(r) * 16.0f * ((float)Math.PI / 180);
+            t = allay.getSpinningProgress(m);
+            u = Mth.cos(r) * 14.0f * ((float)Math.PI / 180);
+            float v = Mth.cos(r) * 30.0f * ((float)Math.PI / 180);
+            this.root.yRot = allay.isSpinning() ? (float)Math.PI * 4 * t : this.root.yRot;
+            this.root.zRot = s * (1.0f - t);
+            this.head.yRot = v * (1.0f - t);
+            this.head.zRot = u * (1.0f - t);
+        } else {
+            this.head.xRot = j * ((float)Math.PI / 180);
+            this.head.yRot = i * ((float)Math.PI / 180);
+        }
         this.right_wing.xRot = 0.43633232f;
         this.right_wing.yRot = -0.61086524f + l;
         this.left_wing.xRot = 0.43633232f;
         this.left_wing.yRot = 0.61086524f - l;
         this.body.xRot = r = o * 0.6981317f;
-        float s = Mth.lerp(q, r, Mth.lerp(o, -1.0471976f, -0.7853982f));
+        s = Mth.lerp(q, r, Mth.lerp(o, -1.0471976f, -0.7853982f));
         this.root.y += (float)Math.cos(n) * 0.25f * p;
         this.right_arm.xRot = s;
         this.left_arm.xRot = s;
-        float t = p * (1.0f - q);
-        float u = 0.43633232f - Mth.cos(n + 4.712389f) * (float)Math.PI * 0.075f * t;
+        t = p * (1.0f - q);
+        u = 0.43633232f - Mth.cos(n + 4.712389f) * (float)Math.PI * 0.075f * t;
         this.left_arm.zRot = -u;
         this.right_arm.zRot = u;
         this.right_arm.yRot = 0.27925268f * q;

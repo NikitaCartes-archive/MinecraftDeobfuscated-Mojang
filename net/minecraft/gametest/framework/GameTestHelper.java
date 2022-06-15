@@ -286,6 +286,14 @@ public class GameTestHelper {
         }
     }
 
+    public void assertEntitiesPresent(EntityType<?> entityType, BlockPos blockPos, int i, double d) {
+        BlockPos blockPos2 = this.absolutePos(blockPos);
+        List<?> list = this.getEntities(entityType, blockPos, d);
+        if (list.size() != i) {
+            throw new GameTestAssertPosException("Expected " + i + " entities of type " + entityType.toShortString() + ", actual number of entities found=" + list.size(), blockPos2, blockPos, this.testInfo.getTick());
+        }
+    }
+
     public void assertEntityPresent(EntityType<?> entityType, BlockPos blockPos, double d) {
         List<?> list = this.getEntities(entityType, blockPos, d);
         if (list.isEmpty()) {

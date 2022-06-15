@@ -59,7 +59,9 @@ extends Button {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, this.resourceLocation);
         int k = this.yTexStart;
-        if (this.isHoveredOrFocused()) {
+        if (!this.isActive()) {
+            k += this.yDiffTex * 2;
+        } else if (this.isHoveredOrFocused()) {
             k += this.yDiffTex;
         }
         RenderSystem.enableDepthTest();

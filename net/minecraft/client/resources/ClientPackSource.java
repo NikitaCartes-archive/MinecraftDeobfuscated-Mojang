@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -123,46 +124,39 @@ implements RepositorySource {
         this.downloadLock.lock();
         try {
             CompletableFuture<String> completableFuture;
-            this.clearServerPack();
-            this.clearOldDownloads();
+            Minecraft minecraft = Minecraft.getInstance();
             File file = new File(this.serverPackDir, string2);
             if (file.exists()) {
                 completableFuture = CompletableFuture.completedFuture("");
             } else {
                 ProgressScreen progressScreen = new ProgressScreen(bl);
                 Map<String, String> map = ClientPackSource.getDownloadHeaders();
-                Minecraft minecraft = Minecraft.getInstance();
                 minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
                 completableFuture = HttpUtil.downloadTo(file, uRL, map, 0xFA00000, progressScreen, minecraft.getProxy());
             }
-            CompletableFuture<?> completableFuture2 = this.currentDownload = ((CompletableFuture)completableFuture.thenCompose(object -> {
+            CompletableFuture<?> completableFuture2 = this.currentDownload = ((CompletableFuture)((CompletableFuture)completableFuture.thenCompose(object -> {
                 if (!this.checkHash(string3, file)) {
                     return Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"));
                 }
-                Minecraft minecraft = Minecraft.getInstance();
                 minecraft.execute(() -> {
                     if (!bl) {
                         minecraft.setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
                     }
                 });
                 return this.setServerPack(file, PackSource.SERVER);
-            })).whenComplete((void_, throwable) -> {
-                if (throwable != null) {
-                    LOGGER.warn("Pack application failed: {}, deleting file {}", (Object)throwable.getMessage(), (Object)file);
-                    ClientPackSource.deleteQuietly(file);
-                    Minecraft minecraft = Minecraft.getInstance();
-                    minecraft.execute(() -> minecraft.setScreen(new ConfirmScreen(bl -> {
-                        if (bl) {
-                            minecraft.setScreen(null);
-                        } else {
-                            ClientPacketListener clientPacketListener = minecraft.getConnection();
-                            if (clientPacketListener != null) {
-                                clientPacketListener.getConnection().disconnect(Component.translatable("connect.aborted"));
-                            }
-                        }
-                    }, Component.translatable("multiplayer.texturePrompt.failure.line1"), Component.translatable("multiplayer.texturePrompt.failure.line2"), CommonComponents.GUI_PROCEED, Component.translatable("menu.disconnect"))));
+            })).exceptionallyCompose(throwable -> ((CompletableFuture)this.clearServerPack().thenAcceptAsync(void_ -> {
+                LOGGER.warn("Pack application failed: {}, deleting file {}", (Object)throwable.getMessage(), (Object)file);
+                ClientPackSource.deleteQuietly(file);
+            }, (Executor)Util.ioPool())).thenAcceptAsync(void_ -> minecraft.setScreen(new ConfirmScreen(bl -> {
+                if (bl) {
+                    minecraft.setScreen(null);
+                } else {
+                    ClientPacketListener clientPacketListener = minecraft.getConnection();
+                    if (clientPacketListener != null) {
+                        clientPacketListener.getConnection().disconnect(Component.translatable("connect.aborted"));
+                    }
                 }
-            });
+            }, Component.translatable("multiplayer.texturePrompt.failure.line1"), Component.translatable("multiplayer.texturePrompt.failure.line2"), CommonComponents.GUI_PROCEED, Component.translatable("menu.disconnect"))), (Executor)minecraft))).thenAcceptAsync(void_ -> this.clearOldDownloads(), (Executor)Util.ioPool());
             return completableFuture2;
         } finally {
             this.downloadLock.unlock();
@@ -177,7 +171,7 @@ implements RepositorySource {
         }
     }
 
-    public CompletableFuture<?> clearServerPack() {
+    public CompletableFuture<Void> clearServerPack() {
         this.downloadLock.lock();
         try {
             if (this.currentDownload != null) {

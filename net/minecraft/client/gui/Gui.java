@@ -18,7 +18,6 @@ import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -61,7 +60,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.StringDecomposer;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffect;
@@ -84,7 +82,6 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -274,7 +271,7 @@ extends GuiComponent {
                     n = m << 24 & 0xFF000000;
                     o = font.width(this.overlayMessageString);
                     this.drawBackdrop(poseStack, font, -4, o, 0xFFFFFF | n);
-                    font.draw(poseStack, this.overlayMessageString, (float)(-o / 2), -4.0f, l | n);
+                    font.drawShadow(poseStack, this.overlayMessageString, (float)(-o / 2), -4.0f, l | n);
                     RenderSystem.disableBlend();
                     poseStack.popPose();
                 }
@@ -1072,7 +1069,9 @@ extends GuiComponent {
     }
 
     public void setNowPlaying(Component component) {
-        this.setOverlayMessage(Component.translatable("record.nowPlaying", component), true);
+        MutableComponent component2 = Component.translatable("record.nowPlaying", component);
+        this.setOverlayMessage(component2, true);
+        NarratorChatListener.INSTANCE.sayNow(component2);
     }
 
     public void setOverlayMessage(Component component, boolean bl) {
@@ -1120,31 +1119,13 @@ extends GuiComponent {
         this.titleTime = 0;
     }
 
-    public UUID guessChatUUID(Component component) {
-        String string = StringDecomposer.getPlainText(component);
-        String string2 = StringUtils.substringBetween(string, "<", ">");
-        if (string2 == null) {
-            return Util.NIL_UUID;
-        }
-        return this.minecraft.getPlayerSocialManager().getDiscoveredUUID(string2);
-    }
-
     public void handlePlayerChat(ChatType chatType, Component component, ChatSender chatSender) {
-        if (this.minecraft.isBlocked(chatSender.uuid())) {
-            return;
-        }
-        if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
-            return;
-        }
         for (ChatListener chatListener : this.chatListeners) {
             chatListener.handle(chatType, component, chatSender);
         }
     }
 
     public void handleSystemChat(ChatType chatType, Component component) {
-        if (this.minecraft.options.hideMatchedNames().get().booleanValue() && this.minecraft.isBlocked(this.guessChatUUID(component))) {
-            return;
-        }
         for (ChatListener chatListener : this.chatListeners) {
             chatListener.handle(chatType, component, null);
         }

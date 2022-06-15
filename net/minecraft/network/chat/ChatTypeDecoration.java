@@ -17,20 +17,20 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
-public record ChatDecoration(String translationKey, List<Parameter> parameters, Style style) {
-    public static final Codec<ChatDecoration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.STRING.fieldOf("translation_key")).forGetter(ChatDecoration::translationKey), ((MapCodec)Parameter.CODEC.listOf().fieldOf("parameters")).forGetter(ChatDecoration::parameters), ((MapCodec)Style.FORMATTING_CODEC.fieldOf("style")).forGetter(ChatDecoration::style)).apply((Applicative<ChatDecoration, ?>)instance, ChatDecoration::new));
+public record ChatTypeDecoration(String translationKey, List<Parameter> parameters, Style style) {
+    public static final Codec<ChatTypeDecoration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.STRING.fieldOf("translation_key")).forGetter(ChatTypeDecoration::translationKey), ((MapCodec)Parameter.CODEC.listOf().fieldOf("parameters")).forGetter(ChatTypeDecoration::parameters), Style.FORMATTING_CODEC.optionalFieldOf("style", Style.EMPTY).forGetter(ChatTypeDecoration::style)).apply((Applicative<ChatTypeDecoration, ?>)instance, ChatTypeDecoration::new));
 
-    public static ChatDecoration withSender(String string) {
-        return new ChatDecoration(string, List.of(Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
+    public static ChatTypeDecoration withSender(String string) {
+        return new ChatTypeDecoration(string, List.of(Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
     }
 
-    public static ChatDecoration directMessage(String string) {
+    public static ChatTypeDecoration directMessage(String string) {
         Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true);
-        return new ChatDecoration(string, List.of(Parameter.SENDER, Parameter.CONTENT), style);
+        return new ChatTypeDecoration(string, List.of(Parameter.SENDER, Parameter.CONTENT), style);
     }
 
-    public static ChatDecoration teamMessage(String string) {
-        return new ChatDecoration(string, List.of(Parameter.TEAM_NAME, Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
+    public static ChatTypeDecoration teamMessage(String string) {
+        return new ChatTypeDecoration(string, List.of(Parameter.TEAM_NAME, Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
     }
 
     public Component decorate(Component component, @Nullable ChatSender chatSender) {

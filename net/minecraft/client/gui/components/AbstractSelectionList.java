@@ -129,6 +129,12 @@ NarratableEntry {
         return this.children.size() - 1;
     }
 
+    protected void addEntryToTop(E entry) {
+        double d = (double)this.getMaxScroll() - this.getScrollAmount();
+        this.children.add(0, entry);
+        this.setScrollAmount((double)this.getMaxScroll() - d);
+    }
+
     protected int getItemCount() {
         return this.children().size();
     }
@@ -210,7 +216,7 @@ NarratableEntry {
         if (this.renderHeader) {
             this.renderHeader(poseStack, m, n, tesselator);
         }
-        this.renderList(poseStack, m, n, i, j, f);
+        this.renderList(poseStack, i, j, f);
         if (this.renderTopAndBottom) {
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
@@ -403,7 +409,7 @@ NarratableEntry {
         }
     }
 
-    protected void moveSelection(SelectionDirection selectionDirection, Predicate<E> predicate) {
+    protected boolean moveSelection(SelectionDirection selectionDirection, Predicate<E> predicate) {
         int i;
         int n = i = selectionDirection == SelectionDirection.UP ? -1 : 1;
         if (!this.children().isEmpty()) {
@@ -414,11 +420,12 @@ NarratableEntry {
                 if (predicate.test(entry)) {
                     this.setSelected(entry);
                     this.ensureVisible(entry);
-                    break;
+                    return true;
                 }
                 j = k;
             }
         }
+        return false;
     }
 
     @Override
@@ -426,44 +433,33 @@ NarratableEntry {
         return e >= (double)this.y0 && e <= (double)this.y1 && d >= (double)this.x0 && d <= (double)this.x1;
     }
 
-    protected void renderList(PoseStack poseStack, int i, int j, int k, int l, float f) {
-        int m = this.getItemCount();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        for (int n = 0; n < m; ++n) {
-            int t;
-            int o = this.getRowTop(n);
-            int p = this.getRowBottom(n);
-            if (p < this.y0 || o > this.y1) continue;
-            int q = j + n * this.itemHeight + this.headerHeight;
-            int r = this.itemHeight - 4;
-            E entry = this.getEntry(n);
-            int s = this.getRowWidth();
-            if (this.renderSelection && this.isSelectedItem(n)) {
-                t = this.x0 + this.width / 2 - s / 2;
-                int u = this.x0 + this.width / 2 + s / 2;
-                RenderSystem.disableTexture();
-                RenderSystem.setShader(GameRenderer::getPositionShader);
-                float g = this.isFocused() ? 1.0f : 0.5f;
-                RenderSystem.setShaderColor(g, g, g, 1.0f);
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-                bufferBuilder.vertex(t, q + r + 2, 0.0).endVertex();
-                bufferBuilder.vertex(u, q + r + 2, 0.0).endVertex();
-                bufferBuilder.vertex(u, q - 2, 0.0).endVertex();
-                bufferBuilder.vertex(t, q - 2, 0.0).endVertex();
-                tesselator.end();
-                RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-                bufferBuilder.vertex(t + 1, q + r + 1, 0.0).endVertex();
-                bufferBuilder.vertex(u - 1, q + r + 1, 0.0).endVertex();
-                bufferBuilder.vertex(u - 1, q - 1, 0.0).endVertex();
-                bufferBuilder.vertex(t + 1, q - 1, 0.0).endVertex();
-                tesselator.end();
-                RenderSystem.enableTexture();
-            }
-            t = this.getRowLeft();
-            ((Entry)entry).render(poseStack, n, o, t, s, r, k, l, Objects.equals(this.hovered, entry), f);
+    protected void renderList(PoseStack poseStack, int i, int j, float f) {
+        int k = this.getRowLeft();
+        int l = this.getRowWidth();
+        int m = this.itemHeight - 4;
+        int n = this.getItemCount();
+        for (int o = 0; o < n; ++o) {
+            int p = this.getRowTop(o);
+            int q = this.getRowBottom(o);
+            if (q < this.y0 || p > this.y1) continue;
+            this.renderItem(poseStack, i, j, f, o, k, p, l, m);
         }
+    }
+
+    protected void renderItem(PoseStack poseStack, int i, int j, float f, int k, int l, int m, int n, int o) {
+        E entry = this.getEntry(k);
+        if (this.renderSelection && this.isSelectedItem(k)) {
+            int p = this.isFocused() ? -1 : -8355712;
+            this.renderSelection(poseStack, m, n, o, p, -16777216);
+        }
+        ((Entry)entry).render(poseStack, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
+    }
+
+    protected void renderSelection(PoseStack poseStack, int i, int j, int k, int l, int m) {
+        int n = this.x0 + (this.width - j) / 2;
+        int o = this.x0 + (this.width + j) / 2;
+        AbstractSelectionList.fill(poseStack, n, i - 2, o, i + k + 2, l);
+        AbstractSelectionList.fill(poseStack, n + 1, i - 1, o - 1, i + k + 1, m);
     }
 
     public int getRowLeft() {

@@ -43,6 +43,8 @@ public class GameEvent {
     public static final GameEvent INSTRUMENT_PLAY = GameEvent.register("instrument_play");
     public static final GameEvent ITEM_INTERACT_FINISH = GameEvent.register("item_interact_finish");
     public static final GameEvent ITEM_INTERACT_START = GameEvent.register("item_interact_start");
+    public static final GameEvent JUKEBOX_PLAY = GameEvent.register("jukebox_play", 10);
+    public static final GameEvent JUKEBOX_STOP_PLAY = GameEvent.register("jukebox_stop_play", 10);
     public static final GameEvent LIGHTNING_STRIKE = GameEvent.register("lightning_strike");
     public static final GameEvent NOTE_BLOCK_PLAY = GameEvent.register("note_block_play");
     public static final GameEvent PISTON_CONTRACT = GameEvent.register("piston_contract");

@@ -576,8 +576,13 @@ ServerGamePacketListener {
     @Override
     public void handleRenameItem(ServerboundRenameItemPacket serverboundRenameItemPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundRenameItemPacket, this, this.player.getLevel());
-        if (this.player.containerMenu instanceof AnvilMenu) {
-            AnvilMenu anvilMenu = (AnvilMenu)this.player.containerMenu;
+        AbstractContainerMenu abstractContainerMenu = this.player.containerMenu;
+        if (abstractContainerMenu instanceof AnvilMenu) {
+            AnvilMenu anvilMenu = (AnvilMenu)abstractContainerMenu;
+            if (!anvilMenu.stillValid(this.player)) {
+                LOGGER.debug("Player {} interacted with invalid menu {}", (Object)this.player, (Object)anvilMenu);
+                return;
+            }
             String string = SharedConstants.filterText(serverboundRenameItemPacket.getName());
             if (string.length() <= 50) {
                 anvilMenu.setItemName(string);
@@ -588,8 +593,14 @@ ServerGamePacketListener {
     @Override
     public void handleSetBeaconPacket(ServerboundSetBeaconPacket serverboundSetBeaconPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundSetBeaconPacket, this, this.player.getLevel());
-        if (this.player.containerMenu instanceof BeaconMenu) {
-            ((BeaconMenu)this.player.containerMenu).updateEffects(serverboundSetBeaconPacket.getPrimary(), serverboundSetBeaconPacket.getSecondary());
+        AbstractContainerMenu abstractContainerMenu = this.player.containerMenu;
+        if (abstractContainerMenu instanceof BeaconMenu) {
+            BeaconMenu beaconMenu = (BeaconMenu)abstractContainerMenu;
+            if (!this.player.containerMenu.stillValid(this.player)) {
+                LOGGER.debug("Player {} interacted with invalid menu {}", (Object)this.player, (Object)this.player.containerMenu);
+                return;
+            }
+            beaconMenu.updateEffects(serverboundSetBeaconPacket.getPrimary(), serverboundSetBeaconPacket.getSecondary());
         }
     }
 
@@ -689,6 +700,10 @@ ServerGamePacketListener {
         AbstractContainerMenu abstractContainerMenu = this.player.containerMenu;
         if (abstractContainerMenu instanceof MerchantMenu) {
             MerchantMenu merchantMenu = (MerchantMenu)abstractContainerMenu;
+            if (!merchantMenu.stillValid(this.player)) {
+                LOGGER.debug("Player {} interacted with invalid menu {}", (Object)this.player, (Object)merchantMenu);
+                return;
+            }
             merchantMenu.setSelectionHint(i);
             merchantMenu.tryMoveItems(i);
         }
@@ -1134,11 +1149,12 @@ ServerGamePacketListener {
             this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
             return;
         }
-        PacketUtils.ensureRunningOnSameThread(serverboundChatCommandPacket, this, this.player.getLevel());
         if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp())) {
-            CommandSourceStack commandSourceStack = this.player.createCommandSourceStack().withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
-            this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
-            this.detectRateSpam();
+            this.server.submit(() -> {
+                CommandSourceStack commandSourceStack = this.player.createCommandSourceStack().withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
+                this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
+                this.detectRateSpam();
+            });
         }
     }
 
@@ -1151,7 +1167,14 @@ ServerGamePacketListener {
         if (this.isChatExpired(instant)) {
             LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", (Object)this.player.getName().getString(), (Object)string);
         }
-        return this.resetLastActionTime();
+        if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+            Registry<ChatType> registry = this.player.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+            int i = registry.getId(registry.get(ChatType.SYSTEM));
+            this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), i));
+            return false;
+        }
+        this.player.resetLastActionTime();
+        return true;
     }
 
     private boolean isChatExpired(Instant instant) {
@@ -1176,24 +1199,11 @@ ServerGamePacketListener {
         return false;
     }
 
-    private boolean resetLastActionTime() {
-        if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-            Registry<ChatType> registry = this.player.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-            int i = registry.getId(registry.get(ChatType.SYSTEM));
-            this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), i));
-            return false;
-        }
-        this.player.resetLastActionTime();
-        return true;
-    }
-
     private void handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText) {
-        if (this.resetLastActionTime()) {
-            MessageSignature messageSignature = serverboundChatPacket.getSignature(this.player.getUUID());
-            boolean bl = serverboundChatPacket.signedPreview();
-            ChatDecorator chatDecorator = this.server.getChatDecorator();
-            chatDecorator.decorateChat(this.player, filteredText.map(Component::literal), messageSignature, bl).thenAcceptAsync(this::broadcastChatMessage, (Executor)this.server);
-        }
+        MessageSignature messageSignature = serverboundChatPacket.getSignature(this.player.getUUID());
+        boolean bl = serverboundChatPacket.signedPreview();
+        ChatDecorator chatDecorator = this.server.getChatDecorator();
+        chatDecorator.decorateChat(this.player, filteredText.map(Component::literal), messageSignature, bl).thenAcceptAsync(this::broadcastChatMessage, (Executor)this.server);
     }
 
     private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
@@ -1431,6 +1441,10 @@ ServerGamePacketListener {
             this.player.containerMenu.sendAllDataToRemote();
             return;
         }
+        if (!this.player.containerMenu.stillValid(this.player)) {
+            LOGGER.debug("Player {} interacted with invalid menu {}", (Object)this.player, (Object)this.player.containerMenu);
+            return;
+        }
         int i = serverboundContainerClickPacket.getSlotNum();
         if (!this.player.containerMenu.isValidSlotIndex(i)) {
             LOGGER.debug("Player {} clicked invalid slot index: {}, available slots: {}", this.player.getName(), i, this.player.containerMenu.slots.size());
@@ -1458,15 +1472,26 @@ ServerGamePacketListener {
         if (this.player.isSpectator() || this.player.containerMenu.containerId != serverboundPlaceRecipePacket.getContainerId() || !(this.player.containerMenu instanceof RecipeBookMenu)) {
             return;
         }
+        if (!this.player.containerMenu.stillValid(this.player)) {
+            LOGGER.debug("Player {} interacted with invalid menu {}", (Object)this.player, (Object)this.player.containerMenu);
+            return;
+        }
         this.server.getRecipeManager().byKey(serverboundPlaceRecipePacket.getRecipe()).ifPresent(recipe -> ((RecipeBookMenu)this.player.containerMenu).handlePlacement(serverboundPlaceRecipePacket.isShiftDown(), (Recipe<?>)recipe, this.player));
     }
 
     @Override
     public void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket) {
-        boolean bl;
         PacketUtils.ensureRunningOnSameThread(serverboundContainerButtonClickPacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
-        if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator() && (bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId()))) {
+        if (this.player.containerMenu.containerId != serverboundContainerButtonClickPacket.getContainerId() || this.player.isSpectator()) {
+            return;
+        }
+        if (!this.player.containerMenu.stillValid(this.player)) {
+            LOGGER.debug("Player {} interacted with invalid menu {}", (Object)this.player, (Object)this.player.containerMenu);
+            return;
+        }
+        boolean bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
+        if (bl) {
             this.player.containerMenu.broadcastChanges();
         }
     }
@@ -1476,12 +1501,12 @@ ServerGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(serverboundSetCreativeModeSlotPacket, this, this.player.getLevel());
         if (this.player.gameMode.isCreative()) {
             boolean bl3;
-            BlockPos blockPos;
             BlockEntity blockEntity;
+            BlockPos blockPos;
             boolean bl = serverboundSetCreativeModeSlotPacket.getSlotNum() < 0;
             ItemStack itemStack = serverboundSetCreativeModeSlotPacket.getItem();
             CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-            if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z") && (blockEntity = this.player.level.getBlockEntity(blockPos = BlockEntity.getPosFromTag(compoundTag))) != null) {
+            if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z") && this.player.level.isLoaded(blockPos = BlockEntity.getPosFromTag(compoundTag)) && (blockEntity = this.player.level.getBlockEntity(blockPos)) != null) {
                 blockEntity.saveToItem(itemStack);
             }
             boolean bl2 = serverboundSetCreativeModeSlotPacket.getSlotNum() >= 1 && serverboundSetCreativeModeSlotPacket.getSlotNum() <= 45;

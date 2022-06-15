@@ -17,6 +17,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -133,8 +134,8 @@ extends GuiComponent {
         PlayerTabOverlay.fill(poseStack, i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + n * 9, Integer.MIN_VALUE);
         int n2 = this.minecraft.options.getBackgroundColor(0x20FFFFFF);
         for (int v = 0; v < m; ++v) {
-            int ad;
-            int ae;
+            int z;
+            int aa;
             t = v / n;
             w = v % n;
             int x = q + t * p + t * 5;
@@ -149,20 +150,14 @@ extends GuiComponent {
             if (bl) {
                 Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
                 boolean bl22 = player != null && LivingEntityRenderer.isEntityUpsideDown(player);
+                boolean bl3 = player != null && player.isModelPartShown(PlayerModelPart.HAT);
                 RenderSystem.setShaderTexture(0, playerInfo2.getSkinLocation());
-                int z = 8 + (bl22 ? 8 : 0);
-                int aa = 8 * (bl22 ? -1 : 1);
-                GuiComponent.blit(poseStack, x, y, 8, 8, 8.0f, z, 8, aa, 64, 64);
-                if (player != null && player.isModelPartShown(PlayerModelPart.HAT)) {
-                    int ab = 8 + (bl22 ? 8 : 0);
-                    int ac = 8 * (bl22 ? -1 : 1);
-                    GuiComponent.blit(poseStack, x, y, 8, 8, 40.0f, ab, 8, ac, 64, 64);
-                }
+                PlayerFaceRenderer.draw(poseStack, x, y, 8, bl3, bl22);
                 x += 9;
             }
             this.minecraft.font.drawShadow(poseStack, this.getNameForDisplay(playerInfo2), (float)x, (float)y, playerInfo2.getGameMode() == GameType.SPECTATOR ? -1862270977 : -1);
-            if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR && (ae = (ad = x + j + 1) + o) - ad > 5) {
-                this.renderTablistScore(objective, y, gameProfile.getName(), ad, ae, playerInfo2, poseStack);
+            if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR && (aa = (z = x + j + 1) + o) - z > 5) {
+                this.renderTablistScore(objective, y, gameProfile.getName(), z, aa, playerInfo2, poseStack);
             }
             this.renderPingIcon(poseStack, p, x - (bl ? 9 : 0), y, playerInfo2);
         }

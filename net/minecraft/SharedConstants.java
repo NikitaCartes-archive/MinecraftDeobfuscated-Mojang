@@ -15,22 +15,22 @@ import org.jetbrains.annotations.Nullable;
 
 public class SharedConstants {
     @Deprecated
-    public static final boolean SNAPSHOT = false;
+    public static final boolean SNAPSHOT = true;
     @Deprecated
-    public static final int WORLD_VERSION = 3105;
+    public static final int WORLD_VERSION = 3106;
     @Deprecated
     public static final String SERIES = "main";
     @Deprecated
-    public static final String VERSION_STRING = "1.19";
+    public static final String VERSION_STRING = "22w24a";
     @Deprecated
-    public static final String RELEASE_TARGET = "1.19";
+    public static final String RELEASE_TARGET = "1.19.1";
     @Deprecated
     public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 759;
     @Deprecated
-    public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 91;
+    public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 92;
     public static final int SNBT_NAG_VERSION = 3075;
     private static final int SNAPSHOT_PROTOCOL_BIT = 30;
-    public static final boolean THROW_ON_TASK_FAILURE = false;
+    public static final boolean THROW_ON_TASK_FAILURE = true;
     @Deprecated
     public static final int RESOURCE_PACK_FORMAT = 9;
     @Deprecated
@@ -82,6 +82,7 @@ public class SharedConstants {
     public static final boolean DEBUG_ORE_VEINS = false;
     public static final boolean DEBUG_SCULK_CATALYST = false;
     public static final boolean DEBUG_BYPASS_REALMS_VERSION_CHECK = false;
+    public static final boolean DEBUG_SOCIAL_INTERACTIONS = false;
     public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
     public static final boolean DEBUG_SMALL_SPAWN = false;
     public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;
@@ -133,9 +134,17 @@ public class SharedConstants {
     }
 
     public static String filterText(String string) {
+        return SharedConstants.filterText(string, false);
+    }
+
+    public static String filterText(String string, boolean bl) {
         StringBuilder stringBuilder = new StringBuilder();
         for (char c : string.toCharArray()) {
-            if (!SharedConstants.isAllowedChatCharacter(c)) continue;
+            if (SharedConstants.isAllowedChatCharacter(c)) {
+                stringBuilder.append(c);
+                continue;
+            }
+            if (!bl || c != '\n') continue;
             stringBuilder.append(c);
         }
         return stringBuilder.toString();
@@ -163,7 +172,7 @@ public class SharedConstants {
     }
 
     public static int getProtocolVersion() {
-        return 759;
+        return 1073741916;
     }
 
     public static boolean debugVoidTerrain(ChunkPos chunkPos) {

@@ -32,6 +32,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix4f;
+import com.mojang.realmsclient.dto.RealmsServer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,6 +126,8 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
@@ -393,6 +396,7 @@ implements WindowEventHandler {
     @Nullable
     private TimerQuery.FrameProfile currentFrameProfile;
     private final Realms32BitWarningStatus realms32BitWarningStatus;
+    private ReportingContext reportingContext;
     private String debugPath = "root";
 
     public Minecraft(GameConfig gameConfig) {
@@ -540,6 +544,7 @@ implements WindowEventHandler {
         this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
         this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
         this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
+        this.reportingContext = ReportingContext.create(ReportEnvironment.local(), this.userApiService);
         LoadingOverlay.registerTextures(this);
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
         this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
@@ -1607,7 +1612,7 @@ implements WindowEventHandler {
                 this.tutorial.removeTimedToast(this.socialInteractionsToast);
                 this.socialInteractionsToast = null;
             }
-            this.setScreen(new SocialInteractionsScreen());
+            this.setScreen(SocialInteractionsScreen.createWithWarning());
         }
         while (this.options.keyInventory.consumeClick()) {
             if (this.gameMode.isServerControlledInventory()) {
@@ -1693,6 +1698,7 @@ implements WindowEventHandler {
                 return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
             }));
             this.isLocalServer = true;
+            this.updateReportEnvironment(ReportEnvironment.local());
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Starting integrated server");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
@@ -1996,6 +2002,19 @@ implements WindowEventHandler {
 
     public void setCurrentServer(@Nullable ServerData serverData) {
         this.currentServer = serverData;
+        ReportEnvironment reportEnvironment = serverData != null ? ReportEnvironment.thirdParty(serverData.ip) : ReportEnvironment.local();
+        this.updateReportEnvironment(reportEnvironment);
+    }
+
+    public void setCurrentServer(RealmsServer realmsServer, String string) {
+        this.currentServer = realmsServer.toServerData(string);
+        this.updateReportEnvironment(ReportEnvironment.realm(realmsServer));
+    }
+
+    private void updateReportEnvironment(ReportEnvironment reportEnvironment) {
+        if (!this.reportingContext.matches(reportEnvironment)) {
+            this.reportingContext = ReportingContext.create(reportEnvironment, this.userApiService);
+        }
     }
 
     @Nullable
@@ -2418,6 +2437,10 @@ implements WindowEventHandler {
 
     public SignatureValidator getServiceSignatureValidator() {
         return this.serviceSignatureValidator;
+    }
+
+    public ReportingContext getReportingContext() {
+        return this.reportingContext;
     }
 
     static {

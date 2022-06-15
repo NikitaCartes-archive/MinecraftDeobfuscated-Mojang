@@ -29,11 +29,13 @@ extends Item {
     private static final Map<SoundEvent, RecordItem> BY_NAME = Maps.newHashMap();
     private final int analogOutput;
     private final SoundEvent sound;
+    private final int lengthInTicks;
 
-    protected RecordItem(int i, SoundEvent soundEvent, Item.Properties properties) {
+    protected RecordItem(int i, SoundEvent soundEvent, Item.Properties properties, int j) {
         super(properties);
         this.analogOutput = i;
         this.sound = soundEvent;
+        this.lengthInTicks = j * 20;
         BY_NAME.put(this.sound, this);
     }
 
@@ -78,6 +80,10 @@ extends Item {
 
     public SoundEvent getSound() {
         return this.sound;
+    }
+
+    public int getLengthInTicks() {
+        return this.lengthInTicks;
     }
 }
 

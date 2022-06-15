@@ -22,6 +22,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.HotbarManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.CreativeInventoryListener;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
@@ -35,6 +36,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -689,7 +691,9 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             }
             Component component = minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
             Component component2 = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
-            minecraft.gui.setOverlayMessage(Component.translatable("inventory.hotbarSaved", component2, component), false);
+            MutableComponent component3 = Component.translatable("inventory.hotbarSaved", component2, component);
+            minecraft.gui.setOverlayMessage(component3, false);
+            NarratorChatListener.INSTANCE.sayNow(component3);
             hotbarManager.save();
         }
     }

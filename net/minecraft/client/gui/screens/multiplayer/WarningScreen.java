@@ -19,13 +19,18 @@ public abstract class WarningScreen
 extends Screen {
     private final Component titleComponent;
     private final Component content;
+    @Nullable
     private final Component check;
     private final Component narration;
     @Nullable
     protected Checkbox stopShowing;
     private MultiLineLabel message = MultiLineLabel.EMPTY;
 
-    protected WarningScreen(Component component, Component component2, Component component3, Component component4) {
+    protected WarningScreen(Component component, Component component2, Component component3) {
+        this(component, component2, null, component3);
+    }
+
+    protected WarningScreen(Component component, Component component2, @Nullable Component component3, Component component4) {
         super(NarratorChatListener.NO_TITLE);
         this.titleComponent = component;
         this.content = component2;
@@ -40,9 +45,11 @@ extends Screen {
         super.init();
         this.message = MultiLineLabel.create(this.font, (FormattedText)this.content, this.width - 100);
         int i = (this.message.getLineCount() + 1) * this.getLineHeight();
-        int j = this.font.width(this.check);
-        this.stopShowing = new Checkbox(this.width / 2 - j / 2 - 8, 76 + i, j + 24, 20, this.check, false);
-        this.addRenderableWidget(this.stopShowing);
+        if (this.check != null) {
+            int j = this.font.width(this.check);
+            this.stopShowing = new Checkbox(this.width / 2 - j / 2 - 8, 76 + i, j + 24, 20, this.check, false);
+            this.addRenderableWidget(this.stopShowing);
+        }
         this.initButtons(i);
     }
 

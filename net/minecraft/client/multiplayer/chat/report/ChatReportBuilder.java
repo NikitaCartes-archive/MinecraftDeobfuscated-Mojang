@@ -1,0 +1,188 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.multiplayer.chat.report;
+
+import com.mojang.authlib.minecraft.report.AbuseReport;
+import com.mojang.authlib.minecraft.report.AbuseReportLimits;
+import com.mojang.authlib.minecraft.report.ReportChatMessage;
+import com.mojang.authlib.minecraft.report.ReportEvidence;
+import com.mojang.authlib.minecraft.report.ReportedEntity;
+import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.IntStream;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.chat.ChatLog;
+import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.report.ReportReason;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.util.Crypt;
+import org.jetbrains.annotations.Nullable;
+
+@Environment(value=EnvType.CLIENT)
+public class ChatReportBuilder {
+    private static final String REPORT_TYPE_CHAT = "CHAT";
+    private static final int CONTEXT_FRONT = 2;
+    private static final int CONTEXT_BACK = 4;
+    private final UUID id;
+    private final Instant createdAt;
+    private final UUID reportedProfileId;
+    private final AbuseReportLimits limits;
+    private final IntSet reportedMessages = new IntOpenHashSet();
+    private String comments = "";
+    @Nullable
+    private ReportReason reason;
+
+    private ChatReportBuilder(UUID uUID, Instant instant, UUID uUID2, AbuseReportLimits abuseReportLimits) {
+        this.id = uUID;
+        this.createdAt = instant;
+        this.reportedProfileId = uUID2;
+        this.limits = abuseReportLimits;
+    }
+
+    public ChatReportBuilder(UUID uUID, AbuseReportLimits abuseReportLimits) {
+        this(UUID.randomUUID(), Instant.now(), uUID, abuseReportLimits);
+    }
+
+    public void setComments(String string) {
+        this.comments = string;
+    }
+
+    public void setReason(ReportReason reportReason) {
+        this.reason = reportReason;
+    }
+
+    public void toggleReported(int i) {
+        if (this.reportedMessages.contains(i)) {
+            this.reportedMessages.remove(i);
+        } else if (this.reportedMessages.size() < this.limits.maxReportedMessageCount()) {
+            this.reportedMessages.add(i);
+        }
+    }
+
+    public UUID reportedProfileId() {
+        return this.reportedProfileId;
+    }
+
+    public IntSet reportedMessages() {
+        return this.reportedMessages;
+    }
+
+    public String comments() {
+        return this.comments;
+    }
+
+    @Nullable
+    public ReportReason reason() {
+        return this.reason;
+    }
+
+    public boolean isReported(int i) {
+        return this.reportedMessages.contains(i);
+    }
+
+    @Nullable
+    public CannotBuildReason checkBuildable() {
+        if (this.reportedMessages.isEmpty()) {
+            return CannotBuildReason.NO_REPORTED_MESSAGES;
+        }
+        if (this.reportedMessages.size() > this.limits.maxReportedMessageCount()) {
+            return CannotBuildReason.TOO_MANY_MESSAGES;
+        }
+        if (this.reason == null) {
+            return CannotBuildReason.NO_REASON;
+        }
+        if (this.comments.length() > this.limits.maxOpinionCommentsLength()) {
+            return CannotBuildReason.COMMENTS_TOO_LONG;
+        }
+        return null;
+    }
+
+    public Either<Result, CannotBuildReason> build(ReportingContext reportingContext) {
+        CannotBuildReason cannotBuildReason = this.checkBuildable();
+        if (cannotBuildReason != null) {
+            return Either.right(cannotBuildReason);
+        }
+        String string = Objects.requireNonNull(this.reason).backendName();
+        ReportEvidence reportEvidence = this.buildEvidence(reportingContext.chatLog());
+        if (reportEvidence.messages.size() > this.limits.maxEvidenceMessageCount()) {
+            return Either.right(CannotBuildReason.TOO_MANY_MESSAGES);
+        }
+        ReportedEntity reportedEntity = new ReportedEntity(this.reportedProfileId);
+        AbuseReport abuseReport = new AbuseReport(REPORT_TYPE_CHAT, this.comments, string, reportEvidence, reportedEntity, this.createdAt);
+        return Either.left(new Result(this.id, abuseReport));
+    }
+
+    private ReportEvidence buildEvidence(ChatLog chatLog) {
+        IntRBTreeSet intSortedSet = new IntRBTreeSet();
+        this.reportedMessages.forEach(i -> {
+            IntStream intStream = this.selectContextMessages(chatLog, i);
+            intStream.forEach(intSortedSet::add);
+        });
+        List<ReportChatMessage> list = intSortedSet.intStream().mapToObj(i -> {
+            LoggedChat loggedChat = chatLog.lookup(i);
+            if (loggedChat instanceof LoggedChat.Player) {
+                LoggedChat.Player player = (LoggedChat.Player)loggedChat;
+                return this.buildReportedChatMessage(i, player);
+            }
+            return null;
+        }).filter(Objects::nonNull).toList();
+        return new ReportEvidence(list);
+    }
+
+    private ReportChatMessage buildReportedChatMessage(int i, LoggedChat.Player player) {
+        PlayerChatMessage playerChatMessage = player.message();
+        Instant instant = playerChatMessage.signature().timeStamp();
+        Crypt.SaltSignaturePair saltSignaturePair = playerChatMessage.signature().saltSignature();
+        long l = saltSignaturePair.salt();
+        String string = saltSignaturePair.isValid() ? ChatReportBuilder.encodeSignature(saltSignaturePair.signature()) : null;
+        String string2 = ChatReportBuilder.encodeComponent(playerChatMessage.signedContent());
+        String string3 = playerChatMessage.unsignedContent().map(ChatReportBuilder::encodeComponent).orElse(null);
+        return new ReportChatMessage(player.profileId(), instant, l, string, string2, string3, this.isReported(i));
+    }
+
+    private static String encodeComponent(Component component) {
+        return Component.Serializer.toStableJson(component);
+    }
+
+    private static String encodeSignature(byte[] bs) {
+        return Base64.getEncoder().encodeToString(bs);
+    }
+
+    private IntStream selectContextMessages(ChatLog chatLog, int i) {
+        int j = chatLog.offsetClamped(i, -4);
+        int k = chatLog.offsetClamped(i, 2);
+        return chatLog.selectBetween(j, k).ids();
+    }
+
+    public ChatReportBuilder copy() {
+        ChatReportBuilder chatReportBuilder = new ChatReportBuilder(this.id, this.createdAt, this.reportedProfileId, this.limits);
+        chatReportBuilder.reportedMessages.addAll(this.reportedMessages);
+        chatReportBuilder.comments = this.comments;
+        chatReportBuilder.reason = this.reason;
+        return chatReportBuilder;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public record CannotBuildReason(Component message) {
+        public static final CannotBuildReason NO_REASON = new CannotBuildReason(Component.translatable("gui.chatReport.send.no_reason"));
+        public static final CannotBuildReason NO_REPORTED_MESSAGES = new CannotBuildReason(Component.translatable("gui.chatReport.send.no_reported_messages"));
+        public static final CannotBuildReason TOO_MANY_MESSAGES = new CannotBuildReason(Component.translatable("gui.chatReport.send.too_many_messages"));
+        public static final CannotBuildReason COMMENTS_TOO_LONG = new CannotBuildReason(Component.translatable("gui.chatReport.send.comments_too_long"));
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public record Result(UUID id, AbuseReport report) {
+    }
+}
+
