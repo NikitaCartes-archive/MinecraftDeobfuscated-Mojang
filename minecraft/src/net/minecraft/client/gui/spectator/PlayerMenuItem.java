@@ -9,7 +9,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
@@ -49,8 +49,7 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 	public void renderIcon(PoseStack poseStack, float f, int i) {
 		RenderSystem.setShaderTexture(0, this.location);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, (float)i / 255.0F);
-		GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
-		GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
+		PlayerFaceRenderer.draw(poseStack, 2, 2, 12);
 	}
 
 	@Override

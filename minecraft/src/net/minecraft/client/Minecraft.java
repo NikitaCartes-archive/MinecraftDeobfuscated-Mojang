@@ -30,6 +30,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix4f;
+import com.mojang.realmsclient.dto.RealmsServer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,6 +107,8 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
@@ -371,6 +374,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	private TimerQuery.FrameProfile currentFrameProfile;
 	private final Realms32BitWarningStatus realms32BitWarningStatus;
+	private ReportingContext reportingContext;
 	private String debugPath = "root";
 
 	public Minecraft(GameConfig gameConfig) {
@@ -547,6 +551,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
 		this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
 		this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
+		this.reportingContext = ReportingContext.create(ReportEnvironment.local(), this.userApiService);
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
 		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
@@ -1797,7 +1802,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					this.socialInteractionsToast = null;
 				}
 
-				this.setScreen(new SocialInteractionsScreen());
+				this.setScreen(SocialInteractionsScreen.createWithWarning());
 			}
 		}
 
@@ -1901,6 +1906,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
 				}));
 			this.isLocalServer = true;
+			this.updateReportEnvironment(ReportEnvironment.local());
 		} catch (Throwable var9) {
 			CrashReport crashReport = CrashReport.forThrowable(var9, "Starting integrated server");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
@@ -2239,6 +2245,19 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void setCurrentServer(@Nullable ServerData serverData) {
 		this.currentServer = serverData;
+		ReportEnvironment reportEnvironment = serverData != null ? ReportEnvironment.thirdParty(serverData.ip) : ReportEnvironment.local();
+		this.updateReportEnvironment(reportEnvironment);
+	}
+
+	public void setCurrentServer(RealmsServer realmsServer, String string) {
+		this.currentServer = realmsServer.toServerData(string);
+		this.updateReportEnvironment(ReportEnvironment.realm(realmsServer));
+	}
+
+	private void updateReportEnvironment(ReportEnvironment reportEnvironment) {
+		if (!this.reportingContext.matches(reportEnvironment)) {
+			this.reportingContext = ReportingContext.create(reportEnvironment, this.userApiService);
+		}
 	}
 
 	@Nullable
@@ -2679,6 +2698,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public SignatureValidator getServiceSignatureValidator() {
 		return this.serviceSignatureValidator;
+	}
+
+	public ReportingContext getReportingContext() {
+		return this.reportingContext;
 	}
 
 	@Environment(EnvType.CLIENT)

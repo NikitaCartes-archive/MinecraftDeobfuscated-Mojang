@@ -35,6 +35,8 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.HIT_GROUND,
 		GameEvent.INSTRUMENT_PLAY,
 		GameEvent.ITEM_INTERACT_FINISH,
+		GameEvent.JUKEBOX_PLAY,
+		GameEvent.JUKEBOX_STOP_PLAY,
 		GameEvent.LIGHTNING_STRIKE,
 		GameEvent.NOTE_BLOCK_PLAY,
 		GameEvent.PISTON_CONTRACT,

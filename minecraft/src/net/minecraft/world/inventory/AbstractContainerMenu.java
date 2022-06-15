@@ -32,7 +32,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.slf4j.Logger;
 
 public abstract class AbstractContainerMenu {
-	private static Logger LOGGER = LogUtils.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int SLOT_CLICKED_OUTSIDE = -999;
 	public static final int QUICKCRAFT_TYPE_CHARITABLE = 0;
 	public static final int QUICKCRAFT_TYPE_GREEDY = 1;

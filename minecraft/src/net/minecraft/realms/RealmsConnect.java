@@ -67,7 +67,7 @@ public class RealmsConnect {
 
 						String string = minecraft.getUser().getName();
 						RealmsConnect.this.connection.send(new ServerboundHelloPacket(string, minecraft.getProfileKeyPairManager().profilePublicKeyData()));
-						minecraft.setCurrentServer(realmsServer.toServerData(string));
+						minecraft.setCurrentServer(realmsServer, string);
 					} catch (Exception var5) {
 						minecraft.getClientPackSource().clearServerPack();
 						if (RealmsConnect.this.aborted) {

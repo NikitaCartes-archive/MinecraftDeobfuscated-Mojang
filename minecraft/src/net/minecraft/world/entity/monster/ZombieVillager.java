@@ -231,6 +231,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 
 		villager.setVillagerXp(this.villagerXp);
 		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null, null);
+		villager.refreshBrain(serverLevel);
 		if (this.conversionStarter != null) {
 			Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
 			if (player instanceof ServerPlayer) {

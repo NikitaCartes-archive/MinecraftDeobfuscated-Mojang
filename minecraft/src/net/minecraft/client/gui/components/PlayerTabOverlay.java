@@ -162,16 +162,9 @@ public class PlayerTabOverlay extends GuiComponent {
 				if (bl) {
 					Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
 					boolean bl2 = player != null && LivingEntityRenderer.isEntityUpsideDown(player);
+					boolean bl3 = player != null && player.isModelPartShown(PlayerModelPart.HAT);
 					RenderSystem.setShaderTexture(0, playerInfo2.getSkinLocation());
-					int z = 8 + (bl2 ? 8 : 0);
-					int aa = 8 * (bl2 ? -1 : 1);
-					GuiComponent.blit(poseStack, x, y, 8, 8, 8.0F, (float)z, 8, aa, 64, 64);
-					if (player != null && player.isModelPartShown(PlayerModelPart.HAT)) {
-						int ab = 8 + (bl2 ? 8 : 0);
-						int ac = 8 * (bl2 ? -1 : 1);
-						GuiComponent.blit(poseStack, x, y, 8, 8, 40.0F, (float)ab, 8, ac, 64, 64);
-					}
-
+					PlayerFaceRenderer.draw(poseStack, x, y, 8, bl3, bl2);
 					x += 9;
 				}
 
@@ -179,10 +172,10 @@ public class PlayerTabOverlay extends GuiComponent {
 					.font
 					.drawShadow(poseStack, this.getNameForDisplay(playerInfo2), (float)x, (float)y, playerInfo2.getGameMode() == GameType.SPECTATOR ? -1862270977 : -1);
 				if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR) {
-					int ad = x + j + 1;
-					int ae = ad + o;
-					if (ae - ad > 5) {
-						this.renderTablistScore(objective, y, gameProfile.getName(), ad, ae, playerInfo2, poseStack);
+					int z = x + j + 1;
+					int aa = z + o;
+					if (aa - z > 5) {
+						this.renderTablistScore(objective, y, gameProfile.getName(), z, aa, playerInfo2, poseStack);
 					}
 				}
 

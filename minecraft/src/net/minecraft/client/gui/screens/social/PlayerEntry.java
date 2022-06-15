@@ -18,8 +18,11 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.reporting.ChatReportScreen;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -41,10 +44,14 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	private Button hideButton;
 	@Nullable
 	private Button showButton;
+	@Nullable
+	private Button reportButton;
 	final Component hideText;
 	final Component showText;
+	final Component reportText;
 	final List<FormattedCharSequence> hideTooltip;
 	final List<FormattedCharSequence> showTooltip;
+	final List<FormattedCharSequence> reportTooltip;
 	float tooltipHoverTime;
 	private static final Component HIDDEN = Component.translatable("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
 	private static final Component BLOCKED = Component.translatable("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
@@ -69,10 +76,50 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		this.skinGetter = supplier;
 		this.hideText = Component.translatable("gui.socialInteractions.tooltip.hide", string);
 		this.showText = Component.translatable("gui.socialInteractions.tooltip.show", string);
+		this.reportText = Component.translatable("gui.socialInteractions.tooltip.report", string);
 		this.hideTooltip = minecraft.font.split(this.hideText, 150);
 		this.showTooltip = minecraft.font.split(this.showText, 150);
+		this.reportTooltip = minecraft.font.split(this.reportText, 150);
 		PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
-		if (!minecraft.player.getGameProfile().getId().equals(uUID) && !playerSocialManager.isBlocked(uUID)) {
+		boolean bl = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
+		boolean bl2 = !minecraft.player.getUUID().equals(uUID);
+		if (bl2 && bl && !playerSocialManager.isBlocked(uUID)) {
+			ReportingContext reportingContext = minecraft.getReportingContext();
+			this.reportButton = new ImageButton(
+				0,
+				0,
+				20,
+				20,
+				40,
+				38,
+				20,
+				SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION,
+				256,
+				256,
+				button -> minecraft.setScreen(new ChatReportScreen(minecraft.screen, reportingContext, uUID)),
+				new Button.OnTooltip() {
+					@Override
+					public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
+						PlayerEntry.this.tooltipHoverTime = PlayerEntry.this.tooltipHoverTime + minecraft.getDeltaFrameTime();
+						if (PlayerEntry.this.tooltipHoverTime >= 10.0F) {
+							socialInteractionsScreen.setPostRenderRunnable(
+								() -> PlayerEntry.postRenderTooltip(socialInteractionsScreen, poseStack, PlayerEntry.this.reportTooltip, i, j)
+							);
+						}
+					}
+
+					@Override
+					public void narrateTooltip(Consumer<Component> consumer) {
+						consumer.accept(PlayerEntry.this.reportText);
+					}
+				},
+				Component.translatable("gui.socialInteractions.report")
+			) {
+				@Override
+				protected MutableComponent createNarrationMessage() {
+					return PlayerEntry.this.getEntryNarationMessage(super.createNarrationMessage());
+				}
+			};
 			this.hideButton = new ImageButton(
 				0,
 				0,
@@ -151,7 +198,8 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			};
 			this.showButton.visible = playerSocialManager.isHidden(uUID);
 			this.hideButton.visible = !this.showButton.visible;
-			this.children = ImmutableList.of(this.hideButton, this.showButton);
+			this.reportButton.active = reportingContext.sender().isEnabled();
+			this.children = ImmutableList.of(this.hideButton, this.showButton, this.reportButton);
 		} else {
 			this.children = ImmutableList.of();
 		}
@@ -174,23 +222,23 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		}
 
 		RenderSystem.setShaderTexture(0, (ResourceLocation)this.skinGetter.get());
-		GuiComponent.blit(poseStack, p, q, 24, 24, 8.0F, 8.0F, 8, 8, 64, 64);
-		RenderSystem.enableBlend();
-		GuiComponent.blit(poseStack, p, q, 24, 24, 40.0F, 8.0F, 8, 8, 64, 64);
-		RenderSystem.disableBlend();
+		PlayerFaceRenderer.draw(poseStack, p, q, 24);
 		this.minecraft.font.draw(poseStack, this.playerName, (float)r, (float)s, PLAYERNAME_COLOR);
 		if (this.isRemoved) {
 			GuiComponent.fill(poseStack, p, q, p + 24, q + 24, SKIN_SHADE);
 		}
 
-		if (this.hideButton != null && this.showButton != null) {
+		if (this.hideButton != null && this.showButton != null && this.reportButton != null) {
 			float g = this.tooltipHoverTime;
-			this.hideButton.x = k + (l - this.hideButton.getWidth() - 4);
+			this.hideButton.x = k + (l - this.hideButton.getWidth() - 4) - 20 - 4;
 			this.hideButton.y = j + (m - this.hideButton.getHeight()) / 2;
 			this.hideButton.render(poseStack, n, o, f);
-			this.showButton.x = k + (l - this.showButton.getWidth() - 4);
+			this.showButton.x = k + (l - this.showButton.getWidth() - 4) - 20 - 4;
 			this.showButton.y = j + (m - this.showButton.getHeight()) / 2;
 			this.showButton.render(poseStack, n, o, f);
+			this.reportButton.x = k + (l - this.showButton.getWidth() - 4);
+			this.reportButton.y = j + (m - this.showButton.getHeight()) / 2;
+			this.reportButton.render(poseStack, n, o, f);
 			if (g == this.tooltipHoverTime) {
 				this.tooltipHoverTime = 0.0F;
 			}

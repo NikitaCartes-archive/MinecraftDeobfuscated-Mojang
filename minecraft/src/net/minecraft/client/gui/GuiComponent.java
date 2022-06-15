@@ -1,6 +1,7 @@
 package net.minecraft.client.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -12,6 +13,7 @@ import com.mojang.math.Matrix4f;
 import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
@@ -43,6 +45,21 @@ public abstract class GuiComponent {
 		}
 
 		fill(poseStack, i, j + 1, i + 1, k, l);
+	}
+
+	public static void enableScissor(int i, int j, int k, int l) {
+		Window window = Minecraft.getInstance().getWindow();
+		int m = window.getHeight();
+		double d = window.getGuiScale();
+		double e = (double)i * d;
+		double f = (double)m - (double)l * d;
+		double g = (double)(k - i) * d;
+		double h = (double)(l - j) * d;
+		RenderSystem.enableScissor((int)e, (int)f, Math.max(0, (int)g), Math.max(0, (int)h));
+	}
+
+	public static void disableScissor() {
+		RenderSystem.disableScissor();
 	}
 
 	public static void fill(PoseStack poseStack, int i, int j, int k, int l, int m) {

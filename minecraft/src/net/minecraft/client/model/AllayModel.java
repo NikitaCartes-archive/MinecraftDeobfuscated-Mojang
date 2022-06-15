@@ -85,8 +85,6 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 
 	public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
 		float k = h * 20.0F * (float) (Math.PI / 180.0) + g;
 		float l = Mth.cos(k) * (float) Math.PI * 0.15F;
 		float m = h - (float)allay.tickCount;
@@ -94,6 +92,21 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		float o = Math.min(g / 0.3F, 1.0F);
 		float p = 1.0F - o;
 		float q = allay.getHoldingItemAnimationProgress(m);
+		if (allay.isDancing()) {
+			float r = h * 8.0F * (float) (Math.PI / 180.0) + g;
+			float s = Mth.cos(r) * 16.0F * (float) (Math.PI / 180.0);
+			float t = allay.getSpinningProgress(m);
+			float u = Mth.cos(r) * 14.0F * (float) (Math.PI / 180.0);
+			float v = Mth.cos(r) * 30.0F * (float) (Math.PI / 180.0);
+			this.root.yRot = allay.isSpinning() ? (float) (Math.PI * 4) * t : this.root.yRot;
+			this.root.zRot = s * (1.0F - t);
+			this.head.yRot = v * (1.0F - t);
+			this.head.zRot = u * (1.0F - t);
+		} else {
+			this.head.xRot = j * (float) (Math.PI / 180.0);
+			this.head.yRot = i * (float) (Math.PI / 180.0);
+		}
+
 		this.right_wing.xRot = 0.43633232F;
 		this.right_wing.yRot = -0.61086524F + l;
 		this.left_wing.xRot = 0.43633232F;

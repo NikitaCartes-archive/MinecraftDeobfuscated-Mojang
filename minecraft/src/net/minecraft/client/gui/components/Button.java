@@ -12,6 +12,9 @@ import net.minecraft.network.chat.Component;
 public class Button extends AbstractButton {
 	public static final Button.OnTooltip NO_TOOLTIP = (button, poseStack, i, j) -> {
 	};
+	public static final int SMALL_WIDTH = 120;
+	public static final int DEFAULT_WIDTH = 150;
+	public static final int DEFAULT_HEIGHT = 20;
 	protected final Button.OnPress onPress;
 	protected final Button.OnTooltip onTooltip;
 

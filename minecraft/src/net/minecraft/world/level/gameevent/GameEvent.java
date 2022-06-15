@@ -39,6 +39,8 @@ public class GameEvent {
 	public static final GameEvent INSTRUMENT_PLAY = register("instrument_play");
 	public static final GameEvent ITEM_INTERACT_FINISH = register("item_interact_finish");
 	public static final GameEvent ITEM_INTERACT_START = register("item_interact_start");
+	public static final GameEvent JUKEBOX_PLAY = register("jukebox_play", 10);
+	public static final GameEvent JUKEBOX_STOP_PLAY = register("jukebox_stop_play", 10);
 	public static final GameEvent LIGHTNING_STRIKE = register("lightning_strike");
 	public static final GameEvent NOTE_BLOCK_PLAY = register("note_block_play");
 	public static final GameEvent PISTON_CONTRACT = register("piston_contract");

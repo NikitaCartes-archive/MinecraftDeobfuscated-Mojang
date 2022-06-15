@@ -63,6 +63,8 @@ import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatSender;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -1799,8 +1801,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return 1000000;
 	}
 
-	public void logMessageFrom(ChatSender chatSender, Component component) {
-		LOGGER.info(Component.translatable("chat.type.text", chatSender.name(), component).getString());
+	public void logChatMessage(ChatSender chatSender, Component component, ResourceKey<ChatType> resourceKey) {
+		ChatTypeDecoration chatTypeDecoration = (ChatTypeDecoration)this.registryAccess()
+			.registry(Registry.CHAT_TYPE_REGISTRY)
+			.map(registry -> registry.get(resourceKey))
+			.flatMap(ChatType::chat)
+			.flatMap(ChatType.TextDisplay::decoration)
+			.orElse(ChatType.DEFAULT_CHAT_DECORATION);
+		LOGGER.info(chatTypeDecoration.decorate(component, chatSender).getString());
 	}
 
 	public ChatDecorator getChatDecorator() {

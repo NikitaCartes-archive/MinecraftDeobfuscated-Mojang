@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 
 public class TryLaySpawnOnWaterNearLand extends Behavior<Frog> {
 	private final Block spawnBlock;
@@ -40,7 +40,8 @@ public class TryLaySpawnOnWaterNearLand extends Behavior<Frog> {
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos blockPos2 = blockPos.relative(direction);
-			if (serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
+			if (serverLevel.getBlockState(blockPos2).getCollisionShape(serverLevel, blockPos2).getFaceShape(Direction.UP).isEmpty()
+				&& serverLevel.getFluidState(blockPos2).is(Fluids.WATER)) {
 				BlockPos blockPos3 = blockPos2.above();
 				if (serverLevel.getBlockState(blockPos3).isAir()) {
 					serverLevel.setBlock(blockPos3, this.spawnBlock.defaultBlockState(), 3);

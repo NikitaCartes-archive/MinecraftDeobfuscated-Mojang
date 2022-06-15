@@ -9,7 +9,9 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsNews;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
+import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.task.RepeatableTask;
+import com.mojang.realmsclient.util.ExponentialBackoff;
 import com.mojang.realmsclient.util.RealmsPersistence;
 import java.time.Duration;
 import java.util.List;
@@ -36,10 +38,10 @@ public class RealmsDataFetcher {
 	private final RepeatableTask serverListUpdateTask = RepeatableTask.withImmediateRestart(this::updateServersList, Duration.ofSeconds(60L), this::isActive);
 	private final RepeatableTask liveStatsTask = RepeatableTask.withImmediateRestart(this::updateLiveStats, Duration.ofSeconds(10L), this::isActive);
 	private final RepeatableTask pendingInviteUpdateTask = RepeatableTask.withRestartDelayAccountingForInterval(
-		this::updatePendingInvites, Duration.ofSeconds(10L), this::isActive
+		new ExponentialBackoff(this::updatePendingInvites, 360), Duration.ofSeconds(10L), this::isActive
 	);
 	private final RepeatableTask trialAvailabilityTask = RepeatableTask.withRestartDelayAccountingForInterval(
-		this::updateTrialAvailable, Duration.ofSeconds(60L), this::isActive
+		new ExponentialBackoff(this::updateTrialAvailable, 60), Duration.ofSeconds(60L), this::isActive
 	);
 	private final RepeatableTask unreadNewsTask = RepeatableTask.withRestartDelayAccountingForInterval(
 		this::updateUnreadNews, Duration.ofMinutes(5L), this::isActive
@@ -212,21 +214,23 @@ public class RealmsDataFetcher {
 		}
 	}
 
-	private void updatePendingInvites() {
+	private void updatePendingInvites() throws RealmsServiceException {
 		try {
 			this.pendingInvitesCount = this.realmsClient.pendingInvitesCount();
 			this.fetchStatus.put(RealmsDataFetcher.Task.PENDING_INVITE, true);
-		} catch (Exception var2) {
+		} catch (RealmsServiceException var2) {
 			LOGGER.error("Couldn't get pending invite count", (Throwable)var2);
+			throw var2;
 		}
 	}
 
-	private void updateTrialAvailable() {
+	private void updateTrialAvailable() throws RealmsServiceException {
 		try {
 			this.trialAvailable = this.realmsClient.trialAvailable();
 			this.fetchStatus.put(RealmsDataFetcher.Task.TRIAL_AVAILABLE, true);
-		} catch (Exception var2) {
+		} catch (RealmsServiceException var2) {
 			LOGGER.error("Couldn't get trial availability", (Throwable)var2);
+			throw var2;
 		}
 	}
 

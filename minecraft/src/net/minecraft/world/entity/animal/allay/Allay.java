@@ -9,9 +9,13 @@ import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -46,25 +50,35 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class Allay extends PathfinderMob implements InventoryCarrier, VibrationListener.VibrationListenerConfig {
+public class Allay extends PathfinderMob implements InventoryCarrier {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final int GAME_EVENT_LISTENER_RANGE = 16;
+	private static final int VIBRATION_EVENT_LISTENER_RANGE = 16;
 	private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 1, 1);
-	private static final int ANIMATION_DURATION = 5;
+	private static final int LIFTING_ITEM_ANIMATION_DURATION = 5;
+	private static final float DANCING_LOOP_DURATION = 55.0F;
+	private static final float SPINNING_ANIMATION_DURATION = 15.0F;
 	private static final float PATHFINDING_BOUNDING_BOX_PADDING = 0.5F;
+	private static final Ingredient DUPLICATION_ITEM = Ingredient.of(Items.AMETHYST_SHARD);
+	private static final int DUPLICATION_COOLDOWN_TICKS = 2400;
+	private static final EntityDataAccessor<Boolean> DATA_DANCING = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_CAN_DUPLICATE = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS
 	);
@@ -85,18 +99,28 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	public static final ImmutableList<Float> THROW_SOUND_PITCHES = ImmutableList.of(
 		0.5625F, 0.625F, 0.75F, 0.9375F, 1.0F, 1.0F, 1.125F, 1.25F, 1.5F, 1.875F, 2.0F, 2.25F, 2.5F, 3.0F, 3.75F, 4.0F
 	);
-	private final DynamicGameEventListener<VibrationListener> dynamicGameEventListener;
+	private final DynamicGameEventListener<VibrationListener> dynamicVibrationListener;
+	private final VibrationListener.VibrationListenerConfig vibrationListenerConfig;
+	private final DynamicGameEventListener<Allay.JukeboxListener> dynamicJukeboxListener;
 	private final SimpleContainer inventory = new SimpleContainer(1);
+	@Nullable
+	private BlockPos jukeboxPos;
+	private long duplicationCooldown;
 	private float holdingItemAnimationTicks;
 	private float holdingItemAnimationTicks0;
+	private float dancingAnimationTicks;
+	private float spinningAnimationTicks;
+	private float spinningAnimationTicks0;
+	private int numOfDuplicatingHearts;
 
 	public Allay(EntityType<? extends Allay> entityType, Level level) {
 		super(entityType, level);
 		this.moveControl = new FlyingMoveControl(this, 20, true);
 		this.setCanPickUpLoot(this.canPickUpLoot());
-		this.dynamicGameEventListener = new DynamicGameEventListener<>(
-			new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0.0F, 0)
-		);
+		PositionSource positionSource = new EntityPositionSource(this, this.getEyeHeight());
+		this.vibrationListenerConfig = new Allay.AllayVibrationListenerConfig();
+		this.dynamicVibrationListener = new DynamicGameEventListener<>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig, null, 0.0F, 0));
+		this.dynamicJukeboxListener = new DynamicGameEventListener<>(new Allay.JukeboxListener(positionSource, GameEvent.JUKEBOX_PLAY.getNotificationRadius()));
 	}
 
 	@Override
@@ -130,6 +154,13 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		flyingPathNavigation.setCanFloat(true);
 		flyingPathNavigation.setCanPassDoors(true);
 		return flyingPathNavigation;
+	}
+
+	@Override
+	protected void defineSynchedData() {
+		super.defineSynchedData();
+		this.entityData.define(DATA_DANCING, false);
+		this.entityData.define(DATA_CAN_DUPLICATE, true);
 	}
 
 	@Override
@@ -220,6 +251,21 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		if (!this.level.isClientSide && this.isAlive() && this.tickCount % 10 == 0) {
 			this.heal(1.0F);
 		}
+
+		if (this.isDancing() && this.shouldStopDancing() && this.tickCount % 20 == 0) {
+			this.setDancing(false);
+			this.jukeboxPos = null;
+		}
+
+		if (this.numOfDuplicatingHearts > 0) {
+			this.numOfDuplicatingHearts--;
+			double d = this.random.nextGaussian() * 0.02;
+			double e = this.random.nextGaussian() * 0.02;
+			double f = this.random.nextGaussian() * 0.02;
+			this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
+		}
+
+		this.updateDuplicationCooldown();
 	}
 
 	@Override
@@ -232,8 +278,24 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 			} else {
 				this.holdingItemAnimationTicks = Mth.clamp(this.holdingItemAnimationTicks - 1.0F, 0.0F, 5.0F);
 			}
+
+			if (this.isDancing()) {
+				this.dancingAnimationTicks++;
+				this.spinningAnimationTicks0 = this.spinningAnimationTicks;
+				if (this.isSpinning()) {
+					this.spinningAnimationTicks++;
+				} else {
+					this.spinningAnimationTicks--;
+				}
+
+				this.spinningAnimationTicks = Mth.clamp(this.spinningAnimationTicks, 0.0F, 15.0F);
+			} else {
+				this.dancingAnimationTicks = 0.0F;
+				this.spinningAnimationTicks = 0.0F;
+				this.spinningAnimationTicks0 = 0.0F;
+			}
 		} else {
-			this.dynamicGameEventListener.getListener().tick(this.level);
+			this.dynamicVibrationListener.getListener().tick(this.level);
 		}
 	}
 
@@ -259,14 +321,17 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-		if (itemStack2.isEmpty() && !itemStack.isEmpty()) {
+		if (this.isDancing() && this.isDuplicationItem(itemStack) && this.canDuplicate()) {
+			this.duplicateAllay();
+			this.numOfDuplicatingHearts = 3;
+			this.level.playSound(player, this, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 2.0F, 1.0F);
+			this.removeInteractionItem(player, itemStack);
+			return InteractionResult.SUCCESS;
+		} else if (itemStack2.isEmpty() && !itemStack.isEmpty()) {
 			ItemStack itemStack3 = itemStack.copy();
 			itemStack3.setCount(1);
 			this.setItemInHand(InteractionHand.MAIN_HAND, itemStack3);
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			this.removeInteractionItem(player, itemStack);
 			this.level.playSound(player, this, SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.NEUTRAL, 2.0F, 1.0F);
 			this.getBrain().setMemory(MemoryModuleType.LIKED_PLAYER, player.getUUID());
 			return InteractionResult.SUCCESS;
@@ -284,6 +349,18 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 			return InteractionResult.SUCCESS;
 		} else {
 			return super.mobInteract(player, interactionHand);
+		}
+	}
+
+	public void setJukeboxPlaying(BlockPos blockPos, boolean bl) {
+		if (bl) {
+			if (!this.isDancing()) {
+				this.jukeboxPos = blockPos;
+				this.setDancing(true);
+			}
+		} else if (blockPos.equals(this.jukeboxPos) || this.jukeboxPos == null) {
+			this.jukeboxPos = null;
+			this.setDancing(false);
 		}
 	}
 
@@ -322,16 +399,38 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	@Override
 	public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> biConsumer) {
 		if (this.level instanceof ServerLevel serverLevel) {
-			biConsumer.accept(this.dynamicGameEventListener, serverLevel);
+			biConsumer.accept(this.dynamicVibrationListener, serverLevel);
+			biConsumer.accept(this.dynamicJukeboxListener, serverLevel);
 		}
 	}
 
-	public boolean isFlying() {
-		return this.animationSpeed > 0.3F;
+	public boolean isDancing() {
+		return this.entityData.get(DATA_DANCING);
+	}
+
+	public void setDancing(boolean bl) {
+		if (!this.level.isClientSide) {
+			this.entityData.set(DATA_DANCING, bl);
+		}
+	}
+
+	private boolean shouldStopDancing() {
+		return this.jukeboxPos == null
+			|| !this.jukeboxPos.closerToCenterThan(this.position(), (double)GameEvent.JUKEBOX_PLAY.getNotificationRadius())
+			|| !this.level.getBlockState(this.jukeboxPos).is(Blocks.JUKEBOX);
 	}
 
 	public float getHoldingItemAnimationProgress(float f) {
 		return Mth.lerp(f, this.holdingItemAnimationTicks0, this.holdingItemAnimationTicks) / 5.0F;
+	}
+
+	public boolean isSpinning() {
+		float f = this.dancingAnimationTicks % 55.0F;
+		return f < 15.0F;
+	}
+
+	public float getSpinningProgress(float f) {
+		return Mth.lerp(f, this.spinningAnimationTicks0, this.spinningAnimationTicks) / 15.0F;
 	}
 
 	@Override
@@ -351,45 +450,15 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 	}
 
 	@Override
-	public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
-		if (this.level != serverLevel || this.isRemoved() || this.isNoAi()) {
-			return false;
-		} else if (!this.brain.hasMemoryValue(MemoryModuleType.LIKED_NOTEBLOCK_POSITION)) {
-			return true;
-		} else {
-			Optional<GlobalPos> optional = this.brain.getMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
-			return optional.isPresent() && ((GlobalPos)optional.get()).dimension() == serverLevel.dimension() && ((GlobalPos)optional.get()).pos().equals(blockPos);
-		}
-	}
-
-	@Override
-	public void onSignalReceive(
-		ServerLevel serverLevel,
-		GameEventListener gameEventListener,
-		BlockPos blockPos,
-		GameEvent gameEvent,
-		@Nullable Entity entity,
-		@Nullable Entity entity2,
-		float f
-	) {
-		if (gameEvent == GameEvent.NOTE_BLOCK_PLAY) {
-			AllayAi.hearNoteblock(this, new BlockPos(blockPos));
-		}
-	}
-
-	@Override
-	public TagKey<GameEvent> getListenableEvents() {
-		return GameEventTags.ALLAY_CAN_LISTEN;
-	}
-
-	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.put("Inventory", this.inventory.createTag());
-		VibrationListener.codec(this)
-			.encodeStart(NbtOps.INSTANCE, this.dynamicGameEventListener.getListener())
+		VibrationListener.codec(this.vibrationListenerConfig)
+			.encodeStart(NbtOps.INSTANCE, this.dynamicVibrationListener.getListener())
 			.resultOrPartial(LOGGER::error)
 			.ifPresent(tag -> compoundTag.put("listener", tag));
+		compoundTag.putLong("DuplicationCooldown", this.duplicationCooldown);
+		compoundTag.putBoolean("CanDuplicate", this.canDuplicate());
 	}
 
 	@Override
@@ -397,11 +466,14 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		super.readAdditionalSaveData(compoundTag);
 		this.inventory.fromTag(compoundTag.getList("Inventory", 10));
 		if (compoundTag.contains("listener", 10)) {
-			VibrationListener.codec(this)
+			VibrationListener.codec(this.vibrationListenerConfig)
 				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("listener")))
 				.resultOrPartial(LOGGER::error)
-				.ifPresent(vibrationListener -> this.dynamicGameEventListener.updateListener(vibrationListener, this.level));
+				.ifPresent(vibrationListener -> this.dynamicVibrationListener.updateListener(vibrationListener, this.level));
 		}
+
+		this.duplicationCooldown = (long)compoundTag.getInt("DuplicationCooldown");
+		this.entityData.set(DATA_CAN_DUPLICATE, compoundTag.getBoolean("CanDuplicate"));
 	}
 
 	@Override
@@ -421,8 +493,117 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationL
 		return BlockPos.betweenClosed(i, m, k, j, n, l);
 	}
 
+	private void updateDuplicationCooldown() {
+		if (this.duplicationCooldown > 0L) {
+			this.duplicationCooldown--;
+			if (this.duplicationCooldown == 0L) {
+				this.entityData.set(DATA_CAN_DUPLICATE, true);
+			}
+		}
+	}
+
+	private boolean isDuplicationItem(ItemStack itemStack) {
+		return DUPLICATION_ITEM.test(itemStack);
+	}
+
+	private void duplicateAllay() {
+		Allay allay = EntityType.ALLAY.create(this.level);
+		if (allay != null) {
+			allay.moveTo(this.position());
+			allay.setPersistenceRequired();
+			allay.resetDuplicationCooldown();
+			this.resetDuplicationCooldown();
+			this.level.addFreshEntity(allay);
+		}
+	}
+
+	private void resetDuplicationCooldown() {
+		this.duplicationCooldown = 2400L;
+		this.entityData.set(DATA_CAN_DUPLICATE, false);
+	}
+
+	private boolean canDuplicate() {
+		return this.entityData.get(DATA_CAN_DUPLICATE);
+	}
+
+	private void removeInteractionItem(Player player, ItemStack itemStack) {
+		if (!player.getAbilities().instabuild) {
+			itemStack.shrink(1);
+		}
+	}
+
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)this.getEyeHeight() * 0.6, (double)this.getBbWidth() * 0.1);
+	}
+
+	class AllayVibrationListenerConfig implements VibrationListener.VibrationListenerConfig {
+		@Override
+		public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
+			if (Allay.this.getLevel() == serverLevel && !Allay.this.isRemoved() && !Allay.this.isNoAi()) {
+				Optional<GlobalPos> optional = Allay.this.getBrain().getMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
+				if (optional.isEmpty()) {
+					return true;
+				} else {
+					GlobalPos globalPos = (GlobalPos)optional.get();
+					return globalPos.dimension().equals(serverLevel.dimension()) && globalPos.pos().equals(blockPos);
+				}
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public void onSignalReceive(
+			ServerLevel serverLevel,
+			GameEventListener gameEventListener,
+			BlockPos blockPos,
+			GameEvent gameEvent,
+			@Nullable Entity entity,
+			@Nullable Entity entity2,
+			float f
+		) {
+			if (gameEvent == GameEvent.NOTE_BLOCK_PLAY) {
+				AllayAi.hearNoteblock(Allay.this, new BlockPos(blockPos));
+			}
+		}
+
+		@Override
+		public TagKey<GameEvent> getListenableEvents() {
+			return GameEventTags.ALLAY_CAN_LISTEN;
+		}
+	}
+
+	class JukeboxListener implements GameEventListener {
+		private final PositionSource listenerSource;
+		private final int listenerRadius;
+
+		public JukeboxListener(PositionSource positionSource, int i) {
+			this.listenerSource = positionSource;
+			this.listenerRadius = i;
+		}
+
+		@Override
+		public PositionSource getListenerSource() {
+			return this.listenerSource;
+		}
+
+		@Override
+		public int getListenerRadius() {
+			return this.listenerRadius;
+		}
+
+		@Override
+		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
+			if (message.gameEvent() == GameEvent.JUKEBOX_PLAY) {
+				Allay.this.setJukeboxPlaying(new BlockPos(message.source()), true);
+				return true;
+			} else if (message.gameEvent() == GameEvent.JUKEBOX_STOP_PLAY) {
+				Allay.this.setJukeboxPlaying(new BlockPos(message.source()), false);
+				return true;
+			} else {
+				return false;
+			}
+		}
 	}
 }

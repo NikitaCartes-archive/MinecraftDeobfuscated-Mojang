@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
@@ -120,8 +121,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 
 			RenderSystem.setShaderTexture(0, this.location);
 			RenderSystem.setShaderColor(f, f, f, (float)i / 255.0F);
-			GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
-			GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
+			PlayerFaceRenderer.draw(poseStack, 2, 2, 12);
 		}
 
 		@Override

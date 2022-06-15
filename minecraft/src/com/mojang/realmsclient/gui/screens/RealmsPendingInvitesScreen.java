@@ -19,6 +19,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -212,8 +213,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			RowButton.drawButtonsInRow(poseStack, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
 			RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				GuiComponent.blit(poseStack, i, j, 32, 32, 8.0F, 8.0F, 8, 8, 64, 64);
-				GuiComponent.blit(poseStack, i, j, 32, 32, 40.0F, 8.0F, 8, 8, 64, 64);
+				PlayerFaceRenderer.draw(poseStack, i, j, 32);
 			});
 		}
 

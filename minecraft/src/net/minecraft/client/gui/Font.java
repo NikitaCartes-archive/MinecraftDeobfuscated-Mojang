@@ -297,6 +297,10 @@ public class Font {
 		return 9 * this.splitter.splitLines(string, i, Style.EMPTY).size();
 	}
 
+	public int wordWrapHeight(FormattedText formattedText, int i) {
+		return 9 * this.splitter.splitLines(formattedText, i, Style.EMPTY).size();
+	}
+
 	public List<FormattedCharSequence> split(FormattedText formattedText, int i) {
 		return Language.getInstance().getVisualOrder(this.splitter.splitLines(formattedText, i, Style.EMPTY));
 	}

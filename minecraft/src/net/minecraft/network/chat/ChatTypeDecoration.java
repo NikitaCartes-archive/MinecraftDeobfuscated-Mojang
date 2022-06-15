@@ -8,27 +8,29 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.StringRepresentable;
 
-public record ChatDecoration(String translationKey, List<ChatDecoration.Parameter> parameters, Style style) {
-	public static final Codec<ChatDecoration> CODEC = RecordCodecBuilder.create(
+public record ChatTypeDecoration(String translationKey, List<ChatTypeDecoration.Parameter> parameters, Style style) {
+	public static final Codec<ChatTypeDecoration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.STRING.fieldOf("translation_key").forGetter(ChatDecoration::translationKey),
-					ChatDecoration.Parameter.CODEC.listOf().fieldOf("parameters").forGetter(ChatDecoration::parameters),
-					Style.FORMATTING_CODEC.fieldOf("style").forGetter(ChatDecoration::style)
+					Codec.STRING.fieldOf("translation_key").forGetter(ChatTypeDecoration::translationKey),
+					ChatTypeDecoration.Parameter.CODEC.listOf().fieldOf("parameters").forGetter(ChatTypeDecoration::parameters),
+					Style.FORMATTING_CODEC.optionalFieldOf("style", Style.EMPTY).forGetter(ChatTypeDecoration::style)
 				)
-				.apply(instance, ChatDecoration::new)
+				.apply(instance, ChatTypeDecoration::new)
 	);
 
-	public static ChatDecoration withSender(String string) {
-		return new ChatDecoration(string, List.of(ChatDecoration.Parameter.SENDER, ChatDecoration.Parameter.CONTENT), Style.EMPTY);
+	public static ChatTypeDecoration withSender(String string) {
+		return new ChatTypeDecoration(string, List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), Style.EMPTY);
 	}
 
-	public static ChatDecoration directMessage(String string) {
+	public static ChatTypeDecoration directMessage(String string) {
 		Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true);
-		return new ChatDecoration(string, List.of(ChatDecoration.Parameter.SENDER, ChatDecoration.Parameter.CONTENT), style);
+		return new ChatTypeDecoration(string, List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), style);
 	}
 
-	public static ChatDecoration teamMessage(String string) {
-		return new ChatDecoration(string, List.of(ChatDecoration.Parameter.TEAM_NAME, ChatDecoration.Parameter.SENDER, ChatDecoration.Parameter.CONTENT), Style.EMPTY);
+	public static ChatTypeDecoration teamMessage(String string) {
+		return new ChatTypeDecoration(
+			string, List.of(ChatTypeDecoration.Parameter.TEAM_NAME, ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), Style.EMPTY
+		);
 	}
 
 	public Component decorate(Component component, @Nullable ChatSender chatSender) {
@@ -40,7 +42,7 @@ public record ChatDecoration(String translationKey, List<ChatDecoration.Paramete
 		Component[] components = new Component[this.parameters.size()];
 
 		for (int i = 0; i < components.length; i++) {
-			ChatDecoration.Parameter parameter = (ChatDecoration.Parameter)this.parameters.get(i);
+			ChatTypeDecoration.Parameter parameter = (ChatTypeDecoration.Parameter)this.parameters.get(i);
 			components[i] = parameter.select(component, chatSender);
 		}
 
@@ -52,11 +54,11 @@ public record ChatDecoration(String translationKey, List<ChatDecoration.Paramete
 		TEAM_NAME("team_name", (component, chatSender) -> chatSender != null ? chatSender.teamName() : null),
 		CONTENT("content", (component, chatSender) -> component);
 
-		public static final Codec<ChatDecoration.Parameter> CODEC = StringRepresentable.fromEnum(ChatDecoration.Parameter::values);
+		public static final Codec<ChatTypeDecoration.Parameter> CODEC = StringRepresentable.fromEnum(ChatTypeDecoration.Parameter::values);
 		private final String name;
-		private final ChatDecoration.Parameter.Selector selector;
+		private final ChatTypeDecoration.Parameter.Selector selector;
 
-		private Parameter(String string2, ChatDecoration.Parameter.Selector selector) {
+		private Parameter(String string2, ChatTypeDecoration.Parameter.Selector selector) {
 			this.name = string2;
 			this.selector = selector;
 		}

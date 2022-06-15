@@ -32,16 +32,7 @@ public abstract class RealmsScreen extends Screen {
 	protected static final int COLOR_INFO = 8226750;
 	protected static final int COLOR_BUTTON_YELLOW = 16777120;
 	protected static final String UPDATE_BREAKS_ADVENTURE_URL = "https://www.minecraft.net/realms/adventure-maps-in-1-9";
-	protected static final int SKIN_HEAD_U = 8;
-	protected static final int SKIN_HEAD_V = 8;
-	protected static final int SKIN_HEAD_WIDTH = 8;
-	protected static final int SKIN_HEAD_HEIGHT = 8;
-	protected static final int SKIN_HAT_U = 40;
-	protected static final int SKIN_HAT_V = 8;
-	protected static final int SKIN_HAT_WIDTH = 8;
-	protected static final int SKIN_HAT_HEIGHT = 8;
-	protected static final int SKIN_TEX_WIDTH = 64;
-	protected static final int SKIN_TEX_HEIGHT = 64;
+	protected static final int SKIN_FACE_SIZE = 8;
 	private final List<RealmsLabel> labels = Lists.<RealmsLabel>newArrayList();
 
 	public RealmsScreen(Component component) {

@@ -615,6 +615,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	public void handleRenameItem(ServerboundRenameItemPacket serverboundRenameItemPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundRenameItemPacket, this, this.player.getLevel());
 		if (this.player.containerMenu instanceof AnvilMenu anvilMenu) {
+			if (!anvilMenu.stillValid(this.player)) {
+				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, anvilMenu);
+				return;
+			}
+
 			String string = SharedConstants.filterText(serverboundRenameItemPacket.getName());
 			if (string.length() <= 50) {
 				anvilMenu.setItemName(string);
@@ -625,8 +630,13 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	@Override
 	public void handleSetBeaconPacket(ServerboundSetBeaconPacket serverboundSetBeaconPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundSetBeaconPacket, this, this.player.getLevel());
-		if (this.player.containerMenu instanceof BeaconMenu) {
-			((BeaconMenu)this.player.containerMenu).updateEffects(serverboundSetBeaconPacket.getPrimary(), serverboundSetBeaconPacket.getSecondary());
+		if (this.player.containerMenu instanceof BeaconMenu beaconMenu) {
+			if (!this.player.containerMenu.stillValid(this.player)) {
+				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
+				return;
+			}
+
+			beaconMenu.updateEffects(serverboundSetBeaconPacket.getPrimary(), serverboundSetBeaconPacket.getSecondary());
 		}
 	}
 
@@ -716,6 +726,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		PacketUtils.ensureRunningOnSameThread(serverboundSelectTradePacket, this, this.player.getLevel());
 		int i = serverboundSelectTradePacket.getItem();
 		if (this.player.containerMenu instanceof MerchantMenu merchantMenu) {
+			if (!merchantMenu.stillValid(this.player)) {
+				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, merchantMenu);
+				return;
+			}
+
 			merchantMenu.setSelectionHint(i);
 			merchantMenu.tryMoveItems(i);
 		}
@@ -1206,13 +1221,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (isChatMessageIllegal(serverboundChatCommandPacket.command())) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
 		} else {
-			PacketUtils.ensureRunningOnSameThread(serverboundChatCommandPacket, this, this.player.getLevel());
 			if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp())) {
-				CommandSourceStack commandSourceStack = this.player
-					.createCommandSourceStack()
-					.withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
-				this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
-				this.detectRateSpam();
+				this.server
+					.submit(
+						() -> {
+							CommandSourceStack commandSourceStack = this.player
+								.createCommandSourceStack()
+								.withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
+							this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
+							this.detectRateSpam();
+						}
+					);
 			}
 		}
 	}
@@ -1227,7 +1246,15 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 				LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", this.player.getName().getString(), string);
 			}
 
-			return this.resetLastActionTime();
+			if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+				Registry<ChatType> registry = this.player.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+				int i = registry.getId(registry.get(ChatType.SYSTEM));
+				this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), i));
+				return false;
+			} else {
+				this.player.resetLastActionTime();
+				return true;
+			}
 		}
 	}
 
@@ -1258,25 +1285,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		return false;
 	}
 
-	private boolean resetLastActionTime() {
-		if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-			Registry<ChatType> registry = this.player.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-			int i = registry.getId(registry.get(ChatType.SYSTEM));
-			this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), i));
-			return false;
-		} else {
-			this.player.resetLastActionTime();
-			return true;
-		}
-	}
-
 	private void handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText) {
-		if (this.resetLastActionTime()) {
-			MessageSignature messageSignature = serverboundChatPacket.getSignature(this.player.getUUID());
-			boolean bl = serverboundChatPacket.signedPreview();
-			ChatDecorator chatDecorator = this.server.getChatDecorator();
-			chatDecorator.decorateChat(this.player, filteredText.map(Component::literal), messageSignature, bl).thenAcceptAsync(this::broadcastChatMessage, this.server);
-		}
+		MessageSignature messageSignature = serverboundChatPacket.getSignature(this.player.getUUID());
+		boolean bl = serverboundChatPacket.signedPreview();
+		ChatDecorator chatDecorator = this.server.getChatDecorator();
+		chatDecorator.decorateChat(this.player, filteredText.map(Component::literal), messageSignature, bl).thenAcceptAsync(this::broadcastChatMessage, this.server);
 	}
 
 	private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
@@ -1512,6 +1525,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (this.player.containerMenu.containerId == serverboundContainerClickPacket.getContainerId()) {
 			if (this.player.isSpectator()) {
 				this.player.containerMenu.sendAllDataToRemote();
+			} else if (!this.player.containerMenu.stillValid(this.player)) {
+				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
 			} else {
 				int i = serverboundContainerClickPacket.getSlotNum();
 				if (!this.player.containerMenu.isValidSlotIndex(i)) {
@@ -1544,10 +1559,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (!this.player.isSpectator()
 			&& this.player.containerMenu.containerId == serverboundPlaceRecipePacket.getContainerId()
 			&& this.player.containerMenu instanceof RecipeBookMenu) {
-			this.server
-				.getRecipeManager()
-				.byKey(serverboundPlaceRecipePacket.getRecipe())
-				.ifPresent(recipe -> ((RecipeBookMenu)this.player.containerMenu).handlePlacement(serverboundPlaceRecipePacket.isShiftDown(), recipe, this.player));
+			if (!this.player.containerMenu.stillValid(this.player)) {
+				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
+			} else {
+				this.server
+					.getRecipeManager()
+					.byKey(serverboundPlaceRecipePacket.getRecipe())
+					.ifPresent(recipe -> ((RecipeBookMenu)this.player.containerMenu).handlePlacement(serverboundPlaceRecipePacket.isShiftDown(), recipe, this.player));
+			}
 		}
 	}
 
@@ -1556,9 +1575,13 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		PacketUtils.ensureRunningOnSameThread(serverboundContainerButtonClickPacket, this, this.player.getLevel());
 		this.player.resetLastActionTime();
 		if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator()) {
-			boolean bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
-			if (bl) {
-				this.player.containerMenu.broadcastChanges();
+			if (!this.player.containerMenu.stillValid(this.player)) {
+				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
+			} else {
+				boolean bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
+				if (bl) {
+					this.player.containerMenu.broadcastChanges();
+				}
 			}
 		}
 	}
@@ -1572,9 +1595,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 			if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z")) {
 				BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag);
-				BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
-				if (blockEntity != null) {
-					blockEntity.saveToItem(itemStack);
+				if (this.player.level.isLoaded(blockPos)) {
+					BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
+					if (blockEntity != null) {
+						blockEntity.saveToItem(itemStack);
+					}
 				}
 			}
 

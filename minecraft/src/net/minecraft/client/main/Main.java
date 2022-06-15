@@ -46,8 +46,15 @@ public class Main {
 
 	@DontObfuscate
 	public static void main(String[] strings) {
+		run(strings, true);
+	}
+
+	public static void run(String[] strings, boolean bl) {
 		SharedConstants.tryDetectVersion();
-		SharedConstants.enableDataFixerOptimizations();
+		if (bl) {
+			SharedConstants.enableDataFixerOptimizations();
+		}
+
 		OptionParser optionParser = new OptionParser();
 		optionParser.allowsUnrecognizedOptions();
 		optionParser.accepts("demo");
@@ -92,7 +99,7 @@ public class Main {
 		if (string != null) {
 			try {
 				proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string, parseArgument(optionSet, optionSpec8)));
-			} catch (Exception var77) {
+			} catch (Exception var78) {
 			}
 		}
 
@@ -110,10 +117,10 @@ public class Main {
 		int j = parseArgument(optionSet, optionSpec18);
 		OptionalInt optionalInt = ofNullable(parseArgument(optionSet, optionSpec19));
 		OptionalInt optionalInt2 = ofNullable(parseArgument(optionSet, optionSpec20));
-		boolean bl = optionSet.has("fullscreen");
-		boolean bl2 = optionSet.has("demo");
-		boolean bl3 = optionSet.has("disableMultiplayer");
-		boolean bl4 = optionSet.has("disableChat");
+		boolean bl2 = optionSet.has("fullscreen");
+		boolean bl3 = optionSet.has("demo");
+		boolean bl4 = optionSet.has("disableMultiplayer");
+		boolean bl5 = optionSet.has("disableChat");
 		String string4 = parseArgument(optionSet, optionSpec16);
 		Gson gson = new GsonBuilder().registerTypeAdapter(PropertyMap.class, new Serializer()).create();
 		PropertyMap propertyMap = GsonHelper.fromJson(gson, parseArgument(optionSet, optionSpec21), PropertyMap.class);
@@ -147,9 +154,9 @@ public class Main {
 		);
 		GameConfig gameConfig = new GameConfig(
 			new GameConfig.UserData(user, propertyMap, propertyMap2, proxy),
-			new DisplayData(i, j, optionalInt, optionalInt2, bl),
+			new DisplayData(i, j, optionalInt, optionalInt2, bl2),
 			new GameConfig.FolderData(file, file3, file2, string7),
-			new GameConfig.GameData(bl2, string4, string5, bl3, bl4),
+			new GameConfig.GameData(bl3, string4, string5, bl4, bl5),
 			new GameConfig.ServerData(string10, integer)
 		);
 		Thread thread = new Thread("Client Shutdown Thread") {
@@ -173,11 +180,11 @@ public class Main {
 			RenderSystem.beginInitialization();
 			minecraft = new Minecraft(gameConfig);
 			RenderSystem.finishInitialization();
-		} catch (SilentInitException var75) {
-			LOGGER.warn("Failed to create window: ", (Throwable)var75);
+		} catch (SilentInitException var76) {
+			LOGGER.warn("Failed to create window: ", (Throwable)var76);
 			return;
-		} catch (Throwable var76) {
-			CrashReport crashReport = CrashReport.forThrowable(var76, "Initializing game");
+		} catch (Throwable var77) {
+			CrashReport crashReport = CrashReport.forThrowable(var77, "Initializing game");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Initialization");
 			NativeModuleLister.addCrashSection(crashReportCategory);
 			Minecraft.fillReport(null, null, gameConfig.game.launchVersion, null, crashReport);
@@ -207,8 +214,8 @@ public class Main {
 			try {
 				RenderSystem.initGameThread(false);
 				minecraft.run();
-			} catch (Throwable var74) {
-				LOGGER.error("Unhandled game exception", var74);
+			} catch (Throwable var75) {
+				LOGGER.error("Unhandled game exception", var75);
 			}
 		}
 
@@ -219,8 +226,8 @@ public class Main {
 			if (thread2 != null) {
 				thread2.join();
 			}
-		} catch (InterruptedException var72) {
-			LOGGER.error("Exception during client thread shutdown", (Throwable)var72);
+		} catch (InterruptedException var73) {
+			LOGGER.error("Exception during client thread shutdown", (Throwable)var73);
 		} finally {
 			minecraft.destroy();
 		}

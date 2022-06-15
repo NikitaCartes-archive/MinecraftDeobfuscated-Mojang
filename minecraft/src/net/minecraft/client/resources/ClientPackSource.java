@@ -118,8 +118,7 @@ public class ClientPackSource implements RepositorySource {
 
 		CompletableFuture var14;
 		try {
-			this.clearServerPack();
-			this.clearOldDownloads();
+			Minecraft minecraft = Minecraft.getInstance();
 			File file = new File(this.serverPackDir, string2);
 			CompletableFuture<?> completableFuture;
 			if (file.exists()) {
@@ -127,7 +126,6 @@ public class ClientPackSource implements RepositorySource {
 			} else {
 				ProgressScreen progressScreen = new ProgressScreen(bl);
 				Map<String, String> map = getDownloadHeaders();
-				Minecraft minecraft = Minecraft.getInstance();
 				minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
 				completableFuture = HttpUtil.downloadTo(file, uRL, map, 262144000, progressScreen, minecraft.getProxy());
 			}
@@ -136,29 +134,28 @@ public class ClientPackSource implements RepositorySource {
 					if (!this.checkHash(string3, file)) {
 						return Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"));
 					} else {
-						Minecraft minecraftx = Minecraft.getInstance();
-						minecraftx.execute(() -> {
+						minecraft.execute(() -> {
 							if (!bl) {
-								minecraftx.setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
+								minecraft.setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
 							}
 						});
 						return this.setServerPack(file, PackSource.SERVER);
 					}
 				})
-				.whenComplete(
-					(void_, throwable) -> {
-						if (throwable != null) {
-							LOGGER.warn("Pack application failed: {}, deleting file {}", throwable.getMessage(), file);
-							deleteQuietly(file);
-							Minecraft minecraftx = Minecraft.getInstance();
-							minecraftx.execute(
-								() -> minecraftx.setScreen(
+				.exceptionallyCompose(
+					throwable -> this.clearServerPack()
+							.thenAcceptAsync(void_ -> {
+								LOGGER.warn("Pack application failed: {}, deleting file {}", throwable.getMessage(), file);
+								deleteQuietly(file);
+							}, Util.ioPool())
+							.thenAcceptAsync(
+								void_ -> minecraft.setScreen(
 										new ConfirmScreen(
 											blx -> {
 												if (blx) {
-													minecraftx.setScreen(null);
+													minecraft.setScreen(null);
 												} else {
-													ClientPacketListener clientPacketListener = minecraftx.getConnection();
+													ClientPacketListener clientPacketListener = minecraft.getConnection();
 													if (clientPacketListener != null) {
 														clientPacketListener.getConnection().disconnect(Component.translatable("connect.aborted"));
 													}
@@ -169,11 +166,11 @@ public class ClientPackSource implements RepositorySource {
 											CommonComponents.GUI_PROCEED,
 											Component.translatable("menu.disconnect")
 										)
-									)
-							);
-						}
-					}
-				);
+									),
+								minecraft
+							)
+				)
+				.thenAcceptAsync(void_ -> this.clearOldDownloads(), Util.ioPool());
 			var14 = this.currentDownload;
 		} finally {
 			this.downloadLock.unlock();
@@ -190,7 +187,7 @@ public class ClientPackSource implements RepositorySource {
 		}
 	}
 
-	public CompletableFuture<?> clearServerPack() {
+	public CompletableFuture<Void> clearServerPack() {
 		this.downloadLock.lock();
 
 		try {

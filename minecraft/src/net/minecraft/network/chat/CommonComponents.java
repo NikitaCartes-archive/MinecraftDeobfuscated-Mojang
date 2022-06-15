@@ -16,6 +16,7 @@ public class CommonComponents {
 	public static final Component CONNECT_FAILED = Component.translatable("connect.failed");
 	public static final Component NEW_LINE = Component.literal("\n");
 	public static final Component NARRATION_SEPARATOR = Component.literal(". ");
+	public static final Component ELLIPSIS = Component.literal("...");
 
 	public static Component optionStatus(boolean bl) {
 		return bl ? OPTION_ON : OPTION_OFF;
