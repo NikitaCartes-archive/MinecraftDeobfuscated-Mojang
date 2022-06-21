@@ -135,6 +135,13 @@ NarratableEntry {
         this.setScrollAmount((double)this.getMaxScroll() - d);
     }
 
+    protected boolean removeEntryFromTop(E entry) {
+        double d = (double)this.getMaxScroll() - this.getScrollAmount();
+        boolean bl = this.removeEntry(entry);
+        this.setScrollAmount((double)this.getMaxScroll() - d);
+        return bl;
+    }
+
     protected int getItemCount() {
         return this.children().size();
     }

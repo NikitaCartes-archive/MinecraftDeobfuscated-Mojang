@@ -23,7 +23,6 @@ import java.nio.IntBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,6 +34,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TimeSource;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
@@ -511,9 +511,9 @@ public class RenderSystem {
         return apiDescription;
     }
 
-    public static LongSupplier initBackendSystem() {
+    public static TimeSource.NanoTimeSource initBackendSystem() {
         RenderSystem.assertInInitPhase();
-        return GLX._initGlfw();
+        return GLX._initGlfw()::getAsLong;
     }
 
     public static void initRenderer(int i, boolean bl) {

@@ -83,7 +83,8 @@ implements InventoryCarrier {
     private static final float SPINNING_ANIMATION_DURATION = 15.0f;
     private static final float PATHFINDING_BOUNDING_BOX_PADDING = 0.5f;
     private static final Ingredient DUPLICATION_ITEM = Ingredient.of(Items.AMETHYST_SHARD);
-    private static final int DUPLICATION_COOLDOWN_TICKS = 2400;
+    private static final int DUPLICATION_COOLDOWN_TICKS = 6000;
+    private static final int NUM_OF_DUPLICATION_HEARTS = 3;
     private static final EntityDataAccessor<Boolean> DATA_DANCING = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_CAN_DUPLICATE = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
     protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS);
@@ -101,7 +102,6 @@ implements InventoryCarrier {
     private float dancingAnimationTicks;
     private float spinningAnimationTicks;
     private float spinningAnimationTicks0;
-    private int numOfDuplicatingHearts;
 
     public Allay(EntityType<? extends Allay> entityType, Level level) {
         super((EntityType<? extends PathfinderMob>)entityType, level);
@@ -238,13 +238,6 @@ implements InventoryCarrier {
             this.setDancing(false);
             this.jukeboxPos = null;
         }
-        if (this.numOfDuplicatingHearts > 0) {
-            --this.numOfDuplicatingHearts;
-            double d = this.random.nextGaussian() * 0.02;
-            double e = this.random.nextGaussian() * 0.02;
-            double f = this.random.nextGaussian() * 0.02;
-            this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
-        }
         this.updateDuplicationCooldown();
     }
 
@@ -293,7 +286,7 @@ implements InventoryCarrier {
         ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
         if (this.isDancing() && this.isDuplicationItem(itemStack) && this.canDuplicate()) {
             this.duplicateAllay();
-            this.numOfDuplicatingHearts = 3;
+            this.level.broadcastEntityEvent(this, (byte)18);
             this.level.playSound(player, this, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 2.0f, 1.0f);
             this.removeInteractionItem(player, itemStack);
             return InteractionResult.SUCCESS;
@@ -459,9 +452,9 @@ implements InventoryCarrier {
     private void updateDuplicationCooldown() {
         if (this.duplicationCooldown > 0L) {
             --this.duplicationCooldown;
-            if (this.duplicationCooldown == 0L) {
-                this.entityData.set(DATA_CAN_DUPLICATE, true);
-            }
+        }
+        if (!this.level.isClientSide() && this.duplicationCooldown == 0L && !this.canDuplicate()) {
+            this.entityData.set(DATA_CAN_DUPLICATE, true);
         }
     }
 
@@ -481,7 +474,7 @@ implements InventoryCarrier {
     }
 
     private void resetDuplicationCooldown() {
-        this.duplicationCooldown = 2400L;
+        this.duplicationCooldown = 6000L;
         this.entityData.set(DATA_CAN_DUPLICATE, false);
     }
 
@@ -498,6 +491,24 @@ implements InventoryCarrier {
     @Override
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, (double)this.getEyeHeight() * 0.6, (double)this.getBbWidth() * 0.1);
+    }
+
+    @Override
+    public void handleEntityEvent(byte b) {
+        if (b == 18) {
+            for (int i = 0; i < 3; ++i) {
+                this.spawnHeartParticle();
+            }
+        } else {
+            super.handleEntityEvent(b);
+        }
+    }
+
+    private void spawnHeartParticle() {
+        double d = this.random.nextGaussian() * 0.02;
+        double e = this.random.nextGaussian() * 0.02;
+        double f = this.random.nextGaussian() * 0.02;
+        this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
     }
 
     class AllayVibrationListenerConfig

@@ -6,7 +6,6 @@ package net.minecraft.client.gui.screens.multiplayer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
@@ -17,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public abstract class WarningScreen
 extends Screen {
-    private final Component titleComponent;
     private final Component content;
     @Nullable
     private final Component check;
@@ -31,8 +29,7 @@ extends Screen {
     }
 
     protected WarningScreen(Component component, Component component2, @Nullable Component component3, Component component4) {
-        super(NarratorChatListener.NO_TITLE);
-        this.titleComponent = component;
+        super(component);
         this.content = component2;
         this.check = component3;
         this.narration = component4;
@@ -61,10 +58,14 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        WarningScreen.drawString(poseStack, this.font, this.titleComponent, 25, 30, 0xFFFFFF);
+        this.renderTitle(poseStack);
         int k = this.width / 2 - this.message.getWidth() / 2;
         this.message.renderLeftAligned(poseStack, k, 70, this.getLineHeight(), 0xFFFFFF);
         super.render(poseStack, i, j, f);
+    }
+
+    protected void renderTitle(PoseStack poseStack) {
+        WarningScreen.drawString(poseStack, this.font, this.title, 25, 30, 0xFFFFFF);
     }
 
     protected int getLineHeight() {

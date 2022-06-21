@@ -33,7 +33,7 @@ implements CloseableResourceManager {
     public MultiPackResourceManager(PackType packType, List<PackResources> list) {
         this.packs = List.copyOf(list);
         HashMap<String, FallbackResourceManager> map = new HashMap<String, FallbackResourceManager>();
-        List list2 = list.stream().flatMap(packResources -> packResources.getNamespaces(packType).stream()).toList();
+        List list2 = list.stream().flatMap(packResources -> packResources.getNamespaces(packType).stream()).distinct().toList();
         for (PackResources packResources2 : list) {
             ResourceFilterSection resourceFilterSection = this.getPackFilterSection(packResources2);
             Set<String> set = packResources2.getNamespaces(packType);

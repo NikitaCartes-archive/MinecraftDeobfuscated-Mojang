@@ -24,6 +24,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class MultiLineEditBox
@@ -169,8 +170,8 @@ extends AbstractScrollWidget {
         super.renderDecorations(poseStack);
         if (this.textField.hasCharacterLimit()) {
             int i = this.textField.characterLimit();
-            String string = this.textField.value().length() + "/" + i;
-            MultiLineEditBox.drawString(poseStack, this.font, string, this.x + this.width - this.font.width(string), this.y + this.height + 4, 0xA0A0A0);
+            MutableComponent component = Component.translatable("gui.multiLineEditBox.character_limit", this.textField.value().length(), i);
+            MultiLineEditBox.drawString(poseStack, this.font, component, this.x + this.width - this.font.width(component), this.y + this.height + 4, 0xA0A0A0);
         }
     }
 

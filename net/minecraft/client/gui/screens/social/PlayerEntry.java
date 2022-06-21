@@ -38,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class PlayerEntry
 extends ContainerObjectSelectionList.Entry<PlayerEntry> {
+    private static final ResourceLocation REPORT_BUTTON_LOCATION = new ResourceLocation("textures/gui/report_button.png");
     private static final int TOOLTIP_DELAY = 10;
     private static final int TOOLTIP_MAX_WIDTH = 150;
     private final Minecraft minecraft;
@@ -64,6 +65,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     private static final Component OFFLINE = Component.translatable("gui.socialInteractions.status_offline").withStyle(ChatFormatting.ITALIC);
     private static final Component HIDDEN_OFFLINE = Component.translatable("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
     private static final Component BLOCKED_OFFLINE = Component.translatable("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
+    private static final Component REPORT_DISABLED_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report.disabled");
     private static final int SKIN_SIZE = 24;
     private static final int PADDING = 4;
     private static final int CHAT_TOGGLE_ICON_SIZE = 20;
@@ -76,23 +78,24 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     public static final int PLAYER_STATUS_COLOR = FastColor.ARGB32.color(140, 255, 255, 255);
 
     public PlayerEntry(final Minecraft minecraft, final SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<ResourceLocation> supplier) {
-        boolean bl2;
+        boolean bl3;
         this.minecraft = minecraft;
         this.id = uUID;
         this.playerName = string;
         this.skinGetter = supplier;
+        ReportingContext reportingContext = minecraft.getReportingContext();
+        boolean bl = reportingContext.sender().isEnabled();
         this.hideText = Component.translatable("gui.socialInteractions.tooltip.hide", string);
         this.showText = Component.translatable("gui.socialInteractions.tooltip.show", string);
-        this.reportText = Component.translatable("gui.socialInteractions.tooltip.report", string);
+        this.reportText = bl ? Component.translatable("gui.socialInteractions.tooltip.report", string) : REPORT_DISABLED_TOOLTIP;
         this.hideTooltip = minecraft.font.split(this.hideText, 150);
         this.showTooltip = minecraft.font.split(this.showText, 150);
         this.reportTooltip = minecraft.font.split(this.reportText, 150);
         PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
-        boolean bl = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
-        boolean bl3 = bl2 = !minecraft.player.getUUID().equals(uUID);
-        if (bl2 && bl && !playerSocialManager.isBlocked(uUID)) {
-            ReportingContext reportingContext = minecraft.getReportingContext();
-            this.reportButton = new ImageButton(0, 0, 20, 20, 40, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> minecraft.setScreen(new ChatReportScreen(minecraft.screen, reportingContext, uUID)), new Button.OnTooltip(){
+        boolean bl2 = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
+        boolean bl4 = bl3 = !minecraft.player.getUUID().equals(uUID);
+        if (bl3 && bl2 && !playerSocialManager.isBlocked(uUID)) {
+            this.reportButton = new ImageButton(0, 0, 20, 20, 0, 0, 20, REPORT_BUTTON_LOCATION, 64, 64, button -> minecraft.setScreen(new ChatReportScreen(minecraft.screen, reportingContext, uUID)), new Button.OnTooltip(){
 
                 @Override
                 public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
@@ -163,7 +166,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
             };
             this.showButton.visible = playerSocialManager.isHidden(uUID);
             this.hideButton.visible = !this.showButton.visible;
-            this.reportButton.active = reportingContext.sender().isEnabled();
+            this.reportButton.active = bl;
             this.children = ImmutableList.of(this.hideButton, this.showButton, this.reportButton);
         } else {
             this.children = ImmutableList.of();

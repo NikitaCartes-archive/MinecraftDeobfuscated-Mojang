@@ -13,10 +13,12 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
@@ -40,10 +42,13 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ChatSelectionScreen
 extends Screen {
+    private static final Component TITLE = Component.translatable("gui.chatSelection.title");
+    private static final Component CONTEXT_INFO = Component.translatable("gui.chatSelection.context").withStyle(ChatFormatting.GRAY);
     @Nullable
     private final Screen lastScreen;
     private final ReportingContext reportingContext;
     private Button confirmSelectedButton;
+    private MultiLineLabel contextInfoLabel;
     @Nullable
     private ChatSelectionList chatSelectionList;
     final ChatReportBuilder report;
@@ -53,7 +58,7 @@ extends Screen {
     private List<FormattedCharSequence> tooltip;
 
     public ChatSelectionScreen(@Nullable Screen screen, ReportingContext reportingContext, ChatReportBuilder chatReportBuilder, Consumer<ChatReportBuilder> consumer) {
-        super(Component.translatable("gui.chatSelection.title"));
+        super(TITLE);
         this.lastScreen = screen;
         this.reportingContext = reportingContext;
         this.report = chatReportBuilder.copy();
@@ -63,7 +68,8 @@ extends Screen {
     @Override
     protected void init() {
         this.chatLogFiller = new ChatSelectionLogFiller(this.reportingContext.chatLog(), this::canReport);
-        this.chatSelectionList = new ChatSelectionList(this.minecraft);
+        this.contextInfoLabel = MultiLineLabel.create(this.font, (FormattedText)CONTEXT_INFO, this.width - 16);
+        this.chatSelectionList = new ChatSelectionList(this.minecraft, (this.contextInfoLabel.getLineCount() + 1) * this.font.lineHeight);
         this.chatSelectionList.setRenderBackground(false);
         this.addWidget(this.chatSelectionList);
         this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 32, 150, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
@@ -103,6 +109,7 @@ extends Screen {
         int l = abuseReportLimits.maxReportedMessageCount();
         MutableComponent component = Component.translatable("gui.chatSelection.selected", k, l);
         ChatSelectionScreen.drawCenteredString(poseStack, this.font, component, this.width / 2, 16 + this.font.lineHeight * 3 / 2, 0xA0A0A0);
+        this.contextInfoLabel.renderCentered(poseStack, this.width / 2, this.chatSelectionList.getFooterTop());
         super.render(poseStack, i, j, f);
         if (this.tooltip != null) {
             this.renderTooltip(poseStack, this.tooltip, i, j);
@@ -113,6 +120,11 @@ extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.lastScreen);
+    }
+
+    @Override
+    public Component getNarrationMessage() {
+        return CommonComponents.joinForNarration(super.getNarrationMessage(), CONTEXT_INFO);
     }
 
     void setTooltip(@Nullable List<FormattedCharSequence> list) {
@@ -126,8 +138,8 @@ extends Screen {
         @Nullable
         private Heading previousHeading;
 
-        public ChatSelectionList(Minecraft minecraft) {
-            super(minecraft, ChatSelectionScreen.this.width, ChatSelectionScreen.this.height, 40, ChatSelectionScreen.this.height - 40, 16);
+        public ChatSelectionList(Minecraft minecraft, int i) {
+            super(minecraft, ChatSelectionScreen.this.width, ChatSelectionScreen.this.height, 40, ChatSelectionScreen.this.height - 40 - i, 16);
         }
 
         @Override
@@ -163,7 +175,7 @@ extends Screen {
             this.addEntryToTop(entry);
             Heading heading = new Heading(player.profileId(), entry);
             if (this.previousHeading != null && this.previousHeading.canCombine(heading)) {
-                this.removeEntry(this.previousHeading.entry());
+                this.removeEntryFromTop(this.previousHeading.entry());
             }
             this.previousHeading = heading;
         }
@@ -224,6 +236,10 @@ extends Screen {
             return super.keyPressed(i, j, k);
         }
 
+        public int getFooterTop() {
+            return this.y1 + ((ChatSelectionScreen)ChatSelectionScreen.this).font.lineHeight;
+        }
+
         @Environment(value=EnvType.CLIENT)
         public class MessageEntry
         extends Entry {
@@ -238,7 +254,7 @@ extends Screen {
 
             public MessageEntry(int i, Component component, Component component2, boolean bl, boolean bl2) {
                 this.chatId = i;
-                FormattedText formattedText = ChatSelectionScreen.this.font.substrByWidth(component, ChatSelectionList.this.getRowWidth() - ChatSelectionScreen.this.font.width(CommonComponents.ELLIPSIS));
+                FormattedText formattedText = ChatSelectionScreen.this.font.substrByWidth(component, this.getMaximumTextWidth() - ChatSelectionScreen.this.font.width(CommonComponents.ELLIPSIS));
                 if (component != formattedText) {
                     this.text = FormattedText.composite(formattedText, CommonComponents.ELLIPSIS);
                     this.hoverText = ChatSelectionScreen.this.font.split(component, ChatSelectionList.this.getRowWidth());
@@ -256,12 +272,20 @@ extends Screen {
                 if (bl && this.canReport) {
                     GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 3, j + m + 1, -16777216);
                 }
-                int p = this.playerMessage ? k + 8 : k;
+                int p = k + this.getTextIndent();
                 int q = j + 1 + (m - ((ChatSelectionScreen)ChatSelectionScreen.this).font.lineHeight) / 2;
                 GuiComponent.drawString(poseStack, ChatSelectionScreen.this.font, Language.getInstance().getVisualOrder(this.text), p, q, this.canReport ? -1 : -1593835521);
                 if (this.hoverText != null && bl) {
                     ChatSelectionScreen.this.setTooltip(this.hoverText);
                 }
+            }
+
+            private int getMaximumTextWidth() {
+                return ChatSelectionList.this.getRowWidth() - this.getTextIndent();
+            }
+
+            private int getTextIndent() {
+                return this.playerMessage ? 8 : 0;
             }
 
             @Override
