@@ -13,16 +13,13 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
+import java.util.concurrent.CompletionException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -75,56 +72,68 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	static final Component SNAPSHOT_TOOLTIP_2 = Component.translatable("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD);
 	static final Component WORLD_LOCKED_TOOLTIP = Component.translatable("selectWorld.locked").withStyle(ChatFormatting.RED);
 	static final Component WORLD_REQUIRES_CONVERSION = Component.translatable("selectWorld.conversion.tooltip").withStyle(ChatFormatting.RED);
-	private static final Duration MAX_LOAD_BLOCK_TIME = Duration.ofMillis(100L);
 	private final SelectWorldScreen screen;
+	private CompletableFuture<List<LevelSummary>> pendingLevels;
 	@Nullable
-	private CompletableFuture<List<LevelSummary>> levelsFuture;
+	private List<LevelSummary> currentlyDisplayedLevels;
+	private String filter;
 	private final WorldSelectionList.LoadingHeader loadingHeader;
 
 	public WorldSelectionList(
-		SelectWorldScreen selectWorldScreen,
-		Minecraft minecraft,
-		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		Supplier<String> supplier,
-		@Nullable WorldSelectionList worldSelectionList
+		SelectWorldScreen selectWorldScreen, Minecraft minecraft, int i, int j, int k, int l, int m, String string, @Nullable WorldSelectionList worldSelectionList
 	) {
 		super(minecraft, i, j, k, l, m);
 		this.screen = selectWorldScreen;
 		this.loadingHeader = new WorldSelectionList.LoadingHeader(minecraft);
+		this.filter = string;
 		if (worldSelectionList != null) {
-			this.levelsFuture = worldSelectionList.levelsFuture;
-			this.refreshList((String)supplier.get());
+			this.pendingLevels = worldSelectionList.pendingLevels;
 		} else {
-			this.reloadLevels(supplier);
+			this.pendingLevels = this.loadLevels();
+		}
+
+		this.handleNewLevels(this.pollLevelsIgnoreErrors());
+	}
+
+	@Nullable
+	private List<LevelSummary> pollLevelsIgnoreErrors() {
+		try {
+			return (List<LevelSummary>)this.pendingLevels.getNow(null);
+		} catch (CancellationException | CompletionException var2) {
+			return null;
 		}
 	}
 
-	public void reloadLevels(Supplier<String> supplier) {
-		this.levelsFuture = this.loadLevels();
-		List<LevelSummary> list = this.pollReadyLevels(this.levelsFuture, MAX_LOAD_BLOCK_TIME);
-		if (list != null) {
-			this.fillLevels((String)supplier.get(), list);
-		} else {
+	void reloadWorldList() {
+		this.pendingLevels = this.loadLevels();
+	}
+
+	@Override
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		List<LevelSummary> list = this.pollLevelsIgnoreErrors();
+		if (list != this.currentlyDisplayedLevels) {
+			this.handleNewLevels(list);
+		}
+
+		super.render(poseStack, i, j, f);
+	}
+
+	private void handleNewLevels(@Nullable List<LevelSummary> list) {
+		if (list == null) {
 			this.fillLoadingLevels();
-			this.levelsFuture.thenAcceptAsync(listx -> this.fillLevels((String)supplier.get(), listx), this.minecraft);
+		} else {
+			this.fillLevels(this.filter, list);
 		}
+
+		this.currentlyDisplayedLevels = list;
 	}
 
-	public void refreshList(String string) {
-		if (this.levelsFuture == null) {
-			this.clearEntries();
-		} else {
-			List<LevelSummary> list = this.pollReadyLevels(this.levelsFuture, Duration.ZERO);
-			if (list != null) {
-				this.fillLevels(string, list);
-			} else {
-				this.fillLoadingLevels();
-			}
+	public void updateFilter(String string) {
+		if (this.currentlyDisplayedLevels != null && !string.equals(this.filter)) {
+			this.fillLevels(string, this.currentlyDisplayedLevels);
 		}
+
+		this.filter = string;
 	}
 
 	private CompletableFuture<List<LevelSummary>> loadLevels() {
@@ -146,18 +155,6 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				return List.of();
 			});
 		}
-	}
-
-	@Nullable
-	private List<LevelSummary> pollReadyLevels(CompletableFuture<List<LevelSummary>> completableFuture, Duration duration) {
-		List<LevelSummary> list = null;
-
-		try {
-			list = (List<LevelSummary>)completableFuture.get(duration.toMillis(), TimeUnit.MILLISECONDS);
-		} catch (ExecutionException | TimeoutException | InterruptedException var5) {
-		}
-
-		return list;
 	}
 
 	private void fillLevels(String string, List<LevelSummary> list) {
@@ -500,7 +497,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				WorldSelectionList.LOGGER.error("Failed to delete world {}", string, var8);
 			}
 
-			WorldSelectionList.this.reloadLevels(this.screen.getFilterSupplier());
+			WorldSelectionList.this.reloadWorldList();
 		}
 
 		public void editWorld() {
@@ -517,7 +514,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 					}
 
 					if (bl) {
-						WorldSelectionList.this.reloadLevels(this.screen.getFilterSupplier());
+						WorldSelectionList.this.reloadWorldList();
 					}
 
 					this.minecraft.setScreen(this.screen);
@@ -525,7 +522,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			} catch (IOException var3) {
 				SystemToast.onWorldAccessFailure(this.minecraft, string);
 				WorldSelectionList.LOGGER.error("Failed to access level {}", string, var3);
-				WorldSelectionList.this.reloadLevels(this.screen.getFilterSupplier());
+				WorldSelectionList.this.reloadWorldList();
 			}
 		}
 

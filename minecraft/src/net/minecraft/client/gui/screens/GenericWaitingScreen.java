@@ -16,7 +16,7 @@ public class GenericWaitingScreen extends Screen {
 	private static final int TITLE_Y = 80;
 	private static final int MESSAGE_Y = 120;
 	private static final int MESSAGE_MAX_WIDTH = 360;
-	private final Component initialButtonLabel;
+	private Component buttonLabel;
 	private Runnable buttonCallback;
 	@Nullable
 	private MultiLineLabel message;
@@ -25,14 +25,14 @@ public class GenericWaitingScreen extends Screen {
 
 	public GenericWaitingScreen(Component component, Component component2, Runnable runnable) {
 		super(component);
-		this.initialButtonLabel = component2;
+		this.buttonLabel = component2;
 		this.buttonCallback = runnable;
 	}
 
 	@Override
 	protected void init() {
 		super.init();
-		this.initButton(this.initialButtonLabel);
+		this.initButton();
 	}
 
 	@Override
@@ -56,7 +56,12 @@ public class GenericWaitingScreen extends Screen {
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return false;
+		return this.message != null && this.button.active;
+	}
+
+	@Override
+	public void onClose() {
+		this.buttonCallback.run();
 	}
 
 	public void update(Component component, Runnable runnable) {
@@ -64,6 +69,7 @@ public class GenericWaitingScreen extends Screen {
 	}
 
 	public void update(@Nullable Component component, Component component2, Runnable runnable) {
+		this.buttonLabel = component2;
 		this.buttonCallback = runnable;
 		if (component != null) {
 			this.message = MultiLineLabel.create(this.font, component, 360);
@@ -72,16 +78,17 @@ public class GenericWaitingScreen extends Screen {
 			this.message = null;
 		}
 
-		this.initButton(component2);
+		this.initButton();
 		this.disableButtonUntil = Util.getMillis() + TimeUnit.SECONDS.toMillis(1L);
 	}
 
-	private void initButton(Component component) {
+	private void initButton() {
 		this.removeWidget(this.button);
 		int i = 150;
 		int j = 20;
 		int k = this.message != null ? this.message.getLineCount() : 1;
-		int l = Math.min(120 + (k + 4) * 9, this.height - 40);
-		this.button = this.addRenderableWidget(new Button((this.width - 150) / 2, l, 150, 20, component, button -> this.buttonCallback.run()));
+		int l = Math.max(k, 5) * 9;
+		int m = Math.min(120 + l, this.height - 40);
+		this.button = this.addRenderableWidget(new Button((this.width - 150) / 2, m, 150, 20, this.buttonLabel, button -> this.onClose()));
 	}
 }

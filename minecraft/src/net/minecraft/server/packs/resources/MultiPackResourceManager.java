@@ -24,7 +24,7 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 	public MultiPackResourceManager(PackType packType, List<PackResources> list) {
 		this.packs = List.copyOf(list);
 		Map<String, FallbackResourceManager> map = new HashMap();
-		List<String> list2 = list.stream().flatMap(packResourcesx -> packResourcesx.getNamespaces(packType).stream()).toList();
+		List<String> list2 = list.stream().flatMap(packResourcesx -> packResourcesx.getNamespaces(packType).stream()).distinct().toList();
 
 		for (PackResources packResources : list) {
 			ResourceFilterSection resourceFilterSection = this.getPackFilterSection(packResources);

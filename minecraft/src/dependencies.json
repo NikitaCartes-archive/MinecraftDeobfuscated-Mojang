@@ -3,9 +3,9 @@
 		"name": "Java 17"
 	},
 	{
-		"sha1sum": "e762256085972cbf69cc3b6ff2c9bbb44fa5d340",
-		"name": "authlib-3.6.42.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.6.42/authlib-3.6.42.jar"
+		"sha1sum": "aeb3685242495f7275673294c042827238b164a6",
+		"name": "authlib-3.7.43.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.7.43/authlib-3.7.43.jar"
 	},
 	{
 		"sha1sum": "5c685c5ffa94c4cd39496c7184c1d122e515ecef",

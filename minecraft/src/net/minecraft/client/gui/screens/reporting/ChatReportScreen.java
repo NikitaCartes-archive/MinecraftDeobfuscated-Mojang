@@ -268,29 +268,19 @@ public class ChatReportScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	class DiscardReportWarningScreen extends WarningScreen {
+		private static final Component TITLE = Component.translatable("gui.chatReport.discard.title").withStyle(ChatFormatting.BOLD);
+		private static final Component MESSAGE = Component.translatable("gui.chatReport.discard.content");
+		private static final Component RETURN = Component.translatable("gui.chatReport.discard.return");
+		private static final Component DISCARD = Component.translatable("gui.chatReport.discard.discard");
+
 		protected DiscardReportWarningScreen() {
-			super(
-				Component.translatable("gui.chatReport.discard.title"),
-				Component.translatable("gui.chatReport.discard.content"),
-				Component.translatable("gui.chatReport.discard.content")
-			);
+			super(TITLE, MESSAGE, MESSAGE);
 		}
 
 		@Override
 		protected void initButtons(int i) {
-			this.addRenderableWidget(
-				new Button(this.width / 2 - 155, 100 + i, 150, 20, Component.translatable("gui.chatReport.discard.return"), button -> this.onClose())
-			);
-			this.addRenderableWidget(
-				new Button(
-					this.width / 2 + 5,
-					100 + i,
-					150,
-					20,
-					Component.translatable("gui.chatReport.discard.discard"),
-					button -> this.minecraft.setScreen(ChatReportScreen.this.lastScreen)
-				)
-			);
+			this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, RETURN, button -> this.onClose()));
+			this.addRenderableWidget(new Button(this.width / 2 + 5, 100 + i, 150, 20, DISCARD, button -> this.minecraft.setScreen(ChatReportScreen.this.lastScreen)));
 		}
 
 		@Override
@@ -301,6 +291,11 @@ public class ChatReportScreen extends Screen {
 		@Override
 		public boolean shouldCloseOnEsc() {
 			return false;
+		}
+
+		@Override
+		protected void renderTitle(PoseStack poseStack) {
+			drawString(poseStack, this.font, this.title, this.width / 2 - 155, 30, 16777215);
 		}
 	}
 

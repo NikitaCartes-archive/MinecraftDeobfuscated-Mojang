@@ -234,16 +234,18 @@ public class MultilineTextField {
 					this.seekCursor(Whence.END, 0);
 					return true;
 				case 268:
-					int j = this.getCursorLineView().beginIndex;
-					if (j != this.cursor) {
-						this.seekCursor(Whence.ABSOLUTE, j);
+					if (Screen.hasControlDown()) {
+						this.seekCursor(Whence.ABSOLUTE, 0);
+					} else {
+						this.seekCursor(Whence.ABSOLUTE, this.getCursorLineView().beginIndex);
 					}
 
 					return true;
 				case 269:
-					int j = this.getCursorLineView().endIndex;
-					if (j != this.cursor) {
-						this.seekCursor(Whence.ABSOLUTE, j);
+					if (Screen.hasControlDown()) {
+						this.seekCursor(Whence.END, 0);
+					} else {
+						this.seekCursor(Whence.ABSOLUTE, this.getCursorLineView().endIndex);
 					}
 
 					return true;

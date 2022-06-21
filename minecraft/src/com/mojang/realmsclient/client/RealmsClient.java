@@ -85,6 +85,10 @@ public class RealmsClient {
 
 	public static RealmsClient create() {
 		Minecraft minecraft = Minecraft.getInstance();
+		return create(minecraft);
+	}
+
+	public static RealmsClient create(Minecraft minecraft) {
 		String string = minecraft.getUser().getName();
 		String string2 = minecraft.getUser().getSessionId();
 		if (!initialized) {

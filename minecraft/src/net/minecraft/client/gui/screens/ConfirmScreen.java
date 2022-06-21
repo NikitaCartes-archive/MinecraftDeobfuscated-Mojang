@@ -14,9 +14,9 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ConfirmScreen extends Screen {
-	private static final int LABEL_Y = 90;
-	private final Component title2;
-	private MultiLineLabel message = MultiLineLabel.EMPTY;
+	private static final int MARGIN = 20;
+	private final Component message;
+	private MultiLineLabel multilineMessage = MultiLineLabel.EMPTY;
 	protected Component yesButton;
 	protected Component noButton;
 	private int delayTicker;
@@ -30,24 +30,23 @@ public class ConfirmScreen extends Screen {
 	public ConfirmScreen(BooleanConsumer booleanConsumer, Component component, Component component2, Component component3, Component component4) {
 		super(component);
 		this.callback = booleanConsumer;
-		this.title2 = component2;
+		this.message = component2;
 		this.yesButton = component3;
 		this.noButton = component4;
 	}
 
 	@Override
 	public Component getNarrationMessage() {
-		return CommonComponents.joinForNarration(super.getNarrationMessage(), this.title2);
+		return CommonComponents.joinForNarration(super.getNarrationMessage(), this.message);
 	}
 
 	@Override
 	protected void init() {
 		super.init();
-		this.message = MultiLineLabel.create(this.font, this.title2, this.width - 50);
-		int i = this.message.getLineCount() * 9;
-		int j = Mth.clamp(90 + i + 12, this.height / 6 + 96, this.height - 24);
+		this.multilineMessage = MultiLineLabel.create(this.font, this.message, this.width - 50);
+		int i = Mth.clamp(this.messageTop() + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24);
 		this.exitButtons.clear();
-		this.addButtons(j);
+		this.addButtons(i);
 	}
 
 	protected void addButtons(int i) {
@@ -62,9 +61,22 @@ public class ConfirmScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
-		this.message.renderCentered(poseStack, this.width / 2, 90);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.titleTop(), 16777215);
+		this.multilineMessage.renderCentered(poseStack, this.width / 2, this.messageTop());
 		super.render(poseStack, i, j, f);
+	}
+
+	private int titleTop() {
+		int i = (this.height - this.messageHeight()) / 2;
+		return Mth.clamp(i - 20 - 9, 10, 80);
+	}
+
+	private int messageTop() {
+		return this.titleTop() + 20;
+	}
+
+	private int messageHeight() {
+		return this.multilineMessage.getLineCount() * 9;
 	}
 
 	public void setDelay(int i) {

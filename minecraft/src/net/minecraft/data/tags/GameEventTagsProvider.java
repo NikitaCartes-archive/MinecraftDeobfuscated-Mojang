@@ -1,12 +1,14 @@
 package net.minecraft.data.tags;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class GameEventTagsProvider extends TagsProvider<GameEvent> {
-	private static final GameEvent[] VIBRATIONS_EXCEPT_FLAP = new GameEvent[]{
+	@VisibleForTesting
+	static final GameEvent[] VIBRATIONS_EXCEPT_FLAP = new GameEvent[]{
 		GameEvent.BLOCK_ATTACH,
 		GameEvent.BLOCK_CHANGE,
 		GameEvent.BLOCK_CLOSE,
@@ -35,8 +37,6 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.HIT_GROUND,
 		GameEvent.INSTRUMENT_PLAY,
 		GameEvent.ITEM_INTERACT_FINISH,
-		GameEvent.JUKEBOX_PLAY,
-		GameEvent.JUKEBOX_STOP_PLAY,
 		GameEvent.LIGHTNING_STRIKE,
 		GameEvent.NOTE_BLOCK_PLAY,
 		GameEvent.PISTON_CONTRACT,

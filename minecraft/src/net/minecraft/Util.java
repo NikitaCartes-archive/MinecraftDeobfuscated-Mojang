@@ -56,7 +56,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -69,6 +68,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.TimeSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
@@ -82,7 +82,7 @@ public class Util {
 	private static final ExecutorService BOOTSTRAP_EXECUTOR = makeExecutor("Bootstrap");
 	private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main");
 	private static final ExecutorService IO_POOL = makeIoExecutor();
-	public static LongSupplier timeSource = System::nanoTime;
+	public static TimeSource.NanoTimeSource timeSource = System::nanoTime;
 	public static final Ticker TICKER = new Ticker() {
 		@Override
 		public long read() {

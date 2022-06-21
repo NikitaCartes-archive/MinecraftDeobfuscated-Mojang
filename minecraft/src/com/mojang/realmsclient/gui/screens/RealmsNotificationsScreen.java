@@ -5,10 +5,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
+import com.mojang.realmsclient.gui.task.DataFetcher;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -20,7 +21,8 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	private static final ResourceLocation INVITE_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/invite_icon.png");
 	private static final ResourceLocation TRIAL_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/trial_icon.png");
 	private static final ResourceLocation NEWS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/news_notification_mainscreen.png");
-	private static final RealmsDataFetcher REALMS_DATA_FETCHER = new RealmsDataFetcher(Minecraft.getInstance(), RealmsClient.create());
+	@Nullable
+	private DataFetcher.Subscription realmsDataSubscription;
 	private volatile int numberOfPendingInvites;
 	static boolean checkedMcoAvailability;
 	private static boolean trialAvailable;
@@ -35,28 +37,34 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	public void init() {
 		this.checkIfMcoEnabled();
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
+		if (this.realmsDataSubscription != null) {
+			this.realmsDataSubscription.forceUpdate();
+		}
 	}
 
 	@Override
 	public void tick() {
-		if ((!this.getRealmsNotificationsEnabled() || !this.inTitleScreen() || !validClient) && !REALMS_DATA_FETCHER.isStopped()) {
-			REALMS_DATA_FETCHER.stop();
-		} else if (validClient && this.getRealmsNotificationsEnabled()) {
-			REALMS_DATA_FETCHER.initWithSpecificTaskList();
-			if (REALMS_DATA_FETCHER.isFetchedSinceLastTry(RealmsDataFetcher.Task.PENDING_INVITE)) {
-				this.numberOfPendingInvites = REALMS_DATA_FETCHER.getPendingInvitesCount();
-			}
-
-			if (REALMS_DATA_FETCHER.isFetchedSinceLastTry(RealmsDataFetcher.Task.TRIAL_AVAILABLE)) {
-				trialAvailable = REALMS_DATA_FETCHER.isTrialAvailable();
-			}
-
-			if (REALMS_DATA_FETCHER.isFetchedSinceLastTry(RealmsDataFetcher.Task.UNREAD_NEWS)) {
-				hasUnreadNews = REALMS_DATA_FETCHER.hasUnreadNews();
-			}
-
-			REALMS_DATA_FETCHER.markClean();
+		boolean bl = this.getRealmsNotificationsEnabled() && this.inTitleScreen() && validClient;
+		if (this.realmsDataSubscription == null && bl) {
+			this.realmsDataSubscription = this.initDataFetcher(this.minecraft.realmsDataFetcher());
+		} else if (this.realmsDataSubscription != null && !bl) {
+			this.realmsDataSubscription = null;
 		}
+
+		if (this.realmsDataSubscription != null) {
+			this.realmsDataSubscription.tick();
+		}
+	}
+
+	private DataFetcher.Subscription initDataFetcher(RealmsDataFetcher realmsDataFetcher) {
+		DataFetcher.Subscription subscription = realmsDataFetcher.dataFetcher.createSubscription();
+		subscription.subscribe(realmsDataFetcher.pendingInvitesTask, integer -> this.numberOfPendingInvites = integer);
+		subscription.subscribe(realmsDataFetcher.trialAvailabilityTask, boolean_ -> trialAvailable = boolean_);
+		subscription.subscribe(realmsDataFetcher.newsTask, realmsNews -> {
+			realmsDataFetcher.newsManager.updateUnreadNews(realmsNews);
+			hasUnreadNews = realmsDataFetcher.newsManager.hasUnreadNews();
+		});
+		return subscription;
 	}
 
 	private boolean getRealmsNotificationsEnabled() {
@@ -136,10 +144,5 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 
 			GuiComponent.blit(poseStack, n + 4 - p, o + 4, 0.0F, (float)q, 8, 8, 8, 16);
 		}
-	}
-
-	@Override
-	public void removed() {
-		REALMS_DATA_FETCHER.stop();
 	}
 }
