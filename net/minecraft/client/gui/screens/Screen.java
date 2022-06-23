@@ -32,6 +32,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -333,13 +334,13 @@ implements Widget {
                     URI uRI = new File(clickEvent.getValue()).toURI();
                     this.openLink(uRI);
                 } else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
-                    this.insertText(clickEvent.getValue(), true);
+                    this.insertText(SharedConstants.filterText(clickEvent.getValue()), true);
                 } else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-                    String string2 = clickEvent.getValue();
+                    String string2 = SharedConstants.filterText(clickEvent.getValue());
                     if (string2.startsWith("/")) {
-                        this.minecraft.player.command(string2.substring(1));
+                        this.minecraft.player.commandUnsigned(string2.substring(1));
                     } else {
-                        this.minecraft.player.chat(string2);
+                        LOGGER.warn("Failed to run command without '/' prefix from click event: '{}'", (Object)string2);
                     }
                 } else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
                     this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());

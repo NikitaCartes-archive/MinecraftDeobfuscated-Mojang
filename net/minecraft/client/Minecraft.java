@@ -1625,7 +1625,7 @@ implements WindowEventHandler {
                 this.tutorial.removeTimedToast(this.socialInteractionsToast);
                 this.socialInteractionsToast = null;
             }
-            this.setScreen(SocialInteractionsScreen.createWithWarning());
+            this.setScreen(new SocialInteractionsScreen());
         }
         while (this.options.keyInventory.consumeClick()) {
             if (this.gameMode.isServerControlledInventory()) {
@@ -1837,7 +1837,7 @@ implements WindowEventHandler {
     }
 
     @Nullable
-    private BanDetails multiplayerBan() {
+    public BanDetails multiplayerBan() {
         return this.userApiService.properties().bannedScopes().get("MULTIPLAYER");
     }
 

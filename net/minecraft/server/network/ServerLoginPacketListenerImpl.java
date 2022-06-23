@@ -13,7 +13,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PrivateKey;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.crypto.Cipher;
@@ -64,7 +63,7 @@ implements ServerLoginPacketListener {
     @Nullable
     private ServerPlayer delayedAcceptPlayer;
     @Nullable
-    private ProfilePublicKey playerProfilePublicKey;
+    private ProfilePublicKey.Data profilePublicKeyData;
 
     public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
         this.server = minecraftServer;
@@ -102,11 +101,26 @@ implements ServerLoginPacketListener {
     }
 
     public void handleAcceptedLogin() {
-        Component component;
-        if (!this.gameProfile.isComplete()) {
-            this.gameProfile = this.createFakeProfile(this.gameProfile);
+        ProfilePublicKey profilePublicKey;
+        UUID uUID;
+        block10: {
+            if (!this.gameProfile.isComplete()) {
+                this.gameProfile = this.createFakeProfile(this.gameProfile);
+            }
+            uUID = this.gameProfile.getId();
+            profilePublicKey = null;
+            try {
+                SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
+                profilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(this.profilePublicKeyData, uUID, signatureValidator, this.server.enforceSecureProfile());
+            } catch (PublicKeyValidationException publicKeyValidationException) {
+                LOGGER.error(publicKeyValidationException.getMessage(), publicKeyValidationException.getCause());
+                if (this.connection.isMemoryConnection()) break block10;
+                this.disconnect(publicKeyValidationException.getComponent());
+                return;
+            }
         }
-        if ((component = this.server.getPlayerList().canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile)) != null) {
+        Component component = this.server.getPlayerList().canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile);
+        if (component != null) {
             this.disconnect(component);
         } else {
             this.state = State.ACCEPTED;
@@ -114,9 +128,9 @@ implements ServerLoginPacketListener {
                 this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
             }
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
-            ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
+            ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(uUID);
             try {
-                ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, this.playerProfilePublicKey);
+                ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, profilePublicKey);
                 if (serverPlayer != null) {
                     this.state = State.DELAY_ACCEPT;
                     this.delayedAcceptPlayer = serverPlayer2;
@@ -149,42 +163,32 @@ implements ServerLoginPacketListener {
     }
 
     @Nullable
-    private static ProfilePublicKey validatePublicKey(ServerboundHelloPacket serverboundHelloPacket, SignatureValidator signatureValidator, boolean bl) throws PublicKeyParseException {
+    private static ProfilePublicKey validatePublicKey(@Nullable ProfilePublicKey.Data data, UUID uUID, SignatureValidator signatureValidator, boolean bl) throws PublicKeyValidationException {
         try {
-            Optional<ProfilePublicKey.Data> optional = serverboundHelloPacket.publicKey();
-            if (optional.isEmpty()) {
+            if (data == null) {
                 if (bl) {
-                    throw new PublicKeyParseException(MISSING_PROFILE_PUBLIC_KEY);
+                    throw new PublicKeyValidationException(MISSING_PROFILE_PUBLIC_KEY);
                 }
                 return null;
             }
-            return ProfilePublicKey.createValidated(signatureValidator, optional.get());
+            return ProfilePublicKey.createValidated(signatureValidator, uUID, data);
         } catch (InsecurePublicKeyException.MissingException missingException) {
             if (bl) {
-                throw new PublicKeyParseException(INVALID_SIGNATURE, (Throwable)missingException);
+                throw new PublicKeyValidationException(INVALID_SIGNATURE, (Throwable)missingException);
             }
             return null;
         } catch (CryptException cryptException) {
-            throw new PublicKeyParseException(INVALID_PUBLIC_KEY, (Throwable)cryptException);
+            throw new PublicKeyValidationException(INVALID_PUBLIC_KEY, (Throwable)cryptException);
         } catch (Exception exception) {
-            throw new PublicKeyParseException(INVALID_SIGNATURE, (Throwable)exception);
+            throw new PublicKeyValidationException(INVALID_SIGNATURE, (Throwable)exception);
         }
     }
 
     @Override
     public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
-        block5: {
-            Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
-            Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
-            try {
-                this.playerProfilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(serverboundHelloPacket, this.server.getServiceSignatureValidator(), this.server.enforceSecureProfile());
-            } catch (PublicKeyParseException publicKeyParseException) {
-                LOGGER.error(publicKeyParseException.getMessage(), publicKeyParseException.getCause());
-                if (this.connection.isMemoryConnection()) break block5;
-                this.disconnect(publicKeyParseException.getComponent());
-                return;
-            }
-        }
+        Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
+        Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
+        this.profilePublicKeyData = serverboundHelloPacket.publicKey().orElse(null);
         GameProfile gameProfile = this.server.getSingleplayerProfile();
         if (gameProfile != null && serverboundHelloPacket.name().equalsIgnoreCase(gameProfile.getName())) {
             this.gameProfile = gameProfile;
@@ -209,8 +213,9 @@ implements ServerLoginPacketListener {
         String string;
         Validate.validState(this.state == State.KEY, "Unexpected key packet", new Object[0]);
         try {
+            ProfilePublicKey profilePublicKey;
             PrivateKey privateKey = this.server.getKeyPair().getPrivate();
-            if (this.playerProfilePublicKey != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, this.playerProfilePublicKey) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
+            if (this.profilePublicKeyData != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, profilePublicKey = ProfilePublicKey.createTrusted(this.profilePublicKeyData)) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
                 throw new IllegalStateException("Protocol error");
             }
             SecretKey secretKey = serverboundKeyPacket.getSecretKey(privateKey);
@@ -282,13 +287,13 @@ implements ServerLoginPacketListener {
 
     }
 
-    static class PublicKeyParseException
+    static class PublicKeyValidationException
     extends ThrowingComponent {
-        public PublicKeyParseException(Component component) {
+        public PublicKeyValidationException(Component component) {
             super(component);
         }
 
-        public PublicKeyParseException(Component component, Throwable throwable) {
+        public PublicKeyValidationException(Component component, Throwable throwable) {
             super(component, throwable);
         }
     }

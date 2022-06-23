@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.logging.LogUtils;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -292,20 +293,20 @@ extends AbstractClientPlayer {
         return !itemStack.isEmpty();
     }
 
-    public void chat(String string) {
-        this.chat(string, null);
+    public void chatSigned(String string) {
+        this.chatSigned(string, null);
     }
 
-    public void chat(String string, @Nullable Component component) {
+    public void chatSigned(String string, @Nullable Component component) {
         MessageSigner messageSigner = MessageSigner.create(this.getUUID());
         this.sendChat(messageSigner, string, component);
     }
 
-    public void command(String string) {
-        this.command(string, null);
+    public void commandUnsigned(String string) {
+        this.connection.send(new ServerboundChatCommandPacket(string, Instant.now(), ArgumentSignatures.empty(), false));
     }
 
-    public void command(String string, @Nullable Component component) {
+    public void commandSigned(String string, @Nullable Component component) {
         MessageSigner messageSigner = MessageSigner.create(this.getUUID());
         this.sendCommand(messageSigner, string, component);
     }

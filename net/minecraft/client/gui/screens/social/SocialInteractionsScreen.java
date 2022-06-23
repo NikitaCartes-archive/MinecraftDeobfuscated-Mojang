@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
@@ -17,7 +18,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
@@ -74,13 +74,6 @@ extends Screen {
     public SocialInteractionsScreen() {
         super(Component.translatable("gui.socialInteractions.title"));
         this.updateServerLabel(Minecraft.getInstance());
-    }
-
-    public static Screen createWithWarning() {
-        Minecraft minecraft = Minecraft.getInstance();
-        MutableComponent component = Component.translatable("gui.abuseReport.under_construction.title").withStyle(ChatFormatting.BOLD);
-        MutableComponent component2 = Component.translatable("gui.abuseReport.under_construction");
-        return new AlertScreen(() -> minecraft.setScreen(new SocialInteractionsScreen()), component, component2, CommonComponents.GUI_PROCEED, true);
     }
 
     private int windowHeight() {
@@ -164,26 +157,32 @@ extends Screen {
         this.allButton.setMessage(TAB_ALL);
         this.hiddenButton.setMessage(TAB_HIDDEN);
         this.blockedButton.setMessage(TAB_BLOCKED);
-        Collection<UUID> collection = switch (page) {
-            default -> throw new IncompatibleClassChangeError();
-            case Page.ALL -> {
+        boolean bl = false;
+        switch (page) {
+            case ALL: {
                 this.allButton.setMessage(TAB_ALL_SELECTED);
-                yield this.minecraft.player.connection.getOnlinePlayerIds();
+                Collection<UUID> collection = this.minecraft.player.connection.getOnlinePlayerIds();
+                this.socialInteractionsPlayerList.updatePlayerListWithLog(collection, this.socialInteractionsPlayerList.getScrollAmount());
+                break;
             }
-            case Page.HIDDEN -> {
+            case HIDDEN: {
                 this.hiddenButton.setMessage(TAB_HIDDEN_SELECTED);
-                yield this.minecraft.getPlayerSocialManager().getHiddenPlayers();
+                Set<UUID> set = this.minecraft.getPlayerSocialManager().getHiddenPlayers();
+                bl = set.isEmpty();
+                this.socialInteractionsPlayerList.updatePlayerList(set, this.socialInteractionsPlayerList.getScrollAmount());
+                break;
             }
-            case Page.BLOCKED -> {
+            case BLOCKED: {
                 this.blockedButton.setMessage(TAB_BLOCKED_SELECTED);
                 PlayerSocialManager playerSocialManager = this.minecraft.getPlayerSocialManager();
-                yield this.minecraft.player.connection.getOnlinePlayerIds().stream().filter(playerSocialManager::isBlocked).collect(Collectors.toSet());
+                Set<UUID> set2 = this.minecraft.player.connection.getOnlinePlayerIds().stream().filter(playerSocialManager::isBlocked).collect(Collectors.toSet());
+                bl = set2.isEmpty();
+                this.socialInteractionsPlayerList.updatePlayerList(set2, this.socialInteractionsPlayerList.getScrollAmount());
             }
-        };
-        this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount());
+        }
         if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
             NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH);
-        } else if (collection.isEmpty()) {
+        } else if (bl) {
             if (page == Page.HIDDEN) {
                 NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN);
             } else if (page == Page.BLOCKED) {

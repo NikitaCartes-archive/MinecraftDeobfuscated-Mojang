@@ -4,7 +4,9 @@
 package net.minecraft.client.gui.screens.social;
 
 import com.google.common.base.Strings;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
@@ -44,14 +46,38 @@ extends ContainerObjectSelectionList<PlayerEntry> {
     }
 
     public void updatePlayerList(Collection<UUID> collection, double d) {
+        this.addOnlinePlayers(collection);
+        this.updateFiltersAndScroll(d);
+    }
+
+    public void updatePlayerListWithLog(Collection<UUID> collection, double d) {
+        this.addOnlinePlayers(collection);
+        this.addPlayersFromLog(collection);
+        this.updateFiltersAndScroll(d);
+    }
+
+    private void addOnlinePlayers(Collection<UUID> collection) {
         this.players.clear();
         for (UUID uUID : collection) {
             PlayerInfo playerInfo = this.minecraft.player.connection.getPlayerInfo(uUID);
             if (playerInfo == null) continue;
             this.players.add(new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation));
         }
-        this.updateFilteredPlayers();
         this.players.sort((playerEntry, playerEntry2) -> playerEntry.getPlayerName().compareToIgnoreCase(playerEntry2.getPlayerName()));
+    }
+
+    private void addPlayersFromLog(Collection<UUID> collection) {
+        Collection<GameProfile> collection2 = this.minecraft.getReportingContext().chatLog().selectAllDescending().distinctGameProfiles();
+        for (GameProfile gameProfile : collection2) {
+            if (collection.contains(gameProfile.getId())) continue;
+            PlayerEntry playerEntry = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, gameProfile.getId(), gameProfile.getName(), Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile)));
+            playerEntry.setRemoved(true);
+            this.players.add(playerEntry);
+        }
+    }
+
+    private void updateFiltersAndScroll(double d) {
+        this.updateFilteredPlayers();
         this.replaceEntries(this.players);
         this.setScrollAmount(d);
     }

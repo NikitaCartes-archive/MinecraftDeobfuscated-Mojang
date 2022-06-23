@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.util.concurrent.Runnables;
+import com.mojang.authlib.minecraft.BanDetails;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -148,24 +149,37 @@ extends Screen {
 
     private void createNormalMenuOptions(int i, int j) {
         this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, Component.translatable("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
-        boolean bl = this.minecraft.allowsMultiplayer();
-        Button.OnTooltip onTooltip = bl ? Button.NO_TOOLTIP : new Button.OnTooltip(){
-            private final Component text = Component.translatable("title.multiplayer.disabled");
+        final Component component = this.getMultiplayerDisabledReason();
+        boolean bl = component == null;
+        Button.OnTooltip onTooltip = component == null ? Button.NO_TOOLTIP : new Button.OnTooltip(){
 
             @Override
             public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-                if (!button.active) {
-                    TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(this.text, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
-                }
+                TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(component, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
             }
 
             @Override
             public void narrateTooltip(Consumer<Component> consumer) {
-                consumer.accept(this.text);
+                consumer.accept(component);
             }
         };
         this.addRenderableWidget(new Button((int)(this.width / 2 - 100), (int)(i + j * 1), (int)200, (int)20, (Component)Component.translatable((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
         this.addRenderableWidget(new Button((int)(this.width / 2 - 100), (int)(i + j * 2), (int)200, (int)20, (Component)Component.translatable((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
+    }
+
+    @Nullable
+    private Component getMultiplayerDisabledReason() {
+        if (this.minecraft.allowsMultiplayer()) {
+            return null;
+        }
+        BanDetails banDetails = this.minecraft.multiplayerBan();
+        if (banDetails != null) {
+            if (banDetails.expires() != null) {
+                return Component.translatable("title.multiplayer.disabled.banned.temporary");
+            }
+            return Component.translatable("title.multiplayer.disabled.banned.permanent");
+        }
+        return Component.translatable("title.multiplayer.disabled");
     }
 
     private void createDemoMenuOptions(int i, int j) {

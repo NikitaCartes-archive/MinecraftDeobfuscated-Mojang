@@ -33,17 +33,17 @@ public class BanNoticeScreen {
     }
 
     private static Component getBannedScreenText(BanDetails banDetails) {
-        return Component.translatable("gui.banned.description", BanNoticeScreen.getBanReasonText(banDetails), BanNoticeScreen.getBanStatusText(banDetails), ConfirmLinkScreen.confirmMessage(true, URL_MODERATION));
+        return Component.translatable("gui.banned.description", BanNoticeScreen.getBanReasonText(banDetails), BanNoticeScreen.getBanStatusText(banDetails), Component.literal(URL_MODERATION));
     }
 
     private static Component getBanReasonText(BanDetails banDetails) {
-        Component component = null;
         String string = banDetails.reason();
+        String string2 = banDetails.reasonMessage();
         if (StringUtils.isNumeric(string)) {
-            component = ReportReason.getTranslationById(Integer.parseInt(string));
-        }
-        if (component != null) {
-            return Component.translatable("gui.banned.description.reason", ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withBold(true)));
+            int i = Integer.parseInt(string);
+            Component component = ReportReason.getTranslationById(i);
+            component = component != null ? ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withBold(true)) : (string2 != null ? Component.translatable("gui.banned.description.reason_id_message", i, string2).withStyle(ChatFormatting.BOLD) : Component.translatable("gui.banned.description.reason_id", i).withStyle(ChatFormatting.BOLD));
+            return Component.translatable("gui.banned.description.reason", component);
         }
         return Component.translatable("gui.banned.description.unknownreason");
     }

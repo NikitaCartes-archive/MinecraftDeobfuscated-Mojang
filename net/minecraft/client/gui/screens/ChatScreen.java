@@ -376,9 +376,9 @@ extends Screen {
         }
         Component component = this.chatPreview.pull(string);
         if (string.startsWith("/")) {
-            this.minecraft.player.command(string.substring(1), component);
+            this.minecraft.player.commandSigned(string.substring(1), component);
         } else {
-            this.minecraft.player.chat(string, component);
+            this.minecraft.player.chatSigned(string, component);
         }
     }
 

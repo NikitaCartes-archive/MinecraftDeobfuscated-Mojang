@@ -54,7 +54,7 @@ public class PlayerInfo {
         try {
             ProfilePublicKey.Data data = playerUpdate.getProfilePublicKey();
             if (data != null) {
-                profilePublicKey = ProfilePublicKey.createValidated(signatureValidator, data);
+                profilePublicKey = ProfilePublicKey.createValidated(signatureValidator, this.profile.getId(), data);
             }
         } catch (InsecurePublicKeyException | CryptException exception) {
             LOGGER.error("Failed to retrieve publicKey property for profile {}", (Object)this.profile.getId(), (Object)exception);

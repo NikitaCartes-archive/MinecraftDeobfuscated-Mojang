@@ -242,8 +242,8 @@ extends GuiComponent {
                 DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
                 list.add(String.format(Locale.ROOT, "Local Difficulty: %.2f // %.2f (Day %d)", Float.valueOf(difficultyInstance.getEffectiveDifficulty()), Float.valueOf(difficultyInstance.getSpecialMultiplier()), this.minecraft.level.getDayTime() / 24000L));
             }
-            if (levelChunk2 != null) {
-                list.add(String.format("Blending: %s", levelChunk2.isOldNoiseGeneration() ? "Old" : "New"));
+            if (levelChunk2 != null && levelChunk2.isOldNoiseGeneration()) {
+                list.add("Blending: Old");
             }
         }
         ServerLevel serverLevel = this.getServerLevel();

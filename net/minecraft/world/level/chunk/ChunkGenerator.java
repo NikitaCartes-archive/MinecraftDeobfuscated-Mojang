@@ -216,11 +216,11 @@ public abstract class ChunkGenerator {
         for (Map.Entry entry : map.entrySet()) {
             StructurePlacement structurePlacement2 = (StructurePlacement)entry.getKey();
             if (structurePlacement2 instanceof ConcentricRingsStructurePlacement) {
+                BlockPos blockPos2;
+                double e;
                 ConcentricRingsStructurePlacement concentricRingsStructurePlacement = (ConcentricRingsStructurePlacement)structurePlacement2;
                 Pair<BlockPos, Holder<Structure>> pair2 = this.getNearestGeneratedStructure((Set)entry.getValue(), serverLevel, structureManager, blockPos, bl, concentricRingsStructurePlacement);
-                BlockPos blockPos2 = pair2.getFirst();
-                double e = blockPos.distSqr(blockPos2);
-                if (!(e < d)) continue;
+                if (pair2 == null || !((e = blockPos.distSqr(blockPos2 = pair2.getFirst())) < d)) continue;
                 d = e;
                 pair = pair2;
                 continue;

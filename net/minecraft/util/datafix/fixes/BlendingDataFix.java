@@ -9,6 +9,7 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.OptionalDynamic;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,12 +30,14 @@ extends DataFix {
     @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getOutputSchema().getType(References.CHUNK);
-        return this.fixTypeEverywhereTyped(this.name, type, typed -> typed.update(DSL.remainderFinder(), BlendingDataFix::updateChunkTag));
+        return this.fixTypeEverywhereTyped(this.name, type, typed -> typed.update(DSL.remainderFinder(), dynamic -> BlendingDataFix.updateChunkTag(dynamic, dynamic.get("__context"))));
     }
 
-    private static Dynamic<?> updateChunkTag(Dynamic<?> dynamic) {
-        Optional<Dynamic<?>> optional = (dynamic = dynamic.remove("blending_data")).get("Status").result();
-        if (optional.isPresent()) {
+    private static Dynamic<?> updateChunkTag(Dynamic<?> dynamic, OptionalDynamic<?> optionalDynamic) {
+        dynamic = dynamic.remove("blending_data");
+        boolean bl = "minecraft:overworld".equals(optionalDynamic.get("dimension").asString().result().orElse(""));
+        Optional<Dynamic<?>> optional = dynamic.get("Status").result();
+        if (bl && optional.isPresent()) {
             Dynamic<?> dynamic2;
             String string2;
             String string = NamespacedSchema.ensureNamespaced(optional.get().asString("empty"));

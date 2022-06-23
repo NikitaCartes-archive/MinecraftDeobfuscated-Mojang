@@ -52,7 +52,9 @@ extends Screen {
     private static final Component DESCRIBE_PLACEHOLDER = Component.translatable("gui.chatReport.describe");
     private static final Component REPORT_SENT_MESSAGE = Component.translatable("gui.chatReport.report_sent_msg");
     private static final Component SELECT_CHAT_MESSAGE = Component.translatable("gui.chatReport.select_chat");
-    private static final Component REPORT_SENDING_TITLE = Component.translatable("gui.abuseReport.sending.title");
+    private static final Component REPORT_SENDING_TITLE = Component.translatable("gui.abuseReport.sending.title").withStyle(ChatFormatting.BOLD);
+    private static final Component REPORT_SENT_TITLE = Component.translatable("gui.abuseReport.sent.title").withStyle(ChatFormatting.BOLD);
+    private static final Component REPORT_ERROR_TITLE = Component.translatable("gui.abuseReport.error.title").withStyle(ChatFormatting.BOLD);
     private static final Component REPORT_SEND_GENERIC_ERROR = Component.translatable("gui.abuseReport.send.generic_error");
     private static final Logger LOGGER = LogUtils.getLogger();
     @Nullable
@@ -112,30 +114,29 @@ extends Screen {
     private void sendReport() {
         this.report.build(this.reportingContext).left().ifPresent(result -> {
             CompletableFuture<Unit> completableFuture = this.reportingContext.sender().send(result.id(), result.report());
-            GenericWaitingScreen genericWaitingScreen = new GenericWaitingScreen(REPORT_SENDING_TITLE, CommonComponents.GUI_CANCEL, () -> {
+            this.minecraft.setScreen(GenericWaitingScreen.createWaiting(REPORT_SENDING_TITLE, CommonComponents.GUI_CANCEL, () -> {
                 this.minecraft.setScreen(this);
                 completableFuture.cancel(true);
-            });
-            this.minecraft.setScreen(genericWaitingScreen);
+            }));
             completableFuture.handleAsync((object, throwable) -> {
                 if (throwable == null) {
-                    this.onReportSendSuccess(genericWaitingScreen);
+                    this.onReportSendSuccess();
                 } else {
                     if (throwable instanceof CancellationException) {
                         return null;
                     }
-                    this.onReportSendError(genericWaitingScreen, (Throwable)throwable);
+                    this.onReportSendError((Throwable)throwable);
                 }
                 return null;
             }, (Executor)this.minecraft);
         });
     }
 
-    private void onReportSendSuccess(GenericWaitingScreen genericWaitingScreen) {
-        genericWaitingScreen.update(REPORT_SENT_MESSAGE, CommonComponents.GUI_DONE, () -> this.minecraft.setScreen(null));
+    private void onReportSendSuccess() {
+        this.minecraft.setScreen(GenericWaitingScreen.createCompleted(REPORT_SENT_TITLE, REPORT_SENT_MESSAGE, CommonComponents.GUI_DONE, () -> this.minecraft.setScreen(null)));
     }
 
-    private void onReportSendError(GenericWaitingScreen genericWaitingScreen, Throwable throwable) {
+    private void onReportSendError(Throwable throwable) {
         Component component;
         LOGGER.error("Encountered error while sending abuse report", throwable);
         Throwable throwable2 = throwable.getCause();
@@ -146,7 +147,7 @@ extends Screen {
             component = REPORT_SEND_GENERIC_ERROR;
         }
         MutableComponent component2 = component.copy().withStyle(ChatFormatting.RED);
-        genericWaitingScreen.update(component2, CommonComponents.GUI_BACK, () -> this.minecraft.setScreen(this));
+        this.minecraft.setScreen(GenericWaitingScreen.createCompleted(REPORT_ERROR_TITLE, component2, CommonComponents.GUI_BACK, () -> this.minecraft.setScreen(this)));
     }
 
     @Override

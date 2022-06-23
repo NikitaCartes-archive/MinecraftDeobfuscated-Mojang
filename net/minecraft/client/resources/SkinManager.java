@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -125,6 +126,14 @@ public class SkinManager {
             return ImmutableMap.of();
         }
         return this.insecureSkinCache.getUnchecked(property.getValue());
+    }
+
+    public ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
+        MinecraftProfileTexture minecraftProfileTexture = this.getInsecureSkinInformation(gameProfile).get((Object)MinecraftProfileTexture.Type.SKIN);
+        if (minecraftProfileTexture != null) {
+            return this.registerTexture(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
+        }
+        return DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -32,8 +32,6 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ChatReportBuilder {
     private static final String REPORT_TYPE_CHAT = "CHAT";
-    private static final int CONTEXT_FRONT = 2;
-    private static final int CONTEXT_BACK = 4;
     private final UUID id;
     private final Instant createdAt;
     private final UUID reportedProfileId;
@@ -160,8 +158,8 @@ public class ChatReportBuilder {
     }
 
     private IntStream selectContextMessages(ChatLog chatLog, int i) {
-        int j = chatLog.offsetClamped(i, -4);
-        int k = chatLog.offsetClamped(i, 2);
+        int j = chatLog.offsetClamped(i, -this.limits.leadingContextMessageCount());
+        int k = chatLog.offsetClamped(i, this.limits.trailingContextMessageCount());
         return chatLog.selectBetween(j, k).ids();
     }
 

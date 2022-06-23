@@ -9,9 +9,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.PublicKey;
 import java.time.Instant;
+import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
@@ -31,11 +33,11 @@ public record ProfilePublicKey(Data data) {
         return new ProfilePublicKey(data);
     }
 
-    public static ProfilePublicKey createValidated(SignatureValidator signatureValidator, Data data) throws InsecurePublicKeyException, CryptException {
+    public static ProfilePublicKey createValidated(SignatureValidator signatureValidator, UUID uUID, Data data) throws InsecurePublicKeyException, CryptException {
         if (data.hasExpired()) {
             throw new InsecurePublicKeyException.InvalidException("Expired profile public key");
         }
-        if (!data.validateSignature(signatureValidator)) {
+        if (!data.validateSignature(signatureValidator, uUID)) {
             throw new InsecurePublicKeyException.InvalidException("Invalid profile public key signature");
         }
         return ProfilePublicKey.createTrusted(data);
@@ -47,7 +49,7 @@ public record ProfilePublicKey(Data data) {
 
     public record Data(Instant expiresAt, PublicKey key, byte[] keySignature) {
         private static final int MAX_KEY_SIGNATURE_SIZE = 4096;
-        public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.INSTANT_ISO8601.fieldOf("expires_at")).forGetter(Data::expiresAt), ((MapCodec)Crypt.PUBLIC_KEY_CODEC.fieldOf("key")).forGetter(Data::key), ((MapCodec)ExtraCodecs.BASE64_STRING.fieldOf("signature")).forGetter(Data::keySignature)).apply((Applicative<Data, ?>)instance, Data::new));
+        public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.INSTANT_ISO8601.fieldOf("expires_at")).forGetter(Data::expiresAt), ((MapCodec)Crypt.PUBLIC_KEY_CODEC.fieldOf("key")).forGetter(Data::key), ((MapCodec)ExtraCodecs.BASE64_STRING.fieldOf("signature_v2")).forGetter(Data::keySignature)).apply((Applicative<Data, ?>)instance, Data::new));
 
         public Data(FriendlyByteBuf friendlyByteBuf) {
             this(friendlyByteBuf.readInstant(), friendlyByteBuf.readPublicKey(), friendlyByteBuf.readByteArray(4096));
@@ -59,13 +61,16 @@ public record ProfilePublicKey(Data data) {
             friendlyByteBuf.writeByteArray(this.keySignature);
         }
 
-        boolean validateSignature(SignatureValidator signatureValidator) {
-            return signatureValidator.validate(this.signedPayload().getBytes(StandardCharsets.US_ASCII), this.keySignature);
+        boolean validateSignature(SignatureValidator signatureValidator, UUID uUID) {
+            return signatureValidator.validate(this.signedPayload(uUID), this.keySignature);
         }
 
-        private String signedPayload() {
-            String string = Crypt.rsaPublicKeyToString(this.key);
-            return this.expiresAt.toEpochMilli() + string;
+        private byte[] signedPayload(UUID uUID) {
+            byte[] bs = this.key.getEncoded();
+            byte[] cs = new byte[24 + bs.length];
+            ByteBuffer byteBuffer = ByteBuffer.wrap(cs).order(ByteOrder.BIG_ENDIAN);
+            byteBuffer.putLong(uUID.getMostSignificantBits()).putLong(uUID.getLeastSignificantBits()).putLong(this.expiresAt.toEpochMilli()).put(bs);
+            return cs;
         }
 
         public boolean hasExpired() {

@@ -7,13 +7,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
@@ -24,10 +22,10 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ReportReasonSelectionScreen
 extends Screen {
-    private static final String STANDARDS_LINK = "https://aka.ms/mccommunitystandards";
+    private static final String ADDITIONAL_INFO_LINK = "https://aka.ms/aboutjavareporting";
     private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
     private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
-    private static final Component COMMUNITY_STANDARDS_LABEL = Component.translatable("gui.chatReport.standards", Component.translatable("gui.chatReport.standards_name").withStyle(ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GRAY);
+    private static final Component READ_INFO_LABEL = Component.translatable("gui.chatReport.read_info");
     private static final int FOOTER_HEIGHT = 85;
     private static final int BUTTON_WIDTH = 150;
     private static final int BUTTON_HEIGHT = 20;
@@ -50,20 +48,20 @@ extends Screen {
 
     @Override
     protected void init() {
-        int i = this.font.width(COMMUNITY_STANDARDS_LABEL);
-        int j = (this.width - i) / 2;
-        this.addRenderableWidget(new PlainTextButton(j, 16 + this.font.lineHeight * 3 / 2, i, this.font.lineHeight, COMMUNITY_STANDARDS_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-            if (bl) {
-                Util.getPlatform().openUri(STANDARDS_LINK);
-            }
-            this.minecraft.setScreen(this);
-        }, STANDARDS_LINK, true)), this.font));
         this.reasonSelectionList = new ReasonSelectionList(this.minecraft);
         this.reasonSelectionList.setRenderBackground(false);
         this.addWidget(this.reasonSelectionList);
         ReasonSelectionList.Entry entry = Util.mapNullable(this.selectedReasonOnInit, this.reasonSelectionList::findEntry);
         this.reasonSelectionList.setSelected(entry);
-        this.addRenderableWidget(new Button(this.buttonLeft(), this.buttonTop(), 150, 20, CommonComponents.GUI_DONE, button -> {
+        int i = this.width / 2 - 150 - 5;
+        this.addRenderableWidget(new Button(i, this.buttonTop(), 150, 20, READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+            if (bl) {
+                Util.getPlatform().openUri(ADDITIONAL_INFO_LINK);
+            }
+            this.minecraft.setScreen(this);
+        }, ADDITIONAL_INFO_LINK, true))));
+        int j = this.width / 2 + 5;
+        this.addRenderableWidget(new Button(j, this.buttonTop(), 150, 20, CommonComponents.GUI_DONE, button -> {
             ReasonSelectionList.Entry entry = (ReasonSelectionList.Entry)this.reasonSelectionList.getSelected();
             if (entry != null) {
                 this.onSelectedReason.accept(entry.getReason());
@@ -92,10 +90,6 @@ extends Screen {
             int q = this.font.wordWrapHeight(entry.reason.description(), o);
             this.font.drawWordWrap(entry.reason.description(), k, m + (p - q) / 2, o, -1);
         }
-    }
-
-    private int buttonLeft() {
-        return this.contentRight() - 150;
     }
 
     private int buttonTop() {

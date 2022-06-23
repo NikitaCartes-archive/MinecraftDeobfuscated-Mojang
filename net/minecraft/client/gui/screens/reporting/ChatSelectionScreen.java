@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.reporting;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.report.AbuseReportLimits;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -26,9 +25,6 @@ import net.minecraft.client.gui.screens.reporting.ChatSelectionLogFiller;
 import net.minecraft.client.multiplayer.chat.LoggedChat;
 import net.minecraft.client.multiplayer.chat.report.ChatReportBuilder;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
-import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.SkinManager;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -160,9 +156,6 @@ extends Screen {
                 LoggedChat.Player player = (LoggedChat.Player)loggedChat;
                 MessageEntry entry = new MessageEntry(i, component, component2, bl, true);
                 this.addEntryToTop(entry);
-                if (ChatSelectionScreen.this.report.isReported(i)) {
-                    this.setSelected(entry);
-                }
                 this.updateHeading(player, bl);
             } else {
                 this.addEntryToTop(new MessageEntry(i, component, component2, bl, false));
@@ -205,14 +198,22 @@ extends Screen {
         @Override
         protected void renderItem(PoseStack poseStack, int i, int j, float f, int k, int l, int m, int n, int o) {
             Entry entry = (Entry)this.getEntry(k);
-            if (entry.isSelected()) {
-                int p = this.isFocused() ? -1 : -8355712;
+            if (this.shouldHighlightEntry(entry)) {
+                boolean bl = this.getSelected() == entry;
+                int p = this.isFocused() && bl ? -1 : -8355712;
                 this.renderSelection(poseStack, m, n, o, p, -16777216);
-            } else if (entry == this.getSelected()) {
-                this.renderSelection(poseStack, m, n, o, -16777216, -16777216);
             }
-            boolean bl = entry == this.getHovered();
-            entry.render(poseStack, k, m, l, n, o, i, j, bl, f);
+            entry.render(poseStack, k, m, l, n, o, i, j, this.getHovered() == entry, f);
+        }
+
+        private boolean shouldHighlightEntry(Entry entry) {
+            if (entry.canSelect()) {
+                boolean bl = this.getSelected() == entry;
+                boolean bl2 = this.getSelected() == null;
+                boolean bl3 = this.getHovered() == entry;
+                return bl || bl2 && bl3 && entry.canReport();
+            }
+            return false;
         }
 
         @Override
@@ -233,6 +234,7 @@ extends Screen {
             if (entry != null && entry.keyPressed(i, j, k)) {
                 return true;
             }
+            this.setFocused(null);
             return super.keyPressed(i, j, k);
         }
 
@@ -240,10 +242,18 @@ extends Screen {
             return this.y1 + ((ChatSelectionScreen)ChatSelectionScreen.this).font.lineHeight;
         }
 
+        @Override
+        protected boolean isFocused() {
+            return ChatSelectionScreen.this.getFocused() == this;
+        }
+
         @Environment(value=EnvType.CLIENT)
         public class MessageEntry
         extends Entry {
-            private static final int INDENT_AMOUNT = 8;
+            private static final ResourceLocation CHECKMARK_TEXTURE = new ResourceLocation("realms", "textures/gui/realms/checkmark.png");
+            private static final int CHECKMARK_WIDTH = 9;
+            private static final int CHECKMARK_HEIGHT = 8;
+            private static final int INDENT_AMOUNT = 11;
             private final int chatId;
             private final FormattedText text;
             private final Component narration;
@@ -269,8 +279,8 @@ extends Screen {
 
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                if (bl && this.canReport) {
-                    GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 3, j + m + 1, -16777216);
+                if (this.isSelected() && this.canReport) {
+                    this.renderSelectedCheckmark(poseStack, j, k, m);
                 }
                 int p = k + this.getTextIndent();
                 int q = j + 1 + (m - ((ChatSelectionScreen)ChatSelectionScreen.this).font.lineHeight) / 2;
@@ -280,12 +290,21 @@ extends Screen {
                 }
             }
 
+            private void renderSelectedCheckmark(PoseStack poseStack, int i, int j, int k) {
+                int l = j;
+                int m = i + (k - 8) / 2;
+                RenderSystem.setShaderTexture(0, CHECKMARK_TEXTURE);
+                RenderSystem.enableBlend();
+                GuiComponent.blit(poseStack, l, m, 0.0f, 0.0f, 9, 8, 9, 8);
+                RenderSystem.disableBlend();
+            }
+
             private int getMaximumTextWidth() {
                 return ChatSelectionList.this.getRowWidth() - this.getTextIndent();
             }
 
             private int getTextIndent() {
-                return this.playerMessage ? 8 : 0;
+                return this.playerMessage ? 11 : 0;
             }
 
             @Override
@@ -296,6 +315,7 @@ extends Screen {
             @Override
             public boolean mouseClicked(double d, double e, int i) {
                 if (i == 0) {
+                    ChatSelectionList.this.setSelected(null);
                     return this.toggleReport();
                 }
                 return false;
@@ -317,6 +337,11 @@ extends Screen {
             @Override
             public boolean canSelect() {
                 return true;
+            }
+
+            @Override
+            public boolean canReport() {
+                return this.canReport;
             }
 
             private boolean toggleReport() {
@@ -347,7 +372,7 @@ extends Screen {
             public MessageHeadingEntry(GameProfile gameProfile, Component component, boolean bl) {
                 this.heading = component;
                 this.canReport = bl;
-                this.skin = this.getSkinLocation(gameProfile);
+                this.skin = ChatSelectionList.this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile);
             }
 
             @Override
@@ -362,15 +387,6 @@ extends Screen {
             private void renderFace(PoseStack poseStack, int i, int j, ResourceLocation resourceLocation) {
                 RenderSystem.setShaderTexture(0, resourceLocation);
                 PlayerFaceRenderer.draw(poseStack, i, j, 12);
-            }
-
-            private ResourceLocation getSkinLocation(GameProfile gameProfile) {
-                SkinManager skinManager = ChatSelectionList.this.minecraft.getSkinManager();
-                MinecraftProfileTexture minecraftProfileTexture = skinManager.getInsecureSkinInformation(gameProfile).get((Object)MinecraftProfileTexture.Type.SKIN);
-                if (minecraftProfileTexture != null) {
-                    return skinManager.registerTexture(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
-                }
-                return DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
             }
         }
 
@@ -388,6 +404,10 @@ extends Screen {
 
             public boolean canSelect() {
                 return false;
+            }
+
+            public boolean canReport() {
+                return this.canSelect();
             }
         }
 

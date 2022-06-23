@@ -70,7 +70,7 @@ extends Screen {
         if (this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished()) {
             this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, Component.translatable("menu.shareToLan"), button -> this.minecraft.setScreen(new ShareToLanScreen(this))));
         } else {
-            this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, Component.translatable("menu.playerReporting"), button -> this.minecraft.setScreen(SocialInteractionsScreen.createWithWarning())));
+            this.addRenderableWidget(new Button(this.width / 2 + 4, this.height / 4 + 96 + -16, 98, 20, Component.translatable("menu.playerReporting"), button -> this.minecraft.setScreen(new SocialInteractionsScreen())));
         }
         MutableComponent component = this.minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
         this.addRenderableWidget(new Button(this.width / 2 - 102, this.height / 4 + 120 + -16, 204, 20, component, button -> {

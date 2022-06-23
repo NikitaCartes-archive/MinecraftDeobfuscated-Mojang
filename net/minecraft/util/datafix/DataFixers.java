@@ -29,6 +29,7 @@ import net.minecraft.util.datafix.fixes.BedItemColorFix;
 import net.minecraft.util.datafix.fixes.BiomeFix;
 import net.minecraft.util.datafix.fixes.BitStorageAlignFix;
 import net.minecraft.util.datafix.fixes.BlendingDataFix;
+import net.minecraft.util.datafix.fixes.BlendingDataRemoveFromNetherEndFix;
 import net.minecraft.util.datafix.fixes.BlockEntityBannerColorFix;
 import net.minecraft.util.datafix.fixes.BlockEntityBlockStateFix;
 import net.minecraft.util.datafix.fixes.BlockEntityCustomNameToComponentFix;
@@ -719,6 +720,8 @@ public class DataFixers {
         dataFixerBuilder.addFixer(new VariantRenameFix(schema169, "Rename british shorthair", References.ENTITY, "minecraft:cat", map));
         dataFixerBuilder.addFixer(new CriteriaRenameFix(schema169, "Migrate cat variant advancement for british shorthair", "minecraft:husbandry/complete_catalogue", string -> map.getOrDefault(string, (String)string)));
         dataFixerBuilder.addFixer(new PoiTypeRemoveFix(schema169, "Remove unpopulated villager PoI types", Set.of("minecraft:unemployed", "minecraft:nitwit")::contains));
+        Schema schema170 = dataFixerBuilder.addSchema(3108, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new BlendingDataRemoveFromNetherEndFix(schema170));
     }
 
     private static UnaryOperator<String> createRenamer(Map<String, String> map) {
