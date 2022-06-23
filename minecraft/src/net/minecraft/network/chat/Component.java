@@ -19,7 +19,6 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
@@ -111,10 +110,6 @@ public interface Component extends Message, FormattedText {
 		}
 	}
 
-	default List<Component> toFlatList() {
-		return this.toFlatList(Style.EMPTY);
-	}
-
 	default List<Component> toFlatList(Style style) {
 		List<Component> list = Lists.<Component>newArrayList();
 		this.visit((stylex, string) -> {
@@ -125,16 +120,6 @@ public interface Component extends Message, FormattedText {
 			return Optional.empty();
 		}, style);
 		return list;
-	}
-
-	default boolean contains(Component component) {
-		if (this.equals(component)) {
-			return true;
-		} else {
-			List<Component> list = this.toFlatList();
-			List<Component> list2 = component.toFlatList(this.getStyle());
-			return Collections.indexOfSubList(list, list2) != -1;
-		}
 	}
 
 	static Component nullToEmpty(@Nullable String string) {

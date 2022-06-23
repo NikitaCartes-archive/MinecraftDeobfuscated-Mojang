@@ -4,12 +4,11 @@ import com.google.gson.JsonObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 
 public abstract class BanListEntry<T> extends StoredUserEntry<T> {
-	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ROOT);
+	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 	public static final String EXPIRES_NEVER = "forever";
 	protected final Date created;
 	protected final String source;

@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -70,7 +70,7 @@ public class BookViewScreen extends Screen {
 	}
 
 	private BookViewScreen(BookViewScreen.BookAccess bookAccess, boolean bl) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.bookAccess = bookAccess;
 		this.playTurnSound = bl;
 	}

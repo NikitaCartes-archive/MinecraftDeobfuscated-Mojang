@@ -66,7 +66,7 @@ public class SkinManager {
 		MinecraftProfileTexture minecraftProfileTexture, Type type, @Nullable SkinManager.SkinTextureCallback skinTextureCallback
 	) {
 		String string = Hashing.sha1().hashUnencodedChars(minecraftProfileTexture.getHash()).toString();
-		ResourceLocation resourceLocation = getTextureLocation(type, string);
+		ResourceLocation resourceLocation = new ResourceLocation("skins/" + string);
 		AbstractTexture abstractTexture = this.textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
 		if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
 			File file = new File(this.skinsDirectory, string.length() > 2 ? string.substring(0, 2) : "xx");
@@ -82,15 +82,6 @@ public class SkinManager {
 		}
 
 		return resourceLocation;
-	}
-
-	private static ResourceLocation getTextureLocation(Type type, String string) {
-		String string2 = switch (type) {
-			case SKIN -> "skins";
-			case CAPE -> "capes";
-			case ELYTRA -> "elytra";
-		};
-		return new ResourceLocation(string2 + "/" + string);
 	}
 
 	public void registerSkins(GameProfile gameProfile, SkinManager.SkinTextureCallback skinTextureCallback, boolean bl) {

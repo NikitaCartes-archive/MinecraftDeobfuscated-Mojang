@@ -1,79 +1,68 @@
 package net.minecraft.commands.arguments;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
-import com.mojang.datafixers.util.Pair;
-import java.util.ArrayList;
-import java.util.List;
+import com.mojang.brigadier.context.ParsedCommandNode;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.network.chat.PreviewableCommand;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Crypt;
 
-public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
-	public static final ArgumentSignatures EMPTY = new ArgumentSignatures(List.of());
+public record ArgumentSignatures(long salt, Map<String, byte[]> signatures) {
 	private static final int MAX_ARGUMENT_COUNT = 8;
 	private static final int MAX_ARGUMENT_NAME_LENGTH = 16;
 
 	public ArgumentSignatures(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 8), ArgumentSignatures.Entry::new));
+		this(
+			friendlyByteBuf.readLong(),
+			friendlyByteBuf.readMap(FriendlyByteBuf.limitValue(HashMap::new, 8), friendlyByteBufx -> friendlyByteBufx.readUtf(16), FriendlyByteBuf::readByteArray)
+		);
 	}
 
-	public MessageSignature get(String string) {
-		for (ArgumentSignatures.Entry entry : this.entries) {
-			if (entry.name.equals(string)) {
-				return entry.signature;
-			}
-		}
+	public static ArgumentSignatures empty() {
+		return new ArgumentSignatures(0L, Map.of());
+	}
 
-		return MessageSignature.EMPTY;
+	@Nullable
+	public Crypt.SaltSignaturePair get(String string) {
+		byte[] bs = (byte[])this.signatures.get(string);
+		return bs != null ? new Crypt.SaltSignaturePair(this.salt, bs) : null;
 	}
 
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> entry.write(friendlyByteBufx));
+		friendlyByteBuf.writeLong(this.salt);
+		friendlyByteBuf.writeMap(this.signatures, (friendlyByteBufx, string) -> friendlyByteBufx.writeUtf(string, 16), FriendlyByteBuf::writeByteArray);
 	}
 
-	public static boolean hasSignableArguments(PreviewableCommand<?> previewableCommand) {
-		return previewableCommand.arguments().stream().anyMatch(argument -> argument.previewType() instanceof SignedArgument);
-	}
+	public static Map<String, Component> collectLastChildPlainSignableComponents(CommandContextBuilder<?> commandContextBuilder) {
+		CommandContextBuilder<?> commandContextBuilder2 = commandContextBuilder.getLastChild();
+		Map<String, Component> map = new Object2ObjectArrayMap<>();
 
-	public static ArgumentSignatures signCommand(PreviewableCommand<?> previewableCommand, ArgumentSignatures.Signer signer) {
-		List<ArgumentSignatures.Entry> list = collectPlainSignableArguments(previewableCommand).stream().map(pair -> {
-			MessageSignature messageSignature = signer.sign((String)pair.getFirst(), (String)pair.getSecond());
-			return new ArgumentSignatures.Entry((String)pair.getFirst(), messageSignature);
-		}).toList();
-		return new ArgumentSignatures(list);
-	}
-
-	public static List<Pair<String, String>> collectPlainSignableArguments(PreviewableCommand<?> previewableCommand) {
-		List<Pair<String, String>> list = new ArrayList();
-
-		for (PreviewableCommand.Argument<?> argument : previewableCommand.arguments()) {
-			if (argument.previewType() instanceof SignedArgument<?> signedArgument) {
-				String string = getSignableText(signedArgument, argument.parsedValue());
-				list.add(Pair.of(argument.name(), string));
+		for (ParsedCommandNode<?> parsedCommandNode : commandContextBuilder2.getNodes()) {
+			CommandNode parsedArgument = parsedCommandNode.getNode();
+			if (parsedArgument instanceof ArgumentCommandNode) {
+				ArgumentCommandNode<?, ?> argumentCommandNode = (ArgumentCommandNode<?, ?>)parsedArgument;
+				ArgumentType var8 = argumentCommandNode.getType();
+				if (var8 instanceof SignedArgument) {
+					SignedArgument<?> signedArgument = (SignedArgument<?>)var8;
+					ParsedArgument<?, ?> parsedArgumentx = (ParsedArgument<?, ?>)commandContextBuilder2.getArguments().get(argumentCommandNode.getName());
+					if (parsedArgumentx != null) {
+						map.put(argumentCommandNode.getName(), getPlainComponentUnchecked(signedArgument, parsedArgumentx));
+					}
+				}
 			}
 		}
 
-		return list;
+		return map;
 	}
 
-	private static <T> String getSignableText(SignedArgument<T> signedArgument, ParsedArgument<?, ?> parsedArgument) {
-		return signedArgument.getSignableText((T)parsedArgument.getResult());
-	}
-
-	public static record Entry(String name, MessageSignature signature) {
-
-		public Entry(FriendlyByteBuf friendlyByteBuf) {
-			this(friendlyByteBuf.readUtf(16), new MessageSignature(friendlyByteBuf));
-		}
-
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeUtf(this.name, 16);
-			this.signature.write(friendlyByteBuf);
-		}
-	}
-
-	@FunctionalInterface
-	public interface Signer {
-		MessageSignature sign(String string, String string2);
+	private static <T> Component getPlainComponentUnchecked(SignedArgument<T> signedArgument, ParsedArgument<?, ?> parsedArgument) {
+		return signedArgument.getPlainSignableComponent((T)parsedArgument.getResult());
 	}
 }

@@ -8,7 +8,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 
@@ -39,7 +38,7 @@ public class LegacyQueryHandler extends ChannelInboundHandlerAdapter {
 				switch (i) {
 					case 0: {
 						LOGGER.debug("Ping: (<1.3.x) from {}:{}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
-						String string = String.format(Locale.ROOT, "%s§%d§%d", minecraftServer.getMotd(), minecraftServer.getPlayerCount(), minecraftServer.getMaxPlayers());
+						String string = String.format("%s§%d§%d", minecraftServer.getMotd(), minecraftServer.getPlayerCount(), minecraftServer.getMaxPlayers());
 						this.sendFlushAndClose(channelHandlerContext, this.createReply(string));
 						break;
 					}
@@ -50,7 +49,6 @@ public class LegacyQueryHandler extends ChannelInboundHandlerAdapter {
 
 						LOGGER.debug("Ping: (1.4-1.5.x) from {}:{}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
 						String string = String.format(
-							Locale.ROOT,
 							"§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
 							127,
 							minecraftServer.getServerVersion(),
@@ -76,7 +74,6 @@ public class LegacyQueryHandler extends ChannelInboundHandlerAdapter {
 
 						LOGGER.debug("Ping: (1.6) from {}:{}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
 						String string2 = String.format(
-							Locale.ROOT,
 							"§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
 							127,
 							minecraftServer.getServerVersion(),

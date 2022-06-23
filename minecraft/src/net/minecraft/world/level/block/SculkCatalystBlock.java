@@ -25,7 +25,7 @@ import net.minecraft.world.level.gameevent.GameEventListener;
 public class SculkCatalystBlock extends BaseEntityBlock {
 	public static final int PULSE_TICKS = 8;
 	public static final BooleanProperty PULSE = BlockStateProperties.BLOOM;
-	private final IntProvider xpRange = ConstantInt.of(5);
+	private final IntProvider xpRange = ConstantInt.of(20);
 
 	public SculkCatalystBlock(BlockBehaviour.Properties properties) {
 		super(properties);

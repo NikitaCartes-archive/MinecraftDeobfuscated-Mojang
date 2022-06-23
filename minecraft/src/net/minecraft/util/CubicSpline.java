@@ -141,7 +141,7 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
 
 		@Override
 		public String parityString() {
-			return String.format(Locale.ROOT, "k=%.3f", this.value);
+			return String.format("k=%.3f", this.value);
 		}
 
 		@Override

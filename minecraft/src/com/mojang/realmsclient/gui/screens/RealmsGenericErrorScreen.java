@@ -5,7 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,19 +20,19 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 	private MultiLineLabel line2Split = MultiLineLabel.EMPTY;
 
 	public RealmsGenericErrorScreen(RealmsServiceException realmsServiceException, Screen screen) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.nextScreen = screen;
 		this.lines = errorMessage(realmsServiceException);
 	}
 
 	public RealmsGenericErrorScreen(Component component, Screen screen) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.nextScreen = screen;
 		this.lines = errorMessage(component);
 	}
 
 	public RealmsGenericErrorScreen(Component component, Component component2, Screen screen) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.nextScreen = screen;
 		this.lines = errorMessage(component, component2);
 	}

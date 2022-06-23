@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -79,7 +78,10 @@ public class Library {
 		} else if (!aLCCapabilities.OpenALC11) {
 			throw new IllegalStateException("OpenAL 1.1 not supported");
 		} else {
-			this.setHrtf(aLCCapabilities.ALC_SOFT_HRTF && bl);
+			if (aLCCapabilities.ALC_SOFT_HRTF && bl) {
+				this.enableHrtf();
+			}
+
 			this.context = ALC10.alcCreateContext(this.currentDevice, (IntBuffer)null);
 			ALC10.alcMakeContextCurrent(this.context);
 			int i = this.getChannelCount();
@@ -103,11 +105,11 @@ public class Library {
 		}
 	}
 
-	private void setHrtf(boolean bl) {
+	private void enableHrtf() {
 		int i = ALC10.alcGetInteger(this.currentDevice, 6548);
 		if (i > 0) {
 			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-				IntBuffer intBuffer = memoryStack.callocInt(10).put(6546).put(bl ? 1 : 0).put(6550).put(0).put(0).flip();
+				IntBuffer intBuffer = memoryStack.callocInt(10).put(6546).put(1).put(6550).put(0).put(0).flip();
 				if (!SOFTHRTF.alcResetDeviceSOFT(this.currentDevice, intBuffer)) {
 					LOGGER.warn("Failed to reset device: {}", ALC10.alcGetString(this.currentDevice, ALC10.alcGetError(this.currentDevice)));
 				}
@@ -231,7 +233,6 @@ public class Library {
 
 	public String getDebugString() {
 		return String.format(
-			Locale.ROOT,
 			"Sounds: %d/%d + %d/%d",
 			this.staticChannels.getUsedCount(),
 			this.staticChannels.getMaxCount(),

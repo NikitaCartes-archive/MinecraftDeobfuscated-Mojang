@@ -1,5 +1,7 @@
 package net.minecraft.commands.arguments;
 
+import net.minecraft.network.chat.Component;
+
 public interface SignedArgument<T> extends PreviewedArgument<T> {
-	String getSignableText(T object);
+	Component getPlainSignableComponent(T object);
 }

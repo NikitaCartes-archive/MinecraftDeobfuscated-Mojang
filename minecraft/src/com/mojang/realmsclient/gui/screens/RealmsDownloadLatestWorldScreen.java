@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -62,7 +62,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private final BooleanConsumer callback;
 
 	public RealmsDownloadLatestWorldScreen(Screen screen, WorldDownload worldDownload, String string, BooleanConsumer booleanConsumer) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.callback = booleanConsumer;
 		this.lastScreen = screen;
 		this.worldName = string;
@@ -109,7 +109,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		this.animTick++;
 		if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
 			Component component = this.createProgressNarrationMessage();
-			this.minecraft.getNarrator().sayNow(component);
+			NarratorChatListener.INSTANCE.sayNow(component);
 		}
 	}
 

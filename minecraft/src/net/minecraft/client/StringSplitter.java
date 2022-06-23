@@ -1,13 +1,10 @@
 package net.minecraft.client;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableList.Builder;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -143,12 +140,6 @@ public class StringSplitter {
 				}
 			}
 		}, style).orElse(formattedText);
-	}
-
-	public List<StringSplitter.Span> findSpans(FormattedCharSequence formattedCharSequence, Predicate<Style> predicate) {
-		StringSplitter.SpanBuilder spanBuilder = new StringSplitter.SpanBuilder(predicate);
-		formattedCharSequence.accept(spanBuilder);
-		return spanBuilder.build();
 	}
 
 	public int findLineBreak(String string, int i, Style style) {
@@ -441,57 +432,6 @@ public class StringSplitter {
 	@Environment(EnvType.CLIENT)
 	public interface LinePosConsumer {
 		void accept(Style style, int i, int j);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static record Span(float left, float right) {
-	}
-
-	@Environment(EnvType.CLIENT)
-	class SpanBuilder implements FormattedCharSink {
-		private final Predicate<Style> predicate;
-		private float cursor;
-		private final Builder<StringSplitter.Span> spans = ImmutableList.builder();
-		private float spanStart;
-		private boolean buildingSpan;
-
-		SpanBuilder(Predicate<Style> predicate) {
-			this.predicate = predicate;
-		}
-
-		@Override
-		public boolean accept(int i, Style style, int j) {
-			boolean bl = this.predicate.test(style);
-			if (this.buildingSpan != bl) {
-				if (bl) {
-					this.startSpan();
-				} else {
-					this.endSpan();
-				}
-			}
-
-			this.cursor = this.cursor + StringSplitter.this.widthProvider.getWidth(j, style);
-			return true;
-		}
-
-		private void startSpan() {
-			this.buildingSpan = true;
-			this.spanStart = this.cursor;
-		}
-
-		private void endSpan() {
-			float f = this.cursor;
-			this.spans.add(new StringSplitter.Span(this.spanStart, f));
-			this.buildingSpan = false;
-		}
-
-		public List<StringSplitter.Span> build() {
-			if (this.buildingSpan) {
-				this.endSpan();
-			}
-
-			return this.spans.build();
-		}
 	}
 
 	@Environment(EnvType.CLIENT)

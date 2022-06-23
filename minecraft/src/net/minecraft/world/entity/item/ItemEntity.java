@@ -74,7 +74,9 @@ public class ItemEntity extends Entity {
 		return this.getItem().is(ItemTags.DAMPENS_VIBRATIONS);
 	}
 
-	public Entity getThrowingEntity() {
+	@Nullable
+	@Override
+	public Entity getResponsibleEntity() {
 		return Util.mapNullable(this.getThrower(), this.level::getPlayerByUUID);
 	}
 

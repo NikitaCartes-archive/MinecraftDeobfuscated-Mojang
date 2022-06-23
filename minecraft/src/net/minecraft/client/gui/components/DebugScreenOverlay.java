@@ -181,9 +181,9 @@ public class DebugScreenOverlay extends GuiComponent {
 		float g = connection.getAverageReceivedPackets();
 		String string;
 		if (integratedServer != null) {
-			string = String.format(Locale.ROOT, "Integrated server @ %.0f ms ticks, %.0f tx, %.0f rx", integratedServer.getAverageTickTime(), f, g);
+			string = String.format("Integrated server @ %.0f ms ticks, %.0f tx, %.0f rx", integratedServer.getAverageTickTime(), f, g);
 		} else {
-			string = String.format(Locale.ROOT, "\"%s\" server, %.0f tx, %.0f rx", this.minecraft.player.getServerBrand(), f, g);
+			string = String.format("\"%s\" server, %.0f tx, %.0f rx", this.minecraft.player.getServerBrand(), f, g);
 		}
 
 		BlockPos blockPos = this.minecraft.getCameraEntity().blockPosition();
@@ -203,7 +203,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				"P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(),
 				this.minecraft.level.gatherChunkSourceStats(),
 				"",
-				String.format(Locale.ROOT, "Chunk-relative: %d %d %d", blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15)
+				String.format("Chunk-relative: %d %d %d", blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15)
 			);
 		} else {
 			Entity entity = this.minecraft.getCameraEntity();
@@ -258,19 +258,11 @@ public class DebugScreenOverlay extends GuiComponent {
 			);
 			list.add(
 				String.format(
-					Locale.ROOT,
-					"Block: %d %d %d [%d %d %d]",
-					blockPos.getX(),
-					blockPos.getY(),
-					blockPos.getZ(),
-					blockPos.getX() & 15,
-					blockPos.getY() & 15,
-					blockPos.getZ() & 15
+					"Block: %d %d %d [%d %d %d]", blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15
 				)
 			);
 			list.add(
 				String.format(
-					Locale.ROOT,
 					"Chunk: %d %d %d [%d %d in r.%d.%d.mca]",
 					chunkPos.x,
 					SectionPos.blockToSectionCoord(blockPos.getY()),
@@ -374,9 +366,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add("Shader: " + postChain.getName());
 			}
 
-			list.add(
-				this.minecraft.getSoundManager().getDebugString() + String.format(Locale.ROOT, " (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F))
-			);
+			list.add(this.minecraft.getSoundManager().getDebugString() + String.format(" (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F)));
 			return list;
 		}
 	}
@@ -437,16 +427,14 @@ public class DebugScreenOverlay extends GuiComponent {
 		long n = Runtime.getRuntime().freeMemory();
 		long o = m - n;
 		List<String> list = Lists.<String>newArrayList(
-			String.format(Locale.ROOT, "Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32),
-			String.format(Locale.ROOT, "Mem: % 2d%% %03d/%03dMB", o * 100L / l, bytesToMegabytes(o), bytesToMegabytes(l)),
-			String.format(Locale.ROOT, "Allocation rate: %03dMB /s", bytesToMegabytes(this.allocationRateCalculator.bytesAllocatedPerSecond(o))),
-			String.format(Locale.ROOT, "Allocated: % 2d%% %03dMB", m * 100L / l, bytesToMegabytes(m)),
+			String.format("Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32),
+			String.format("Mem: % 2d%% %03d/%03dMB", o * 100L / l, bytesToMegabytes(o), bytesToMegabytes(l)),
+			String.format("Allocation rate: %03dMB /s", bytesToMegabytes(this.allocationRateCalculator.bytesAllocatedPerSecond(o))),
+			String.format("Allocated: % 2d%% %03dMB", m * 100L / l, bytesToMegabytes(m)),
 			"",
-			String.format(Locale.ROOT, "CPU: %s", GlUtil.getCpuInfo()),
+			String.format("CPU: %s", GlUtil.getCpuInfo()),
 			"",
-			String.format(
-				Locale.ROOT, "Display: %dx%d (%s)", Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight(), GlUtil.getVendor()
-			),
+			String.format("Display: %dx%d (%s)", Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight(), GlUtil.getVendor()),
 			GlUtil.getRenderer(),
 			GlUtil.getOpenGLVersion()
 		);

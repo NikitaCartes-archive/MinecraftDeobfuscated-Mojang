@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -1311,20 +1310,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		Writer writer = Files.newBufferedWriter(path.resolve("stats.txt"));
 
 		try {
-			writer.write(String.format(Locale.ROOT, "spawning_chunks: %d\n", chunkMap.getDistanceManager().getNaturalSpawnChunkCount()));
+			writer.write(String.format("spawning_chunks: %d\n", chunkMap.getDistanceManager().getNaturalSpawnChunkCount()));
 			NaturalSpawner.SpawnState spawnState = this.getChunkSource().getLastSpawnState();
 			if (spawnState != null) {
 				for (Entry<MobCategory> entry : spawnState.getMobCategoryCounts().object2IntEntrySet()) {
-					writer.write(String.format(Locale.ROOT, "spawn_count.%s: %d\n", ((MobCategory)entry.getKey()).getName(), entry.getIntValue()));
+					writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)entry.getKey()).getName(), entry.getIntValue()));
 				}
 			}
 
-			writer.write(String.format(Locale.ROOT, "entities: %s\n", this.entityManager.gatherStats()));
-			writer.write(String.format(Locale.ROOT, "block_entity_tickers: %d\n", this.blockEntityTickers.size()));
-			writer.write(String.format(Locale.ROOT, "block_ticks: %d\n", this.getBlockTicks().count()));
-			writer.write(String.format(Locale.ROOT, "fluid_ticks: %d\n", this.getFluidTicks().count()));
+			writer.write(String.format("entities: %s\n", this.entityManager.gatherStats()));
+			writer.write(String.format("block_entity_tickers: %d\n", this.blockEntityTickers.size()));
+			writer.write(String.format("block_ticks: %d\n", this.getBlockTicks().count()));
+			writer.write(String.format("fluid_ticks: %d\n", this.getFluidTicks().count()));
 			writer.write("distance_manager: " + chunkMap.getDistanceManager().getDebugStatus() + "\n");
-			writer.write(String.format(Locale.ROOT, "pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
+			writer.write(String.format("pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
 		} catch (Throwable var22) {
 			if (writer != null) {
 				try {
@@ -1532,7 +1531,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@VisibleForTesting
 	public String getWatchdogStats() {
 		return String.format(
-			Locale.ROOT,
 			"players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s",
 			this.players.size(),
 			this.entityManager.gatherStats(),

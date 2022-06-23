@@ -18,15 +18,14 @@ import net.fabricmc.api.Environment;
 public interface ChatLog {
 	int NO_MESSAGE = -1;
 
-	void push(LoggedChatEvent loggedChatEvent);
+	void push(LoggedChat loggedChat);
 
 	@Nullable
-	LoggedChatEvent lookup(int i);
+	LoggedChat lookup(int i);
 
-	@Nullable
-	default ChatLog.Entry<LoggedChatEvent> lookupEntry(int i) {
-		LoggedChatEvent loggedChatEvent = this.lookup(i);
-		return loggedChatEvent != null ? new ChatLog.Entry<>(i, loggedChatEvent) : null;
+	default LoggedChat.WithId lookupWithId(int i) {
+		LoggedChat loggedChat = this.lookup(i);
+		return loggedChat != null ? new LoggedChat.WithId(i, loggedChat) : null;
 	}
 
 	default boolean contains(int i) {
@@ -34,6 +33,8 @@ public interface ChatLog {
 	}
 
 	int offset(int i, int j);
+
+	int offsetClamped(int i, int j);
 
 	default int before(int i) {
 		return this.offset(i, -1);
@@ -88,14 +89,6 @@ public interface ChatLog {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record Entry<T extends LoggedChatEvent>(int id, T event) {
-		@Nullable
-		public <U extends LoggedChatEvent> ChatLog.Entry<U> tryCast(Class<U> class_) {
-			return class_.isInstance(this.event) ? new ChatLog.Entry<>(this.id, (U)class_.cast(this.event)) : null;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
 	public static class Selection {
 		private static final int CHARACTERISTICS = 1041;
 		private final ChatLog log;
@@ -110,20 +103,20 @@ public interface ChatLog {
 			return StreamSupport.intStream(Spliterators.spliteratorUnknownSize(this.ids, 1041), false);
 		}
 
-		public Stream<LoggedChatEvent> events() {
+		public Stream<LoggedChat> messages() {
 			return this.ids().mapToObj(this.log::lookup).filter(Objects::nonNull);
 		}
 
 		public Collection<GameProfile> distinctGameProfiles() {
-			return this.events()
-				.map(loggedChatEvent -> loggedChatEvent instanceof LoggedChatMessage.Player player ? player.profile() : null)
+			return this.messages()
+				.map(loggedChat -> loggedChat instanceof LoggedChat.Player player ? player.profile() : null)
 				.filter(Objects::nonNull)
 				.distinct()
 				.toList();
 		}
 
-		public Stream<ChatLog.Entry<LoggedChatEvent>> entries() {
-			return this.ids().mapToObj(this.log::lookupEntry).filter(Objects::nonNull);
+		public Stream<LoggedChat.WithId> messagesWithIds() {
+			return this.ids().mapToObj(this.log::lookupWithId).filter(Objects::nonNull);
 		}
 	}
 }

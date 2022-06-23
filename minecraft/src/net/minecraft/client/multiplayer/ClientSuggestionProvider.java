@@ -6,7 +6,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -21,7 +20,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +36,6 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 	private int pendingSuggestionsId = -1;
 	@Nullable
 	private CompletableFuture<Suggestions> pendingSuggestionsFuture;
-	private final Set<String> customCompletionSuggestions = new HashSet();
 
 	public ClientSuggestionProvider(ClientPacketListener clientPacketListener, Minecraft minecraft) {
 		this.connection = clientPacketListener;
@@ -54,17 +51,6 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 		}
 
 		return list;
-	}
-
-	@Override
-	public Collection<String> getCustomTabSugggestions() {
-		if (this.customCompletionSuggestions.isEmpty()) {
-			return this.getOnlinePlayerNames();
-		} else {
-			Set<String> set = new HashSet(this.getOnlinePlayerNames());
-			set.addAll(this.customCompletionSuggestions);
-			return set;
-		}
 	}
 
 	@Override
@@ -167,20 +153,6 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 			this.pendingSuggestionsFuture.complete(suggestions);
 			this.pendingSuggestionsFuture = null;
 			this.pendingSuggestionsId = -1;
-		}
-	}
-
-	public void modifyCustomCompletions(ClientboundCustomChatCompletionsPacket.Action action, List<String> list) {
-		switch (action) {
-			case ADD:
-				this.customCompletionSuggestions.addAll(list);
-				break;
-			case REMOVE:
-				list.forEach(this.customCompletionSuggestions::remove);
-				break;
-			case SET:
-				this.customCompletionSuggestions.clear();
-				this.customCompletionSuggestions.addAll(list);
 		}
 	}
 }

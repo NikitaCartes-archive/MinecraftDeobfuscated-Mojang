@@ -104,7 +104,6 @@ import net.minecraft.util.datafix.fixes.ItemCustomNameToComponentFix;
 import net.minecraft.util.datafix.fixes.ItemIdFix;
 import net.minecraft.util.datafix.fixes.ItemLoreFix;
 import net.minecraft.util.datafix.fixes.ItemPotionFix;
-import net.minecraft.util.datafix.fixes.ItemRemoveBlockEntityTagFix;
 import net.minecraft.util.datafix.fixes.ItemRenameFix;
 import net.minecraft.util.datafix.fixes.ItemShulkerBoxColorFix;
 import net.minecraft.util.datafix.fixes.ItemSpawnEggFix;
@@ -368,37 +367,6 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new BlockNameFlatteningFix(schema42, true));
 		dataFixerBuilder.addFixer(new ItemStackTheFlatteningFix(schema42, false));
 		Schema schema43 = dataFixerBuilder.addSchema(1451, 5, V1451_5::new);
-		dataFixerBuilder.addFixer(
-			new ItemRemoveBlockEntityTagFix(
-				schema43,
-				false,
-				Set.of(
-					"minecraft:note_block",
-					"minecraft:flower_pot",
-					"minecraft:dandelion",
-					"minecraft:poppy",
-					"minecraft:blue_orchid",
-					"minecraft:allium",
-					"minecraft:azure_bluet",
-					"minecraft:red_tulip",
-					"minecraft:orange_tulip",
-					"minecraft:white_tulip",
-					"minecraft:pink_tulip",
-					"minecraft:oxeye_daisy",
-					"minecraft:cactus",
-					"minecraft:brown_mushroom",
-					"minecraft:red_mushroom",
-					"minecraft:oak_sapling",
-					"minecraft:spruce_sapling",
-					"minecraft:birch_sapling",
-					"minecraft:jungle_sapling",
-					"minecraft:acacia_sapling",
-					"minecraft:dark_oak_sapling",
-					"minecraft:dead_bush",
-					"minecraft:fern"
-				)
-			)
-		);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema43, "RemoveNoteBlockFlowerPotFix", References.BLOCK_ENTITY));
 		dataFixerBuilder.addFixer(new ItemStackSpawnEggFix(schema43, false));
 		dataFixerBuilder.addFixer(new EntityWolfColorFix(schema43, false));

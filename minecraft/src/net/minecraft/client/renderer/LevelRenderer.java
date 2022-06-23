@@ -40,7 +40,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -791,7 +790,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		int i = this.viewArea.chunks.length;
 		int j = this.countRenderedChunks();
 		return String.format(
-			Locale.ROOT,
 			"C: %d/%d %sD: %d, %s",
 			j,
 			i,

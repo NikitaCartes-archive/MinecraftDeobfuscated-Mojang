@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 @Environment(EnvType.CLIENT)
 public class ClientChatPreview {
 	private static final long PREVIEW_VALID_AFTER_MS = 200L;
+	private boolean enabled;
 	@Nullable
 	private String lastQuery;
 	@Nullable
@@ -31,6 +32,7 @@ public class ClientChatPreview {
 	}
 
 	public void update(String string) {
+		this.enabled = true;
 		string = normalizeQuery(string);
 		if (!string.isEmpty()) {
 			if (!string.equals(this.lastQuery)) {
@@ -51,6 +53,7 @@ public class ClientChatPreview {
 	}
 
 	public void disable() {
+		this.enabled = false;
 		this.clear();
 	}
 
@@ -64,32 +67,29 @@ public class ClientChatPreview {
 	public void handleResponse(int i, @Nullable Component component) {
 		String string = this.requests.handleResponse(i);
 		if (string != null) {
-			this.preview = new ClientChatPreview.Preview(Util.getMillis(), string, component);
+			Component component2 = (Component)(component != null ? component : Component.literal(string));
+			this.preview = new ClientChatPreview.Preview(Util.getMillis(), string, component2);
 		}
 	}
 
-	public boolean hasScheduledRequest() {
-		return this.scheduledRequest != null || this.preview != null && !this.preview.isPreviewValid();
-	}
-
-	public boolean queryEquals(String string) {
-		return normalizeQuery(string).equals(this.lastQuery);
+	@Nullable
+	public Component peek() {
+		return Util.mapNullable(this.preview, ClientChatPreview.Preview::response);
 	}
 
 	@Nullable
-	public ClientChatPreview.Preview peek() {
-		return this.preview;
-	}
-
-	@Nullable
-	public ClientChatPreview.Preview pull(String string) {
+	public Component pull(String string) {
 		if (this.preview != null && this.preview.canPull(string)) {
-			ClientChatPreview.Preview preview = this.preview;
+			Component component = this.preview.response();
 			this.preview = null;
-			return preview;
+			return component;
 		} else {
 			return null;
 		}
+	}
+
+	public boolean isEnabled() {
+		return this.enabled;
 	}
 
 	static String normalizeQuery(String string) {
@@ -97,7 +97,7 @@ public class ClientChatPreview {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record Preview(long receivedTimeStamp, String query, @Nullable Component response) {
+	static record Preview(long receivedTimeStamp, String query, @Nullable Component response) {
 		public Preview(long receivedTimeStamp, String query, @Nullable Component response) {
 			query = ClientChatPreview.normalizeQuery(query);
 			this.receivedTimeStamp = receivedTimeStamp;
@@ -105,17 +105,13 @@ public class ClientChatPreview {
 			this.response = response;
 		}
 
-		private boolean queryEquals(String string) {
-			return this.query.equals(ClientChatPreview.normalizeQuery(string));
-		}
-
-		boolean canPull(String string) {
-			return this.queryEquals(string) ? this.isPreviewValid() : false;
-		}
-
-		boolean isPreviewValid() {
-			long l = this.receivedTimeStamp + 200L;
-			return Util.getMillis() >= l;
+		public boolean canPull(String string) {
+			if (this.query.equals(ClientChatPreview.normalizeQuery(string))) {
+				long l = this.receivedTimeStamp + 200L;
+				return Util.getMillis() >= l;
+			} else {
+				return false;
+			}
 		}
 	}
 }

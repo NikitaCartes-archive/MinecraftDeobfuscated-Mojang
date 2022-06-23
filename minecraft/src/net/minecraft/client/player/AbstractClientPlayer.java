@@ -2,7 +2,6 @@ package net.minecraft.client.player;
 
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.GameProfile;
-import java.util.Locale;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -97,7 +96,7 @@ public abstract class AbstractClientPlayer extends Player {
 		if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
 			AbstractTexture var4 = new HttpTexture(
 				null,
-				String.format(Locale.ROOT, "http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)),
+				String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)),
 				DefaultPlayerSkin.getDefaultSkin(UUIDUtil.createOfflinePlayerUUID(string)),
 				true,
 				null

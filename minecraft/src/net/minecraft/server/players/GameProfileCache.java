@@ -191,7 +191,7 @@ public class GameProfileCache {
 	}
 
 	private static DateFormat createDateFormat() {
-		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ROOT);
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 	}
 
 	public List<GameProfileCache.GameProfileInfo> load() {

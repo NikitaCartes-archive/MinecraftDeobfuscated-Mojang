@@ -12,8 +12,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -157,13 +157,13 @@ public class SocialInteractionsScreen extends Screen {
 			case ALL:
 				this.allButton.setMessage(TAB_ALL_SELECTED);
 				Collection<UUID> collection = this.minecraft.player.connection.getOnlinePlayerIds();
-				this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount(), true);
+				this.socialInteractionsPlayerList.updatePlayerListWithLog(collection, this.socialInteractionsPlayerList.getScrollAmount());
 				break;
 			case HIDDEN:
 				this.hiddenButton.setMessage(TAB_HIDDEN_SELECTED);
 				Set<UUID> set = this.minecraft.getPlayerSocialManager().getHiddenPlayers();
 				bl = set.isEmpty();
-				this.socialInteractionsPlayerList.updatePlayerList(set, this.socialInteractionsPlayerList.getScrollAmount(), false);
+				this.socialInteractionsPlayerList.updatePlayerList(set, this.socialInteractionsPlayerList.getScrollAmount());
 				break;
 			case BLOCKED:
 				this.blockedButton.setMessage(TAB_BLOCKED_SELECTED);
@@ -176,17 +176,16 @@ public class SocialInteractionsScreen extends Screen {
 					.filter(playerSocialManager::isBlocked)
 					.collect(Collectors.toSet());
 				bl = set2.isEmpty();
-				this.socialInteractionsPlayerList.updatePlayerList(set2, this.socialInteractionsPlayerList.getScrollAmount(), false);
+				this.socialInteractionsPlayerList.updatePlayerList(set2, this.socialInteractionsPlayerList.getScrollAmount());
 		}
 
-		GameNarrator gameNarrator = this.minecraft.getNarrator();
 		if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
-			gameNarrator.sayNow(EMPTY_SEARCH);
+			NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH);
 		} else if (bl) {
 			if (page == SocialInteractionsScreen.Page.HIDDEN) {
-				gameNarrator.sayNow(EMPTY_HIDDEN);
+				NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN);
 			} else if (page == SocialInteractionsScreen.Page.BLOCKED) {
-				gameNarrator.sayNow(EMPTY_BLOCKED);
+				NarratorChatListener.INSTANCE.sayNow(EMPTY_BLOCKED);
 			}
 		}
 	}

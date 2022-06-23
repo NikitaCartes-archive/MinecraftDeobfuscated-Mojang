@@ -21,16 +21,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageHeader;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -51,7 +51,6 @@ import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
@@ -584,7 +583,7 @@ public class ServerPlayer extends Player {
 				);
 			Team team = this.getTeam();
 			if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
-				this.server.getPlayerList().broadcastSystemMessage(component, false);
+				this.server.getPlayerList().broadcastSystemMessage(component, ChatType.SYSTEM);
 			} else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OTHER_TEAMS) {
 				this.server.getPlayerList().broadcastSystemToTeam(this, component);
 			} else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OWN_TEAM) {
@@ -1127,7 +1126,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void displayClientMessage(Component component, boolean bl) {
-		this.sendSystemMessage(component, bl);
+		this.sendSystemMessage(component, bl ? ChatType.GAME_INFO : ChatType.SYSTEM);
 	}
 
 	@Override
@@ -1277,41 +1276,52 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void sendSystemMessage(Component component) {
-		this.sendSystemMessage(component, false);
+		this.sendSystemMessage(component, ChatType.SYSTEM);
 	}
 
-	public void sendSystemMessage(Component component, boolean bl) {
-		if (this.acceptsSystemMessages(bl)) {
-			this.connection.send(new ClientboundSystemChatPacket(component, bl), future -> {
+	public void sendSystemMessage(Component component, ResourceKey<ChatType> resourceKey) {
+		if (this.acceptsChat(resourceKey)) {
+			this.connection.send(new ClientboundSystemChatPacket(component, this.resolveChatTypeId(resourceKey)), future -> {
 				if (!future.isSuccess()) {
-					this.handleMessageDeliveryFailure(component);
+					this.handleMessageDeliveryFailure(component, resourceKey);
 				}
 			});
 		}
 	}
 
-	private void handleMessageDeliveryFailure(Component component) {
-		if (this.acceptsSystemMessages(false)) {
+	private void handleMessageDeliveryFailure(Component component, ResourceKey<ChatType> resourceKey) {
+		if ((resourceKey == ChatType.GAME_INFO || resourceKey == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
 			int i = 256;
 			String string = component.getString(256);
 			Component component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
 			this.connection
-				.send(new ClientboundSystemChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), false));
+				.send(
+					new ClientboundSystemChatPacket(
+						Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), this.resolveChatTypeId(ChatType.SYSTEM)
+					)
+				);
 		}
 	}
 
-	public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, ChatType.Bound bound) {
-		if (this.acceptsChatMessages()) {
-			ClientboundPlayerChatPacket clientboundPlayerChatPacket = outgoingPlayerChatMessage.packetForPlayer(this, bound);
-			this.connection.addPendingMessage(clientboundPlayerChatPacket.message());
-			this.connection.send(clientboundPlayerChatPacket);
+	public void sendChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
+		if (this.acceptsChat(resourceKey)) {
+			this.connection
+				.send(
+					new ClientboundPlayerChatPacket(
+						playerChatMessage.signedContent(),
+						playerChatMessage.unsignedContent(),
+						this.resolveChatTypeId(resourceKey),
+						chatSender,
+						playerChatMessage.signature().timeStamp(),
+						playerChatMessage.signature().saltSignature()
+					)
+				);
 		}
 	}
 
-	public void sendChatHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-		if (this.acceptsChatMessages()) {
-			this.connection.send(new ClientboundPlayerChatHeaderPacket(signedMessageHeader, messageSignature, bs));
-		}
+	private int resolveChatTypeId(ResourceKey<ChatType> resourceKey) {
+		Registry<ChatType> registry = this.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		return registry.getId(registry.get(resourceKey));
 	}
 
 	public String getIpAddress() {
@@ -1337,12 +1347,16 @@ public class ServerPlayer extends Player {
 		return this.chatVisibility;
 	}
 
-	private boolean acceptsSystemMessages(boolean bl) {
-		return this.chatVisibility == ChatVisiblity.HIDDEN ? bl : true;
-	}
-
-	private boolean acceptsChatMessages() {
-		return this.chatVisibility == ChatVisiblity.FULL;
+	private boolean acceptsChat(ResourceKey<ChatType> resourceKey) {
+		switch (this.chatVisibility) {
+			case HIDDEN:
+				return resourceKey == ChatType.GAME_INFO;
+			case SYSTEM:
+				return resourceKey == ChatType.SYSTEM || resourceKey == ChatType.GAME_INFO;
+			case FULL:
+			default:
+				return true;
+		}
 	}
 
 	public void sendTexturePack(String string, String string2, boolean bl, @Nullable Component component) {

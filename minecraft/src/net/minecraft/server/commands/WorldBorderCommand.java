@@ -191,7 +191,7 @@ public class WorldBorderCommand {
 		} else if (!((double)Math.abs(vec2.x) > 2.9999984E7) && !((double)Math.abs(vec2.y) > 2.9999984E7)) {
 			worldBorder.setCenter((double)vec2.x, (double)vec2.y);
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", vec2.x), String.format(Locale.ROOT, "%.2f", vec2.y)), true
+				Component.translatable("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", vec2.x), String.format("%.2f", vec2.y)), true
 			);
 			return 0;
 		} else {

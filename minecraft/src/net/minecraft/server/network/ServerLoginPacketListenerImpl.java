@@ -18,7 +18,6 @@ import javax.crypto.SecretKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
-import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ThrowingComponent;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
@@ -40,7 +39,7 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
-public class ServerLoginPacketListenerImpl implements TickablePacketListener, ServerLoginPacketListener {
+public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_TICKS_BEFORE_LOGIN = 600;
@@ -67,7 +66,6 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 		this.nonce = Ints.toByteArray(RANDOM.nextInt());
 	}
 
-	@Override
 	public void tick() {
 		if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
 			this.handleAcceptedLogin();
@@ -101,19 +99,21 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 	}
 
 	public void handleAcceptedLogin() {
-		ProfilePublicKey profilePublicKey = null;
 		if (!this.gameProfile.isComplete()) {
 			this.gameProfile = this.createFakeProfile(this.gameProfile);
-		} else {
-			try {
-				SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
-				profilePublicKey = validatePublicKey(this.profilePublicKeyData, this.gameProfile.getId(), signatureValidator, this.server.enforceSecureProfile());
-			} catch (ServerLoginPacketListenerImpl.PublicKeyValidationException var7) {
-				LOGGER.error(var7.getMessage(), var7.getCause());
-				if (!this.connection.isMemoryConnection()) {
-					this.disconnect(var7.getComponent());
-					return;
-				}
+		}
+
+		UUID uUID = this.gameProfile.getId();
+		ProfilePublicKey profilePublicKey = null;
+
+		try {
+			SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
+			profilePublicKey = validatePublicKey(this.profilePublicKeyData, uUID, signatureValidator, this.server.enforceSecureProfile());
+		} catch (ServerLoginPacketListenerImpl.PublicKeyValidationException var8) {
+			LOGGER.error(var8.getMessage(), var8.getCause());
+			if (!this.connection.isMemoryConnection()) {
+				this.disconnect(var8.getComponent());
+				return;
 			}
 		}
 
@@ -131,7 +131,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 			}
 
 			this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
-			ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
+			ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(uUID);
 
 			try {
 				ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, profilePublicKey);
@@ -141,8 +141,8 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 				} else {
 					this.placeNewPlayer(serverPlayer2);
 				}
-			} catch (Exception var6) {
-				LOGGER.error("Couldn't place player in world", (Throwable)var6);
+			} catch (Exception var7) {
+				LOGGER.error("Couldn't place player in world", (Throwable)var7);
 				Component component2 = Component.translatable("multiplayer.disconnect.invalid_player_data");
 				this.connection.send(new ClientboundDisconnectPacket(component2));
 				this.connection.disconnect(component2);
@@ -252,7 +252,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 						ServerLoginPacketListenerImpl.this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
 					} else if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
 						ServerLoginPacketListenerImpl.LOGGER.warn("Failed to verify username but will let them in anyway!");
-						ServerLoginPacketListenerImpl.this.gameProfile = gameProfile;
+						ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.createFakeProfile(gameProfile);
 						ServerLoginPacketListenerImpl.this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
 					} else {
 						ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
@@ -261,7 +261,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 				} catch (AuthenticationUnavailableException var3) {
 					if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
 						ServerLoginPacketListenerImpl.LOGGER.warn("Authentication servers are down but will let them in anyway!");
-						ServerLoginPacketListenerImpl.this.gameProfile = gameProfile;
+						ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.createFakeProfile(gameProfile);
 						ServerLoginPacketListenerImpl.this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
 					} else {
 						ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.authservers_down"));

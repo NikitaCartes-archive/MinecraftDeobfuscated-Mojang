@@ -5,7 +5,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -17,7 +17,7 @@ public class RepeatedNarrator {
 		this.permitsPerSecond = 1000.0F / (float)duration.toMillis();
 	}
 
-	public void narrate(GameNarrator gameNarrator, Component component) {
+	public void narrate(Component component) {
 		RepeatedNarrator.Params params = (RepeatedNarrator.Params)this.params
 			.updateAndGet(
 				paramsx -> paramsx != null && component.equals(paramsx.narration)
@@ -25,7 +25,7 @@ public class RepeatedNarrator {
 						: new RepeatedNarrator.Params(component, RateLimiter.create((double)this.permitsPerSecond))
 			);
 		if (params.rateLimiter.tryAcquire(1)) {
-			gameNarrator.sayNow(component);
+			NarratorChatListener.INSTANCE.sayNow(component);
 		}
 	}
 

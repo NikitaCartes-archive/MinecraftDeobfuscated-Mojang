@@ -40,7 +40,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
-public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ingredient>, Widget, GuiEventListener, NarratableEntry, RecipeShownListener {
+public class RecipeBookComponent extends GuiComponent implements Widget, GuiEventListener, NarratableEntry, RecipeShownListener, PlaceRecipe<Ingredient> {
 	protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final Component SEARCH_HINT = Component.translatable("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)

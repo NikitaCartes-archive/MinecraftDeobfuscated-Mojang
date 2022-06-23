@@ -23,7 +23,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -111,13 +110,6 @@ public class SculkShriekerBlockEntity extends BlockEntity implements VibrationLi
 				Entity var3 = projectile.getOwner();
 				if (var3 instanceof ServerPlayer) {
 					return (ServerPlayer)var3;
-				}
-			}
-
-			if (entity instanceof ItemEntity itemEntity) {
-				Entity var9 = itemEntity.getThrowingEntity();
-				if (var9 instanceof ServerPlayer) {
-					return (ServerPlayer)var9;
 				}
 			}
 

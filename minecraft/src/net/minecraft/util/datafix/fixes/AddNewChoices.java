@@ -7,7 +7,6 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.TaggedChoice.TaggedChoiceType;
 import com.mojang.datafixers.util.Pair;
-import java.util.Locale;
 
 public class AddNewChoices extends DataFix {
 	private final String name;
@@ -32,7 +31,7 @@ public class AddNewChoices extends DataFix {
 		} else {
 			return this.fixTypeEverywhere(string, taggedChoiceType, (Type<Pair<K, ?>>)taggedChoiceType2, dynamicOps -> pair -> {
 					if (!((TaggedChoiceType<Object>)taggedChoiceType2).hasType(pair.getFirst())) {
-						throw new IllegalArgumentException(String.format(Locale.ROOT, "Unknown type %s in %s ", pair.getFirst(), this.type));
+						throw new IllegalArgumentException(String.format("Unknown type %s in %s ", pair.getFirst(), this.type));
 					} else {
 						return pair;
 					}

@@ -8,7 +8,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -207,24 +205,17 @@ public class Commands {
 		this.dispatcher.setConsumer((commandContext, bl, i) -> commandContext.getSource().onCommandComplete(commandContext, bl, i));
 	}
 
-	public static <S> ParseResults<S> mapSource(ParseResults<S> parseResults, UnaryOperator<S> unaryOperator) {
-		CommandContextBuilder<S> commandContextBuilder = parseResults.getContext();
-		CommandContextBuilder<S> commandContextBuilder2 = commandContextBuilder.withSource((S)unaryOperator.apply(commandContextBuilder.getSource()));
-		return new ParseResults<>(commandContextBuilder2, parseResults.getReader(), parseResults.getExceptions());
-	}
-
 	public int performPrefixedCommand(CommandSourceStack commandSourceStack, String string) {
-		string = string.startsWith("/") ? string.substring(1) : string;
-		return this.performCommand(this.dispatcher.parse(string, commandSourceStack), string);
+		return this.performCommand(commandSourceStack, string.startsWith("/") ? string.substring(1) : string);
 	}
 
-	public int performCommand(ParseResults<CommandSourceStack> parseResults, String string) {
-		CommandSourceStack commandSourceStack = parseResults.getContext().getSource();
+	public int performCommand(CommandSourceStack commandSourceStack, String string) {
+		StringReader stringReader = new StringReader(string);
 		commandSourceStack.getServer().getProfiler().push((Supplier<String>)(() -> "/" + string));
 
 		byte var20;
 		try {
-			return this.dispatcher.execute(parseResults);
+			return this.dispatcher.execute(stringReader, commandSourceStack);
 		} catch (CommandRuntimeException var13) {
 			commandSourceStack.sendFailure(var13.getComponent());
 			return 0;

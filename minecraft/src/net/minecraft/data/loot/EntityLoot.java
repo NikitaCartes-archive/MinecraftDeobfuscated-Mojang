@@ -3,7 +3,6 @@ package net.minecraft.data.loot;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -1136,15 +1135,13 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 			if (!SPECIAL_LOOT_TABLE_TYPES.contains(entityType) && entityType.getCategory() == MobCategory.MISC) {
 				if (resourceLocation != BuiltInLootTables.EMPTY && this.map.remove(resourceLocation) != null) {
 					throw new IllegalStateException(
-						String.format(
-							Locale.ROOT, "Weird loottable '%s' for '%s', not a LivingEntity so should not have loot", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)
-						)
+						String.format("Weird loottable '%s' for '%s', not a LivingEntity so should not have loot", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType))
 					);
 				}
 			} else if (resourceLocation != BuiltInLootTables.EMPTY && set.add(resourceLocation)) {
 				LootTable.Builder builder = (LootTable.Builder)this.map.remove(resourceLocation);
 				if (builder == null) {
-					throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)));
+					throw new IllegalStateException(String.format("Missing loottable '%s' for '%s'", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)));
 				}
 
 				biConsumer.accept(resourceLocation, builder);

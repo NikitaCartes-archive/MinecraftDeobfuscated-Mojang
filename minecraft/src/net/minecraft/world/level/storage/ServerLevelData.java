@@ -1,6 +1,5 @@
 package net.minecraft.world.level.storage;
 
-import java.util.Locale;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
@@ -31,18 +30,13 @@ public interface ServerLevelData extends WritableLevelData {
 		crashReportCategory.setDetail(
 			"Level game mode",
 			(CrashReportDetail<String>)(() -> String.format(
-					Locale.ROOT,
-					"Game mode: %s (ID %d). Hardcore: %b. Cheats: %b",
-					this.getGameType().getName(),
-					this.getGameType().getId(),
-					this.isHardcore(),
-					this.getAllowCommands()
+					"Game mode: %s (ID %d). Hardcore: %b. Cheats: %b", this.getGameType().getName(), this.getGameType().getId(), this.isHardcore(), this.getAllowCommands()
 				))
 		);
 		crashReportCategory.setDetail(
 			"Level weather",
 			(CrashReportDetail<String>)(() -> String.format(
-					Locale.ROOT, "Rain time: %d (now: %b), thunder time: %d (now: %b)", this.getRainTime(), this.isRaining(), this.getThunderTime(), this.isThundering()
+					"Rain time: %d (now: %b), thunder time: %d (now: %b)", this.getRainTime(), this.isRaining(), this.getThunderTime(), this.isThundering()
 				))
 		);
 	}

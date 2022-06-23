@@ -1,33 +1,44 @@
-package net.minecraft.client;
+package net.minecraft.client.gui.chat;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.text2speech.Narrator;
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.network.chat.ChatSender;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class GameNarrator {
+public class NarratorChatListener implements ChatListener {
 	public static final Component NO_TITLE = CommonComponents.EMPTY;
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Minecraft minecraft;
+	public static final NarratorChatListener INSTANCE = new NarratorChatListener();
 	private final Narrator narrator = Narrator.getNarrator();
 
-	public GameNarrator(Minecraft minecraft) {
-		this.minecraft = minecraft;
-	}
-
-	public void sayChatNow(Supplier<Component> supplier) {
-		if (this.getStatus().shouldNarrateChat()) {
-			String string = ((Component)supplier.get()).getString();
-			this.logNarratedMessage(string);
-			this.narrator.say(string, false);
+	@Override
+	public void handle(ChatType chatType, Component component, @Nullable ChatSender chatSender) {
+		NarratorStatus narratorStatus = getStatus();
+		if (narratorStatus != NarratorStatus.OFF) {
+			if (!this.narrator.active()) {
+				this.logNarratedMessage(component.getString());
+			} else {
+				chatType.narration().ifPresent(narration -> {
+					if (narratorStatus.shouldNarrate(narration.priority())) {
+						Component component2 = narration.decorate(component, chatSender);
+						String string = component2.getString();
+						this.logNarratedMessage(string);
+						this.narrator.say(string, narration.priority().interrupts());
+					}
+				});
+			}
 		}
 	}
 
@@ -36,7 +47,8 @@ public class GameNarrator {
 	}
 
 	public void sayNow(String string) {
-		if (this.getStatus().shouldNarrateSystem() && !string.isEmpty()) {
+		NarratorStatus narratorStatus = getStatus();
+		if (narratorStatus != NarratorStatus.OFF && narratorStatus != NarratorStatus.CHAT && !string.isEmpty()) {
 			this.logNarratedMessage(string);
 			if (this.narrator.active()) {
 				this.narrator.clear();
@@ -45,8 +57,8 @@ public class GameNarrator {
 		}
 	}
 
-	private NarratorStatus getStatus() {
-		return this.minecraft.options.narrator().get();
+	private static NarratorStatus getStatus() {
+		return Minecraft.getInstance().options.narrator().get();
 	}
 
 	private void logNarratedMessage(String string) {
@@ -82,7 +94,7 @@ public class GameNarrator {
 	}
 
 	public void clear() {
-		if (this.getStatus() != NarratorStatus.OFF && this.narrator.active()) {
+		if (getStatus() != NarratorStatus.OFF && this.narrator.active()) {
 			this.narrator.clear();
 		}
 	}

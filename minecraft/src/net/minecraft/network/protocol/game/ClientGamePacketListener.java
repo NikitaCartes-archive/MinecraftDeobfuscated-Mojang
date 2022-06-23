@@ -31,13 +31,9 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket);
 
-	void handlePlayerChatHeader(ClientboundPlayerChatHeaderPacket clientboundPlayerChatHeaderPacket);
-
 	void handleChatPreview(ClientboundChatPreviewPacket clientboundChatPreviewPacket);
 
 	void handleSetDisplayChatPreview(ClientboundSetDisplayChatPreviewPacket clientboundSetDisplayChatPreviewPacket);
-
-	void handleDeleteChat(ClientboundDeleteChatPacket clientboundDeleteChatPacket);
 
 	void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket);
 
@@ -212,6 +208,4 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleTitlesClear(ClientboundClearTitlesPacket clientboundClearTitlesPacket);
 
 	void handleServerData(ClientboundServerDataPacket clientboundServerDataPacket);
-
-	void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket clientboundCustomChatCompletionsPacket);
 }

@@ -10,6 +10,7 @@ import io.netty.buffer.Unpooled;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.ClientRecipeBook;
@@ -34,6 +36,7 @@ import net.minecraft.client.DebugQueryHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.MapRenderer;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -54,6 +57,7 @@ import net.minecraft.client.gui.screens.multiplayer.ChatPreviewWarningScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.multiplayer.chat.LoggedChat;
 import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
@@ -85,14 +89,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.LastSeenMessages;
-import net.minecraft.network.chat.LastSeenMessagesTracker;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -117,10 +118,8 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
-import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
-import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -146,7 +145,6 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
@@ -205,7 +203,6 @@ import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
-import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
@@ -226,6 +223,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringDecomposer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -246,6 +244,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -288,13 +287,13 @@ import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientPacketListener implements ClientGamePacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component GENERIC_DISCONNECT_MESSAGE = Component.translatable("disconnect.lost");
-	private static final int UNACKNOWLEDGED_MESSAGES_THRESHOLD = 64;
 	private final Connection connection;
 	private final GameProfile localGameProfile;
 	private final Screen callbackScreen;
@@ -314,10 +313,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private Set<ResourceKey<Level>> levels;
 	private RegistryAccess.Frozen registryAccess = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
 	private final ClientTelemetryManager telemetryManager;
-	private final SignedMessageChain.Encoder signedMessageEncoder = new SignedMessageChain().encoder();
-	private final LastSeenMessagesTracker lastSeenMessagesTracker = new LastSeenMessagesTracker(5);
-	private Optional<LastSeenMessages.Entry> lastUnacknowledgedReceivedMessage = Optional.empty();
-	private int unacknowledgedReceivedMessageCount;
 
 	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager) {
 		this.minecraft = minecraft;
@@ -813,37 +808,62 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleSystemChat(ClientboundSystemChatPacket clientboundSystemChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSystemChatPacket, this, this.minecraft);
-		this.minecraft.getChatListener().handleSystemMessage(clientboundSystemChatPacket.content(), clientboundSystemChatPacket.overlay());
+		if (!this.minecraft.options.hideMatchedNames().get() || !this.minecraft.isBlocked(this.guessChatUUID(clientboundSystemChatPacket.content()))) {
+			Registry<ChatType> registry = this.registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+			ChatType chatType = clientboundSystemChatPacket.resolveType(registry);
+			this.minecraft.gui.handleSystemChat(chatType, clientboundSystemChatPacket.content());
+			Instant instant = Instant.now();
+			this.minecraft.getReportingContext().chatLog().push(LoggedChat.system(clientboundSystemChatPacket.content(), instant));
+		}
+	}
+
+	private UUID guessChatUUID(Component component) {
+		String string = StringDecomposer.getPlainText(component);
+		String string2 = StringUtils.substringBetween(string, "<", ">");
+		return string2 == null ? Util.NIL_UUID : this.minecraft.getPlayerSocialManager().getDiscoveredUUID(string2);
 	}
 
 	@Override
 	public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
-		Optional<ChatType.Bound> optional = clientboundPlayerChatPacket.resolveChatType(this.registryAccess);
-		if (!optional.isPresent()) {
-			this.connection.disconnect(Component.translatable("multiplayer.disconnect.invalid_packet"));
-		} else {
-			this.minecraft.getChatListener().handleChatMessage(clientboundPlayerChatPacket.message(), (ChatType.Bound)optional.get());
+		ChatSender chatSender = clientboundPlayerChatPacket.sender();
+		if (clientboundPlayerChatPacket.hasExpired(Instant.now())) {
+			LOGGER.warn("Received expired chat packet from {}", chatSender.name().getString());
+		}
+
+		Registry<ChatType> registry = this.registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		ChatType chatType = clientboundPlayerChatPacket.resolveType(registry);
+		PlayerChatMessage playerChatMessage = clientboundPlayerChatPacket.getMessage();
+		this.handlePlayerChat(chatType, playerChatMessage, chatSender);
+	}
+
+	private void handlePlayerChat(ChatType chatType, PlayerChatMessage playerChatMessage, ChatSender chatSender) {
+		if (!this.minecraft.isBlocked(chatSender.uuid())) {
+			boolean bl = this.minecraft.options.onlyShowSecureChat().get();
+			PlayerInfo playerInfo = this.getPlayerInfo(playerChatMessage.signature().sender());
+			if (playerInfo != null && !this.hasValidSignature(playerChatMessage, playerInfo)) {
+				LOGGER.warn("Received chat packet without valid signature from {}", playerInfo.getProfile().getName());
+				if (bl) {
+					return;
+				}
+			}
+
+			PlayerChatMessage playerChatMessage2 = bl ? playerChatMessage.removeUnsignedContent() : playerChatMessage;
+			Component component = playerChatMessage2.serverContent();
+			this.minecraft.gui.handlePlayerChat(chatType, component, chatSender);
+			GameProfile gameProfile = this.getSenderProfile(chatSender);
+			this.minecraft.getReportingContext().chatLog().push(LoggedChat.player(gameProfile, chatSender.name(), playerChatMessage2));
 		}
 	}
 
-	@Override
-	public void handlePlayerChatHeader(ClientboundPlayerChatHeaderPacket clientboundPlayerChatHeaderPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatHeaderPacket, this, this.minecraft);
-		this.minecraft
-			.getChatListener()
-			.handleChatHeader(
-				clientboundPlayerChatHeaderPacket.header(), clientboundPlayerChatHeaderPacket.headerSignature(), clientboundPlayerChatHeaderPacket.bodyDigest()
-			);
+	private GameProfile getSenderProfile(ChatSender chatSender) {
+		PlayerInfo playerInfo = this.getPlayerInfo(chatSender.uuid());
+		return playerInfo == null ? new GameProfile(chatSender.uuid(), chatSender.name().getString()) : playerInfo.getProfile();
 	}
 
-	@Override
-	public void handleDeleteChat(ClientboundDeleteChatPacket clientboundDeleteChatPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundDeleteChatPacket, this, this.minecraft);
-		MessageSignature messageSignature = clientboundDeleteChatPacket.messageSignature();
-		if (!this.minecraft.getChatListener().removeFromDelayedMessageQueue(messageSignature)) {
-			this.minecraft.gui.getChat().deleteMessage(messageSignature);
-		}
+	private boolean hasValidSignature(PlayerChatMessage playerChatMessage, PlayerInfo playerInfo) {
+		ProfilePublicKey profilePublicKey = playerInfo.getProfilePublicKey();
+		return profilePublicKey != null && playerChatMessage.verify(profilePublicKey);
 	}
 
 	@Override
@@ -909,7 +929,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 						Component component = Component.translatable("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage());
 						this.minecraft.gui.setOverlayMessage(component, false);
-						this.minecraft.getNarrator().sayNow(component);
+						NarratorChatListener.INSTANCE.sayNow(component);
 					}
 				}
 			}
@@ -1012,10 +1032,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 		String string = localPlayer.getServerBrand();
 		this.minecraft.cameraEntity = null;
-		if (localPlayer.hasContainerOpen()) {
-			localPlayer.closeContainer();
-		}
-
 		LocalPlayer localPlayer2 = this.minecraft
 			.gameMode
 			.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
@@ -1595,17 +1611,13 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			});
 			serverData.setPreviewsChat(clientboundServerDataPacket.previewsChat());
 			ServerList.saveSingleServer(serverData);
-			ServerData.ChatPreview chatPreview = serverData.getChatPreview();
-			if (chatPreview != null && !chatPreview.isAcknowledged()) {
-				this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(this.minecraft.screen, serverData)));
+			if (this.minecraft.options.chatPreview().get()) {
+				ServerData.ChatPreview chatPreview = serverData.getChatPreview();
+				if (chatPreview != null && !chatPreview.isAcknowledged()) {
+					this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(this.minecraft.screen, serverData)));
+				}
 			}
 		}
-	}
-
-	@Override
-	public void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket clientboundCustomChatCompletionsPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundCustomChatCompletionsPacket, this, this.minecraft);
-		this.suggestionsProvider.modifyCustomCompletions(clientboundCustomChatCompletionsPacket.action(), clientboundCustomChatCompletionsPacket.entries());
 	}
 
 	@Override
@@ -2460,30 +2472,5 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	public RegistryAccess registryAccess() {
 		return this.registryAccess;
-	}
-
-	public SignedMessageChain.Encoder signedMessageEncoder() {
-		return this.signedMessageEncoder;
-	}
-
-	public LastSeenMessages.Update generateMessageAcknowledgements() {
-		this.unacknowledgedReceivedMessageCount = 0;
-		return new LastSeenMessages.Update(this.lastSeenMessagesTracker.get(), this.lastUnacknowledgedReceivedMessage);
-	}
-
-	public void markMessageAsProcessed(PlayerChatMessage playerChatMessage, boolean bl) {
-		LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
-		if (entry != null) {
-			if (bl) {
-				this.lastSeenMessagesTracker.push(entry);
-				this.lastUnacknowledgedReceivedMessage = Optional.empty();
-			} else {
-				this.lastUnacknowledgedReceivedMessage = Optional.of(entry);
-			}
-
-			if (this.unacknowledgedReceivedMessageCount++ > 64) {
-				this.send(new ServerboundChatAckPacket(this.generateMessageAcknowledgements()));
-			}
-		}
 	}
 }

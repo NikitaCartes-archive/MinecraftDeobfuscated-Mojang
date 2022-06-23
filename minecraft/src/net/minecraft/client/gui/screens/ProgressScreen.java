@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ProgressListener;
 
@@ -19,7 +19,7 @@ public class ProgressScreen extends Screen implements ProgressListener {
 	private final boolean clearScreenAfterStop;
 
 	public ProgressScreen(boolean bl) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.clearScreenAfterStop = bl;
 	}
 

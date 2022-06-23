@@ -1,6 +1,5 @@
 package net.minecraft.world.level.redstone;
 
-import java.util.Locale;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -45,7 +44,7 @@ public interface NeighborUpdater {
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");
 			crashReportCategory.setDetail("Source block type", (CrashReportDetail<String>)(() -> {
 				try {
-					return String.format(Locale.ROOT, "ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
+					return String.format("ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
 				} catch (Throwable var2) {
 					return "ID #" + Registry.BLOCK.getKey(block);
 				}

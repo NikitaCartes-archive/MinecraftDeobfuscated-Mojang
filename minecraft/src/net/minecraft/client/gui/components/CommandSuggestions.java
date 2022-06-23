@@ -35,6 +35,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.commands.Commands;
@@ -74,7 +75,7 @@ public class CommandSuggestions {
 	@Nullable
 	private CompletableFuture<Suggestions> pendingSuggestions;
 	@Nullable
-	private CommandSuggestions.SuggestionsList suggestions;
+	CommandSuggestions.SuggestionsList suggestions;
 	private boolean allowSuggestions;
 	boolean keepSuggestions;
 
@@ -135,10 +136,6 @@ public class CommandSuggestions {
 		}
 	}
 
-	public void hide() {
-		this.suggestions = null;
-	}
-
 	private List<Suggestion> sortSuggestions(Suggestions suggestions) {
 		String string = this.input.getValue().substring(0, this.input.getCursorPosition());
 		int i = getLastWordIndex(string);
@@ -196,7 +193,7 @@ public class CommandSuggestions {
 		} else {
 			String string2 = string.substring(0, i);
 			int j = getLastWordIndex(string2);
-			Collection<String> collection = this.minecraft.player.connection.getSuggestionsProvider().getCustomTabSugggestions();
+			Collection<String> collection = this.minecraft.player.connection.getSuggestionsProvider().getOnlinePlayerNames();
 			this.pendingSuggestions = SharedSuggestionProvider.suggest(collection, new SuggestionsBuilder(string2, j));
 		}
 	}
@@ -332,28 +329,17 @@ public class CommandSuggestions {
 	}
 
 	public void render(PoseStack poseStack, int i, int j) {
-		if (!this.renderSuggestions(poseStack, i, j)) {
-			this.renderUsage(poseStack);
-		}
-	}
-
-	public boolean renderSuggestions(PoseStack poseStack, int i, int j) {
 		if (this.suggestions != null) {
 			this.suggestions.render(poseStack, i, j);
-			return true;
 		} else {
-			return false;
-		}
-	}
+			int k = 0;
 
-	public void renderUsage(PoseStack poseStack) {
-		int i = 0;
-
-		for (FormattedCharSequence formattedCharSequence : this.commandUsage) {
-			int j = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * i : 72 + 12 * i;
-			GuiComponent.fill(poseStack, this.commandUsagePosition - 1, j, this.commandUsagePosition + this.commandUsageWidth + 1, j + 12, this.fillColor);
-			this.font.drawShadow(poseStack, formattedCharSequence, (float)this.commandUsagePosition, (float)(j + 2), -1);
-			i++;
+			for (FormattedCharSequence formattedCharSequence : this.commandUsage) {
+				int l = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * k : 72 + 12 * k;
+				GuiComponent.fill(poseStack, this.commandUsagePosition - 1, l, this.commandUsagePosition + this.commandUsageWidth + 1, l + 12, this.fillColor);
+				this.font.drawShadow(poseStack, formattedCharSequence, (float)this.commandUsagePosition, (float)(l + 2), -1);
+				k++;
+			}
 		}
 	}
 
@@ -364,11 +350,6 @@ public class CommandSuggestions {
 	@Nullable
 	public CommandNode<SharedSuggestionProvider> getNodeAt(int i) {
 		return this.currentParse != null ? getNodeAt(i, this.currentParse.getContext()) : null;
-	}
-
-	@Nullable
-	public ParseResults<SharedSuggestionProvider> getCurrentContext() {
-		return this.currentParse;
 	}
 
 	@Nullable
@@ -547,7 +528,7 @@ public class CommandSuggestions {
 				this.useSuggestion();
 				return true;
 			} else if (i == 256) {
-				CommandSuggestions.this.hide();
+				this.hide();
 				return true;
 			} else {
 				return false;
@@ -583,7 +564,7 @@ public class CommandSuggestions {
 			CommandSuggestions.this.input
 				.setSuggestion(CommandSuggestions.calculateSuggestionSuffix(CommandSuggestions.this.input.getValue(), suggestion.apply(this.originalContents)));
 			if (this.lastNarratedEntry != this.current) {
-				CommandSuggestions.this.minecraft.getNarrator().sayNow(this.getNarrationMessage());
+				NarratorChatListener.INSTANCE.sayNow(this.getNarrationMessage());
 			}
 		}
 
@@ -606,6 +587,10 @@ public class CommandSuggestions {
 			return message != null
 				? Component.translatable("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message)
 				: Component.translatable("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
+		}
+
+		public void hide() {
+			CommandSuggestions.this.suggestions = null;
 		}
 	}
 }

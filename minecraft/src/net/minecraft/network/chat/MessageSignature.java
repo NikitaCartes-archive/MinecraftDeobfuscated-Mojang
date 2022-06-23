@@ -1,63 +1,53 @@
 package net.minecraft.network.chat;
 
-import it.unimi.dsi.fastutil.bytes.ByteArrays;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Base64;
-import javax.annotation.Nullable;
-import net.minecraft.network.FriendlyByteBuf;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.time.Instant;
+import java.util.UUID;
+import net.minecraft.Util;
+import net.minecraft.util.Crypt;
+import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
 
-public record MessageSignature(byte[] bytes) {
-	public static final MessageSignature EMPTY = new MessageSignature(ByteArrays.EMPTY_ARRAY);
-
-	public MessageSignature(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readByteArray());
+public record MessageSignature(UUID sender, Instant timeStamp, Crypt.SaltSignaturePair saltSignature) {
+	public static MessageSignature unsigned() {
+		return new MessageSignature(Util.NIL_UUID, Instant.now(), Crypt.SaltSignaturePair.EMPTY);
 	}
 
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeByteArray(this.bytes);
+	public boolean verify(SignatureValidator signatureValidator, Component component) {
+		return this.isValid()
+			? signatureValidator.validate(
+				output -> updateSignature(output, component, this.sender, this.timeStamp, this.saltSignature.salt()), this.saltSignature.signature()
+			)
+			: false;
 	}
 
-	public boolean verify(SignatureValidator signatureValidator, SignedMessageHeader signedMessageHeader, SignedMessageBody signedMessageBody) {
-		if (!this.isEmpty()) {
-			byte[] bs = signedMessageBody.hash().asBytes();
-			return signatureValidator.validate(output -> signedMessageHeader.updateSignature(output, bs), this.bytes);
-		} else {
-			return false;
-		}
+	public boolean verify(SignatureValidator signatureValidator, String string) throws SignatureException {
+		return this.verify(signatureValidator, Component.literal(string));
 	}
 
-	public boolean verify(SignatureValidator signatureValidator, SignedMessageHeader signedMessageHeader, byte[] bs) {
-		return !this.isEmpty() ? signatureValidator.validate(output -> signedMessageHeader.updateSignature(output, bs), this.bytes) : false;
+	public static void updateSignature(SignatureUpdater.Output output, Component component, UUID uUID, Instant instant, long l) throws SignatureException {
+		byte[] bs = new byte[32];
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bs).order(ByteOrder.BIG_ENDIAN);
+		byteBuffer.putLong(l);
+		byteBuffer.putLong(uUID.getMostSignificantBits()).putLong(uUID.getLeastSignificantBits());
+		byteBuffer.putLong(instant.getEpochSecond());
+		output.update(bs);
+		output.update(encodeContent(component));
 	}
 
-	public boolean isEmpty() {
-		return this.bytes.length == 0;
+	private static byte[] encodeContent(Component component) {
+		String string = Component.Serializer.toStableJson(component);
+		return string.getBytes(StandardCharsets.UTF_8);
 	}
 
-	@Nullable
-	public ByteBuffer asByteBuffer() {
-		return !this.isEmpty() ? ByteBuffer.wrap(this.bytes) : null;
+	public boolean isValid() {
+		return this.sender != Util.NIL_UUID && this.saltSignature.isValid();
 	}
 
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else {
-			if (object instanceof MessageSignature messageSignature && Arrays.equals(this.bytes, messageSignature.bytes)) {
-				return true;
-			}
-
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		return Arrays.hashCode(this.bytes);
-	}
-
-	public String toString() {
-		return !this.isEmpty() ? Base64.getEncoder().encodeToString(this.bytes) : "empty";
+	public boolean isValid(UUID uUID) {
+		return this.isValid() && uUID.equals(this.sender);
 	}
 }

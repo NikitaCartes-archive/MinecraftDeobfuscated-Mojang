@@ -21,8 +21,8 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -55,7 +55,7 @@ public class WinScreen extends Screen {
 	private final float unmodifiedScrollSpeed;
 
 	public WinScreen(boolean bl, Runnable runnable) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.poem = bl;
 		this.onFinished = runnable;
 		if (!bl) {

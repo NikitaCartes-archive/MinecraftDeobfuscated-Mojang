@@ -1,26 +1,31 @@
 package net.minecraft.commands;
 
-import java.util.Map;
-import javax.annotation.Nullable;
-import net.minecraft.network.chat.PlayerChatMessage;
+import java.time.Instant;
+import java.util.UUID;
+import net.minecraft.commands.arguments.ArgumentSignatures;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.util.Crypt;
 
 public interface CommandSigningContext {
-	CommandSigningContext ANONYMOUS = new CommandSigningContext() {
-		@Nullable
+	CommandSigningContext NONE = string -> MessageSignature.unsigned();
+
+	MessageSignature getArgumentSignature(String string);
+
+	default boolean signedArgumentPreview(String string) {
+		return false;
+	}
+
+	public static record SignedArguments(UUID sender, Instant timeStamp, ArgumentSignatures argumentSignatures, boolean signedPreview)
+		implements CommandSigningContext {
 		@Override
-		public PlayerChatMessage getArgument(String string) {
-			return null;
+		public MessageSignature getArgumentSignature(String string) {
+			Crypt.SaltSignaturePair saltSignaturePair = this.argumentSignatures.get(string);
+			return saltSignaturePair != null ? new MessageSignature(this.sender, this.timeStamp, saltSignaturePair) : MessageSignature.unsigned();
 		}
-	};
 
-	@Nullable
-	PlayerChatMessage getArgument(String string);
-
-	public static record SignedArguments(Map<String, PlayerChatMessage> arguments) implements CommandSigningContext {
-		@Nullable
 		@Override
-		public PlayerChatMessage getArgument(String string) {
-			return (PlayerChatMessage)this.arguments.get(string);
+		public boolean signedArgumentPreview(String string) {
+			return this.signedPreview;
 		}
 	}
 }

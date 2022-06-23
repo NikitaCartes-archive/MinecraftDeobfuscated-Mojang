@@ -11,18 +11,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageHeader;
 
 @Environment(EnvType.CLIENT)
-public interface LoggedChatMessage extends LoggedChatEvent {
-	static LoggedChatMessage.Player player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage, ChatTrustLevel chatTrustLevel) {
-		return new LoggedChatMessage.Player(gameProfile, component, playerChatMessage, chatTrustLevel);
+public interface LoggedChat {
+	static LoggedChat player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage) {
+		return new LoggedChat.Player(gameProfile, component, playerChatMessage);
 	}
 
-	static LoggedChatMessage.System system(Component component, Instant instant) {
-		return new LoggedChatMessage.System(component, instant);
+	static LoggedChat system(Component component, Instant instant) {
+		return new LoggedChat.System(component, instant);
 	}
 
 	Component toContentComponent();
@@ -34,9 +32,7 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 	boolean canReport(UUID uUID);
 
 	@Environment(EnvType.CLIENT)
-	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel)
-		implements LoggedChatMessage,
-		LoggedChatMessageLink {
+	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message) implements LoggedChat {
 		private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
 		@Override
@@ -57,7 +53,7 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 		}
 
 		private Component getTimeComponent() {
-			LocalDateTime localDateTime = LocalDateTime.ofInstant(this.message.timeStamp(), ZoneOffset.systemDefault());
+			LocalDateTime localDateTime = LocalDateTime.ofInstant(this.message.signature().timeStamp(), ZoneOffset.systemDefault());
 			return Component.literal(localDateTime.format(TIME_FORMATTER)).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
 		}
 
@@ -66,28 +62,13 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 			return this.profileId().equals(uUID);
 		}
 
-		@Override
-		public SignedMessageHeader header() {
-			return this.message.signedHeader();
-		}
-
-		@Override
-		public byte[] bodyDigest() {
-			return this.message.signedBody().hash().asBytes();
-		}
-
-		@Override
-		public MessageSignature headerSignature() {
-			return this.message.headerSignature();
-		}
-
 		public UUID profileId() {
 			return this.profile.getId();
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record System(Component message, Instant timeStamp) implements LoggedChatMessage {
+	public static record System(Component message, Instant timeStamp) implements LoggedChat {
 		@Override
 		public Component toContentComponent() {
 			return this.message;
@@ -97,5 +78,9 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 		public boolean canReport(UUID uUID) {
 			return false;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static record WithId(int id, LoggedChat message) {
 	}
 }

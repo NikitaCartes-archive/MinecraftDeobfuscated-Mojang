@@ -1,6 +1,5 @@
 package net.minecraft.server.network;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -19,25 +18,7 @@ public record FilteredText<T>(T raw, @Nullable T filtered) {
 	}
 
 	public <U> FilteredText<U> map(Function<T, U> function) {
-		return this.map(function, function);
-	}
-
-	public <U> FilteredText<U> map(Function<T, U> function, Function<T, U> function2) {
-		return (FilteredText<U>)(new FilteredText<>(function.apply(this.raw), Util.mapNullable(this.filtered, function2)));
-	}
-
-	public <U> FilteredText<U> rebuildIfNeeded(U object, Function<T, U> function) {
-		return !this.isFiltered() ? passThrough(object) : new FilteredText<>(object, Util.mapNullable(this.filtered, function));
-	}
-
-	public <U> CompletableFuture<FilteredText<U>> rebuildIfNeededAsync(U object, Function<T, CompletableFuture<U>> function) {
-		if (this.filtered() == null) {
-			return CompletableFuture.completedFuture(fullyFiltered(object));
-		} else {
-			return !this.isFiltered()
-				? CompletableFuture.completedFuture(passThrough(object))
-				: ((CompletableFuture)function.apply(this.filtered())).thenApply(object2 -> new FilteredText<>(object, (U)object2));
-		}
+		return (FilteredText<U>)(new FilteredText<>(function.apply(this.raw), Util.mapNullable(this.filtered, function)));
 	}
 
 	public boolean isFiltered() {
@@ -61,10 +42,5 @@ public record FilteredText<T>(T raw, @Nullable T filtered) {
 	public T filter(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer) {
 		ServerPlayer serverPlayer2 = commandSourceStack.getPlayer();
 		return serverPlayer2 != null ? this.filter(serverPlayer2, serverPlayer) : this.raw;
-	}
-
-	@Nullable
-	public T select(boolean bl) {
-		return bl ? this.filtered : this.raw;
 	}
 }

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 	public RealmsLongConfirmationScreen(
 		BooleanConsumer booleanConsumer, RealmsLongConfirmationScreen.Type type, Component component, Component component2, boolean bl
 	) {
-		super(GameNarrator.NO_TITLE);
+		super(NarratorChatListener.NO_TITLE);
 		this.callback = booleanConsumer;
 		this.type = type;
 		this.line2 = component;

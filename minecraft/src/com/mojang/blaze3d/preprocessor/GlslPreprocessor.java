@@ -64,7 +64,7 @@ public abstract class GlslPreprocessor {
 
 						list.addAll(list2);
 					} else {
-						String string8 = bl ? String.format(Locale.ROOT, "/*#moj_import \"%s\"*/", string4) : String.format(Locale.ROOT, "/*#moj_import <%s>*/", string4);
+						String string8 = bl ? String.format("/*#moj_import \"%s\"*/", string4) : String.format("/*#moj_import <%s>*/", string4);
 						list.add(string3 + string5 + string8);
 					}
 

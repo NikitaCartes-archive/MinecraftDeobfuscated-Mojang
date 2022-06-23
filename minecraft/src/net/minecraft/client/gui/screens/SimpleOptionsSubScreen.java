@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -35,7 +36,7 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 		this.createFooter();
 		this.narratorButton = this.list.findOption(this.options.narrator());
 		if (this.narratorButton != null) {
-			this.narratorButton.active = this.minecraft.getNarrator().isActive();
+			this.narratorButton.active = NarratorChatListener.INSTANCE.isActive();
 		}
 	}
 

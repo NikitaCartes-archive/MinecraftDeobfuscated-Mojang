@@ -19,16 +19,13 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatSender;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -54,7 +51,6 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	private final EntityAnchorArgument.Anchor anchor;
 	private final Vec2 rotation;
 	private final CommandSigningContext signingContext;
-	private final TaskChainer chatMessageChainer;
 
 	public CommandSourceStack(
 		CommandSource commandSource,
@@ -68,7 +64,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		@Nullable Entity entity
 	) {
 		this(commandSource, vec3, vec2, serverLevel, i, string, component, minecraftServer, entity, false, (commandContext, bl, ix) -> {
-		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.ANONYMOUS, TaskChainer.IMMEDIATE);
+		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.NONE);
 	}
 
 	protected CommandSourceStack(
@@ -84,8 +80,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		boolean bl,
 		@Nullable ResultConsumer<CommandSourceStack> resultConsumer,
 		EntityAnchorArgument.Anchor anchor,
-		CommandSigningContext commandSigningContext,
-		TaskChainer taskChainer
+		CommandSigningContext commandSigningContext
 	) {
 		this.source = commandSource;
 		this.worldPosition = vec3;
@@ -100,7 +95,6 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		this.anchor = anchor;
 		this.rotation = vec2;
 		this.signingContext = commandSigningContext;
-		this.chatMessageChainer = taskChainer;
 	}
 
 	public CommandSourceStack withSource(CommandSource commandSource) {
@@ -119,8 +113,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -140,8 +133,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -161,8 +153,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -182,8 +173,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -203,8 +193,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				resultConsumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -228,8 +217,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				true,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			)
 			: this;
 	}
@@ -250,8 +238,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -271,8 +258,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -292,8 +278,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 	}
 
@@ -316,8 +301,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer
+				this.signingContext
 			);
 		}
 	}
@@ -353,29 +337,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.silent,
 				this.consumer,
 				this.anchor,
-				commandSigningContext,
-				this.chatMessageChainer
-			);
-	}
-
-	public CommandSourceStack withChatMessageChainer(TaskChainer taskChainer) {
-		return taskChainer == this.chatMessageChainer
-			? this
-			: new CommandSourceStack(
-				this.source,
-				this.worldPosition,
-				this.rotation,
-				this.level,
-				this.permissionLevel,
-				this.textName,
-				this.displayName,
-				this.server,
-				this.entity,
-				this.silent,
-				this.consumer,
-				this.anchor,
-				this.signingContext,
-				taskChainer
+				commandSigningContext
 			);
 	}
 
@@ -388,7 +350,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	public ChatSender asChatSender() {
-		return this.entity != null ? this.entity.asChatSender() : ChatSender.SYSTEM;
+		return this.entity != null ? this.entity.asChatSender() : ChatSender.system(this.getDisplayName());
 	}
 
 	@Override
@@ -449,21 +411,6 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 
 	public CommandSigningContext getSigningContext() {
 		return this.signingContext;
-	}
-
-	public TaskChainer getChatMessageChainer() {
-		return this.chatMessageChainer;
-	}
-
-	public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, ChatType.Bound bound) {
-		if (!this.silent) {
-			ServerPlayer serverPlayer = this.getPlayer();
-			if (serverPlayer != null) {
-				serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
-			} else {
-				this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.serverContent()));
-			}
-		}
 	}
 
 	public void sendSuccess(Component component, boolean bl) {
