@@ -13,6 +13,8 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
@@ -22,6 +24,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.reporting.ChatSelectionLogFiller;
+import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
 import net.minecraft.client.multiplayer.chat.LoggedChat;
 import net.minecraft.client.multiplayer.chat.report.ChatReportBuilder;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
@@ -154,11 +157,13 @@ extends Screen {
             boolean bl = loggedChat.canReport(ChatSelectionScreen.this.report.reportedProfileId());
             if (loggedChat instanceof LoggedChat.Player) {
                 LoggedChat.Player player = (LoggedChat.Player)loggedChat;
-                MessageEntry entry = new MessageEntry(i, component, component2, bl, true);
+                ChatTrustLevel chatTrustLevel = player.trustLevel();
+                GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
+                MessageEntry entry = new MessageEntry(i, component, component2, guiMessageTag, bl, true);
                 this.addEntryToTop(entry);
                 this.updateHeading(player, bl);
             } else {
-                this.addEntryToTop(new MessageEntry(i, component, component2, bl, false));
+                this.addEntryToTop(new MessageEntry(i, component, component2, null, bl, false));
                 this.previousHeading = null;
             }
         }
@@ -254,16 +259,25 @@ extends Screen {
             private static final int CHECKMARK_WIDTH = 9;
             private static final int CHECKMARK_HEIGHT = 8;
             private static final int INDENT_AMOUNT = 11;
+            private static final int TAG_MARGIN_LEFT = 4;
             private final int chatId;
             private final FormattedText text;
             private final Component narration;
             @Nullable
             private final List<FormattedCharSequence> hoverText;
+            @Nullable
+            private final GuiMessageTag.Icon tagIcon;
+            @Nullable
+            private final List<FormattedCharSequence> tagHoverText;
             private final boolean canReport;
             private final boolean playerMessage;
 
-            public MessageEntry(int i, Component component, Component component2, boolean bl, boolean bl2) {
+            public MessageEntry(int i, Component component, @Nullable Component component2, GuiMessageTag guiMessageTag, boolean bl, boolean bl2) {
                 this.chatId = i;
+                this.tagIcon = Util.mapNullable(guiMessageTag, GuiMessageTag::icon);
+                this.tagHoverText = guiMessageTag != null && guiMessageTag.text() != null ? ChatSelectionScreen.this.font.split(guiMessageTag.text(), ChatSelectionList.this.getRowWidth()) : null;
+                this.canReport = bl;
+                this.playerMessage = bl2;
                 FormattedText formattedText = ChatSelectionScreen.this.font.substrByWidth(component, this.getMaximumTextWidth() - ChatSelectionScreen.this.font.width(CommonComponents.ELLIPSIS));
                 if (component != formattedText) {
                     this.text = FormattedText.composite(formattedText, CommonComponents.ELLIPSIS);
@@ -273,8 +287,6 @@ extends Screen {
                     this.hoverText = null;
                 }
                 this.narration = component2;
-                this.canReport = bl;
-                this.playerMessage = bl2;
             }
 
             @Override
@@ -288,6 +300,18 @@ extends Screen {
                 if (this.hoverText != null && bl) {
                     ChatSelectionScreen.this.setTooltip(this.hoverText);
                 }
+                int r = ChatSelectionScreen.this.font.width(this.text);
+                this.renderTag(poseStack, p + r + 4, j, m, n, o);
+            }
+
+            private void renderTag(PoseStack poseStack, int i, int j, int k, int l, int m) {
+                if (this.tagIcon != null) {
+                    int n = j + (k - this.tagIcon.height) / 2;
+                    this.tagIcon.draw(poseStack, i, n);
+                    if (this.tagHoverText != null && l >= i && l <= i + this.tagIcon.width && m >= n && m <= n + this.tagIcon.height) {
+                        ChatSelectionScreen.this.setTooltip(this.tagHoverText);
+                    }
+                }
             }
 
             private void renderSelectedCheckmark(PoseStack poseStack, int i, int j, int k) {
@@ -300,7 +324,8 @@ extends Screen {
             }
 
             private int getMaximumTextWidth() {
-                return ChatSelectionList.this.getRowWidth() - this.getTextIndent();
+                int i = this.tagIcon != null ? this.tagIcon.width + 4 : 0;
+                return ChatSelectionList.this.getRowWidth() - this.getTextIndent() - 4 - i;
             }
 
             private int getTextIndent() {

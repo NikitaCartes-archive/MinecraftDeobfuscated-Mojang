@@ -60,7 +60,6 @@ import net.minecraft.client.OptionInstance;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.ToggleKeyMapping;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -383,11 +382,11 @@ public class Options {
     }), 0, integer -> {});
     private final OptionInstance<ParticleStatus> particles = new OptionInstance<ParticleStatus>("options.particles", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<ParticleStatus>(Arrays.asList(ParticleStatus.values()), Codec.INT.xmap(ParticleStatus::byId, ParticleStatus::getId)), ParticleStatus.ALL, particleStatus -> {});
     private final OptionInstance<NarratorStatus> narrator = new OptionInstance<NarratorStatus>("options.narrator", OptionInstance.noTooltip(), (component, narratorStatus) -> {
-        if (NarratorChatListener.INSTANCE.isActive()) {
+        if (this.minecraft.getNarrator().isActive()) {
             return narratorStatus.getName();
         }
         return Component.translatable("options.narrator.notavailable");
-    }, new OptionInstance.Enum<NarratorStatus>(Arrays.asList(NarratorStatus.values()), Codec.INT.xmap(NarratorStatus::byId, NarratorStatus::getId)), NarratorStatus.OFF, narratorStatus -> NarratorChatListener.INSTANCE.updateNarratorStatus((NarratorStatus)((Object)narratorStatus)));
+    }, new OptionInstance.Enum<NarratorStatus>(Arrays.asList(NarratorStatus.values()), Codec.INT.xmap(NarratorStatus::byId, NarratorStatus::getId)), NarratorStatus.OFF, narratorStatus -> this.minecraft.getNarrator().updateNarratorStatus((NarratorStatus)((Object)narratorStatus)));
     public String languageCode = "en_us";
     private final OptionInstance<String> soundDevice = new OptionInstance<String>("options.audioDevice", OptionInstance.noTooltip(), (component, string) -> {
         if (DEFAULT_SOUND_DEVICE.equals(string)) {

@@ -36,7 +36,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -517,7 +516,7 @@ implements Widget {
     }
 
     private boolean shouldRunNarration() {
-        return NarratorChatListener.INSTANCE.isActive();
+        return this.minecraft.getNarrator().isActive();
     }
 
     public void handleDelayedNarration() {
@@ -538,7 +537,7 @@ implements Widget {
         this.narrationState.update(this::updateNarrationState);
         String string = this.narrationState.collectNarrationText(!bl);
         if (!string.isEmpty()) {
-            NarratorChatListener.INSTANCE.sayNow(string);
+            this.minecraft.getNarrator().sayNow(string);
         }
     }
 

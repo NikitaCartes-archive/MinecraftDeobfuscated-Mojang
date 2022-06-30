@@ -6,8 +6,8 @@ package net.minecraft.client.gui.screens.inventory;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -44,7 +44,7 @@ extends Screen {
     private JigsawBlockEntity.JointType joint;
 
     public JigsawBlockEditScreen(JigsawBlockEntity jigsawBlockEntity) {
-        super(NarratorChatListener.NO_TITLE);
+        super(GameNarrator.NO_TITLE);
         this.jigsawEntity = jigsawBlockEntity;
     }
 

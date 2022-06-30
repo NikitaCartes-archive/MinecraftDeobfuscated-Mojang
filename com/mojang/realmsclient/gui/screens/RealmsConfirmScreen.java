@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ extends RealmsScreen {
     private final Component title2;
 
     public RealmsConfirmScreen(BooleanConsumer booleanConsumer, Component component, Component component2) {
-        super(NarratorChatListener.NO_TITLE);
+        super(GameNarrator.NO_TITLE);
         this.callback = booleanConsumer;
         this.title1 = component;
         this.title2 = component2;

@@ -102,21 +102,20 @@ implements ServerLoginPacketListener {
 
     public void handleAcceptedLogin() {
         ProfilePublicKey profilePublicKey;
-        UUID uUID;
-        block10: {
+        block11: {
+            profilePublicKey = null;
             if (!this.gameProfile.isComplete()) {
                 this.gameProfile = this.createFakeProfile(this.gameProfile);
-            }
-            uUID = this.gameProfile.getId();
-            profilePublicKey = null;
-            try {
-                SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
-                profilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(this.profilePublicKeyData, uUID, signatureValidator, this.server.enforceSecureProfile());
-            } catch (PublicKeyValidationException publicKeyValidationException) {
-                LOGGER.error(publicKeyValidationException.getMessage(), publicKeyValidationException.getCause());
-                if (this.connection.isMemoryConnection()) break block10;
-                this.disconnect(publicKeyValidationException.getComponent());
-                return;
+            } else {
+                try {
+                    SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
+                    profilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(this.profilePublicKeyData, this.gameProfile.getId(), signatureValidator, this.server.enforceSecureProfile());
+                } catch (PublicKeyValidationException publicKeyValidationException) {
+                    LOGGER.error(publicKeyValidationException.getMessage(), publicKeyValidationException.getCause());
+                    if (this.connection.isMemoryConnection()) break block11;
+                    this.disconnect(publicKeyValidationException.getComponent());
+                    return;
+                }
             }
         }
         Component component = this.server.getPlayerList().canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile);
@@ -128,7 +127,7 @@ implements ServerLoginPacketListener {
                 this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
             }
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
-            ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(uUID);
+            ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
             try {
                 ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, profilePublicKey);
                 if (serverPlayer != null) {
@@ -239,7 +238,7 @@ implements ServerLoginPacketListener {
                         ServerLoginPacketListenerImpl.this.state = State.READY_TO_ACCEPT;
                     } else if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
                         LOGGER.warn("Failed to verify username but will let them in anyway!");
-                        ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.createFakeProfile(gameProfile);
+                        ServerLoginPacketListenerImpl.this.gameProfile = gameProfile;
                         ServerLoginPacketListenerImpl.this.state = State.READY_TO_ACCEPT;
                     } else {
                         ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
@@ -248,7 +247,7 @@ implements ServerLoginPacketListener {
                 } catch (AuthenticationUnavailableException authenticationUnavailableException) {
                     if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
                         LOGGER.warn("Authentication servers are down but will let them in anyway!");
-                        ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.createFakeProfile(gameProfile);
+                        ServerLoginPacketListenerImpl.this.gameProfile = gameProfile;
                         ServerLoginPacketListenerImpl.this.state = State.READY_TO_ACCEPT;
                     }
                     ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.authservers_down"));

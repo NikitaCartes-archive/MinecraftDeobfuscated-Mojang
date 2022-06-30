@@ -33,12 +33,12 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
         return new ChatTypeDecoration(string, List.of(Parameter.TEAM_NAME, Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
     }
 
-    public Component decorate(Component component, @Nullable ChatSender chatSender) {
+    public Component decorate(Component component, ChatSender chatSender) {
         Object[] objects = this.resolveParameters(component, chatSender);
         return Component.translatable(this.translationKey, objects).withStyle(this.style);
     }
 
-    private Component[] resolveParameters(Component component, @Nullable ChatSender chatSender) {
+    private Component[] resolveParameters(Component component, ChatSender chatSender) {
         Component[] components = new Component[this.parameters.size()];
         for (int i = 0; i < components.length; ++i) {
             Parameter parameter = this.parameters.get(i);
@@ -49,8 +49,8 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
 
     public static enum Parameter implements StringRepresentable
     {
-        SENDER("sender", (component, chatSender) -> chatSender != null ? chatSender.name() : null),
-        TEAM_NAME("team_name", (component, chatSender) -> chatSender != null ? chatSender.teamName() : null),
+        SENDER("sender", (component, chatSender) -> chatSender.name()),
+        TEAM_NAME("team_name", (component, chatSender) -> chatSender.teamName()),
         CONTENT("content", (component, chatSender) -> component);
 
         public static final Codec<Parameter> CODEC;
@@ -62,7 +62,7 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
             this.selector = selector;
         }
 
-        public Component select(Component component, @Nullable ChatSender chatSender) {
+        public Component select(Component component, ChatSender chatSender) {
             Component component2 = this.selector.select(component, chatSender);
             return Objects.requireNonNullElse(component2, CommonComponents.EMPTY);
         }
@@ -78,7 +78,7 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
 
         public static interface Selector {
             @Nullable
-            public Component select(Component var1, @Nullable ChatSender var2);
+            public Component select(Component var1, ChatSender var2);
         }
     }
 }

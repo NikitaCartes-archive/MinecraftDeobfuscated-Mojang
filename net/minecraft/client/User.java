@@ -58,13 +58,17 @@ public class User {
         return this.xuid;
     }
 
-    public GameProfile getGameProfile() {
+    @Nullable
+    public UUID getProfileId() {
         try {
-            UUID uUID = UUIDTypeAdapter.fromString(this.getUuid());
-            return new GameProfile(uUID, this.getName());
+            return UUIDTypeAdapter.fromString(this.getUuid());
         } catch (IllegalArgumentException illegalArgumentException) {
-            return new GameProfile(null, this.getName());
+            return null;
         }
+    }
+
+    public GameProfile getGameProfile() {
+        return new GameProfile(this.getProfileId(), this.getName());
     }
 
     public Type getType() {

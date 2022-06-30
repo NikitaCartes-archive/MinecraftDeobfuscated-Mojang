@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.protocol.game;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,7 +14,6 @@ import net.minecraft.util.StringUtil;
 
 public class ServerboundChatPacket
 implements Packet<ServerGamePacketListener> {
-    public static final Duration MESSAGE_EXPIRES_AFTER = Duration.ofMinutes(5L);
     private final String message;
     private final Instant timeStamp;
     private final Crypt.SaltSignaturePair saltSignature;

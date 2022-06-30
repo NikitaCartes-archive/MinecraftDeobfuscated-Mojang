@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -77,6 +78,7 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.ClientTelemetryManager;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Game;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.HotbarManager;
 import net.minecraft.client.KeyMapping;
@@ -93,7 +95,6 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
@@ -130,6 +131,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
@@ -401,6 +403,8 @@ implements WindowEventHandler {
     @Nullable
     private TimerQuery.FrameProfile currentFrameProfile;
     private final Realms32BitWarningStatus realms32BitWarningStatus;
+    private final GameNarrator narrator;
+    private final ChatListener chatListener;
     private ReportingContext reportingContext;
     private String debugPath = "root";
 
@@ -550,6 +554,8 @@ implements WindowEventHandler {
         this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
         this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
         this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
+        this.narrator = new GameNarrator(this);
+        this.chatListener = new ChatListener(this);
         this.reportingContext = ReportingContext.create(ReportEnvironment.local(), this.userApiService);
         LoadingOverlay.registerTextures(this);
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
@@ -836,7 +842,7 @@ implements WindowEventHandler {
             } else {
                 Component component = chatStatus.getMessage();
                 this.gui.setOverlayMessage(component, false);
-                NarratorChatListener.INSTANCE.sayNow(component);
+                this.narrator.sayNow(component);
                 this.gui.setChatDisabledByPlayerShown(chatStatus == ChatStatus.DISABLED_BY_PROFILE);
             }
         } else {
@@ -882,7 +888,7 @@ implements WindowEventHandler {
         try {
             LOGGER.info("Stopping!");
             try {
-                NarratorChatListener.INSTANCE.destroy();
+                this.narrator.destroy();
             } catch (Throwable throwable) {
                 // empty catch block
             }
@@ -1618,7 +1624,7 @@ implements WindowEventHandler {
         while (this.options.keySocialInteractions.consumeClick()) {
             if (!this.isMultiplayerServer()) {
                 this.player.displayClientMessage(SOCIAL_INTERACTIONS_NOT_AVAILABLE, true);
-                NarratorChatListener.INSTANCE.sayNow(SOCIAL_INTERACTIONS_NOT_AVAILABLE);
+                this.narrator.sayNow(SOCIAL_INTERACTIONS_NOT_AVAILABLE);
                 continue;
             }
             if (this.socialInteractionsToast != null) {
@@ -1742,7 +1748,7 @@ implements WindowEventHandler {
         Connection connection = Connection.connectToLocalServer(socketAddress);
         connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, component -> {}));
         connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
-        connection.send(new ServerboundHelloPacket(this.getUser().getName(), this.profileKeyPairManager.profilePublicKeyData()));
+        connection.send(new ServerboundHelloPacket(this.getUser().getName(), this.profileKeyPairManager.profilePublicKeyData(), Optional.ofNullable(this.getUser().getProfileId())));
         this.pendingConnection = connection;
     }
 
@@ -1778,7 +1784,7 @@ implements WindowEventHandler {
         this.singleplayerServer = null;
         this.gameRenderer.resetData();
         this.gameMode = null;
-        NarratorChatListener.INSTANCE.clear();
+        this.narrator.clear();
         this.updateScreenAndTick(screen);
         if (this.level != null) {
             if (integratedServer != null) {
@@ -2459,6 +2465,14 @@ implements WindowEventHandler {
 
     public SignatureValidator getServiceSignatureValidator() {
         return this.serviceSignatureValidator;
+    }
+
+    public GameNarrator getNarrator() {
+        return this.narrator;
+    }
+
+    public ChatListener getChatListener() {
+        return this.chatListener;
     }
 
     public ReportingContext getReportingContext() {

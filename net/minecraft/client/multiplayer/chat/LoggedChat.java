@@ -13,13 +13,14 @@ import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 
 @Environment(value=EnvType.CLIENT)
 public interface LoggedChat {
-    public static LoggedChat player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage) {
-        return new Player(gameProfile, component, playerChatMessage);
+    public static LoggedChat player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage, ChatTrustLevel chatTrustLevel) {
+        return new Player(gameProfile, component, playerChatMessage, chatTrustLevel);
     }
 
     public static LoggedChat system(Component component, Instant instant) {
@@ -35,7 +36,7 @@ public interface LoggedChat {
     public boolean canReport(UUID var1);
 
     @Environment(value=EnvType.CLIENT)
-    public record Player(GameProfile profile, Component displayName, PlayerChatMessage message) implements LoggedChat
+    public record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChat
     {
         private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 

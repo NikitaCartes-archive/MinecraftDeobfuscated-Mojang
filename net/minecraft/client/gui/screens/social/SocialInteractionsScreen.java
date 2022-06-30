@@ -14,8 +14,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -180,13 +180,14 @@ extends Screen {
                 this.socialInteractionsPlayerList.updatePlayerList(set2, this.socialInteractionsPlayerList.getScrollAmount());
             }
         }
+        GameNarrator gameNarrator = this.minecraft.getNarrator();
         if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
-            NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH);
+            gameNarrator.sayNow(EMPTY_SEARCH);
         } else if (bl) {
             if (page == Page.HIDDEN) {
-                NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN);
+                gameNarrator.sayNow(EMPTY_HIDDEN);
             } else if (page == Page.BLOCKED) {
-                NarratorChatListener.INSTANCE.sayNow(EMPTY_BLOCKED);
+                gameNarrator.sayNow(EMPTY_BLOCKED);
             }
         }
     }

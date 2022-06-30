@@ -12,8 +12,8 @@ import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,7 +48,7 @@ extends Screen {
     private final List<GameModeSlot> slots = Lists.newArrayList();
 
     public GameModeSwitcherScreen() {
-        super(NarratorChatListener.NO_TITLE);
+        super(GameNarrator.NO_TITLE);
         this.previousHovered = GameModeIcon.getFromGameType(this.getDefaultSelected());
     }
 

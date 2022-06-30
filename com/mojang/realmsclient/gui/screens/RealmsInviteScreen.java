@@ -11,7 +11,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsPlayerScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -35,7 +35,7 @@ extends RealmsScreen {
     private Component errorMsg;
 
     public RealmsInviteScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, Screen screen, RealmsServer realmsServer) {
-        super(NarratorChatListener.NO_TITLE);
+        super(GameNarrator.NO_TITLE);
         this.configureScreen = realmsConfigureWorldScreen;
         this.lastScreen = screen;
         this.serverData = realmsServer;
@@ -83,7 +83,7 @@ extends RealmsScreen {
 
     private void showError(Component component) {
         this.errorMsg = component;
-        NarratorChatListener.INSTANCE.sayNow(component);
+        this.minecraft.getNarrator().sayNow(component);
     }
 
     @Override

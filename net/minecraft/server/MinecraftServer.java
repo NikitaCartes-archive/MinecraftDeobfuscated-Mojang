@@ -1580,7 +1580,7 @@ AutoCloseable {
     }
 
     public void logChatMessage(ChatSender chatSender, Component component, ResourceKey<ChatType> resourceKey) {
-        ChatTypeDecoration chatTypeDecoration = this.registryAccess().registry(Registry.CHAT_TYPE_REGISTRY).map(registry -> (ChatType)registry.get(resourceKey)).flatMap(ChatType::chat).flatMap(ChatType.TextDisplay::decoration).orElse(ChatType.DEFAULT_CHAT_DECORATION);
+        ChatTypeDecoration chatTypeDecoration = this.registryAccess().registry(Registry.CHAT_TYPE_REGISTRY).map(registry -> (ChatType)registry.get(resourceKey)).map(ChatType::chat).orElse(ChatType.DEFAULT_CHAT_DECORATION);
         LOGGER.info(chatTypeDecoration.decorate(component, chatSender).getString());
     }
 

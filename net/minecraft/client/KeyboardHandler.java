@@ -20,7 +20,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.Screenshot;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -330,7 +329,7 @@ public class KeyboardHandler {
                 return;
             }
         }
-        if (NarratorChatListener.INSTANCE.isActive()) {
+        if (this.minecraft.getNarrator().isActive()) {
             boolean bl;
             boolean bl3 = bl = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
             if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {

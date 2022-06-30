@@ -13,8 +13,8 @@ import com.mojang.realmsclient.gui.task.DataFetcher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -35,7 +35,7 @@ extends RealmsScreen {
     private static boolean hasUnreadNews;
 
     public RealmsNotificationsScreen() {
-        super(NarratorChatListener.NO_TITLE);
+        super(GameNarrator.NO_TITLE);
     }
 
     @Override

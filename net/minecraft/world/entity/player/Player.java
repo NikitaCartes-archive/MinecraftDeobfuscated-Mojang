@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -1400,6 +1401,11 @@ extends LivingEntity {
             this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
         }
         return super.causeFallDamage(f, g, damageSource);
+    }
+
+    @Override
+    public ChatSender asChatSender() {
+        return new ChatSender(this.getGameProfile().getId(), this.getDisplayName());
     }
 
     public boolean tryToStartFallFlying() {

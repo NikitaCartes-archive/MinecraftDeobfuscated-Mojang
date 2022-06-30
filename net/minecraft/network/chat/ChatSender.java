@@ -9,7 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-public record ChatSender(UUID uuid, Component name, @Nullable Component teamName) {
+public record ChatSender(UUID profileId, Component name, @Nullable Component teamName) {
     public ChatSender(UUID uUID, Component component) {
         this(uUID, component, null);
     }
@@ -23,13 +23,17 @@ public record ChatSender(UUID uuid, Component name, @Nullable Component teamName
     }
 
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeUUID(this.uuid);
+        friendlyByteBuf.writeUUID(this.profileId);
         friendlyByteBuf.writeComponent(this.name);
         friendlyByteBuf.writeNullable(this.teamName, FriendlyByteBuf::writeComponent);
     }
 
     public ChatSender withTeamName(Component component) {
-        return new ChatSender(this.uuid, this.name, component);
+        return new ChatSender(this.profileId, this.name, component);
+    }
+
+    public boolean isPlayer() {
+        return !this.profileId.equals(Util.NIL_UUID);
     }
 
     @Nullable
