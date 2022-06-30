@@ -330,8 +330,8 @@ public class DebugScreenOverlay extends GuiComponent {
 					);
 				}
 
-				if (levelChunk2 != null) {
-					list.add(String.format("Blending: %s", levelChunk2.isOldNoiseGeneration() ? "Old" : "New"));
+				if (levelChunk2 != null && levelChunk2.isOldNoiseGeneration()) {
+					list.add("Blending: Old");
 				}
 			}
 

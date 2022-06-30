@@ -6,6 +6,7 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.OptionalDynamic;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,13 +27,16 @@ public class BlendingDataFix extends DataFix {
 	@Override
 	protected TypeRewriteRule makeRule() {
 		Type<?> type = this.getOutputSchema().getType(References.CHUNK);
-		return this.fixTypeEverywhereTyped(this.name, type, typed -> typed.update(DSL.remainderFinder(), BlendingDataFix::updateChunkTag));
+		return this.fixTypeEverywhereTyped(
+			this.name, type, typed -> typed.update(DSL.remainderFinder(), dynamic -> updateChunkTag(dynamic, dynamic.get("__context")))
+		);
 	}
 
-	private static Dynamic<?> updateChunkTag(Dynamic<?> dynamic) {
+	private static Dynamic<?> updateChunkTag(Dynamic<?> dynamic, OptionalDynamic<?> optionalDynamic) {
 		dynamic = dynamic.remove("blending_data");
+		boolean bl = "minecraft:overworld".equals(optionalDynamic.get("dimension").asString().result().orElse(""));
 		Optional<? extends Dynamic<?>> optional = dynamic.get("Status").result();
-		if (optional.isPresent()) {
+		if (bl && optional.isPresent()) {
 			String string = NamespacedSchema.ensureNamespaced(((Dynamic)optional.get()).asString("empty"));
 			Optional<? extends Dynamic<?>> optional2 = dynamic.get("below_zero_retrogen").result();
 			if (!STATUSES_TO_SKIP_BLENDING.contains(string)) {

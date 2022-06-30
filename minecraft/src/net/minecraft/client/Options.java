@@ -45,7 +45,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -635,12 +634,12 @@ public class Options {
 	private final OptionInstance<NarratorStatus> narrator = new OptionInstance<>(
 		"options.narrator",
 		OptionInstance.noTooltip(),
-		(component, narratorStatus) -> (Component)(NarratorChatListener.INSTANCE.isActive()
+		(component, narratorStatus) -> (Component)(this.minecraft.getNarrator().isActive()
 				? narratorStatus.getName()
 				: Component.translatable("options.narrator.notavailable")),
 		new OptionInstance.Enum<>(Arrays.asList(NarratorStatus.values()), Codec.INT.xmap(NarratorStatus::byId, NarratorStatus::getId)),
 		NarratorStatus.OFF,
-		narratorStatus -> NarratorChatListener.INSTANCE.updateNarratorStatus(narratorStatus)
+		narratorStatus -> this.minecraft.getNarrator().updateNarratorStatus(narratorStatus)
 	);
 	public String languageCode = "en_us";
 	private final OptionInstance<String> soundDevice = new OptionInstance<>(

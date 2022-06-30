@@ -1,14 +1,13 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -16,28 +15,53 @@ public class GenericWaitingScreen extends Screen {
 	private static final int TITLE_Y = 80;
 	private static final int MESSAGE_Y = 120;
 	private static final int MESSAGE_MAX_WIDTH = 360;
-	private Component buttonLabel;
-	private Runnable buttonCallback;
+	@Nullable
+	private final Component messageText;
+	private final Component buttonLabel;
+	private final Runnable buttonCallback;
 	@Nullable
 	private MultiLineLabel message;
 	private Button button;
-	private long disableButtonUntil;
+	private int disableButtonTicks;
 
-	public GenericWaitingScreen(Component component, Component component2, Runnable runnable) {
+	public static GenericWaitingScreen createWaiting(Component component, Component component2, Runnable runnable) {
+		return new GenericWaitingScreen(component, null, component2, runnable, 0);
+	}
+
+	public static GenericWaitingScreen createCompleted(Component component, Component component2, Component component3, Runnable runnable) {
+		return new GenericWaitingScreen(component, component2, component3, runnable, 20);
+	}
+
+	protected GenericWaitingScreen(Component component, @Nullable Component component2, Component component3, Runnable runnable, int i) {
 		super(component);
-		this.buttonLabel = component2;
+		this.messageText = component2;
+		this.buttonLabel = component3;
 		this.buttonCallback = runnable;
+		this.disableButtonTicks = i;
 	}
 
 	@Override
 	protected void init() {
 		super.init();
-		this.initButton();
+		if (this.messageText != null) {
+			this.message = MultiLineLabel.create(this.font, this.messageText, 360);
+		}
+
+		int i = 150;
+		int j = 20;
+		int k = this.message != null ? this.message.getLineCount() : 1;
+		int l = Math.max(k, 5) * 9;
+		int m = Math.min(120 + l, this.height - 40);
+		this.button = this.addRenderableWidget(new Button((this.width - 150) / 2, m, 150, 20, this.buttonLabel, button -> this.onClose()));
 	}
 
 	@Override
 	public void tick() {
-		this.button.active = Util.getMillis() > this.disableButtonUntil;
+		if (this.disableButtonTicks > 0) {
+			this.disableButtonTicks--;
+		}
+
+		this.button.active = this.disableButtonTicks == 0;
 	}
 
 	@Override
@@ -64,31 +88,8 @@ public class GenericWaitingScreen extends Screen {
 		this.buttonCallback.run();
 	}
 
-	public void update(Component component, Runnable runnable) {
-		this.update(null, component, runnable);
-	}
-
-	public void update(@Nullable Component component, Component component2, Runnable runnable) {
-		this.buttonLabel = component2;
-		this.buttonCallback = runnable;
-		if (component != null) {
-			this.message = MultiLineLabel.create(this.font, component, 360);
-			NarratorChatListener.INSTANCE.sayNow(component);
-		} else {
-			this.message = null;
-		}
-
-		this.initButton();
-		this.disableButtonUntil = Util.getMillis() + TimeUnit.SECONDS.toMillis(1L);
-	}
-
-	private void initButton() {
-		this.removeWidget(this.button);
-		int i = 150;
-		int j = 20;
-		int k = this.message != null ? this.message.getLineCount() : 1;
-		int l = Math.max(k, 5) * 9;
-		int m = Math.min(120 + l, this.height - 40);
-		this.button = this.addRenderableWidget(new Button((this.width - 150) / 2, m, 150, 20, this.buttonLabel, button -> this.onClose()));
+	@Override
+	public Component getNarrationMessage() {
+		return CommonComponents.joinForNarration(this.title, this.messageText != null ? this.messageText : CommonComponents.EMPTY);
 	}
 }

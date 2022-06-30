@@ -9,7 +9,7 @@ import java.time.Duration;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -55,7 +55,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	};
 
 	public RealmsLongRunningMcoTaskScreen(Screen screen, LongRunningTask longRunningTask) {
-		super(NarratorChatListener.NO_TITLE);
+		super(GameNarrator.NO_TITLE);
 		this.lastScreen = screen;
 		this.task = longRunningTask;
 		longRunningTask.setScreen(this);
@@ -67,7 +67,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void tick() {
 		super.tick();
-		REPEATED_NARRATOR.narrate(this.title);
+		REPEATED_NARRATOR.narrate(this.minecraft.getNarrator(), this.title);
 		this.animTicks++;
 		this.task.tick();
 	}
@@ -113,7 +113,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void error(Component component) {
 		this.errorMessage = component;
-		NarratorChatListener.INSTANCE.sayNow(component);
+		this.minecraft.getNarrator().sayNow(component);
 		this.minecraft
 			.execute(
 				() -> {

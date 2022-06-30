@@ -5,6 +5,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +45,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		MessageSignature messageSignature = commandSigningContext.getArgumentSignature(string);
 		boolean bl = commandSigningContext.signedArgumentPreview(string);
 		ChatSender chatSender = commandContext.getSource().asChatSender();
-		return messageSignature.isValid(chatSender.uuid())
+		return messageSignature.isValid(chatSender.profileId())
 			? new MessageArgument.ChatMessage(message.text, component, messageSignature, bl)
 			: new MessageArgument.ChatMessage(message.text, component, MessageSignature.unsigned(), false);
 	}
@@ -110,6 +111,15 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 			if (!playerChatMessage.verify(commandSourceStack)) {
 				MessageArgument.LOGGER
 					.warn("{} sent message with invalid signature: '{}'", commandSourceStack.getDisplayName().getString(), playerChatMessage.signedContent().getString());
+			}
+
+			if (playerChatMessage.hasExpiredServer(Instant.now())) {
+				MessageArgument.LOGGER
+					.warn(
+						"{} sent expired chat: '{}'. Is the client/server system time unsynchronized?",
+						commandSourceStack.getDisplayName().getString(),
+						playerChatMessage.signedContent().getString()
+					);
 			}
 		}
 

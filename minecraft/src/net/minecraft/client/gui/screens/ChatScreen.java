@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.ClientChatPreview;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -37,6 +38,7 @@ public class ChatScreen extends Screen {
 	private static final Component PREVIEW_WARNING_TITLE = Component.translatable("chatPreview.warning.toast.title");
 	private static final Component PREVIEW_WARNING_TOAST = Component.translatable("chatPreview.warning.toast");
 	private static final Component PREVIEW_HINT = Component.translatable("chat.preview").withStyle(ChatFormatting.DARK_GRAY);
+	private static final int TOOLTIP_MAX_WIDTH = 260;
 	private String historyBuffer = "";
 	private int historyPos = -1;
 	protected EditBox input;
@@ -261,6 +263,11 @@ public class ChatScreen extends Screen {
 		Style style = this.getComponentStyleAt((double)i, (double)j);
 		if (style != null && style.getHoverEvent() != null) {
 			this.renderComponentHoverEffect(poseStack, style, i, j);
+		} else {
+			GuiMessageTag guiMessageTag = this.minecraft.gui.getChat().getMessageTagAt((double)i, (double)j);
+			if (guiMessageTag != null && guiMessageTag.text() != null) {
+				this.renderTooltip(poseStack, this.font.split(guiMessageTag.text(), 260), i, j);
+			}
 		}
 
 		super.render(poseStack, i, j, f);
@@ -380,9 +387,9 @@ public class ChatScreen extends Screen {
 
 			Component component = this.chatPreview.pull(string);
 			if (string.startsWith("/")) {
-				this.minecraft.player.command(string.substring(1), component);
+				this.minecraft.player.commandSigned(string.substring(1), component);
 			} else {
-				this.minecraft.player.chat(string, component);
+				this.minecraft.player.chatSigned(string, component);
 			}
 		}
 	}

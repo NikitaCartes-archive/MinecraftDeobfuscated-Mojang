@@ -11,6 +11,7 @@ import net.minecraft.client.multiplayer.chat.report.ReportReason;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,23 +33,29 @@ public class BanNoticeScreen {
 
 	private static Component getBannedScreenText(BanDetails banDetails) {
 		return Component.translatable(
-			"gui.banned.description",
-			getBanReasonText(banDetails),
-			getBanStatusText(banDetails),
-			ConfirmLinkScreen.confirmMessage(true, "https://aka.ms/mcjavamoderation")
+			"gui.banned.description", getBanReasonText(banDetails), getBanStatusText(banDetails), Component.literal("https://aka.ms/mcjavamoderation")
 		);
 	}
 
 	private static Component getBanReasonText(BanDetails banDetails) {
-		Component component = null;
 		String string = banDetails.reason();
+		String string2 = banDetails.reasonMessage();
 		if (StringUtils.isNumeric(string)) {
-			component = ReportReason.getTranslationById(Integer.parseInt(string));
-		}
+			int i = Integer.parseInt(string);
+			Component component = ReportReason.getTranslationById(i);
+			MutableComponent var5;
+			if (component != null) {
+				var5 = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withBold(true));
+			} else if (string2 != null) {
+				var5 = Component.translatable("gui.banned.description.reason_id_message", i, string2).withStyle(ChatFormatting.BOLD);
+			} else {
+				var5 = Component.translatable("gui.banned.description.reason_id", i).withStyle(ChatFormatting.BOLD);
+			}
 
-		return component != null
-			? Component.translatable("gui.banned.description.reason", ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withBold(true)))
-			: Component.translatable("gui.banned.description.unknownreason");
+			return Component.translatable("gui.banned.description.reason", var5);
+		} else {
+			return Component.translatable("gui.banned.description.unknownreason");
+		}
 	}
 
 	private static Component getBanStatusText(BanDetails banDetails) {

@@ -215,7 +215,7 @@ public abstract class PlayerList {
 			mutableComponent = Component.translatable("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
 		}
 
-		this.broadcastSystemMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM);
+		this.broadcastSystemMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), false);
 		serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
 		this.players.add(serverPlayer);
 		this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
@@ -579,7 +579,7 @@ public abstract class PlayerList {
 	public void broadcastSystemToAllExceptTeam(Player player, Component component) {
 		Team team = player.getTeam();
 		if (team == null) {
-			this.broadcastSystemMessage(component, ChatType.SYSTEM);
+			this.broadcastSystemMessage(component, false);
 		} else {
 			for (int i = 0; i < this.players.size(); i++) {
 				ServerPlayer serverPlayer = (ServerPlayer)this.players.get(i);
@@ -775,17 +775,17 @@ public abstract class PlayerList {
 		}
 	}
 
-	public void broadcastSystemMessage(Component component, ResourceKey<ChatType> resourceKey) {
-		this.broadcastSystemMessage(component, serverPlayer -> component, resourceKey);
+	public void broadcastSystemMessage(Component component, boolean bl) {
+		this.broadcastSystemMessage(component, serverPlayer -> component, bl);
 	}
 
-	public void broadcastSystemMessage(Component component, Function<ServerPlayer, Component> function, ResourceKey<ChatType> resourceKey) {
+	public void broadcastSystemMessage(Component component, Function<ServerPlayer, Component> function, boolean bl) {
 		this.server.sendSystemMessage(component);
 
 		for (ServerPlayer serverPlayer : this.players) {
 			Component component2 = (Component)function.apply(serverPlayer);
 			if (component2 != null) {
-				serverPlayer.sendSystemMessage(component2, resourceKey);
+				serverPlayer.sendSystemMessage(component2, bl);
 			}
 		}
 	}

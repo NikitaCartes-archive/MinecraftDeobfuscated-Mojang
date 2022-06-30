@@ -1,20 +1,24 @@
 package com.mojang.realmsclient.util;
 
 import com.google.gson.annotations.SerializedName;
+import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.GuardedSerializer;
 import com.mojang.realmsclient.dto.ReflectionBasedSerialization;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsPersistence {
 	private static final String FILE_NAME = "realms_persistence.json";
 	private static final GuardedSerializer GSON = new GuardedSerializer();
+	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public RealmsPersistence.RealmsPersistenceData read() {
 		return readFile();
@@ -30,10 +34,15 @@ public class RealmsPersistence {
 		try {
 			String string = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 			RealmsPersistence.RealmsPersistenceData realmsPersistenceData = GSON.fromJson(string, RealmsPersistence.RealmsPersistenceData.class);
-			return realmsPersistenceData != null ? realmsPersistenceData : new RealmsPersistence.RealmsPersistenceData();
-		} catch (IOException var3) {
-			return new RealmsPersistence.RealmsPersistenceData();
+			if (realmsPersistenceData != null) {
+				return realmsPersistenceData;
+			}
+		} catch (FileNotFoundException var3) {
+		} catch (Exception var4) {
+			LOGGER.warn("Failed to read Realms storage {}", file, var4);
 		}
+
+		return new RealmsPersistence.RealmsPersistenceData();
 	}
 
 	public static void writeFile(RealmsPersistence.RealmsPersistenceData realmsPersistenceData) {

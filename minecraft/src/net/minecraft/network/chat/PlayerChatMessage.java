@@ -1,5 +1,7 @@
 package net.minecraft.network.chat;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -8,6 +10,9 @@ import net.minecraft.server.network.FilteredText;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 
 public record PlayerChatMessage(Component signedContent, MessageSignature signature, Optional<Component> unsignedContent) {
+	public static final Duration MESSAGE_EXPIRES_AFTER_SERVER = Duration.ofMinutes(5L);
+	public static final Duration MESSAGE_EXPIRES_AFTER_CLIENT = MESSAGE_EXPIRES_AFTER_SERVER.plus(Duration.ofMinutes(2L));
+
 	public static PlayerChatMessage signed(Component component, MessageSignature messageSignature) {
 		return new PlayerChatMessage(component, messageSignature, Optional.empty());
 	}
@@ -66,5 +71,13 @@ public record PlayerChatMessage(Component signedContent, MessageSignature signat
 
 	public Component serverContent() {
 		return (Component)this.unsignedContent.orElse(this.signedContent);
+	}
+
+	public boolean hasExpiredServer(Instant instant) {
+		return instant.isAfter(this.signature.timeStamp().plus(MESSAGE_EXPIRES_AFTER_SERVER));
+	}
+
+	public boolean hasExpiredClient(Instant instant) {
+		return instant.isAfter(this.signature.timeStamp().plus(MESSAGE_EXPIRES_AFTER_CLIENT));
 	}
 }

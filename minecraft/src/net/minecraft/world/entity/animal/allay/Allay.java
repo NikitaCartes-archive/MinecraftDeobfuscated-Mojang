@@ -53,6 +53,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -369,7 +370,10 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
 		ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-		return !itemStack2.isEmpty() && itemStack2.sameItemStackIgnoreDurability(itemStack) && this.inventory.canAddItem(itemStack);
+		return !itemStack2.isEmpty()
+			&& itemStack2.sameItemStackIgnoreDurability(itemStack)
+			&& this.inventory.canAddItem(itemStack)
+			&& this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 	}
 
 	@Override

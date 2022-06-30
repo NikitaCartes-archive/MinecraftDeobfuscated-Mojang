@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -47,7 +47,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	private static final String PURCHASE_LINK = "https://aka.ms/ExtendJavaRealms";
 
 	public RealmsSubscriptionInfoScreen(Screen screen, RealmsServer realmsServer, Screen screen2) {
-		super(NarratorChatListener.NO_TITLE);
+		super(GameNarrator.NO_TITLE);
 		this.lastScreen = screen;
 		this.serverData = realmsServer;
 		this.mainScreen = screen2;

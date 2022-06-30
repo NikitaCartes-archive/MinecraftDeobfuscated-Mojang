@@ -1,7 +1,9 @@
 package net.minecraft.client.gui.screens.social;
 
 import com.google.common.base.Strings;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
@@ -43,6 +45,17 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 	}
 
 	public void updatePlayerList(Collection<UUID> collection, double d) {
+		this.addOnlinePlayers(collection);
+		this.updateFiltersAndScroll(d);
+	}
+
+	public void updatePlayerListWithLog(Collection<UUID> collection, double d) {
+		this.addOnlinePlayers(collection);
+		this.addPlayersFromLog(collection);
+		this.updateFiltersAndScroll(d);
+	}
+
+	private void addOnlinePlayers(Collection<UUID> collection) {
 		this.players.clear();
 
 		for (UUID uUID : collection) {
@@ -57,8 +70,27 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 			}
 		}
 
-		this.updateFilteredPlayers();
 		this.players.sort((playerEntry, playerEntry2) -> playerEntry.getPlayerName().compareToIgnoreCase(playerEntry2.getPlayerName()));
+	}
+
+	private void addPlayersFromLog(Collection<UUID> collection) {
+		for (GameProfile gameProfile : this.minecraft.getReportingContext().chatLog().selectAllDescending().distinctGameProfiles()) {
+			if (!collection.contains(gameProfile.getId())) {
+				PlayerEntry playerEntry = new PlayerEntry(
+					this.minecraft,
+					this.socialInteractionsScreen,
+					gameProfile.getId(),
+					gameProfile.getName(),
+					Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile))
+				);
+				playerEntry.setRemoved(true);
+				this.players.add(playerEntry);
+			}
+		}
+	}
+
+	private void updateFiltersAndScroll(double d) {
+		this.updateFilteredPlayers();
 		this.replaceEntries(this.players);
 		this.setScrollAmount(d);
 	}

@@ -35,7 +35,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.commands.Commands;
@@ -564,7 +563,7 @@ public class CommandSuggestions {
 			CommandSuggestions.this.input
 				.setSuggestion(CommandSuggestions.calculateSuggestionSuffix(CommandSuggestions.this.input.getValue(), suggestion.apply(this.originalContents)));
 			if (this.lastNarratedEntry != this.current) {
-				NarratorChatListener.INSTANCE.sayNow(this.getNarrationMessage());
+				CommandSuggestions.this.minecraft.getNarrator().sayNow(this.getNarrationMessage());
 			}
 		}
 

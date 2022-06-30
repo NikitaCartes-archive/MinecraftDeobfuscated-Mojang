@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.logging.LogUtils;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +39,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
@@ -57,7 +56,6 @@ import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -305,20 +303,20 @@ public class LocalPlayer extends AbstractClientPlayer {
 		return !itemStack.isEmpty();
 	}
 
-	public void chat(String string) {
-		this.chat(string, null);
+	public void chatSigned(String string) {
+		this.chatSigned(string, null);
 	}
 
-	public void chat(String string, @Nullable Component component) {
+	public void chatSigned(String string, @Nullable Component component) {
 		MessageSigner messageSigner = MessageSigner.create(this.getUUID());
 		this.sendChat(messageSigner, string, component);
 	}
 
-	public void command(String string) {
-		this.command(string, null);
+	public void commandUnsigned(String string) {
+		this.connection.send(new ServerboundChatCommandPacket(string, Instant.now(), ArgumentSignatures.empty(), false));
 	}
 
-	public void command(String string, @Nullable Component component) {
+	public void commandSigned(String string, @Nullable Component component) {
 		MessageSigner messageSigner = MessageSigner.create(this.getUUID());
 		this.sendCommand(messageSigner, string, component);
 	}
@@ -498,12 +496,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public void displayClientMessage(Component component, boolean bl) {
-		ResourceKey<ChatType> resourceKey = bl ? ChatType.GAME_INFO : ChatType.SYSTEM;
-		this.level
-			.registryAccess()
-			.registry(Registry.CHAT_TYPE_REGISTRY)
-			.map(registry -> registry.get(resourceKey))
-			.ifPresent(chatType -> this.minecraft.gui.handleSystemChat(chatType, component));
+		this.minecraft.getChatListener().handleSystemMessage(component, bl);
 	}
 
 	private void moveTowardsClosestSpace(double d, double e) {

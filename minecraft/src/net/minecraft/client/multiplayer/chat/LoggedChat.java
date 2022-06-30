@@ -15,8 +15,8 @@ import net.minecraft.network.chat.PlayerChatMessage;
 
 @Environment(EnvType.CLIENT)
 public interface LoggedChat {
-	static LoggedChat player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage) {
-		return new LoggedChat.Player(gameProfile, component, playerChatMessage);
+	static LoggedChat player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage, ChatTrustLevel chatTrustLevel) {
+		return new LoggedChat.Player(gameProfile, component, playerChatMessage, chatTrustLevel);
 	}
 
 	static LoggedChat system(Component component, Instant instant) {
@@ -32,7 +32,7 @@ public interface LoggedChat {
 	boolean canReport(UUID uUID);
 
 	@Environment(EnvType.CLIENT)
-	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message) implements LoggedChat {
+	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChat {
 		private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
 		@Override

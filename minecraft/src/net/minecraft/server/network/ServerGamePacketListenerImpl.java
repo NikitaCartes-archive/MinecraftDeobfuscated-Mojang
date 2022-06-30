@@ -1080,14 +1080,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 						InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
 						if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
 							Component component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
-							this.player.sendSystemMessage(component, ChatType.GAME_INFO);
+							this.player.sendSystemMessage(component, true);
 						} else if (interactionResult.shouldSwing()) {
 							this.player.swing(interactionHand, true);
 						}
 					}
 				} else {
 					Component component2 = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
-					this.player.sendSystemMessage(component2, ChatType.GAME_INFO);
+					this.player.sendSystemMessage(component2, true);
 				}
 
 				this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
@@ -1156,7 +1156,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		this.server.invalidateStatus();
 		this.server
 			.getPlayerList()
-			.broadcastSystemMessage(Component.translatable("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM);
+			.broadcastSystemMessage(Component.translatable("multiplayer.player.left", this.player.getDisplayName()).withStyle(ChatFormatting.YELLOW), false);
 		this.player.disconnect();
 		this.server.getPlayerList().remove(this.player);
 		this.player.getTextFilter().leave();
@@ -1241,26 +1241,13 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			LOGGER.warn("{} sent out-of-order chat: '{}'", this.player.getName().getString(), string);
 			this.disconnect(Component.translatable("multiplayer.disconnect.out_of_order_chat"));
 			return false;
+		} else if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+			this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), false));
+			return false;
 		} else {
-			if (this.isChatExpired(instant)) {
-				LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", this.player.getName().getString(), string);
-			}
-
-			if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-				Registry<ChatType> registry = this.player.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-				int i = registry.getId(registry.get(ChatType.SYSTEM));
-				this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), i));
-				return false;
-			} else {
-				this.player.resetLastActionTime();
-				return true;
-			}
+			this.player.resetLastActionTime();
+			return true;
 		}
-	}
-
-	private boolean isChatExpired(Instant instant) {
-		Instant instant2 = instant.plus(ServerboundChatPacket.MESSAGE_EXPIRES_AFTER);
-		return Instant.now().isAfter(instant2);
 	}
 
 	private boolean updateChatOrder(Instant instant) {
@@ -1293,12 +1280,25 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	}
 
 	private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
-		if (!filteredText.raw().verify(this.player)) {
-			LOGGER.warn("{} sent message with invalid signature: '{}'", this.player.getName().getString(), filteredText.raw().signedContent().getString());
-		} else {
-			this.server.getPlayerList().broadcastChatMessage(filteredText, this.player, ChatType.CHAT);
-			this.detectRateSpam();
+		PlayerChatMessage playerChatMessage = filteredText.raw();
+		if (!playerChatMessage.verify(this.player)) {
+			LOGGER.warn("{} sent message with invalid signature: '{}'", this.player.getName().getString(), playerChatMessage.signedContent().getString());
+			if (this.server.enforceSecureProfile()) {
+				this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
+				return;
+			}
 		}
+
+		if (playerChatMessage.hasExpiredServer(Instant.now())) {
+			LOGGER.warn(
+				"{} sent expired chat: '{}'. Is the client/server system time unsynchronized?",
+				this.player.getName().getString(),
+				playerChatMessage.signedContent().getString()
+			);
+		}
+
+		this.server.getPlayerList().broadcastChatMessage(filteredText, this.player, ChatType.CHAT);
+		this.detectRateSpam();
 	}
 
 	private void detectRateSpam() {

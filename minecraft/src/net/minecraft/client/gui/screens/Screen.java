@@ -31,10 +31,10 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -340,13 +340,13 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 					URI uRIx = new File(clickEvent.getValue()).toURI();
 					this.openLink(uRIx);
 				} else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
-					this.insertText(clickEvent.getValue(), true);
+					this.insertText(SharedConstants.filterText(clickEvent.getValue()), true);
 				} else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-					String string2 = clickEvent.getValue();
+					String string2 = SharedConstants.filterText(clickEvent.getValue());
 					if (string2.startsWith("/")) {
-						this.minecraft.player.command(string2.substring(1));
+						this.minecraft.player.commandUnsigned(string2.substring(1));
 					} else {
-						this.minecraft.player.chat(string2);
+						LOGGER.warn("Failed to run command without '/' prefix from click event: '{}'", string2);
 					}
 				} else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
 					this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
@@ -530,7 +530,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	}
 
 	private boolean shouldRunNarration() {
-		return NarratorChatListener.INSTANCE.isActive();
+		return this.minecraft.getNarrator().isActive();
 	}
 
 	public void handleDelayedNarration() {
@@ -553,7 +553,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 		this.narrationState.update(this::updateNarrationState);
 		String string = this.narrationState.collectNarrationText(!bl);
 		if (!string.isEmpty()) {
-			NarratorChatListener.INSTANCE.sayNow(string);
+			this.minecraft.getNarrator().sayNow(string);
 		}
 	}
 

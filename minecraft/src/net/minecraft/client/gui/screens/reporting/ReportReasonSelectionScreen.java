@@ -5,13 +5,11 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
@@ -20,14 +18,11 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class ReportReasonSelectionScreen extends Screen {
-	private static final String STANDARDS_LINK = "https://aka.ms/mccommunitystandards";
+	private static final String ADDITIONAL_INFO_LINK = "https://aka.ms/aboutjavareporting";
 	private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
 	private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
-	private static final Component COMMUNITY_STANDARDS_LABEL = Component.translatable(
-			"gui.chatReport.standards", Component.translatable("gui.chatReport.standards_name").withStyle(ChatFormatting.UNDERLINE)
-		)
-		.withStyle(ChatFormatting.GRAY);
-	private static final int FOOTER_HEIGHT = 85;
+	private static final Component READ_INFO_LABEL = Component.translatable("gui.chatReport.read_info");
+	private static final int FOOTER_HEIGHT = 95;
 	private static final int BUTTON_WIDTH = 150;
 	private static final int BUTTON_HEIGHT = 20;
 	private static final int CONTENT_WIDTH = 320;
@@ -37,35 +32,33 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Nullable
 	private ReportReasonSelectionScreen.ReasonSelectionList reasonSelectionList;
 	@Nullable
-	private final ReportReason selectedReasonOnInit;
+	ReportReason currentlySelectedReason;
 	private final Consumer<ReportReason> onSelectedReason;
 
 	public ReportReasonSelectionScreen(@Nullable Screen screen, @Nullable ReportReason reportReason, Consumer<ReportReason> consumer) {
 		super(REASON_TITLE);
 		this.lastScreen = screen;
-		this.selectedReasonOnInit = reportReason;
+		this.currentlySelectedReason = reportReason;
 		this.onSelectedReason = consumer;
 	}
 
 	@Override
 	protected void init() {
-		int i = this.font.width(COMMUNITY_STANDARDS_LABEL);
-		int j = (this.width - i) / 2;
-		this.addRenderableWidget(
-			new PlainTextButton(j, 16 + 9 * 3 / 2, i, 9, COMMUNITY_STANDARDS_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-					if (bl) {
-						Util.getPlatform().openUri("https://aka.ms/mccommunitystandards");
-					}
-
-					this.minecraft.setScreen(this);
-				}, "https://aka.ms/mccommunitystandards", true)), this.font)
-		);
 		this.reasonSelectionList = new ReportReasonSelectionScreen.ReasonSelectionList(this.minecraft);
 		this.reasonSelectionList.setRenderBackground(false);
 		this.addWidget(this.reasonSelectionList);
-		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Util.mapNullable(this.selectedReasonOnInit, this.reasonSelectionList::findEntry);
+		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Util.mapNullable(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
 		this.reasonSelectionList.setSelected(entry);
-		this.addRenderableWidget(new Button(this.buttonLeft(), this.buttonTop(), 150, 20, CommonComponents.GUI_DONE, button -> {
+		int i = this.width / 2 - 150 - 5;
+		this.addRenderableWidget(new Button(i, this.buttonTop(), 150, 20, READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+				if (bl) {
+					Util.getPlatform().openUri("https://aka.ms/aboutjavareporting");
+				}
+
+				this.minecraft.setScreen(this);
+			}, "https://aka.ms/aboutjavareporting", true))));
+		int j = this.width / 2 + 5;
+		this.addRenderableWidget(new Button(j, this.buttonTop(), 150, 20, CommonComponents.GUI_DONE, button -> {
 			ReportReasonSelectionScreen.ReasonSelectionList.Entry entryx = this.reasonSelectionList.getSelected();
 			if (entryx != null) {
 				this.onSelectedReason.accept(entryx.getReason());
@@ -97,10 +90,6 @@ public class ReportReasonSelectionScreen extends Screen {
 		}
 	}
 
-	private int buttonLeft() {
-		return this.contentRight() - 150;
-	}
-
 	private int buttonTop() {
 		return this.height - 20 - 4;
 	}
@@ -114,7 +103,7 @@ public class ReportReasonSelectionScreen extends Screen {
 	}
 
 	private int descriptionTop() {
-		return this.height - 85 + 4;
+		return this.height - 95 + 4;
 	}
 
 	private int descriptionBottom() {
@@ -129,7 +118,7 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public class ReasonSelectionList extends ObjectSelectionList<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
 		public ReasonSelectionList(Minecraft minecraft) {
-			super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height, 40, ReportReasonSelectionScreen.this.height - 85, 18);
+			super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height, 40, ReportReasonSelectionScreen.this.height - 95, 18);
 
 			for (ReportReason reportReason : ReportReason.values()) {
 				this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
@@ -153,6 +142,16 @@ public class ReportReasonSelectionScreen extends Screen {
 		@Override
 		protected int getScrollbarPosition() {
 			return this.getRowRight() - 2;
+		}
+
+		@Override
+		protected boolean isFocused() {
+			return ReportReasonSelectionScreen.this.getFocused() == this;
+		}
+
+		public void setSelected(@Nullable ReportReasonSelectionScreen.ReasonSelectionList.Entry entry) {
+			super.setSelected(entry);
+			ReportReasonSelectionScreen.this.currentlySelectedReason = entry != null ? entry.getReason() : null;
 		}
 
 		@Environment(EnvType.CLIENT)

@@ -10,8 +10,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.Util;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ServerData;
@@ -40,7 +40,7 @@ public class ConnectScreen extends Screen {
 	private long lastNarration = -1L;
 
 	private ConnectScreen(Screen screen) {
-		super(NarratorChatListener.NO_TITLE);
+		super(GameNarrator.NO_TITLE);
 		this.parent = screen;
 	}
 
@@ -81,7 +81,12 @@ public class ConnectScreen extends Screen {
 					ConnectScreen.this.connection
 						.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
 					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getProfileKeyPairManager().profilePublicKeyData()));
+					ConnectScreen.this.connection
+						.send(
+							new ServerboundHelloPacket(
+								minecraft.getUser().getName(), minecraft.getProfileKeyPairManager().profilePublicKeyData(), Optional.ofNullable(minecraft.getUser().getProfileId())
+							)
+						);
 				} catch (Exception var6) {
 					if (ConnectScreen.this.aborted) {
 						return;
@@ -150,7 +155,7 @@ public class ConnectScreen extends Screen {
 		long l = Util.getMillis();
 		if (l - this.lastNarration > 2000L) {
 			this.lastNarration = l;
-			NarratorChatListener.INSTANCE.sayNow(Component.translatable("narrator.joining"));
+			this.minecraft.getNarrator().sayNow(Component.translatable("narrator.joining"));
 		}
 
 		drawCenteredString(poseStack, this.font, this.status, this.width / 2, this.height / 2 - 50, 16777215);

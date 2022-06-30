@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.util.concurrent.Runnables;
+import com.mojang.authlib.minecraft.BanDetails;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -191,20 +192,17 @@ public class TitleScreen extends Screen {
 		this.addRenderableWidget(
 			new Button(this.width / 2 - 100, i, 200, 20, Component.translatable("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this)))
 		);
-		boolean bl = this.minecraft.allowsMultiplayer();
-		Button.OnTooltip onTooltip = bl ? Button.NO_TOOLTIP : new Button.OnTooltip() {
-			private final Component text = Component.translatable("title.multiplayer.disabled");
-
+		final Component component = this.getMultiplayerDisabledReason();
+		boolean bl = component == null;
+		Button.OnTooltip onTooltip = component == null ? Button.NO_TOOLTIP : new Button.OnTooltip() {
 			@Override
 			public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-				if (!button.active) {
-					TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(this.text, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
-				}
+				TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(component, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
 			}
 
 			@Override
 			public void narrateTooltip(Consumer<Component> consumer) {
-				consumer.accept(this.text);
+				consumer.accept(component);
 			}
 		};
 		this.addRenderableWidget(new Button(this.width / 2 - 100, i + j * 1, 200, 20, Component.translatable("menu.multiplayer"), button -> {
@@ -215,6 +213,22 @@ public class TitleScreen extends Screen {
 				new Button(this.width / 2 - 100, i + j * 2, 200, 20, Component.translatable("menu.online"), button -> this.realmsButtonClicked(), onTooltip)
 			)
 			.active = bl;
+	}
+
+	@Nullable
+	private Component getMultiplayerDisabledReason() {
+		if (this.minecraft.allowsMultiplayer()) {
+			return null;
+		} else {
+			BanDetails banDetails = this.minecraft.multiplayerBan();
+			if (banDetails != null) {
+				return banDetails.expires() != null
+					? Component.translatable("title.multiplayer.disabled.banned.temporary")
+					: Component.translatable("title.multiplayer.disabled.banned.permanent");
+			} else {
+				return Component.translatable("title.multiplayer.disabled");
+			}
+		}
 	}
 
 	private void createDemoMenuOptions(int i, int j) {

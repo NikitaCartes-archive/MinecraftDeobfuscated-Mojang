@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
@@ -119,6 +120,13 @@ public class SkinManager {
 	public Map<Type, MinecraftProfileTexture> getInsecureSkinInformation(GameProfile gameProfile) {
 		Property property = Iterables.getFirst(gameProfile.getProperties().get("textures"), null);
 		return (Map<Type, MinecraftProfileTexture>)(property == null ? ImmutableMap.of() : this.insecureSkinCache.getUnchecked(property.getValue()));
+	}
+
+	public ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
+		MinecraftProfileTexture minecraftProfileTexture = (MinecraftProfileTexture)this.getInsecureSkinInformation(gameProfile).get(Type.SKIN);
+		return minecraftProfileTexture != null
+			? this.registerTexture(minecraftProfileTexture, Type.SKIN)
+			: DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
 	}
 
 	@Environment(EnvType.CLIENT)

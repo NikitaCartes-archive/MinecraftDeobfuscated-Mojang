@@ -1,21 +1,18 @@
 package net.minecraft.network.protocol.game;
 
-import java.util.Objects;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 
-public record ClientboundSystemChatPacket(Component content, int typeId) implements Packet<ClientGamePacketListener> {
+public record ClientboundSystemChatPacket(Component content, boolean overlay) implements Packet<ClientGamePacketListener> {
 	public ClientboundSystemChatPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readComponent(), friendlyByteBuf.readVarInt());
+		this(friendlyByteBuf.readComponent(), friendlyByteBuf.readBoolean());
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeComponent(this.content);
-		friendlyByteBuf.writeVarInt(this.typeId);
+		friendlyByteBuf.writeBoolean(this.overlay);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -25,9 +22,5 @@ public record ClientboundSystemChatPacket(Component content, int typeId) impleme
 	@Override
 	public boolean isSkippable() {
 		return true;
-	}
-
-	public ChatType resolveType(Registry<ChatType> registry) {
-		return (ChatType)Objects.requireNonNull(registry.byId(this.typeId), "Invalid chat type");
 	}
 }

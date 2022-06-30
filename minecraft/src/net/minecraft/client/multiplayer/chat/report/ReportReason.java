@@ -14,11 +14,8 @@ public enum ReportReason {
 	IMMINENT_HARM(18, "imminent_harm"),
 	NON_CONSENSUAL_INTIMATE_IMAGERY(19, "non_consensual_intimate_imagery"),
 	HARASSMENT_OR_BULLYING(21, "harassment_or_bullying"),
-	PROFANITY(22, "profanity"),
 	DEFAMATION_IMPERSONATION_FALSE_INFORMATION(27, "defamation_impersonation_false_information"),
 	SELF_HARM_OR_SUICIDE(31, "self_harm_or_suicide"),
-	NUDITY_OR_PORNOGRAPHY(32, "nudity_or_pornography"),
-	EXTREME_VIOLENCE_OR_GORE(34, "extreme_violence_or_gore"),
 	ALCOHOL_TOBACCO_DRUGS(39, "alcohol_tobacco_drugs");
 
 	private final int id;

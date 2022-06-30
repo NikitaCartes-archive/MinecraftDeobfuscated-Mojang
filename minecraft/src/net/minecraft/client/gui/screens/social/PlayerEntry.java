@@ -13,7 +13,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -279,7 +278,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		this.showButton.visible = bl;
 		this.hideButton.visible = !bl;
 		this.minecraft.gui.getChat().addMessage(component);
-		NarratorChatListener.INSTANCE.sayNow(component);
+		this.minecraft.getNarrator().sayNow(component);
 	}
 
 	MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {

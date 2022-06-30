@@ -583,7 +583,7 @@ public class ServerPlayer extends Player {
 				);
 			Team team = this.getTeam();
 			if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
-				this.server.getPlayerList().broadcastSystemMessage(component, ChatType.SYSTEM);
+				this.server.getPlayerList().broadcastSystemMessage(component, false);
 			} else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OTHER_TEAMS) {
 				this.server.getPlayerList().broadcastSystemToTeam(this, component);
 			} else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OWN_TEAM) {
@@ -1126,7 +1126,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void displayClientMessage(Component component, boolean bl) {
-		this.sendSystemMessage(component, bl ? ChatType.GAME_INFO : ChatType.SYSTEM);
+		this.sendSystemMessage(component, bl);
 	}
 
 	@Override
@@ -1276,35 +1276,31 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void sendSystemMessage(Component component) {
-		this.sendSystemMessage(component, ChatType.SYSTEM);
+		this.sendSystemMessage(component, false);
 	}
 
-	public void sendSystemMessage(Component component, ResourceKey<ChatType> resourceKey) {
-		if (this.acceptsChat(resourceKey)) {
-			this.connection.send(new ClientboundSystemChatPacket(component, this.resolveChatTypeId(resourceKey)), future -> {
+	public void sendSystemMessage(Component component, boolean bl) {
+		if (this.acceptsSystemMessages(bl)) {
+			this.connection.send(new ClientboundSystemChatPacket(component, bl), future -> {
 				if (!future.isSuccess()) {
-					this.handleMessageDeliveryFailure(component, resourceKey);
+					this.handleMessageDeliveryFailure(component);
 				}
 			});
 		}
 	}
 
-	private void handleMessageDeliveryFailure(Component component, ResourceKey<ChatType> resourceKey) {
-		if ((resourceKey == ChatType.GAME_INFO || resourceKey == ChatType.SYSTEM) && this.acceptsChat(ChatType.SYSTEM)) {
+	private void handleMessageDeliveryFailure(Component component) {
+		if (this.acceptsSystemMessages(false)) {
 			int i = 256;
 			String string = component.getString(256);
 			Component component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
 			this.connection
-				.send(
-					new ClientboundSystemChatPacket(
-						Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), this.resolveChatTypeId(ChatType.SYSTEM)
-					)
-				);
+				.send(new ClientboundSystemChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), false));
 		}
 	}
 
 	public void sendChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ResourceKey<ChatType> resourceKey) {
-		if (this.acceptsChat(resourceKey)) {
+		if (this.acceptsChatMessages()) {
 			this.connection
 				.send(
 					new ClientboundPlayerChatPacket(
@@ -1347,16 +1343,12 @@ public class ServerPlayer extends Player {
 		return this.chatVisibility;
 	}
 
-	private boolean acceptsChat(ResourceKey<ChatType> resourceKey) {
-		switch (this.chatVisibility) {
-			case HIDDEN:
-				return resourceKey == ChatType.GAME_INFO;
-			case SYSTEM:
-				return resourceKey == ChatType.SYSTEM || resourceKey == ChatType.GAME_INFO;
-			case FULL:
-			default:
-				return true;
-		}
+	private boolean acceptsSystemMessages(boolean bl) {
+		return this.chatVisibility == ChatVisiblity.HIDDEN ? bl : true;
+	}
+
+	private boolean acceptsChatMessages() {
+		return this.chatVisibility == ChatVisiblity.FULL;
 	}
 
 	public void sendTexturePack(String string, String string2, boolean bl, @Nullable Component component) {
