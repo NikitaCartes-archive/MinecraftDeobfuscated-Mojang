@@ -327,7 +327,7 @@ extends AbstractClientPlayer {
         } catch (Exception exception) {
             LOGGER.error("Failed to sign chat message: '{}'", (Object)component.getString(), (Object)exception);
         }
-        return MessageSignature.unsigned();
+        return MessageSignature.unsigned(this.getUUID());
     }
 
     private void sendCommand(MessageSigner messageSigner, String string, @Nullable Component component) {

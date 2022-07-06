@@ -135,7 +135,7 @@ FormattedText {
             return true;
         }
         List<Component> list = this.toFlatList();
-        return Collections.indexOfSubList(list, list2 = component.toFlatList()) != -1;
+        return Collections.indexOfSubList(list, list2 = component.toFlatList(this.getStyle())) != -1;
     }
 
     public static Component nullToEmpty(@Nullable String string) {

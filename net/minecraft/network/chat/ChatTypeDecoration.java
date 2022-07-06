@@ -24,13 +24,18 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
         return new ChatTypeDecoration(string, List.of(Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
     }
 
-    public static ChatTypeDecoration directMessage(String string) {
+    public static ChatTypeDecoration incomingDirectMessage(String string) {
         Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true);
         return new ChatTypeDecoration(string, List.of(Parameter.SENDER, Parameter.CONTENT), style);
     }
 
+    public static ChatTypeDecoration outgoingDirectMessage(String string) {
+        Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true);
+        return new ChatTypeDecoration(string, List.of(Parameter.TARGET, Parameter.CONTENT), style);
+    }
+
     public static ChatTypeDecoration teamMessage(String string) {
-        return new ChatTypeDecoration(string, List.of(Parameter.TEAM_NAME, Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
+        return new ChatTypeDecoration(string, List.of(Parameter.TARGET, Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
     }
 
     public Component decorate(Component component, ChatSender chatSender) {
@@ -50,7 +55,7 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
     public static enum Parameter implements StringRepresentable
     {
         SENDER("sender", (component, chatSender) -> chatSender.name()),
-        TEAM_NAME("team_name", (component, chatSender) -> chatSender.teamName()),
+        TARGET("target", (component, chatSender) -> chatSender.targetName()),
         CONTENT("content", (component, chatSender) -> component);
 
         public static final Codec<Parameter> CODEC;

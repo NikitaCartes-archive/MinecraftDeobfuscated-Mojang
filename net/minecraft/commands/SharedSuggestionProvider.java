@@ -29,6 +29,10 @@ import net.minecraft.world.level.Level;
 public interface SharedSuggestionProvider {
     public Collection<String> getOnlinePlayerNames();
 
+    default public Collection<String> getCustomTabSugggestions() {
+        return this.getOnlinePlayerNames();
+    }
+
     default public Collection<String> getSelectedEntities() {
         return Collections.emptyList();
     }

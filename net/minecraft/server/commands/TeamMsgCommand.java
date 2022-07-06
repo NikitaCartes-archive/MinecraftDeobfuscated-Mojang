@@ -42,7 +42,7 @@ public class TeamMsgCommand {
             throw ERROR_NOT_ON_TEAM.create();
         }
         MutableComponent component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
-        ChatSender chatSender = commandSourceStack.asChatSender().withTeamName(component);
+        ChatSender chatSender = commandSourceStack.asChatSender().withTargetName(component);
         List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers().stream().filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam).toList();
         if (list.isEmpty()) {
             return 0;

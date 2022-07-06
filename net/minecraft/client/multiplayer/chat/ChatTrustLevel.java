@@ -18,8 +18,7 @@ import org.jetbrains.annotations.Nullable;
 public enum ChatTrustLevel {
     SECURE,
     MODIFIED,
-    NOT_SECURE,
-    UNKNOWN;
+    NOT_SECURE;
 
 
     public static ChatTrustLevel evaluate(PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo) {

@@ -5,12 +5,13 @@ package net.minecraft.commands;
 
 import java.time.Instant;
 import java.util.UUID;
+import net.minecraft.Util;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.util.Crypt;
 
 public interface CommandSigningContext {
-    public static final CommandSigningContext NONE = string -> MessageSignature.unsigned();
+    public static final CommandSigningContext NONE = string -> MessageSignature.unsigned(Util.NIL_UUID);
 
     public MessageSignature getArgumentSignature(String var1);
 
@@ -26,7 +27,7 @@ public interface CommandSigningContext {
             if (saltSignaturePair != null) {
                 return new MessageSignature(this.sender, this.timeStamp, saltSignaturePair);
             }
-            return MessageSignature.unsigned();
+            return MessageSignature.unsigned(this.sender);
         }
 
         @Override

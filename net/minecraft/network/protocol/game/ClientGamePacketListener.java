@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
+import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
@@ -315,5 +316,7 @@ extends PacketListener {
     public void handleTitlesClear(ClientboundClearTitlesPacket var1);
 
     public void handleServerData(ClientboundServerDataPacket var1);
+
+    public void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket var1);
 }
 

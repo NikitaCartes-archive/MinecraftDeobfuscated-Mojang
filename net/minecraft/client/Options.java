@@ -214,7 +214,7 @@ public class Options {
             return Component.translatable("options.chat.delay_none");
         }
         return Component.translatable("options.chat.delay", String.format("%.1f", double_));
-    }, new OptionInstance.IntRange(0, 60).xmap(i -> (double)i / 10.0, double_ -> (int)(double_ * 10.0)), Codec.doubleRange(0.0, 6.0), 0.0, double_ -> {});
+    }, new OptionInstance.IntRange(0, 60).xmap(i -> (double)i / 10.0, double_ -> (int)(double_ * 10.0)), Codec.doubleRange(0.0, 6.0), 0.0, double_ -> Minecraft.getInstance().getChatListener().setMessageDelay((double)double_));
     private final OptionInstance<Integer> mipmapLevels = new OptionInstance<Integer>("options.mipmapLevels", OptionInstance.noTooltip(), (component, integer) -> {
         if (integer == 0) {
             return CommonComponents.optionStatus(component, false);

@@ -6,8 +6,10 @@ package net.minecraft.network.chat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,18 +39,19 @@ public record PlayerChatMessage(Component signedContent, MessageSignature signat
     }
 
     public static FilteredText<PlayerChatMessage> filteredSigned(FilteredText<Component> filteredText, FilteredText<Component> filteredText2, MessageSignature messageSignature, boolean bl) {
-        Component component = filteredText.raw();
-        Component component2 = filteredText2.raw();
-        PlayerChatMessage playerChatMessage = PlayerChatMessage.signed(component, component2, messageSignature, bl);
+        Component component2 = filteredText.raw();
+        Component component22 = filteredText2.raw();
+        PlayerChatMessage playerChatMessage = PlayerChatMessage.signed(component2, component22, messageSignature, bl);
         if (filteredText2.isFiltered()) {
-            PlayerChatMessage playerChatMessage2 = Util.mapNullable(filteredText2.filtered(), PlayerChatMessage::unsigned);
+            UUID uUID = messageSignature.sender();
+            PlayerChatMessage playerChatMessage2 = Util.mapNullable(filteredText2.filtered(), component -> PlayerChatMessage.unsigned(uUID, component));
             return new FilteredText<PlayerChatMessage>(playerChatMessage, playerChatMessage2);
         }
         return FilteredText.passThrough(playerChatMessage);
     }
 
-    public static PlayerChatMessage unsigned(Component component) {
-        return new PlayerChatMessage(component, MessageSignature.unsigned(), Optional.empty());
+    public static PlayerChatMessage unsigned(UUID uUID, Component component) {
+        return new PlayerChatMessage(component, MessageSignature.unsigned(uUID), Optional.empty());
     }
 
     public PlayerChatMessage withUnsignedContent(Component component) {
@@ -86,6 +89,10 @@ public record PlayerChatMessage(Component signedContent, MessageSignature signat
 
     public boolean hasExpiredClient(Instant instant) {
         return instant.isAfter(this.signature.timeStamp().plus(MESSAGE_EXPIRES_AFTER_CLIENT));
+    }
+
+    public boolean isSignedBy(ChatSender chatSender) {
+        return chatSender.isPlayer() && this.signature.sender().equals(chatSender.profileId());
     }
 }
 

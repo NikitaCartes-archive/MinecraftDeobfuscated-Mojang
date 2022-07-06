@@ -220,9 +220,6 @@ implements Widget {
         if (o + p + 6 > this.height) {
             o = this.height - p - 6;
         }
-        if (j - p - 8 < 0) {
-            o = j + 8;
-        }
         poseStack.pushPose();
         int q = -267386864;
         int r = 0x505000FF;

@@ -23,6 +23,10 @@ public record ClientboundPlayerChatPacket(Component signedContent, Optional<Comp
         this(friendlyByteBuf.readComponent(), friendlyByteBuf.readOptional(FriendlyByteBuf::readComponent), friendlyByteBuf.readVarInt(), new ChatSender(friendlyByteBuf), friendlyByteBuf.readInstant(), new Crypt.SaltSignaturePair(friendlyByteBuf));
     }
 
+    public static ClientboundPlayerChatPacket system(Component component, int i, ChatSender chatSender, Instant instant) {
+        return new ClientboundPlayerChatPacket(component, Optional.empty(), i, chatSender, instant, Crypt.SaltSignaturePair.EMPTY);
+    }
+
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeComponent(this.signedContent);
