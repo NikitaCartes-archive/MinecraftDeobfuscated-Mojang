@@ -3,13 +3,12 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.Collection;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -37,25 +36,17 @@ public class MsgCommand {
 		if (collection.isEmpty()) {
 			return 0;
 		} else {
-			chatMessage.resolve(commandSourceStack)
-				.thenAcceptAsync(
-					filteredText -> {
-						Component component = ((PlayerChatMessage)filteredText.raw()).serverContent();
-
-						for (ServerPlayer serverPlayer : collection) {
-							commandSourceStack.sendSuccess(
-								Component.translatable("commands.message.display.outgoing", serverPlayer.getDisplayName(), component)
-									.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
-								false
-							);
-							PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.filter(commandSourceStack, serverPlayer);
-							if (playerChatMessage != null) {
-								serverPlayer.sendChatMessage(playerChatMessage, commandSourceStack.asChatSender(), ChatType.MSG_COMMAND);
-							}
-						}
-					},
-					commandSourceStack.getServer()
-				);
+			ChatSender chatSender = commandSourceStack.asChatSender();
+			chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> {
+				for (ServerPlayer serverPlayer : collection) {
+					ChatSender chatSender2 = chatSender.withTargetName(serverPlayer.getDisplayName());
+					commandSourceStack.sendChatMessage(chatSender2, (PlayerChatMessage)filteredText.raw(), ChatType.MSG_COMMAND_OUTGOING);
+					PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.filter(commandSourceStack, serverPlayer);
+					if (playerChatMessage != null) {
+						serverPlayer.sendChatMessage(playerChatMessage, chatSender, ChatType.MSG_COMMAND_INCOMING);
+					}
+				}
+			}, commandSourceStack.getServer());
 			return collection.size();
 		}
 	}

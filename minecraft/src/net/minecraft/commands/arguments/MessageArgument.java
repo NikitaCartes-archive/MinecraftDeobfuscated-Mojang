@@ -16,7 +16,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.ChatDecorator;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
@@ -44,10 +43,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		CommandSigningContext commandSigningContext = commandContext.getSource().getSigningContext();
 		MessageSignature messageSignature = commandSigningContext.getArgumentSignature(string);
 		boolean bl = commandSigningContext.signedArgumentPreview(string);
-		ChatSender chatSender = commandContext.getSource().asChatSender();
-		return messageSignature.isValid(chatSender.profileId())
-			? new MessageArgument.ChatMessage(message.text, component, messageSignature, bl)
-			: new MessageArgument.ChatMessage(message.text, component, MessageSignature.unsigned(), false);
+		return new MessageArgument.ChatMessage(message.text, component, messageSignature, bl);
 	}
 
 	public MessageArgument.Message parse(StringReader stringReader) throws CommandSyntaxException {

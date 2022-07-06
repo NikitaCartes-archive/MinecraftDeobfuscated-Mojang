@@ -341,7 +341,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			LOGGER.error("Failed to sign chat message: '{}'", component.getString(), var4);
 		}
 
-		return MessageSignature.unsigned();
+		return MessageSignature.unsigned(this.getUUID());
 	}
 
 	private void sendCommand(MessageSigner messageSigner, String string, @Nullable Component component) {

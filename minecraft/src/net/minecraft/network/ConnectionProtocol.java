@@ -37,6 +37,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
+import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
@@ -213,6 +214,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundContainerSetDataPacket.class, ClientboundContainerSetDataPacket::new)
 					.addPacket(ClientboundContainerSetSlotPacket.class, ClientboundContainerSetSlotPacket::new)
 					.addPacket(ClientboundCooldownPacket.class, ClientboundCooldownPacket::new)
+					.addPacket(ClientboundCustomChatCompletionsPacket.class, ClientboundCustomChatCompletionsPacket::new)
 					.addPacket(ClientboundCustomPayloadPacket.class, ClientboundCustomPayloadPacket::new)
 					.addPacket(ClientboundCustomSoundPacket.class, ClientboundCustomSoundPacket::new)
 					.addPacket(ClientboundDisconnectPacket.class, ClientboundDisconnectPacket::new)

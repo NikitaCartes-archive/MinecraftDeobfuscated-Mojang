@@ -132,7 +132,7 @@ public interface Component extends Message, FormattedText {
 			return true;
 		} else {
 			List<Component> list = this.toFlatList();
-			List<Component> list2 = component.toFlatList();
+			List<Component> list2 = component.toFlatList(this.getStyle());
 			return Collections.indexOfSubList(list, list2) != -1;
 		}
 	}

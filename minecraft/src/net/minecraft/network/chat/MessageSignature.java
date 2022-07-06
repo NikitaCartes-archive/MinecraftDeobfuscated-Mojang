@@ -12,8 +12,8 @@ import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
 
 public record MessageSignature(UUID sender, Instant timeStamp, Crypt.SaltSignaturePair saltSignature) {
-	public static MessageSignature unsigned() {
-		return new MessageSignature(Util.NIL_UUID, Instant.now(), Crypt.SaltSignaturePair.EMPTY);
+	public static MessageSignature unsigned(UUID uUID) {
+		return new MessageSignature(uUID, Instant.now(), Crypt.SaltSignaturePair.EMPTY);
 	}
 
 	public boolean verify(SignatureValidator signatureValidator, Component component) {
@@ -45,9 +45,5 @@ public record MessageSignature(UUID sender, Instant timeStamp, Crypt.SaltSignatu
 
 	public boolean isValid() {
 		return this.sender != Util.NIL_UUID && this.saltSignature.isValid();
-	}
-
-	public boolean isValid(UUID uUID) {
-		return this.isValid() && uUID.equals(this.sender);
 	}
 }

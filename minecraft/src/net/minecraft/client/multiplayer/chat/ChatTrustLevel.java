@@ -15,8 +15,7 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 public enum ChatTrustLevel {
 	SECURE,
 	MODIFIED,
-	NOT_SECURE,
-	UNKNOWN;
+	NOT_SECURE;
 
 	public static ChatTrustLevel evaluate(PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo) {
 		if (playerChatMessage.hasExpiredClient(Instant.now())) {

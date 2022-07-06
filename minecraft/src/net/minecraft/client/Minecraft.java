@@ -562,6 +562,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
 		this.narrator = new GameNarrator(this);
 		this.chatListener = new ChatListener(this);
+		this.chatListener.setMessageDelay(this.options.chatDelay().get());
 		this.reportingContext = ReportingContext.create(ReportEnvironment.local(), this.userApiService);
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
@@ -1659,6 +1660,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		this.profiler.push("gui");
+		this.chatListener.tick();
 		this.gui.tick(this.pause);
 		this.profiler.pop();
 		this.gameRenderer.pick(1.0F);

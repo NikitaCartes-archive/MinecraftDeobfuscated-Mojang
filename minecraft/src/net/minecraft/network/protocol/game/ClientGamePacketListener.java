@@ -208,4 +208,6 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleTitlesClear(ClientboundClearTitlesPacket clientboundClearTitlesPacket);
 
 	void handleServerData(ClientboundServerDataPacket clientboundServerDataPacket);
+
+	void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket clientboundCustomChatCompletionsPacket);
 }

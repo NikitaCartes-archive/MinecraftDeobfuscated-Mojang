@@ -1802,12 +1802,16 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public void logChatMessage(ChatSender chatSender, Component component, ResourceKey<ChatType> resourceKey) {
+		LOGGER.info(this.decorateChatMessage(chatSender, component, resourceKey).getString());
+	}
+
+	public Component decorateChatMessage(ChatSender chatSender, Component component, ResourceKey<ChatType> resourceKey) {
 		ChatTypeDecoration chatTypeDecoration = (ChatTypeDecoration)this.registryAccess()
 			.registry(Registry.CHAT_TYPE_REGISTRY)
 			.map(registry -> registry.get(resourceKey))
 			.map(ChatType::chat)
 			.orElse(ChatType.DEFAULT_CHAT_DECORATION);
-		LOGGER.info(chatTypeDecoration.decorate(component, chatSender).getString());
+		return chatTypeDecoration.decorate(component, chatSender);
 	}
 
 	public ChatDecorator getChatDecorator() {

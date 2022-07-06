@@ -220,10 +220,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 				o = this.height - l - 6;
 			}
 
-			if (j - l - 8 < 0) {
-				o = j + 8;
-			}
-
 			poseStack.pushPose();
 			int q = -267386864;
 			int r = 1347420415;
