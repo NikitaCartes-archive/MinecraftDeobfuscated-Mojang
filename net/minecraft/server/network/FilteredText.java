@@ -21,7 +21,11 @@ public record FilteredText<T>(T raw, @Nullable T filtered) {
     }
 
     public <U> FilteredText<U> map(Function<T, U> function) {
-        return new FilteredText<U>(function.apply(this.raw), Util.mapNullable(this.filtered, function));
+        return this.map(function, function);
+    }
+
+    public <U> FilteredText<U> map(Function<T, U> function, Function<T, U> function2) {
+        return new FilteredText<U>(function.apply(this.raw), Util.mapNullable(this.filtered, function2));
     }
 
     public boolean isFiltered() {
@@ -45,6 +49,11 @@ public record FilteredText<T>(T raw, @Nullable T filtered) {
     public T filter(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer) {
         ServerPlayer serverPlayer2 = commandSourceStack.getPlayer();
         return serverPlayer2 != null ? this.filter(serverPlayer2, serverPlayer) : this.raw;
+    }
+
+    @Nullable
+    public T select(boolean bl) {
+        return bl ? this.filtered : this.raw;
     }
 
     @Nullable

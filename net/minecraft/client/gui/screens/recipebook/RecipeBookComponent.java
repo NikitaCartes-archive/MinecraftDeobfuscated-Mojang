@@ -51,11 +51,11 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class RecipeBookComponent
 extends GuiComponent
-implements Widget,
+implements PlaceRecipe<Ingredient>,
+Widget,
 GuiEventListener,
 NarratableEntry,
-RecipeShownListener,
-PlaceRecipe<Ingredient> {
+RecipeShownListener {
     protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
     private static final Component SEARCH_HINT = Component.translatable("gui.recipebook.search_hint").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
     public static final int IMAGE_WIDTH = 147;

@@ -15,29 +15,38 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.FilteredText;
 
 public class MsgCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("msg").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.players()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", MessageArgument.message()).executes(commandContext -> MsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), MessageArgument.getChatMessage(commandContext, "message"))))));
+        LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("msg").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.players()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
+            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
+            try {
+                return MsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), chatMessage);
+            } catch (Exception exception) {
+                chatMessage.consume((CommandSourceStack)commandContext.getSource());
+                throw exception;
+            }
+        }))));
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("tell").redirect(literalCommandNode));
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("w").redirect(literalCommandNode));
     }
 
     private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, MessageArgument.ChatMessage chatMessage) {
-        if (collection.isEmpty()) {
-            return 0;
-        }
         ChatSender chatSender = commandSourceStack.asChatSender();
+        ChatType.Bound bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, commandSourceStack);
         chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> {
+            FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
             for (ServerPlayer serverPlayer : collection) {
-                ChatSender chatSender2 = chatSender.withTargetName(serverPlayer.getDisplayName());
-                commandSourceStack.sendChatMessage(chatSender2, (PlayerChatMessage)filteredText.raw(), ChatType.MSG_COMMAND_OUTGOING);
-                PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.filter(commandSourceStack, serverPlayer);
-                if (playerChatMessage == null) continue;
-                serverPlayer.sendChatMessage(playerChatMessage, chatSender, ChatType.MSG_COMMAND_INCOMING);
+                ChatType.Bound bound2 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(serverPlayer.getDisplayName());
+                commandSourceStack.sendChatMessage(filteredText2.raw(), bound2);
+                OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
+                if (outgoingPlayerChatMessage == null) continue;
+                serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
             }
+            filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
         }, (Executor)commandSourceStack.getServer());
         return collection.size();
     }

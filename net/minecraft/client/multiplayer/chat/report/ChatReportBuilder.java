@@ -13,7 +13,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,7 +25,6 @@ import net.minecraft.client.multiplayer.chat.report.ReportReason;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.util.Crypt;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -140,10 +138,9 @@ public class ChatReportBuilder {
 
     private ReportChatMessage buildReportedChatMessage(int i, LoggedChat.Player player) {
         PlayerChatMessage playerChatMessage = player.message();
-        Instant instant = playerChatMessage.signature().timeStamp();
-        Crypt.SaltSignaturePair saltSignaturePair = playerChatMessage.signature().saltSignature();
-        long l = saltSignaturePair.salt();
-        String string = saltSignaturePair.isValid() ? ChatReportBuilder.encodeSignature(saltSignaturePair.signature()) : null;
+        Instant instant = playerChatMessage.timeStamp();
+        long l = playerChatMessage.salt();
+        String string = playerChatMessage.headerSignature().asString();
         String string2 = ChatReportBuilder.encodeComponent(playerChatMessage.signedContent());
         String string3 = playerChatMessage.unsignedContent().map(ChatReportBuilder::encodeComponent).orElse(null);
         return new ReportChatMessage(player.profileId(), instant, l, string, string2, string3, this.isReported(i));
@@ -151,10 +148,6 @@ public class ChatReportBuilder {
 
     private static String encodeComponent(Component component) {
         return Component.Serializer.toStableJson(component);
-    }
-
-    private static String encodeSignature(byte[] bs) {
-        return Base64.getEncoder().encodeToString(bs);
     }
 
     private IntStream selectContextMessages(ChatLog chatLog, int i) {

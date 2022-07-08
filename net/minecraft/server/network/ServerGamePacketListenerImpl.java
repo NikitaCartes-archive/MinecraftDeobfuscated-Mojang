@@ -49,14 +49,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatPreviewThrottler;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -221,6 +221,7 @@ ServerGamePacketListener {
     private int knownMovePacketCount;
     private final ChatPreviewThrottler chatPreviewThrottler = new ChatPreviewThrottler();
     private final AtomicReference<Instant> lastChatTimeStamp = new AtomicReference<Instant>(Instant.EPOCH);
+    private final SignedMessageChain.Decoder signedMessageDecoder = new SignedMessageChain().decoder();
 
     public ServerGamePacketListenerImpl(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer) {
         this.server = minecraftServer;
@@ -1134,12 +1135,12 @@ ServerGamePacketListener {
 
     @Override
     public void handleChat(ServerboundChatPacket serverboundChatPacket) {
-        if (ServerGamePacketListenerImpl.isChatMessageIllegal(serverboundChatPacket.getMessage())) {
+        if (ServerGamePacketListenerImpl.isChatMessageIllegal(serverboundChatPacket.message())) {
             this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
             return;
         }
-        if (this.tryHandleChat(serverboundChatPacket.getMessage(), serverboundChatPacket.getTimeStamp())) {
-            this.filterTextPacket(serverboundChatPacket.getMessage(), (FilteredText<String> filteredText) -> this.handleChat(serverboundChatPacket, (FilteredText<String>)filteredText));
+        if (this.tryHandleChat(serverboundChatPacket.message(), serverboundChatPacket.timeStamp())) {
+            this.filterTextPacket(serverboundChatPacket.message(), (FilteredText<String> filteredText) -> this.handleChat(serverboundChatPacket, (FilteredText<String>)filteredText));
         }
     }
 
@@ -1151,7 +1152,7 @@ ServerGamePacketListener {
         }
         if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp())) {
             this.server.submit(() -> {
-                CommandSourceStack commandSourceStack = this.player.createCommandSourceStack().withSigningContext(serverboundChatCommandPacket.signingContext(this.player.getUUID()));
+                CommandSourceStack commandSourceStack = this.player.createCommandSourceStack().withSigningContext(serverboundChatCommandPacket.signingContext(this.player));
                 this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
                 this.detectRateSpam();
             });
@@ -1189,26 +1190,28 @@ ServerGamePacketListener {
         return false;
     }
 
-    private void handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText) {
-        MessageSignature messageSignature = serverboundChatPacket.getSignature(this.player.getUUID());
-        boolean bl = serverboundChatPacket.signedPreview();
-        ChatDecorator chatDecorator = this.server.getChatDecorator();
-        chatDecorator.decorateChat(this.player, filteredText.map(Component::literal), messageSignature, bl).thenAcceptAsync(this::broadcastChatMessage, (Executor)this.server);
+    private void handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText2) {
+        MessageSigner messageSigner = serverboundChatPacket.getSigner(this.player);
+        SignedMessageChain.Link link = new SignedMessageChain.Link(serverboundChatPacket.signature());
+        FilteredText<Component> filteredText22 = filteredText2.map(Component::literal);
+        if (serverboundChatPacket.signedPreview()) {
+            ((CompletableFuture)this.server.getChatDecorator().decorateFiltered(this.player, filteredText22).thenApply(filteredText -> this.signedMessageDecoder.unpack(link, messageSigner, (FilteredText<Component>)filteredText))).thenAcceptAsync(this::broadcastChatMessage, (Executor)this.server);
+        } else {
+            FilteredText<PlayerChatMessage> filteredText3 = this.signedMessageDecoder.unpack(link, messageSigner, filteredText22);
+            this.server.getChatDecorator().decorateSignedChat(this.player, filteredText3).thenAcceptAsync(this::broadcastChatMessage, (Executor)this.server);
+        }
     }
 
     private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
         PlayerChatMessage playerChatMessage = filteredText.raw();
-        if (!playerChatMessage.verify(this.player)) {
-            LOGGER.warn("{} sent message with invalid signature: '{}'", (Object)this.player.getName().getString(), (Object)playerChatMessage.signedContent().getString());
-            if (this.server.enforceSecureProfile()) {
-                this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
-                return;
-            }
+        if (this.server.enforceSecureProfile() && !playerChatMessage.verify(this.player.asChatSender())) {
+            this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
+            return;
         }
         if (playerChatMessage.hasExpiredServer(Instant.now())) {
             LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", (Object)this.player.getName().getString(), (Object)playerChatMessage.signedContent().getString());
         }
-        this.server.getPlayerList().broadcastChatMessage(filteredText, this.player, ChatType.CHAT);
+        this.server.getPlayerList().broadcastChatMessage(filteredText, this.player, ChatType.bind(ChatType.CHAT, this.player));
         this.detectRateSpam();
     }
 
@@ -1342,6 +1345,10 @@ ServerGamePacketListener {
                 throw new IllegalArgumentException("Invalid client command!");
             }
         }
+    }
+
+    public SignedMessageChain.Decoder signedMessageDecoder() {
+        return this.signedMessageDecoder;
     }
 
     @Override

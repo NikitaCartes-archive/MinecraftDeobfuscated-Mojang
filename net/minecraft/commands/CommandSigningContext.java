@@ -3,31 +3,51 @@
  */
 package net.minecraft.commands;
 
-import java.time.Instant;
-import java.util.UUID;
-import net.minecraft.Util;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.util.Crypt;
+import net.minecraft.network.chat.MessageSigner;
+import net.minecraft.network.chat.SignedMessageChain;
 
 public interface CommandSigningContext {
-    public static final CommandSigningContext NONE = string -> MessageSignature.unsigned(Util.NIL_UUID);
+    public static CommandSigningContext anonymous() {
+        final MessageSigner messageSigner = MessageSigner.system();
+        return new CommandSigningContext(){
+
+            @Override
+            public MessageSignature getArgumentSignature(String string) {
+                return MessageSignature.EMPTY;
+            }
+
+            @Override
+            public MessageSigner argumentSigner() {
+                return messageSigner;
+            }
+
+            @Override
+            public boolean signedArgumentPreview(String string) {
+                return false;
+            }
+
+            @Override
+            public SignedMessageChain.Decoder decoder() {
+                return SignedMessageChain.Decoder.UNSIGNED;
+            }
+        };
+    }
 
     public MessageSignature getArgumentSignature(String var1);
 
-    default public boolean signedArgumentPreview(String string) {
-        return false;
-    }
+    public MessageSigner argumentSigner();
 
-    public record SignedArguments(UUID sender, Instant timeStamp, ArgumentSignatures argumentSignatures, boolean signedPreview) implements CommandSigningContext
+    public SignedMessageChain.Decoder decoder();
+
+    public boolean signedArgumentPreview(String var1);
+
+    public record SignedArguments(SignedMessageChain.Decoder decoder, MessageSigner argumentSigner, ArgumentSignatures argumentSignatures, boolean signedPreview) implements CommandSigningContext
     {
         @Override
         public MessageSignature getArgumentSignature(String string) {
-            Crypt.SaltSignaturePair saltSignaturePair = this.argumentSignatures.get(string);
-            if (saltSignaturePair != null) {
-                return new MessageSignature(this.sender, this.timeStamp, saltSignaturePair);
-            }
-            return MessageSignature.unsigned(this.sender);
+            return this.argumentSignatures.get(string);
         }
 
         @Override

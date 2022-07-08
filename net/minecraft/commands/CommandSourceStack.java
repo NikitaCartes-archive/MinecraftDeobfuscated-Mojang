@@ -27,7 +27,7 @@ import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -63,7 +63,7 @@ implements SharedSuggestionProvider {
     private final CommandSigningContext signingContext;
 
     public CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i2, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity) {
-        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.NONE);
+        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.anonymous());
     }
 
     protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, @Nullable ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor, CommandSigningContext commandSigningContext) {
@@ -193,7 +193,7 @@ implements SharedSuggestionProvider {
         if (this.entity != null) {
             return this.entity.asChatSender();
         }
-        return ChatSender.system(this.getDisplayName());
+        return ChatSender.SYSTEM;
     }
 
     @Override
@@ -257,15 +257,15 @@ implements SharedSuggestionProvider {
         return this.signingContext;
     }
 
-    public void sendChatMessage(ChatSender chatSender, PlayerChatMessage playerChatMessage, ResourceKey<ChatType> resourceKey) {
+    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, ChatType.Bound bound) {
         if (this.silent) {
             return;
         }
         ServerPlayer serverPlayer = this.getPlayer();
         if (serverPlayer != null) {
-            serverPlayer.sendChatMessage(playerChatMessage, chatSender, resourceKey);
+            serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
         } else {
-            this.source.sendSystemMessage(this.server.decorateChatMessage(chatSender, playerChatMessage.serverContent(), resourceKey));
+            this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.original().serverContent()));
         }
     }
 

@@ -6,12 +6,10 @@ package net.minecraft.client.multiplayer.chat;
 import java.time.Instant;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -25,8 +23,7 @@ public enum ChatTrustLevel {
         if (playerChatMessage.hasExpiredClient(Instant.now())) {
             return NOT_SECURE;
         }
-        ProfilePublicKey profilePublicKey = Util.mapNullable(playerInfo, PlayerInfo::getProfilePublicKey);
-        if (profilePublicKey == null || !playerChatMessage.verify(profilePublicKey)) {
+        if (playerInfo == null || !playerInfo.getMessageValidator().validateMessage(playerChatMessage)) {
             return NOT_SECURE;
         }
         if (playerChatMessage.unsignedContent().isPresent()) {

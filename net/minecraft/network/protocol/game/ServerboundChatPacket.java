@@ -4,40 +4,34 @@
 package net.minecraft.network.protocol.game;
 
 import java.time.Instant;
-import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.util.Crypt;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringUtil;
 
-public class ServerboundChatPacket
-implements Packet<ServerGamePacketListener> {
-    private final String message;
-    private final Instant timeStamp;
-    private final Crypt.SaltSignaturePair saltSignature;
-    private final boolean signedPreview;
-
-    public ServerboundChatPacket(String string, MessageSignature messageSignature, boolean bl) {
-        this.message = StringUtil.trimChatMessage(string);
-        this.timeStamp = messageSignature.timeStamp();
-        this.saltSignature = messageSignature.saltSignature();
+public record ServerboundChatPacket(String message, Instant timeStamp, long salt, MessageSignature signature, boolean signedPreview) implements Packet<ServerGamePacketListener>
+{
+    public ServerboundChatPacket(String string, Instant instant, long l, MessageSignature messageSignature, boolean bl) {
+        this.message = string = StringUtil.trimChatMessage(string);
+        this.timeStamp = instant;
+        this.salt = l;
+        this.signature = messageSignature;
         this.signedPreview = bl;
     }
 
     public ServerboundChatPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.message = friendlyByteBuf.readUtf(256);
-        this.timeStamp = friendlyByteBuf.readInstant();
-        this.saltSignature = new Crypt.SaltSignaturePair(friendlyByteBuf);
-        this.signedPreview = friendlyByteBuf.readBoolean();
+        this(friendlyByteBuf.readUtf(256), friendlyByteBuf.readInstant(), friendlyByteBuf.readLong(), new MessageSignature(friendlyByteBuf), friendlyByteBuf.readBoolean());
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeUtf(this.message, 256);
         friendlyByteBuf.writeInstant(this.timeStamp);
-        Crypt.SaltSignaturePair.write(friendlyByteBuf, this.saltSignature);
+        friendlyByteBuf.writeLong(this.salt);
+        this.signature.write(friendlyByteBuf);
         friendlyByteBuf.writeBoolean(this.signedPreview);
     }
 
@@ -46,20 +40,8 @@ implements Packet<ServerGamePacketListener> {
         serverGamePacketListener.handleChat(this);
     }
 
-    public String getMessage() {
-        return this.message;
-    }
-
-    public MessageSignature getSignature(UUID uUID) {
-        return new MessageSignature(uUID, this.timeStamp, this.saltSignature);
-    }
-
-    public Instant getTimeStamp() {
-        return this.timeStamp;
-    }
-
-    public boolean signedPreview() {
-        return this.signedPreview;
+    public MessageSigner getSigner(ServerPlayer serverPlayer) {
+        return new MessageSigner(serverPlayer.getUUID(), this.timeStamp, this.salt);
     }
 }
 

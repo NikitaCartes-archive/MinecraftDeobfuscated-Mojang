@@ -21,7 +21,7 @@ public class EmoteCommands {
             MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "action");
             CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
             PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-            chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> playerList.broadcastChatMessage((FilteredText<PlayerChatMessage>)filteredText, commandSourceStack, ChatType.EMOTE_COMMAND), (Executor)commandSourceStack.getServer());
+            chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> playerList.broadcastChatMessage((FilteredText<PlayerChatMessage>)filteredText, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)), (Executor)commandSourceStack.getServer());
             return 1;
         })));
     }

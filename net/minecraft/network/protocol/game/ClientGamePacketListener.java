@@ -28,6 +28,7 @@ import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -51,6 +52,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
@@ -139,9 +141,13 @@ extends PacketListener {
 
     public void handlePlayerChat(ClientboundPlayerChatPacket var1);
 
+    public void handlePlayerChatHeader(ClientboundPlayerChatHeaderPacket var1);
+
     public void handleChatPreview(ClientboundChatPreviewPacket var1);
 
     public void handleSetDisplayChatPreview(ClientboundSetDisplayChatPreviewPacket var1);
+
+    public void handleDeleteChat(ClientboundDeleteChatPacket var1);
 
     public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket var1);
 

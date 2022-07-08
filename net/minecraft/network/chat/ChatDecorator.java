@@ -5,7 +5,6 @@ package net.minecraft.network.chat;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
@@ -19,18 +18,23 @@ public interface ChatDecorator {
 
     default public CompletableFuture<FilteredText<Component>> decorateFiltered(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText) {
         CompletableFuture<Component> completableFuture = this.decorate(serverPlayer, filteredText.raw());
-        if (!filteredText.isFiltered()) {
-            return completableFuture.thenApply(FilteredText::passThrough);
-        }
         if (filteredText.filtered() == null) {
             return completableFuture.thenApply(FilteredText::fullyFiltered);
+        }
+        if (!filteredText.isFiltered()) {
+            return completableFuture.thenApply(FilteredText::passThrough);
         }
         CompletableFuture<Component> completableFuture2 = this.decorate(serverPlayer, filteredText.filtered());
         return CompletableFuture.allOf(completableFuture, completableFuture2).thenApply(void_ -> new FilteredText<Component>((Component)completableFuture.join(), (Component)completableFuture2.join()));
     }
 
-    default public CompletableFuture<FilteredText<PlayerChatMessage>> decorateChat(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText, MessageSignature messageSignature, boolean bl) {
-        return this.decorateFiltered(serverPlayer, filteredText).thenApply(filteredText2 -> PlayerChatMessage.filteredSigned(filteredText, filteredText2, messageSignature, bl));
+    default public CompletableFuture<FilteredText<PlayerChatMessage>> decorateSignedChat(@Nullable ServerPlayer serverPlayer, FilteredText<PlayerChatMessage> filteredText) {
+        FilteredText<Component> filteredText22 = filteredText.map(PlayerChatMessage::signedContent);
+        return this.decorateFiltered(serverPlayer, filteredText22).thenApply(filteredText2 -> ChatDecorator.attachDecoration(filteredText, filteredText2));
+    }
+
+    public static FilteredText<PlayerChatMessage> attachDecoration(FilteredText<PlayerChatMessage> filteredText, FilteredText<Component> filteredText2) {
+        return filteredText.map(playerChatMessage -> playerChatMessage.withDecoratedContent((Component)filteredText2.raw()), playerChatMessage -> filteredText2.filtered() != null ? playerChatMessage.withDecoratedContent((Component)filteredText2.filtered()) : playerChatMessage);
     }
 }
 

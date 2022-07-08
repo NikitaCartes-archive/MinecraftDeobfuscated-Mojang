@@ -7,11 +7,17 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public record GuiMessage(int addedTime, Component content, @Nullable GuiMessageTag tag) {
+public record GuiMessage(int addedTime, Component content, @Nullable MessageSignature headerSignature, @Nullable GuiMessageTag tag) {
+    @Nullable
+    public MessageSignature headerSignature() {
+        return this.headerSignature;
+    }
+
     @Nullable
     public GuiMessageTag tag() {
         return this.tag;

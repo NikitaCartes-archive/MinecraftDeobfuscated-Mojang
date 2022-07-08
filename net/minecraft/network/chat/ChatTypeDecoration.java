@@ -10,7 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.ChatSender;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -38,25 +38,25 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
         return new ChatTypeDecoration(string, List.of(Parameter.TARGET, Parameter.SENDER, Parameter.CONTENT), Style.EMPTY);
     }
 
-    public Component decorate(Component component, ChatSender chatSender) {
-        Object[] objects = this.resolveParameters(component, chatSender);
+    public Component decorate(Component component, ChatType.Bound bound) {
+        Object[] objects = this.resolveParameters(component, bound);
         return Component.translatable(this.translationKey, objects).withStyle(this.style);
     }
 
-    private Component[] resolveParameters(Component component, ChatSender chatSender) {
+    private Component[] resolveParameters(Component component, ChatType.Bound bound) {
         Component[] components = new Component[this.parameters.size()];
         for (int i = 0; i < components.length; ++i) {
             Parameter parameter = this.parameters.get(i);
-            components[i] = parameter.select(component, chatSender);
+            components[i] = parameter.select(component, bound);
         }
         return components;
     }
 
     public static enum Parameter implements StringRepresentable
     {
-        SENDER("sender", (component, chatSender) -> chatSender.name()),
-        TARGET("target", (component, chatSender) -> chatSender.targetName()),
-        CONTENT("content", (component, chatSender) -> component);
+        SENDER("sender", (component, bound) -> bound.name()),
+        TARGET("target", (component, bound) -> bound.targetName()),
+        CONTENT("content", (component, bound) -> component);
 
         public static final Codec<Parameter> CODEC;
         private final String name;
@@ -67,8 +67,8 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
             this.selector = selector;
         }
 
-        public Component select(Component component, ChatSender chatSender) {
-            Component component2 = this.selector.select(component, chatSender);
+        public Component select(Component component, ChatType.Bound bound) {
+            Component component2 = this.selector.select(component, bound);
             return Objects.requireNonNullElse(component2, CommonComponents.EMPTY);
         }
 
@@ -83,7 +83,7 @@ public record ChatTypeDecoration(String translationKey, List<Parameter> paramete
 
         public static interface Selector {
             @Nullable
-            public Component select(Component var1, ChatSender var2);
+            public Component select(Component var1, ChatType.Bound var2);
         }
     }
 }

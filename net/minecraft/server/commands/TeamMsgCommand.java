@@ -20,9 +20,11 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 
@@ -31,7 +33,15 @@ public class TeamMsgCommand {
     private static final SimpleCommandExceptionType ERROR_NOT_ON_TEAM = new SimpleCommandExceptionType(Component.translatable("commands.teammsg.failed.noteam"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("teammsg").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", MessageArgument.message()).executes(commandContext -> TeamMsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), MessageArgument.getChatMessage(commandContext, "message")))));
+        LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("teammsg").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
+            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
+            try {
+                return TeamMsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), chatMessage);
+            } catch (Exception exception) {
+                chatMessage.consume((CommandSourceStack)commandContext.getSource());
+                throw exception;
+            }
+        })));
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("tm").redirect(literalCommandNode));
     }
 
@@ -42,21 +52,21 @@ public class TeamMsgCommand {
             throw ERROR_NOT_ON_TEAM.create();
         }
         MutableComponent component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
-        ChatSender chatSender = commandSourceStack.asChatSender().withTargetName(component);
+        ChatSender chatSender = commandSourceStack.asChatSender();
+        ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND, commandSourceStack).withTargetName(component);
         List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers().stream().filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam).toList();
-        if (list.isEmpty()) {
-            return 0;
-        }
         chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> {
+            FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
             for (ServerPlayer serverPlayer : list) {
                 if (serverPlayer == entity) {
                     serverPlayer.sendSystemMessage(Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), ((PlayerChatMessage)filteredText.raw()).serverContent()));
                     continue;
                 }
-                PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.filter(commandSourceStack, serverPlayer);
-                if (playerChatMessage == null) continue;
-                serverPlayer.sendChatMessage(playerChatMessage, chatSender, ChatType.TEAM_MSG_COMMAND);
+                OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
+                if (outgoingPlayerChatMessage == null) continue;
+                serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
             }
+            filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
         }, (Executor)commandSourceStack.getServer());
         return list.size();
     }
