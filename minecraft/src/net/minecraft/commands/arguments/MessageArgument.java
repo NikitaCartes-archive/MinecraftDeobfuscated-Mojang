@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSigningContext;
@@ -18,10 +19,13 @@ import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
+import net.minecraft.server.players.PlayerList;
 import org.slf4j.Logger;
 
 public class MessageArgument implements SignedArgument<MessageArgument.Message> {
@@ -77,53 +81,78 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 
 	public static record ChatMessage(String plain, Component formatted, MessageSignature signature, boolean signedPreview) {
 		public CompletableFuture<FilteredText<PlayerChatMessage>> resolve(CommandSourceStack commandSourceStack) {
-			CompletableFuture<FilteredText<PlayerChatMessage>> completableFuture = this.filterComponent(commandSourceStack, this.formatted)
+			CompletableFuture<FilteredText<PlayerChatMessage>> completableFuture = this.filterPlainText(commandSourceStack, this.plain)
 				.thenComposeAsync(filteredText -> {
-					ChatDecorator chatDecorator = commandSourceStack.getServer().getChatDecorator();
-					return chatDecorator.decorateChat(commandSourceStack.getPlayer(), filteredText, this.signature, this.signedPreview);
-				}, commandSourceStack.getServer())
-				.thenApply(filteredText -> {
-					PlayerChatMessage playerChatMessage = this.getSignedMessage(filteredText);
-					if (playerChatMessage != null) {
-						this.verify(commandSourceStack, playerChatMessage);
+					FilteredText<Component> filteredText2 = this.rebuildMessageIfNeeded(commandSourceStack, filteredText);
+					return this.resolveFiltered(commandSourceStack, filteredText, filteredText2);
+				}, commandSourceStack.getServer());
+			completableFuture.thenAccept(
+				filteredText -> {
+					PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.raw();
+					if (playerChatMessage.hasExpiredServer(Instant.now())) {
+						MessageArgument.LOGGER
+							.warn(
+								"{} sent expired chat: '{}'. Is the client/server system time unsynchronized?",
+								commandSourceStack.getDisplayName().getString(),
+								playerChatMessage.signedContent().getString()
+							);
 					}
-
-					return filteredText;
-				});
+				}
+			);
 			MessageArgument.logResolutionFailure(commandSourceStack, completableFuture);
 			return completableFuture;
 		}
 
+		private FilteredText<Component> rebuildMessageIfNeeded(CommandSourceStack commandSourceStack, FilteredText<String> filteredText) {
+			String string = filteredText.filtered();
+			return string != null
+				? new FilteredText<>(this.formatted, this.rebuildFilteredMessage(commandSourceStack, string))
+				: FilteredText.passThrough(this.formatted);
+		}
+
 		@Nullable
-		private PlayerChatMessage getSignedMessage(FilteredText<PlayerChatMessage> filteredText) {
-			if (this.signature.isValid()) {
-				return this.signedPreview ? filteredText.raw() : PlayerChatMessage.signed(this.plain, this.signature);
-			} else {
+		private Component rebuildFilteredMessage(CommandSourceStack commandSourceStack, String string) {
+			try {
+				MessageArgument.Message message = MessageArgument.Message.parseText(new StringReader(string), true);
+				return message.resolveComponent(commandSourceStack);
+			} catch (CommandSyntaxException var4) {
 				return null;
 			}
 		}
 
-		private void verify(CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) {
-			if (!playerChatMessage.verify(commandSourceStack)) {
-				MessageArgument.LOGGER
-					.warn("{} sent message with invalid signature: '{}'", commandSourceStack.getDisplayName().getString(), playerChatMessage.signedContent().getString());
-			}
-
-			if (playerChatMessage.hasExpiredServer(Instant.now())) {
-				MessageArgument.LOGGER
-					.warn(
-						"{} sent expired chat: '{}'. Is the client/server system time unsynchronized?",
-						commandSourceStack.getDisplayName().getString(),
-						playerChatMessage.signedContent().getString()
-					);
+		private CompletableFuture<FilteredText<PlayerChatMessage>> resolveFiltered(
+			CommandSourceStack commandSourceStack, FilteredText<String> filteredText, FilteredText<Component> filteredText2
+		) {
+			ChatDecorator chatDecorator = commandSourceStack.getServer().getChatDecorator();
+			ServerPlayer serverPlayer = commandSourceStack.getPlayer();
+			CommandSigningContext commandSigningContext = commandSourceStack.getSigningContext();
+			SignedMessageChain.Decoder decoder = commandSigningContext.decoder();
+			MessageSigner messageSigner = commandSigningContext.argumentSigner();
+			SignedMessageChain.Link link = new SignedMessageChain.Link(this.signature);
+			if (this.signedPreview) {
+				return chatDecorator.decorateFiltered(serverPlayer, filteredText2).thenApply(filteredTextx -> decoder.unpack(link, messageSigner, filteredTextx));
+			} else {
+				FilteredText<Component> filteredText3 = filteredText.map(Component::literal);
+				FilteredText<PlayerChatMessage> filteredText4 = decoder.unpack(link, messageSigner, filteredText3);
+				return chatDecorator.decorateFiltered(serverPlayer, filteredText2)
+					.thenApply(filteredText2x -> ChatDecorator.attachDecoration(filteredText4, filteredText2x));
 			}
 		}
 
-		private CompletableFuture<FilteredText<Component>> filterComponent(CommandSourceStack commandSourceStack, Component component) {
+		private CompletableFuture<FilteredText<String>> filterPlainText(CommandSourceStack commandSourceStack, String string) {
 			ServerPlayer serverPlayer = commandSourceStack.getPlayer();
 			return serverPlayer != null
-				? serverPlayer.getTextFilter().processStreamComponent(component)
-				: CompletableFuture.completedFuture(FilteredText.passThrough(component));
+				? serverPlayer.getTextFilter().processStreamMessage(string)
+				: CompletableFuture.completedFuture(FilteredText.passThrough(string));
+		}
+
+		public void consume(CommandSourceStack commandSourceStack) {
+			if (!commandSourceStack.getSigningContext().argumentSigner().isSystem()) {
+				this.resolve(commandSourceStack).thenAcceptAsync(filteredText -> {
+					PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+					playerList.broadcastMessageHeader((PlayerChatMessage)filteredText.raw(), Set.of());
+				}, commandSourceStack.getServer());
+			}
 		}
 	}
 

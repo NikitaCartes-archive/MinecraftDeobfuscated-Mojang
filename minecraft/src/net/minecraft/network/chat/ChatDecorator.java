@@ -13,10 +13,10 @@ public interface ChatDecorator {
 
 	default CompletableFuture<FilteredText<Component>> decorateFiltered(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText) {
 		CompletableFuture<Component> completableFuture = this.decorate(serverPlayer, filteredText.raw());
-		if (!filteredText.isFiltered()) {
-			return completableFuture.thenApply(FilteredText::passThrough);
-		} else if (filteredText.filtered() == null) {
+		if (filteredText.filtered() == null) {
 			return completableFuture.thenApply(FilteredText::fullyFiltered);
+		} else if (!filteredText.isFiltered()) {
+			return completableFuture.thenApply(FilteredText::passThrough);
 		} else {
 			CompletableFuture<Component> completableFuture2 = this.decorate(serverPlayer, filteredText.filtered());
 			return CompletableFuture.allOf(completableFuture, completableFuture2)
@@ -24,10 +24,17 @@ public interface ChatDecorator {
 		}
 	}
 
-	default CompletableFuture<FilteredText<PlayerChatMessage>> decorateChat(
-		@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText, MessageSignature messageSignature, boolean bl
+	default CompletableFuture<FilteredText<PlayerChatMessage>> decorateSignedChat(
+		@Nullable ServerPlayer serverPlayer, FilteredText<PlayerChatMessage> filteredText
 	) {
-		return this.decorateFiltered(serverPlayer, filteredText)
-			.thenApply(filteredText2 -> PlayerChatMessage.filteredSigned(filteredText, filteredText2, messageSignature, bl));
+		FilteredText<Component> filteredText2 = filteredText.map(PlayerChatMessage::signedContent);
+		return this.decorateFiltered(serverPlayer, filteredText2).thenApply(filteredText2x -> attachDecoration(filteredText, filteredText2x));
+	}
+
+	static FilteredText<PlayerChatMessage> attachDecoration(FilteredText<PlayerChatMessage> filteredText, FilteredText<Component> filteredText2) {
+		return filteredText.map(
+			playerChatMessage -> playerChatMessage.withDecoratedContent(filteredText2.raw()),
+			playerChatMessage -> filteredText2.filtered() != null ? playerChatMessage.withDecoratedContent(filteredText2.filtered()) : playerChatMessage
+		);
 	}
 }

@@ -85,11 +85,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -117,6 +117,7 @@ import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -142,6 +143,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
@@ -307,6 +309,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private Set<ResourceKey<Level>> levels;
 	private RegistryAccess.Frozen registryAccess = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
 	private final ClientTelemetryManager telemetryManager;
+	private final SignedMessageChain.Encoder signedMessageEncoder = new SignedMessageChain().encoder();
 
 	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager) {
 		this.minecraft = minecraft;
@@ -808,11 +811,27 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
-		Registry<ChatType> registry = this.registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-		ChatType chatType = clientboundPlayerChatPacket.resolveType(registry);
-		ChatSender chatSender = clientboundPlayerChatPacket.sender();
-		PlayerChatMessage playerChatMessage = clientboundPlayerChatPacket.getMessage();
-		this.minecraft.getChatListener().handleChatMessage(chatType, playerChatMessage, chatSender);
+		ChatType.Bound bound = clientboundPlayerChatPacket.resolveChatType(this.registryAccess);
+		this.minecraft.getChatListener().handleChatMessage(clientboundPlayerChatPacket.message(), bound);
+	}
+
+	@Override
+	public void handlePlayerChatHeader(ClientboundPlayerChatHeaderPacket clientboundPlayerChatHeaderPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatHeaderPacket, this, this.minecraft);
+		this.minecraft
+			.getChatListener()
+			.handleChatHeader(
+				clientboundPlayerChatHeaderPacket.header(), clientboundPlayerChatHeaderPacket.headerSignature(), clientboundPlayerChatHeaderPacket.bodyDigest()
+			);
+	}
+
+	@Override
+	public void handleDeleteChat(ClientboundDeleteChatPacket clientboundDeleteChatPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundDeleteChatPacket, this, this.minecraft);
+		MessageSignature messageSignature = clientboundDeleteChatPacket.messageSignature();
+		if (!this.minecraft.getChatListener().removeFromDelayedMessageQueue(messageSignature)) {
+			this.minecraft.gui.getChat().deleteMessage(messageSignature);
+		}
 	}
 
 	@Override
@@ -2427,5 +2446,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	public RegistryAccess registryAccess() {
 		return this.registryAccess;
+	}
+
+	public SignedMessageChain.Encoder signedMessageEncoder() {
+		return this.signedMessageEncoder;
 	}
 }

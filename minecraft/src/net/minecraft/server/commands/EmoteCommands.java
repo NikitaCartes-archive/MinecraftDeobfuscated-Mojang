@@ -20,7 +20,8 @@ public class EmoteCommands {
 								PlayerList playerList = commandSourceStack.getServer().getPlayerList();
 								chatMessage.resolve(commandSourceStack)
 									.thenAcceptAsync(
-										filteredText -> playerList.broadcastChatMessage(filteredText, commandSourceStack, ChatType.EMOTE_COMMAND), commandSourceStack.getServer()
+										filteredText -> playerList.broadcastChatMessage(filteredText, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)),
+										commandSourceStack.getServer()
 									);
 								return 1;
 							}

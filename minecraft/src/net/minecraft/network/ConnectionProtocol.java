@@ -40,6 +40,7 @@ import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -63,6 +64,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
@@ -217,6 +219,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundCustomChatCompletionsPacket.class, ClientboundCustomChatCompletionsPacket::new)
 					.addPacket(ClientboundCustomPayloadPacket.class, ClientboundCustomPayloadPacket::new)
 					.addPacket(ClientboundCustomSoundPacket.class, ClientboundCustomSoundPacket::new)
+					.addPacket(ClientboundDeleteChatPacket.class, ClientboundDeleteChatPacket::new)
 					.addPacket(ClientboundDisconnectPacket.class, ClientboundDisconnectPacket::new)
 					.addPacket(ClientboundEntityEventPacket.class, ClientboundEntityEventPacket::new)
 					.addPacket(ClientboundExplodePacket.class, ClientboundExplodePacket::new)
@@ -243,6 +246,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundPlaceGhostRecipePacket.class, ClientboundPlaceGhostRecipePacket::new)
 					.addPacket(ClientboundPlayerAbilitiesPacket.class, ClientboundPlayerAbilitiesPacket::new)
 					.addPacket(ClientboundPlayerChatPacket.class, ClientboundPlayerChatPacket::new)
+					.addPacket(ClientboundPlayerChatHeaderPacket.class, ClientboundPlayerChatHeaderPacket::new)
 					.addPacket(ClientboundPlayerCombatEndPacket.class, ClientboundPlayerCombatEndPacket::new)
 					.addPacket(ClientboundPlayerCombatEnterPacket.class, ClientboundPlayerCombatEnterPacket::new)
 					.addPacket(ClientboundPlayerCombatKillPacket.class, ClientboundPlayerCombatKillPacket::new)

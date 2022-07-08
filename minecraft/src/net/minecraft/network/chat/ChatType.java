@@ -2,11 +2,17 @@ package net.minecraft.network.chat;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Objects;
+import javax.annotation.Nullable;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
 public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 	public static final Codec<ChatType> CODEC = RecordCodecBuilder.create(
@@ -48,5 +54,62 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 		return BuiltinRegistries.register(
 			registry, EMOTE_COMMAND, new ChatType(ChatTypeDecoration.withSender("chat.type.emote"), ChatTypeDecoration.withSender("chat.type.emote"))
 		);
+	}
+
+	public static ChatType.Bound bind(ResourceKey<ChatType> resourceKey, Entity entity) {
+		return bind(resourceKey, entity.level.registryAccess(), entity.getDisplayName());
+	}
+
+	public static ChatType.Bound bind(ResourceKey<ChatType> resourceKey, CommandSourceStack commandSourceStack) {
+		return bind(resourceKey, commandSourceStack.registryAccess(), commandSourceStack.getDisplayName());
+	}
+
+	public static ChatType.Bound bind(ResourceKey<ChatType> resourceKey, RegistryAccess registryAccess, Component component) {
+		Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		return registry.getOrThrow(resourceKey).bind(component);
+	}
+
+	public ChatType.Bound bind(Component component) {
+		return new ChatType.Bound(this, component);
+	}
+
+	public static record Bound(ChatType chatType, Component name, @Nullable Component targetName) {
+		Bound(ChatType chatType, Component component) {
+			this(chatType, component, null);
+		}
+
+		public Component decorate(Component component) {
+			return this.chatType.chat().decorate(component, this);
+		}
+
+		public Component decorateNarration(Component component) {
+			return this.chatType.narration().decorate(component, this);
+		}
+
+		public ChatType.Bound withTargetName(Component component) {
+			return new ChatType.Bound(this.chatType, this.name, component);
+		}
+
+		public ChatType.BoundNetwork toNetwork(RegistryAccess registryAccess) {
+			Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+			return new ChatType.BoundNetwork(registry.getId(this.chatType), this.name, this.targetName);
+		}
+	}
+
+	public static record BoundNetwork(int chatType, Component name, @Nullable Component targetName) {
+		public BoundNetwork(FriendlyByteBuf friendlyByteBuf) {
+			this(friendlyByteBuf.readVarInt(), friendlyByteBuf.readComponent(), friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent));
+		}
+
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeVarInt(this.chatType);
+			friendlyByteBuf.writeComponent(this.name);
+			friendlyByteBuf.writeNullable(this.targetName, FriendlyByteBuf::writeComponent);
+		}
+
+		public ChatType.Bound resolve(RegistryAccess registryAccess) {
+			Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+			return new ChatType.Bound((ChatType)Objects.requireNonNull(registry.byId(this.chatType), "Invalid chat type"), this.name, this.targetName);
+		}
 	}
 }

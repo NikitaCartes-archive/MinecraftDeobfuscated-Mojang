@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -166,7 +168,7 @@ public class ChatComponent extends GuiComponent {
 	}
 
 	public void addMessage(Component component, @Nullable GuiMessageTag guiMessageTag) {
-		this.addMessage(component, this.minecraft.gui.getGuiTicks(), guiMessageTag, false);
+		this.addMessage(component, null, guiMessageTag);
 		String string = component.getString().replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n");
 		String string2 = Util.mapNullable(guiMessageTag, GuiMessageTag::logTag);
 		if (string2 != null) {
@@ -176,7 +178,11 @@ public class ChatComponent extends GuiComponent {
 		}
 	}
 
-	private void addMessage(Component component, int i, @Nullable GuiMessageTag guiMessageTag, boolean bl) {
+	public void addMessage(Component component, @Nullable MessageSignature messageSignature, @Nullable GuiMessageTag guiMessageTag) {
+		this.addMessage(component, messageSignature, this.minecraft.gui.getGuiTicks(), guiMessageTag, false);
+	}
+
+	private void addMessage(Component component, @Nullable MessageSignature messageSignature, int i, @Nullable GuiMessageTag guiMessageTag, boolean bl) {
 		int j = Mth.floor((double)this.getWidth() / this.getScale());
 		if (guiMessageTag != null && guiMessageTag.icon() != null) {
 			j -= guiMessageTag.icon().width + 4 + 2;
@@ -201,7 +207,7 @@ public class ChatComponent extends GuiComponent {
 		}
 
 		if (!bl) {
-			this.allMessages.add(0, new GuiMessage(i, component, guiMessageTag));
+			this.allMessages.add(0, new GuiMessage(i, component, messageSignature, guiMessageTag));
 
 			while (this.allMessages.size() > 100) {
 				this.allMessages.remove(this.allMessages.size() - 1);
@@ -209,13 +215,31 @@ public class ChatComponent extends GuiComponent {
 		}
 	}
 
+	public void deleteMessage(MessageSignature messageSignature) {
+		Iterator<GuiMessage> iterator = this.allMessages.iterator();
+
+		while (iterator.hasNext()) {
+			MessageSignature messageSignature2 = ((GuiMessage)iterator.next()).headerSignature();
+			if (messageSignature2 != null && messageSignature2.equals(messageSignature)) {
+				iterator.remove();
+				break;
+			}
+		}
+
+		this.refreshTrimmedMessage();
+	}
+
 	public void rescaleChat() {
-		this.trimmedMessages.clear();
 		this.resetChatScroll();
+		this.refreshTrimmedMessage();
+	}
+
+	private void refreshTrimmedMessage() {
+		this.trimmedMessages.clear();
 
 		for (int i = this.allMessages.size() - 1; i >= 0; i--) {
 			GuiMessage guiMessage = (GuiMessage)this.allMessages.get(i);
-			this.addMessage(guiMessage.content(), guiMessage.addedTime(), guiMessage.tag(), true);
+			this.addMessage(guiMessage.content(), guiMessage.headerSignature(), guiMessage.addedTime(), guiMessage.tag(), true);
 		}
 	}
 

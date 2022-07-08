@@ -21,7 +21,8 @@ public class SayCommand {
 								PlayerList playerList = commandSourceStack.getServer().getPlayerList();
 								chatMessage.resolve(commandSourceStack)
 									.thenAcceptAsync(
-										filteredText -> playerList.broadcastChatMessage(filteredText, commandSourceStack, ChatType.SAY_COMMAND), commandSourceStack.getServer()
+										filteredText -> playerList.broadcastChatMessage(filteredText, commandSourceStack, ChatType.bind(ChatType.SAY_COMMAND, commandSourceStack)),
+										commandSourceStack.getServer()
 									);
 								return 1;
 							}

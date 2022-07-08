@@ -21,7 +21,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -66,7 +66,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		@Nullable Entity entity
 	) {
 		this(commandSource, vec3, vec2, serverLevel, i, string, component, minecraftServer, entity, false, (commandContext, bl, ix) -> {
-		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.NONE);
+		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.anonymous());
 	}
 
 	protected CommandSourceStack(
@@ -352,7 +352,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	public ChatSender asChatSender() {
-		return this.entity != null ? this.entity.asChatSender() : ChatSender.system(this.getDisplayName());
+		return this.entity != null ? this.entity.asChatSender() : ChatSender.SYSTEM;
 	}
 
 	@Override
@@ -415,13 +415,13 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		return this.signingContext;
 	}
 
-	public void sendChatMessage(ChatSender chatSender, PlayerChatMessage playerChatMessage, ResourceKey<ChatType> resourceKey) {
+	public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, ChatType.Bound bound) {
 		if (!this.silent) {
 			ServerPlayer serverPlayer = this.getPlayer();
 			if (serverPlayer != null) {
-				serverPlayer.sendChatMessage(playerChatMessage, chatSender, resourceKey);
+				serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
 			} else {
-				this.source.sendSystemMessage(this.server.decorateChatMessage(chatSender, playerChatMessage.serverContent(), resourceKey));
+				this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.original().serverContent()));
 			}
 		}
 	}

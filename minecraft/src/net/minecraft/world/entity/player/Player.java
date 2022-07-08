@@ -1576,7 +1576,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public ChatSender asChatSender() {
-		return new ChatSender(this.getGameProfile().getId(), this.getDisplayName());
+		return new ChatSender(this.getGameProfile().getId(), this.getProfilePublicKey());
 	}
 
 	public boolean tryToStartFallFlying() {
