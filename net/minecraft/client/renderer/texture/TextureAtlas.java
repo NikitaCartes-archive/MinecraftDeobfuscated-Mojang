@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -132,7 +133,7 @@ implements Tickable {
         } catch (StitcherException stitcherException) {
             CrashReport crashReport = CrashReport.forThrowable(stitcherException, "Stitching");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Stitcher");
-            crashReportCategory.setDetail("Sprites", stitcherException.getAllSprites().stream().map(info -> String.format("%s[%dx%d]", info.name(), info.width(), info.height())).collect(Collectors.joining(",")));
+            crashReportCategory.setDetail("Sprites", stitcherException.getAllSprites().stream().map(info -> String.format(Locale.ROOT, "%s[%dx%d]", info.name(), info.width(), info.height())).collect(Collectors.joining(",")));
             crashReportCategory.setDetail("Max Texture Size", j);
             throw new ReportedException(crashReport);
         }
@@ -232,7 +233,7 @@ implements Tickable {
     }
 
     private ResourceLocation getResourceLocation(ResourceLocation resourceLocation) {
-        return new ResourceLocation(resourceLocation.getNamespace(), String.format("textures/%s%s", resourceLocation.getPath(), FILE_EXTENSION));
+        return new ResourceLocation(resourceLocation.getNamespace(), String.format(Locale.ROOT, "textures/%s%s", resourceLocation.getPath(), FILE_EXTENSION));
     }
 
     public void cycleAnimationFrames() {

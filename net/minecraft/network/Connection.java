@@ -45,6 +45,7 @@ import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.SkipPacketException;
+import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.Varint21FrameDecoder;
 import net.minecraft.network.Varint21LengthFieldPrepender;
 import net.minecraft.network.chat.Component;
@@ -55,8 +56,6 @@ import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.RunningOnDifferentThreadException;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
@@ -234,11 +233,10 @@ extends SimpleChannelInboundHandler<Packet<?>> {
 
     public void tick() {
         this.flushQueue();
-        if (this.packetListener instanceof ServerLoginPacketListenerImpl) {
-            ((ServerLoginPacketListenerImpl)this.packetListener).tick();
-        }
-        if (this.packetListener instanceof ServerGamePacketListenerImpl) {
-            ((ServerGamePacketListenerImpl)this.packetListener).tick();
+        PacketListener packetListener = this.packetListener;
+        if (packetListener instanceof TickablePacketListener) {
+            TickablePacketListener tickablePacketListener = (TickablePacketListener)packetListener;
+            tickablePacketListener.tick();
         }
         if (!this.isConnected() && !this.disconnectionHandled) {
             this.handleDisconnection();

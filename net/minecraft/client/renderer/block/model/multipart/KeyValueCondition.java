@@ -6,6 +6,7 @@ package net.minecraft.client.renderer.block.model.multipart;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Splitter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ implements Condition {
         boolean bl;
         Property<?> property = stateDefinition.getProperty(this.key);
         if (property == null) {
-            throw new RuntimeException(String.format("Unknown property '%s' on '%s'", this.key, stateDefinition.getOwner()));
+            throw new RuntimeException(String.format(Locale.ROOT, "Unknown property '%s' on '%s'", this.key, stateDefinition.getOwner()));
         }
         String string2 = this.value;
         boolean bl2 = bl = !string2.isEmpty() && string2.charAt(0) == '!';
@@ -44,7 +45,7 @@ implements Condition {
             string2 = string2.substring(1);
         }
         if ((list = PIPE_SPLITTER.splitToList(string2)).isEmpty()) {
-            throw new RuntimeException(String.format("Empty value '%s' for property '%s' on '%s'", this.value, this.key, stateDefinition.getOwner()));
+            throw new RuntimeException(String.format(Locale.ROOT, "Empty value '%s' for property '%s' on '%s'", this.value, this.key, stateDefinition.getOwner()));
         }
         if (list.size() == 1) {
             predicate = this.getBlockStatePredicate(stateDefinition, property, string2);
@@ -58,7 +59,7 @@ implements Condition {
     private Predicate<BlockState> getBlockStatePredicate(StateDefinition<Block, BlockState> stateDefinition, Property<?> property, String string) {
         Optional<?> optional = property.getValue(string);
         if (!optional.isPresent()) {
-            throw new RuntimeException(String.format("Unknown value '%s' for property '%s' on '%s' in '%s'", string, this.key, stateDefinition.getOwner(), this.value));
+            throw new RuntimeException(String.format(Locale.ROOT, "Unknown value '%s' for property '%s' on '%s' in '%s'", string, this.key, stateDefinition.getOwner(), this.value));
         }
         return blockState -> blockState.getValue(property).equals(optional.get());
     }

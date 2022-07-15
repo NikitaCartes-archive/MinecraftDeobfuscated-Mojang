@@ -82,7 +82,7 @@ extends ToFloatFunction<C> {
 
         @Override
         public String parityString() {
-            return String.format("k=%.3f", Float.valueOf(this.value));
+            return String.format(Locale.ROOT, "k=%.3f", Float.valueOf(this.value));
         }
 
         @Override

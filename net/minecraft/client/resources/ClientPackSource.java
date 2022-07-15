@@ -238,7 +238,7 @@ implements RepositorySource {
         try (FilePackResources filePackResources = new FilePackResources(file);){
             packMetadataSection = filePackResources.getMetadataSection(PackMetadataSection.SERIALIZER);
         } catch (IOException iOException) {
-            return Util.failedFuture(new IOException(String.format("Invalid resourcepack at %s", file), iOException));
+            return Util.failedFuture(new IOException(String.format(Locale.ROOT, "Invalid resourcepack at %s", file), iOException));
         }
         LOGGER.info("Applying server pack {}", (Object)file);
         this.serverPack = new Pack(SERVER_ID, true, () -> new FilePackResources(file), Component.translatable("resourcePack.server.name"), packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, PackType.CLIENT_RESOURCES), Pack.Position.TOP, true, packSource);

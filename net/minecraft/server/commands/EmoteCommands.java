@@ -6,7 +6,6 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import java.util.concurrent.Executor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
@@ -21,7 +20,7 @@ public class EmoteCommands {
             MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "action");
             CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
             PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-            chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> playerList.broadcastChatMessage((FilteredText<PlayerChatMessage>)filteredText, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)), (Executor)commandSourceStack.getServer());
+            chatMessage.resolve(commandSourceStack, filteredText -> playerList.broadcastChatMessage((FilteredText<PlayerChatMessage>)filteredText, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)));
             return 1;
         })));
     }

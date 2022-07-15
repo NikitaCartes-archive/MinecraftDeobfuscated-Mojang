@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -1148,19 +1149,19 @@ implements WorldGenLevel {
     public void saveDebugReport(Path path) throws IOException {
         ChunkMap chunkMap = this.getChunkSource().chunkMap;
         try (BufferedWriter writer = Files.newBufferedWriter(path.resolve("stats.txt"), new OpenOption[0]);){
-            writer.write(String.format("spawning_chunks: %d\n", chunkMap.getDistanceManager().getNaturalSpawnChunkCount()));
+            writer.write(String.format(Locale.ROOT, "spawning_chunks: %d\n", chunkMap.getDistanceManager().getNaturalSpawnChunkCount()));
             NaturalSpawner.SpawnState spawnState = this.getChunkSource().getLastSpawnState();
             if (spawnState != null) {
                 for (Object2IntMap.Entry entry : spawnState.getMobCategoryCounts().object2IntEntrySet()) {
-                    writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)entry.getKey()).getName(), entry.getIntValue()));
+                    writer.write(String.format(Locale.ROOT, "spawn_count.%s: %d\n", ((MobCategory)entry.getKey()).getName(), entry.getIntValue()));
                 }
             }
-            writer.write(String.format("entities: %s\n", this.entityManager.gatherStats()));
-            writer.write(String.format("block_entity_tickers: %d\n", this.blockEntityTickers.size()));
-            writer.write(String.format("block_ticks: %d\n", ((LevelTicks)this.getBlockTicks()).count()));
-            writer.write(String.format("fluid_ticks: %d\n", ((LevelTicks)this.getFluidTicks()).count()));
+            writer.write(String.format(Locale.ROOT, "entities: %s\n", this.entityManager.gatherStats()));
+            writer.write(String.format(Locale.ROOT, "block_entity_tickers: %d\n", this.blockEntityTickers.size()));
+            writer.write(String.format(Locale.ROOT, "block_ticks: %d\n", ((LevelTicks)this.getBlockTicks()).count()));
+            writer.write(String.format(Locale.ROOT, "fluid_ticks: %d\n", ((LevelTicks)this.getFluidTicks()).count()));
             writer.write("distance_manager: " + chunkMap.getDistanceManager().getDebugStatus() + "\n");
-            writer.write(String.format("pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
+            writer.write(String.format(Locale.ROOT, "pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
         }
         CrashReport crashReport = new CrashReport("Level dump", new Exception("dummy"));
         this.fillReportDetails(crashReport);
@@ -1248,7 +1249,7 @@ implements WorldGenLevel {
 
     @VisibleForTesting
     public String getWatchdogStats() {
-        return String.format("players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entityManager.gatherStats(), ServerLevel.getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()), this.blockEntityTickers.size(), ServerLevel.getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType), ((LevelTicks)this.getBlockTicks()).count(), ((LevelTicks)this.getFluidTicks()).count(), this.gatherChunkSourceStats());
+        return String.format(Locale.ROOT, "players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entityManager.gatherStats(), ServerLevel.getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()), this.blockEntityTickers.size(), ServerLevel.getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType), ((LevelTicks)this.getBlockTicks()).count(), ((LevelTicks)this.getFluidTicks()).count(), this.gatherChunkSourceStats());
     }
 
     private static <T> String getTypeCount(Iterable<T> iterable, Function<T, String> function) {

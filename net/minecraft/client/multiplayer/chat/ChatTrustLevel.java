@@ -19,8 +19,8 @@ public enum ChatTrustLevel {
     NOT_SECURE;
 
 
-    public static ChatTrustLevel evaluate(PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo) {
-        if (playerChatMessage.hasExpiredClient(Instant.now())) {
+    public static ChatTrustLevel evaluate(PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo, Instant instant) {
+        if (playerChatMessage.hasExpiredClient(instant)) {
             return NOT_SECURE;
         }
         if (playerInfo == null || !playerInfo.getMessageValidator().validateMessage(playerChatMessage)) {
@@ -29,7 +29,7 @@ public enum ChatTrustLevel {
         if (playerChatMessage.unsignedContent().isPresent()) {
             return MODIFIED;
         }
-        if (!component.contains(playerChatMessage.signedContent())) {
+        if (!component.contains(playerChatMessage.signedContent().decorated())) {
             return MODIFIED;
         }
         return SECURE;
@@ -42,7 +42,7 @@ public enum ChatTrustLevel {
     @Nullable
     public GuiMessageTag createTag(PlayerChatMessage playerChatMessage) {
         return switch (this) {
-            case MODIFIED -> GuiMessageTag.chatModified(playerChatMessage.signedContent());
+            case MODIFIED -> GuiMessageTag.chatModified(playerChatMessage.signedContent().plain());
             case NOT_SECURE -> GuiMessageTag.chatNotSecure();
             default -> null;
         };

@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -1151,7 +1152,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
             if (resourceLocation == BuiltInLootTables.EMPTY || !set.add(resourceLocation)) continue;
             LootTable.Builder builder6 = this.map.remove(resourceLocation);
             if (builder6 == null) {
-                throw new IllegalStateException(String.format("Missing loottable '%s' for '%s'", resourceLocation, Registry.BLOCK.getKey(block2)));
+                throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, Registry.BLOCK.getKey(block2)));
             }
             biConsumer.accept(resourceLocation, builder6);
         }

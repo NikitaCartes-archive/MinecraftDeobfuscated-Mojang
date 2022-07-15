@@ -34,7 +34,7 @@ public class ChatPreviewRequests {
         if (this.pending != null && this.pending.matches(string)) {
             return true;
         }
-        if (this.isRequestReady(l)) {
+        if (this.minecraft.isLocalServer() || this.isRequestReady(l)) {
             PendingPreview pendingPreview;
             this.pending = pendingPreview = new PendingPreview(this.queryIdGenerator.next(), string);
             this.lastRequestTime = l;

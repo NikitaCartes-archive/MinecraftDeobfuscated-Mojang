@@ -4,6 +4,7 @@
 package net.minecraft.commands;
 
 import net.minecraft.commands.arguments.ArgumentSignatures;
+import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.SignedMessageChain;
@@ -14,18 +15,13 @@ public interface CommandSigningContext {
         return new CommandSigningContext(){
 
             @Override
-            public MessageSignature getArgumentSignature(String string) {
-                return MessageSignature.EMPTY;
+            public SignedArgument getArgument(String string) {
+                return SignedArgument.UNSIGNED;
             }
 
             @Override
             public MessageSigner argumentSigner() {
                 return messageSigner;
-            }
-
-            @Override
-            public boolean signedArgumentPreview(String string) {
-                return false;
             }
 
             @Override
@@ -35,25 +31,22 @@ public interface CommandSigningContext {
         };
     }
 
-    public MessageSignature getArgumentSignature(String var1);
+    public SignedArgument getArgument(String var1);
 
     public MessageSigner argumentSigner();
 
     public SignedMessageChain.Decoder decoder();
 
-    public boolean signedArgumentPreview(String var1);
-
-    public record SignedArguments(SignedMessageChain.Decoder decoder, MessageSigner argumentSigner, ArgumentSignatures argumentSignatures, boolean signedPreview) implements CommandSigningContext
+    public record SignedArguments(SignedMessageChain.Decoder decoder, MessageSigner argumentSigner, ArgumentSignatures argumentSignatures, boolean signedPreview, LastSeenMessages lastSeenMessages) implements CommandSigningContext
     {
         @Override
-        public MessageSignature getArgumentSignature(String string) {
-            return this.argumentSignatures.get(string);
+        public SignedArgument getArgument(String string) {
+            return new SignedArgument(this.argumentSignatures.get(string), this.signedPreview, this.lastSeenMessages);
         }
+    }
 
-        @Override
-        public boolean signedArgumentPreview(String string) {
-            return this.signedPreview;
-        }
+    public record SignedArgument(MessageSignature signature, boolean signedPreview, LastSeenMessages lastSeenMessages) {
+        public static final SignedArgument UNSIGNED = new SignedArgument(MessageSignature.EMPTY, false, LastSeenMessages.EMPTY);
     }
 }
 

@@ -91,7 +91,7 @@ public class WorldBorderCommand {
             throw ERROR_TOO_FAR_OUT.create();
         }
         worldBorder.setCenter(vec2.x, vec2.y);
-        commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", Float.valueOf(vec2.x)), String.format("%.2f", Float.valueOf(vec2.y))), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", Float.valueOf(vec2.x)), String.format(Locale.ROOT, "%.2f", Float.valueOf(vec2.y))), true);
         return 0;
     }
 

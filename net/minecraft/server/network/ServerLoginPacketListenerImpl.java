@@ -20,6 +20,7 @@ import javax.crypto.SecretKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
+import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.ThrowingComponent;
@@ -44,7 +45,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class ServerLoginPacketListenerImpl
-implements ServerLoginPacketListener {
+implements TickablePacketListener,
+ServerLoginPacketListener {
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_TICKS_BEFORE_LOGIN = 600;
@@ -71,6 +73,7 @@ implements ServerLoginPacketListener {
         this.nonce = Ints.toByteArray(RANDOM.nextInt());
     }
 
+    @Override
     public void tick() {
         ServerPlayer serverPlayer;
         if (this.state == State.READY_TO_ACCEPT) {

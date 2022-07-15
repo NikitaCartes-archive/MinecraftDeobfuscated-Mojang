@@ -6,6 +6,7 @@ package net.minecraft;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class SystemReport {
         this.ignoreErrors("hardware", () -> this.putHardware(new SystemInfo()));
         this.setDetail("JVM Flags", () -> {
             List list = Util.getVmArguments().collect(Collectors.toList());
-            return String.format("%d total; %s", list.size(), String.join((CharSequence)" ", list));
+            return String.format(Locale.ROOT, "%d total; %s", list.size(), String.join((CharSequence)" ", list));
         });
     }
 
@@ -84,18 +85,18 @@ public class SystemReport {
     private void putPhysicalMemory(List<PhysicalMemory> list) {
         int i = 0;
         for (PhysicalMemory physicalMemory : list) {
-            String string = String.format("Memory slot #%d ", i++);
-            this.setDetail(string + "capacity (MB)", () -> String.format("%.2f", Float.valueOf((float)physicalMemory.getCapacity() / 1048576.0f)));
-            this.setDetail(string + "clockSpeed (GHz)", () -> String.format("%.2f", Float.valueOf((float)physicalMemory.getClockSpeed() / 1.0E9f)));
+            String string = String.format(Locale.ROOT, "Memory slot #%d ", i++);
+            this.setDetail(string + "capacity (MB)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)physicalMemory.getCapacity() / 1048576.0f)));
+            this.setDetail(string + "clockSpeed (GHz)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)physicalMemory.getClockSpeed() / 1.0E9f)));
             this.setDetail(string + "type", physicalMemory::getMemoryType);
         }
     }
 
     private void putVirtualMemory(VirtualMemory virtualMemory) {
-        this.setDetail("Virtual memory max (MB)", () -> String.format("%.2f", Float.valueOf((float)virtualMemory.getVirtualMax() / 1048576.0f)));
-        this.setDetail("Virtual memory used (MB)", () -> String.format("%.2f", Float.valueOf((float)virtualMemory.getVirtualInUse() / 1048576.0f)));
-        this.setDetail("Swap memory total (MB)", () -> String.format("%.2f", Float.valueOf((float)virtualMemory.getSwapTotal() / 1048576.0f)));
-        this.setDetail("Swap memory used (MB)", () -> String.format("%.2f", Float.valueOf((float)virtualMemory.getSwapUsed() / 1048576.0f)));
+        this.setDetail("Virtual memory max (MB)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)virtualMemory.getVirtualMax() / 1048576.0f)));
+        this.setDetail("Virtual memory used (MB)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)virtualMemory.getVirtualInUse() / 1048576.0f)));
+        this.setDetail("Swap memory total (MB)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)virtualMemory.getSwapTotal() / 1048576.0f)));
+        this.setDetail("Swap memory used (MB)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)virtualMemory.getSwapUsed() / 1048576.0f)));
     }
 
     private void putMemory(GlobalMemory globalMemory) {
@@ -106,10 +107,10 @@ public class SystemReport {
     private void putGraphics(List<GraphicsCard> list) {
         int i = 0;
         for (GraphicsCard graphicsCard : list) {
-            String string = String.format("Graphics card #%d ", i++);
+            String string = String.format(Locale.ROOT, "Graphics card #%d ", i++);
             this.setDetail(string + "name", graphicsCard::getName);
             this.setDetail(string + "vendor", graphicsCard::getVendor);
-            this.setDetail(string + "VRAM (MB)", () -> String.format("%.2f", Float.valueOf((float)graphicsCard.getVRam() / 1048576.0f)));
+            this.setDetail(string + "VRAM (MB)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)graphicsCard.getVRam() / 1048576.0f)));
             this.setDetail(string + "deviceId", graphicsCard::getDeviceId);
             this.setDetail(string + "versionInfo", graphicsCard::getVersionInfo);
         }
@@ -121,7 +122,7 @@ public class SystemReport {
         this.setDetail("Processor Name", processorIdentifier::getName);
         this.setDetail("Identifier", processorIdentifier::getIdentifier);
         this.setDetail("Microarchitecture", processorIdentifier::getMicroarchitecture);
-        this.setDetail("Frequency (GHz)", () -> String.format("%.2f", Float.valueOf((float)processorIdentifier.getVendorFreq() / 1.0E9f)));
+        this.setDetail("Frequency (GHz)", () -> String.format(Locale.ROOT, "%.2f", Float.valueOf((float)processorIdentifier.getVendorFreq() / 1.0E9f)));
         this.setDetail("Number of physical packages", () -> String.valueOf(centralProcessor.getPhysicalPackageCount()));
         this.setDetail("Number of physical CPUs", () -> String.valueOf(centralProcessor.getPhysicalProcessorCount()));
         this.setDetail("Number of logical CPUs", () -> String.valueOf(centralProcessor.getLogicalProcessorCount()));

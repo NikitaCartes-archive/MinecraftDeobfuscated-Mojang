@@ -9,8 +9,6 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,7 +62,7 @@ implements Runnable {
                 crashReportCategory2.setDetail("Random tick rate", () -> this.server.getWorldData().getGameRules().getRule(GameRules.RULE_RANDOMTICKING).toString());
                 crashReportCategory2.setDetail("Level stats", () -> Streams.stream(this.server.getAllLevels()).map(serverLevel -> serverLevel.dimension() + ": " + serverLevel.getWatchdogStats()).collect(Collectors.joining(",\n")));
                 Bootstrap.realStdoutPrintln("Crash report:\n" + crashReport.getFriendlyReport());
-                File file = new File(new File(this.server.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt");
+                File file = new File(new File(this.server.getServerDirectory(), "crash-reports"), "crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
                 if (crashReport.saveToFile(file)) {
                     LOGGER.error("This crash report has been saved to: {}", (Object)file.getAbsolutePath());
                 } else {

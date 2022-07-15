@@ -10,6 +10,7 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.TaggedChoice;
 import com.mojang.datafixers.util.Pair;
+import java.util.Locale;
 import java.util.Objects;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
@@ -36,7 +37,7 @@ extends DataFix {
             Type<?> type = taggedChoiceType.types().get(string);
             Type<?> type2 = taggedChoiceType2.types().get(string2);
             if (!type2.equals(type, true, true)) {
-                throw new IllegalStateException(String.format("Dynamic type check failed: %s not equal to %s", type2, type));
+                throw new IllegalStateException(String.format(Locale.ROOT, "Dynamic type check failed: %s not equal to %s", type2, type));
             }
             return string2;
         })), this.fixTypeEverywhere(this.name + " for entity name", type, dynamicOps -> pair -> pair.mapSecond(this::rename)));

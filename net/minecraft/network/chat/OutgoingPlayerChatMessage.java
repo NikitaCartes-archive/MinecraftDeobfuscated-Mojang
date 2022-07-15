@@ -33,7 +33,7 @@ public interface OutgoingPlayerChatMessage {
     }
 
     public static FilteredText<OutgoingPlayerChatMessage> createFromFiltered(FilteredText<PlayerChatMessage> filteredText, ChatSender chatSender) {
-        return filteredText.map(playerChatMessage -> OutgoingPlayerChatMessage.create((PlayerChatMessage)filteredText.raw(), chatSender), NotTracked::new);
+        return filteredText.mapWithEquality(playerChatMessage -> OutgoingPlayerChatMessage.create((PlayerChatMessage)filteredText.raw(), chatSender), NotTracked::new);
     }
 
     public static class NotTracked

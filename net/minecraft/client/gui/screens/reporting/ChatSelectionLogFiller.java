@@ -4,13 +4,14 @@
 package net.minecraft.client.gui.screens.reporting;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.reporting.ChatLogSegmenter;
 import net.minecraft.client.multiplayer.chat.ChatLog;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,10 +19,10 @@ import org.jetbrains.annotations.Nullable;
 public class ChatSelectionLogFiller {
     private static final int CONTEXT_FOLDED_SIZE = 4;
     private final ChatLog log;
-    private final Predicate<LoggedChat> canReport;
+    private final Predicate<LoggedChatMessage> canReport;
     private int nextMessageId;
 
-    public ChatSelectionLogFiller(ChatLog chatLog, Predicate<LoggedChat> predicate) {
+    public ChatSelectionLogFiller(ChatLog chatLog, Predicate<LoggedChatMessage> predicate) {
         this.log = chatLog;
         this.canReport = predicate;
         this.nextMessageId = chatLog.newest();
@@ -40,7 +41,7 @@ public class ChatSelectionLogFiller {
         }
     }
 
-    private static int addFoldedMessagesTo(List<LoggedChat.WithId> list, Output output) {
+    private static int addFoldedMessagesTo(List<ChatLog.Entry<LoggedChatMessage>> list, Output output) {
         int i = 8;
         if (list.size() > 8) {
             int j = list.size() - 8;
@@ -55,27 +56,27 @@ public class ChatSelectionLogFiller {
 
     @Nullable
     private ChatLogSegmenter.Results nextSegment() {
-        ChatLogSegmenter chatLogSegmenter = new ChatLogSegmenter(withId -> this.getMessageType(withId.message()));
-        OptionalInt optionalInt = this.log.selectBefore(this.nextMessageId).messagesWithIds().takeWhile(chatLogSegmenter::accept).mapToInt(LoggedChat.WithId::id).reduce((i, j) -> j);
+        ChatLogSegmenter chatLogSegmenter = new ChatLogSegmenter(entry -> this.getMessageType((LoggedChatMessage)entry.event()));
+        OptionalInt optionalInt = this.log.selectBefore(this.nextMessageId).entries().map(entry -> entry.tryCast(LoggedChatMessage.class)).filter(Objects::nonNull).takeWhile(chatLogSegmenter::accept).mapToInt(ChatLog.Entry::id).reduce((i, j) -> j);
         if (optionalInt.isPresent()) {
             this.nextMessageId = this.log.before(optionalInt.getAsInt());
         }
         return chatLogSegmenter.build();
     }
 
-    private ChatLogSegmenter.MessageType getMessageType(LoggedChat loggedChat) {
-        return this.canReport.test(loggedChat) ? ChatLogSegmenter.MessageType.REPORTABLE : ChatLogSegmenter.MessageType.CONTEXT;
+    private ChatLogSegmenter.MessageType getMessageType(LoggedChatMessage loggedChatMessage) {
+        return this.canReport.test(loggedChatMessage) ? ChatLogSegmenter.MessageType.REPORTABLE : ChatLogSegmenter.MessageType.CONTEXT;
     }
 
     @Environment(value=EnvType.CLIENT)
     public static interface Output {
-        default public void acceptMessages(Iterable<LoggedChat.WithId> iterable) {
-            for (LoggedChat.WithId withId : iterable) {
-                this.acceptMessage(withId.id(), withId.message());
+        default public void acceptMessages(Iterable<ChatLog.Entry<LoggedChatMessage>> iterable) {
+            for (ChatLog.Entry<LoggedChatMessage> entry : iterable) {
+                this.acceptMessage(entry.id(), entry.event());
             }
         }
 
-        public void acceptMessage(int var1, LoggedChat var2);
+        public void acceptMessage(int var1, LoggedChatMessage var2);
 
         public void acceptDivider(Component var1);
     }

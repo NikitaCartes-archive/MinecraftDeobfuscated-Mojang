@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
 
 public interface SignedMessageValidator {
-    public static final SignedMessageValidator ALWAYS_ACCEPT = new SignedMessageValidator(){
+    public static final SignedMessageValidator ALWAYS_REJECT = new SignedMessageValidator(){
 
         @Override
         public void validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
@@ -19,12 +19,12 @@ public interface SignedMessageValidator {
 
         @Override
         public boolean validateMessage(PlayerChatMessage playerChatMessage) {
-            return true;
+            return false;
         }
     };
 
     public static SignedMessageValidator create(@Nullable ProfilePublicKey profilePublicKey) {
-        return profilePublicKey != null ? new KeyBased(profilePublicKey.createSignatureValidator()) : ALWAYS_ACCEPT;
+        return profilePublicKey != null ? new KeyBased(profilePublicKey.createSignatureValidator()) : ALWAYS_REJECT;
     }
 
     public void validateHeader(SignedMessageHeader var1, MessageSignature var2, byte[] var3);
@@ -42,27 +42,29 @@ public interface SignedMessageValidator {
             this.validator = signatureValidator;
         }
 
-        private boolean updateAndValidateChain(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature) {
-            boolean bl = this.lastSignature == null || this.lastSignature.equals(signedMessageHeader.previousSignature()) || this.lastSignature.equals(messageSignature);
-            this.lastSignature = messageSignature;
-            return bl;
+        private boolean validateChain(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature) {
+            return this.lastSignature == null || this.lastSignature.equals(signedMessageHeader.previousSignature()) || this.lastSignature.equals(messageSignature);
+        }
+
+        private boolean validateContents(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
+            return this.validateChain(signedMessageHeader, messageSignature) && messageSignature.verify(this.validator, signedMessageHeader, bs);
         }
 
         @Override
         public void validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-            boolean bl = messageSignature.verify(this.validator, signedMessageHeader, bs);
-            boolean bl2 = this.updateAndValidateChain(signedMessageHeader, messageSignature);
-            this.isChainConsistent = this.isChainConsistent && bl && bl2;
+            this.isChainConsistent = this.isChainConsistent && this.validateContents(signedMessageHeader, messageSignature, bs);
+            this.lastSignature = messageSignature;
         }
 
         @Override
         public boolean validateMessage(PlayerChatMessage playerChatMessage) {
-            byte[] bs = playerChatMessage.signedBody().hash().asBytes();
-            boolean bl = playerChatMessage.headerSignature().verify(this.validator, playerChatMessage.signedHeader(), bs);
-            boolean bl2 = this.updateAndValidateChain(playerChatMessage.signedHeader(), playerChatMessage.headerSignature());
-            boolean bl3 = this.isChainConsistent && bl && bl2;
-            this.isChainConsistent = bl;
-            return bl3;
+            if (this.isChainConsistent && this.validateContents(playerChatMessage.signedHeader(), playerChatMessage.headerSignature(), playerChatMessage.signedBody().hash().asBytes())) {
+                this.lastSignature = playerChatMessage.headerSignature();
+                return true;
+            }
+            this.isChainConsistent = true;
+            this.lastSignature = null;
+            return false;
         }
     }
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -305,7 +306,7 @@ public final class NbtUtils {
                         } else if (k != 0) {
                             stringBuilder.append(' ');
                         }
-                        stringBuilder.append(String.format("0x%02X", bs[k] & 0xFF));
+                        stringBuilder.append(String.format(Locale.ROOT, "0x%02X", bs[k] & 0xFF));
                     }
                 } else {
                     NbtUtils.indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
@@ -344,7 +345,7 @@ public final class NbtUtils {
                 int m = string.length;
                 for (int k = 0; k < m; ++k) {
                     int n = string[k];
-                    j = Math.max(j, String.format("%X", n).length());
+                    j = Math.max(j, String.format(Locale.ROOT, "%X", n).length());
                 }
                 int k = is.length;
                 NbtUtils.indent(i, stringBuilder).append("int[").append(k).append("] {\n");
@@ -362,7 +363,7 @@ public final class NbtUtils {
                         } else if (m != 0) {
                             stringBuilder.append(' ');
                         }
-                        stringBuilder.append(String.format("0x%0" + j + "X", is[m]));
+                        stringBuilder.append(String.format(Locale.ROOT, "0x%0" + j + "X", is[m]));
                     }
                 } else {
                     NbtUtils.indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
@@ -405,7 +406,7 @@ public final class NbtUtils {
                 int n2 = m.length;
                 for (n = 0; n < n2; ++n) {
                     long p = m[n];
-                    o = Math.max(o, (long)String.format("%X", p).length());
+                    o = Math.max(o, (long)String.format(Locale.ROOT, "%X", p).length());
                 }
                 long q = ls.length;
                 NbtUtils.indent(i, stringBuilder).append("long[").append(q).append("] {\n");
@@ -423,7 +424,7 @@ public final class NbtUtils {
                         } else if (n != 0) {
                             stringBuilder.append(' ');
                         }
-                        stringBuilder.append(String.format("0x%0" + o + "X", ls[n]));
+                        stringBuilder.append(String.format(Locale.ROOT, "0x%0" + o + "X", ls[n]));
                     }
                 } else {
                     NbtUtils.indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");

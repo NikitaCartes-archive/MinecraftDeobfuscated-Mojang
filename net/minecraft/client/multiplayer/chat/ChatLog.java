@@ -15,21 +15,23 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.LoggedChatEvent;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public interface ChatLog {
     public static final int NO_MESSAGE = -1;
 
-    public void push(LoggedChat var1);
+    public void push(LoggedChatEvent var1);
 
     @Nullable
-    public LoggedChat lookup(int var1);
+    public LoggedChatEvent lookup(int var1);
 
-    default public LoggedChat.WithId lookupWithId(int i) {
-        LoggedChat loggedChat = this.lookup(i);
-        return loggedChat != null ? new LoggedChat.WithId(i, loggedChat) : null;
+    @Nullable
+    default public Entry<LoggedChatEvent> lookupEntry(int i) {
+        LoggedChatEvent loggedChatEvent = this.lookup(i);
+        return loggedChatEvent != null ? new Entry<LoggedChatEvent>(i, loggedChatEvent) : null;
     }
 
     default public boolean contains(int i) {
@@ -37,8 +39,6 @@ public interface ChatLog {
     }
 
     public int offset(int var1, int var2);
-
-    public int offsetClamped(int var1, int var2);
 
     default public int before(int i) {
         return this.offset(i, -1);
@@ -109,6 +109,17 @@ public interface ChatLog {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public record Entry<T extends LoggedChatEvent>(int id, T event) {
+        @Nullable
+        public <U extends LoggedChatEvent> Entry<U> tryCast(Class<U> class_) {
+            if (class_.isInstance(this.event)) {
+                return new Entry<LoggedChatEvent>(this.id, (LoggedChatEvent)class_.cast(this.event));
+            }
+            return null;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static class Selection {
         private static final int CHARACTERISTICS = 1041;
         private final ChatLog log;
@@ -123,22 +134,22 @@ public interface ChatLog {
             return StreamSupport.intStream(Spliterators.spliteratorUnknownSize(this.ids, 1041), false);
         }
 
-        public Stream<LoggedChat> messages() {
+        public Stream<LoggedChatEvent> events() {
             return this.ids().mapToObj(this.log::lookup).filter(Objects::nonNull);
         }
 
         public Collection<GameProfile> distinctGameProfiles() {
-            return this.messages().map(loggedChat -> {
-                if (loggedChat instanceof LoggedChat.Player) {
-                    LoggedChat.Player player = (LoggedChat.Player)loggedChat;
+            return this.events().map(loggedChatEvent -> {
+                if (loggedChatEvent instanceof LoggedChatMessage.Player) {
+                    LoggedChatMessage.Player player = (LoggedChatMessage.Player)loggedChatEvent;
                     return player.profile();
                 }
                 return null;
             }).filter(Objects::nonNull).distinct().toList();
         }
 
-        public Stream<LoggedChat.WithId> messagesWithIds() {
-            return this.ids().mapToObj(this.log::lookupWithId).filter(Objects::nonNull);
+        public Stream<Entry<LoggedChatEvent>> entries() {
+            return this.ids().mapToObj(this.log::lookupEntry).filter(Objects::nonNull);
         }
     }
 }

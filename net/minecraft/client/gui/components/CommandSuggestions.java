@@ -74,7 +74,7 @@ public class CommandSuggestions {
     @Nullable
     private CompletableFuture<Suggestions> pendingSuggestions;
     @Nullable
-    SuggestionsList suggestions;
+    private SuggestionsList suggestions;
     private boolean allowSuggestions;
     boolean keepSuggestions;
 
@@ -129,6 +129,10 @@ public class CommandSuggestions {
             int k = this.anchorToBottom ? this.screen.height - 12 : 72;
             this.suggestions = new SuggestionsList(j, k, i, this.sortSuggestions(suggestions), bl);
         }
+    }
+
+    public void hide() {
+        this.suggestions = null;
     }
 
     private List<Suggestion> sortSuggestions(Suggestions suggestions) {
@@ -304,16 +308,26 @@ public class CommandSuggestions {
     }
 
     public void render(PoseStack poseStack, int i, int j) {
+        if (!this.renderSuggestions(poseStack, i, j)) {
+            this.renderUsage(poseStack);
+        }
+    }
+
+    public boolean renderSuggestions(PoseStack poseStack, int i, int j) {
         if (this.suggestions != null) {
             this.suggestions.render(poseStack, i, j);
-        } else {
-            int k = 0;
-            for (FormattedCharSequence formattedCharSequence : this.commandUsage) {
-                int l = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * k : 72 + 12 * k;
-                GuiComponent.fill(poseStack, this.commandUsagePosition - 1, l, this.commandUsagePosition + this.commandUsageWidth + 1, l + 12, this.fillColor);
-                this.font.drawShadow(poseStack, formattedCharSequence, (float)this.commandUsagePosition, (float)(l + 2), -1);
-                ++k;
-            }
+            return true;
+        }
+        return false;
+    }
+
+    public void renderUsage(PoseStack poseStack) {
+        int i = 0;
+        for (FormattedCharSequence formattedCharSequence : this.commandUsage) {
+            int j = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * i : 72 + 12 * i;
+            GuiComponent.fill(poseStack, this.commandUsagePosition - 1, j, this.commandUsagePosition + this.commandUsageWidth + 1, j + 12, this.fillColor);
+            this.font.drawShadow(poseStack, formattedCharSequence, (float)this.commandUsagePosition, (float)(j + 2), -1);
+            ++i;
         }
     }
 
@@ -462,7 +476,7 @@ public class CommandSuggestions {
                 return true;
             }
             if (i == 256) {
-                this.hide();
+                CommandSuggestions.this.hide();
                 return true;
             }
             return false;
@@ -514,10 +528,6 @@ public class CommandSuggestions {
                 return Component.translatable("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message);
             }
             return Component.translatable("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
-        }
-
-        public void hide() {
-            CommandSuggestions.this.suggestions = null;
         }
     }
 }

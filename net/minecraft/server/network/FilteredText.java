@@ -28,6 +28,14 @@ public record FilteredText<T>(T raw, @Nullable T filtered) {
         return new FilteredText<U>(function.apply(this.raw), Util.mapNullable(this.filtered, function2));
     }
 
+    public <U> FilteredText<U> mapWithEquality(Function<T, U> function, Function<T, U> function2) {
+        U object = function.apply(this.raw);
+        if (this.raw.equals(this.filtered)) {
+            return FilteredText.passThrough(object);
+        }
+        return new FilteredText<U>(object, Util.mapNullable(this.filtered, function2));
+    }
+
     public boolean isFiltered() {
         return !this.raw.equals(this.filtered);
     }

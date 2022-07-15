@@ -101,7 +101,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             for (i = 0; i < path.getNodeCount(); ++i) {
                 Node node = path.getNode(i);
                 if (!(PathfindingRenderer.distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0f)) continue;
-                DebugRenderer.renderFloatingText(String.format("%s", new Object[]{node.type}), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02f, true, 0.0f, true);
+                DebugRenderer.renderFloatingText(String.valueOf((Object)node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02f, true, 0.0f, true);
                 DebugRenderer.renderFloatingText(String.format(Locale.ROOT, "%.2f", Float.valueOf(node.costMalus)), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1, 0.02f, true, 0.0f, true);
             }
         }

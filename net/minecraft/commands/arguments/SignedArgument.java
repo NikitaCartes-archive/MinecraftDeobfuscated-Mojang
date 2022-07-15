@@ -4,10 +4,9 @@
 package net.minecraft.commands.arguments;
 
 import net.minecraft.commands.arguments.PreviewedArgument;
-import net.minecraft.network.chat.Component;
 
 public interface SignedArgument<T>
 extends PreviewedArgument<T> {
-    public Component getPlainSignableComponent(T var1);
+    public String getSignableText(T var1);
 }
 

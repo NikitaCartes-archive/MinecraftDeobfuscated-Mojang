@@ -28,13 +28,8 @@ public interface ChatDecorator {
         return CompletableFuture.allOf(completableFuture, completableFuture2).thenApply(void_ -> new FilteredText<Component>((Component)completableFuture.join(), (Component)completableFuture2.join()));
     }
 
-    default public CompletableFuture<FilteredText<PlayerChatMessage>> decorateSignedChat(@Nullable ServerPlayer serverPlayer, FilteredText<PlayerChatMessage> filteredText) {
-        FilteredText<Component> filteredText22 = filteredText.map(PlayerChatMessage::signedContent);
-        return this.decorateFiltered(serverPlayer, filteredText22).thenApply(filteredText2 -> ChatDecorator.attachDecoration(filteredText, filteredText2));
-    }
-
-    public static FilteredText<PlayerChatMessage> attachDecoration(FilteredText<PlayerChatMessage> filteredText, FilteredText<Component> filteredText2) {
-        return filteredText.map(playerChatMessage -> playerChatMessage.withDecoratedContent((Component)filteredText2.raw()), playerChatMessage -> filteredText2.filtered() != null ? playerChatMessage.withDecoratedContent((Component)filteredText2.filtered()) : playerChatMessage);
+    public static FilteredText<PlayerChatMessage> attachUnsignedDecoration(FilteredText<PlayerChatMessage> filteredText, FilteredText<Component> filteredText2) {
+        return filteredText.map(playerChatMessage -> playerChatMessage.withUnsignedContent((Component)filteredText2.raw()), playerChatMessage -> filteredText2.filtered() != null ? playerChatMessage.withUnsignedContent((Component)filteredText2.filtered()) : playerChatMessage);
     }
 }
 

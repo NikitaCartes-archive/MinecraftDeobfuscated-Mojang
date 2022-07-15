@@ -15,6 +15,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.server.ServerInterface;
@@ -288,7 +289,7 @@ extends GenericThread {
             this.identBytes[3] = bs[6];
             this.ident = new String(this.identBytes, StandardCharsets.UTF_8);
             this.challenge = RandomSource.create().nextInt(0x1000000);
-            this.challengeBytes = String.format("\t%s%d\u0000", this.ident, this.challenge).getBytes(StandardCharsets.UTF_8);
+            this.challengeBytes = String.format(Locale.ROOT, "\t%s%d\u0000", this.ident, this.challenge).getBytes(StandardCharsets.UTF_8);
         }
 
         public Boolean before(long l) {

@@ -25,6 +25,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -331,7 +332,7 @@ public class ModelBakery {
                                 }
                                 throw throwable;
                             } catch (Exception exception) {
-                                throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resourceLocation3, resource.sourcePackId(), exception.getMessage()));
+                                throw new BlockStateDefinitionException(String.format(Locale.ROOT, "Exception loading blockstate definition: '%s' in resourcepack: '%s': %s", resourceLocation3, resource.sourcePackId(), exception.getMessage()));
                             }
                         }
                         ((Reader)reader).close();
@@ -366,7 +367,7 @@ public class ModelBakery {
             } catch (BlockStateDefinitionException blockStateDefinitionException) {
                 throw blockStateDefinitionException;
             } catch (Exception exception) {
-                throw new BlockStateDefinitionException(String.format("Exception loading blockstate definition: '%s': %s", resourceLocation3, exception));
+                throw new BlockStateDefinitionException(String.format(Locale.ROOT, "Exception loading blockstate definition: '%s': %s", resourceLocation3, exception));
             } finally {
                 HashMap<ModelGroupKey, Set> map5 = Maps.newHashMap();
                 map.forEach((modelResourceLocation, blockState) -> {

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -108,7 +109,7 @@ public class Climate {
 
         @Override
         public String toString() {
-            return this.min == this.max ? String.format("%d", this.min) : String.format("[%d-%d]", this.min, this.max);
+            return this.min == this.max ? String.format(Locale.ROOT, "%d", this.min) : String.format(Locale.ROOT, "[%d-%d]", this.min, this.max);
         }
 
         public long distance(long l) {

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,7 +42,7 @@ extends Language {
         for (LanguageInfo languageInfo : list) {
             bl |= languageInfo.isBidirectional();
             String string = languageInfo.getCode();
-            String string2 = String.format("lang/%s.json", string);
+            String string2 = String.format(Locale.ROOT, "lang/%s.json", string);
             for (String string3 : resourceManager.getNamespaces()) {
                 try {
                     ResourceLocation resourceLocation = new ResourceLocation(string3, string2);

@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.lighting;
 
+import java.util.Locale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -51,7 +52,7 @@ extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLight
         int r = Integer.signum(o - j);
         Direction direction = Direction.fromNormal(r, s = Integer.signum(p - k), t = Integer.signum(q - n));
         if (direction == null) {
-            throw new IllegalStateException(String.format("Light was spread in illegal direction %d, %d, %d", r, s, t));
+            throw new IllegalStateException(String.format(Locale.ROOT, "Light was spread in illegal direction %d, %d, %d", r, s, t));
         }
         BlockState blockState2 = this.getStateAndOpacity(l, null);
         VoxelShape voxelShape = this.getShape(blockState2, l, direction);

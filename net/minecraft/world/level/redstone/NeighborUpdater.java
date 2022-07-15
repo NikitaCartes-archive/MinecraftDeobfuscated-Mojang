@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.redstone;
 
+import java.util.Locale;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -45,7 +46,7 @@ public interface NeighborUpdater {
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");
             crashReportCategory.setDetail("Source block type", () -> {
                 try {
-                    return String.format("ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
+                    return String.format(Locale.ROOT, "ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
                 } catch (Throwable throwable) {
                     return "ID #" + Registry.BLOCK.getKey(block);
                 }

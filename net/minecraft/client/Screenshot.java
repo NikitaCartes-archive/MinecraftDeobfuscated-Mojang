@@ -12,9 +12,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -29,7 +26,6 @@ import org.slf4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class Screenshot {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
     private int rowHeight;
     private final DataOutputStream outputStream;
     private final byte[] bytes;
@@ -79,7 +75,7 @@ public class Screenshot {
     }
 
     private static File getFile(File file) {
-        String string = DATE_FORMAT.format(new Date());
+        String string = Util.getFilenameFormattedDateTime();
         int i = 1;
         File file2;
         while ((file2 = new File(file, string + (String)(i == 1 ? "" : "_" + i) + ".png")).exists()) {
@@ -94,7 +90,7 @@ public class Screenshot {
         this.rowHeight = k;
         File file2 = new File(file, "screenshots");
         file2.mkdir();
-        String string = "huge_" + DATE_FORMAT.format(new Date());
+        String string = "huge_" + Util.getFilenameFormattedDateTime();
         int l = 1;
         while ((this.file = new File(file2, string + (String)(l == 1 ? "" : "_" + l) + ".tga")).exists()) {
             ++l;

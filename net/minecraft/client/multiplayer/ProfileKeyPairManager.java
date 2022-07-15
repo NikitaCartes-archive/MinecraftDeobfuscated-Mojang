@@ -13,6 +13,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
@@ -21,7 +22,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.security.PublicKey;
 import java.time.DateTimeException;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -128,14 +128,14 @@ public class ProfileKeyPairManager {
     }
 
     private static ProfilePublicKey.Data parsePublicKey(KeyPairResponse keyPairResponse) throws CryptException {
-        if (Strings.isNullOrEmpty(keyPairResponse.getPublicKey()) || Strings.isNullOrEmpty(keyPairResponse.getPublicKeySignature())) {
+        if (Strings.isNullOrEmpty(keyPairResponse.getPublicKey()) || keyPairResponse.getPublicKeySignature() == null || keyPairResponse.getPublicKeySignature().array().length == 0) {
             throw new CryptException(new InsecurePublicKeyException.MissingException());
         }
         try {
             Instant instant = Instant.parse(keyPairResponse.getExpiresAt());
             PublicKey publicKey = Crypt.stringToRsaPublicKey(keyPairResponse.getPublicKey());
-            byte[] bs = Base64.getDecoder().decode(keyPairResponse.getPublicKeySignature());
-            return new ProfilePublicKey.Data(instant, publicKey, bs);
+            ByteBuffer byteBuffer = keyPairResponse.getPublicKeySignature();
+            return new ProfilePublicKey.Data(instant, publicKey, byteBuffer.array());
         } catch (IllegalArgumentException | DateTimeException runtimeException) {
             throw new CryptException(runtimeException);
         }

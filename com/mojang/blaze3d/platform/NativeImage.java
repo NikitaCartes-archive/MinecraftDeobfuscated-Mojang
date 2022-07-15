@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.util.Base64;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -179,10 +180,10 @@ implements AutoCloseable {
 
     public int getPixelRGBA(int i, int j) {
         if (this.format != Format.RGBA) {
-            throw new IllegalArgumentException(String.format("getPixelRGBA only works on RGBA images; have %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "getPixelRGBA only works on RGBA images; have %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
         long l = ((long)i + (long)j * (long)this.width) * 4L;
@@ -191,10 +192,10 @@ implements AutoCloseable {
 
     public void setPixelRGBA(int i, int j, int k) {
         if (this.format != Format.RGBA) {
-            throw new IllegalArgumentException(String.format("getPixelRGBA only works on RGBA images; have %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "getPixelRGBA only works on RGBA images; have %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
         long l = ((long)i + (long)j * (long)this.width) * 4L;
@@ -204,10 +205,10 @@ implements AutoCloseable {
     public void setPixelLuminance(int i, int j, byte b) {
         RenderSystem.assertOnRenderThread();
         if (!this.format.hasLuminance()) {
-            throw new IllegalArgumentException(String.format("setPixelLuminance only works on image with luminance; have %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "setPixelLuminance only works on image with luminance; have %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
         long l = ((long)i + (long)j * (long)this.width) * (long)this.format.components() + (long)(this.format.luminanceOffset() / 8);
@@ -217,10 +218,10 @@ implements AutoCloseable {
     public byte getRedOrLuminance(int i, int j) {
         RenderSystem.assertOnRenderThread();
         if (!this.format.hasLuminanceOrRed()) {
-            throw new IllegalArgumentException(String.format("no red or luminance in %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "no red or luminance in %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrRedOffset() / 8;
         return MemoryUtil.memGetByte(this.pixels + (long)k);
@@ -229,10 +230,10 @@ implements AutoCloseable {
     public byte getGreenOrLuminance(int i, int j) {
         RenderSystem.assertOnRenderThread();
         if (!this.format.hasLuminanceOrGreen()) {
-            throw new IllegalArgumentException(String.format("no green or luminance in %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "no green or luminance in %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrGreenOffset() / 8;
         return MemoryUtil.memGetByte(this.pixels + (long)k);
@@ -241,10 +242,10 @@ implements AutoCloseable {
     public byte getBlueOrLuminance(int i, int j) {
         RenderSystem.assertOnRenderThread();
         if (!this.format.hasLuminanceOrBlue()) {
-            throw new IllegalArgumentException(String.format("no blue or luminance in %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "no blue or luminance in %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrBlueOffset() / 8;
         return MemoryUtil.memGetByte(this.pixels + (long)k);
@@ -252,10 +253,10 @@ implements AutoCloseable {
 
     public byte getLuminanceOrAlpha(int i, int j) {
         if (!this.format.hasLuminanceOrAlpha()) {
-            throw new IllegalArgumentException(String.format("no luminance or alpha in %s", new Object[]{this.format}));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "no luminance or alpha in %s", new Object[]{this.format}));
         }
         if (this.isOutsideBounds(i, j)) {
-            throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8;
         return MemoryUtil.memGetByte(this.pixels + (long)k);
@@ -398,7 +399,7 @@ implements AutoCloseable {
 
     public void copyFromFont(STBTTFontinfo sTBTTFontinfo, int i, int j, int k, float f, float g, float h, float l, int m, int n) {
         if (m < 0 || m + j > this.getWidth() || n < 0 || n + k > this.getHeight()) {
-            throw new IllegalArgumentException(String.format("Out of bounds: start: (%s, %s) (size: %sx%s); size: %sx%s", m, n, j, k, this.getWidth(), this.getHeight()));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "Out of bounds: start: (%s, %s) (size: %sx%s); size: %sx%s", m, n, j, k, this.getWidth(), this.getHeight()));
         }
         if (this.format.components() != 1) {
             throw new IllegalArgumentException("Can only write fonts into 1-component images.");

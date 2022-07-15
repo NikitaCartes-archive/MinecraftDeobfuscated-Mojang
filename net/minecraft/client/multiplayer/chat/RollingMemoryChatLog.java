@@ -6,25 +6,24 @@ package net.minecraft.client.multiplayer.chat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.chat.ChatLog;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
-import net.minecraft.util.Mth;
+import net.minecraft.client.multiplayer.chat.LoggedChatEvent;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RollingMemoryChatLog
 implements ChatLog {
-    private final LoggedChat[] buffer;
+    private final LoggedChatEvent[] buffer;
     private int newestId = -1;
     private int oldestId = -1;
 
     public RollingMemoryChatLog(int i) {
-        this.buffer = new LoggedChat[i];
+        this.buffer = new LoggedChatEvent[i];
     }
 
     @Override
-    public void push(LoggedChat loggedChat) {
+    public void push(LoggedChatEvent loggedChatEvent) {
         int i = this.nextId();
-        this.buffer[this.index((int)i)] = loggedChat;
+        this.buffer[this.index((int)i)] = loggedChatEvent;
     }
 
     private int nextId() {
@@ -35,7 +34,7 @@ implements ChatLog {
 
     @Override
     @Nullable
-    public LoggedChat lookup(int i) {
+    public LoggedChatEvent lookup(int i) {
         return this.contains(i) ? this.buffer[this.index(i)] : null;
     }
 
@@ -52,11 +51,6 @@ implements ChatLog {
     public int offset(int i, int j) {
         int k = i + j;
         return this.contains(k) ? k : -1;
-    }
-
-    @Override
-    public int offsetClamped(int i, int j) {
-        return Mth.clamp(i + j, this.oldestId, this.newestId);
     }
 
     @Override

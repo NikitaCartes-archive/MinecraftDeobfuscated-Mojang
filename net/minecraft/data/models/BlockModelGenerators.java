@@ -11,6 +11,7 @@ import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -1735,7 +1736,7 @@ public class BlockModelGenerators {
         this.skipAutoItemBlock(Blocks.LIGHT);
         PropertyDispatch.C1<Integer> c1 = PropertyDispatch.property(BlockStateProperties.LEVEL);
         for (int i = 0; i < 16; ++i) {
-            String string = String.format("_%02d", i);
+            String string = String.format(Locale.ROOT, "_%02d", i);
             ResourceLocation resourceLocation = TextureMapping.getItemTexture(Items.LIGHT, string);
             c1.select((Integer)i, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PARTICLE_ONLY.createWithSuffix(Blocks.LIGHT, string, TextureMapping.particle(resourceLocation), this.modelOutput)));
             ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(resourceLocation), this.modelOutput);

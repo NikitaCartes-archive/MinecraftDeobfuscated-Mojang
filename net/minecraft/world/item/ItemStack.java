@@ -618,7 +618,7 @@ public final class ItemStack {
                 CompoundTag compoundTag = this.tag.getCompound(TAG_DISPLAY);
                 if (ItemStack.shouldShowInTooltip(i, TooltipPart.DYE) && compoundTag.contains(TAG_COLOR, 99)) {
                     if (tooltipFlag.isAdvanced()) {
-                        list.add(Component.translatable("item.color", String.format("#%06X", compoundTag.getInt(TAG_COLOR))).withStyle(ChatFormatting.GRAY));
+                        list.add(Component.translatable("item.color", String.format(Locale.ROOT, "#%06X", compoundTag.getInt(TAG_COLOR))).withStyle(ChatFormatting.GRAY));
                     } else {
                         list.add(Component.translatable("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                     }

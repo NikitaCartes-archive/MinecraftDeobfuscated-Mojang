@@ -16,6 +16,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -64,10 +65,10 @@ public class GLX {
         LongSupplier longSupplier;
         RenderSystem.assertInInitPhase();
         Window.checkGlfwError((integer, string) -> {
-            throw new IllegalStateException(String.format("GLFW error before init: [0x%X]%s", integer, string));
+            throw new IllegalStateException(String.format(Locale.ROOT, "GLFW error before init: [0x%X]%s", integer, string));
         });
         ArrayList<String> list = Lists.newArrayList();
-        GLFWErrorCallback gLFWErrorCallback = GLFW.glfwSetErrorCallback((i, l) -> list.add(String.format("GLFW error during init: [0x%X]%s", i, l)));
+        GLFWErrorCallback gLFWErrorCallback = GLFW.glfwSetErrorCallback((i, l) -> list.add(String.format(Locale.ROOT, "GLFW error during init: [0x%X]%s", i, l)));
         if (GLFW.glfwInit()) {
             longSupplier = () -> (long)(GLFW.glfwGetTime() * 1.0E9);
             for (String string2 : list) {
@@ -96,7 +97,7 @@ public class GLX {
         RenderSystem.assertInInitPhase();
         try {
             CentralProcessor centralProcessor = new SystemInfo().getHardware().getProcessor();
-            cpuInfo = String.format("%dx %s", centralProcessor.getLogicalProcessorCount(), centralProcessor.getProcessorIdentifier().getName()).replaceAll("\\s+", " ");
+            cpuInfo = String.format(Locale.ROOT, "%dx %s", centralProcessor.getLogicalProcessorCount(), centralProcessor.getProcessorIdentifier().getName()).replaceAll("\\s+", " ");
         } catch (Throwable throwable) {
             // empty catch block
         }

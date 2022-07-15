@@ -5,6 +5,7 @@ package net.minecraft.client.player;
 
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.GameProfile;
+import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -97,7 +98,7 @@ extends Player {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
         AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
         if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
-            abstractTexture = new HttpTexture(null, String.format(SKIN_URL_TEMPLATE, StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(UUIDUtil.createOfflinePlayerUUID(string)), true, null);
+            abstractTexture = new HttpTexture(null, String.format(Locale.ROOT, SKIN_URL_TEMPLATE, StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(UUIDUtil.createOfflinePlayerUUID(string)), true, null);
             textureManager.register(resourceLocation, abstractTexture);
         }
     }

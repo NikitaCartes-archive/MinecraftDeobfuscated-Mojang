@@ -6,6 +6,7 @@ package net.minecraft.client.resources.metadata.animation;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
+import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
@@ -47,7 +48,7 @@ public class AnimationMetadataSection {
         int k = pair.getFirst();
         int l = pair.getSecond();
         if (!AnimationMetadataSection.isDivisionInteger(i, k) || !AnimationMetadataSection.isDivisionInteger(j, l)) {
-            throw new IllegalArgumentException(String.format("Image size %s,%s is not multiply of frame size %s,%s", i, j, k, l));
+            throw new IllegalArgumentException(String.format(Locale.ROOT, "Image size %s,%s is not multiply of frame size %s,%s", i, j, k, l));
         }
         return pair;
     }

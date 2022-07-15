@@ -47,9 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -743,7 +741,7 @@ implements WindowEventHandler {
 
     public static void crash(CrashReport crashReport) {
         File file = new File(Minecraft.getInstance().gameDirectory, "crash-reports");
-        File file2 = new File(file, "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-client.txt");
+        File file2 = new File(file, "crash-" + Util.getFilenameFormattedDateTime() + "-client.txt");
         Bootstrap.realStdoutPrintln(crashReport.getFriendlyReport());
         if (crashReport.getSaveFile() != null) {
             Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + crashReport.getSaveFile());
@@ -1053,7 +1051,7 @@ implements WindowEventHandler {
         while (Util.getMillis() >= this.lastTime + 1000L) {
             Object string = this.gpuUtilization > 0.0 ? " GPU: " + (this.gpuUtilization > 100.0 ? ChatFormatting.RED + "100%" : Math.round(this.gpuUtilization) + "%") : "";
             fps = this.frames;
-            this.fpsString = String.format("%d fps T: %s%s%s%s B: %d%s", fps, k == 260 ? "inf" : Integer.valueOf(k), this.options.enableVsync().get() != false ? " vsync" : "", this.options.graphicsMode().get(), this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius().get(), string);
+            this.fpsString = String.format(Locale.ROOT, "%d fps T: %s%s%s%s B: %d%s", fps, k == 260 ? "inf" : Integer.valueOf(k), this.options.enableVsync().get() != false ? " vsync" : "", this.options.graphicsMode().get(), this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"), this.options.biomeBlendRadius().get(), string);
             this.lastTime += 1000L;
             this.frames = 0;
         }
@@ -1201,7 +1199,7 @@ implements WindowEventHandler {
         Path path;
         String string = this.isLocalServer() ? this.getSingleplayerServer().getWorldData().getLevelName() : this.getCurrentServer().name;
         try {
-            String string2 = String.format("%s-%s-%s", new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()), string, SharedConstants.getCurrentVersion().getId());
+            String string2 = String.format(Locale.ROOT, "%s-%s-%s", Util.getFilenameFormattedDateTime(), string, SharedConstants.getCurrentVersion().getId());
             String string3 = FileUtil.findAvailableName(MetricsPersister.PROFILING_RESULTS_DIR, string2, ".zip");
             path = MetricsPersister.PROFILING_RESULTS_DIR.resolve(string3);
         } catch (IOException iOException) {

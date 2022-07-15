@@ -38,6 +38,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -61,6 +62,7 @@ import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.ToggleKeyMapping;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.chat.ChatPreviewStatus;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
@@ -213,7 +215,7 @@ public class Options {
         if (double_ <= 0.0) {
             return Component.translatable("options.chat.delay_none");
         }
-        return Component.translatable("options.chat.delay", String.format("%.1f", double_));
+        return Component.translatable("options.chat.delay", String.format(Locale.ROOT, "%.1f", double_));
     }, new OptionInstance.IntRange(0, 60).xmap(i -> (double)i / 10.0, double_ -> (int)(double_ * 10.0)), Codec.doubleRange(0.0, 6.0), 0.0, double_ -> Minecraft.getInstance().getChatListener().setMessageDelay((double)double_));
     private final OptionInstance<Integer> mipmapLevels = new OptionInstance<Integer>("options.mipmapLevels", OptionInstance.noTooltip(), (component, integer) -> {
         if (integer == 0) {
@@ -231,7 +233,7 @@ public class Options {
         int i = integer * 2 + 1;
         return Options.genericValueLabel(component, Component.translatable("options.biomeBlendRadius." + i));
     }, new OptionInstance.IntRange(0, 7), 2, integer -> Minecraft.getInstance().levelRenderer.allChanged());
-    private final OptionInstance<Double> mouseWheelSensitivity = new OptionInstance<Double>("options.mouseWheelSensitivity", OptionInstance.noTooltip(), (component, double_) -> Options.genericValueLabel(component, Component.literal(String.format("%.2f", double_))), new OptionInstance.IntRange(-200, 100).xmap(Options::logMouse, Options::unlogMouse), Codec.doubleRange(Options.logMouse(-200), Options.logMouse(100)), Options.logMouse(0), double_ -> {});
+    private final OptionInstance<Double> mouseWheelSensitivity = new OptionInstance<Double>("options.mouseWheelSensitivity", OptionInstance.noTooltip(), (component, double_) -> Options.genericValueLabel(component, Component.literal(String.format(Locale.ROOT, "%.2f", double_))), new OptionInstance.IntRange(-200, 100).xmap(Options::logMouse, Options::unlogMouse), Codec.doubleRange(Options.logMouse(-200), Options.logMouse(100)), Options.logMouse(0), double_ -> {});
     private final OptionInstance<Boolean> rawMouseInput = OptionInstance.createBoolean("options.rawMouseInput", true, boolean_ -> {
         Window window = Minecraft.getInstance().getWindow();
         if (window != null) {
@@ -294,8 +296,15 @@ public class Options {
     private static final Component CHAT_TOOLTIP_HIDE_MATCHED_NAMES = Component.translatable("options.hideMatchedNames.tooltip");
     private final OptionInstance<Boolean> hideMatchedNames = OptionInstance.createBoolean("options.hideMatchedNames", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_HIDE_MATCHED_NAMES), true);
     private final OptionInstance<Boolean> showAutosaveIndicator = OptionInstance.createBoolean("options.autosaveIndicator", true);
-    private static final Component CHAT_TOOLTIP_PREVIEW = Component.translatable("options.chatPreview.tooltip");
-    private final OptionInstance<Boolean> chatPreview = OptionInstance.createBoolean("options.chatPreview", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_PREVIEW), true);
+    private static final Component CHAT_PREVIEW_OFF_TOOLTIP = Component.translatable("options.chatPreview.tooltip.off");
+    private static final Component CHAT_PREVIEW_LIVE_TOOLTIP = Component.translatable("options.chatPreview.tooltip.live");
+    private static final Component CHAT_PREVIEW_CONFIRM_TOOLTIP = Component.translatable("options.chatPreview.tooltip.confirm");
+    private final OptionInstance<ChatPreviewStatus> chatPreview = new OptionInstance<ChatPreviewStatus>("options.chatPreview", minecraft -> chatPreviewStatus -> switch (chatPreviewStatus) {
+        default -> throw new IncompatibleClassChangeError();
+        case ChatPreviewStatus.OFF -> OptionInstance.splitTooltip(minecraft, CHAT_PREVIEW_OFF_TOOLTIP);
+        case ChatPreviewStatus.LIVE -> OptionInstance.splitTooltip(minecraft, CHAT_PREVIEW_LIVE_TOOLTIP);
+        case ChatPreviewStatus.CONFIRM -> OptionInstance.splitTooltip(minecraft, CHAT_PREVIEW_CONFIRM_TOOLTIP);
+    }, OptionInstance.forOptionEnum(), new OptionInstance.Enum<ChatPreviewStatus>(Arrays.asList(ChatPreviewStatus.values()), Codec.INT.xmap(ChatPreviewStatus::byId, ChatPreviewStatus::getId)), ChatPreviewStatus.LIVE, chatPreviewStatus -> {});
     private static final Component CHAT_TOOLTIP_ONLY_SHOW_SECURE = Component.translatable("options.onlyShowSecureChat.tooltip");
     private final OptionInstance<Boolean> onlyShowSecureChat = OptionInstance.createBoolean("options.onlyShowSecureChat", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_ONLY_SHOW_SECURE), false);
     public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
@@ -612,7 +621,7 @@ public class Options {
         return this.showAutosaveIndicator;
     }
 
-    public OptionInstance<Boolean> chatPreview() {
+    public OptionInstance<ChatPreviewStatus> chatPreview() {
         return this.chatPreview;
     }
 

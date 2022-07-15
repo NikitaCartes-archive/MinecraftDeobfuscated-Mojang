@@ -5,69 +5,51 @@ package net.minecraft.network.chat;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import com.google.common.hash.HashingOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.LastSeenMessages;
 
-public record SignedMessageBody(Component content, Instant timeStamp, long salt, List<LastSeen> lastSeen) {
-    private static final byte HASH_SEPARATOR_BYTE = 70;
+public record SignedMessageBody(ChatMessageContent content, Instant timeStamp, long salt, LastSeenMessages lastSeen) {
+    public static final byte HASH_SEPARATOR_BYTE = 70;
 
     public SignedMessageBody(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readComponent(), friendlyByteBuf.readInstant(), friendlyByteBuf.readLong(), friendlyByteBuf.readCollection(ArrayList::new, LastSeen::new));
+        this(ChatMessageContent.read(friendlyByteBuf), friendlyByteBuf.readInstant(), friendlyByteBuf.readLong(), new LastSeenMessages(friendlyByteBuf));
     }
 
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeComponent(this.content);
-        friendlyByteBuf2.writeInstant(this.timeStamp);
-        friendlyByteBuf2.writeLong(this.salt);
-        friendlyByteBuf2.writeCollection(this.lastSeen, (friendlyByteBuf, lastSeen) -> lastSeen.write((FriendlyByteBuf)friendlyByteBuf));
+    public void write(FriendlyByteBuf friendlyByteBuf) {
+        ChatMessageContent.write(friendlyByteBuf, this.content);
+        friendlyByteBuf.writeInstant(this.timeStamp);
+        friendlyByteBuf.writeLong(this.salt);
+        this.lastSeen.write(friendlyByteBuf);
     }
 
     public HashCode hash() {
-        byte[] bs = SignedMessageBody.encodeContent(this.content);
-        byte[] cs = SignedMessageBody.encodeLastSeen(this.lastSeen);
-        byte[] ds = new byte[16 + bs.length];
-        ByteBuffer byteBuffer = ByteBuffer.wrap(ds).order(ByteOrder.BIG_ENDIAN);
-        byteBuffer.putLong(this.salt);
-        byteBuffer.putLong(this.timeStamp.getEpochSecond());
-        byteBuffer.put(bs);
-        byteBuffer.put(cs);
-        return Hashing.sha256().hashBytes(ds);
-    }
-
-    private static byte[] encodeContent(Component component) {
-        String string = Component.Serializer.toStableJson(component);
-        return string.getBytes(StandardCharsets.UTF_8);
-    }
-
-    private static byte[] encodeLastSeen(List<LastSeen> list) {
-        int i = list.stream().mapToInt(lastSeen -> 17 + lastSeen.lastSignature().bytes().length).sum();
-        byte[] bs = new byte[i];
-        ByteBuffer byteBuffer = ByteBuffer.wrap(bs).order(ByteOrder.BIG_ENDIAN);
-        for (LastSeen lastSeen2 : list) {
-            UUID uUID = lastSeen2.profileId();
-            MessageSignature messageSignature = lastSeen2.lastSignature();
-            byteBuffer.put((byte)70).putLong(uUID.getMostSignificantBits()).putLong(uUID.getLeastSignificantBits()).put(messageSignature.bytes());
+        HashingOutputStream hashingOutputStream = new HashingOutputStream(Hashing.sha256(), OutputStream.nullOutputStream());
+        try {
+            DataOutputStream dataOutputStream = new DataOutputStream(hashingOutputStream);
+            dataOutputStream.writeLong(this.salt);
+            dataOutputStream.writeLong(this.timeStamp.getEpochSecond());
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter((OutputStream)dataOutputStream, StandardCharsets.UTF_8);
+            outputStreamWriter.write(Component.Serializer.toStableJson(this.content.plain()));
+            outputStreamWriter.flush();
+            dataOutputStream.write(70);
+            if (this.content.isDecorated()) {
+                outputStreamWriter.write(Component.Serializer.toStableJson(this.content.decorated()));
+                outputStreamWriter.flush();
+            }
+            this.lastSeen.updateHash(dataOutputStream);
+        } catch (IOException iOException) {
+            // empty catch block
         }
-        return bs;
-    }
-
-    public record LastSeen(UUID profileId, MessageSignature lastSignature) {
-        public LastSeen(FriendlyByteBuf friendlyByteBuf) {
-            this(friendlyByteBuf.readUUID(), new MessageSignature(friendlyByteBuf));
-        }
-
-        public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeUUID(this.profileId);
-            this.lastSignature.write(friendlyByteBuf);
-        }
+        return hashingOutputStream.hash();
     }
 }
 

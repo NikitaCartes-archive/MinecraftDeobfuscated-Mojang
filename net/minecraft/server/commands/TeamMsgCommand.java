@@ -10,7 +10,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.List;
-import java.util.concurrent.Executor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
@@ -21,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.OutgoingPlayerChatMessage;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
@@ -53,13 +51,14 @@ public class TeamMsgCommand {
         }
         MutableComponent component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
         ChatSender chatSender = commandSourceStack.asChatSender();
-        ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND, commandSourceStack).withTargetName(component);
+        ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, commandSourceStack).withTargetName(component);
+        ChatType.Bound bound2 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(component);
         List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers().stream().filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam).toList();
-        chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> {
+        chatMessage.resolve(commandSourceStack, filteredText -> {
             FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
             for (ServerPlayer serverPlayer : list) {
                 if (serverPlayer == entity) {
-                    serverPlayer.sendSystemMessage(Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), ((PlayerChatMessage)filteredText.raw()).serverContent()));
+                    serverPlayer.sendChatMessage(filteredText2.raw(), bound2);
                     continue;
                 }
                 OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
@@ -67,7 +66,7 @@ public class TeamMsgCommand {
                 serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
             }
             filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
-        }, (Executor)commandSourceStack.getServer());
+        });
         return list.size();
     }
 }

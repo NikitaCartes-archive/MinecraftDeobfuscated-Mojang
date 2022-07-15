@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -166,13 +167,13 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
                 if (resourceLocation == BuiltInLootTables.EMPTY || !set.add(resourceLocation)) continue;
                 LootTable.Builder builder = this.map.remove(resourceLocation);
                 if (builder == null) {
-                    throw new IllegalStateException(String.format("Missing loottable '%s' for '%s'", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)));
+                    throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)));
                 }
                 biConsumer.accept(resourceLocation, builder);
                 continue;
             }
             if (resourceLocation == BuiltInLootTables.EMPTY || this.map.remove(resourceLocation) == null) continue;
-            throw new IllegalStateException(String.format("Weird loottable '%s' for '%s', not a LivingEntity so should not have loot", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)));
+            throw new IllegalStateException(String.format(Locale.ROOT, "Weird loottable '%s' for '%s', not a LivingEntity so should not have loot", resourceLocation, Registry.ENTITY_TYPE.getKey(entityType)));
         }
         this.map.forEach(biConsumer);
     }

@@ -25,7 +25,7 @@ import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.reporting.ChatSelectionLogFiller;
 import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.client.multiplayer.chat.report.ChatReportBuilder;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.locale.Language;
@@ -81,8 +81,8 @@ extends Screen {
         this.chatSelectionList.setScrollAmount(this.chatSelectionList.getMaxScroll());
     }
 
-    private boolean canReport(LoggedChat loggedChat) {
-        return loggedChat.canReport(this.report.reportedProfileId());
+    private boolean canReport(LoggedChatMessage loggedChatMessage) {
+        return loggedChatMessage.canReport(this.report.reportedProfileId());
     }
 
     private void extendLog() {
@@ -151,12 +151,12 @@ extends Screen {
         }
 
         @Override
-        public void acceptMessage(int i, LoggedChat loggedChat) {
-            Component component = loggedChat.toContentComponent();
-            Component component2 = loggedChat.toNarrationComponent();
-            boolean bl = loggedChat.canReport(ChatSelectionScreen.this.report.reportedProfileId());
-            if (loggedChat instanceof LoggedChat.Player) {
-                LoggedChat.Player player = (LoggedChat.Player)loggedChat;
+        public void acceptMessage(int i, LoggedChatMessage loggedChatMessage) {
+            Component component = loggedChatMessage.toContentComponent();
+            Component component2 = loggedChatMessage.toNarrationComponent();
+            boolean bl = loggedChatMessage.canReport(ChatSelectionScreen.this.report.reportedProfileId());
+            if (loggedChatMessage instanceof LoggedChatMessage.Player) {
+                LoggedChatMessage.Player player = (LoggedChatMessage.Player)loggedChatMessage;
                 ChatTrustLevel chatTrustLevel = player.trustLevel();
                 GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
                 MessageEntry entry = new MessageEntry(i, component, component2, guiMessageTag, bl, true);
@@ -168,7 +168,7 @@ extends Screen {
             }
         }
 
-        private void updateHeading(LoggedChat.Player player, boolean bl) {
+        private void updateHeading(LoggedChatMessage.Player player, boolean bl) {
             MessageHeadingEntry entry = new MessageHeadingEntry(player.profile(), player.toHeadingComponent(), bl);
             this.addEntryToTop(entry);
             Heading heading = new Heading(player.profileId(), entry);

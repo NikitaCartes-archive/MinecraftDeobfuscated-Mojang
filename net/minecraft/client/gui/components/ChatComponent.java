@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -50,6 +49,7 @@ extends GuiComponent {
     }
 
     public void render(PoseStack poseStack, int i) {
+        int v;
         int u;
         int t;
         int s;
@@ -85,7 +85,7 @@ extends GuiComponent {
             if (r <= 3) continue;
             t = 0;
             u = -o * m;
-            int v = (int)((double)u + h);
+            v = (int)((double)u + h);
             poseStack.pushPose();
             poseStack.translate(0.0, 0.0, 50.0);
             ChatComponent.fill(poseStack, -4, u - m, 0 + l + 4 + 4, u, s << 24);
@@ -105,31 +105,31 @@ extends GuiComponent {
             RenderSystem.disableBlend();
             poseStack.popPose();
         }
-        Collection<?> collection = this.minecraft.getChatListener().delayedMessageQueue();
-        if (!collection.isEmpty()) {
-            int z = (int)(128.0 * d);
-            p = (int)(255.0 * e);
+        long z = this.minecraft.getChatListener().queueSize();
+        if (z > 0L) {
+            p = (int)(128.0 * d);
+            int aa = (int)(255.0 * e);
             poseStack.pushPose();
             poseStack.translate(0.0, 0.0, 50.0);
-            ChatComponent.fill(poseStack, -2, 0, l + 4, 9, p << 24);
+            ChatComponent.fill(poseStack, -2, 0, l + 4, 9, aa << 24);
             RenderSystem.enableBlend();
             poseStack.translate(0.0, 0.0, 50.0);
-            this.minecraft.font.drawShadow(poseStack, Component.translatable("chat.queue", collection.size()), 0.0f, 1.0f, 0xFFFFFF + (z << 24));
+            this.minecraft.font.drawShadow(poseStack, Component.translatable("chat.queue", z), 0.0f, 1.0f, 0xFFFFFF + (p << 24));
             poseStack.popPose();
             RenderSystem.disableBlend();
         }
         if (bl) {
-            int z = this.getLineHeight();
-            p = k * z;
-            int aa = n * z;
-            int ab = this.chatScrollbarPos * aa / k;
-            r = aa * aa / p;
-            if (p != aa) {
-                s = ab > 0 ? 170 : 96;
-                t = this.newMessageSinceScroll ? 0xCC3333 : 0x3333AA;
-                u = l + 4;
-                ChatComponent.fill(poseStack, u, -ab, u + 2, -ab - r, t + (s << 24));
-                ChatComponent.fill(poseStack, u + 2, -ab, u + 1, -ab - r, 0xCCCCCC + (s << 24));
+            p = this.getLineHeight();
+            int aa = k * p;
+            int ab = n * p;
+            r = this.chatScrollbarPos * ab / k;
+            s = ab * ab / aa;
+            if (aa != ab) {
+                t = r > 0 ? 170 : 96;
+                u = this.newMessageSinceScroll ? 0xCC3333 : 0x3333AA;
+                v = l + 4;
+                ChatComponent.fill(poseStack, v, -r, v + 2, -r - s, u + (t << 24));
+                ChatComponent.fill(poseStack, v + 2, -r, v + 1, -r - s, 0xCCCCCC + (t << 24));
             }
         }
         poseStack.popPose();
@@ -158,7 +158,7 @@ extends GuiComponent {
     }
 
     public void clearMessages(boolean bl) {
-        this.minecraft.getChatListener().delayedMessageQueue().clear();
+        this.minecraft.getChatListener().clearQueue();
         this.trimmedMessages.clear();
         this.allMessages.clear();
         if (bl) {
@@ -268,7 +268,7 @@ extends GuiComponent {
             return false;
         }
         ChatListener chatListener = this.minecraft.getChatListener();
-        if (chatListener.delayedMessageQueue().isEmpty()) {
+        if (chatListener.queueSize() == 0L) {
             return false;
         }
         double f = d - 2.0;

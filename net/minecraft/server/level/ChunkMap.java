@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
@@ -577,7 +578,7 @@ implements ChunkHolder.PlayerProvider {
                 exception.getStackTrace();
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Exception generating new chunk");
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk to be generated");
-                crashReportCategory.setDetail("Location", String.format("%d,%d", chunkPos.x, chunkPos.z));
+                crashReportCategory.setDetail("Location", String.format(Locale.ROOT, "%d,%d", chunkPos.x, chunkPos.z));
                 crashReportCategory.setDetail("Position hash", ChunkPos.asLong(chunkPos.x, chunkPos.z));
                 crashReportCategory.setDetail("Generator", this.generator);
                 this.mainThreadExecutor.execute(() -> {
