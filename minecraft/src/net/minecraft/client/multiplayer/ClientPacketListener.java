@@ -88,7 +88,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.LastSeenMessages;
+import net.minecraft.network.chat.LastSeenMessagesTracker;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
@@ -202,6 +205,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
+import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
@@ -290,6 +294,7 @@ import org.slf4j.Logger;
 public class ClientPacketListener implements ClientGamePacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component GENERIC_DISCONNECT_MESSAGE = Component.translatable("disconnect.lost");
+	private static final int UNACKNOWLEDGED_MESSAGES_THRESHOLD = 64;
 	private final Connection connection;
 	private final GameProfile localGameProfile;
 	private final Screen callbackScreen;
@@ -310,6 +315,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private RegistryAccess.Frozen registryAccess = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
 	private final ClientTelemetryManager telemetryManager;
 	private final SignedMessageChain.Encoder signedMessageEncoder = new SignedMessageChain().encoder();
+	private final LastSeenMessagesTracker lastSeenMessagesTracker = new LastSeenMessagesTracker(5);
+	private Optional<LastSeenMessages.Entry> lastUnacknowledgedReceivedMessage = Optional.empty();
+	private int unacknowledgedReceivedMessageCount;
 
 	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile, ClientTelemetryManager clientTelemetryManager) {
 		this.minecraft = minecraft;
@@ -1579,11 +1587,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			});
 			serverData.setPreviewsChat(clientboundServerDataPacket.previewsChat());
 			ServerList.saveSingleServer(serverData);
-			if (this.minecraft.options.chatPreview().get()) {
-				ServerData.ChatPreview chatPreview = serverData.getChatPreview();
-				if (chatPreview != null && !chatPreview.isAcknowledged()) {
-					this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(this.minecraft.screen, serverData)));
-				}
+			ServerData.ChatPreview chatPreview = serverData.getChatPreview();
+			if (chatPreview != null && !chatPreview.isAcknowledged()) {
+				this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(this.minecraft.screen, serverData)));
 			}
 		}
 	}
@@ -2450,5 +2456,26 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	public SignedMessageChain.Encoder signedMessageEncoder() {
 		return this.signedMessageEncoder;
+	}
+
+	public LastSeenMessages.Update generateMessageAcknowledgements() {
+		this.unacknowledgedReceivedMessageCount = 0;
+		return new LastSeenMessages.Update(this.lastSeenMessagesTracker.get(), this.lastUnacknowledgedReceivedMessage);
+	}
+
+	public void markMessageAsProcessed(PlayerChatMessage playerChatMessage, boolean bl) {
+		if (!playerChatMessage.signer().isSystem()) {
+			LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
+			if (bl) {
+				this.lastSeenMessagesTracker.push(entry);
+				this.lastUnacknowledgedReceivedMessage = Optional.empty();
+			} else {
+				this.lastUnacknowledgedReceivedMessage = Optional.of(entry);
+			}
+
+			if (this.unacknowledgedReceivedMessageCount++ > 64) {
+				this.send(new ServerboundChatAckPacket(this.generateMessageAcknowledgements()));
+			}
+		}
 	}
 }

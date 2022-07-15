@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ public abstract class TagsProvider<T> implements DataProvider {
 					if (!list2.isEmpty()) {
 						throw new IllegalArgumentException(
 							String.format(
+								Locale.ROOT,
 								"Couldn't define tag %s as it is missing following references: %s",
 								resourceLocation,
 								list2.stream().map(Objects::toString).collect(Collectors.joining(","))

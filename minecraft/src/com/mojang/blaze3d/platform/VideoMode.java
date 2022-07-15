@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.platform;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -92,7 +93,7 @@ public final class VideoMode {
 	}
 
 	public String toString() {
-		return String.format("%sx%s@%s (%sbit)", this.width, this.height, this.refreshRate, this.redBits + this.greenBits + this.blueBits);
+		return String.format(Locale.ROOT, "%sx%s@%s (%sbit)", this.width, this.height, this.refreshRate, this.redBits + this.greenBits + this.blueBits);
 	}
 
 	public static Optional<VideoMode> read(@Nullable String string) {
@@ -131,6 +132,6 @@ public final class VideoMode {
 	}
 
 	public String write() {
-		return String.format("%sx%s@%s:%s", this.width, this.height, this.refreshRate, this.redBits + this.greenBits + this.blueBits);
+		return String.format(Locale.ROOT, "%sx%s@%s:%s", this.width, this.height, this.refreshRate, this.redBits + this.greenBits + this.blueBits);
 	}
 }

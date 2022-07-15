@@ -1,8 +1,8 @@
 package net.minecraft.network.chat;
 
-import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.util.Signer;
 
@@ -10,30 +10,42 @@ public class SignedMessageChain {
 	@Nullable
 	private MessageSignature previousSignature;
 
-	private SignedMessageChain.Link pack(Signer signer, MessageSigner messageSigner, Component component) {
-		MessageSignature messageSignature = pack(signer, messageSigner, this.previousSignature, component);
+	private SignedMessageChain.Link pack(Signer signer, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages) {
+		MessageSignature messageSignature = pack(signer, messageSigner, this.previousSignature, chatMessageContent, lastSeenMessages);
 		this.previousSignature = messageSignature;
 		return new SignedMessageChain.Link(messageSignature);
 	}
 
-	private static MessageSignature pack(Signer signer, MessageSigner messageSigner, @Nullable MessageSignature messageSignature, Component component) {
+	private static MessageSignature pack(
+		Signer signer,
+		MessageSigner messageSigner,
+		@Nullable MessageSignature messageSignature,
+		ChatMessageContent chatMessageContent,
+		LastSeenMessages lastSeenMessages
+	) {
 		SignedMessageHeader signedMessageHeader = new SignedMessageHeader(messageSignature, messageSigner.profileId());
-		SignedMessageBody signedMessageBody = new SignedMessageBody(component, messageSigner.timeStamp(), messageSigner.salt(), List.of());
+		SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), lastSeenMessages);
 		byte[] bs = signedMessageBody.hash().asBytes();
 		return new MessageSignature(signer.sign(output -> signedMessageHeader.updateSignature(output, bs)));
 	}
 
-	private PlayerChatMessage unpack(SignedMessageChain.Link link, MessageSigner messageSigner, Component component) {
-		PlayerChatMessage playerChatMessage = unpack(link, this.previousSignature, messageSigner, component);
+	private PlayerChatMessage unpack(
+		SignedMessageChain.Link link, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages
+	) {
+		PlayerChatMessage playerChatMessage = unpack(link, this.previousSignature, messageSigner, chatMessageContent, lastSeenMessages);
 		this.previousSignature = link.signature;
 		return playerChatMessage;
 	}
 
 	private static PlayerChatMessage unpack(
-		SignedMessageChain.Link link, @Nullable MessageSignature messageSignature, MessageSigner messageSigner, Component component
+		SignedMessageChain.Link link,
+		@Nullable MessageSignature messageSignature,
+		MessageSigner messageSigner,
+		ChatMessageContent chatMessageContent,
+		LastSeenMessages lastSeenMessages
 	) {
 		SignedMessageHeader signedMessageHeader = new SignedMessageHeader(messageSignature, messageSigner.profileId());
-		SignedMessageBody signedMessageBody = new SignedMessageBody(component, messageSigner.timeStamp(), messageSigner.salt(), List.of());
+		SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), lastSeenMessages);
 		return new PlayerChatMessage(signedMessageHeader, link.signature, signedMessageBody, Optional.empty());
 	}
 
@@ -47,18 +59,23 @@ public class SignedMessageChain {
 
 	@FunctionalInterface
 	public interface Decoder {
-		SignedMessageChain.Decoder UNSIGNED = (link, messageSigner, component) -> PlayerChatMessage.unsigned(messageSigner, component);
+		SignedMessageChain.Decoder UNSIGNED = (link, messageSigner, chatMessageContent, lastSeenMessages) -> PlayerChatMessage.unsigned(
+				messageSigner, chatMessageContent.decorated()
+			);
 
-		PlayerChatMessage unpack(SignedMessageChain.Link link, MessageSigner messageSigner, Component component);
+		PlayerChatMessage unpack(SignedMessageChain.Link link, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages);
 
-		default FilteredText<PlayerChatMessage> unpack(SignedMessageChain.Link link, MessageSigner messageSigner, FilteredText<Component> filteredText) {
-			return this.unpack(link, messageSigner, filteredText.raw()).withFilteredText(filteredText.filtered());
+		default FilteredText<PlayerChatMessage> unpack(
+			SignedMessageChain.Link link, MessageSigner messageSigner, FilteredText<ChatMessageContent> filteredText, LastSeenMessages lastSeenMessages
+		) {
+			return this.unpack(link, messageSigner, filteredText.raw(), lastSeenMessages)
+				.withFilteredText(Util.mapNullable(filteredText.filtered(), ChatMessageContent::decorated));
 		}
 	}
 
 	@FunctionalInterface
 	public interface Encoder {
-		SignedMessageChain.Link pack(Signer signer, MessageSigner messageSigner, Component component);
+		SignedMessageChain.Link pack(Signer signer, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages);
 	}
 
 	public static record Link(MessageSignature signature) {

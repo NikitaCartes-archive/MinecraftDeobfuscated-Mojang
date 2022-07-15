@@ -22,7 +22,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.client.multiplayer.chat.report.ChatReportBuilder;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.locale.Language;
@@ -79,8 +79,8 @@ public class ChatSelectionScreen extends Screen {
 		this.chatSelectionList.setScrollAmount((double)this.chatSelectionList.getMaxScroll());
 	}
 
-	private boolean canReport(LoggedChat loggedChat) {
-		return loggedChat.canReport(this.report.reportedProfileId());
+	private boolean canReport(LoggedChatMessage loggedChatMessage) {
+		return loggedChatMessage.canReport(this.report.reportedProfileId());
 	}
 
 	private void extendLog() {
@@ -147,11 +147,11 @@ public class ChatSelectionScreen extends Screen {
 		}
 
 		@Override
-		public void acceptMessage(int i, LoggedChat loggedChat) {
-			Component component = loggedChat.toContentComponent();
-			Component component2 = loggedChat.toNarrationComponent();
-			boolean bl = loggedChat.canReport(ChatSelectionScreen.this.report.reportedProfileId());
-			if (loggedChat instanceof LoggedChat.Player player) {
+		public void acceptMessage(int i, LoggedChatMessage loggedChatMessage) {
+			Component component = loggedChatMessage.toContentComponent();
+			Component component2 = loggedChatMessage.toNarrationComponent();
+			boolean bl = loggedChatMessage.canReport(ChatSelectionScreen.this.report.reportedProfileId());
+			if (loggedChatMessage instanceof LoggedChatMessage.Player player) {
 				ChatTrustLevel chatTrustLevel = player.trustLevel();
 				GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
 				ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageEntry(
@@ -165,7 +165,7 @@ public class ChatSelectionScreen extends Screen {
 			}
 		}
 
-		private void updateHeading(LoggedChat.Player player, boolean bl) {
+		private void updateHeading(LoggedChatMessage.Player player, boolean bl) {
 			ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageHeadingEntry(
 				player.profile(), player.toHeadingComponent(), bl
 			);

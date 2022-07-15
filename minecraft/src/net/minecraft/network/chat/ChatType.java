@@ -26,7 +26,8 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 	public static final ResourceKey<ChatType> SAY_COMMAND = create("say_command");
 	public static final ResourceKey<ChatType> MSG_COMMAND_INCOMING = create("msg_command_incoming");
 	public static final ResourceKey<ChatType> MSG_COMMAND_OUTGOING = create("msg_command_outgoing");
-	public static final ResourceKey<ChatType> TEAM_MSG_COMMAND = create("team_msg_command");
+	public static final ResourceKey<ChatType> TEAM_MSG_COMMAND_INCOMING = create("team_msg_command_incoming");
+	public static final ResourceKey<ChatType> TEAM_MSG_COMMAND_OUTGOING = create("team_msg_command_outgoing");
 	public static final ResourceKey<ChatType> EMOTE_COMMAND = create("emote_command");
 
 	private static ResourceKey<ChatType> create(String string) {
@@ -49,7 +50,14 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 			new ChatType(ChatTypeDecoration.outgoingDirectMessage("commands.message.display.outgoing"), ChatTypeDecoration.withSender("chat.type.text.narrate"))
 		);
 		BuiltinRegistries.register(
-			registry, TEAM_MSG_COMMAND, new ChatType(ChatTypeDecoration.teamMessage("chat.type.team.text"), ChatTypeDecoration.withSender("chat.type.text.narrate"))
+			registry,
+			TEAM_MSG_COMMAND_INCOMING,
+			new ChatType(ChatTypeDecoration.teamMessage("chat.type.team.text"), ChatTypeDecoration.withSender("chat.type.text.narrate"))
+		);
+		BuiltinRegistries.register(
+			registry,
+			TEAM_MSG_COMMAND_OUTGOING,
+			new ChatType(ChatTypeDecoration.teamMessage("chat.type.team.sent"), ChatTypeDecoration.withSender("chat.type.text.narrate"))
 		);
 		return BuiltinRegistries.register(
 			registry, EMOTE_COMMAND, new ChatType(ChatTypeDecoration.withSender("chat.type.emote"), ChatTypeDecoration.withSender("chat.type.emote"))

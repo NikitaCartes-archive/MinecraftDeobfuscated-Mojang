@@ -14,7 +14,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.OutgoingPlayerChatMessage;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
@@ -51,35 +50,30 @@ public class TeamMsgCommand {
 		} else {
 			Component component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
 			ChatSender chatSender = commandSourceStack.asChatSender();
-			ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND, commandSourceStack).withTargetName(component);
+			ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, commandSourceStack).withTargetName(component);
+			ChatType.Bound bound2 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(component);
 			List<ServerPlayer> list = commandSourceStack.getServer()
 				.getPlayerList()
 				.getPlayers()
 				.stream()
 				.filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam)
 				.toList();
-			chatMessage.resolve(commandSourceStack)
-				.thenAcceptAsync(
-					filteredText -> {
-						FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
+			chatMessage.resolve(commandSourceStack, filteredText -> {
+				FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
 
-						for (ServerPlayer serverPlayer : list) {
-							if (serverPlayer == entity) {
-								serverPlayer.sendSystemMessage(
-									Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), ((PlayerChatMessage)filteredText.raw()).serverContent())
-								);
-							} else {
-								OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
-								if (outgoingPlayerChatMessage != null) {
-									serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
-								}
-							}
+				for (ServerPlayer serverPlayer : list) {
+					if (serverPlayer == entity) {
+						serverPlayer.sendChatMessage(filteredText2.raw(), bound2);
+					} else {
+						OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
+						if (outgoingPlayerChatMessage != null) {
+							serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
 						}
+					}
+				}
 
-						filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
-					},
-					commandSourceStack.getServer()
-				);
+				filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
+			});
 			return list.size();
 		}
 	}

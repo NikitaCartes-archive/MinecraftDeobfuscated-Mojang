@@ -24,15 +24,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -676,9 +675,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			LOGGER.error("Encountered an unexpected exception", var44);
 			CrashReport crashReport = constructOrExtractCrashReport(var44);
 			this.fillSystemReport(crashReport.getSystemReport());
-			File file = new File(
-				new File(this.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt"
-			);
+			File file = new File(new File(this.getServerDirectory(), "crash-reports"), "crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
 			if (crashReport.saveToFile(file)) {
 				LOGGER.error("This crash report has been saved to: {}", file.getAbsolutePath());
 			} else {
@@ -1523,10 +1520,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		Writer writer = Files.newBufferedWriter(path);
 
 		try {
-			writer.write(String.format("pending_tasks: %d\n", this.getPendingTasksCount()));
-			writer.write(String.format("average_tick_time: %f\n", this.getAverageTickTime()));
-			writer.write(String.format("tick_times: %s\n", Arrays.toString(this.tickTimes)));
-			writer.write(String.format("queue: %s\n", Util.backgroundExecutor()));
+			writer.write(String.format(Locale.ROOT, "pending_tasks: %d\n", this.getPendingTasksCount()));
+			writer.write(String.format(Locale.ROOT, "average_tick_time: %f\n", this.getAverageTickTime()));
+			writer.write(String.format(Locale.ROOT, "tick_times: %s\n", Arrays.toString(this.tickTimes)));
+			writer.write(String.format(Locale.ROOT, "queue: %s\n", Util.backgroundExecutor()));
 		} catch (Throwable var6) {
 			if (writer != null) {
 				try {
@@ -1553,7 +1550,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
 				@Override
 				public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
-					list.add(String.format("%s=%s\n", key.getId(), gameRules.getRule(key)));
+					list.add(String.format(Locale.ROOT, "%s=%s\n", key.getId(), gameRules.getRule(key)));
 				}
 			});
 

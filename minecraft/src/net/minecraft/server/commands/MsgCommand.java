@@ -35,7 +35,7 @@ public class MsgCommand {
 	private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, MessageArgument.ChatMessage chatMessage) {
 		ChatSender chatSender = commandSourceStack.asChatSender();
 		ChatType.Bound bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, commandSourceStack);
-		chatMessage.resolve(commandSourceStack).thenAcceptAsync(filteredText -> {
+		chatMessage.resolve(commandSourceStack, filteredText -> {
 			FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
 
 			for (ServerPlayer serverPlayer : collection) {
@@ -48,7 +48,7 @@ public class MsgCommand {
 			}
 
 			filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
-		}, commandSourceStack.getServer());
+		});
 		return collection.size();
 	}
 }

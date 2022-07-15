@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -132,7 +133,10 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Stitcher");
 			crashReportCategory.setDetail(
 				"Sprites",
-				var16.getAllSprites().stream().map(info -> String.format("%s[%dx%d]", info.name(), info.width(), info.height())).collect(Collectors.joining(","))
+				var16.getAllSprites()
+					.stream()
+					.map(info -> String.format(Locale.ROOT, "%s[%dx%d]", info.name(), info.width(), info.height()))
+					.collect(Collectors.joining(","))
 			);
 			crashReportCategory.setDetail("Max Texture Size", j);
 			throw new ReportedException(crashReport);
@@ -269,7 +273,7 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 	}
 
 	private ResourceLocation getResourceLocation(ResourceLocation resourceLocation) {
-		return new ResourceLocation(resourceLocation.getNamespace(), String.format("textures/%s%s", resourceLocation.getPath(), ".png"));
+		return new ResourceLocation(resourceLocation.getNamespace(), String.format(Locale.ROOT, "textures/%s%s", resourceLocation.getPath(), ".png"));
 	}
 
 	public void cycleAnimationFrames() {

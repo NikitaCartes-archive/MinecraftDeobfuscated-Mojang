@@ -251,18 +251,20 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		Writer writer = Files.newBufferedWriter(path);
 
 		try {
-			writer.write(String.format("sync-chunk-writes=%s%n", dedicatedServerProperties.syncChunkWrites));
-			writer.write(String.format("gamemode=%s%n", dedicatedServerProperties.gamemode));
-			writer.write(String.format("spawn-monsters=%s%n", dedicatedServerProperties.spawnMonsters));
-			writer.write(String.format("entity-broadcast-range-percentage=%d%n", dedicatedServerProperties.entityBroadcastRangePercentage));
-			writer.write(String.format("max-world-size=%d%n", dedicatedServerProperties.maxWorldSize));
-			writer.write(String.format("spawn-npcs=%s%n", dedicatedServerProperties.spawnNpcs));
-			writer.write(String.format("view-distance=%d%n", dedicatedServerProperties.viewDistance));
-			writer.write(String.format("simulation-distance=%d%n", dedicatedServerProperties.simulationDistance));
-			writer.write(String.format("spawn-animals=%s%n", dedicatedServerProperties.spawnAnimals));
-			writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryAccess()).generateStructures()));
-			writer.write(String.format("use-native=%s%n", dedicatedServerProperties.useNativeTransport));
-			writer.write(String.format("rate-limit=%d%n", dedicatedServerProperties.rateLimitPacketsPerSecond));
+			writer.write(String.format(Locale.ROOT, "sync-chunk-writes=%s%n", dedicatedServerProperties.syncChunkWrites));
+			writer.write(String.format(Locale.ROOT, "gamemode=%s%n", dedicatedServerProperties.gamemode));
+			writer.write(String.format(Locale.ROOT, "spawn-monsters=%s%n", dedicatedServerProperties.spawnMonsters));
+			writer.write(String.format(Locale.ROOT, "entity-broadcast-range-percentage=%d%n", dedicatedServerProperties.entityBroadcastRangePercentage));
+			writer.write(String.format(Locale.ROOT, "max-world-size=%d%n", dedicatedServerProperties.maxWorldSize));
+			writer.write(String.format(Locale.ROOT, "spawn-npcs=%s%n", dedicatedServerProperties.spawnNpcs));
+			writer.write(String.format(Locale.ROOT, "view-distance=%d%n", dedicatedServerProperties.viewDistance));
+			writer.write(String.format(Locale.ROOT, "simulation-distance=%d%n", dedicatedServerProperties.simulationDistance));
+			writer.write(String.format(Locale.ROOT, "spawn-animals=%s%n", dedicatedServerProperties.spawnAnimals));
+			writer.write(
+				String.format(Locale.ROOT, "generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryAccess()).generateStructures())
+			);
+			writer.write(String.format(Locale.ROOT, "use-native=%s%n", dedicatedServerProperties.useNativeTransport));
+			writer.write(String.format(Locale.ROOT, "rate-limit=%d%n", dedicatedServerProperties.rateLimitPacketsPerSecond));
 		} catch (Throwable var7) {
 			if (writer != null) {
 				try {

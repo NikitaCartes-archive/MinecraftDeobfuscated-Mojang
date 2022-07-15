@@ -1,5 +1,6 @@
 package net.minecraft.commands.arguments;
 
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
@@ -10,7 +11,6 @@ import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 
 public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
@@ -36,17 +36,36 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> entry.write(friendlyByteBufx));
 	}
 
+	public static boolean hasSignableArguments(ParseResults<?> parseResults) {
+		CommandContextBuilder<?> commandContextBuilder = parseResults.getContext().getLastChild();
+
+		for (ParsedCommandNode<?> parsedCommandNode : commandContextBuilder.getNodes()) {
+			CommandNode parsedArgument = parsedCommandNode.getNode();
+			if (parsedArgument instanceof ArgumentCommandNode) {
+				ArgumentCommandNode<?, ?> argumentCommandNode = (ArgumentCommandNode<?, ?>)parsedArgument;
+				if (argumentCommandNode.getType() instanceof SignedArgument) {
+					ParsedArgument<?, ?> parsedArgumentx = (ParsedArgument<?, ?>)commandContextBuilder.getArguments().get(argumentCommandNode.getName());
+					if (parsedArgumentx != null) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
 	public static ArgumentSignatures signCommand(CommandContextBuilder<?> commandContextBuilder, ArgumentSignatures.Signer signer) {
-		List<ArgumentSignatures.Entry> list = collectLastChildPlainSignableComponents(commandContextBuilder).stream().map(pair -> {
-			MessageSignature messageSignature = signer.sign((String)pair.getFirst(), (Component)pair.getSecond());
+		List<ArgumentSignatures.Entry> list = collectLastChildPlainSignableArguments(commandContextBuilder).stream().map(pair -> {
+			MessageSignature messageSignature = signer.sign((String)pair.getFirst(), (String)pair.getSecond());
 			return new ArgumentSignatures.Entry((String)pair.getFirst(), messageSignature);
 		}).toList();
 		return new ArgumentSignatures(list);
 	}
 
-	private static List<Pair<String, Component>> collectLastChildPlainSignableComponents(CommandContextBuilder<?> commandContextBuilder) {
+	private static List<Pair<String, String>> collectLastChildPlainSignableArguments(CommandContextBuilder<?> commandContextBuilder) {
 		CommandContextBuilder<?> commandContextBuilder2 = commandContextBuilder.getLastChild();
-		List<Pair<String, Component>> list = new ArrayList();
+		List<Pair<String, String>> list = new ArrayList();
 
 		for (ParsedCommandNode<?> parsedCommandNode : commandContextBuilder2.getNodes()) {
 			CommandNode parsedArgument = parsedCommandNode.getNode();
@@ -57,8 +76,8 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 					SignedArgument<?> signedArgument = (SignedArgument<?>)var9;
 					ParsedArgument<?, ?> parsedArgumentx = (ParsedArgument<?, ?>)commandContextBuilder2.getArguments().get(argumentCommandNode.getName());
 					if (parsedArgumentx != null) {
-						Component component = getPlainComponentUnchecked(signedArgument, parsedArgumentx);
-						list.add(Pair.of(argumentCommandNode.getName(), component));
+						String string = getSignableText(signedArgument, parsedArgumentx);
+						list.add(Pair.of(argumentCommandNode.getName(), string));
 					}
 				}
 			}
@@ -67,8 +86,8 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 		return list;
 	}
 
-	private static <T> Component getPlainComponentUnchecked(SignedArgument<T> signedArgument, ParsedArgument<?, ?> parsedArgument) {
-		return signedArgument.getPlainSignableComponent((T)parsedArgument.getResult());
+	private static <T> String getSignableText(SignedArgument<T> signedArgument, ParsedArgument<?, ?> parsedArgument) {
+		return signedArgument.getSignableText((T)parsedArgument.getResult());
 	}
 
 	public static record Entry(String name, MessageSignature signature) {
@@ -85,6 +104,6 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 
 	@FunctionalInterface
 	public interface Signer {
-		MessageSignature sign(String string, Component component);
+		MessageSignature sign(String string, String string2);
 	}
 }

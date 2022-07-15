@@ -1,6 +1,7 @@
 package net.minecraft.client.resources.language;
 
 import com.mojang.bridge.game.Language;
+import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -38,7 +39,7 @@ public class LanguageInfo implements Language, Comparable<LanguageInfo> {
 	}
 
 	public String toString() {
-		return String.format("%s (%s)", this.name, this.region);
+		return String.format(Locale.ROOT, "%s (%s)", this.name, this.region);
 	}
 
 	public boolean equals(Object object) {

@@ -6,26 +6,27 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.ChatLog;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 
 @Environment(EnvType.CLIENT)
 public class ChatLogSegmenter {
-	private final Function<LoggedChat.WithId, ChatLogSegmenter.MessageType> typeFunction;
-	private final List<LoggedChat.WithId> messages = new ArrayList();
+	private final Function<ChatLog.Entry<LoggedChatMessage>, ChatLogSegmenter.MessageType> typeFunction;
+	private final List<ChatLog.Entry<LoggedChatMessage>> messages = new ArrayList();
 	@Nullable
 	private ChatLogSegmenter.MessageType segmentType;
 
-	public ChatLogSegmenter(Function<LoggedChat.WithId, ChatLogSegmenter.MessageType> function) {
+	public ChatLogSegmenter(Function<ChatLog.Entry<LoggedChatMessage>, ChatLogSegmenter.MessageType> function) {
 		this.typeFunction = function;
 	}
 
-	public boolean accept(LoggedChat.WithId withId) {
-		ChatLogSegmenter.MessageType messageType = (ChatLogSegmenter.MessageType)this.typeFunction.apply(withId);
+	public boolean accept(ChatLog.Entry<LoggedChatMessage> entry) {
+		ChatLogSegmenter.MessageType messageType = (ChatLogSegmenter.MessageType)this.typeFunction.apply(entry);
 		if (this.segmentType != null && messageType != this.segmentType) {
 			return false;
 		} else {
 			this.segmentType = messageType;
-			this.messages.add(withId);
+			this.messages.add(entry);
 			return true;
 		}
 	}
@@ -46,6 +47,6 @@ public class ChatLogSegmenter {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record Results(List<LoggedChat.WithId> messages, ChatLogSegmenter.MessageType type) {
+	public static record Results(List<ChatLog.Entry<LoggedChatMessage>> messages, ChatLogSegmenter.MessageType type) {
 	}
 }

@@ -32,6 +32,8 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -82,6 +84,7 @@ public class Util {
 	private static final ExecutorService BOOTSTRAP_EXECUTOR = makeExecutor("Bootstrap");
 	private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main");
 	private static final ExecutorService IO_POOL = makeIoExecutor();
+	private static final DateTimeFormatter FILENAME_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 	public static TimeSource.NanoTimeSource timeSource = System::nanoTime;
 	public static final Ticker TICKER = new Ticker() {
 		@Override
@@ -122,6 +125,10 @@ public class Util {
 
 	public static long getEpochMillis() {
 		return Instant.now().toEpochMilli();
+	}
+
+	public static String getFilenameFormattedDateTime() {
+		return FILENAME_DATE_TIME_FORMATTER.format(ZonedDateTime.now());
 	}
 
 	private static ExecutorService makeExecutor(String string) {
@@ -230,7 +237,7 @@ public class Util {
 			System.exit(-1);
 		}
 
-		LOGGER.error(String.format("Caught exception in thread %s", thread), throwable);
+		LOGGER.error(String.format(Locale.ROOT, "Caught exception in thread %s", thread), throwable);
 	}
 
 	@Nullable

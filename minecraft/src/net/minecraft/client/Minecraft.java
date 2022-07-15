@@ -45,9 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -790,7 +788,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public static void crash(CrashReport crashReport) {
 		File file = new File(getInstance().gameDirectory, "crash-reports");
-		File file2 = new File(file, "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-client.txt");
+		File file2 = new File(file, "crash-" + Util.getFilenameFormattedDateTime() + "-client.txt");
 		Bootstrap.realStdoutPrintln(crashReport.getFriendlyReport());
 		if (crashReport.getSaveFile() != null) {
 			Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + crashReport.getSaveFile());
@@ -1153,6 +1151,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			fps = this.frames;
 			this.fpsString = String.format(
+				Locale.ROOT,
 				"%d fps T: %s%s%s%s B: %d%s",
 				fps,
 				k == 260 ? "inf" : k,
@@ -1333,9 +1332,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		Path path;
 		try {
-			String string2 = String.format(
-				"%s-%s-%s", new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()), string, SharedConstants.getCurrentVersion().getId()
-			);
+			String string2 = String.format(Locale.ROOT, "%s-%s-%s", Util.getFilenameFormattedDateTime(), string, SharedConstants.getCurrentVersion().getId());
 			String string3 = FileUtil.findAvailableName(MetricsPersister.PROFILING_RESULTS_DIR, string2, ".zip");
 			path = MetricsPersister.PROFILING_RESULTS_DIR.resolve(string3);
 		} catch (IOException var21) {

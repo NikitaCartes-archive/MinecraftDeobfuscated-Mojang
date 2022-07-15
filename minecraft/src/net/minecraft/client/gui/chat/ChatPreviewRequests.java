@@ -29,14 +29,14 @@ public class ChatPreviewRequests {
 			return true;
 		} else if (this.pending != null && this.pending.matches(string)) {
 			return true;
-		} else if (this.isRequestReady(l)) {
+		} else if (!this.minecraft.isLocalServer() && !this.isRequestReady(l)) {
+			return false;
+		} else {
 			ChatPreviewRequests.PendingPreview pendingPreview = new ChatPreviewRequests.PendingPreview(this.queryIdGenerator.next(), string);
 			this.pending = pendingPreview;
 			this.lastRequestTime = l;
 			clientPacketListener.send(new ServerboundChatPreviewPacket(pendingPreview.id(), pendingPreview.query()));
 			return true;
-		} else {
-			return false;
 		}
 	}
 

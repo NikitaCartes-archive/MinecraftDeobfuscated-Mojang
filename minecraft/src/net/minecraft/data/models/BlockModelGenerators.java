@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -4385,7 +4386,7 @@ public class BlockModelGenerators {
 		PropertyDispatch.C1<Integer> c1 = PropertyDispatch.property(BlockStateProperties.LEVEL);
 
 		for (int i = 0; i < 16; i++) {
-			String string = String.format("_%02d", i);
+			String string = String.format(Locale.ROOT, "_%02d", i);
 			ResourceLocation resourceLocation = TextureMapping.getItemTexture(Items.LIGHT, string);
 			c1.select(
 				i,

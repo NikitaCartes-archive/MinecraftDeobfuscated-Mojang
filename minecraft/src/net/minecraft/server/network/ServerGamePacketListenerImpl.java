@@ -19,10 +19,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,10 +47,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.TickablePacketListener;
+import net.minecraft.network.chat.ChatDecorator;
+import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatPreviewThrottler;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.LastSeenMessages;
+import net.minecraft.network.chat.LastSeenMessagesValidator;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.SignedMessageChain;
@@ -70,6 +77,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPreviewPacket;
@@ -119,6 +127,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.FutureChain;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.thread.BlockableEventLoop;
@@ -168,11 +177,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-public class ServerGamePacketListenerImpl implements ServerPlayerConnection, ServerGamePacketListener {
+public class ServerGamePacketListenerImpl implements ServerPlayerConnection, TickablePacketListener, ServerGamePacketListener {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int LATENCY_CHECK_INTERVAL = 15000;
 	public static final double MAX_INTERACTION_DISTANCE = Mth.square(6.0);
 	private static final int NO_BLOCK_UPDATES_TO_ACK = -1;
+	private static final int PENDING_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	public final Connection connection;
 	private final MinecraftServer server;
 	public ServerPlayer player;
@@ -210,6 +220,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 	private final ChatPreviewThrottler chatPreviewThrottler = new ChatPreviewThrottler();
 	private final AtomicReference<Instant> lastChatTimeStamp = new AtomicReference(Instant.EPOCH);
 	private final SignedMessageChain.Decoder signedMessageDecoder = new SignedMessageChain().decoder();
+	private final LastSeenMessagesValidator lastSeenMessagesValidator = new LastSeenMessagesValidator();
+	private final FutureChain chatMessageChain;
 
 	public ServerGamePacketListenerImpl(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer) {
 		this.server = minecraftServer;
@@ -219,8 +231,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		serverPlayer.connection = this;
 		this.keepAliveTime = Util.getMillis();
 		serverPlayer.getTextFilter().join();
+		this.chatMessageChain = new FutureChain(minecraftServer);
 	}
 
+	@Override
 	public void tick() {
 		if (this.ackBlockChangesUpTo > -1) {
 			this.send(new ClientboundBlockChangedAckPacket(this.ackBlockChangesUpTo));
@@ -325,28 +339,30 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		this.server.executeBlocking(this.connection::handleDisconnection);
 	}
 
-	private <T, R> void filterTextPacket(T object, Consumer<R> consumer, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
+	private <T, R, O> CompletableFuture<O> filterTextPacket(
+		T object, Function<R, CompletableFuture<O>> function, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction
+	) {
 		BlockableEventLoop<?> blockableEventLoop = this.player.getLevel().getServer();
-		Consumer<R> consumer2 = object2 -> {
+		Function<R, CompletableFuture<O>> function2 = objectx -> {
 			if (this.getConnection().isConnected()) {
-				try {
-					consumer.accept(object2);
-				} catch (Exception var5x) {
-					LOGGER.error("Failed to handle chat packet {}, suppressing error", object, var5x);
-				}
+				return (CompletableFuture)function.apply(objectx);
 			} else {
 				LOGGER.debug("Ignoring packet due to disconnection");
+				return CompletableFuture.failedFuture(new CancellationException("disconnected"));
 			}
 		};
-		((CompletableFuture)biFunction.apply(this.player.getTextFilter(), object)).thenAcceptAsync(consumer2, blockableEventLoop);
+		return ((CompletableFuture)biFunction.apply(this.player.getTextFilter(), object)).thenComposeAsync(function2, blockableEventLoop);
 	}
 
-	private void filterTextPacket(String string, Consumer<FilteredText<String>> consumer) {
-		this.filterTextPacket(string, consumer, TextFilter::processStreamMessage);
+	private CompletableFuture<Void> filterTextPacket(String string, Function<FilteredText<String>, CompletableFuture<Void>> function) {
+		return this.filterTextPacket(string, function, TextFilter::processStreamMessage);
 	}
 
 	private void filterTextPacket(List<String> list, Consumer<List<FilteredText<String>>> consumer) {
-		this.filterTextPacket(list, consumer, TextFilter::processMessageBundle);
+		this.filterTextPacket(list, listx -> {
+			consumer.accept(listx);
+			return CompletableFuture.completedFuture(null);
+		}, TextFilter::processMessageBundle);
 	}
 
 	@Override
@@ -1211,8 +1227,9 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (isChatMessageIllegal(serverboundChatPacket.message())) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
 		} else {
-			if (this.tryHandleChat(serverboundChatPacket.message(), serverboundChatPacket.timeStamp())) {
-				this.filterTextPacket(serverboundChatPacket.message(), filteredText -> this.handleChat(serverboundChatPacket, filteredText));
+			if (this.tryHandleChat(serverboundChatPacket.message(), serverboundChatPacket.timeStamp(), serverboundChatPacket.lastSeenMessages())) {
+				this.chatMessageChain
+					.append(() -> this.filterTextPacket(serverboundChatPacket.message(), filteredText -> this.handleChat(serverboundChatPacket, filteredText)));
 			}
 		}
 	}
@@ -1222,13 +1239,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		if (isChatMessageIllegal(serverboundChatCommandPacket.command())) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
 		} else {
-			if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp())) {
+			if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp(), serverboundChatCommandPacket.lastSeenMessages())) {
 				this.server
 					.submit(
 						() -> {
 							CommandSourceStack commandSourceStack = this.player
 								.createCommandSourceStack()
-								.withSigningContext(serverboundChatCommandPacket.signingContext(this.player));
+								.withSigningContext(serverboundChatCommandPacket.signingContext(this.player))
+								.withChatMessageChainer(this.chatMessageChain);
 							this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
 							this.detectRateSpam();
 						}
@@ -1237,7 +1255,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		}
 	}
 
-	private boolean tryHandleChat(String string, Instant instant) {
+	private boolean tryHandleChat(String string, Instant instant, LastSeenMessages.Update update) {
 		if (!this.updateChatOrder(instant)) {
 			LOGGER.warn("{} sent out-of-order chat: '{}'", this.player.getName().getString(), string);
 			this.disconnect(Component.translatable("multiplayer.disconnect.out_of_order_chat"));
@@ -1246,8 +1264,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 			this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), false));
 			return false;
 		} else {
-			this.player.resetLastActionTime();
-			return true;
+			Set<LastSeenMessagesValidator.ErrorCondition> set;
+			synchronized (this.lastSeenMessagesValidator) {
+				set = this.lastSeenMessagesValidator.validateAndUpdate(update);
+			}
+
+			if (!set.isEmpty()) {
+				this.handleValidationFailure(set);
+				return false;
+			} else {
+				this.player.resetLastActionTime();
+				return true;
+			}
 		}
 	}
 
@@ -1273,20 +1301,20 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 		return false;
 	}
 
-	private void handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText) {
+	private CompletableFuture<Void> handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText) {
 		MessageSigner messageSigner = serverboundChatPacket.getSigner(this.player);
+		LastSeenMessages lastSeenMessages = serverboundChatPacket.lastSeenMessages().lastSeen();
 		SignedMessageChain.Link link = new SignedMessageChain.Link(serverboundChatPacket.signature());
-		FilteredText<Component> filteredText2 = filteredText.map(Component::literal);
-		if (serverboundChatPacket.signedPreview()) {
-			this.server
-				.getChatDecorator()
-				.decorateFiltered(this.player, filteredText2)
-				.thenApply(filteredTextx -> this.signedMessageDecoder.unpack(link, messageSigner, filteredTextx))
-				.thenAcceptAsync(this::broadcastChatMessage, this.server);
-		} else {
-			FilteredText<PlayerChatMessage> filteredText3 = this.signedMessageDecoder.unpack(link, messageSigner, filteredText2);
-			this.server.getChatDecorator().decorateSignedChat(this.player, filteredText3).thenAcceptAsync(this::broadcastChatMessage, this.server);
-		}
+		return this.server.getChatDecorator().decorateFiltered(this.player, filteredText.map(Component::literal)).thenAcceptAsync(filteredText2 -> {
+			if (serverboundChatPacket.signedPreview()) {
+				FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText, filteredText2);
+				this.broadcastChatMessage(this.signedMessageDecoder.unpack(link, messageSigner, filteredText3, lastSeenMessages));
+			} else {
+				FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText);
+				FilteredText<PlayerChatMessage> filteredText4 = this.signedMessageDecoder.unpack(link, messageSigner, filteredText3, lastSeenMessages);
+				this.broadcastChatMessage(ChatDecorator.attachUnsignedDecoration(filteredText4, filteredText2));
+			}
+		}, this.server);
 	}
 
 	private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
@@ -1298,7 +1326,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 				LOGGER.warn(
 					"{} sent expired chat: '{}'. Is the client/server system time unsynchronized?",
 					this.player.getName().getString(),
-					playerChatMessage.signedContent().getString()
+					playerChatMessage.signedContent().plain().getString()
 				);
 			}
 
@@ -1316,13 +1344,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 
 	@Override
 	public void handleChatPreview(ServerboundChatPreviewPacket serverboundChatPreviewPacket) {
-		if (this.server.previewsChat()) {
+		if (this.handlesPreviewRequests()) {
 			this.chatPreviewThrottler.schedule(() -> {
 				int i = serverboundChatPreviewPacket.queryId();
 				String string = serverboundChatPreviewPacket.query();
 				return this.queryPreview(string).thenAccept(component -> this.sendPreviewResponse(i, component));
 			});
 		}
+	}
+
+	private boolean handlesPreviewRequests() {
+		return this.server.previewsChat() || this.connection.isMemoryConnection();
 	}
 
 	private void sendPreviewResponse(int i, Component component) {
@@ -1374,6 +1406,27 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 
 			return CompletableFuture.completedFuture(null);
 		}
+	}
+
+	@Override
+	public void handleChatAck(ServerboundChatAckPacket serverboundChatAckPacket) {
+		Set<LastSeenMessagesValidator.ErrorCondition> set;
+		synchronized (this.lastSeenMessagesValidator) {
+			set = this.lastSeenMessagesValidator.validateAndUpdate(serverboundChatAckPacket.lastSeenMessages());
+		}
+
+		if (!set.isEmpty()) {
+			this.handleValidationFailure(set);
+		}
+	}
+
+	private void handleValidationFailure(Set<LastSeenMessagesValidator.ErrorCondition> set) {
+		LOGGER.warn(
+			"Failed to validate message from {}, reasons: {}",
+			this.player.getName().getString(),
+			set.stream().map(LastSeenMessagesValidator.ErrorCondition::message).collect(Collectors.joining(","))
+		);
+		this.disconnect(Component.translatable("multiplayer.disconnect.chat_validation_failed"));
 	}
 
 	@Override
@@ -1438,6 +1491,20 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
 
 	public SignedMessageChain.Decoder signedMessageDecoder() {
 		return this.signedMessageDecoder;
+	}
+
+	public void addPendingMessage(PlayerChatMessage playerChatMessage) {
+		if (!playerChatMessage.signer().isSystem()) {
+			int i;
+			synchronized (this.lastSeenMessagesValidator) {
+				this.lastSeenMessagesValidator.addPending(playerChatMessage.toLastSeenEntry());
+				i = this.lastSeenMessagesValidator.pendingMessagesCount();
+			}
+
+			if (i > 4096) {
+				this.disconnect(Component.translatable("multiplayer.disconnect.too_many_pending_chats"));
+			}
+		}
 	}
 
 	@Override
