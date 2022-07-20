@@ -138,7 +138,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 				sculkSensorBlockEntity.setLastVibrationFrequency(VIBRATION_FREQUENCY_FOR_EVENT.get(GameEvent.STEP));
 			}
 
-			activate(entity.getResponsibleEntity(), level, blockPos, blockState, 15);
+			activate(entity, level, blockPos, blockState, 15);
 		}
 
 		super.stepOn(level, blockPos, blockState, entity);

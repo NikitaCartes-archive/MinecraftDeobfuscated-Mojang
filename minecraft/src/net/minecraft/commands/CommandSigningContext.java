@@ -1,54 +1,26 @@
 package net.minecraft.commands;
 
-import net.minecraft.commands.arguments.ArgumentSignatures;
-import net.minecraft.network.chat.LastSeenMessages;
-import net.minecraft.network.chat.MessageSignature;
-import net.minecraft.network.chat.MessageSigner;
-import net.minecraft.network.chat.SignedMessageChain;
+import java.util.Map;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.PlayerChatMessage;
 
 public interface CommandSigningContext {
-	static CommandSigningContext anonymous() {
-		final MessageSigner messageSigner = MessageSigner.system();
-		return new CommandSigningContext() {
-			@Override
-			public CommandSigningContext.SignedArgument getArgument(String string) {
-				return CommandSigningContext.SignedArgument.UNSIGNED;
-			}
-
-			@Override
-			public MessageSigner argumentSigner() {
-				return messageSigner;
-			}
-
-			@Override
-			public SignedMessageChain.Decoder decoder() {
-				return SignedMessageChain.Decoder.UNSIGNED;
-			}
-		};
-	}
-
-	CommandSigningContext.SignedArgument getArgument(String string);
-
-	MessageSigner argumentSigner();
-
-	SignedMessageChain.Decoder decoder();
-
-	public static record SignedArgument(MessageSignature signature, boolean signedPreview, LastSeenMessages lastSeenMessages) {
-		public static final CommandSigningContext.SignedArgument UNSIGNED = new CommandSigningContext.SignedArgument(
-			MessageSignature.EMPTY, false, LastSeenMessages.EMPTY
-		);
-	}
-
-	public static record SignedArguments(
-		SignedMessageChain.Decoder decoder,
-		MessageSigner argumentSigner,
-		ArgumentSignatures argumentSignatures,
-		boolean signedPreview,
-		LastSeenMessages lastSeenMessages
-	) implements CommandSigningContext {
+	CommandSigningContext ANONYMOUS = new CommandSigningContext() {
+		@Nullable
 		@Override
-		public CommandSigningContext.SignedArgument getArgument(String string) {
-			return new CommandSigningContext.SignedArgument(this.argumentSignatures.get(string), this.signedPreview, this.lastSeenMessages);
+		public PlayerChatMessage getArgument(String string) {
+			return null;
+		}
+	};
+
+	@Nullable
+	PlayerChatMessage getArgument(String string);
+
+	public static record SignedArguments(Map<String, PlayerChatMessage> arguments) implements CommandSigningContext {
+		@Nullable
+		@Override
+		public PlayerChatMessage getArgument(String string) {
+			return (PlayerChatMessage)this.arguments.get(string);
 		}
 	}
 }

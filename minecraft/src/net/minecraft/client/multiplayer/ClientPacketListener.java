@@ -819,8 +819,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
-		ChatType.Bound bound = clientboundPlayerChatPacket.resolveChatType(this.registryAccess);
-		this.minecraft.getChatListener().handleChatMessage(clientboundPlayerChatPacket.message(), bound);
+		Optional<ChatType.Bound> optional = clientboundPlayerChatPacket.resolveChatType(this.registryAccess);
+		if (!optional.isPresent()) {
+			this.connection.disconnect(Component.translatable("multiplayer.disconnect.invalid_packet"));
+		} else {
+			this.minecraft.getChatListener().handleChatMessage(clientboundPlayerChatPacket.message(), (ChatType.Bound)optional.get());
+		}
 	}
 
 	@Override
@@ -1008,6 +1012,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 		String string = localPlayer.getServerBrand();
 		this.minecraft.cameraEntity = null;
+		if (localPlayer.hasContainerOpen()) {
+			localPlayer.closeContainer();
+		}
+
 		LocalPlayer localPlayer2 = this.minecraft
 			.gameMode
 			.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
@@ -2464,8 +2472,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	}
 
 	public void markMessageAsProcessed(PlayerChatMessage playerChatMessage, boolean bl) {
-		if (!playerChatMessage.signer().isSystem()) {
-			LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
+		LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
+		if (entry != null) {
 			if (bl) {
 				this.lastSeenMessagesTracker.push(entry);
 				this.lastUnacknowledgedReceivedMessage = Optional.empty();

@@ -1,17 +1,12 @@
 package net.minecraft.commands.arguments;
 
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
-import com.mojang.brigadier.context.ParsedCommandNode;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.PreviewableCommand;
 
 public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 	public static final ArgumentSignatures EMPTY = new ArgumentSignatures(List.of());
@@ -36,50 +31,25 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> entry.write(friendlyByteBufx));
 	}
 
-	public static boolean hasSignableArguments(ParseResults<?> parseResults) {
-		CommandContextBuilder<?> commandContextBuilder = parseResults.getContext().getLastChild();
-
-		for (ParsedCommandNode<?> parsedCommandNode : commandContextBuilder.getNodes()) {
-			CommandNode parsedArgument = parsedCommandNode.getNode();
-			if (parsedArgument instanceof ArgumentCommandNode) {
-				ArgumentCommandNode<?, ?> argumentCommandNode = (ArgumentCommandNode<?, ?>)parsedArgument;
-				if (argumentCommandNode.getType() instanceof SignedArgument) {
-					ParsedArgument<?, ?> parsedArgumentx = (ParsedArgument<?, ?>)commandContextBuilder.getArguments().get(argumentCommandNode.getName());
-					if (parsedArgumentx != null) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
+	public static boolean hasSignableArguments(PreviewableCommand<?> previewableCommand) {
+		return previewableCommand.arguments().stream().anyMatch(argument -> argument.previewType() instanceof SignedArgument);
 	}
 
-	public static ArgumentSignatures signCommand(CommandContextBuilder<?> commandContextBuilder, ArgumentSignatures.Signer signer) {
-		List<ArgumentSignatures.Entry> list = collectLastChildPlainSignableArguments(commandContextBuilder).stream().map(pair -> {
+	public static ArgumentSignatures signCommand(PreviewableCommand<?> previewableCommand, ArgumentSignatures.Signer signer) {
+		List<ArgumentSignatures.Entry> list = collectPlainSignableArguments(previewableCommand).stream().map(pair -> {
 			MessageSignature messageSignature = signer.sign((String)pair.getFirst(), (String)pair.getSecond());
 			return new ArgumentSignatures.Entry((String)pair.getFirst(), messageSignature);
 		}).toList();
 		return new ArgumentSignatures(list);
 	}
 
-	private static List<Pair<String, String>> collectLastChildPlainSignableArguments(CommandContextBuilder<?> commandContextBuilder) {
-		CommandContextBuilder<?> commandContextBuilder2 = commandContextBuilder.getLastChild();
+	public static List<Pair<String, String>> collectPlainSignableArguments(PreviewableCommand<?> previewableCommand) {
 		List<Pair<String, String>> list = new ArrayList();
 
-		for (ParsedCommandNode<?> parsedCommandNode : commandContextBuilder2.getNodes()) {
-			CommandNode parsedArgument = parsedCommandNode.getNode();
-			if (parsedArgument instanceof ArgumentCommandNode) {
-				ArgumentCommandNode<?, ?> argumentCommandNode = (ArgumentCommandNode<?, ?>)parsedArgument;
-				ArgumentType var9 = argumentCommandNode.getType();
-				if (var9 instanceof SignedArgument) {
-					SignedArgument<?> signedArgument = (SignedArgument<?>)var9;
-					ParsedArgument<?, ?> parsedArgumentx = (ParsedArgument<?, ?>)commandContextBuilder2.getArguments().get(argumentCommandNode.getName());
-					if (parsedArgumentx != null) {
-						String string = getSignableText(signedArgument, parsedArgumentx);
-						list.add(Pair.of(argumentCommandNode.getName(), string));
-					}
-				}
+		for (PreviewableCommand.Argument<?> argument : previewableCommand.arguments()) {
+			if (argument.previewType() instanceof SignedArgument<?> signedArgument) {
+				String string = getSignableText(signedArgument, argument.parsedValue());
+				list.add(Pair.of(argument.name(), string));
 			}
 		}
 

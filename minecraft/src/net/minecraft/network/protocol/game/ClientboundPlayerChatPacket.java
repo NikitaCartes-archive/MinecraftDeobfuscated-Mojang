@@ -1,5 +1,6 @@
 package net.minecraft.network.protocol.game;
 
+import java.util.Optional;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
@@ -26,7 +27,7 @@ public record ClientboundPlayerChatPacket(PlayerChatMessage message, ChatType.Bo
 		return true;
 	}
 
-	public ChatType.Bound resolveChatType(RegistryAccess registryAccess) {
+	public Optional<ChatType.Bound> resolveChatType(RegistryAccess registryAccess) {
 		return this.chatType.resolve(registryAccess);
 	}
 }

@@ -121,7 +121,9 @@ public class ReportReasonSelectionScreen extends Screen {
 			super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height, 40, ReportReasonSelectionScreen.this.height - 95, 18);
 
 			for (ReportReason reportReason : ReportReason.values()) {
-				this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
+				if (reportReason.reportable()) {
+					this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
+				}
 			}
 		}
 

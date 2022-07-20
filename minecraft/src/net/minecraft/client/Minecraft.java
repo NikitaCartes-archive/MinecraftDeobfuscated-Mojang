@@ -186,6 +186,7 @@ import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.players.GameProfileCache;
@@ -455,8 +456,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
 				this.window.setIcon(inputStream, inputStream2);
 			}
-		} catch (IOException var8) {
-			LOGGER.error("Couldn't set icon", (Throwable)var8);
+		} catch (IOException var9) {
+			LOGGER.error("Couldn't set icon", (Throwable)var9);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit().get());
@@ -565,22 +566,16 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		LoadingOverlay.registerTextures(this);
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
 		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
-		this.setOverlay(
-			new LoadingOverlay(
-				this,
-				this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
-				optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
-						if (SharedConstants.IS_RUNNING_IN_IDE) {
-							this.selfTest();
-						}
+		ReloadInstance reloadInstance = this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list);
+		this.setOverlay(new LoadingOverlay(this, reloadInstance, optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+				if (SharedConstants.IS_RUNNING_IN_IDE) {
+					this.selfTest();
+				}
 
-						this.reloadStateTracker.finishReload();
-					}),
-				false
-			)
-		);
+				this.reloadStateTracker.finishReload();
+			}), false));
 		if (string != null) {
-			ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null);
+			reloadInstance.done().thenRunAsync(() -> ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null), this);
 		} else if (this.shouldShowBanNotice()) {
 			this.setScreen(BanNoticeScreen.create(bl -> {
 				if (bl) {

@@ -813,7 +813,7 @@ public abstract class PlayerList {
 	private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText, Predicate<ServerPlayer> predicate, ChatSender chatSender, ChatType.Bound bound) {
 		boolean bl = this.verifyChatTrusted(filteredText.raw(), chatSender);
 		this.server.logChatMessage(filteredText.raw().serverContent(), bound, bl ? null : "Not Secure");
-		FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
+		FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
 
 		for (ServerPlayer serverPlayer : this.players) {
 			OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.select(predicate.test(serverPlayer));

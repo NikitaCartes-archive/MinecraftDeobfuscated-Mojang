@@ -647,7 +647,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 							}
 
 							if (movementEmission.emitsEvents() && (this.onGround || vec3.y == 0.0 || this.isInPowderSnow || bl3)) {
-								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this.getResponsibleEntity(), this.getBlockStateOn()));
+								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
 							}
 						}
 					} else if (blockState.isAir()) {
@@ -993,18 +993,13 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (bl) {
 			if (this.fallDistance > 0.0F) {
 				blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
-				this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this.getResponsibleEntity(), this.getBlockStateOn()));
+				this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
 			}
 
 			this.resetFallDistance();
 		} else if (d < 0.0) {
 			this.fallDistance -= (float)d;
 		}
-	}
-
-	@Nullable
-	public Entity getResponsibleEntity() {
-		return this;
 	}
 
 	public boolean fireImmune() {
@@ -1526,7 +1521,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			double e = listTag2.getDouble(1);
 			double f = listTag2.getDouble(2);
 			this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-			this.setPosRaw(listTag.getDouble(0), Mth.clamp(listTag.getDouble(1), -2.0E7, 2.0E7), listTag.getDouble(2));
+			double g = 3.0000512E7;
+			this.setPosRaw(
+				Mth.clamp(listTag.getDouble(0), -3.0000512E7, 3.0000512E7),
+				Mth.clamp(listTag.getDouble(1), -2.0E7, 2.0E7),
+				Mth.clamp(listTag.getDouble(2), -3.0000512E7, 3.0000512E7)
+			);
 			this.setYRot(listTag3.getFloat(0));
 			this.setXRot(listTag3.getFloat(1));
 			this.setOldPosAndRot();
@@ -1556,8 +1556,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 					try {
 						this.setCustomName(Component.Serializer.fromJson(string));
-					} catch (Exception var14) {
-						LOGGER.warn("Failed to parse entity custom name {}", string, var14);
+					} catch (Exception var16) {
+						LOGGER.warn("Failed to parse entity custom name {}", string, var16);
 					}
 				}
 
@@ -1584,8 +1584,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			} else {
 				throw new IllegalStateException("Entity has invalid rotation");
 			}
-		} catch (Throwable var15) {
-			CrashReport crashReport = CrashReport.forThrowable(var15, "Loading entity NBT");
+		} catch (Throwable var17) {
+			CrashReport crashReport = CrashReport.forThrowable(var17, "Loading entity NBT");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being loaded");
 			this.fillCrashReportCategory(crashReportCategory);
 			throw new ReportedException(crashReport);

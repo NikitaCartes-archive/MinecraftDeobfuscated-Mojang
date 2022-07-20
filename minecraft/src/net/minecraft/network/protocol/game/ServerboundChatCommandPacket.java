@@ -1,13 +1,10 @@
 package net.minecraft.network.protocol.game;
 
 import java.time.Instant;
-import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.LastSeenMessages;
-import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringUtil;
 
 public record ServerboundChatCommandPacket(
@@ -48,12 +45,5 @@ public record ServerboundChatCommandPacket(
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
 		serverGamePacketListener.handleChatCommand(this);
-	}
-
-	public CommandSigningContext signingContext(ServerPlayer serverPlayer) {
-		MessageSigner messageSigner = new MessageSigner(serverPlayer.getUUID(), this.timeStamp, this.salt);
-		return new CommandSigningContext.SignedArguments(
-			serverPlayer.connection.signedMessageDecoder(), messageSigner, this.argumentSignatures, this.signedPreview, this.lastSeenMessages.lastSeen()
-		);
 	}
 }

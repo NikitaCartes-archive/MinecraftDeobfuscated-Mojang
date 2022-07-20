@@ -30,10 +30,10 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 		return CHAT_NOT_SECURE;
 	}
 
-	public static GuiMessageTag chatModified(Component component) {
-		Component component2 = Component.translatable("chat.tag.modified.original", component);
-		Component component3 = Component.empty().append(CHAT_MODIFIED_TEXT).append(CommonComponents.NEW_LINE).append(component2);
-		return new GuiMessageTag(15386724, GuiMessageTag.Icon.CHAT_MODIFIED, component3, "Modified");
+	public static GuiMessageTag chatModified(String string) {
+		Component component = Component.translatable("chat.tag.modified.original", string);
+		Component component2 = Component.empty().append(CHAT_MODIFIED_TEXT).append(CommonComponents.NEW_LINE).append(component);
+		return new GuiMessageTag(15386724, GuiMessageTag.Icon.CHAT_MODIFIED, component2, "Modified");
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.tree.CommandNode;
 import java.util.List;
 import java.util.Objects;
@@ -26,9 +27,9 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
 import net.minecraft.client.multiplayer.chat.ChatPreviewStatus;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.PreviewedArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.PreviewableCommand;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -36,8 +37,9 @@ import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class ChatScreen extends Screen {
-	private static final int CHAT_SIGNING_PENDING_INDICATOR_COLOR = 16744192;
-	private static final int CHAT_SIGNING_READY_INDICATOR_COLOR = 65280;
+	private static final int CHAT_SIGNING_PENDING_INDICATOR_COLOR = 15118153;
+	private static final int CHAT_SIGNING_READY_INDICATOR_COLOR = 7844841;
+	private static final int PREVIEW_HIGHLIGHT_COLOR = 10533887;
 	public static final double MOUSE_SCROLL_SPEED = 7.0;
 	private static final Component USAGE_TEXT = Component.translatable("chat_screen.usage");
 	private static final int PREVIEW_MARGIN_SIDES = 2;
@@ -48,7 +50,6 @@ public class ChatScreen extends Screen {
 	private static final Component PREVIEW_INPUT_HINT = Component.translatable("chat.previewInput", Component.translatable("key.keyboard.enter"))
 		.withStyle(ChatFormatting.DARK_GRAY);
 	private static final int TOOLTIP_MAX_WIDTH = 260;
-	private static final int PREVIEW_HIGHLIGHT_COLOR = 10533887;
 	private String historyBuffer = "";
 	private int historyPos = -1;
 	protected EditBox input;
@@ -157,8 +158,9 @@ public class ChatScreen extends Screen {
 	}
 
 	private void requestCommandArgumentPreview(String string) {
+		ParseResults<SharedSuggestionProvider> parseResults = this.commandSuggestions.getCurrentContext();
 		CommandNode<SharedSuggestionProvider> commandNode = this.commandSuggestions.getNodeAt(this.input.getCursorPosition());
-		if (commandNode != null && PreviewedArgument.isPreviewed(commandNode)) {
+		if (parseResults != null && commandNode != null && PreviewableCommand.of(parseResults).isPreviewed(commandNode)) {
 			this.chatPreview.update(string);
 		} else {
 			this.chatPreview.disable();
@@ -282,29 +284,17 @@ public class ChatScreen extends Screen {
 		this.input.setFocus(true);
 		fill(poseStack, 2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
 		this.input.render(poseStack, i, j, f);
+		super.render(poseStack, i, j, f);
 		boolean bl = this.minecraft.getProfileKeyPairManager().signer() != null;
-		Component component;
-		float g;
-		if (this.chatPreviewStatus == ChatPreviewStatus.CONFIRM && !this.previewNotRequired) {
-			String string = this.input.getValue();
-			component = (Component)Objects.requireNonNullElse(
-				this.peekPreview(), this.chatPreview.queryEquals(string) && !string.startsWith("/") ? Component.literal(string) : PREVIEW_INPUT_HINT
-			);
-			g = 1.0F;
-		} else {
-			ChatPreviewAnimator.State state = this.chatPreviewAnimator.get(Util.getMillis(), this.peekPreview());
-			component = state.preview();
-			g = state.alpha();
-		}
-
-		if (component != null) {
-			this.renderChatPreview(poseStack, component, g, bl);
+		ChatPreviewAnimator.State state = this.chatPreviewAnimator.get(Util.getMillis(), this.getDisplayedPreviewText());
+		if (state.preview() != null) {
+			this.renderChatPreview(poseStack, state.preview(), state.alpha(), bl);
 			this.commandSuggestions.renderSuggestions(poseStack, i, j);
 		} else {
 			this.commandSuggestions.render(poseStack, i, j);
 			if (bl) {
 				poseStack.pushPose();
-				fill(poseStack, 0, this.height - 14, 2, this.height - 2, -16711936);
+				fill(poseStack, 0, this.height - 14, 2, this.height - 2, -8932375);
 				poseStack.popPose();
 			}
 		}
@@ -318,8 +308,21 @@ public class ChatScreen extends Screen {
 				this.renderTooltip(poseStack, this.font.split(guiMessageTag.text(), 260), i, j);
 			}
 		}
+	}
 
-		super.render(poseStack, i, j, f);
+	@Nullable
+	protected Component getDisplayedPreviewText() {
+		String string = this.input.getValue();
+		if (string.isBlank()) {
+			return null;
+		} else {
+			Component component = this.peekPreview();
+			return this.chatPreviewStatus == ChatPreviewStatus.CONFIRM && !this.previewNotRequired
+				? (Component)Objects.requireNonNullElse(
+					component, this.chatPreview.queryEquals(string) && !string.startsWith("/") ? Component.literal(string) : PREVIEW_INPUT_HINT
+				)
+				: component;
+		}
 	}
 
 	@Override
@@ -366,7 +369,7 @@ public class ChatScreen extends Screen {
 		poseStack.popPose();
 		RenderSystem.disableBlend();
 		if (bl && this.chatPreview.peek() != null) {
-			int n = this.chatPreview.hasScheduledRequest() ? 16744192 : '\uff00';
+			int n = this.chatPreview.hasScheduledRequest() ? 15118153 : 7844841;
 			int p = (int)(255.0F * f);
 			poseStack.pushPose();
 			fill(poseStack, 0, m, 2, this.chatPreviewBottom(), p << 24 | n);

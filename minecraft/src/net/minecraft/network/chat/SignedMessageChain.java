@@ -2,8 +2,6 @@ package net.minecraft.network.chat;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.util.Signer;
 
 public class SignedMessageChain {
@@ -59,18 +57,7 @@ public class SignedMessageChain {
 
 	@FunctionalInterface
 	public interface Decoder {
-		SignedMessageChain.Decoder UNSIGNED = (link, messageSigner, chatMessageContent, lastSeenMessages) -> PlayerChatMessage.unsigned(
-				messageSigner, chatMessageContent.decorated()
-			);
-
 		PlayerChatMessage unpack(SignedMessageChain.Link link, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages);
-
-		default FilteredText<PlayerChatMessage> unpack(
-			SignedMessageChain.Link link, MessageSigner messageSigner, FilteredText<ChatMessageContent> filteredText, LastSeenMessages lastSeenMessages
-		) {
-			return this.unpack(link, messageSigner, filteredText.raw(), lastSeenMessages)
-				.withFilteredText(Util.mapNullable(filteredText.filtered(), ChatMessageContent::decorated));
-		}
 	}
 
 	@FunctionalInterface

@@ -7,23 +7,10 @@ import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.StringUtil;
 
 public record ServerboundChatPacket(
 	String message, Instant timeStamp, long salt, MessageSignature signature, boolean signedPreview, LastSeenMessages.Update lastSeenMessages
 ) implements Packet<ServerGamePacketListener> {
-	public ServerboundChatPacket(
-		String message, Instant timeStamp, long salt, MessageSignature signature, boolean signedPreview, LastSeenMessages.Update lastSeenMessages
-	) {
-		message = StringUtil.trimChatMessage(message);
-		this.message = message;
-		this.timeStamp = timeStamp;
-		this.salt = salt;
-		this.signature = signature;
-		this.signedPreview = signedPreview;
-		this.lastSeenMessages = lastSeenMessages;
-	}
-
 	public ServerboundChatPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readUtf(256),

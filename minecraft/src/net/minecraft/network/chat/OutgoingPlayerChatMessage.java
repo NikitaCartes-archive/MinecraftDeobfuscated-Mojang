@@ -9,51 +9,21 @@ import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.players.PlayerList;
 
 public interface OutgoingPlayerChatMessage {
-	PlayerChatMessage original();
+	Component serverContent();
 
 	ClientboundPlayerChatPacket packetForPlayer(ServerPlayer serverPlayer, ChatType.Bound bound);
 
 	void sendHeadersToRemainingPlayers(PlayerList playerList);
 
-	static OutgoingPlayerChatMessage create(PlayerChatMessage playerChatMessage, ChatSender chatSender) {
-		if (playerChatMessage.signer().isSystem()) {
-			return new OutgoingPlayerChatMessage.NotTracked(playerChatMessage);
-		} else {
-			return (OutgoingPlayerChatMessage)(!playerChatMessage.signer().profileId().equals(chatSender.profileId())
-				? new OutgoingPlayerChatMessage.Disguised(playerChatMessage)
-				: new OutgoingPlayerChatMessage.Tracked(playerChatMessage));
-		}
+	static OutgoingPlayerChatMessage create(PlayerChatMessage playerChatMessage) {
+		return (OutgoingPlayerChatMessage)(playerChatMessage.signer().isSystem()
+			? new OutgoingPlayerChatMessage.NotTracked(playerChatMessage)
+			: new OutgoingPlayerChatMessage.Tracked(playerChatMessage));
 	}
 
-	static FilteredText<OutgoingPlayerChatMessage> createFromFiltered(FilteredText<PlayerChatMessage> filteredText, ChatSender chatSender) {
-		return filteredText.mapWithEquality(playerChatMessage -> create(filteredText.raw(), chatSender), OutgoingPlayerChatMessage.NotTracked::new);
-	}
-
-	public static class Disguised implements OutgoingPlayerChatMessage {
-		private final PlayerChatMessage signedMessage;
-		private final PlayerChatMessage unsignedMessage;
-
-		public Disguised(PlayerChatMessage playerChatMessage) {
-			this.signedMessage = playerChatMessage;
-			this.unsignedMessage = PlayerChatMessage.unsigned(MessageSigner.system(), playerChatMessage.serverContent());
-		}
-
-		@Override
-		public PlayerChatMessage original() {
-			return this.signedMessage;
-		}
-
-		@Override
-		public ClientboundPlayerChatPacket packetForPlayer(ServerPlayer serverPlayer, ChatType.Bound bound) {
-			RegistryAccess registryAccess = serverPlayer.level.registryAccess();
-			ChatType.BoundNetwork boundNetwork = bound.toNetwork(registryAccess);
-			return new ClientboundPlayerChatPacket(this.unsignedMessage, boundNetwork);
-		}
-
-		@Override
-		public void sendHeadersToRemainingPlayers(PlayerList playerList) {
-			playerList.broadcastMessageHeader(this.signedMessage, Set.of());
-		}
+	static FilteredText<OutgoingPlayerChatMessage> createFromFiltered(FilteredText<PlayerChatMessage> filteredText) {
+		OutgoingPlayerChatMessage outgoingPlayerChatMessage = create(filteredText.raw());
+		return filteredText.rebuildIfNeeded(outgoingPlayerChatMessage, OutgoingPlayerChatMessage.NotTracked::new);
 	}
 
 	public static class NotTracked implements OutgoingPlayerChatMessage {
@@ -64,8 +34,8 @@ public interface OutgoingPlayerChatMessage {
 		}
 
 		@Override
-		public PlayerChatMessage original() {
-			return this.message;
+		public Component serverContent() {
+			return this.message.serverContent();
 		}
 
 		@Override
@@ -89,8 +59,8 @@ public interface OutgoingPlayerChatMessage {
 		}
 
 		@Override
-		public PlayerChatMessage original() {
-			return this.message;
+		public Component serverContent() {
+			return this.message.serverContent();
 		}
 
 		@Override

@@ -68,7 +68,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		@Nullable Entity entity
 	) {
 		this(commandSource, vec3, vec2, serverLevel, i, string, component, minecraftServer, entity, false, (commandContext, bl, ix) -> {
-		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.anonymous(), TaskChainer.IMMEDIATE);
+		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.ANONYMOUS, TaskChainer.IMMEDIATE);
 	}
 
 	protected CommandSourceStack(
@@ -461,7 +461,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 			if (serverPlayer != null) {
 				serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
 			} else {
-				this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.original().serverContent()));
+				this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.serverContent()));
 			}
 		}
 	}

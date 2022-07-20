@@ -46,7 +46,7 @@ public class ChatSelectionScreen extends Screen {
 	private ChatSelectionScreen.ChatSelectionList chatSelectionList;
 	final ChatReportBuilder report;
 	private final Consumer<ChatReportBuilder> onSelected;
-	private ChatSelectionLogFiller chatLogFiller;
+	private ChatSelectionLogFiller<LoggedChatMessage.Player> chatLogFiller;
 	@Nullable
 	private List<FormattedCharSequence> tooltip;
 
@@ -62,7 +62,7 @@ public class ChatSelectionScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.chatLogFiller = new ChatSelectionLogFiller(this.reportingContext.chatLog(), this::canReport);
+		this.chatLogFiller = new ChatSelectionLogFiller<>(this.reportingContext.chatLog(), this::canReport, LoggedChatMessage.Player.class);
 		this.contextInfoLabel = MultiLineLabel.create(this.font, CONTEXT_INFO, this.width - 16);
 		this.chatSelectionList = new ChatSelectionScreen.ChatSelectionList(this.minecraft, (this.contextInfoLabel.getLineCount() + 1) * 9);
 		this.chatSelectionList.setRenderBackground(false);
@@ -129,7 +129,9 @@ public class ChatSelectionScreen extends Screen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public class ChatSelectionList extends ObjectSelectionList<ChatSelectionScreen.ChatSelectionList.Entry> implements ChatSelectionLogFiller.Output {
+	public class ChatSelectionList
+		extends ObjectSelectionList<ChatSelectionScreen.ChatSelectionList.Entry>
+		implements ChatSelectionLogFiller.Output<LoggedChatMessage.Player> {
 		@Nullable
 		private ChatSelectionScreen.ChatSelectionList.Heading previousHeading;
 
@@ -146,23 +148,15 @@ public class ChatSelectionScreen extends Screen {
 			}
 		}
 
-		@Override
-		public void acceptMessage(int i, LoggedChatMessage loggedChatMessage) {
-			Component component = loggedChatMessage.toContentComponent();
-			Component component2 = loggedChatMessage.toNarrationComponent();
-			boolean bl = loggedChatMessage.canReport(ChatSelectionScreen.this.report.reportedProfileId());
-			if (loggedChatMessage instanceof LoggedChatMessage.Player player) {
-				ChatTrustLevel chatTrustLevel = player.trustLevel();
-				GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
-				ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageEntry(
-					i, component, component2, guiMessageTag, bl, true
-				);
-				this.addEntryToTop(entry);
-				this.updateHeading(player, bl);
-			} else {
-				this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.MessageEntry(i, component, component2, null, bl, false));
-				this.previousHeading = null;
-			}
+		public void acceptMessage(int i, LoggedChatMessage.Player player) {
+			boolean bl = player.canReport(ChatSelectionScreen.this.report.reportedProfileId());
+			ChatTrustLevel chatTrustLevel = player.trustLevel();
+			GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
+			ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageEntry(
+				i, player.toContentComponent(), player.toNarrationComponent(), guiMessageTag, bl, true
+			);
+			this.addEntryToTop(entry);
+			this.updateHeading(player, bl);
 		}
 
 		private void updateHeading(LoggedChatMessage.Player player, boolean bl) {

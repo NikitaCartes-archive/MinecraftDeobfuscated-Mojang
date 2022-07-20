@@ -40,7 +40,10 @@ public class ConditionReference implements LootItemCondition {
 
 	public boolean test(LootContext lootContext) {
 		LootItemCondition lootItemCondition = lootContext.getCondition(this.name);
-		if (lootContext.addVisitedCondition(lootItemCondition)) {
+		if (lootItemCondition == null) {
+			LOGGER.warn("Tried using unknown condition table called {}", this.name);
+			return false;
+		} else if (lootContext.addVisitedCondition(lootItemCondition)) {
 			boolean var3;
 			try {
 				var3 = lootItemCondition.test(lootContext);

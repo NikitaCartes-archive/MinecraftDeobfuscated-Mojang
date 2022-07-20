@@ -73,7 +73,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class Util {
@@ -832,16 +831,11 @@ public class Util {
 		public void openUrl(URL uRL) {
 			try {
 				Process process = (Process)AccessController.doPrivileged(() -> Runtime.getRuntime().exec(this.getOpenUrlArguments(uRL)));
-
-				for (String string : IOUtils.readLines(process.getErrorStream())) {
-					Util.LOGGER.error(string);
-				}
-
 				process.getInputStream().close();
 				process.getErrorStream().close();
 				process.getOutputStream().close();
-			} catch (IOException | PrivilegedActionException var5) {
-				Util.LOGGER.error("Couldn't open url '{}'", uRL, var5);
+			} catch (IOException | PrivilegedActionException var3) {
+				Util.LOGGER.error("Couldn't open url '{}'", uRL, var3);
 			}
 		}
 

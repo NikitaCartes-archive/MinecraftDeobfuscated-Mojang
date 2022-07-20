@@ -19,11 +19,13 @@ import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.SignedMessageHeader;
+import net.minecraft.network.chat.SignedMessageValidator;
 import net.minecraft.util.StringDecomposer;
 import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class ChatListener {
+	private static final Component CHAT_VALIDATION_FAILED_ERROR = Component.translatable("multiplayer.disconnect.chat_validation_failed");
 	private final Minecraft minecraft;
 	private final Deque<ChatListener.Message> delayedMessageQueue = Queues.<ChatListener.Message>newArrayDeque();
 	private long messageDelay;
@@ -170,7 +172,10 @@ public class ChatListener {
 		ChatType.Bound bound, PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo, boolean bl, Instant instant
 	) {
 		ChatTrustLevel chatTrustLevel = this.evaluateTrustLevel(playerChatMessage, component, playerInfo, instant);
-		if (bl && chatTrustLevel.isNotSecure()) {
+		if (chatTrustLevel == ChatTrustLevel.BROKEN_CHAIN) {
+			this.onChatChainBroken();
+			return true;
+		} else if (bl && chatTrustLevel.isNotSecure()) {
 			return false;
 		} else if (this.minecraft.isBlocked(playerChatMessage.signer().profileId())) {
 			return false;
@@ -195,11 +200,22 @@ public class ChatListener {
 	boolean processPlayerChatHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
 		PlayerInfo playerInfo = this.resolveSenderPlayer(signedMessageHeader.sender());
 		if (playerInfo != null) {
-			playerInfo.getMessageValidator().validateHeader(signedMessageHeader, messageSignature, bs);
+			SignedMessageValidator.State state = playerInfo.getMessageValidator().validateHeader(signedMessageHeader, messageSignature, bs);
+			if (state == SignedMessageValidator.State.BROKEN_CHAIN) {
+				this.onChatChainBroken();
+				return true;
+			}
 		}
 
 		this.logPlayerHeader(signedMessageHeader, messageSignature, bs);
 		return false;
+	}
+
+	private void onChatChainBroken() {
+		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+		if (clientPacketListener != null) {
+			clientPacketListener.getConnection().disconnect(CHAT_VALIDATION_FAILED_ERROR);
+		}
 	}
 
 	private void narrateChatMessage(ChatType.Bound bound, PlayerChatMessage playerChatMessage) {

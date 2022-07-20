@@ -59,7 +59,7 @@ public class TeamMsgCommand {
 				.filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam)
 				.toList();
 			chatMessage.resolve(commandSourceStack, filteredText -> {
-				FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
+				FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
 
 				for (ServerPlayer serverPlayer : list) {
 					if (serverPlayer == entity) {

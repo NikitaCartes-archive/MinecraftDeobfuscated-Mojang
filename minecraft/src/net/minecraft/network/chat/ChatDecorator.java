@@ -11,17 +11,10 @@ public interface ChatDecorator {
 
 	CompletableFuture<Component> decorate(@Nullable ServerPlayer serverPlayer, Component component);
 
-	default CompletableFuture<FilteredText<Component>> decorateFiltered(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText) {
-		CompletableFuture<Component> completableFuture = this.decorate(serverPlayer, filteredText.raw());
-		if (filteredText.filtered() == null) {
-			return completableFuture.thenApply(FilteredText::fullyFiltered);
-		} else if (!filteredText.isFiltered()) {
-			return completableFuture.thenApply(FilteredText::passThrough);
-		} else {
-			CompletableFuture<Component> completableFuture2 = this.decorate(serverPlayer, filteredText.filtered());
-			return CompletableFuture.allOf(completableFuture, completableFuture2)
-				.thenApply(void_ -> new FilteredText<>((Component)completableFuture.join(), (Component)completableFuture2.join()));
-		}
+	default CompletableFuture<FilteredText<Component>> rebuildFiltered(
+		@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText, Component component
+	) {
+		return filteredText.rebuildIfNeededAsync(component, componentx -> this.decorate(serverPlayer, componentx));
 	}
 
 	static FilteredText<PlayerChatMessage> attachUnsignedDecoration(FilteredText<PlayerChatMessage> filteredText, FilteredText<Component> filteredText2) {
