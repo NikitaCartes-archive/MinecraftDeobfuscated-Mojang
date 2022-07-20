@@ -1180,6 +1180,10 @@ extends LivingEntity {
     public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
     }
 
+    public boolean hasContainerOpen() {
+        return this.containerMenu != this.inventoryMenu;
+    }
+
     public Either<BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {
         this.startSleeping(blockPos);
         this.sleepCounter = 0;

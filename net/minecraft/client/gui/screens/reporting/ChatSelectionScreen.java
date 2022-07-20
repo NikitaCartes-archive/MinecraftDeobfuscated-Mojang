@@ -52,7 +52,7 @@ extends Screen {
     private ChatSelectionList chatSelectionList;
     final ChatReportBuilder report;
     private final Consumer<ChatReportBuilder> onSelected;
-    private ChatSelectionLogFiller chatLogFiller;
+    private ChatSelectionLogFiller<LoggedChatMessage.Player> chatLogFiller;
     @Nullable
     private List<FormattedCharSequence> tooltip;
 
@@ -66,7 +66,7 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.chatLogFiller = new ChatSelectionLogFiller(this.reportingContext.chatLog(), this::canReport);
+        this.chatLogFiller = new ChatSelectionLogFiller<LoggedChatMessage.Player>(this.reportingContext.chatLog(), this::canReport, LoggedChatMessage.Player.class);
         this.contextInfoLabel = MultiLineLabel.create(this.font, (FormattedText)CONTEXT_INFO, this.width - 16);
         this.chatSelectionList = new ChatSelectionList(this.minecraft, (this.contextInfoLabel.getLineCount() + 1) * this.font.lineHeight);
         this.chatSelectionList.setRenderBackground(false);
@@ -133,7 +133,7 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     public class ChatSelectionList
     extends ObjectSelectionList<Entry>
-    implements ChatSelectionLogFiller.Output {
+    implements ChatSelectionLogFiller.Output<LoggedChatMessage.Player> {
         @Nullable
         private Heading previousHeading;
 
@@ -151,21 +151,13 @@ extends Screen {
         }
 
         @Override
-        public void acceptMessage(int i, LoggedChatMessage loggedChatMessage) {
-            Component component = loggedChatMessage.toContentComponent();
-            Component component2 = loggedChatMessage.toNarrationComponent();
-            boolean bl = loggedChatMessage.canReport(ChatSelectionScreen.this.report.reportedProfileId());
-            if (loggedChatMessage instanceof LoggedChatMessage.Player) {
-                LoggedChatMessage.Player player = (LoggedChatMessage.Player)loggedChatMessage;
-                ChatTrustLevel chatTrustLevel = player.trustLevel();
-                GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
-                MessageEntry entry = new MessageEntry(i, component, component2, guiMessageTag, bl, true);
-                this.addEntryToTop(entry);
-                this.updateHeading(player, bl);
-            } else {
-                this.addEntryToTop(new MessageEntry(i, component, component2, null, bl, false));
-                this.previousHeading = null;
-            }
+        public void acceptMessage(int i, LoggedChatMessage.Player player) {
+            boolean bl = player.canReport(ChatSelectionScreen.this.report.reportedProfileId());
+            ChatTrustLevel chatTrustLevel = player.trustLevel();
+            GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
+            MessageEntry entry = new MessageEntry(i, player.toContentComponent(), player.toNarrationComponent(), guiMessageTag, bl, true);
+            this.addEntryToTop(entry);
+            this.updateHeading(player, bl);
         }
 
         private void updateHeading(LoggedChatMessage.Player player, boolean bl) {
@@ -380,13 +372,6 @@ extends Screen {
         }
 
         @Environment(value=EnvType.CLIENT)
-        record Heading(UUID sender, Entry entry) {
-            public boolean canCombine(Heading heading) {
-                return heading.sender.equals(this.sender);
-            }
-        }
-
-        @Environment(value=EnvType.CLIENT)
         public class MessageHeadingEntry
         extends Entry {
             private static final int FACE_SIZE = 12;
@@ -412,6 +397,13 @@ extends Screen {
             private void renderFace(PoseStack poseStack, int i, int j, ResourceLocation resourceLocation) {
                 RenderSystem.setShaderTexture(0, resourceLocation);
                 PlayerFaceRenderer.draw(poseStack, i, j, 12);
+            }
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        record Heading(UUID sender, Entry entry) {
+            public boolean canCombine(Heading heading) {
+                return heading.sender.equals(this.sender);
             }
         }
 

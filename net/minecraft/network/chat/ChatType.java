@@ -7,7 +7,7 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -102,9 +102,10 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
             friendlyByteBuf.writeNullable(this.targetName, FriendlyByteBuf::writeComponent);
         }
 
-        public Bound resolve(RegistryAccess registryAccess) {
+        public Optional<Bound> resolve(RegistryAccess registryAccess) {
             Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-            return new Bound(Objects.requireNonNull((ChatType)registry.byId(this.chatType), "Invalid chat type"), this.name, this.targetName);
+            ChatType chatType2 = (ChatType)registry.byId(this.chatType);
+            return Optional.ofNullable(chatType2).map(chatType -> new Bound((ChatType)chatType, this.name, this.targetName));
         }
 
         @Nullable

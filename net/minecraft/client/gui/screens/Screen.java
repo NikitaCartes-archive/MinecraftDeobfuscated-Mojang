@@ -303,7 +303,7 @@ implements Widget {
                 this.insertText(style.getInsertion(), false);
             }
         } else if (clickEvent != null) {
-            block23: {
+            block24: {
                 if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
                     if (!this.minecraft.options.chatLinks().get().booleanValue()) {
                         return false;
@@ -320,7 +320,7 @@ implements Widget {
                         if (this.minecraft.options.chatLinksPrompt().get().booleanValue()) {
                             this.clickedLink = uRI;
                             this.minecraft.setScreen(new ConfirmLinkScreen(this::confirmLink, clickEvent.getValue(), false));
-                            break block23;
+                            break block24;
                         }
                         this.openLink(uRI);
                     } catch (URISyntaxException uRISyntaxException) {
@@ -334,9 +334,11 @@ implements Widget {
                 } else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
                     String string2 = SharedConstants.filterText(clickEvent.getValue());
                     if (string2.startsWith("/")) {
-                        this.minecraft.player.commandUnsigned(string2.substring(1));
+                        if (!this.minecraft.player.commandUnsigned(string2.substring(1))) {
+                            LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", (Object)string2);
+                        }
                     } else {
-                        LOGGER.warn("Failed to run command without '/' prefix from click event: '{}'", (Object)string2);
+                        LOGGER.error("Failed to run command without '/' prefix from click event: '{}'", (Object)string2);
                     }
                 } else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
                     this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());

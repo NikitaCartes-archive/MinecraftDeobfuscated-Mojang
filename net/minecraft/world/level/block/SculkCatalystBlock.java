@@ -32,7 +32,7 @@ public class SculkCatalystBlock
 extends BaseEntityBlock {
     public static final int PULSE_TICKS = 8;
     public static final BooleanProperty PULSE = BlockStateProperties.BLOOM;
-    private final IntProvider xpRange = ConstantInt.of(20);
+    private final IntProvider xpRange = ConstantInt.of(5);
 
     public SculkCatalystBlock(BlockBehaviour.Properties properties) {
         super(properties);

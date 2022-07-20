@@ -65,7 +65,7 @@ implements SharedSuggestionProvider {
     private final TaskChainer chatMessageChainer;
 
     public CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i2, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity) {
-        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.anonymous(), TaskChainer.IMMEDIATE);
+        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.ANONYMOUS, TaskChainer.IMMEDIATE);
     }
 
     protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, @Nullable ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor, CommandSigningContext commandSigningContext, TaskChainer taskChainer) {
@@ -279,7 +279,7 @@ implements SharedSuggestionProvider {
         if (serverPlayer != null) {
             serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
         } else {
-            this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.original().serverContent()));
+            this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.serverContent()));
         }
     }
 

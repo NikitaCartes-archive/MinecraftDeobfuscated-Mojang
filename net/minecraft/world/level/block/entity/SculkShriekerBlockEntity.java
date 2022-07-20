@@ -26,6 +26,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -103,6 +104,8 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Nullable
     public static ServerPlayer tryGetPlayer(@Nullable Entity entity) {
+        ItemEntity itemEntity;
+        ServerPlayer serverPlayer2;
         Projectile projectile;
         Entity entity2;
         Entity entity3;
@@ -115,7 +118,11 @@ implements VibrationListener.VibrationListenerConfig {
             return serverPlayer;
         }
         if (entity instanceof Projectile && (entity2 = (projectile = (Projectile)entity).getOwner()) instanceof ServerPlayer) {
-            ServerPlayer serverPlayer2 = (ServerPlayer)entity2;
+            serverPlayer2 = (ServerPlayer)entity2;
+            return serverPlayer2;
+        }
+        if (entity instanceof ItemEntity && (entity2 = (itemEntity = (ItemEntity)entity).getThrowingEntity()) instanceof ServerPlayer) {
+            serverPlayer2 = (ServerPlayer)entity2;
             return serverPlayer2;
         }
         return null;

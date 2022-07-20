@@ -642,7 +642,7 @@ CommandSource {
                         this.playStepSound(blockPos, blockState2);
                     }
                     if (movementEmission.emitsEvents() && (this.onGround || vec3.y == 0.0 || this.isInPowderSnow || bl3)) {
-                        this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this.getResponsibleEntity(), this.getBlockStateOn()));
+                        this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
                     }
                 }
             } else if (blockState2.isAir()) {
@@ -961,17 +961,12 @@ CommandSource {
         if (bl) {
             if (this.fallDistance > 0.0f) {
                 blockState.getBlock().fallOn(this.level, blockState, blockPos, this, this.fallDistance);
-                this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this.getResponsibleEntity(), this.getBlockStateOn()));
+                this.level.gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
             }
             this.resetFallDistance();
         } else if (d < 0.0) {
             this.fallDistance -= (float)d;
         }
-    }
-
-    @Nullable
-    public Entity getResponsibleEntity() {
-        return this;
     }
 
     public boolean fireImmune() {
@@ -1475,7 +1470,8 @@ CommandSource {
             double e = listTag2.getDouble(1);
             double f = listTag2.getDouble(2);
             this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-            this.setPosRaw(listTag.getDouble(0), Mth.clamp(listTag.getDouble(1), -2.0E7, 2.0E7), listTag.getDouble(2));
+            double g = 3.0000512E7;
+            this.setPosRaw(Mth.clamp(listTag.getDouble(0), -3.0000512E7, 3.0000512E7), Mth.clamp(listTag.getDouble(1), -2.0E7, 2.0E7), Mth.clamp(listTag.getDouble(2), -3.0000512E7, 3.0000512E7));
             this.setYRot(listTag3.getFloat(0));
             this.setXRot(listTag3.getFloat(1));
             this.setOldPosAndRot();

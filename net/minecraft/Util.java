@@ -80,7 +80,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeSource;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -829,9 +828,6 @@ public class Util {
         public void openUrl(URL uRL) {
             try {
                 Process process = AccessController.doPrivileged(() -> Runtime.getRuntime().exec(this.getOpenUrlArguments(uRL)));
-                for (String string : IOUtils.readLines(process.getErrorStream())) {
-                    LOGGER.error(string);
-                }
                 process.getInputStream().close();
                 process.getErrorStream().close();
                 process.getOutputStream().close();

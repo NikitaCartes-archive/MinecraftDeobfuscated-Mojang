@@ -206,6 +206,7 @@ import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.players.GameProfileCache;
@@ -559,14 +560,15 @@ implements WindowEventHandler {
         LoadingOverlay.registerTextures(this);
         List<PackResources> list = this.resourcePackRepository.openAllSelected();
         this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
-        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+        ReloadInstance reloadInstance = this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list);
+        this.setOverlay(new LoadingOverlay(this, reloadInstance, optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 this.selfTest();
             }
             this.reloadStateTracker.finishReload();
         }), false));
         if (string != null) {
-            ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null);
+            reloadInstance.done().thenRunAsync(() -> ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null), this);
         } else if (this.shouldShowBanNotice()) {
             this.setScreen(BanNoticeScreen.create(bl -> {
                 if (bl) {

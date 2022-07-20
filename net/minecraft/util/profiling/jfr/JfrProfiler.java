@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import jdk.jfr.Configuration;
@@ -141,9 +142,9 @@ implements JvmProfiler {
                 CUSTOM_EVENTS.forEach(recording::enable);
                 recording.setDumpOnExit(true);
                 recording.setToDisk(true);
-                recording.setName("%s-%s-%s".formatted(environment.getDescription(), SharedConstants.getCurrentVersion().getName(), string));
+                recording.setName(String.format(Locale.ROOT, "%s-%s-%s", environment.getDescription(), SharedConstants.getCurrentVersion().getName(), string));
             });
-            Path path = Paths.get("debug/%s-%s.jfr".formatted(environment.getDescription(), string), new String[0]);
+            Path path = Paths.get(String.format(Locale.ROOT, "debug/%s-%s.jfr", environment.getDescription(), string), new String[0]);
             if (!Files.exists(path.getParent(), new LinkOption[0])) {
                 Files.createDirectories(path.getParent(), new FileAttribute[0]);
             }

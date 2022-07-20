@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -143,7 +144,7 @@ implements PackResources {
                 String string2 = path22.relativize((Path)path2).toString().replaceAll("\\\\", "/");
                 ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string2);
                 if (resourceLocation == null) {
-                    Util.logAndPauseIfInIde("Invalid path in datapack: %s:%s, ignoring".formatted(string, string2));
+                    Util.logAndPauseIfInIde(String.format(Locale.ROOT, "Invalid path in datapack: %s:%s, ignoring", string, string2));
                 } else {
                     consumer.accept(resourceLocation);
                 }

@@ -178,13 +178,14 @@ public class ChatReportBuilder {
         return chatLog.selectBetween(i, j).entries().map(entry -> entry.tryCast(LoggedChatMessageLink.class)).filter(Objects::nonNull).filter(entry -> ((LoggedChatMessageLink)entry.event()).header().sender().equals(uUID));
     }
 
-    private static Int2ObjectMap<LoggedChatMessage.Player> collectReferencedContext(ChatLog chatLog, int i2, AbuseReportLimits abuseReportLimits) {
+    private static Int2ObjectMap<LoggedChatMessage.Player> collectReferencedContext(ChatLog chatLog, int i, AbuseReportLimits abuseReportLimits) {
+        int j2 = abuseReportLimits.leadingContextMessageCount() + 1;
         Int2ObjectOpenHashMap<LoggedChatMessage.Player> int2ObjectMap = new Int2ObjectOpenHashMap<LoggedChatMessage.Player>();
-        ChatReportBuilder.walkLastSeenReferenceGraph(chatLog, i2, (i, player) -> {
-            int2ObjectMap.put(i, player);
-            return int2ObjectMap.size() < abuseReportLimits.leadingContextMessageCount();
+        ChatReportBuilder.walkMessageReferenceGraph(chatLog, i, (j, player) -> {
+            int2ObjectMap.put(j, player);
+            return int2ObjectMap.size() < j2;
         });
-        ChatReportBuilder.trailingContext(chatLog, i2, abuseReportLimits.trailingContextMessageCount()).forEach(entry -> int2ObjectMap.put(entry.id(), (LoggedChatMessage.Player)entry.event()));
+        ChatReportBuilder.trailingContext(chatLog, i, abuseReportLimits.trailingContextMessageCount()).forEach(entry -> int2ObjectMap.put(entry.id(), (LoggedChatMessage.Player)entry.event()));
         return int2ObjectMap;
     }
 
@@ -192,7 +193,7 @@ public class ChatReportBuilder {
         return chatLog.selectAfter(chatLog.after(i)).entries().map(entry -> entry.tryCast(LoggedChatMessage.Player.class)).filter(Objects::nonNull).limit(j);
     }
 
-    private static void walkLastSeenReferenceGraph(ChatLog chatLog, int i, LastSeenVisitor lastSeenVisitor) {
+    private static void walkMessageReferenceGraph(ChatLog chatLog, int i, ReferencedMessageVisitor referencedMessageVisitor) {
         IntArrayPriorityQueue intPriorityQueue = new IntArrayPriorityQueue(IntComparators.OPPOSITE_COMPARATOR);
         intPriorityQueue.enqueue(i);
         IntOpenHashSet intSet = new IntOpenHashSet();
@@ -202,8 +203,8 @@ public class ChatReportBuilder {
             Object object = chatLog.lookup(j);
             if (!(object instanceof LoggedChatMessage.Player)) continue;
             LoggedChatMessage.Player player = (LoggedChatMessage.Player)object;
-            if (!lastSeenVisitor.accept(j, player)) break;
-            object = ChatReportBuilder.lastSeenReferences(chatLog, j, player).iterator();
+            if (!referencedMessageVisitor.accept(j, player)) break;
+            object = ChatReportBuilder.messageReferences(chatLog, j, player.message()).iterator();
             while (object.hasNext()) {
                 int k = (Integer)object.next();
                 if (!intSet.add(k)) continue;
@@ -212,15 +213,19 @@ public class ChatReportBuilder {
         }
     }
 
-    private static IntCollection lastSeenReferences(ChatLog chatLog, int i, LoggedChatMessage.Player player) {
-        Set set = player.message().signedBody().lastSeen().entries().stream().map(LastSeenMessages.Entry::lastSignature).collect(Collectors.toSet());
+    private static IntCollection messageReferences(ChatLog chatLog, int i, PlayerChatMessage playerChatMessage) {
+        Set set = playerChatMessage.signedBody().lastSeen().entries().stream().map(LastSeenMessages.Entry::lastSignature).collect(Collectors.toCollection(ObjectOpenHashSet::new));
+        MessageSignature messageSignature = playerChatMessage.signedHeader().previousSignature();
+        if (messageSignature != null) {
+            set.add(messageSignature);
+        }
         IntArrayList intList = new IntArrayList();
         Iterator iterator = chatLog.selectBefore(i).entries().iterator();
         while (iterator.hasNext() && !set.isEmpty()) {
-            LoggedChatMessage.Player player2;
+            LoggedChatMessage.Player player;
             ChatLog.Entry entry = (ChatLog.Entry)iterator.next();
             Object t = entry.event();
-            if (!(t instanceof LoggedChatMessage.Player) || !set.remove((player2 = (LoggedChatMessage.Player)t).headerSignature())) continue;
+            if (!(t instanceof LoggedChatMessage.Player) || !set.remove((player = (LoggedChatMessage.Player)t).headerSignature())) continue;
             intList.add(entry.id());
         }
         return intList;
@@ -234,7 +239,7 @@ public class ChatReportBuilder {
         ByteBuffer byteBuffer = playerChatMessage.headerSignature().asByteBuffer();
         ByteBuffer byteBuffer2 = Util.mapNullable(playerChatMessage.signedHeader().previousSignature(), MessageSignature::asByteBuffer);
         ByteBuffer byteBuffer3 = ByteBuffer.wrap(signedMessageBody.hash().asBytes());
-        ReportChatMessageContent reportChatMessageContent = new ReportChatMessageContent(ChatReportBuilder.encodeComponent(playerChatMessage.signedContent().plain()), playerChatMessage.signedContent().isDecorated() ? ChatReportBuilder.encodeComponent(playerChatMessage.signedContent().decorated()) : null);
+        ReportChatMessageContent reportChatMessageContent = new ReportChatMessageContent(playerChatMessage.signedContent().plain(), playerChatMessage.signedContent().isDecorated() ? ChatReportBuilder.encodeComponent(playerChatMessage.signedContent().decorated()) : null);
         String string = playerChatMessage.unsignedContent().map(ChatReportBuilder::encodeComponent).orElse(null);
         List<ReportChatMessageBody.LastSeenSignature> list = signedMessageBody.lastSeen().entries().stream().map(entry -> new ReportChatMessageBody.LastSeenSignature(entry.profileId(), entry.lastSignature().asByteBuffer())).toList();
         return new ReportChatMessage(new ReportChatMessageHeader(byteBuffer2, player.profileId(), byteBuffer3, byteBuffer), new ReportChatMessageBody(instant, l, list, reportChatMessageContent), string, this.isReported(i));
@@ -271,7 +276,7 @@ public class ChatReportBuilder {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static interface LastSeenVisitor {
+    static interface ReferencedMessageVisitor {
         public boolean accept(int var1, LoggedChatMessage.Player var2);
     }
 }

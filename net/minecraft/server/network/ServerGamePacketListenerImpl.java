@@ -5,27 +5,28 @@ package net.minecraft.server.network;
 
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.context.CommandContextBuilder;
-import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -42,8 +43,10 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.PreviewedArgument;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -54,15 +57,19 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatMessageContent;
+import net.minecraft.network.chat.ChatPreviewCache;
 import net.minecraft.network.chat.ChatPreviewThrottler;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.LastSeenMessagesValidator;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.PreviewableCommand;
 import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
@@ -230,6 +237,7 @@ ServerGamePacketListener {
     private int aboveGroundVehicleTickCount;
     private int receivedMovePacketCount;
     private int knownMovePacketCount;
+    private final ChatPreviewCache chatPreviewCache = new ChatPreviewCache();
     private final ChatPreviewThrottler chatPreviewThrottler = new ChatPreviewThrottler();
     private final AtomicReference<Instant> lastChatTimeStamp = new AtomicReference<Instant>(Instant.EPOCH);
     private final SignedMessageChain.Decoder signedMessageDecoder = new SignedMessageChain().decoder();
@@ -1154,7 +1162,16 @@ ServerGamePacketListener {
             return;
         }
         if (this.tryHandleChat(serverboundChatPacket.message(), serverboundChatPacket.timeStamp(), serverboundChatPacket.lastSeenMessages())) {
-            this.chatMessageChain.append(() -> this.filterTextPacket(serverboundChatPacket.message(), (FilteredText<String> filteredText) -> this.handleChat(serverboundChatPacket, (FilteredText<String>)filteredText)));
+            this.server.submit(() -> {
+                PlayerChatMessage playerChatMessage = this.getSignedMessage(serverboundChatPacket);
+                if (!this.verifyChatMessage(playerChatMessage)) {
+                    return;
+                }
+                this.chatMessageChain.append(() -> {
+                    String string = playerChatMessage.signedContent().plain();
+                    return this.filterTextPacket(string, (FilteredText<String> filteredText) -> this.handleChat(playerChatMessage, (FilteredText<String>)filteredText));
+                });
+            });
         }
     }
 
@@ -1166,11 +1183,44 @@ ServerGamePacketListener {
         }
         if (this.tryHandleChat(serverboundChatCommandPacket.command(), serverboundChatCommandPacket.timeStamp(), serverboundChatCommandPacket.lastSeenMessages())) {
             this.server.submit(() -> {
-                CommandSourceStack commandSourceStack = this.player.createCommandSourceStack().withSigningContext(serverboundChatCommandPacket.signingContext(this.player)).withChatMessageChainer(this.chatMessageChain);
-                this.server.getCommands().performCommand(commandSourceStack, serverboundChatCommandPacket.command());
+                this.performChatCommand(serverboundChatCommandPacket);
                 this.detectRateSpam();
             });
         }
+    }
+
+    private void performChatCommand(ServerboundChatCommandPacket serverboundChatCommandPacket) {
+        ParseResults<CommandSourceStack> parseResults = this.parseCommand(serverboundChatCommandPacket.command());
+        Map<String, PlayerChatMessage> map = this.collectSignedArguments(serverboundChatCommandPacket, PreviewableCommand.of(parseResults));
+        for (PlayerChatMessage playerChatMessage : map.values()) {
+            if (this.verifyChatMessage(playerChatMessage)) continue;
+            return;
+        }
+        CommandSigningContext.SignedArguments commandSigningContext = new CommandSigningContext.SignedArguments(map);
+        parseResults = Commands.mapSource(parseResults, commandSourceStack -> commandSourceStack.withSigningContext(commandSigningContext));
+        this.server.getCommands().performCommand(parseResults, serverboundChatCommandPacket.command());
+    }
+
+    private Map<String, PlayerChatMessage> collectSignedArguments(ServerboundChatCommandPacket serverboundChatCommandPacket, PreviewableCommand<?> previewableCommand) {
+        Component component = this.chatPreviewCache.pull(serverboundChatCommandPacket.command());
+        MessageSigner messageSigner = new MessageSigner(this.player.getUUID(), serverboundChatCommandPacket.timeStamp(), serverboundChatCommandPacket.salt());
+        LastSeenMessages lastSeenMessages = serverboundChatCommandPacket.lastSeenMessages().lastSeen();
+        Object2ObjectOpenHashMap<String, PlayerChatMessage> map = new Object2ObjectOpenHashMap<String, PlayerChatMessage>();
+        SignedMessageChain.Decoder decoder = this.player.connection.signedMessageDecoder();
+        for (Pair<String, String> pair : ArgumentSignatures.collectPlainSignableArguments(previewableCommand)) {
+            String string = pair.getFirst();
+            String string2 = pair.getSecond();
+            MessageSignature messageSignature = serverboundChatCommandPacket.argumentSignatures().get(string);
+            ChatMessageContent chatMessageContent = serverboundChatCommandPacket.signedPreview() && component != null ? new ChatMessageContent(string2, component) : new ChatMessageContent(string2);
+            SignedMessageChain.Link link = new SignedMessageChain.Link(messageSignature);
+            map.put(string, decoder.unpack(link, messageSigner, chatMessageContent, lastSeenMessages));
+        }
+        return map;
+    }
+
+    private ParseResults<CommandSourceStack> parseCommand(String string) {
+        CommandDispatcher<CommandSourceStack> commandDispatcher = this.server.getCommands().getDispatcher();
+        return commandDispatcher.parse(string, this.player.createCommandSourceStack());
     }
 
     /*
@@ -1216,33 +1266,54 @@ ServerGamePacketListener {
         return false;
     }
 
-    private CompletableFuture<Void> handleChat(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText) {
-        MessageSigner messageSigner = serverboundChatPacket.getSigner(this.player);
-        LastSeenMessages lastSeenMessages = serverboundChatPacket.lastSeenMessages().lastSeen();
-        SignedMessageChain.Link link = new SignedMessageChain.Link(serverboundChatPacket.signature());
-        return this.server.getChatDecorator().decorateFiltered(this.player, filteredText.map(Component::literal)).thenAcceptAsync(filteredText2 -> {
-            if (serverboundChatPacket.signedPreview()) {
+    private CompletableFuture<Void> handleChat(PlayerChatMessage playerChatMessage, FilteredText<String> filteredText) {
+        ChatDecorator chatDecorator = this.server.getChatDecorator();
+        FilteredText<Component> filteredText22 = filteredText.map(Component::literal);
+        ChatMessageContent chatMessageContent = playerChatMessage.signedContent();
+        if (chatMessageContent.isDecorated()) {
+            return chatDecorator.rebuildFiltered(this.player, filteredText22, chatMessageContent.decorated()).thenAcceptAsync(filteredText2 -> {
                 FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText, filteredText2);
-                this.broadcastChatMessage(this.signedMessageDecoder.unpack(link, messageSigner, filteredText3, lastSeenMessages));
-            } else {
-                FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText);
-                FilteredText<PlayerChatMessage> filteredText4 = this.signedMessageDecoder.unpack(link, messageSigner, filteredText3, lastSeenMessages);
-                this.broadcastChatMessage(ChatDecorator.attachUnsignedDecoration(filteredText4, filteredText2));
-            }
+                this.broadcastChatMessage(playerChatMessage.withFilteredText(filteredText3));
+            }, (Executor)this.server);
+        }
+        return ((CompletableFuture)chatDecorator.decorate(this.player, Component.literal(filteredText.raw())).thenComposeAsync(component -> chatDecorator.rebuildFiltered(this.player, filteredText22, (Component)component), (Executor)this.server)).thenAcceptAsync(filteredText2 -> {
+            FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText);
+            FilteredText<PlayerChatMessage> filteredText4 = playerChatMessage.withFilteredText(filteredText3);
+            this.broadcastChatMessage(ChatDecorator.attachUnsignedDecoration(filteredText4, filteredText2));
         }, (Executor)this.server);
     }
 
+    private PlayerChatMessage getSignedMessage(ServerboundChatPacket serverboundChatPacket) {
+        MessageSigner messageSigner = serverboundChatPacket.getSigner(this.player);
+        SignedMessageChain.Link link = new SignedMessageChain.Link(serverboundChatPacket.signature());
+        LastSeenMessages lastSeenMessages = serverboundChatPacket.lastSeenMessages().lastSeen();
+        ChatMessageContent chatMessageContent = this.getSignedContent(serverboundChatPacket);
+        return this.signedMessageDecoder.unpack(link, messageSigner, chatMessageContent, lastSeenMessages);
+    }
+
+    private ChatMessageContent getSignedContent(ServerboundChatPacket serverboundChatPacket) {
+        Component component = this.chatPreviewCache.pull(serverboundChatPacket.message());
+        if (serverboundChatPacket.signedPreview() && component != null) {
+            return new ChatMessageContent(serverboundChatPacket.message(), component);
+        }
+        return new ChatMessageContent(serverboundChatPacket.message());
+    }
+
     private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
-        PlayerChatMessage playerChatMessage = filteredText.raw();
-        if (this.server.enforceSecureProfile() && !playerChatMessage.verify(this.player.asChatSender())) {
-            this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
-            return;
-        }
-        if (playerChatMessage.hasExpiredServer(Instant.now())) {
-            LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", (Object)this.player.getName().getString(), (Object)playerChatMessage.signedContent().plain().getString());
-        }
         this.server.getPlayerList().broadcastChatMessage(filteredText, this.player, ChatType.bind(ChatType.CHAT, this.player));
         this.detectRateSpam();
+    }
+
+    private boolean verifyChatMessage(PlayerChatMessage playerChatMessage) {
+        ChatSender chatSender = this.player.asChatSender();
+        if (chatSender.profilePublicKey() != null && !playerChatMessage.verify(chatSender)) {
+            this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
+            return false;
+        }
+        if (playerChatMessage.hasExpiredServer(Instant.now())) {
+            LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", (Object)this.player.getName().getString(), (Object)playerChatMessage.signedContent().plain());
+        }
+        return true;
     }
 
     private void detectRateSpam() {
@@ -1284,28 +1355,29 @@ ServerGamePacketListener {
     }
 
     private CompletableFuture<Component> queryChatPreview(String string) {
-        MutableComponent component = Component.literal(string);
-        return this.server.getChatDecorator().decorate(this.player, component).thenApply(component2 -> !component.equals(component2) ? component2 : null);
+        MutableComponent component3 = Component.literal(string);
+        CompletionStage completableFuture = this.server.getChatDecorator().decorate(this.player, component3).thenApply(component2 -> !component3.equals(component2) ? component2 : null);
+        ((CompletableFuture)completableFuture).thenAcceptAsync(component -> this.chatPreviewCache.set(string, (Component)component), (Executor)this.server);
+        return completableFuture;
     }
 
     private CompletableFuture<Component> queryCommandPreview(String string) {
         CommandSourceStack commandSourceStack = this.player.createCommandSourceStack();
         ParseResults<CommandSourceStack> parseResults = this.server.getCommands().getDispatcher().parse(string, commandSourceStack);
-        return this.getPreviewedArgument(parseResults.getContext());
+        CompletableFuture<Component> completableFuture = this.getPreviewedArgument(commandSourceStack, PreviewableCommand.of(parseResults));
+        completableFuture.thenAcceptAsync(component -> this.chatPreviewCache.set(string, (Component)component), (Executor)this.server);
+        return completableFuture;
     }
 
-    private CompletableFuture<Component> getPreviewedArgument(CommandContextBuilder<CommandSourceStack> commandContextBuilder) {
-        CommandContextBuilder<CommandSourceStack> commandContextBuilder2 = commandContextBuilder.getLastChild();
-        if (commandContextBuilder2.getArguments().isEmpty()) {
+    private CompletableFuture<Component> getPreviewedArgument(CommandSourceStack commandSourceStack, PreviewableCommand<CommandSourceStack> previewableCommand) {
+        List<PreviewableCommand.Argument<CommandSourceStack>> list = previewableCommand.arguments();
+        if (list.isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
-        List<ParsedCommandNode<CommandSourceStack>> list = commandContextBuilder2.getNodes();
         for (int i = list.size() - 1; i >= 0; --i) {
-            CommandNode<CommandSourceStack> commandNode = list.get(i).getNode();
-            if (!(commandNode instanceof ArgumentCommandNode)) continue;
-            ArgumentCommandNode argumentCommandNode = (ArgumentCommandNode)commandNode;
+            PreviewableCommand.Argument<CommandSourceStack> argument = list.get(i);
             try {
-                CompletableFuture<Component> completableFuture = PreviewedArgument.resolvePreviewed(argumentCommandNode, commandContextBuilder2);
+                CompletableFuture<Component> completableFuture = argument.previewType().resolvePreview(commandSourceStack, argument.parsedValue());
                 if (completableFuture == null) continue;
                 return completableFuture;
             } catch (CommandSyntaxException commandSyntaxException) {
@@ -1409,16 +1481,18 @@ ServerGamePacketListener {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void addPendingMessage(PlayerChatMessage playerChatMessage) {
-        if (!playerChatMessage.signer().isSystem()) {
-            int i;
-            LastSeenMessagesValidator lastSeenMessagesValidator = this.lastSeenMessagesValidator;
-            synchronized (lastSeenMessagesValidator) {
-                this.lastSeenMessagesValidator.addPending(playerChatMessage.toLastSeenEntry());
-                i = this.lastSeenMessagesValidator.pendingMessagesCount();
-            }
-            if (i > 4096) {
-                this.disconnect(Component.translatable("multiplayer.disconnect.too_many_pending_chats"));
-            }
+        int i;
+        LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
+        if (entry == null) {
+            return;
+        }
+        LastSeenMessagesValidator lastSeenMessagesValidator = this.lastSeenMessagesValidator;
+        synchronized (lastSeenMessagesValidator) {
+            this.lastSeenMessagesValidator.addPending(entry);
+            i = this.lastSeenMessagesValidator.pendingMessagesCount();
+        }
+        if (i > 4096) {
+            this.disconnect(Component.translatable("multiplayer.disconnect.too_many_pending_chats"));
         }
     }
 

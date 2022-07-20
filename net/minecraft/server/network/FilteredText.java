@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.network;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -28,12 +29,21 @@ public record FilteredText<T>(T raw, @Nullable T filtered) {
         return new FilteredText<U>(function.apply(this.raw), Util.mapNullable(this.filtered, function2));
     }
 
-    public <U> FilteredText<U> mapWithEquality(Function<T, U> function, Function<T, U> function2) {
-        U object = function.apply(this.raw);
-        if (this.raw.equals(this.filtered)) {
+    public <U> FilteredText<U> rebuildIfNeeded(U object, Function<T, U> function) {
+        if (!this.isFiltered()) {
             return FilteredText.passThrough(object);
         }
-        return new FilteredText<U>(object, Util.mapNullable(this.filtered, function2));
+        return new FilteredText<U>(object, Util.mapNullable(this.filtered, function));
+    }
+
+    public <U> CompletableFuture<FilteredText<U>> rebuildIfNeededAsync(U object, Function<T, CompletableFuture<U>> function) {
+        if (this.filtered() == null) {
+            return CompletableFuture.completedFuture(FilteredText.fullyFiltered(object));
+        }
+        if (!this.isFiltered()) {
+            return CompletableFuture.completedFuture(FilteredText.passThrough(object));
+        }
+        return function.apply(this.filtered()).thenApply(object2 -> new FilteredText<Object>(object, object2));
     }
 
     public boolean isFiltered() {

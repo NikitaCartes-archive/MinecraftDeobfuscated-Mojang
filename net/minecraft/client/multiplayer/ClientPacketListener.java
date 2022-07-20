@@ -757,8 +757,12 @@ implements ClientGamePacketListener {
     @Override
     public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
-        ChatType.Bound bound = clientboundPlayerChatPacket.resolveChatType(this.registryAccess);
-        this.minecraft.getChatListener().handleChatMessage(clientboundPlayerChatPacket.message(), bound);
+        Optional<ChatType.Bound> optional = clientboundPlayerChatPacket.resolveChatType(this.registryAccess);
+        if (!optional.isPresent()) {
+            this.connection.disconnect(Component.translatable("multiplayer.disconnect.invalid_packet"));
+            return;
+        }
+        this.minecraft.getChatListener().handleChatMessage(clientboundPlayerChatPacket.message(), optional.get());
     }
 
     @Override
@@ -919,6 +923,9 @@ implements ClientGamePacketListener {
         }
         String string = localPlayer.getServerBrand();
         this.minecraft.cameraEntity = null;
+        if (localPlayer.hasContainerOpen()) {
+            localPlayer.closeContainer();
+        }
         LocalPlayer localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
         localPlayer2.setId(i);
         this.minecraft.player = localPlayer2;
@@ -2166,17 +2173,18 @@ implements ClientGamePacketListener {
     }
 
     public void markMessageAsProcessed(PlayerChatMessage playerChatMessage, boolean bl) {
-        if (!playerChatMessage.signer().isSystem()) {
-            LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
-            if (bl) {
-                this.lastSeenMessagesTracker.push(entry);
-                this.lastUnacknowledgedReceivedMessage = Optional.empty();
-            } else {
-                this.lastUnacknowledgedReceivedMessage = Optional.of(entry);
-            }
-            if (this.unacknowledgedReceivedMessageCount++ > 64) {
-                this.send(new ServerboundChatAckPacket(this.generateMessageAcknowledgements()));
-            }
+        LastSeenMessages.Entry entry = playerChatMessage.toLastSeenEntry();
+        if (entry == null) {
+            return;
+        }
+        if (bl) {
+            this.lastSeenMessagesTracker.push(entry);
+            this.lastUnacknowledgedReceivedMessage = Optional.empty();
+        } else {
+            this.lastUnacknowledgedReceivedMessage = Optional.of(entry);
+        }
+        if (this.unacknowledgedReceivedMessageCount++ > 64) {
+            this.send(new ServerboundChatAckPacket(this.generateMessageAcknowledgements()));
         }
     }
 }

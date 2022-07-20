@@ -38,7 +38,7 @@ public record SignedMessageBody(ChatMessageContent content, Instant timeStamp, l
             dataOutputStream.writeLong(this.salt);
             dataOutputStream.writeLong(this.timeStamp.getEpochSecond());
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter((OutputStream)dataOutputStream, StandardCharsets.UTF_8);
-            outputStreamWriter.write(Component.Serializer.toStableJson(this.content.plain()));
+            outputStreamWriter.write(this.content.plain());
             outputStreamWriter.flush();
             dataOutputStream.write(70);
             if (this.content.isDecorated()) {
@@ -50,6 +50,10 @@ public record SignedMessageBody(ChatMessageContent content, Instant timeStamp, l
             // empty catch block
         }
         return hashingOutputStream.hash();
+    }
+
+    public SignedMessageBody withContent(ChatMessageContent chatMessageContent) {
+        return new SignedMessageBody(chatMessageContent, this.timeStamp, this.salt, this.lastSeen);
     }
 }
 

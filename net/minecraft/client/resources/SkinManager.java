@@ -72,7 +72,7 @@ public class SkinManager {
 
     private ResourceLocation registerTexture(MinecraftProfileTexture minecraftProfileTexture, MinecraftProfileTexture.Type type, @Nullable SkinTextureCallback skinTextureCallback) {
         String string = Hashing.sha1().hashUnencodedChars(minecraftProfileTexture.getHash()).toString();
-        ResourceLocation resourceLocation = new ResourceLocation("skins/" + string);
+        ResourceLocation resourceLocation = SkinManager.getTextureLocation(type, string);
         AbstractTexture abstractTexture = this.textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
         if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
             File file = new File(this.skinsDirectory, string.length() > 2 ? string.substring(0, 2) : "xx");
@@ -87,6 +87,16 @@ public class SkinManager {
             skinTextureCallback.onSkinTextureAvailable(type, resourceLocation, minecraftProfileTexture);
         }
         return resourceLocation;
+    }
+
+    private static ResourceLocation getTextureLocation(MinecraftProfileTexture.Type type, String string) {
+        String string2 = switch (type) {
+            default -> throw new IncompatibleClassChangeError();
+            case MinecraftProfileTexture.Type.SKIN -> "skins";
+            case MinecraftProfileTexture.Type.CAPE -> "capes";
+            case MinecraftProfileTexture.Type.ELYTRA -> "elytra";
+        };
+        return new ResourceLocation(string2 + "/" + string);
     }
 
     public void registerSkins(GameProfile gameProfile, SkinTextureCallback skinTextureCallback, boolean bl) {

@@ -8,10 +8,10 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -24,10 +24,9 @@ import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageChain;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.players.PlayerList;
@@ -37,7 +36,7 @@ import org.slf4j.Logger;
 public class MessageArgument
 implements SignedArgument<Message> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Hello world!", "foo", "@e", "Hello @p :)");
-    static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static MessageArgument message() {
         return new MessageArgument();
@@ -52,8 +51,11 @@ implements SignedArgument<Message> {
         Message message = commandContext.getArgument(string, Message.class);
         Component component = message.resolveComponent(commandContext.getSource());
         CommandSigningContext commandSigningContext = commandContext.getSource().getSigningContext();
-        CommandSigningContext.SignedArgument signedArgument = commandSigningContext.getArgument(string);
-        return new ChatMessage(message.text, component, signedArgument);
+        PlayerChatMessage playerChatMessage = Objects.requireNonNullElseGet(commandSigningContext.getArgument(string), () -> {
+            ChatMessageContent chatMessageContent = new ChatMessageContent(message.text);
+            return PlayerChatMessage.system(chatMessageContent);
+        });
+        return new ChatMessage(component, playerChatMessage);
     }
 
     @Override
@@ -174,22 +176,14 @@ implements SignedArgument<Message> {
         }
     }
 
-    public record ChatMessage(String plain, Component formatted, CommandSigningContext.SignedArgument signedArgument) {
+    public record ChatMessage(Component formatted, PlayerChatMessage signedArgument) {
         public void resolve(CommandSourceStack commandSourceStack, Consumer<FilteredText<PlayerChatMessage>> consumer) {
-            commandSourceStack.getChatMessageChainer().append(() -> ((CompletableFuture)((CompletableFuture)this.filterPlainText(commandSourceStack, this.plain).thenComposeAsync(filteredText -> {
-                FilteredText<Component> filteredText2 = this.rebuildMessageIfNeeded(commandSourceStack, (FilteredText<String>)filteredText);
+            MinecraftServer minecraftServer = commandSourceStack.getServer();
+            String string = this.signedArgument.signedContent().plain();
+            commandSourceStack.getChatMessageChainer().append(() -> ((CompletableFuture)this.filterPlainText(commandSourceStack, string).thenComposeAsync(filteredText -> {
+                FilteredText<Component> filteredText2 = filteredText.rebuildIfNeeded(this.formatted, string -> this.rebuildFilteredMessage(commandSourceStack, (String)string));
                 return this.resolveFiltered(commandSourceStack, (FilteredText<String>)filteredText, filteredText2);
-            }, (Executor)commandSourceStack.getServer())).thenApply(filteredText -> {
-                PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.raw();
-                if (playerChatMessage.hasExpiredServer(Instant.now())) {
-                    LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", (Object)commandSourceStack.getDisplayName().getString(), (Object)playerChatMessage.signedContent().plain().getString());
-                }
-                return filteredText;
-            })).thenAcceptAsync(consumer, (Executor)commandSourceStack.getServer()));
-        }
-
-        private FilteredText<Component> rebuildMessageIfNeeded(CommandSourceStack commandSourceStack, FilteredText<String> filteredText) {
-            return filteredText.mapWithEquality(string -> this.formatted, string -> this.rebuildFilteredMessage(commandSourceStack, (String)string));
+            }, (Executor)minecraftServer)).thenAcceptAsync(consumer, (Executor)minecraftServer));
         }
 
         @Nullable
@@ -203,29 +197,33 @@ implements SignedArgument<Message> {
         }
 
         private CompletableFuture<FilteredText<PlayerChatMessage>> resolveFiltered(CommandSourceStack commandSourceStack, FilteredText<String> filteredText, FilteredText<Component> filteredText22) {
-            ChatDecorator chatDecorator = commandSourceStack.getServer().getChatDecorator();
+            MinecraftServer minecraftServer = commandSourceStack.getServer();
+            ChatDecorator chatDecorator = minecraftServer.getChatDecorator();
             ServerPlayer serverPlayer = commandSourceStack.getPlayer();
-            CommandSigningContext commandSigningContext = commandSourceStack.getSigningContext();
-            SignedMessageChain.Decoder decoder = commandSigningContext.decoder();
-            MessageSigner messageSigner = commandSigningContext.argumentSigner();
-            SignedMessageChain.Link link = new SignedMessageChain.Link(this.signedArgument.signature());
-            if (this.signedArgument.signedPreview()) {
-                return chatDecorator.decorateFiltered(serverPlayer, filteredText22).thenApply(filteredText2 -> decoder.unpack(link, messageSigner, ChatMessageContent.fromFiltered(filteredText, filteredText2), this.signedArgument.lastSeenMessages()));
+            ChatMessageContent chatMessageContent = this.signedArgument.signedContent();
+            if (chatMessageContent.isDecorated()) {
+                return chatDecorator.rebuildFiltered(serverPlayer, filteredText22, chatMessageContent.decorated()).thenApply(filteredText2 -> {
+                    FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText, filteredText2);
+                    return this.signedArgument.withFilteredText(filteredText3);
+                });
             }
-            FilteredText<PlayerChatMessage> filteredText3 = decoder.unpack(link, messageSigner, ChatMessageContent.fromFiltered(filteredText), this.signedArgument.lastSeenMessages());
-            return chatDecorator.decorateFiltered(serverPlayer, filteredText22).thenApply(filteredText2 -> ChatDecorator.attachUnsignedDecoration(filteredText3, filteredText2));
+            return ((CompletableFuture)chatDecorator.decorate(serverPlayer, filteredText22.raw()).thenComposeAsync(component -> chatDecorator.rebuildFiltered(serverPlayer, filteredText22, (Component)component), (Executor)minecraftServer)).thenApply(filteredText2 -> {
+                FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText);
+                FilteredText<PlayerChatMessage> filteredText4 = this.signedArgument.withFilteredText(filteredText3);
+                return ChatDecorator.attachUnsignedDecoration(filteredText4, filteredText2);
+            });
         }
 
         private CompletableFuture<FilteredText<String>> filterPlainText(CommandSourceStack commandSourceStack, String string) {
             ServerPlayer serverPlayer = commandSourceStack.getPlayer();
-            if (serverPlayer != null) {
+            if (serverPlayer != null && this.signedArgument.hasSignatureFrom(serverPlayer)) {
                 return serverPlayer.getTextFilter().processStreamMessage(string);
             }
             return CompletableFuture.completedFuture(FilteredText.passThrough(string));
         }
 
         public void consume(CommandSourceStack commandSourceStack) {
-            if (!commandSourceStack.getSigningContext().argumentSigner().isSystem()) {
+            if (!this.signedArgument.signer().isSystem()) {
                 this.resolve(commandSourceStack, filteredText -> {
                     PlayerList playerList = commandSourceStack.getServer().getPlayerList();
                     playerList.broadcastMessageHeader((PlayerChatMessage)filteredText.raw(), Set.of());

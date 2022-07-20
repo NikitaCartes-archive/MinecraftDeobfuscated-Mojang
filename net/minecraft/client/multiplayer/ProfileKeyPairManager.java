@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
@@ -55,7 +56,11 @@ public class ProfileKeyPairManager {
         return CompletableFuture.supplyAsync(() -> {
             Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired());
             if (optional.isPresent() && !optional.get().dueRefresh()) {
-                return optional;
+                if (!SharedConstants.IS_RUNNING_IN_IDE) {
+                    this.writeProfileKeyPair(null);
+                } else {
+                    return optional;
+                }
             }
             try {
                 ProfileKeyPair profileKeyPair2 = this.fetchProfileKeyPair(userApiService);
@@ -106,6 +111,9 @@ public class ProfileKeyPairManager {
             LOGGER.error("Failed to delete profile key pair file {}", (Object)this.profileKeyPairPath, (Object)iOException);
         }
         if (profileKeyPair == null) {
+            return;
+        }
+        if (!SharedConstants.IS_RUNNING_IN_IDE) {
             return;
         }
         ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, profileKeyPair).result().ifPresent(jsonElement -> {

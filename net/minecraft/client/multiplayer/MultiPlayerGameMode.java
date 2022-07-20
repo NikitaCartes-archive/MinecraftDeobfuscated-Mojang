@@ -376,6 +376,10 @@ public class MultiPlayerGameMode {
 
     public void handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {
         AbstractContainerMenu abstractContainerMenu = player.containerMenu;
+        if (i != abstractContainerMenu.containerId) {
+            LOGGER.warn("Ignoring click in mismatching container. Click in {}, player has {}.", (Object)i, (Object)abstractContainerMenu.containerId);
+            return;
+        }
         NonNullList<Slot> nonNullList = abstractContainerMenu.slots;
         int l = nonNullList.size();
         ArrayList<ItemStack> list = Lists.newArrayListWithCapacity(l);

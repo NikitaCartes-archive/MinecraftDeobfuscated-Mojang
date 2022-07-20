@@ -13,17 +13,17 @@ import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class ChatLogSegmenter {
-    private final Function<ChatLog.Entry<LoggedChatMessage>, MessageType> typeFunction;
-    private final List<ChatLog.Entry<LoggedChatMessage>> messages = new ArrayList<ChatLog.Entry<LoggedChatMessage>>();
+public class ChatLogSegmenter<T extends LoggedChatMessage> {
+    private final Function<ChatLog.Entry<T>, MessageType> typeFunction;
+    private final List<ChatLog.Entry<T>> messages = new ArrayList<ChatLog.Entry<T>>();
     @Nullable
     private MessageType segmentType;
 
-    public ChatLogSegmenter(Function<ChatLog.Entry<LoggedChatMessage>, MessageType> function) {
+    public ChatLogSegmenter(Function<ChatLog.Entry<T>, MessageType> function) {
         this.typeFunction = function;
     }
 
-    public boolean accept(ChatLog.Entry<LoggedChatMessage> entry) {
+    public boolean accept(ChatLog.Entry<T> entry) {
         MessageType messageType = this.typeFunction.apply(entry);
         if (this.segmentType == null || messageType == this.segmentType) {
             this.segmentType = messageType;
@@ -34,9 +34,9 @@ public class ChatLogSegmenter {
     }
 
     @Nullable
-    public Results build() {
+    public Results<T> build() {
         if (!this.messages.isEmpty() && this.segmentType != null) {
-            return new Results(this.messages, this.segmentType);
+            return new Results<T>(this.messages, this.segmentType);
         }
         return null;
     }
@@ -53,7 +53,7 @@ public class ChatLogSegmenter {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public record Results(List<ChatLog.Entry<LoggedChatMessage>> messages, MessageType type) {
+    public record Results<T extends LoggedChatMessage>(List<ChatLog.Entry<T>> messages, MessageType type) {
     }
 }
 

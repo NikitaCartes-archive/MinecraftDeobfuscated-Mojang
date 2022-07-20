@@ -148,7 +148,7 @@ implements SimpleWaterloggedBlock {
                 SculkSensorBlockEntity sculkSensorBlockEntity = (SculkSensorBlockEntity)blockEntity;
                 sculkSensorBlockEntity.setLastVibrationFrequency(VIBRATION_FREQUENCY_FOR_EVENT.get(GameEvent.STEP));
             }
-            SculkSensorBlock.activate(entity.getResponsibleEntity(), level, blockPos, blockState, 15);
+            SculkSensorBlock.activate(entity, level, blockPos, blockState, 15);
         }
         super.stepOn(level, blockPos, blockState, entity);
     }

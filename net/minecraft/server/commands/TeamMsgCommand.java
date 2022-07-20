@@ -55,7 +55,7 @@ public class TeamMsgCommand {
         ChatType.Bound bound2 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(component);
         List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers().stream().filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam).toList();
         chatMessage.resolve(commandSourceStack, filteredText -> {
-            FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText, chatSender);
+            FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
             for (ServerPlayer serverPlayer : list) {
                 if (serverPlayer == entity) {
                     serverPlayer.sendChatMessage(filteredText2.raw(), bound2);

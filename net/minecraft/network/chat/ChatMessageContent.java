@@ -8,17 +8,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.FilteredText;
 
-public record ChatMessageContent(Component plain, Component decorated) {
-    public ChatMessageContent(Component component) {
-        this(component, component);
-    }
-
-    public ChatMessageContent(String string, Component component) {
-        this(Component.literal(string), component);
-    }
-
+public record ChatMessageContent(String plain, Component decorated) {
     public ChatMessageContent(String string) {
-        this(Component.literal(string));
+        this(string, Component.literal(string));
     }
 
     public static FilteredText<ChatMessageContent> fromFiltered(FilteredText<String> filteredText) {
@@ -30,17 +22,17 @@ public record ChatMessageContent(Component plain, Component decorated) {
     }
 
     public boolean isDecorated() {
-        return !this.decorated.equals(this.plain);
+        return !this.decorated.equals(Component.literal(this.plain));
     }
 
     public static ChatMessageContent read(FriendlyByteBuf friendlyByteBuf) {
-        Component component = friendlyByteBuf.readComponent();
-        Component component2 = (Component)friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent);
-        return new ChatMessageContent(component, Objects.requireNonNullElse(component2, component));
+        String string = friendlyByteBuf.readUtf(256);
+        Component component = (Component)friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent);
+        return new ChatMessageContent(string, Objects.requireNonNullElse(component, Component.literal(string)));
     }
 
     public static void write(FriendlyByteBuf friendlyByteBuf, ChatMessageContent chatMessageContent) {
-        friendlyByteBuf.writeComponent(chatMessageContent.plain());
+        friendlyByteBuf.writeUtf(chatMessageContent.plain(), 256);
         Component component = chatMessageContent.isDecorated() ? chatMessageContent.decorated() : null;
         friendlyByteBuf.writeNullable(component, FriendlyByteBuf::writeComponent);
     }

@@ -46,6 +46,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
+import net.minecraft.network.chat.PreviewableCommand;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -66,6 +67,7 @@ import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Signer;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -296,12 +298,16 @@ extends AbstractClientPlayer {
 
     public boolean commandHasSignableArguments(String string) {
         ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, (SharedSuggestionProvider)this.connection.getSuggestionsProvider());
-        return ArgumentSignatures.hasSignableArguments(parseResults);
+        return ArgumentSignatures.hasSignableArguments(PreviewableCommand.of(parseResults));
     }
 
-    public void commandUnsigned(String string) {
-        LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
-        this.connection.send(new ServerboundChatCommandPacket(string, Instant.now(), 0L, ArgumentSignatures.EMPTY, false, update));
+    public boolean commandUnsigned(String string) {
+        if (!this.commandHasSignableArguments(string)) {
+            LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
+            this.connection.send(new ServerboundChatCommandPacket(string, Instant.now(), 0L, ArgumentSignatures.EMPTY, false, update));
+            return true;
+        }
+        return false;
     }
 
     public void commandSigned(String string, @Nullable Component component) {
@@ -309,16 +315,17 @@ extends AbstractClientPlayer {
     }
 
     private void sendChat(String string, @Nullable Component component) {
+        String string2 = StringUtil.trimChatMessage(string);
         MessageSigner messageSigner = this.createMessageSigner();
         LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
         if (component != null) {
-            ChatMessageContent chatMessageContent = new ChatMessageContent(string, component);
+            ChatMessageContent chatMessageContent = new ChatMessageContent(string2, component);
             MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
-            this.connection.send(new ServerboundChatPacket(string, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, true, update));
+            this.connection.send(new ServerboundChatPacket(string2, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, true, update));
         } else {
-            ChatMessageContent chatMessageContent = new ChatMessageContent(string);
+            ChatMessageContent chatMessageContent = new ChatMessageContent(string2);
             MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
-            this.connection.send(new ServerboundChatPacket(string, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, false, update));
+            this.connection.send(new ServerboundChatPacket(string2, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, false, update));
         }
     }
 
@@ -329,7 +336,7 @@ extends AbstractClientPlayer {
                 return this.connection.signedMessageEncoder().pack(signer, messageSigner, chatMessageContent, lastSeenMessages).signature();
             }
         } catch (Exception exception) {
-            LOGGER.error("Failed to sign chat message: '{}'", (Object)chatMessageContent.plain().getString(), (Object)exception);
+            LOGGER.error("Failed to sign chat message: '{}'", (Object)chatMessageContent.plain(), (Object)exception);
         }
         return MessageSignature.EMPTY;
     }
@@ -348,7 +355,7 @@ extends AbstractClientPlayer {
             return ArgumentSignatures.EMPTY;
         }
         try {
-            return ArgumentSignatures.signCommand(parseResults.getContext(), (string, string2) -> {
+            return ArgumentSignatures.signCommand(PreviewableCommand.of(parseResults), (string, string2) -> {
                 ChatMessageContent chatMessageContent = component != null ? new ChatMessageContent(string2, component) : new ChatMessageContent(string2);
                 return this.connection.signedMessageEncoder().pack(signer, messageSigner, chatMessageContent, lastSeenMessages).signature();
             });

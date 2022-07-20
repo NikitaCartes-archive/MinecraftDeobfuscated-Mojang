@@ -15,6 +15,7 @@ import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.SignedMessageHeader;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.entity.player.ProfilePublicKey;
@@ -28,8 +29,9 @@ public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignatu
         this(new SignedMessageHeader(friendlyByteBuf), new MessageSignature(friendlyByteBuf), new SignedMessageBody(friendlyByteBuf), friendlyByteBuf.readOptional(FriendlyByteBuf::readComponent));
     }
 
-    public static PlayerChatMessage unsigned(MessageSigner messageSigner, Component component) {
-        SignedMessageBody signedMessageBody = new SignedMessageBody(new ChatMessageContent(component), messageSigner.timeStamp(), messageSigner.salt(), LastSeenMessages.EMPTY);
+    public static PlayerChatMessage system(ChatMessageContent chatMessageContent) {
+        MessageSigner messageSigner = MessageSigner.system();
+        SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), LastSeenMessages.EMPTY);
         SignedMessageHeader signedMessageHeader = new SignedMessageHeader(null, messageSigner.profileId());
         return new PlayerChatMessage(signedMessageHeader, MessageSignature.EMPTY, signedMessageBody, Optional.empty());
     }
@@ -41,14 +43,13 @@ public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignatu
         friendlyByteBuf.writeOptional(this.unsignedContent, FriendlyByteBuf::writeComponent);
     }
 
-    public FilteredText<PlayerChatMessage> withFilteredText(@Nullable Component component) {
-        if (component == null) {
-            return FilteredText.fullyFiltered(this);
-        }
-        if (this.signedContent().decorated().equals(component)) {
-            return FilteredText.passThrough(this);
-        }
-        return new FilteredText<PlayerChatMessage>(this, PlayerChatMessage.unsigned(this.signer(), component));
+    public FilteredText<PlayerChatMessage> withFilteredText(FilteredText<ChatMessageContent> filteredText) {
+        return filteredText.rebuildIfNeeded(this, chatMessageContent -> {
+            if (this.signedContent().equals(chatMessageContent)) {
+                return this;
+            }
+            return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody.withContent((ChatMessageContent)chatMessageContent), this.unsignedContent);
+        });
     }
 
     public PlayerChatMessage withUnsignedContent(Component component) {
@@ -105,8 +106,17 @@ public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignatu
         return new MessageSigner(this.signedHeader.sender(), this.timeStamp(), this.salt());
     }
 
+    @Nullable
     public LastSeenMessages.Entry toLastSeenEntry() {
-        return new LastSeenMessages.Entry(this.signer().profileId(), this.headerSignature);
+        MessageSigner messageSigner = this.signer();
+        if (!this.headerSignature.isEmpty() && !messageSigner.isSystem()) {
+            return new LastSeenMessages.Entry(messageSigner.profileId(), this.headerSignature);
+        }
+        return null;
+    }
+
+    public boolean hasSignatureFrom(ServerPlayer serverPlayer) {
+        return !this.headerSignature.isEmpty() && this.signedHeader.sender().equals(serverPlayer.getUUID());
     }
 }
 
