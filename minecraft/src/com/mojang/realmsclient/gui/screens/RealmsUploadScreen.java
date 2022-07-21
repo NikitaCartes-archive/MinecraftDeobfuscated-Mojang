@@ -32,7 +32,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
@@ -75,7 +75,7 @@ public class RealmsUploadScreen extends RealmsScreen {
 	private final Runnable callback;
 
 	public RealmsUploadScreen(long l, int i, RealmsResetWorldScreen realmsResetWorldScreen, LevelSummary levelSummary, Runnable runnable) {
-		super(NarratorChatListener.NO_TITLE);
+		super(GameNarrator.NO_TITLE);
 		this.worldId = l;
 		this.slotId = i;
 		this.lastScreen = realmsResetWorldScreen;
@@ -226,7 +226,7 @@ public class RealmsUploadScreen extends RealmsScreen {
 		this.tickCount++;
 		if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
 			Component component = this.createProgressNarrationMessage();
-			NarratorChatListener.INSTANCE.sayNow(component);
+			this.minecraft.getNarrator().sayNow(component);
 		}
 	}
 

@@ -1,39 +1,42 @@
 package net.minecraft.client.gui.screens.reporting;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.chat.ChatLog;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
-public class ChatSelectionLogFiller {
+public class ChatSelectionLogFiller<T extends LoggedChatMessage> {
 	private static final int CONTEXT_FOLDED_SIZE = 4;
 	private final ChatLog log;
-	private final Predicate<LoggedChat> canReport;
+	private final Predicate<T> canReport;
 	private int nextMessageId;
+	final Class<T> tClass;
 
-	public ChatSelectionLogFiller(ChatLog chatLog, Predicate<LoggedChat> predicate) {
+	public ChatSelectionLogFiller(ChatLog chatLog, Predicate<T> predicate, Class<T> class_) {
 		this.log = chatLog;
 		this.canReport = predicate;
 		this.nextMessageId = chatLog.newest();
+		this.tClass = class_;
 	}
 
-	public void fillNextPage(int i, ChatSelectionLogFiller.Output output) {
+	public void fillNextPage(int i, ChatSelectionLogFiller.Output<T> output) {
 		int j = 0;
 
 		while (j < i) {
-			ChatLogSegmenter.Results results = this.nextSegment();
+			ChatLogSegmenter.Results<T> results = this.nextSegment();
 			if (results == null) {
 				break;
 			}
 
 			if (results.type().foldable()) {
-				j += addFoldedMessagesTo(results.messages(), output);
+				j += this.addFoldedMessagesTo(results.messages(), output);
 			} else {
 				output.acceptMessages(results.messages());
 				j += results.messages().size();
@@ -41,7 +44,7 @@ public class ChatSelectionLogFiller {
 		}
 	}
 
-	private static int addFoldedMessagesTo(List<LoggedChat.WithId> list, ChatSelectionLogFiller.Output output) {
+	private int addFoldedMessagesTo(List<ChatLog.Entry<T>> list, ChatSelectionLogFiller.Output<T> output) {
 		int i = 8;
 		if (list.size() > 8) {
 			int j = list.size() - 8;
@@ -56,13 +59,15 @@ public class ChatSelectionLogFiller {
 	}
 
 	@Nullable
-	private ChatLogSegmenter.Results nextSegment() {
-		ChatLogSegmenter chatLogSegmenter = new ChatLogSegmenter(withId -> this.getMessageType(withId.message()));
+	private ChatLogSegmenter.Results<T> nextSegment() {
+		ChatLogSegmenter<T> chatLogSegmenter = new ChatLogSegmenter<>(entry -> this.getMessageType((T)entry.event()));
 		OptionalInt optionalInt = this.log
 			.selectBefore(this.nextMessageId)
-			.messagesWithIds()
+			.entries()
+			.map(entry -> entry.tryCast(this.tClass))
+			.filter(Objects::nonNull)
 			.takeWhile(chatLogSegmenter::accept)
-			.mapToInt(LoggedChat.WithId::id)
+			.mapToInt(ChatLog.Entry::id)
 			.reduce((i, j) -> j);
 		if (optionalInt.isPresent()) {
 			this.nextMessageId = this.log.before(optionalInt.getAsInt());
@@ -71,19 +76,19 @@ public class ChatSelectionLogFiller {
 		return chatLogSegmenter.build();
 	}
 
-	private ChatLogSegmenter.MessageType getMessageType(LoggedChat loggedChat) {
-		return this.canReport.test(loggedChat) ? ChatLogSegmenter.MessageType.REPORTABLE : ChatLogSegmenter.MessageType.CONTEXT;
+	private ChatLogSegmenter.MessageType getMessageType(T loggedChatMessage) {
+		return this.canReport.test(loggedChatMessage) ? ChatLogSegmenter.MessageType.REPORTABLE : ChatLogSegmenter.MessageType.CONTEXT;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public interface Output {
-		default void acceptMessages(Iterable<LoggedChat.WithId> iterable) {
-			for (LoggedChat.WithId withId : iterable) {
-				this.acceptMessage(withId.id(), withId.message());
+	public interface Output<T extends LoggedChatMessage> {
+		default void acceptMessages(Iterable<ChatLog.Entry<T>> iterable) {
+			for (ChatLog.Entry<T> entry : iterable) {
+				this.acceptMessage(entry.id(), entry.event());
 			}
 		}
 
-		void acceptMessage(int i, LoggedChat loggedChat);
+		void acceptMessage(int i, T loggedChatMessage);
 
 		void acceptDivider(Component component);
 	}

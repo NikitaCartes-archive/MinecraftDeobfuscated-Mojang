@@ -3,6 +3,7 @@ package com.mojang.blaze3d.platform;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -91,6 +92,6 @@ public final class Monitor {
 	}
 
 	public String toString() {
-		return String.format("Monitor[%s %sx%s %s]", this.monitor, this.x, this.y, this.currentMode);
+		return String.format(Locale.ROOT, "Monitor[%s %sx%s %s]", this.monitor, this.x, this.y, this.currentMode);
 	}
 }

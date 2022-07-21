@@ -8,6 +8,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.datafixers.util.Unit;
 import com.mojang.logging.LogUtils;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -168,7 +169,8 @@ public class ResetChunksCommand {
 		LOGGER.debug("blockChanged took " + (System.currentTimeMillis() - x) + " ms");
 		long r = System.currentTimeMillis() - p;
 		commandSourceStack.sendSuccess(
-			Component.literal(String.format("%d chunks have been reset. This took %d ms for %d chunks, or %02f ms per chunk", q, r, q, (float)r / (float)q)), true
+			Component.literal(String.format(Locale.ROOT, "%d chunks have been reset. This took %d ms for %d chunks, or %02f ms per chunk", q, r, q, (float)r / (float)q)),
+			true
 		);
 		return 1;
 	}

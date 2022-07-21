@@ -20,10 +20,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -87,7 +87,7 @@ public class BookEditScreen extends Screen {
 	private final Component ownerText;
 
 	public BookEditScreen(Player player, ItemStack itemStack, InteractionHand interactionHand) {
-		super(NarratorChatListener.NO_TITLE);
+		super(GameNarrator.NO_TITLE);
 		this.owner = player;
 		this.book = itemStack;
 		this.hand = interactionHand;

@@ -35,7 +35,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -221,10 +220,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 				o = this.height - l - 6;
 			}
 
-			if (j - l - 8 < 0) {
-				o = j + 8;
-			}
-
 			poseStack.pushPose();
 			int q = -267386864;
 			int r = 1347420415;
@@ -345,9 +340,11 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 				} else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
 					String string2 = SharedConstants.filterText(clickEvent.getValue());
 					if (string2.startsWith("/")) {
-						this.minecraft.player.commandUnsigned(string2.substring(1));
+						if (!this.minecraft.player.commandUnsigned(string2.substring(1))) {
+							LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", string2);
+						}
 					} else {
-						LOGGER.warn("Failed to run command without '/' prefix from click event: '{}'", string2);
+						LOGGER.error("Failed to run command without '/' prefix from click event: '{}'", string2);
 					}
 				} else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
 					this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
@@ -531,7 +528,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	}
 
 	private boolean shouldRunNarration() {
-		return NarratorChatListener.INSTANCE.isActive();
+		return this.minecraft.getNarrator().isActive();
 	}
 
 	public void handleDelayedNarration() {
@@ -554,7 +551,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 		this.narrationState.update(this::updateNarrationState);
 		String string = this.narrationState.collectNarrationText(!bl);
 		if (!string.isEmpty()) {
-			NarratorChatListener.INSTANCE.sayNow(string);
+			this.minecraft.getNarrator().sayNow(string);
 		}
 	}
 

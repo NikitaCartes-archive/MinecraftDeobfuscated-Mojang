@@ -7,14 +7,18 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 
 @Environment(EnvType.CLIENT)
@@ -44,52 +48,73 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 		RenderSystem.disableScissor();
 	}
 
-	public void updatePlayerList(Collection<UUID> collection, double d) {
-		this.addOnlinePlayers(collection);
-		this.updateFiltersAndScroll(d);
+	public void updatePlayerList(Collection<UUID> collection, double d, boolean bl) {
+		Map<UUID, PlayerEntry> map = new HashMap();
+		this.addOnlinePlayers(collection, map);
+		this.updatePlayersFromChatLog(map, bl);
+		this.updateFiltersAndScroll(map.values(), d);
 	}
 
-	public void updatePlayerListWithLog(Collection<UUID> collection, double d) {
-		this.addOnlinePlayers(collection);
-		this.addPlayersFromLog(collection);
-		this.updateFiltersAndScroll(d);
-	}
-
-	private void addOnlinePlayers(Collection<UUID> collection) {
-		this.players.clear();
+	private void addOnlinePlayers(Collection<UUID> collection, Map<UUID, PlayerEntry> map) {
+		ClientPacketListener clientPacketListener = this.minecraft.player.connection;
 
 		for (UUID uUID : collection) {
-			PlayerInfo playerInfo = this.minecraft.player.connection.getPlayerInfo(uUID);
+			PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(uUID);
 			if (playerInfo != null) {
-				this.players
-					.add(
-						new PlayerEntry(
-							this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation
-						)
-					);
+				UUID uUID2 = playerInfo.getProfile().getId();
+				map.put(uUID2, new PlayerEntry(this.minecraft, this.socialInteractionsScreen, uUID2, playerInfo.getProfile().getName(), playerInfo::getSkinLocation));
 			}
 		}
-
-		this.players.sort((playerEntry, playerEntry2) -> playerEntry.getPlayerName().compareToIgnoreCase(playerEntry2.getPlayerName()));
 	}
 
-	private void addPlayersFromLog(Collection<UUID> collection) {
+	private void updatePlayersFromChatLog(Map<UUID, PlayerEntry> map, boolean bl) {
 		for (GameProfile gameProfile : this.minecraft.getReportingContext().chatLog().selectAllDescending().distinctGameProfiles()) {
-			if (!collection.contains(gameProfile.getId())) {
-				PlayerEntry playerEntry = new PlayerEntry(
-					this.minecraft,
-					this.socialInteractionsScreen,
+			PlayerEntry playerEntry;
+			if (bl) {
+				playerEntry = (PlayerEntry)map.computeIfAbsent(
 					gameProfile.getId(),
-					gameProfile.getName(),
-					Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile))
+					uUID -> {
+						PlayerEntry playerEntryx = new PlayerEntry(
+							this.minecraft,
+							this.socialInteractionsScreen,
+							gameProfile.getId(),
+							gameProfile.getName(),
+							Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile))
+						);
+						playerEntryx.setRemoved(true);
+						return playerEntryx;
+					}
 				);
-				playerEntry.setRemoved(true);
-				this.players.add(playerEntry);
+			} else {
+				playerEntry = (PlayerEntry)map.get(gameProfile.getId());
+				if (playerEntry == null) {
+					continue;
+				}
 			}
+
+			playerEntry.setHasRecentMessages(true);
 		}
 	}
 
-	private void updateFiltersAndScroll(double d) {
+	private void sortPlayerEntries() {
+		this.players.sort(Comparator.comparing(playerEntry -> {
+			if (playerEntry.getPlayerId().equals(this.minecraft.getUser().getProfileId())) {
+				return 0;
+			} else if (playerEntry.getPlayerId().version() == 2) {
+				return 3;
+			} else {
+				return playerEntry.hasRecentMessages() ? 1 : 2;
+			}
+		}).thenComparing(playerEntry -> {
+			int i = playerEntry.getPlayerName().codePointAt(0);
+			return i != 95 && (i < 97 || i > 122) && (i < 65 || i > 90) && (i < 48 || i > 57) ? 1 : 0;
+		}).thenComparing(PlayerEntry::getPlayerName, String::compareToIgnoreCase));
+	}
+
+	private void updateFiltersAndScroll(Collection<PlayerEntry> collection, double d) {
+		this.players.clear();
+		this.players.addAll(collection);
+		this.sortPlayerEntries();
 		this.updateFilteredPlayers();
 		this.replaceEntries(this.players);
 		this.setScrollAmount(d);

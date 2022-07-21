@@ -13,6 +13,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.SignedMessageValidator;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CryptException;
@@ -41,8 +42,9 @@ public class PlayerInfo {
 	private long renderVisibilityId;
 	@Nullable
 	private final ProfilePublicKey profilePublicKey;
+	private final SignedMessageValidator messageValidator;
 
-	public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, SignatureValidator signatureValidator) {
+	public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, SignatureValidator signatureValidator, boolean bl) {
 		this.profile = playerUpdate.getProfile();
 		this.gameMode = playerUpdate.getGameMode();
 		this.latency = playerUpdate.getLatency();
@@ -54,11 +56,12 @@ public class PlayerInfo {
 			if (data != null) {
 				profilePublicKey = ProfilePublicKey.createValidated(signatureValidator, this.profile.getId(), data);
 			}
-		} catch (InsecurePublicKeyException | CryptException var5) {
-			LOGGER.error("Failed to retrieve publicKey property for profile {}", this.profile.getId(), var5);
+		} catch (InsecurePublicKeyException | CryptException var6) {
+			LOGGER.error("Failed to retrieve publicKey property for profile {}", this.profile.getId(), var6);
 		}
 
 		this.profilePublicKey = profilePublicKey;
+		this.messageValidator = SignedMessageValidator.create(profilePublicKey, bl);
 	}
 
 	public GameProfile getProfile() {
@@ -68,6 +71,10 @@ public class PlayerInfo {
 	@Nullable
 	public ProfilePublicKey getProfilePublicKey() {
 		return this.profilePublicKey;
+	}
+
+	public SignedMessageValidator getMessageValidator() {
+		return this.messageValidator;
 	}
 
 	@Nullable

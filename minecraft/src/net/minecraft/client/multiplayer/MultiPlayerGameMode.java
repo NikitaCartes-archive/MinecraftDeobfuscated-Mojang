@@ -396,27 +396,31 @@ public class MultiPlayerGameMode {
 
 	public void handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {
 		AbstractContainerMenu abstractContainerMenu = player.containerMenu;
-		NonNullList<Slot> nonNullList = abstractContainerMenu.slots;
-		int l = nonNullList.size();
-		List<ItemStack> list = Lists.<ItemStack>newArrayListWithCapacity(l);
+		if (i != abstractContainerMenu.containerId) {
+			LOGGER.warn("Ignoring click in mismatching container. Click in {}, player has {}.", i, abstractContainerMenu.containerId);
+		} else {
+			NonNullList<Slot> nonNullList = abstractContainerMenu.slots;
+			int l = nonNullList.size();
+			List<ItemStack> list = Lists.<ItemStack>newArrayListWithCapacity(l);
 
-		for (Slot slot : nonNullList) {
-			list.add(slot.getItem().copy());
-		}
-
-		abstractContainerMenu.clicked(j, k, clickType, player);
-		Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-
-		for (int m = 0; m < l; m++) {
-			ItemStack itemStack = (ItemStack)list.get(m);
-			ItemStack itemStack2 = nonNullList.get(m).getItem();
-			if (!ItemStack.matches(itemStack, itemStack2)) {
-				int2ObjectMap.put(m, itemStack2.copy());
+			for (Slot slot : nonNullList) {
+				list.add(slot.getItem().copy());
 			}
-		}
 
-		this.connection
-			.send(new ServerboundContainerClickPacket(i, abstractContainerMenu.getStateId(), j, k, clickType, abstractContainerMenu.getCarried().copy(), int2ObjectMap));
+			abstractContainerMenu.clicked(j, k, clickType, player);
+			Int2ObjectMap<ItemStack> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+
+			for (int m = 0; m < l; m++) {
+				ItemStack itemStack = (ItemStack)list.get(m);
+				ItemStack itemStack2 = nonNullList.get(m).getItem();
+				if (!ItemStack.matches(itemStack, itemStack2)) {
+					int2ObjectMap.put(m, itemStack2.copy());
+				}
+			}
+
+			this.connection
+				.send(new ServerboundContainerClickPacket(i, abstractContainerMenu.getStateId(), j, k, clickType, abstractContainerMenu.getCarried().copy(), int2ObjectMap));
+		}
 	}
 
 	public void handlePlaceRecipe(int i, Recipe<?> recipe, boolean bl) {

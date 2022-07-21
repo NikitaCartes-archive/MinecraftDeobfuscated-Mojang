@@ -1,29 +1,15 @@
 package net.minecraft.client;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
-public class GuiMessage<T> {
-	private final int addedTime;
-	private final T message;
-	private final int id;
-
-	public GuiMessage(int i, T object, int j) {
-		this.message = object;
-		this.addedTime = i;
-		this.id = j;
-	}
-
-	public T getMessage() {
-		return this.message;
-	}
-
-	public int getAddedTime() {
-		return this.addedTime;
-	}
-
-	public int getId() {
-		return this.id;
+public record GuiMessage(int addedTime, Component content, @Nullable MessageSignature headerSignature, @Nullable GuiMessageTag tag) {
+	@Environment(EnvType.CLIENT)
+	public static record Line(int addedTime, FormattedCharSequence content, @Nullable GuiMessageTag tag, boolean endOfEntry) {
 	}
 }

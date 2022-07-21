@@ -144,6 +144,10 @@ public class LoomMenu extends AbstractContainerMenu {
 		}
 	}
 
+	private boolean isValidPatternIndex(int i) {
+		return i >= 0 && i < this.selectablePatterns.size();
+	}
+
 	@Override
 	public void slotsChanged(Container container) {
 		ItemStack itemStack = this.bannerSlot.getItem();
@@ -151,13 +155,14 @@ public class LoomMenu extends AbstractContainerMenu {
 		ItemStack itemStack3 = this.patternSlot.getItem();
 		if (!itemStack.isEmpty() && !itemStack2.isEmpty()) {
 			int i = this.selectedBannerPatternIndex.get();
+			boolean bl = this.isValidPatternIndex(i);
 			List<Holder<BannerPattern>> list = this.selectablePatterns;
 			this.selectablePatterns = this.getSelectablePatterns(itemStack3);
 			Holder<BannerPattern> holder;
 			if (this.selectablePatterns.size() == 1) {
 				this.selectedBannerPatternIndex.set(0);
 				holder = (Holder<BannerPattern>)this.selectablePatterns.get(0);
-			} else if (i == -1) {
+			} else if (!bl) {
 				this.selectedBannerPatternIndex.set(-1);
 				holder = null;
 			} else {
@@ -174,8 +179,8 @@ public class LoomMenu extends AbstractContainerMenu {
 
 			if (holder != null) {
 				CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-				boolean bl = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
-				if (bl) {
+				boolean bl2 = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
+				if (bl2) {
 					this.selectedBannerPatternIndex.set(-1);
 					this.resultSlot.set(ItemStack.EMPTY);
 				} else {

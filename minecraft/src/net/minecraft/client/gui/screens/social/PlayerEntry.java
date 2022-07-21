@@ -13,7 +13,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -41,18 +40,17 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	private final String playerName;
 	private final Supplier<ResourceLocation> skinGetter;
 	private boolean isRemoved;
+	private boolean hasRecentMessages;
+	private final boolean reportingEnabled;
 	@Nullable
 	private Button hideButton;
 	@Nullable
 	private Button showButton;
 	@Nullable
 	private Button reportButton;
-	final Component hideText;
-	final Component showText;
-	final Component reportText;
 	final List<FormattedCharSequence> hideTooltip;
 	final List<FormattedCharSequence> showTooltip;
-	final List<FormattedCharSequence> reportTooltip;
+	List<FormattedCharSequence> reportTooltip;
 	float tooltipHoverTime;
 	private static final Component HIDDEN = Component.translatable("gui.socialInteractions.status_hidden").withStyle(ChatFormatting.ITALIC);
 	private static final Component BLOCKED = Component.translatable("gui.socialInteractions.status_blocked").withStyle(ChatFormatting.ITALIC);
@@ -60,6 +58,9 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	private static final Component HIDDEN_OFFLINE = Component.translatable("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
 	private static final Component BLOCKED_OFFLINE = Component.translatable("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
 	private static final Component REPORT_DISABLED_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report.disabled");
+	private static final Component HIDE_TEXT_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.hide");
+	private static final Component SHOW_TEXT_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.show");
+	private static final Component REPORT_PLAYER_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report");
 	private static final int SKIN_SIZE = 24;
 	private static final int PADDING = 4;
 	private static final int CHAT_TOGGLE_ICON_SIZE = 20;
@@ -77,22 +78,16 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		this.playerName = string;
 		this.skinGetter = supplier;
 		ReportingContext reportingContext = minecraft.getReportingContext();
-		boolean bl = reportingContext.sender().isEnabled();
-		this.hideText = Component.translatable("gui.socialInteractions.tooltip.hide", string);
-		this.showText = Component.translatable("gui.socialInteractions.tooltip.show", string);
-		if (bl) {
-			this.reportText = Component.translatable("gui.socialInteractions.tooltip.report", string);
-		} else {
-			this.reportText = REPORT_DISABLED_TOOLTIP;
-		}
-
-		this.hideTooltip = minecraft.font.split(this.hideText, 150);
-		this.showTooltip = minecraft.font.split(this.showText, 150);
-		this.reportTooltip = minecraft.font.split(this.reportText, 150);
+		this.reportingEnabled = reportingContext.sender().isEnabled();
+		final Component component = Component.translatable("gui.socialInteractions.narration.hide", string);
+		final Component component2 = Component.translatable("gui.socialInteractions.narration.show", string);
+		this.hideTooltip = minecraft.font.split(HIDE_TEXT_TOOLTIP, 150);
+		this.showTooltip = minecraft.font.split(SHOW_TEXT_TOOLTIP, 150);
+		this.reportTooltip = minecraft.font.split(this.getReportButtonText(false), 150);
 		PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
-		boolean bl2 = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
-		boolean bl3 = !minecraft.player.getUUID().equals(uUID);
-		if (bl3 && bl2 && !playerSocialManager.isBlocked(uUID)) {
+		boolean bl = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
+		boolean bl2 = !minecraft.player.getUUID().equals(uUID);
+		if (bl2 && bl && !playerSocialManager.isBlocked(uUID)) {
 			this.reportButton = new ImageButton(
 				0,
 				0,
@@ -118,7 +113,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 
 					@Override
 					public void narrateTooltip(Consumer<Component> consumer) {
-						consumer.accept(PlayerEntry.this.reportText);
+						consumer.accept(PlayerEntry.this.getReportButtonText(true));
 					}
 				},
 				Component.translatable("gui.socialInteractions.report")
@@ -156,7 +151,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 
 					@Override
 					public void narrateTooltip(Consumer<Component> consumer) {
-						consumer.accept(PlayerEntry.this.hideText);
+						consumer.accept(component);
 					}
 				},
 				Component.translatable("gui.socialInteractions.hide")
@@ -194,7 +189,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 
 					@Override
 					public void narrateTooltip(Consumer<Component> consumer) {
-						consumer.accept(PlayerEntry.this.showText);
+						consumer.accept(component2);
 					}
 				},
 				Component.translatable("gui.socialInteractions.show")
@@ -206,10 +201,20 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			};
 			this.showButton.visible = playerSocialManager.isHidden(uUID);
 			this.hideButton.visible = !this.showButton.visible;
-			this.reportButton.active = bl;
+			this.reportButton.active = false;
 			this.children = ImmutableList.of(this.hideButton, this.showButton, this.reportButton);
 		} else {
 			this.children = ImmutableList.of();
+		}
+	}
+
+	Component getReportButtonText(boolean bl) {
+		if (!this.reportingEnabled) {
+			return REPORT_DISABLED_TOOLTIP;
+		} else if (!this.hasRecentMessages) {
+			return Component.translatable("gui.socialInteractions.tooltip.report.no_messages", this.playerName);
+		} else {
+			return (Component)(bl ? Component.translatable("gui.socialInteractions.narration.report", this.playerName) : REPORT_PLAYER_TOOLTIP);
 		}
 	}
 
@@ -275,11 +280,28 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		this.isRemoved = bl;
 	}
 
+	public boolean isRemoved() {
+		return this.isRemoved;
+	}
+
+	public void setHasRecentMessages(boolean bl) {
+		this.hasRecentMessages = bl;
+		if (this.reportButton != null) {
+			this.reportButton.active = this.reportingEnabled && bl;
+		}
+
+		this.reportTooltip = this.minecraft.font.split(this.getReportButtonText(false), 150);
+	}
+
+	public boolean hasRecentMessages() {
+		return this.hasRecentMessages;
+	}
+
 	private void onHiddenOrShown(boolean bl, Component component) {
 		this.showButton.visible = bl;
 		this.hideButton.visible = !bl;
 		this.minecraft.gui.getChat().addMessage(component);
-		NarratorChatListener.INSTANCE.sayNow(component);
+		this.minecraft.getNarrator().sayNow(component);
 	}
 
 	MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {

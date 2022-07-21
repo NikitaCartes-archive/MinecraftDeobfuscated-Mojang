@@ -11,6 +11,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
@@ -19,7 +21,8 @@ import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.multiplayer.chat.LoggedChat;
+import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
+import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.client.multiplayer.chat.report.ChatReportBuilder;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.locale.Language;
@@ -43,7 +46,7 @@ public class ChatSelectionScreen extends Screen {
 	private ChatSelectionScreen.ChatSelectionList chatSelectionList;
 	final ChatReportBuilder report;
 	private final Consumer<ChatReportBuilder> onSelected;
-	private ChatSelectionLogFiller chatLogFiller;
+	private ChatSelectionLogFiller<LoggedChatMessage.Player> chatLogFiller;
 	@Nullable
 	private List<FormattedCharSequence> tooltip;
 
@@ -59,7 +62,7 @@ public class ChatSelectionScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.chatLogFiller = new ChatSelectionLogFiller(this.reportingContext.chatLog(), this::canReport);
+		this.chatLogFiller = new ChatSelectionLogFiller<>(this.reportingContext.chatLog(), this::canReport, LoggedChatMessage.Player.class);
 		this.contextInfoLabel = MultiLineLabel.create(this.font, CONTEXT_INFO, this.width - 16);
 		this.chatSelectionList = new ChatSelectionScreen.ChatSelectionList(this.minecraft, (this.contextInfoLabel.getLineCount() + 1) * 9);
 		this.chatSelectionList.setRenderBackground(false);
@@ -76,8 +79,8 @@ public class ChatSelectionScreen extends Screen {
 		this.chatSelectionList.setScrollAmount((double)this.chatSelectionList.getMaxScroll());
 	}
 
-	private boolean canReport(LoggedChat loggedChat) {
-		return loggedChat.canReport(this.report.reportedProfileId());
+	private boolean canReport(LoggedChatMessage loggedChatMessage) {
+		return loggedChatMessage.canReport(this.report.reportedProfileId());
 	}
 
 	private void extendLog() {
@@ -126,7 +129,9 @@ public class ChatSelectionScreen extends Screen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public class ChatSelectionList extends ObjectSelectionList<ChatSelectionScreen.ChatSelectionList.Entry> implements ChatSelectionLogFiller.Output {
+	public class ChatSelectionList
+		extends ObjectSelectionList<ChatSelectionScreen.ChatSelectionList.Entry>
+		implements ChatSelectionLogFiller.Output<LoggedChatMessage.Player> {
 		@Nullable
 		private ChatSelectionScreen.ChatSelectionList.Heading previousHeading;
 
@@ -143,22 +148,18 @@ public class ChatSelectionScreen extends Screen {
 			}
 		}
 
-		@Override
-		public void acceptMessage(int i, LoggedChat loggedChat) {
-			Component component = loggedChat.toContentComponent();
-			Component component2 = loggedChat.toNarrationComponent();
-			boolean bl = loggedChat.canReport(ChatSelectionScreen.this.report.reportedProfileId());
-			if (loggedChat instanceof LoggedChat.Player player) {
-				ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageEntry(i, component, component2, bl, true);
-				this.addEntryToTop(entry);
-				this.updateHeading(player, bl);
-			} else {
-				this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.MessageEntry(i, component, component2, bl, false));
-				this.previousHeading = null;
-			}
+		public void acceptMessage(int i, LoggedChatMessage.Player player) {
+			boolean bl = player.canReport(ChatSelectionScreen.this.report.reportedProfileId());
+			ChatTrustLevel chatTrustLevel = player.trustLevel();
+			GuiMessageTag guiMessageTag = chatTrustLevel.createTag(player.message());
+			ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageEntry(
+				i, player.toContentComponent(), player.toNarrationComponent(), guiMessageTag, bl, true
+			);
+			this.addEntryToTop(entry);
+			this.updateHeading(player, bl);
 		}
 
-		private void updateHeading(LoggedChat.Player player, boolean bl) {
+		private void updateHeading(LoggedChatMessage.Player player, boolean bl) {
 			ChatSelectionScreen.ChatSelectionList.Entry entry = new ChatSelectionScreen.ChatSelectionList.MessageHeadingEntry(
 				player.profile(), player.toHeadingComponent(), bl
 			);
@@ -306,16 +307,27 @@ public class ChatSelectionScreen extends Screen {
 			private static final int CHECKMARK_WIDTH = 9;
 			private static final int CHECKMARK_HEIGHT = 8;
 			private static final int INDENT_AMOUNT = 11;
+			private static final int TAG_MARGIN_LEFT = 4;
 			private final int chatId;
 			private final FormattedText text;
 			private final Component narration;
 			@Nullable
 			private final List<FormattedCharSequence> hoverText;
+			@Nullable
+			private final GuiMessageTag.Icon tagIcon;
+			@Nullable
+			private final List<FormattedCharSequence> tagHoverText;
 			private final boolean canReport;
 			private final boolean playerMessage;
 
-			public MessageEntry(int i, Component component, Component component2, boolean bl, boolean bl2) {
+			public MessageEntry(int i, Component component, Component component2, @Nullable GuiMessageTag guiMessageTag, boolean bl, boolean bl2) {
 				this.chatId = i;
+				this.tagIcon = Util.mapNullable(guiMessageTag, GuiMessageTag::icon);
+				this.tagHoverText = guiMessageTag != null && guiMessageTag.text() != null
+					? ChatSelectionScreen.this.font.split(guiMessageTag.text(), ChatSelectionList.this.getRowWidth())
+					: null;
+				this.canReport = bl;
+				this.playerMessage = bl2;
 				FormattedText formattedText = ChatSelectionScreen.this.font
 					.substrByWidth(component, this.getMaximumTextWidth() - ChatSelectionScreen.this.font.width(CommonComponents.ELLIPSIS));
 				if (component != formattedText) {
@@ -327,8 +339,6 @@ public class ChatSelectionScreen extends Screen {
 				}
 
 				this.narration = component2;
-				this.canReport = bl;
-				this.playerMessage = bl2;
 			}
 
 			@Override
@@ -343,6 +353,19 @@ public class ChatSelectionScreen extends Screen {
 				if (this.hoverText != null && bl) {
 					ChatSelectionScreen.this.setTooltip(this.hoverText);
 				}
+
+				int r = ChatSelectionScreen.this.font.width(this.text);
+				this.renderTag(poseStack, p + r + 4, j, m, n, o);
+			}
+
+			private void renderTag(PoseStack poseStack, int i, int j, int k, int l, int m) {
+				if (this.tagIcon != null) {
+					int n = j + (k - this.tagIcon.height) / 2;
+					this.tagIcon.draw(poseStack, i, n);
+					if (this.tagHoverText != null && l >= i && l <= i + this.tagIcon.width && m >= n && m <= n + this.tagIcon.height) {
+						ChatSelectionScreen.this.setTooltip(this.tagHoverText);
+					}
+				}
 			}
 
 			private void renderSelectedCheckmark(PoseStack poseStack, int i, int j, int k) {
@@ -354,7 +377,8 @@ public class ChatSelectionScreen extends Screen {
 			}
 
 			private int getMaximumTextWidth() {
-				return ChatSelectionList.this.getRowWidth() - this.getTextIndent();
+				int i = this.tagIcon != null ? this.tagIcon.width + 4 : 0;
+				return ChatSelectionList.this.getRowWidth() - this.getTextIndent() - 4 - i;
 			}
 
 			private int getTextIndent() {

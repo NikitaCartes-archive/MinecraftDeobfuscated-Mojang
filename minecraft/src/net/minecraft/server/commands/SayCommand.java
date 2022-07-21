@@ -19,10 +19,10 @@ public class SayCommand {
 								MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
 								CommandSourceStack commandSourceStack = commandContext.getSource();
 								PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-								chatMessage.resolve(commandSourceStack)
-									.thenAcceptAsync(
-										filteredText -> playerList.broadcastChatMessage(filteredText, commandSourceStack, ChatType.SAY_COMMAND), commandSourceStack.getServer()
-									);
+								chatMessage.resolve(
+									commandSourceStack,
+									filteredText -> playerList.broadcastChatMessage(filteredText, commandSourceStack, ChatType.bind(ChatType.SAY_COMMAND, commandSourceStack))
+								);
 								return 1;
 							}
 						)

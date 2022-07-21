@@ -11,23 +11,16 @@ public interface ChatDecorator {
 
 	CompletableFuture<Component> decorate(@Nullable ServerPlayer serverPlayer, Component component);
 
-	default CompletableFuture<FilteredText<Component>> decorateFiltered(@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText) {
-		CompletableFuture<Component> completableFuture = this.decorate(serverPlayer, filteredText.raw());
-		if (!filteredText.isFiltered()) {
-			return completableFuture.thenApply(FilteredText::passThrough);
-		} else if (filteredText.filtered() == null) {
-			return completableFuture.thenApply(FilteredText::fullyFiltered);
-		} else {
-			CompletableFuture<Component> completableFuture2 = this.decorate(serverPlayer, filteredText.filtered());
-			return CompletableFuture.allOf(completableFuture, completableFuture2)
-				.thenApply(void_ -> new FilteredText<>((Component)completableFuture.join(), (Component)completableFuture2.join()));
-		}
+	default CompletableFuture<FilteredText<Component>> rebuildFiltered(
+		@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText, Component component
+	) {
+		return filteredText.rebuildIfNeededAsync(component, componentx -> this.decorate(serverPlayer, componentx));
 	}
 
-	default CompletableFuture<FilteredText<PlayerChatMessage>> decorateChat(
-		@Nullable ServerPlayer serverPlayer, FilteredText<Component> filteredText, MessageSignature messageSignature, boolean bl
-	) {
-		return this.decorateFiltered(serverPlayer, filteredText)
-			.thenApply(filteredText2 -> PlayerChatMessage.filteredSigned(filteredText, filteredText2, messageSignature, bl));
+	static FilteredText<PlayerChatMessage> attachUnsignedDecoration(FilteredText<PlayerChatMessage> filteredText, FilteredText<Component> filteredText2) {
+		return filteredText.map(
+			playerChatMessage -> playerChatMessage.withUnsignedContent(filteredText2.raw()),
+			playerChatMessage -> filteredText2.filtered() != null ? playerChatMessage.withUnsignedContent(filteredText2.filtered()) : playerChatMessage
+		);
 	}
 }

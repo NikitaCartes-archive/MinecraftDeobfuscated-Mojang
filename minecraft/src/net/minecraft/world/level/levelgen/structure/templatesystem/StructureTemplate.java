@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -795,7 +796,7 @@ public class StructureTemplate {
 		}
 
 		public String toString() {
-			return String.format("<StructureBlockInfo | %s | %s | %s>", this.pos, this.state, this.nbt);
+			return String.format(Locale.ROOT, "<StructureBlockInfo | %s | %s | %s>", this.pos, this.state, this.nbt);
 		}
 	}
 

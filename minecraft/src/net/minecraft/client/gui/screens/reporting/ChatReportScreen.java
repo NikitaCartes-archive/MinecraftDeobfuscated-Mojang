@@ -151,7 +151,7 @@ public class ChatReportScreen extends Screen {
 	}
 
 	private void sendReport() {
-		this.report.build(this.reportingContext).left().ifPresent(result -> {
+		this.report.build(this.reportingContext).ifLeft(result -> {
 			CompletableFuture<?> completableFuture = this.reportingContext.sender().send(result.id(), result.report());
 			this.minecraft.setScreen(GenericWaitingScreen.createWaiting(REPORT_SENDING_TITLE, CommonComponents.GUI_CANCEL, () -> {
 				this.minecraft.setScreen(this);
@@ -170,7 +170,7 @@ public class ChatReportScreen extends Screen {
 
 				return null;
 			}, this.minecraft);
-		});
+		}).ifRight(cannotBuildReason -> this.displayReportSendError(cannotBuildReason.message()));
 	}
 
 	private void onReportSendSuccess() {
@@ -187,6 +187,10 @@ public class ChatReportScreen extends Screen {
 			component = REPORT_SEND_GENERIC_ERROR;
 		}
 
+		this.displayReportSendError(component);
+	}
+
+	private void displayReportSendError(Component component) {
 		Component component2 = component.copy().withStyle(ChatFormatting.RED);
 		this.minecraft
 			.setScreen(GenericWaitingScreen.createCompleted(REPORT_ERROR_TITLE, component2, CommonComponents.GUI_BACK, () -> this.minecraft.setScreen(this)));

@@ -22,37 +22,42 @@ public record ChatTypeDecoration(String translationKey, List<ChatTypeDecoration.
 		return new ChatTypeDecoration(string, List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), Style.EMPTY);
 	}
 
-	public static ChatTypeDecoration directMessage(String string) {
+	public static ChatTypeDecoration incomingDirectMessage(String string) {
 		Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true);
 		return new ChatTypeDecoration(string, List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), style);
 	}
 
+	public static ChatTypeDecoration outgoingDirectMessage(String string) {
+		Style style = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true);
+		return new ChatTypeDecoration(string, List.of(ChatTypeDecoration.Parameter.TARGET, ChatTypeDecoration.Parameter.CONTENT), style);
+	}
+
 	public static ChatTypeDecoration teamMessage(String string) {
 		return new ChatTypeDecoration(
-			string, List.of(ChatTypeDecoration.Parameter.TEAM_NAME, ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), Style.EMPTY
+			string, List.of(ChatTypeDecoration.Parameter.TARGET, ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT), Style.EMPTY
 		);
 	}
 
-	public Component decorate(Component component, @Nullable ChatSender chatSender) {
-		Object[] objects = this.resolveParameters(component, chatSender);
+	public Component decorate(Component component, ChatType.Bound bound) {
+		Object[] objects = this.resolveParameters(component, bound);
 		return Component.translatable(this.translationKey, objects).withStyle(this.style);
 	}
 
-	private Component[] resolveParameters(Component component, @Nullable ChatSender chatSender) {
+	private Component[] resolveParameters(Component component, ChatType.Bound bound) {
 		Component[] components = new Component[this.parameters.size()];
 
 		for (int i = 0; i < components.length; i++) {
 			ChatTypeDecoration.Parameter parameter = (ChatTypeDecoration.Parameter)this.parameters.get(i);
-			components[i] = parameter.select(component, chatSender);
+			components[i] = parameter.select(component, bound);
 		}
 
 		return components;
 	}
 
 	public static enum Parameter implements StringRepresentable {
-		SENDER("sender", (component, chatSender) -> chatSender != null ? chatSender.name() : null),
-		TEAM_NAME("team_name", (component, chatSender) -> chatSender != null ? chatSender.teamName() : null),
-		CONTENT("content", (component, chatSender) -> component);
+		SENDER("sender", (component, bound) -> bound.name()),
+		TARGET("target", (component, bound) -> bound.targetName()),
+		CONTENT("content", (component, bound) -> component);
 
 		public static final Codec<ChatTypeDecoration.Parameter> CODEC = StringRepresentable.fromEnum(ChatTypeDecoration.Parameter::values);
 		private final String name;
@@ -63,8 +68,8 @@ public record ChatTypeDecoration(String translationKey, List<ChatTypeDecoration.
 			this.selector = selector;
 		}
 
-		public Component select(Component component, @Nullable ChatSender chatSender) {
-			Component component2 = this.selector.select(component, chatSender);
+		public Component select(Component component, ChatType.Bound bound) {
+			Component component2 = this.selector.select(component, bound);
 			return (Component)Objects.requireNonNullElse(component2, CommonComponents.EMPTY);
 		}
 
@@ -75,7 +80,7 @@ public record ChatTypeDecoration(String translationKey, List<ChatTypeDecoration.
 
 		public interface Selector {
 			@Nullable
-			Component select(Component component, @Nullable ChatSender chatSender);
+			Component select(Component component, ChatType.Bound bound);
 		}
 	}
 }

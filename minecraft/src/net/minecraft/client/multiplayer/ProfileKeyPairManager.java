@@ -10,19 +10,20 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.time.DateTimeException;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
@@ -50,17 +51,21 @@ public class ProfileKeyPairManager {
 		return CompletableFuture.supplyAsync(() -> {
 			Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired());
 			if (optional.isPresent() && !((ProfileKeyPair)optional.get()).dueRefresh()) {
-				return optional;
-			} else {
-				try {
-					ProfileKeyPair profileKeyPair = this.fetchProfileKeyPair(userApiService);
-					this.writeProfileKeyPair(profileKeyPair);
-					return Optional.of(profileKeyPair);
-				} catch (CryptException | MinecraftClientException | IOException var4) {
-					LOGGER.error("Failed to retrieve profile key pair", (Throwable)var4);
-					this.writeProfileKeyPair(null);
+				if (SharedConstants.IS_RUNNING_IN_IDE) {
 					return optional;
 				}
+
+				this.writeProfileKeyPair(null);
+			}
+
+			try {
+				ProfileKeyPair profileKeyPair = this.fetchProfileKeyPair(userApiService);
+				this.writeProfileKeyPair(profileKeyPair);
+				return Optional.of(profileKeyPair);
+			} catch (CryptException | MinecraftClientException | IOException var4) {
+				LOGGER.error("Failed to retrieve profile key pair", (Throwable)var4);
+				this.writeProfileKeyPair(null);
+				return optional;
 			}
 		}, Util.backgroundExecutor());
 	}
@@ -107,14 +112,16 @@ public class ProfileKeyPairManager {
 		}
 
 		if (profileKeyPair != null) {
-			ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, profileKeyPair).result().ifPresent(jsonElement -> {
-				try {
-					Files.createDirectories(this.profileKeyPairPath.getParent());
-					Files.writeString(this.profileKeyPairPath, jsonElement.toString());
-				} catch (Exception var3x) {
-					LOGGER.error("Failed to write profile key pair file {}", this.profileKeyPairPath, var3x);
-				}
-			});
+			if (SharedConstants.IS_RUNNING_IN_IDE) {
+				ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, profileKeyPair).result().ifPresent(jsonElement -> {
+					try {
+						Files.createDirectories(this.profileKeyPairPath.getParent());
+						Files.writeString(this.profileKeyPairPath, jsonElement.toString());
+					} catch (Exception var3x) {
+						LOGGER.error("Failed to write profile key pair file {}", this.profileKeyPairPath, var3x);
+					}
+				});
+			}
 		}
 	}
 
@@ -131,12 +138,14 @@ public class ProfileKeyPairManager {
 	}
 
 	private static ProfilePublicKey.Data parsePublicKey(KeyPairResponse keyPairResponse) throws CryptException {
-		if (!Strings.isNullOrEmpty(keyPairResponse.getPublicKey()) && !Strings.isNullOrEmpty(keyPairResponse.getPublicKeySignature())) {
+		if (!Strings.isNullOrEmpty(keyPairResponse.getPublicKey())
+			&& keyPairResponse.getPublicKeySignature() != null
+			&& keyPairResponse.getPublicKeySignature().array().length != 0) {
 			try {
 				Instant instant = Instant.parse(keyPairResponse.getExpiresAt());
 				PublicKey publicKey = Crypt.stringToRsaPublicKey(keyPairResponse.getPublicKey());
-				byte[] bs = Base64.getDecoder().decode(keyPairResponse.getPublicKeySignature());
-				return new ProfilePublicKey.Data(instant, publicKey, bs);
+				ByteBuffer byteBuffer = keyPairResponse.getPublicKeySignature();
+				return new ProfilePublicKey.Data(instant, publicKey, byteBuffer.array());
 			} catch (IllegalArgumentException | DateTimeException var4) {
 				throw new CryptException(var4);
 			}

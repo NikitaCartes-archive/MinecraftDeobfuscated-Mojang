@@ -13,17 +13,17 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3109;
+	public static final int WORLD_VERSION = 3115;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "1.19.1-rc1";
+	public static final String VERSION_STRING = "1.19.1-rc2";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.19.1";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 760;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 94;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 100;
 	public static final int SNBT_NAG_VERSION = 3075;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = false;
@@ -115,6 +115,7 @@ public class SharedConstants {
 	public static final int MAX_CHAT_LENGTH = 256;
 	public static final int MAX_COMMAND_LENGTH = 32500;
 	public static final int MAX_CHAINED_NEIGHBOR_UPDATES = 1000000;
+	public static final int MAX_RENDER_DISTANCE = 32;
 	public static final char[] ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
 	public static final int TICKS_PER_SECOND = 20;
 	public static final int TICKS_PER_MINUTE = 1200;
@@ -170,7 +171,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741918;
+		return 1073741924;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

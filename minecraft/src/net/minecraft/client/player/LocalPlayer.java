@@ -1,14 +1,11 @@
 package net.minecraft.client.player;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.logging.LogUtils;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
@@ -39,12 +36,13 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
+import net.minecraft.network.chat.PreviewableCommand;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -58,7 +56,6 @@ import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -66,6 +63,7 @@ import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Signer;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -306,78 +304,87 @@ public class LocalPlayer extends AbstractClientPlayer {
 		return !itemStack.isEmpty();
 	}
 
-	public void chatSigned(String string) {
-		this.chatSigned(string, null);
-	}
-
 	public void chatSigned(String string, @Nullable Component component) {
-		MessageSigner messageSigner = MessageSigner.create(this.getUUID());
-		this.sendChat(messageSigner, string, component);
+		this.sendChat(string, component);
 	}
 
-	public void commandUnsigned(String string) {
-		this.connection.send(new ServerboundChatCommandPacket(string, Instant.now(), ArgumentSignatures.empty(), false));
+	public boolean commandHasSignableArguments(String string) {
+		ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, this.connection.getSuggestionsProvider());
+		return ArgumentSignatures.hasSignableArguments(PreviewableCommand.of(parseResults));
+	}
+
+	public boolean commandUnsigned(String string) {
+		if (!this.commandHasSignableArguments(string)) {
+			LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
+			this.connection.send(new ServerboundChatCommandPacket(string, Instant.now(), 0L, ArgumentSignatures.EMPTY, false, update));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void commandSigned(String string, @Nullable Component component) {
-		MessageSigner messageSigner = MessageSigner.create(this.getUUID());
-		this.sendCommand(messageSigner, string, component);
+		this.sendCommand(string, component);
 	}
 
-	private void sendChat(MessageSigner messageSigner, String string, @Nullable Component component) {
+	private void sendChat(String string, @Nullable Component component) {
+		String string2 = StringUtil.trimChatMessage(string);
+		MessageSigner messageSigner = this.createMessageSigner();
+		LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
 		if (component != null) {
-			MessageSignature messageSignature = this.signMessage(messageSigner, component);
-			this.connection.send(new ServerboundChatPacket(string, messageSignature, true));
+			ChatMessageContent chatMessageContent = new ChatMessageContent(string2, component);
+			MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
+			this.connection.send(new ServerboundChatPacket(string2, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, true, update));
 		} else {
-			MessageSignature messageSignature = this.signMessage(messageSigner, Component.literal(string));
-			this.connection.send(new ServerboundChatPacket(string, messageSignature, false));
+			ChatMessageContent chatMessageContent = new ChatMessageContent(string2);
+			MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
+			this.connection.send(new ServerboundChatPacket(string2, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, false, update));
 		}
 	}
 
-	private MessageSignature signMessage(MessageSigner messageSigner, Component component) {
+	private MessageSignature signMessage(MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages) {
 		try {
 			Signer signer = this.minecraft.getProfileKeyPairManager().signer();
 			if (signer != null) {
-				return messageSigner.sign(signer, component);
+				return this.connection.signedMessageEncoder().pack(signer, messageSigner, chatMessageContent, lastSeenMessages).signature();
 			}
-		} catch (Exception var4) {
-			LOGGER.error("Failed to sign chat message: '{}'", component.getString(), var4);
+		} catch (Exception var5) {
+			LOGGER.error("Failed to sign chat message: '{}'", chatMessageContent.plain(), var5);
 		}
 
-		return MessageSignature.unsigned();
+		return MessageSignature.EMPTY;
 	}
 
-	private void sendCommand(MessageSigner messageSigner, String string, @Nullable Component component) {
+	private void sendCommand(String string, @Nullable Component component) {
 		ParseResults<SharedSuggestionProvider> parseResults = this.connection.getCommands().parse(string, this.connection.getSuggestionsProvider());
-		ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults, component);
-		this.connection.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), argumentSignatures, component != null));
+		MessageSigner messageSigner = this.createMessageSigner();
+		LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
+		ArgumentSignatures argumentSignatures = this.signCommandArguments(messageSigner, parseResults, component, update.lastSeen());
+		this.connection
+			.send(new ServerboundChatCommandPacket(string, messageSigner.timeStamp(), messageSigner.salt(), argumentSignatures, component != null, update));
 	}
 
 	private ArgumentSignatures signCommandArguments(
-		MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults, @Nullable Component component
+		MessageSigner messageSigner, ParseResults<SharedSuggestionProvider> parseResults, @Nullable Component component, LastSeenMessages lastSeenMessages
 	) {
-		Map<String, Component> map = ArgumentSignatures.collectLastChildPlainSignableComponents(parseResults.getContext());
-		if (map.isEmpty()) {
-			return ArgumentSignatures.empty();
+		Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+		if (signer == null) {
+			return ArgumentSignatures.EMPTY;
 		} else {
-			Signer signer = this.minecraft.getProfileKeyPairManager().signer();
-			if (signer == null) {
-				return ArgumentSignatures.empty();
-			} else {
-				try {
-					Builder<String, byte[]> builder = ImmutableMap.builder();
-					map.forEach((string, component2) -> {
-						Component component3 = component != null ? component : component2;
-						MessageSignature messageSignature = messageSigner.sign(signer, component3);
-						builder.put(string, messageSignature.saltSignature().signature());
-					});
-					return new ArgumentSignatures(messageSigner.salt(), builder.build());
-				} catch (Exception var7) {
-					LOGGER.error("Failed to sign command arguments", (Throwable)var7);
-					return ArgumentSignatures.empty();
-				}
+			try {
+				return ArgumentSignatures.signCommand(PreviewableCommand.of(parseResults), (string, string2) -> {
+					ChatMessageContent chatMessageContent = component != null ? new ChatMessageContent(string2, component) : new ChatMessageContent(string2);
+					return this.connection.signedMessageEncoder().pack(signer, messageSigner, chatMessageContent, lastSeenMessages).signature();
+				});
+			} catch (Exception var7) {
+				LOGGER.error("Failed to sign command arguments", (Throwable)var7);
+				return ArgumentSignatures.EMPTY;
 			}
 		}
+	}
+
+	private MessageSigner createMessageSigner() {
+		return MessageSigner.create(this.getUUID());
 	}
 
 	@Override
@@ -499,12 +506,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public void displayClientMessage(Component component, boolean bl) {
-		ResourceKey<ChatType> resourceKey = bl ? ChatType.GAME_INFO : ChatType.SYSTEM;
-		this.level
-			.registryAccess()
-			.registry(Registry.CHAT_TYPE_REGISTRY)
-			.map(registry -> registry.get(resourceKey))
-			.ifPresent(chatType -> this.minecraft.gui.handleSystemChat(chatType, component));
+		this.minecraft.getChatListener().handleSystemMessage(component, bl);
 	}
 
 	private void moveTowardsClosestSpace(double d, double e) {

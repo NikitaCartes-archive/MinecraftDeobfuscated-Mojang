@@ -6,8 +6,6 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -74,9 +72,7 @@ public class ServerWatchdog implements Runnable {
 							.collect(Collectors.joining(",\n")))
 				);
 				Bootstrap.realStdoutPrintln("Crash report:\n" + crashReport.getFriendlyReport());
-				File file = new File(
-					new File(this.server.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt"
-				);
+				File file = new File(new File(this.server.getServerDirectory(), "crash-reports"), "crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
 				if (crashReport.saveToFile(file)) {
 					LOGGER.error("This crash report has been saved to: {}", file.getAbsolutePath());
 				} else {

@@ -169,7 +169,12 @@ public class InputConstants {
 			for (InputConstants.Type type : InputConstants.Type.values()) {
 				if (string.startsWith(type.defaultPrefix)) {
 					String string2 = string.substring(type.defaultPrefix.length() + 1);
-					return type.getOrCreate(Integer.parseInt(string2));
+					int i = Integer.parseInt(string2);
+					if (type == InputConstants.Type.MOUSE) {
+						i--;
+					}
+
+					return type.getOrCreate(i);
 				}
 			}
 

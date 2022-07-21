@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -208,7 +209,13 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		if (bl) {
 			int j = brainDump.health < brainDump.maxHealth ? -23296 : -1;
-			renderTextOverMob(brainDump.pos, i, "health: " + String.format("%.1f", brainDump.health) + " / " + String.format("%.1f", brainDump.maxHealth), j, 0.02F);
+			renderTextOverMob(
+				brainDump.pos,
+				i,
+				"health: " + String.format(Locale.ROOT, "%.1f", brainDump.health) + " / " + String.format(Locale.ROOT, "%.1f", brainDump.maxHealth),
+				j,
+				0.02F
+			);
 			i++;
 		}
 

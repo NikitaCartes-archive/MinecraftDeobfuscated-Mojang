@@ -37,8 +37,10 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
+import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -62,6 +64,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
@@ -122,6 +125,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPreviewPacket;
@@ -213,8 +217,10 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundContainerSetDataPacket.class, ClientboundContainerSetDataPacket::new)
 					.addPacket(ClientboundContainerSetSlotPacket.class, ClientboundContainerSetSlotPacket::new)
 					.addPacket(ClientboundCooldownPacket.class, ClientboundCooldownPacket::new)
+					.addPacket(ClientboundCustomChatCompletionsPacket.class, ClientboundCustomChatCompletionsPacket::new)
 					.addPacket(ClientboundCustomPayloadPacket.class, ClientboundCustomPayloadPacket::new)
 					.addPacket(ClientboundCustomSoundPacket.class, ClientboundCustomSoundPacket::new)
+					.addPacket(ClientboundDeleteChatPacket.class, ClientboundDeleteChatPacket::new)
 					.addPacket(ClientboundDisconnectPacket.class, ClientboundDisconnectPacket::new)
 					.addPacket(ClientboundEntityEventPacket.class, ClientboundEntityEventPacket::new)
 					.addPacket(ClientboundExplodePacket.class, ClientboundExplodePacket::new)
@@ -240,6 +246,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundPingPacket.class, ClientboundPingPacket::new)
 					.addPacket(ClientboundPlaceGhostRecipePacket.class, ClientboundPlaceGhostRecipePacket::new)
 					.addPacket(ClientboundPlayerAbilitiesPacket.class, ClientboundPlayerAbilitiesPacket::new)
+					.addPacket(ClientboundPlayerChatHeaderPacket.class, ClientboundPlayerChatHeaderPacket::new)
 					.addPacket(ClientboundPlayerChatPacket.class, ClientboundPlayerChatPacket::new)
 					.addPacket(ClientboundPlayerCombatEndPacket.class, ClientboundPlayerCombatEndPacket::new)
 					.addPacket(ClientboundPlayerCombatEnterPacket.class, ClientboundPlayerCombatEnterPacket::new)
@@ -304,6 +311,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundAcceptTeleportationPacket.class, ServerboundAcceptTeleportationPacket::new)
 					.addPacket(ServerboundBlockEntityTagQuery.class, ServerboundBlockEntityTagQuery::new)
 					.addPacket(ServerboundChangeDifficultyPacket.class, ServerboundChangeDifficultyPacket::new)
+					.addPacket(ServerboundChatAckPacket.class, ServerboundChatAckPacket::new)
 					.addPacket(ServerboundChatCommandPacket.class, ServerboundChatCommandPacket::new)
 					.addPacket(ServerboundChatPacket.class, ServerboundChatPacket::new)
 					.addPacket(ServerboundChatPreviewPacket.class, ServerboundChatPreviewPacket::new)

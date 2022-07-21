@@ -22,7 +22,7 @@ public class ReportReasonSelectionScreen extends Screen {
 	private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
 	private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
 	private static final Component READ_INFO_LABEL = Component.translatable("gui.chatReport.read_info");
-	private static final int FOOTER_HEIGHT = 85;
+	private static final int FOOTER_HEIGHT = 95;
 	private static final int BUTTON_WIDTH = 150;
 	private static final int BUTTON_HEIGHT = 20;
 	private static final int CONTENT_WIDTH = 320;
@@ -32,13 +32,13 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Nullable
 	private ReportReasonSelectionScreen.ReasonSelectionList reasonSelectionList;
 	@Nullable
-	private final ReportReason selectedReasonOnInit;
+	ReportReason currentlySelectedReason;
 	private final Consumer<ReportReason> onSelectedReason;
 
 	public ReportReasonSelectionScreen(@Nullable Screen screen, @Nullable ReportReason reportReason, Consumer<ReportReason> consumer) {
 		super(REASON_TITLE);
 		this.lastScreen = screen;
-		this.selectedReasonOnInit = reportReason;
+		this.currentlySelectedReason = reportReason;
 		this.onSelectedReason = consumer;
 	}
 
@@ -47,7 +47,7 @@ public class ReportReasonSelectionScreen extends Screen {
 		this.reasonSelectionList = new ReportReasonSelectionScreen.ReasonSelectionList(this.minecraft);
 		this.reasonSelectionList.setRenderBackground(false);
 		this.addWidget(this.reasonSelectionList);
-		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Util.mapNullable(this.selectedReasonOnInit, this.reasonSelectionList::findEntry);
+		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Util.mapNullable(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
 		this.reasonSelectionList.setSelected(entry);
 		int i = this.width / 2 - 150 - 5;
 		this.addRenderableWidget(new Button(i, this.buttonTop(), 150, 20, READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
@@ -103,7 +103,7 @@ public class ReportReasonSelectionScreen extends Screen {
 	}
 
 	private int descriptionTop() {
-		return this.height - 85 + 4;
+		return this.height - 95 + 4;
 	}
 
 	private int descriptionBottom() {
@@ -118,10 +118,12 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public class ReasonSelectionList extends ObjectSelectionList<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
 		public ReasonSelectionList(Minecraft minecraft) {
-			super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height, 40, ReportReasonSelectionScreen.this.height - 85, 18);
+			super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height, 40, ReportReasonSelectionScreen.this.height - 95, 18);
 
 			for (ReportReason reportReason : ReportReason.values()) {
-				this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
+				if (reportReason.reportable()) {
+					this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
+				}
 			}
 		}
 
@@ -142,6 +144,16 @@ public class ReportReasonSelectionScreen extends Screen {
 		@Override
 		protected int getScrollbarPosition() {
 			return this.getRowRight() - 2;
+		}
+
+		@Override
+		protected boolean isFocused() {
+			return ReportReasonSelectionScreen.this.getFocused() == this;
+		}
+
+		public void setSelected(@Nullable ReportReasonSelectionScreen.ReasonSelectionList.Entry entry) {
+			super.setSelected(entry);
+			ReportReasonSelectionScreen.this.currentlySelectedReason = entry != null ? entry.getReason() : null;
 		}
 
 		@Environment(EnvType.CLIENT)

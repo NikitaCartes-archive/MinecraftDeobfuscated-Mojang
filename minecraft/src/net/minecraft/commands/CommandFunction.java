@@ -130,8 +130,7 @@ public class CommandFunction {
 		}
 
 		private int execute(ServerFunctionManager serverFunctionManager, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-			return serverFunctionManager.getDispatcher()
-				.execute(new ParseResults<>(this.parse.getContext().withSource(commandSourceStack), this.parse.getReader(), this.parse.getExceptions()));
+			return serverFunctionManager.getDispatcher().execute(Commands.mapSource(this.parse, commandSourceStack2 -> commandSourceStack));
 		}
 
 		public String toString() {

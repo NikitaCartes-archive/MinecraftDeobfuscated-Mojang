@@ -184,7 +184,7 @@ public class ChaseClient {
 							serverPlayer, Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, "", CommonComponents.EMPTY, this.server, serverPlayer
 						);
 						Commands commands = this.server.getCommands();
-						commands.performCommand(commandSourceStack, string);
+						commands.performPrefixedCommand(commandSourceStack, string);
 					}
 				}
 			);

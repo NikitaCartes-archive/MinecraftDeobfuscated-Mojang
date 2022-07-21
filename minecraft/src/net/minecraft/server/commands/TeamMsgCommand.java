@@ -13,9 +13,10 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 
@@ -27,11 +28,16 @@ public class TeamMsgCommand {
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register(
-			Commands.literal("teammsg")
-				.then(
-					Commands.argument("message", MessageArgument.message())
-						.executes(commandContext -> sendMessage(commandContext.getSource(), MessageArgument.getChatMessage(commandContext, "message")))
-				)
+			Commands.literal("teammsg").then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
+				MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
+
+				try {
+					return sendMessage(commandContext.getSource(), chatMessage);
+				} catch (Exception var3) {
+					chatMessage.consume(commandContext.getSource());
+					throw var3;
+				}
+			}))
 		);
 		commandDispatcher.register(Commands.literal("tm").redirect(literalCommandNode));
 	}
@@ -43,36 +49,32 @@ public class TeamMsgCommand {
 			throw ERROR_NOT_ON_TEAM.create();
 		} else {
 			Component component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
-			ChatSender chatSender = commandSourceStack.asChatSender().withTeamName(component);
+			ChatSender chatSender = commandSourceStack.asChatSender();
+			ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, commandSourceStack).withTargetName(component);
+			ChatType.Bound bound2 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(component);
 			List<ServerPlayer> list = commandSourceStack.getServer()
 				.getPlayerList()
 				.getPlayers()
 				.stream()
 				.filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam)
 				.toList();
-			if (list.isEmpty()) {
-				return 0;
-			} else {
-				chatMessage.resolve(commandSourceStack)
-					.thenAcceptAsync(
-						filteredText -> {
-							for (ServerPlayer serverPlayer : list) {
-								if (serverPlayer == entity) {
-									serverPlayer.sendSystemMessage(
-										Component.translatable("chat.type.team.sent", component, commandSourceStack.getDisplayName(), ((PlayerChatMessage)filteredText.raw()).serverContent())
-									);
-								} else {
-									PlayerChatMessage playerChatMessage = (PlayerChatMessage)filteredText.filter(commandSourceStack, serverPlayer);
-									if (playerChatMessage != null) {
-										serverPlayer.sendChatMessage(playerChatMessage, chatSender, ChatType.TEAM_MSG_COMMAND);
-									}
-								}
-							}
-						},
-						commandSourceStack.getServer()
-					);
-				return list.size();
-			}
+			chatMessage.resolve(commandSourceStack, filteredText -> {
+				FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
+
+				for (ServerPlayer serverPlayer : list) {
+					if (serverPlayer == entity) {
+						serverPlayer.sendChatMessage(filteredText2.raw(), bound2);
+					} else {
+						OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
+						if (outgoingPlayerChatMessage != null) {
+							serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
+						}
+					}
+				}
+
+				filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
+			});
+			return list.size();
 		}
 	}
 }

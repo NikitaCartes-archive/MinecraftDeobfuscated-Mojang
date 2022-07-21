@@ -24,15 +24,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,9 +61,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.ChatDecorator;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -645,6 +642,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.status.setDescription(Component.literal(this.motd));
 			this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
 			this.status.setPreviewsChat(this.previewsChat());
+			this.status.setEnforcesSecureChat(this.enforceSecureProfile());
 			this.updateStatusIcon(this.status);
 
 			while (this.running) {
@@ -678,9 +676,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			LOGGER.error("Encountered an unexpected exception", var44);
 			CrashReport crashReport = constructOrExtractCrashReport(var44);
 			this.fillSystemReport(crashReport.getSystemReport());
-			File file = new File(
-				new File(this.getServerDirectory(), "crash-reports"), "crash-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt"
-			);
+			File file = new File(new File(this.getServerDirectory(), "crash-reports"), "crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
 			if (crashReport.saveToFile(file)) {
 				LOGGER.error("This crash report has been saved to: {}", file.getAbsolutePath());
 			} else {
@@ -1525,10 +1521,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		Writer writer = Files.newBufferedWriter(path);
 
 		try {
-			writer.write(String.format("pending_tasks: %d\n", this.getPendingTasksCount()));
-			writer.write(String.format("average_tick_time: %f\n", this.getAverageTickTime()));
-			writer.write(String.format("tick_times: %s\n", Arrays.toString(this.tickTimes)));
-			writer.write(String.format("queue: %s\n", Util.backgroundExecutor()));
+			writer.write(String.format(Locale.ROOT, "pending_tasks: %d\n", this.getPendingTasksCount()));
+			writer.write(String.format(Locale.ROOT, "average_tick_time: %f\n", this.getAverageTickTime()));
+			writer.write(String.format(Locale.ROOT, "tick_times: %s\n", Arrays.toString(this.tickTimes)));
+			writer.write(String.format(Locale.ROOT, "queue: %s\n", Util.backgroundExecutor()));
 		} catch (Throwable var6) {
 			if (writer != null) {
 				try {
@@ -1555,7 +1551,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
 				@Override
 				public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
-					list.add(String.format("%s=%s\n", key.getId(), gameRules.getRule(key)));
+					list.add(String.format(Locale.ROOT, "%s=%s\n", key.getId(), gameRules.getRule(key)));
 				}
 			});
 
@@ -1801,14 +1797,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return 1000000;
 	}
 
-	public void logChatMessage(ChatSender chatSender, Component component, ResourceKey<ChatType> resourceKey) {
-		ChatTypeDecoration chatTypeDecoration = (ChatTypeDecoration)this.registryAccess()
-			.registry(Registry.CHAT_TYPE_REGISTRY)
-			.map(registry -> registry.get(resourceKey))
-			.flatMap(ChatType::chat)
-			.flatMap(ChatType.TextDisplay::decoration)
-			.orElse(ChatType.DEFAULT_CHAT_DECORATION);
-		LOGGER.info(chatTypeDecoration.decorate(component, chatSender).getString());
+	public void logChatMessage(Component component, ChatType.Bound bound, @Nullable String string) {
+		String string2 = bound.decorate(component).getString();
+		if (string != null) {
+			LOGGER.info("[{}] {}", string, string2);
+		} else {
+			LOGGER.info("{}", string2);
+		}
 	}
 
 	public ChatDecorator getChatDecorator() {
