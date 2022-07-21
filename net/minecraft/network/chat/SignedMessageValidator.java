@@ -11,26 +11,38 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
 
 public interface SignedMessageValidator {
-    public static final SignedMessageValidator ALWAYS_REJECT = new SignedMessageValidator(){
+    public static SignedMessageValidator alwaysReturn(final State state) {
+        return new SignedMessageValidator(){
 
-        @Override
-        public State validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-            return State.NOT_SECURE;
+            @Override
+            public State validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
+                return state;
+            }
+
+            @Override
+            public State validateMessage(PlayerChatMessage playerChatMessage) {
+                return state;
+            }
+        };
+    }
+
+    public static SignedMessageValidator create(@Nullable ProfilePublicKey profilePublicKey, boolean bl) {
+        if (profilePublicKey == null) {
+            return SignedMessageValidator.alwaysReturn(bl ? State.BROKEN_CHAIN : State.NOT_SECURE);
         }
-
-        @Override
-        public State validateMessage(PlayerChatMessage playerChatMessage) {
-            return State.NOT_SECURE;
-        }
-    };
-
-    public static SignedMessageValidator create(@Nullable ProfilePublicKey profilePublicKey) {
-        return profilePublicKey != null ? new KeyBased(profilePublicKey.createSignatureValidator()) : ALWAYS_REJECT;
+        return new KeyBased(profilePublicKey.createSignatureValidator());
     }
 
     public State validateHeader(SignedMessageHeader var1, MessageSignature var2, byte[] var3);
 
     public State validateMessage(PlayerChatMessage var1);
+
+    public static enum State {
+        SECURE,
+        NOT_SECURE,
+        BROKEN_CHAIN;
+
+    }
 
     public static class KeyBased
     implements SignedMessageValidator {
@@ -77,13 +89,6 @@ public interface SignedMessageValidator {
             byte[] bs = playerChatMessage.signedBody().hash().asBytes();
             return this.updateAndValidate(playerChatMessage.signedHeader(), playerChatMessage.headerSignature(), bs);
         }
-    }
-
-    public static enum State {
-        SECURE,
-        NOT_SECURE,
-        BROKEN_CHAIN;
-
     }
 }
 

@@ -173,7 +173,11 @@ public class InputConstants {
         for (Type type : Type.values()) {
             if (!string.startsWith(type.defaultPrefix)) continue;
             String string2 = string.substring(type.defaultPrefix.length() + 1);
-            return type.getOrCreate(Integer.parseInt(string2));
+            int i = Integer.parseInt(string2);
+            if (type == Type.MOUSE) {
+                --i;
+            }
+            return type.getOrCreate(i);
         }
         throw new IllegalArgumentException("Unknown key name: " + string);
     }

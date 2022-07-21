@@ -167,11 +167,7 @@ extends GuiComponent {
     }
 
     public void addMessage(Component component) {
-        this.addMessage(component, null);
-    }
-
-    public void addMessage(Component component, @Nullable GuiMessageTag guiMessageTag) {
-        this.addMessage(component, null, guiMessageTag);
+        this.addMessage(component, null, GuiMessageTag.system());
     }
 
     public void addMessage(Component component, @Nullable MessageSignature messageSignature, @Nullable GuiMessageTag guiMessageTag) {

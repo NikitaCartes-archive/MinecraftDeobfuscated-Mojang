@@ -149,7 +149,8 @@ implements Toast {
         WORLD_ACCESS_FAILURE,
         PACK_COPY_FAILURE,
         PERIODIC_NOTIFICATION,
-        CHAT_PREVIEW_WARNING(10000L);
+        CHAT_PREVIEW_WARNING(10000L),
+        UNSECURE_SERVER_WARNING(10000L);
 
         final long displayTime;
 

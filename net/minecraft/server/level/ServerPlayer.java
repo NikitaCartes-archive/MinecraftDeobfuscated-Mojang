@@ -1269,7 +1269,7 @@ extends Player {
     }
 
     public void sendServerStatus(ServerStatus serverStatus) {
-        this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.previewsChat()));
+        this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.previewsChat(), serverStatus.enforcesSecureChat()));
     }
 
     @Override

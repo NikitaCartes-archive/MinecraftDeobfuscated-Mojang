@@ -28,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.ClientRecipeBook;
@@ -37,6 +38,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
@@ -306,6 +308,8 @@ public class ClientPacketListener
 implements ClientGamePacketListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Component GENERIC_DISCONNECT_MESSAGE = Component.translatable("disconnect.lost");
+    private static final Component UNSECURE_SERVER_TOAST_TITLE = Component.translatable("multiplayer.unsecureserver.toast.title");
+    private static final Component UNSERURE_SERVER_TOAST = Component.translatable("multiplayer.unsecureserver.toast");
     private static final int UNACKNOWLEDGED_MESSAGES_THRESHOLD = 64;
     private final Connection connection;
     private final GameProfile localGameProfile;
@@ -1416,6 +1420,7 @@ implements ClientGamePacketListener {
 
     @Override
     public void handleServerData(ClientboundServerDataPacket clientboundServerDataPacket) {
+        ServerData.ChatPreview chatPreview;
         PacketUtils.ensureRunningOnSameThread(clientboundServerDataPacket, this, this.minecraft);
         ServerData serverData = this.minecraft.getCurrentServer();
         if (serverData == null) {
@@ -1432,9 +1437,13 @@ implements ClientGamePacketListener {
             }
         });
         serverData.setPreviewsChat(clientboundServerDataPacket.previewsChat());
+        serverData.setEnforcesSecureChat(clientboundServerDataPacket.enforcesSecureChat());
         ServerList.saveSingleServer(serverData);
-        ServerData.ChatPreview chatPreview = serverData.getChatPreview();
-        if (chatPreview != null && !chatPreview.isAcknowledged()) {
+        if (!clientboundServerDataPacket.enforcesSecureChat()) {
+            SystemToast systemToast = SystemToast.multiline(this.minecraft, SystemToast.SystemToastIds.UNSECURE_SERVER_WARNING, UNSECURE_SERVER_TOAST_TITLE, UNSERURE_SERVER_TOAST);
+            this.minecraft.getToasts().addToast(systemToast);
+        }
+        if ((chatPreview = serverData.getChatPreview()) != null && !chatPreview.isAcknowledged()) {
             this.minecraft.execute(() -> this.minecraft.setScreen(new ChatPreviewWarningScreen(this.minecraft.screen, serverData)));
         }
     }
@@ -1496,7 +1505,8 @@ implements ClientGamePacketListener {
             }
             PlayerInfo playerInfo = this.playerInfoMap.get(playerUpdate.getProfile().getId());
             if (clientboundPlayerInfoPacket.getAction() == ClientboundPlayerInfoPacket.Action.ADD_PLAYER) {
-                playerInfo = new PlayerInfo(playerUpdate, this.minecraft.getServiceSignatureValidator());
+                boolean bl = Util.mapNullable(this.minecraft.getCurrentServer(), ServerData::enforcesSecureChat, false);
+                playerInfo = new PlayerInfo(playerUpdate, this.minecraft.getServiceSignatureValidator(), bl);
                 this.playerInfoMap.put(playerInfo.getProfile().getId(), playerInfo);
                 this.minecraft.getPlayerSocialManager().addPlayer(playerInfo);
             }

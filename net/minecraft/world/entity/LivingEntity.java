@@ -2037,7 +2037,9 @@ extends Entity {
                 this.stopSleeping();
             }
         }
-        this.aiStep();
+        if (!this.isRemoved()) {
+            this.aiStep();
+        }
         double d = this.getX() - this.xo;
         double e = this.getZ() - this.zo;
         float f = (float)(d * d + e * e);

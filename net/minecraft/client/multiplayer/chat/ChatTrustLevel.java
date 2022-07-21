@@ -22,7 +22,7 @@ public enum ChatTrustLevel {
 
 
     public static ChatTrustLevel evaluate(PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo, Instant instant) {
-        if (playerInfo == null || playerChatMessage.hasExpiredClient(instant)) {
+        if (playerInfo == null) {
             return NOT_SECURE;
         }
         SignedMessageValidator.State state = playerInfo.getMessageValidator().validateMessage(playerChatMessage);
@@ -30,6 +30,9 @@ public enum ChatTrustLevel {
             return BROKEN_CHAIN;
         }
         if (state == SignedMessageValidator.State.NOT_SECURE) {
+            return NOT_SECURE;
+        }
+        if (playerChatMessage.hasExpiredClient(instant)) {
             return NOT_SECURE;
         }
         if (playerChatMessage.unsignedContent().isPresent()) {

@@ -189,7 +189,7 @@ public class ChatListener {
     }
 
     boolean processNonPlayerChatMessage(ChatType.Bound bound, PlayerChatMessage playerChatMessage, Component component) {
-        this.minecraft.gui.getChat().addMessage(component, GuiMessageTag.system());
+        this.minecraft.gui.getChat().addMessage(component);
         this.narrateChatMessage(bound, playerChatMessage);
         this.logSystemMessage(component, playerChatMessage.timeStamp());
         this.previousMessageTime = Util.getMillis();
@@ -254,7 +254,7 @@ public class ChatListener {
         if (bl) {
             this.minecraft.gui.setOverlayMessage(component, false);
         } else {
-            this.minecraft.gui.getChat().addMessage(component, GuiMessageTag.system());
+            this.minecraft.gui.getChat().addMessage(component);
             this.logSystemMessage(component, Instant.now());
         }
         this.minecraft.getNarrator().sayNow(component);

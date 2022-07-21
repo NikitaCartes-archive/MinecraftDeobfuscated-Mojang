@@ -131,9 +131,6 @@ public class ChatReportBuilder {
         }
         String string = Objects.requireNonNull(this.reason).backendName();
         ReportEvidence reportEvidence = this.buildEvidence(reportingContext.chatLog());
-        if (reportEvidence.messages.size() > this.limits.maxEvidenceMessageCount()) {
-            return Either.right(CannotBuildReason.TOO_MANY_MESSAGES);
-        }
         ReportedEntity reportedEntity = new ReportedEntity(this.reportedProfileId);
         AbuseReport abuseReport = new AbuseReport(this.comments, string, reportEvidence, reportedEntity, this.createdAt);
         return Either.left(new Result(this.reportId, abuseReport));

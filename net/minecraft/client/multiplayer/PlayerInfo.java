@@ -47,7 +47,7 @@ public class PlayerInfo {
     private final ProfilePublicKey profilePublicKey;
     private final SignedMessageValidator messageValidator;
 
-    public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, SignatureValidator signatureValidator) {
+    public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, SignatureValidator signatureValidator, boolean bl) {
         this.profile = playerUpdate.getProfile();
         this.gameMode = playerUpdate.getGameMode();
         this.latency = playerUpdate.getLatency();
@@ -62,7 +62,7 @@ public class PlayerInfo {
             LOGGER.error("Failed to retrieve publicKey property for profile {}", (Object)this.profile.getId(), (Object)exception);
         }
         this.profilePublicKey = profilePublicKey;
-        this.messageValidator = SignedMessageValidator.create(profilePublicKey);
+        this.messageValidator = SignedMessageValidator.create(profilePublicKey, bl);
     }
 
     public GameProfile getProfile() {

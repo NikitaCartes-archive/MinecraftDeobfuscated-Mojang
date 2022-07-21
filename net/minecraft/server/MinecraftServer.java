@@ -589,6 +589,7 @@ AutoCloseable {
                     this.status.setDescription(Component.literal(this.motd));
                     this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
                     this.status.setPreviewsChat(this.previewsChat());
+                    this.status.setEnforcesSecureChat(this.enforceSecureProfile());
                     this.updateStatusIcon(this.status);
                     while (this.running) {
                         long l = Util.getMillis() - this.nextTickTime;
