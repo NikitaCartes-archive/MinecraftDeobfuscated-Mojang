@@ -12,11 +12,13 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public interface Toast {
     public static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/toasts.png");
     public static final Object NO_TOKEN = new Object();
+    public static final int SLOT_HEIGHT = 32;
 
     public Visibility render(PoseStack var1, ToastComponent var2, long var3);
 
@@ -30,6 +32,10 @@ public interface Toast {
 
     default public int height() {
         return 32;
+    }
+
+    default public int slotCount() {
+        return Mth.positiveCeilDiv(this.height(), 32);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -11,38 +11,16 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
 
 public interface SignedMessageValidator {
-    public static SignedMessageValidator alwaysReturn(final State state) {
-        return new SignedMessageValidator(){
-
-            @Override
-            public State validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-                return state;
-            }
-
-            @Override
-            public State validateMessage(PlayerChatMessage playerChatMessage) {
-                return state;
-            }
-        };
-    }
-
     public static SignedMessageValidator create(@Nullable ProfilePublicKey profilePublicKey, boolean bl) {
-        if (profilePublicKey == null) {
-            return SignedMessageValidator.alwaysReturn(bl ? State.BROKEN_CHAIN : State.NOT_SECURE);
+        if (profilePublicKey != null) {
+            return new KeyBased(profilePublicKey.createSignatureValidator());
         }
-        return new KeyBased(profilePublicKey.createSignatureValidator());
+        return new Unsigned(bl);
     }
 
     public State validateHeader(SignedMessageHeader var1, MessageSignature var2, byte[] var3);
 
     public State validateMessage(PlayerChatMessage var1);
-
-    public static enum State {
-        SECURE,
-        NOT_SECURE,
-        BROKEN_CHAIN;
-
-    }
 
     public static class KeyBased
     implements SignedMessageValidator {
@@ -55,25 +33,24 @@ public interface SignedMessageValidator {
             this.validator = signatureValidator;
         }
 
-        private boolean validateChain(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature) {
+        private boolean validateChain(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, boolean bl) {
             if (messageSignature.isEmpty()) {
                 return false;
             }
-            return this.lastSignature == null || this.lastSignature.equals(signedMessageHeader.previousSignature()) || this.lastSignature.equals(messageSignature);
+            if (bl && messageSignature.equals(this.lastSignature)) {
+                return true;
+            }
+            return this.lastSignature == null || this.lastSignature.equals(signedMessageHeader.previousSignature());
         }
 
-        private boolean validateContents(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-            return messageSignature.verify(this.validator, signedMessageHeader, bs);
+        private boolean validateContents(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs, boolean bl) {
+            return this.validateChain(signedMessageHeader, messageSignature, bl) && messageSignature.verify(this.validator, signedMessageHeader, bs);
         }
 
-        private State updateAndValidate(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-            boolean bl = this.isChainConsistent = this.isChainConsistent && this.validateChain(signedMessageHeader, messageSignature);
+        private State updateAndValidate(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs, boolean bl) {
+            boolean bl2 = this.isChainConsistent = this.isChainConsistent && this.validateContents(signedMessageHeader, messageSignature, bs, bl);
             if (!this.isChainConsistent) {
                 return State.BROKEN_CHAIN;
-            }
-            if (!this.validateContents(signedMessageHeader, messageSignature, bs)) {
-                this.lastSignature = null;
-                return State.NOT_SECURE;
             }
             this.lastSignature = messageSignature;
             return State.SECURE;
@@ -81,14 +58,47 @@ public interface SignedMessageValidator {
 
         @Override
         public State validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-            return this.updateAndValidate(signedMessageHeader, messageSignature, bs);
+            return this.updateAndValidate(signedMessageHeader, messageSignature, bs, false);
         }
 
         @Override
         public State validateMessage(PlayerChatMessage playerChatMessage) {
             byte[] bs = playerChatMessage.signedBody().hash().asBytes();
-            return this.updateAndValidate(playerChatMessage.signedHeader(), playerChatMessage.headerSignature(), bs);
+            return this.updateAndValidate(playerChatMessage.signedHeader(), playerChatMessage.headerSignature(), bs, true);
         }
+    }
+
+    public static class Unsigned
+    implements SignedMessageValidator {
+        private final boolean enforcesSecureChat;
+
+        public Unsigned(boolean bl) {
+            this.enforcesSecureChat = bl;
+        }
+
+        private State validate(MessageSignature messageSignature) {
+            if (!messageSignature.isEmpty()) {
+                return State.BROKEN_CHAIN;
+            }
+            return this.enforcesSecureChat ? State.BROKEN_CHAIN : State.NOT_SECURE;
+        }
+
+        @Override
+        public State validateHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
+            return this.validate(messageSignature);
+        }
+
+        @Override
+        public State validateMessage(PlayerChatMessage playerChatMessage) {
+            return this.validate(playerChatMessage.headerSignature());
+        }
+    }
+
+    public static enum State {
+        SECURE,
+        NOT_SECURE,
+        BROKEN_CHAIN;
+
     }
 }
 

@@ -48,6 +48,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     private boolean isRemoved;
     private boolean hasRecentMessages;
     private final boolean reportingEnabled;
+    private final boolean playerReportable;
     @Nullable
     private Button hideButton;
     @Nullable
@@ -64,6 +65,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     private static final Component HIDDEN_OFFLINE = Component.translatable("gui.socialInteractions.status_hidden_offline").withStyle(ChatFormatting.ITALIC);
     private static final Component BLOCKED_OFFLINE = Component.translatable("gui.socialInteractions.status_blocked_offline").withStyle(ChatFormatting.ITALIC);
     private static final Component REPORT_DISABLED_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report.disabled");
+    private static final Component NOT_REPORTABLE_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report.not_reportable");
     private static final Component HIDE_TEXT_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.hide");
     private static final Component SHOW_TEXT_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.show");
     private static final Component REPORT_PLAYER_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report");
@@ -78,23 +80,24 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     public static final int PLAYERNAME_COLOR = FastColor.ARGB32.color(255, 255, 255, 255);
     public static final int PLAYER_STATUS_COLOR = FastColor.ARGB32.color(140, 255, 255, 255);
 
-    public PlayerEntry(final Minecraft minecraft, final SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<ResourceLocation> supplier) {
-        boolean bl2;
+    public PlayerEntry(final Minecraft minecraft, final SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<ResourceLocation> supplier, boolean bl) {
+        boolean bl3;
         this.minecraft = minecraft;
         this.id = uUID;
         this.playerName = string;
         this.skinGetter = supplier;
         ReportingContext reportingContext = minecraft.getReportingContext();
         this.reportingEnabled = reportingContext.sender().isEnabled();
+        this.playerReportable = bl;
         final MutableComponent component = Component.translatable("gui.socialInteractions.narration.hide", string);
         final MutableComponent component2 = Component.translatable("gui.socialInteractions.narration.show", string);
         this.hideTooltip = minecraft.font.split(HIDE_TEXT_TOOLTIP, 150);
         this.showTooltip = minecraft.font.split(SHOW_TEXT_TOOLTIP, 150);
         this.reportTooltip = minecraft.font.split(this.getReportButtonText(false), 150);
         PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
-        boolean bl = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
-        boolean bl3 = bl2 = !minecraft.player.getUUID().equals(uUID);
-        if (bl2 && bl && !playerSocialManager.isBlocked(uUID)) {
+        boolean bl2 = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
+        boolean bl4 = bl3 = !minecraft.player.getUUID().equals(uUID);
+        if (bl3 && bl2 && !playerSocialManager.isBlocked(uUID)) {
             this.reportButton = new ImageButton(0, 0, 20, 20, 0, 0, 20, REPORT_BUTTON_LOCATION, 64, 64, button -> minecraft.setScreen(new ChatReportScreen(minecraft.screen, reportingContext, uUID)), new Button.OnTooltip(){
 
                 @Override
@@ -174,6 +177,9 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     }
 
     Component getReportButtonText(boolean bl) {
+        if (!this.playerReportable) {
+            return NOT_REPORTABLE_TOOLTIP;
+        }
         if (!this.reportingEnabled) {
             return REPORT_DISABLED_TOOLTIP;
         }
@@ -250,7 +256,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     public void setHasRecentMessages(boolean bl) {
         this.hasRecentMessages = bl;
         if (this.reportButton != null) {
-            this.reportButton.active = this.reportingEnabled && bl;
+            this.reportButton.active = this.reportingEnabled && this.playerReportable && bl;
         }
         this.reportTooltip = this.minecraft.font.split(this.getReportButtonText(false), 150);
     }

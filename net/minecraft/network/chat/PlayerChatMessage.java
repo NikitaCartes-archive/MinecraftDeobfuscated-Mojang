@@ -6,34 +6,37 @@ package net.minecraft.network.chat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FilterMask;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.SignedMessageHeader;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
 
-public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignature headerSignature, SignedMessageBody signedBody, Optional<Component> unsignedContent) {
+public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignature headerSignature, SignedMessageBody signedBody, Optional<Component> unsignedContent, FilterMask filterMask) {
     public static final Duration MESSAGE_EXPIRES_AFTER_SERVER = Duration.ofMinutes(5L);
     public static final Duration MESSAGE_EXPIRES_AFTER_CLIENT = MESSAGE_EXPIRES_AFTER_SERVER.plus(Duration.ofMinutes(2L));
 
     public PlayerChatMessage(FriendlyByteBuf friendlyByteBuf) {
-        this(new SignedMessageHeader(friendlyByteBuf), new MessageSignature(friendlyByteBuf), new SignedMessageBody(friendlyByteBuf), friendlyByteBuf.readOptional(FriendlyByteBuf::readComponent));
+        this(new SignedMessageHeader(friendlyByteBuf), new MessageSignature(friendlyByteBuf), new SignedMessageBody(friendlyByteBuf), friendlyByteBuf.readOptional(FriendlyByteBuf::readComponent), FilterMask.read(friendlyByteBuf));
     }
 
     public static PlayerChatMessage system(ChatMessageContent chatMessageContent) {
-        MessageSigner messageSigner = MessageSigner.system();
+        return PlayerChatMessage.unsigned(MessageSigner.system(), chatMessageContent);
+    }
+
+    public static PlayerChatMessage unsigned(MessageSigner messageSigner, ChatMessageContent chatMessageContent) {
         SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), LastSeenMessages.EMPTY);
         SignedMessageHeader signedMessageHeader = new SignedMessageHeader(null, messageSigner.profileId());
-        return new PlayerChatMessage(signedMessageHeader, MessageSignature.EMPTY, signedMessageBody, Optional.empty());
+        return new PlayerChatMessage(signedMessageHeader, MessageSignature.EMPTY, signedMessageBody, Optional.empty(), FilterMask.PASS_THROUGH);
     }
 
     public void write(FriendlyByteBuf friendlyByteBuf) {
@@ -41,27 +44,30 @@ public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignatu
         this.headerSignature.write(friendlyByteBuf);
         this.signedBody.write(friendlyByteBuf);
         friendlyByteBuf.writeOptional(this.unsignedContent, FriendlyByteBuf::writeComponent);
-    }
-
-    public FilteredText<PlayerChatMessage> withFilteredText(FilteredText<ChatMessageContent> filteredText) {
-        return filteredText.rebuildIfNeeded(this, chatMessageContent -> {
-            if (this.signedContent().equals(chatMessageContent)) {
-                return this;
-            }
-            return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody.withContent((ChatMessageContent)chatMessageContent), this.unsignedContent);
-        });
+        FilterMask.write(friendlyByteBuf, this.filterMask);
     }
 
     public PlayerChatMessage withUnsignedContent(Component component) {
         Optional<Component> optional = !this.signedContent().decorated().equals(component) ? Optional.of(component) : Optional.empty();
-        return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, optional);
+        return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, optional, this.filterMask);
     }
 
     public PlayerChatMessage removeUnsignedContent() {
         if (this.unsignedContent.isPresent()) {
-            return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, Optional.empty());
+            return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, Optional.empty(), this.filterMask);
         }
         return this;
+    }
+
+    public PlayerChatMessage filter(FilterMask filterMask) {
+        if (this.filterMask.equals(filterMask)) {
+            return this;
+        }
+        return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, this.unsignedContent, filterMask);
+    }
+
+    public PlayerChatMessage filter(boolean bl) {
+        return this.filter(bl ? this.filterMask : FilterMask.PASS_THROUGH);
     }
 
     public boolean verify(SignatureValidator signatureValidator) {
@@ -115,8 +121,12 @@ public record PlayerChatMessage(SignedMessageHeader signedHeader, MessageSignatu
         return null;
     }
 
-    public boolean hasSignatureFrom(ServerPlayer serverPlayer) {
-        return !this.headerSignature.isEmpty() && this.signedHeader.sender().equals(serverPlayer.getUUID());
+    public boolean hasSignatureFrom(UUID uUID) {
+        return !this.headerSignature.isEmpty() && this.signedHeader.sender().equals(uUID);
+    }
+
+    public boolean isFullyFiltered() {
+        return this.filterMask.isFullyFiltered();
     }
 }
 

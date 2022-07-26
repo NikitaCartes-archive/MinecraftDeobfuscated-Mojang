@@ -5,6 +5,7 @@ package net.minecraft.network.chat;
 
 import java.util.Optional;
 import net.minecraft.network.chat.ChatMessageContent;
+import net.minecraft.network.chat.FilterMask;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
@@ -40,7 +41,7 @@ public class SignedMessageChain {
     private static PlayerChatMessage unpack(Link link, @Nullable MessageSignature messageSignature, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages) {
         SignedMessageHeader signedMessageHeader = new SignedMessageHeader(messageSignature, messageSigner.profileId());
         SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), lastSeenMessages);
-        return new PlayerChatMessage(signedMessageHeader, link.signature, signedMessageBody, Optional.empty());
+        return new PlayerChatMessage(signedMessageHeader, link.signature, signedMessageBody, Optional.empty(), FilterMask.PASS_THROUGH);
     }
 
     public Decoder decoder() {
@@ -56,6 +57,8 @@ public class SignedMessageChain {
 
     @FunctionalInterface
     public static interface Decoder {
+        public static final Decoder UNSIGNED = (link, messageSigner, chatMessageContent, lastSeenMessages) -> PlayerChatMessage.unsigned(messageSigner, chatMessageContent);
+
         public PlayerChatMessage unpack(Link var1, MessageSigner var2, ChatMessageContent var3, LastSeenMessages var4);
     }
 

@@ -73,7 +73,8 @@ extends Screen {
     private Button resetDemoButton;
     private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
     private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
-    private Screen realmsNotificationsScreen;
+    @Nullable
+    private RealmsNotificationsScreen realmsNotificationsScreen;
     private final PanoramaRenderer panorama = new PanoramaRenderer(CUBE_MAP);
     private final boolean fading;
     private long fadeInStart;
@@ -304,6 +305,7 @@ extends Screen {
         }
         super.render(poseStack, i, j, f);
         if (this.realmsNotificationsEnabled() && h >= 1.0f) {
+            RenderSystem.enableDepthTest();
             this.realmsNotificationsScreen.render(poseStack, i, j, f);
         }
     }

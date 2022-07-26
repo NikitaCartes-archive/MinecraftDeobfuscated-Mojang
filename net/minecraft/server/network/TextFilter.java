@@ -20,12 +20,12 @@ public interface TextFilter {
         }
 
         @Override
-        public CompletableFuture<FilteredText<String>> processStreamMessage(String string) {
+        public CompletableFuture<FilteredText> processStreamMessage(String string) {
             return CompletableFuture.completedFuture(FilteredText.passThrough(string));
         }
 
         @Override
-        public CompletableFuture<List<FilteredText<String>>> processMessageBundle(List<String> list) {
+        public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> list) {
             return CompletableFuture.completedFuture((List)list.stream().map(FilteredText::passThrough).collect(ImmutableList.toImmutableList()));
         }
     };
@@ -34,8 +34,8 @@ public interface TextFilter {
 
     public void leave();
 
-    public CompletableFuture<FilteredText<String>> processStreamMessage(String var1);
+    public CompletableFuture<FilteredText> processStreamMessage(String var1);
 
-    public CompletableFuture<List<FilteredText<String>>> processMessageBundle(List<String> var1);
+    public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> var1);
 }
 

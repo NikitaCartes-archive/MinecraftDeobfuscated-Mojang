@@ -6,8 +6,10 @@ package net.minecraft.client.gui.components.toasts;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Deque;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -20,9 +22,11 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ToastComponent
 extends GuiComponent {
-    private static final int VISIBLE_TOASTS = 5;
+    private static final int SLOT_COUNT = 5;
+    private static final int NO_SPACE = -1;
     final Minecraft minecraft;
-    private final ToastInstance<?>[] visible = new ToastInstance[5];
+    private final List<ToastInstance<?>> visible = new ArrayList();
+    private final BitSet occupiedSlots = new BitSet(5);
     private final Deque<Toast> queued = Queues.newArrayDeque();
 
     public ToastComponent(Minecraft minecraft) {
@@ -33,14 +37,45 @@ extends GuiComponent {
         if (this.minecraft.options.hideGui) {
             return;
         }
-        for (int i = 0; i < this.visible.length; ++i) {
-            ToastInstance<?> toastInstance = this.visible[i];
-            if (toastInstance != null && toastInstance.render(this.minecraft.getWindow().getGuiScaledWidth(), i, poseStack)) {
-                this.visible[i] = null;
+        int i = this.minecraft.getWindow().getGuiScaledWidth();
+        this.visible.removeIf(toastInstance -> {
+            if (toastInstance != null && toastInstance.render(i, poseStack)) {
+                this.occupiedSlots.clear(toastInstance.index, toastInstance.index + toastInstance.slotCount);
+                return true;
             }
-            if (this.visible[i] != null || this.queued.isEmpty()) continue;
-            this.visible[i] = new ToastInstance(this, this.queued.removeFirst());
+            return false;
+        });
+        if (!this.queued.isEmpty() && this.freeSlots() > 0) {
+            this.queued.removeIf(toast -> {
+                int i = toast.slotCount();
+                int j = this.findFreeIndex(i);
+                if (j != -1) {
+                    this.visible.add(new ToastInstance(this, toast, j, i));
+                    this.occupiedSlots.set(j, j + i);
+                    return true;
+                }
+                return false;
+            });
         }
+    }
+
+    private int findFreeIndex(int i) {
+        if (this.freeSlots() >= i) {
+            int j = 0;
+            for (int k = 0; k < 5; ++k) {
+                if (this.occupiedSlots.get(k)) {
+                    j = 0;
+                    continue;
+                }
+                if (++j != i) continue;
+                return k + 1 - j;
+            }
+        }
+        return -1;
+    }
+
+    private int freeSlots() {
+        return 5 - this.occupiedSlots.cardinality();
     }
 
     @Nullable
@@ -57,7 +92,8 @@ extends GuiComponent {
     }
 
     public void clear() {
-        Arrays.fill(this.visible, null);
+        this.occupiedSlots.clear();
+        this.visible.clear();
         this.queued.clear();
     }
 
@@ -70,17 +106,24 @@ extends GuiComponent {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class ToastInstance<T extends Toast> {
+    class ToastInstance<T extends Toast> {
         private static final long ANIMATION_TIME = 600L;
         private final T toast;
+        final int index;
+        final int slotCount;
         private long animationTime = -1L;
         private long visibleTime = -1L;
         private Toast.Visibility visibility = Toast.Visibility.SHOW;
         final /* synthetic */ ToastComponent field_2245;
 
-        ToastInstance(T toast) {
-            this.field_2245 = toastComponent;
+        /*
+         * WARNING - Possible parameter corruption
+         */
+        ToastInstance(T toast, int i, int j) {
+            this.field_2245 = (ToastComponent)toastComponent;
             this.toast = toast;
+            this.index = i;
+            this.slotCount = j;
         }
 
         public T getToast() {
@@ -96,7 +139,7 @@ extends GuiComponent {
             return f;
         }
 
-        public boolean render(int i, int j, PoseStack poseStack) {
+        public boolean render(int i, PoseStack poseStack) {
             long l = Util.getMillis();
             if (this.animationTime == -1L) {
                 this.animationTime = l;
@@ -107,7 +150,7 @@ extends GuiComponent {
             }
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
-            poseStack2.translate((float)i - (float)this.toast.width() * this.getVisibility(l), j * this.toast.height(), 800 + j);
+            poseStack2.translate((float)i - (float)this.toast.width() * this.getVisibility(l), this.index * 32, 800.0);
             RenderSystem.applyModelViewMatrix();
             Toast.Visibility visibility = this.toast.render(poseStack, this.field_2245, l - this.visibleTime);
             poseStack2.popPose();

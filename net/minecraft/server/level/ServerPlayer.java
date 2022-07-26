@@ -28,6 +28,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -57,7 +58,6 @@ import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
@@ -542,15 +542,13 @@ extends Player {
         boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES);
         if (bl) {
             Component component = this.getCombatTracker().getDeathMessage();
-            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component), future -> {
-                if (!future.isSuccess()) {
-                    int i = 256;
-                    String string = component.getString(256);
-                    MutableComponent component2 = Component.translatable("death.attack.message_too_long", Component.literal(string).withStyle(ChatFormatting.YELLOW));
-                    MutableComponent component3 = Component.translatable("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
-                    this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3));
-                }
-            });
+            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component), PacketSendListener.exceptionallySend(() -> {
+                int i = 256;
+                String string = component.getString(256);
+                MutableComponent component2 = Component.translatable("death.attack.message_too_long", Component.literal(string).withStyle(ChatFormatting.YELLOW));
+                MutableComponent component3 = Component.translatable("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
+                return new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3);
+            }));
             Team team = this.getTeam();
             if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
                 this.server.getPlayerList().broadcastSystemMessage(component, false);
@@ -1199,27 +1197,20 @@ extends Player {
         if (!this.acceptsSystemMessages(bl)) {
             return;
         }
-        this.connection.send(new ClientboundSystemChatPacket(component, bl), future -> {
-            if (!future.isSuccess()) {
-                this.handleMessageDeliveryFailure(component);
+        this.connection.send(new ClientboundSystemChatPacket(component, bl), PacketSendListener.exceptionallySend(() -> {
+            if (this.acceptsSystemMessages(false)) {
+                int i = 256;
+                String string = component.getString(256);
+                MutableComponent component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
+                return new ClientboundSystemChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), false);
             }
-        });
+            return null;
+        }));
     }
 
-    private void handleMessageDeliveryFailure(Component component) {
-        if (this.acceptsSystemMessages(false)) {
-            int i = 256;
-            String string = component.getString(256);
-            MutableComponent component2 = Component.literal(string).withStyle(ChatFormatting.YELLOW);
-            this.connection.send(new ClientboundSystemChatPacket(Component.translatable("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), false));
-        }
-    }
-
-    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, ChatType.Bound bound) {
+    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, boolean bl, ChatType.Bound bound) {
         if (this.acceptsChatMessages()) {
-            ClientboundPlayerChatPacket clientboundPlayerChatPacket = outgoingPlayerChatMessage.packetForPlayer(this, bound);
-            this.connection.addPendingMessage(clientboundPlayerChatPacket.message());
-            this.connection.send(clientboundPlayerChatPacket);
+            outgoingPlayerChatMessage.sendToPlayer(this, bl, bound);
         }
     }
 

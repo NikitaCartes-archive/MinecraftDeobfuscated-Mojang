@@ -20,6 +20,7 @@ import javax.crypto.SecretKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -127,7 +128,7 @@ ServerLoginPacketListener {
         } else {
             this.state = State.ACCEPTED;
             if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
+                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), PacketSendListener.thenRun(() -> this.connection.setupCompression(this.server.getCompressionThreshold(), true)));
             }
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
             ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());

@@ -21,6 +21,7 @@ import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.client.multiplayer.chat.LoggedChatMessageLink;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FilterMask;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.PlayerChatMessage;
@@ -177,12 +178,22 @@ public class ChatListener {
         if (bl && chatTrustLevel.isNotSecure()) {
             return false;
         }
-        if (this.minecraft.isBlocked(playerChatMessage.signer().profileId())) {
+        if (this.minecraft.isBlocked(playerChatMessage.signer().profileId()) || playerChatMessage.isFullyFiltered()) {
             return false;
         }
         GuiMessageTag guiMessageTag = chatTrustLevel.createTag(playerChatMessage);
-        this.minecraft.gui.getChat().addMessage(component, playerChatMessage.headerSignature(), guiMessageTag);
-        this.narrateChatMessage(bound, playerChatMessage);
+        MessageSignature messageSignature = playerChatMessage.headerSignature();
+        FilterMask filterMask = playerChatMessage.filterMask();
+        if (filterMask.isEmpty()) {
+            this.minecraft.gui.getChat().addMessage(component, messageSignature, guiMessageTag);
+            this.narrateChatMessage(bound, playerChatMessage.serverContent());
+        } else {
+            Component component2 = filterMask.apply(playerChatMessage.signedContent());
+            if (component2 != null) {
+                this.minecraft.gui.getChat().addMessage(bound.decorate(component2), messageSignature, guiMessageTag);
+                this.narrateChatMessage(bound, component2);
+            }
+        }
         this.logPlayerMessage(playerChatMessage, bound, playerInfo, chatTrustLevel);
         this.previousMessageTime = Util.getMillis();
         return true;
@@ -190,7 +201,7 @@ public class ChatListener {
 
     boolean processNonPlayerChatMessage(ChatType.Bound bound, PlayerChatMessage playerChatMessage, Component component) {
         this.minecraft.gui.getChat().addMessage(component);
-        this.narrateChatMessage(bound, playerChatMessage);
+        this.narrateChatMessage(bound, playerChatMessage.serverContent());
         this.logSystemMessage(component, playerChatMessage.timeStamp());
         this.previousMessageTime = Util.getMillis();
         return true;
@@ -214,8 +225,8 @@ public class ChatListener {
         }
     }
 
-    private void narrateChatMessage(ChatType.Bound bound, PlayerChatMessage playerChatMessage) {
-        this.minecraft.getNarrator().sayChatNow(() -> bound.decorateNarration(playerChatMessage.serverContent()));
+    private void narrateChatMessage(ChatType.Bound bound, Component component) {
+        this.minecraft.getNarrator().sayChatNow(() -> bound.decorateNarration(component));
     }
 
     private ChatTrustLevel evaluateTrustLevel(PlayerChatMessage playerChatMessage, Component component, @Nullable PlayerInfo playerInfo, Instant instant) {

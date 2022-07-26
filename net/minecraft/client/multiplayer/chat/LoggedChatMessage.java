@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Objects;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
 import net.minecraft.client.multiplayer.chat.LoggedChatEvent;
 import net.minecraft.client.multiplayer.chat.LoggedChatMessageLink;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
@@ -48,12 +50,16 @@ extends LoggedChatEvent {
 
         @Override
         public Component toContentComponent() {
+            if (!this.message.filterMask().isEmpty()) {
+                Component component = this.message.filterMask().apply(this.message.signedContent());
+                return Objects.requireNonNullElse(component, CommonComponents.EMPTY);
+            }
             return this.message.serverContent();
         }
 
         @Override
         public Component toNarrationComponent() {
-            Component component = this.message.serverContent();
+            Component component = this.toContentComponent();
             Component component2 = this.getTimeComponent();
             return Component.translatable("gui.chatSelection.message.narrate", this.displayName, component, component2);
         }
@@ -70,7 +76,7 @@ extends LoggedChatEvent {
 
         @Override
         public boolean canReport(UUID uUID) {
-            return this.profileId().equals(uUID);
+            return this.message.hasSignatureFrom(uUID);
         }
 
         @Override

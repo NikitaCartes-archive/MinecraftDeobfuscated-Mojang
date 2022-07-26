@@ -19,11 +19,13 @@ import org.jetbrains.annotations.Nullable;
 public record GuiMessageTag(int indicatorColor, @Nullable Icon icon, @Nullable Component text, @Nullable String logTag) {
     private static final Component CHAT_NOT_SECURE_TEXT = Component.translatable("chat.tag.not_secure").withStyle(ChatFormatting.UNDERLINE);
     private static final Component CHAT_MODIFIED_TEXT = Component.translatable("chat.tag.modified").withStyle(ChatFormatting.UNDERLINE);
+    private static final Component CHAT_FILTERED_TEXT = Component.translatable("chat.tag.filtered").withStyle(ChatFormatting.UNDERLINE);
     private static final int SYSTEM_INDICATOR_COLOR = 0xA0A0A0;
     private static final int CHAT_NOT_SECURE_INDICATOR_COLOR = 15224664;
     private static final int CHAT_MODIFIED_INDICATOR_COLOR = 15386724;
     private static final GuiMessageTag SYSTEM = new GuiMessageTag(0xA0A0A0, null, null, "System");
     private static final GuiMessageTag CHAT_NOT_SECURE = new GuiMessageTag(15224664, Icon.CHAT_NOT_SECURE, CHAT_NOT_SECURE_TEXT, "Not Secure");
+    private static final GuiMessageTag CHAT_FILTERED = new GuiMessageTag(15386724, Icon.CHAT_MODIFIED, CHAT_FILTERED_TEXT, "Filtered");
     static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/chat_tags.png");
 
     public static GuiMessageTag system() {
@@ -38,6 +40,10 @@ public record GuiMessageTag(int indicatorColor, @Nullable Icon icon, @Nullable C
         MutableComponent component = Component.translatable("chat.tag.modified.original", string);
         MutableComponent component2 = Component.empty().append(CHAT_MODIFIED_TEXT).append(CommonComponents.NEW_LINE).append(component);
         return new GuiMessageTag(15386724, Icon.CHAT_MODIFIED, component2, "Modified");
+    }
+
+    public static GuiMessageTag chatFiltered() {
+        return CHAT_FILTERED;
     }
 
     @Nullable

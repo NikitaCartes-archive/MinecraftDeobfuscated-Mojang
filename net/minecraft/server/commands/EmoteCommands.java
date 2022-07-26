@@ -11,7 +11,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.players.PlayerList;
 
 public class EmoteCommands {
@@ -20,7 +19,7 @@ public class EmoteCommands {
             MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "action");
             CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
             PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-            chatMessage.resolve(commandSourceStack, filteredText -> playerList.broadcastChatMessage((FilteredText<PlayerChatMessage>)filteredText, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)));
+            chatMessage.resolve(commandSourceStack, playerChatMessage -> playerList.broadcastChatMessage((PlayerChatMessage)playerChatMessage, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)));
             return 1;
         })));
     }

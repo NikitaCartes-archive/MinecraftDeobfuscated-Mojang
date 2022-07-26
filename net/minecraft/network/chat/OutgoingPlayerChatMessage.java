@@ -6,18 +6,19 @@ package net.minecraft.network.chat;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.players.PlayerList;
 
 public interface OutgoingPlayerChatMessage {
     public Component serverContent();
 
-    public ClientboundPlayerChatPacket packetForPlayer(ServerPlayer var1, ChatType.Bound var2);
+    public void sendToPlayer(ServerPlayer var1, boolean var2, ChatType.Bound var3);
 
     public void sendHeadersToRemainingPlayers(PlayerList var1);
 
@@ -26,11 +27,6 @@ public interface OutgoingPlayerChatMessage {
             return new NotTracked(playerChatMessage);
         }
         return new Tracked(playerChatMessage);
-    }
-
-    public static FilteredText<OutgoingPlayerChatMessage> createFromFiltered(FilteredText<PlayerChatMessage> filteredText) {
-        OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(filteredText.raw());
-        return filteredText.rebuildIfNeeded(outgoingPlayerChatMessage, NotTracked::new);
     }
 
     public static class NotTracked
@@ -47,10 +43,14 @@ public interface OutgoingPlayerChatMessage {
         }
 
         @Override
-        public ClientboundPlayerChatPacket packetForPlayer(ServerPlayer serverPlayer, ChatType.Bound bound) {
-            RegistryAccess registryAccess = serverPlayer.level.registryAccess();
-            ChatType.BoundNetwork boundNetwork = bound.toNetwork(registryAccess);
-            return new ClientboundPlayerChatPacket(this.message, boundNetwork);
+        public void sendToPlayer(ServerPlayer serverPlayer, boolean bl, ChatType.Bound bound) {
+            PlayerChatMessage playerChatMessage = this.message.filter(bl);
+            if (!playerChatMessage.isFullyFiltered()) {
+                RegistryAccess registryAccess = serverPlayer.level.registryAccess();
+                ChatType.BoundNetwork boundNetwork = bound.toNetwork(registryAccess);
+                serverPlayer.connection.send(new ClientboundPlayerChatPacket(playerChatMessage, boundNetwork));
+                serverPlayer.connection.addPendingMessage(playerChatMessage);
+            }
         }
 
         @Override
@@ -73,11 +73,15 @@ public interface OutgoingPlayerChatMessage {
         }
 
         @Override
-        public ClientboundPlayerChatPacket packetForPlayer(ServerPlayer serverPlayer, ChatType.Bound bound) {
-            this.playersWithFullMessage.add(serverPlayer);
-            RegistryAccess registryAccess = serverPlayer.level.registryAccess();
-            ChatType.BoundNetwork boundNetwork = bound.toNetwork(registryAccess);
-            return new ClientboundPlayerChatPacket(this.message, boundNetwork);
+        public void sendToPlayer(ServerPlayer serverPlayer, boolean bl, ChatType.Bound bound) {
+            PlayerChatMessage playerChatMessage = this.message.filter(bl);
+            if (!playerChatMessage.isFullyFiltered()) {
+                this.playersWithFullMessage.add(serverPlayer);
+                RegistryAccess registryAccess = serverPlayer.level.registryAccess();
+                ChatType.BoundNetwork boundNetwork = bound.toNetwork(registryAccess);
+                serverPlayer.connection.send(new ClientboundPlayerChatPacket(playerChatMessage, boundNetwork), PacketSendListener.exceptionallySend(() -> new ClientboundPlayerChatHeaderPacket(this.message)));
+                serverPlayer.connection.addPendingMessage(playerChatMessage);
+            }
         }
 
         @Override

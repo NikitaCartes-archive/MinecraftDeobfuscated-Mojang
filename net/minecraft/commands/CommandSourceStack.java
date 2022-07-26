@@ -271,15 +271,35 @@ implements SharedSuggestionProvider {
         return this.chatMessageChainer;
     }
 
-    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, ChatType.Bound bound) {
+    public boolean shouldFilterMessageTo(ServerPlayer serverPlayer) {
+        ServerPlayer serverPlayer2 = this.getPlayer();
+        if (serverPlayer == serverPlayer2) {
+            return false;
+        }
+        return serverPlayer2 != null && serverPlayer2.isTextFilteringEnabled() || serverPlayer.isTextFilteringEnabled();
+    }
+
+    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, boolean bl, ChatType.Bound bound) {
         if (this.silent) {
             return;
         }
         ServerPlayer serverPlayer = this.getPlayer();
         if (serverPlayer != null) {
-            serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
+            serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl, bound);
         } else {
             this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.serverContent()));
+        }
+    }
+
+    public void sendSystemMessage(Component component) {
+        if (this.silent) {
+            return;
+        }
+        ServerPlayer serverPlayer = this.getPlayer();
+        if (serverPlayer != null) {
+            serverPlayer.sendSystemMessage(component);
+        } else {
+            this.source.sendSystemMessage(component);
         }
     }
 

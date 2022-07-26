@@ -149,7 +149,11 @@ implements AutoCloseable {
     }
 
     public Font createFont() {
-        return new Font(resourceLocation -> this.fontSets.getOrDefault(this.renames.getOrDefault(resourceLocation, (ResourceLocation)resourceLocation), this.missingFontSet));
+        return new Font(resourceLocation -> this.fontSets.getOrDefault(this.renames.getOrDefault(resourceLocation, (ResourceLocation)resourceLocation), this.missingFontSet), false);
+    }
+
+    public Font createFontFilterFishy() {
+        return new Font(resourceLocation -> this.fontSets.getOrDefault(this.renames.getOrDefault(resourceLocation, (ResourceLocation)resourceLocation), this.missingFontSet), true);
     }
 
     public PreparableReloadListener getReloadListener() {

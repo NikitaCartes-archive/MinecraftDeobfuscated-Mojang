@@ -62,17 +62,18 @@ extends ContainerObjectSelectionList<PlayerEntry> {
             PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(uUID);
             if (playerInfo == null) continue;
             UUID uUID2 = playerInfo.getProfile().getId();
-            map.put(uUID2, new PlayerEntry(this.minecraft, this.socialInteractionsScreen, uUID2, playerInfo.getProfile().getName(), playerInfo::getSkinLocation));
+            boolean bl = playerInfo.getProfilePublicKey() != null;
+            map.put(uUID2, new PlayerEntry(this.minecraft, this.socialInteractionsScreen, uUID2, playerInfo.getProfile().getName(), playerInfo::getSkinLocation, bl));
         }
     }
 
     private void updatePlayersFromChatLog(Map<UUID, PlayerEntry> map, boolean bl) {
-        Collection<GameProfile> collection = this.minecraft.getReportingContext().chatLog().selectAllDescending().distinctGameProfiles();
+        Collection<GameProfile> collection = this.minecraft.getReportingContext().chatLog().selectAllDescending().reportableGameProfiles();
         for (GameProfile gameProfile : collection) {
             PlayerEntry playerEntry;
             if (bl) {
                 playerEntry = map.computeIfAbsent(gameProfile.getId(), uUID -> {
-                    PlayerEntry playerEntry = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, gameProfile.getId(), gameProfile.getName(), Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile)));
+                    PlayerEntry playerEntry = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, gameProfile.getId(), gameProfile.getName(), Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile)), true);
                     playerEntry.setRemoved(true);
                     return playerEntry;
                 });
@@ -137,9 +138,11 @@ extends ContainerObjectSelectionList<PlayerEntry> {
             return;
         }
         if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().shouldHideMessageFrom(uUID)) && (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).contains(this.filter))) {
-            PlayerEntry playerEntry2 = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation);
-            this.addEntry(playerEntry2);
-            this.players.add(playerEntry2);
+            PlayerEntry playerEntry;
+            boolean bl = playerInfo.getProfilePublicKey() != null;
+            playerEntry = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation, bl);
+            this.addEntry(playerEntry);
+            this.players.add(playerEntry);
         }
     }
 

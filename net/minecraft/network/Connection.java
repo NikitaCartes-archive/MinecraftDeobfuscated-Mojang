@@ -44,6 +44,7 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.PacketListener;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.SkipPacketException;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.Varint21FrameDecoder;
@@ -138,7 +139,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
                 LOGGER.debug("Failed to sent packet", throwable);
                 ConnectionProtocol connectionProtocol = this.getCurrentProtocol();
                 Packet<ClientLoginPacketListener> packet = connectionProtocol == ConnectionProtocol.LOGIN ? new ClientboundLoginDisconnectPacket(component) : new ClientboundDisconnectPacket(component);
-                this.send(packet, future -> this.disconnect(component));
+                this.send(packet, PacketSendListener.thenRun(() -> this.disconnect(component)));
                 this.setReadOnly();
             } else {
                 LOGGER.debug("Double fault", throwable);
@@ -176,16 +177,16 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         this.send(packet, null);
     }
 
-    public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
+    public void send(Packet<?> packet, @Nullable PacketSendListener packetSendListener) {
         if (this.isConnected()) {
             this.flushQueue();
-            this.sendPacket(packet, genericFutureListener);
+            this.sendPacket(packet, packetSendListener);
         } else {
-            this.queue.add(new PacketHolder(packet, genericFutureListener));
+            this.queue.add(new PacketHolder(packet, packetSendListener));
         }
     }
 
-    private void sendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
+    private void sendPacket(Packet<?> packet, @Nullable PacketSendListener packetSendListener) {
         ConnectionProtocol connectionProtocol = ConnectionProtocol.getProtocolForPacket(packet);
         ConnectionProtocol connectionProtocol2 = this.getCurrentProtocol();
         ++this.sentPackets;
@@ -194,19 +195,29 @@ extends SimpleChannelInboundHandler<Packet<?>> {
             this.channel.config().setAutoRead(false);
         }
         if (this.channel.eventLoop().inEventLoop()) {
-            this.doSendPacket(packet, genericFutureListener, connectionProtocol, connectionProtocol2);
+            this.doSendPacket(packet, packetSendListener, connectionProtocol, connectionProtocol2);
         } else {
-            this.channel.eventLoop().execute(() -> this.doSendPacket(packet, genericFutureListener, connectionProtocol, connectionProtocol2));
+            this.channel.eventLoop().execute(() -> this.doSendPacket(packet, packetSendListener, connectionProtocol, connectionProtocol2));
         }
     }
 
-    private void doSendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener, ConnectionProtocol connectionProtocol, ConnectionProtocol connectionProtocol2) {
+    private void doSendPacket(Packet<?> packet, @Nullable PacketSendListener packetSendListener, ConnectionProtocol connectionProtocol, ConnectionProtocol connectionProtocol2) {
         if (connectionProtocol != connectionProtocol2) {
             this.setProtocol(connectionProtocol);
         }
         ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
-        if (genericFutureListener != null) {
-            channelFuture.addListener(genericFutureListener);
+        if (packetSendListener != null) {
+            channelFuture.addListener((GenericFutureListener<? extends Future<? super Void>>)((GenericFutureListener<Future>)future -> {
+                if (future.isSuccess()) {
+                    packetSendListener.onSuccess();
+                } else {
+                    Packet<?> packet = packetSendListener.onFailure();
+                    if (packet != null) {
+                        ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
+                        channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                    }
+                }
+            }));
         }
         channelFuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
@@ -402,11 +413,11 @@ extends SimpleChannelInboundHandler<Packet<?>> {
     static class PacketHolder {
         final Packet<?> packet;
         @Nullable
-        final GenericFutureListener<? extends Future<? super Void>> listener;
+        final PacketSendListener listener;
 
-        public PacketHolder(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
+        public PacketHolder(Packet<?> packet, @Nullable PacketSendListener packetSendListener) {
             this.packet = packet;
-            this.listener = genericFutureListener;
+            this.listener = packetSendListener;
         }
     }
 }

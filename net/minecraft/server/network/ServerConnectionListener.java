@@ -39,6 +39,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.RateKickingConnection;
 import net.minecraft.network.Varint21FrameDecoder;
 import net.minecraft.network.Varint21LengthFieldPrepender;
@@ -157,7 +158,7 @@ public class ServerConnectionListener {
                         }
                         LOGGER.warn("Failed to handle packet for {}", (Object)connection.getRemoteAddress(), (Object)exception);
                         MutableComponent component = Component.literal("Internal server error");
-                        connection.send(new ClientboundDisconnectPacket(component), future -> connection.disconnect(component));
+                        connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> connection.disconnect(component)));
                         connection.setReadOnly();
                     }
                     continue;

@@ -21,6 +21,8 @@ import org.jetbrains.annotations.Nullable;
 public class SystemToast
 implements Toast {
     private static final int MAX_LINE_SIZE = 200;
+    private static final int LINE_SPACING = 12;
+    private static final int MARGIN = 10;
     private final SystemToastIds id;
     private Component title;
     private List<FormattedCharSequence> messageLines;
@@ -56,8 +58,13 @@ implements Toast {
     }
 
     @Override
+    public int height() {
+        return 20 + this.messageLines.size() * 12;
+    }
+
+    @Override
     public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
-        int k;
+        int j;
         if (this.changed) {
             this.lastChanged = l;
             this.changed = false;
@@ -65,25 +72,24 @@ implements Toast {
         RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.width();
-        int j = 12;
         if (i == 160 && this.messageLines.size() <= 1) {
             toastComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
         } else {
-            k = this.height() + Math.max(0, this.messageLines.size() - 1) * 12;
-            int m = 28;
-            int n = Math.min(4, k - 28);
+            j = this.height();
+            int k = 28;
+            int m = Math.min(4, j - 28);
             this.renderBackgroundRow(poseStack, toastComponent, i, 0, 0, 28);
-            for (int o = 28; o < k - n; o += 10) {
-                this.renderBackgroundRow(poseStack, toastComponent, i, 16, o, Math.min(16, k - o - n));
+            for (int n = 28; n < j - m; n += 10) {
+                this.renderBackgroundRow(poseStack, toastComponent, i, 16, n, Math.min(16, j - n - m));
             }
-            this.renderBackgroundRow(poseStack, toastComponent, i, 32 - n, k - n, n);
+            this.renderBackgroundRow(poseStack, toastComponent, i, 32 - m, j - m, m);
         }
         if (this.messageLines == null) {
             toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0f, 12.0f, -256);
         } else {
             toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0f, 7.0f, -256);
-            for (k = 0; k < this.messageLines.size(); ++k) {
-                toastComponent.getMinecraft().font.draw(poseStack, this.messageLines.get(k), 18.0f, (float)(18 + k * 12), -1);
+            for (j = 0; j < this.messageLines.size(); ++j) {
+                toastComponent.getMinecraft().font.draw(poseStack, this.messageLines.get(j), 18.0f, (float)(18 + j * 12), -1);
             }
         }
         return l - this.lastChanged < this.id.displayTime ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;

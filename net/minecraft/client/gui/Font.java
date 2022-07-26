@@ -44,11 +44,13 @@ public class Font {
     public final int lineHeight = 9;
     public final RandomSource random = RandomSource.create();
     private final Function<ResourceLocation, FontSet> fonts;
+    final boolean filterFishyGlyphs;
     private final StringSplitter splitter;
 
-    public Font(Function<ResourceLocation, FontSet> function) {
+    public Font(Function<ResourceLocation, FontSet> function, boolean bl) {
         this.fonts = function;
-        this.splitter = new StringSplitter((i, style) -> this.getFontSet(style.getFont()).getGlyphInfo(i).getAdvance(style.isBold()));
+        this.filterFishyGlyphs = bl;
+        this.splitter = new StringSplitter((i, style) -> this.getFontSet(style.getFont()).getGlyphInfo(i, this.filterFishyGlyphs).getAdvance(style.isBold()));
     }
 
     FontSet getFontSet(ResourceLocation resourceLocation) {
@@ -138,7 +140,7 @@ public class Font {
                 formattedCharSequence.accept((l, style, m) -> {
                     boolean bl = style.isBold();
                     FontSet fontSet = this.getFontSet(style.getFont());
-                    GlyphInfo glyphInfo = fontSet.getGlyphInfo(m);
+                    GlyphInfo glyphInfo = fontSet.getGlyphInfo(m, this.filterFishyGlyphs);
                     stringRenderOutput.x = fs[0] + (float)o * glyphInfo.getShadowOffset();
                     stringRenderOutput.y = g + (float)p * glyphInfo.getShadowOffset();
                     fs[0] = fs[0] + glyphInfo.getAdvance(bl);
@@ -305,7 +307,7 @@ public class Font {
             float h;
             float g;
             FontSet fontSet = Font.this.getFontSet(style.getFont());
-            GlyphInfo glyphInfo = fontSet.getGlyphInfo(j);
+            GlyphInfo glyphInfo = fontSet.getGlyphInfo(j, Font.this.filterFishyGlyphs);
             BakedGlyph bakedGlyph = style.isObfuscated() && j != 32 ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(j);
             boolean bl = style.isBold();
             float f = this.a;

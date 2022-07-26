@@ -12,8 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -31,7 +29,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,15 +51,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
-import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatPreviewCache;
 import net.minecraft.network.chat.ChatPreviewThrottler;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FilterMask;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.LastSeenMessagesValidator;
 import net.minecraft.network.chat.MessageSignature;
@@ -157,6 +154,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -240,7 +238,7 @@ ServerGamePacketListener {
     private final ChatPreviewCache chatPreviewCache = new ChatPreviewCache();
     private final ChatPreviewThrottler chatPreviewThrottler = new ChatPreviewThrottler();
     private final AtomicReference<Instant> lastChatTimeStamp = new AtomicReference<Instant>(Instant.EPOCH);
-    private final SignedMessageChain.Decoder signedMessageDecoder = new SignedMessageChain().decoder();
+    private final SignedMessageChain.Decoder signedMessageDecoder;
     private final LastSeenMessagesValidator lastSeenMessagesValidator = new LastSeenMessagesValidator();
     private final FutureChain chatMessageChain;
 
@@ -252,6 +250,8 @@ ServerGamePacketListener {
         serverPlayer.connection = this;
         this.keepAliveTime = Util.getMillis();
         serverPlayer.getTextFilter().join();
+        ProfilePublicKey profilePublicKey = serverPlayer.getProfilePublicKey();
+        this.signedMessageDecoder = profilePublicKey != null ? new SignedMessageChain().decoder() : SignedMessageChain.Decoder.UNSIGNED;
         this.chatMessageChain = new FutureChain(minecraftServer);
     }
 
@@ -346,32 +346,27 @@ ServerGamePacketListener {
     }
 
     public void disconnect(Component component) {
-        this.connection.send(new ClientboundDisconnectPacket(component), future -> this.connection.disconnect(component));
+        this.connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> this.connection.disconnect(component)));
         this.connection.setReadOnly();
         this.server.executeBlocking(this.connection::handleDisconnection);
     }
 
-    private <T, R, O> CompletableFuture<O> filterTextPacket(T object2, Function<R, CompletableFuture<O>> function, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
-        MinecraftServer blockableEventLoop = this.player.getLevel().getServer();
-        Function<Object, CompletableFuture> function2 = object -> {
-            if (this.getConnection().isConnected()) {
-                return (CompletableFuture)function.apply(object);
+    private <T, R> CompletableFuture<R> filterTextPacket(T object2, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
+        return biFunction.apply(this.player.getTextFilter(), (TextFilter)object2).thenApply(object -> {
+            if (!this.getConnection().isConnected()) {
+                LOGGER.debug("Ignoring packet due to disconnection");
+                throw new CancellationException("disconnected");
             }
-            LOGGER.debug("Ignoring packet due to disconnection");
-            return CompletableFuture.failedFuture(new CancellationException("disconnected"));
-        };
-        return biFunction.apply(this.player.getTextFilter(), (TextFilter)object2).thenComposeAsync(function2, (Executor)blockableEventLoop);
+            return object;
+        });
     }
 
-    private CompletableFuture<Void> filterTextPacket(String string, Function<FilteredText<String>, CompletableFuture<Void>> function) {
-        return this.filterTextPacket(string, function, TextFilter::processStreamMessage);
+    private CompletableFuture<FilteredText> filterTextPacket(String string) {
+        return this.filterTextPacket(string, TextFilter::processStreamMessage);
     }
 
-    private void filterTextPacket(List<String> list2, Consumer<List<FilteredText<String>>> consumer) {
-        this.filterTextPacket(list2, list -> {
-            consumer.accept((List<FilteredText<String>>)list);
-            return CompletableFuture.completedFuture(null);
-        }, TextFilter::processMessageBundle);
+    private CompletableFuture<List<FilteredText>> filterTextPacket(List<String> list) {
+        return this.filterTextPacket(list, TextFilter::processMessageBundle);
     }
 
     @Override
@@ -742,10 +737,11 @@ ServerGamePacketListener {
         Optional<String> optional = serverboundEditBookPacket.getTitle();
         optional.ifPresent(list2::add);
         serverboundEditBookPacket.getPages().stream().limit(100L).forEach(list2::add);
-        this.filterTextPacket(list2, optional.isPresent() ? list -> this.signBook((FilteredText)list.get(0), list.subList(1, list.size()), i) : list -> this.updateBookContents((List<FilteredText<String>>)list, i));
+        Consumer<List> consumer = optional.isPresent() ? list -> this.signBook((FilteredText)list.get(0), list.subList(1, list.size()), i) : list -> this.updateBookContents((List<FilteredText>)list, i);
+        this.filterTextPacket(list2).thenAcceptAsync(consumer, (Executor)this.server);
     }
 
-    private void updateBookContents(List<FilteredText<String>> list, int i) {
+    private void updateBookContents(List<FilteredText> list, int i) {
         ItemStack itemStack = this.player.getInventory().getItem(i);
         if (!itemStack.is(Items.WRITABLE_BOOK)) {
             return;
@@ -753,7 +749,7 @@ ServerGamePacketListener {
         this.updateBookPages(list, UnaryOperator.identity(), itemStack);
     }
 
-    private void signBook(FilteredText<String> filteredText, List<FilteredText<String>> list, int i) {
+    private void signBook(FilteredText filteredText, List<FilteredText> list, int i) {
         ItemStack itemStack = this.player.getInventory().getItem(i);
         if (!itemStack.is(Items.WRITABLE_BOOK)) {
             return;
@@ -765,28 +761,28 @@ ServerGamePacketListener {
         }
         itemStack2.addTagElement("author", StringTag.valueOf(this.player.getName().getString()));
         if (this.player.isTextFilteringEnabled()) {
-            itemStack2.addTagElement("title", StringTag.valueOf(filteredText.filteredOrElse("")));
+            itemStack2.addTagElement("title", StringTag.valueOf(filteredText.filteredOrEmpty()));
         } else {
-            itemStack2.addTagElement("filtered_title", StringTag.valueOf(filteredText.filteredOrElse("")));
+            itemStack2.addTagElement("filtered_title", StringTag.valueOf(filteredText.filteredOrEmpty()));
             itemStack2.addTagElement("title", StringTag.valueOf(filteredText.raw()));
         }
         this.updateBookPages(list, string -> Component.Serializer.toJson(Component.literal(string)), itemStack2);
         this.player.getInventory().setItem(i, itemStack2);
     }
 
-    private void updateBookPages(List<FilteredText<String>> list, UnaryOperator<String> unaryOperator, ItemStack itemStack) {
+    private void updateBookPages(List<FilteredText> list, UnaryOperator<String> unaryOperator, ItemStack itemStack) {
         ListTag listTag = new ListTag();
         if (this.player.isTextFilteringEnabled()) {
-            list.stream().map(filteredText -> StringTag.valueOf((String)unaryOperator.apply(filteredText.filteredOrElse("")))).forEach(listTag::add);
+            list.stream().map(filteredText -> StringTag.valueOf((String)unaryOperator.apply(filteredText.filteredOrEmpty()))).forEach(listTag::add);
         } else {
             CompoundTag compoundTag = new CompoundTag();
             int j = list.size();
             for (int i = 0; i < j; ++i) {
-                FilteredText<String> filteredText2 = list.get(i);
+                FilteredText filteredText2 = list.get(i);
                 String string = filteredText2.raw();
                 listTag.add(StringTag.valueOf((String)unaryOperator.apply(string)));
                 if (!filteredText2.isFiltered()) continue;
-                compoundTag.putString(String.valueOf(i), (String)unaryOperator.apply(filteredText2.filteredOrElse("")));
+                compoundTag.putString(String.valueOf(i), (String)unaryOperator.apply(filteredText2.filteredOrEmpty()));
             }
             if (!compoundTag.isEmpty()) {
                 itemStack.addTagElement("filtered_pages", compoundTag);
@@ -1130,9 +1126,9 @@ ServerGamePacketListener {
         this.send(packet, null);
     }
 
-    public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> genericFutureListener) {
+    public void send(Packet<?> packet, @Nullable PacketSendListener packetSendListener) {
         try {
-            this.connection.send(packet, genericFutureListener);
+            this.connection.send(packet, packetSendListener);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Sending packet");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Packet being sent");
@@ -1168,8 +1164,13 @@ ServerGamePacketListener {
                     return;
                 }
                 this.chatMessageChain.append(() -> {
-                    String string = playerChatMessage.signedContent().plain();
-                    return this.filterTextPacket(string, (FilteredText<String> filteredText) -> this.handleChat(playerChatMessage, (FilteredText<String>)filteredText));
+                    CompletableFuture<FilteredText> completableFuture = this.filterTextPacket(playerChatMessage.signedContent().plain());
+                    CompletableFuture<PlayerChatMessage> completableFuture2 = this.server.getChatDecorator().decorate(this.player, playerChatMessage);
+                    return CompletableFuture.allOf(completableFuture, completableFuture2).thenAcceptAsync(void_ -> {
+                        FilterMask filterMask = ((FilteredText)completableFuture.join()).mask();
+                        PlayerChatMessage playerChatMessage = ((PlayerChatMessage)completableFuture2.join()).filter(filterMask);
+                        this.broadcastChatMessage(playerChatMessage);
+                    }, (Executor)this.server);
                 });
             });
         }
@@ -1266,23 +1267,6 @@ ServerGamePacketListener {
         return false;
     }
 
-    private CompletableFuture<Void> handleChat(PlayerChatMessage playerChatMessage, FilteredText<String> filteredText) {
-        ChatDecorator chatDecorator = this.server.getChatDecorator();
-        FilteredText<Component> filteredText22 = filteredText.map(Component::literal);
-        ChatMessageContent chatMessageContent = playerChatMessage.signedContent();
-        if (chatMessageContent.isDecorated()) {
-            return chatDecorator.rebuildFiltered(this.player, filteredText22, chatMessageContent.decorated()).thenAcceptAsync(filteredText2 -> {
-                FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText, filteredText2);
-                this.broadcastChatMessage(playerChatMessage.withFilteredText(filteredText3));
-            }, (Executor)this.server);
-        }
-        return ((CompletableFuture)chatDecorator.decorate(this.player, Component.literal(filteredText.raw())).thenComposeAsync(component -> chatDecorator.rebuildFiltered(this.player, filteredText22, (Component)component), (Executor)this.server)).thenAcceptAsync(filteredText2 -> {
-            FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText);
-            FilteredText<PlayerChatMessage> filteredText4 = playerChatMessage.withFilteredText(filteredText3);
-            this.broadcastChatMessage(ChatDecorator.attachUnsignedDecoration(filteredText4, filteredText2));
-        }, (Executor)this.server);
-    }
-
     private PlayerChatMessage getSignedMessage(ServerboundChatPacket serverboundChatPacket) {
         MessageSigner messageSigner = serverboundChatPacket.getSigner(this.player);
         SignedMessageChain.Link link = new SignedMessageChain.Link(serverboundChatPacket.signature());
@@ -1299,8 +1283,8 @@ ServerGamePacketListener {
         return new ChatMessageContent(serverboundChatPacket.message());
     }
 
-    private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText) {
-        this.server.getPlayerList().broadcastChatMessage(filteredText, this.player, ChatType.bind(ChatType.CHAT, this.player));
+    private void broadcastChatMessage(PlayerChatMessage playerChatMessage) {
+        this.server.getPlayerList().broadcastChatMessage(playerChatMessage, this.player, ChatType.bind(ChatType.CHAT, this.player));
         this.detectRateSpam();
     }
 
@@ -1339,11 +1323,7 @@ ServerGamePacketListener {
     }
 
     private void sendPreviewResponse(int i, Component component) {
-        this.send(new ClientboundChatPreviewPacket(i, component), future -> {
-            if (!future.isSuccess()) {
-                this.send(new ClientboundChatPreviewPacket(i, null));
-            }
-        });
+        this.send(new ClientboundChatPreviewPacket(i, component), PacketSendListener.exceptionallySend(() -> new ClientboundChatPreviewPacket(i, null)));
     }
 
     private CompletableFuture<Component> queryPreview(String string) {
@@ -1673,10 +1653,10 @@ ServerGamePacketListener {
     @Override
     public void handleSignUpdate(ServerboundSignUpdatePacket serverboundSignUpdatePacket) {
         List<String> list2 = Stream.of(serverboundSignUpdatePacket.getLines()).map(ChatFormatting::stripFormatting).collect(Collectors.toList());
-        this.filterTextPacket(list2, (List<FilteredText<String>> list) -> this.updateSignText(serverboundSignUpdatePacket, (List<FilteredText<String>>)list));
+        this.filterTextPacket(list2).thenAcceptAsync(list -> this.updateSignText(serverboundSignUpdatePacket, (List<FilteredText>)list), (Executor)this.server);
     }
 
-    private void updateSignText(ServerboundSignUpdatePacket serverboundSignUpdatePacket, List<FilteredText<String>> list) {
+    private void updateSignText(ServerboundSignUpdatePacket serverboundSignUpdatePacket, List<FilteredText> list) {
         this.player.resetLastActionTime();
         ServerLevel serverLevel = this.player.getLevel();
         BlockPos blockPos = serverboundSignUpdatePacket.getPos();
@@ -1692,12 +1672,12 @@ ServerGamePacketListener {
                 return;
             }
             for (int i = 0; i < list.size(); ++i) {
-                FilteredText<Component> filteredText = list.get(i).map(Component::literal);
+                FilteredText filteredText = list.get(i);
                 if (this.player.isTextFilteringEnabled()) {
-                    signBlockEntity.setMessage(i, filteredText.filteredOrElse(CommonComponents.EMPTY));
+                    signBlockEntity.setMessage(i, Component.literal(filteredText.filteredOrEmpty()));
                     continue;
                 }
-                signBlockEntity.setMessage(i, filteredText.raw(), filteredText.filteredOrElse(CommonComponents.EMPTY));
+                signBlockEntity.setMessage(i, Component.literal(filteredText.raw()), Component.literal(filteredText.filteredOrEmpty()));
             }
             signBlockEntity.setChanged();
             serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
