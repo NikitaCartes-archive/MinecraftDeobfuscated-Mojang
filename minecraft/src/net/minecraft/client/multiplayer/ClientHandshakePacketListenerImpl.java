@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
@@ -97,7 +98,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 			}
 
 			this.updateStatus.accept(Component.translatable("connect.encrypting"));
-			this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(cipher, cipher2));
+			this.connection.send(serverboundKeyPacket, PacketSendListener.thenRun(() -> this.connection.setEncryptionKey(cipher, cipher2)));
 		}));
 	}
 

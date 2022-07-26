@@ -2,6 +2,7 @@ package net.minecraft.server.network;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.network.chat.FilterMask;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.thread.ProcessorMailbox;
 import org.slf4j.Logger;
@@ -164,10 +166,10 @@ public class TextFilterClient implements AutoCloseable {
 		});
 	}
 
-	CompletableFuture<FilteredText<String>> requestMessageProcessing(
+	CompletableFuture<FilteredText> requestMessageProcessing(
 		GameProfile gameProfile, String string, TextFilterClient.IgnoreStrategy ignoreStrategy, Executor executor
 	) {
-		return string.isEmpty() ? CompletableFuture.completedFuture(FilteredText.EMPTY_STRING) : CompletableFuture.supplyAsync(() -> {
+		return string.isEmpty() ? CompletableFuture.completedFuture(FilteredText.EMPTY) : CompletableFuture.supplyAsync(() -> {
 			JsonObject jsonObject = this.chatEncoder.encode(gameProfile, string);
 
 			try {
@@ -180,15 +182,32 @@ public class TextFilterClient implements AutoCloseable {
 					if (string2 == null) {
 						return FilteredText.fullyFiltered(string);
 					} else {
-						int i = GsonHelper.getAsJsonArray(jsonObject2, "hashes").size();
-						return ignoreStrategy.shouldIgnore(string2, i) ? FilteredText.fullyFiltered(string) : new FilteredText<>(string, string2);
+						JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject2, "hashes");
+						FilterMask filterMask = this.parseMask(string, jsonArray, ignoreStrategy);
+						return new FilteredText(string, filterMask);
 					}
 				}
-			} catch (Exception var9) {
-				LOGGER.warn("Failed to validate message '{}'", string, var9);
+			} catch (Exception var10) {
+				LOGGER.warn("Failed to validate message '{}'", string, var10);
 				return FilteredText.fullyFiltered(string);
 			}
 		}, executor);
+	}
+
+	private FilterMask parseMask(String string, JsonArray jsonArray, TextFilterClient.IgnoreStrategy ignoreStrategy) {
+		if (jsonArray.isEmpty()) {
+			return FilterMask.PASS_THROUGH;
+		} else if (ignoreStrategy.shouldIgnore(string, jsonArray.size())) {
+			return FilterMask.FULLY_FILTERED;
+		} else {
+			FilterMask filterMask = new FilterMask(string.length());
+
+			for (int i = 0; i < jsonArray.size(); i++) {
+				filterMask.setFiltered(jsonArray.get(i).getAsInt());
+			}
+
+			return filterMask;
+		}
 	}
 
 	public void close() {
@@ -372,15 +391,15 @@ public class TextFilterClient implements AutoCloseable {
 		}
 
 		@Override
-		public CompletableFuture<List<FilteredText<String>>> processMessageBundle(List<String> list) {
-			List<CompletableFuture<FilteredText<String>>> list2 = (List<CompletableFuture<FilteredText<String>>>)list.stream()
+		public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> list) {
+			List<CompletableFuture<FilteredText>> list2 = (List<CompletableFuture<FilteredText>>)list.stream()
 				.map(string -> TextFilterClient.this.requestMessageProcessing(this.profile, string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor))
 				.collect(ImmutableList.toImmutableList());
 			return Util.sequenceFailFast(list2).exceptionally(throwable -> ImmutableList.of());
 		}
 
 		@Override
-		public CompletableFuture<FilteredText<String>> processStreamMessage(String string) {
+		public CompletableFuture<FilteredText> processStreamMessage(String string) {
 			return TextFilterClient.this.requestMessageProcessing(this.profile, string, TextFilterClient.this.chatIgnoreStrategy, this.streamExecutor);
 		}
 	}

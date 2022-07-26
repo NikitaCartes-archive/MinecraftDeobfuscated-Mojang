@@ -8,7 +8,6 @@ import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -16,7 +15,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.FilteredText;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 
@@ -49,7 +48,6 @@ public class TeamMsgCommand {
 			throw ERROR_NOT_ON_TEAM.create();
 		} else {
 			Component component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
-			ChatSender chatSender = commandSourceStack.asChatSender();
 			ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, commandSourceStack).withTargetName(component);
 			ChatType.Bound bound2 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(component);
 			List<ServerPlayer> list = commandSourceStack.getServer()
@@ -58,21 +56,23 @@ public class TeamMsgCommand {
 				.stream()
 				.filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam)
 				.toList();
-			chatMessage.resolve(commandSourceStack, filteredText -> {
-				FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
+			chatMessage.resolve(commandSourceStack, playerChatMessage -> {
+				OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(playerChatMessage);
+				boolean bl = playerChatMessage.isFullyFiltered();
+				boolean bl2 = false;
 
 				for (ServerPlayer serverPlayer : list) {
-					if (serverPlayer == entity) {
-						serverPlayer.sendChatMessage(filteredText2.raw(), bound2);
-					} else {
-						OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
-						if (outgoingPlayerChatMessage != null) {
-							serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
-						}
-					}
+					ChatType.Bound bound3 = serverPlayer == entity ? bound2 : bound;
+					boolean bl3 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
+					serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl3, bound3);
+					bl2 |= bl && bl3 && serverPlayer != entity;
 				}
 
-				filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
+				if (bl2) {
+					commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+				}
+
+				outgoingPlayerChatMessage.sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
 			});
 			return list.size();
 		}

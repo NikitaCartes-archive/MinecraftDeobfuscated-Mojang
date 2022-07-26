@@ -168,7 +168,15 @@ public class FontManager implements AutoCloseable {
 	}
 
 	public Font createFont() {
-		return new Font(resourceLocation -> (FontSet)this.fontSets.getOrDefault(this.renames.getOrDefault(resourceLocation, resourceLocation), this.missingFontSet));
+		return new Font(
+			resourceLocation -> (FontSet)this.fontSets.getOrDefault(this.renames.getOrDefault(resourceLocation, resourceLocation), this.missingFontSet), false
+		);
+	}
+
+	public Font createFontFilterFishy() {
+		return new Font(
+			resourceLocation -> (FontSet)this.fontSets.getOrDefault(this.renames.getOrDefault(resourceLocation, resourceLocation), this.missingFontSet), true
+		);
 	}
 
 	public PreparableReloadListener getReloadListener() {

@@ -10,7 +10,8 @@ import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.FilteredText;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.Entity;
 
 public class MsgCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -33,19 +34,25 @@ public class MsgCommand {
 
 	private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, MessageArgument.ChatMessage chatMessage) {
 		ChatType.Bound bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, commandSourceStack);
-		chatMessage.resolve(commandSourceStack, filteredText -> {
-			FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
+		chatMessage.resolve(commandSourceStack, playerChatMessage -> {
+			OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(playerChatMessage);
+			boolean bl = playerChatMessage.isFullyFiltered();
+			Entity entity = commandSourceStack.getEntity();
+			boolean bl2 = false;
 
 			for (ServerPlayer serverPlayer : collection) {
 				ChatType.Bound bound2 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(serverPlayer.getDisplayName());
-				commandSourceStack.sendChatMessage(filteredText2.raw(), bound2);
-				OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.filter(commandSourceStack, serverPlayer);
-				if (outgoingPlayerChatMessage != null) {
-					serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
-				}
+				commandSourceStack.sendChatMessage(outgoingPlayerChatMessage, false, bound2);
+				boolean bl3 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
+				serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl3, bound);
+				bl2 |= bl && bl3 && serverPlayer != entity;
 			}
 
-			filteredText2.raw().sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
+			if (bl2) {
+				commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+			}
+
+			outgoingPlayerChatMessage.sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
 		});
 		return collection.size();
 	}

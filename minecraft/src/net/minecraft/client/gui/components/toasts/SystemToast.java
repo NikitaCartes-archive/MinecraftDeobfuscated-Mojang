@@ -15,6 +15,8 @@ import net.minecraft.util.FormattedCharSequence;
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
 	private static final int MAX_LINE_SIZE = 200;
+	private static final int LINE_SPACING = 12;
+	private static final int MARGIN = 10;
 	private final SystemToast.SystemToastIds id;
 	private Component title;
 	private List<FormattedCharSequence> messageLines;
@@ -55,6 +57,11 @@ public class SystemToast implements Toast {
 	}
 
 	@Override
+	public int height() {
+		return 20 + this.messageLines.size() * 12;
+	}
+
+	@Override
 	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
 		if (this.changed) {
 			this.lastChanged = l;
@@ -64,20 +71,19 @@ public class SystemToast implements Toast {
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int i = this.width();
-		int j = 12;
 		if (i == 160 && this.messageLines.size() <= 1) {
 			toastComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
 		} else {
-			int k = this.height() + Math.max(0, this.messageLines.size() - 1) * 12;
-			int m = 28;
-			int n = Math.min(4, k - 28);
+			int j = this.height();
+			int k = 28;
+			int m = Math.min(4, j - 28);
 			this.renderBackgroundRow(poseStack, toastComponent, i, 0, 0, 28);
 
-			for (int o = 28; o < k - n; o += 10) {
-				this.renderBackgroundRow(poseStack, toastComponent, i, 16, o, Math.min(16, k - o - n));
+			for (int n = 28; n < j - m; n += 10) {
+				this.renderBackgroundRow(poseStack, toastComponent, i, 16, n, Math.min(16, j - n - m));
 			}
 
-			this.renderBackgroundRow(poseStack, toastComponent, i, 32 - n, k - n, n);
+			this.renderBackgroundRow(poseStack, toastComponent, i, 32 - m, j - m, m);
 		}
 
 		if (this.messageLines == null) {
@@ -85,8 +91,8 @@ public class SystemToast implements Toast {
 		} else {
 			toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0F, 7.0F, -256);
 
-			for (int k = 0; k < this.messageLines.size(); k++) {
-				toastComponent.getMinecraft().font.draw(poseStack, (FormattedCharSequence)this.messageLines.get(k), 18.0F, (float)(18 + k * 12), -1);
+			for (int j = 0; j < this.messageLines.size(); j++) {
+				toastComponent.getMinecraft().font.draw(poseStack, (FormattedCharSequence)this.messageLines.get(j), 18.0F, (float)(18 + j * 12), -1);
 			}
 		}
 

@@ -14,6 +14,7 @@ import net.minecraft.network.chat.SignedMessageValidator;
 public enum ChatTrustLevel {
 	SECURE,
 	MODIFIED,
+	FILTERED,
 	NOT_SECURE,
 	BROKEN_CHAIN;
 
@@ -28,6 +29,8 @@ public enum ChatTrustLevel {
 				return NOT_SECURE;
 			} else if (playerChatMessage.hasExpiredClient(instant)) {
 				return NOT_SECURE;
+			} else if (!playerChatMessage.filterMask().isEmpty()) {
+				return FILTERED;
 			} else if (playerChatMessage.unsignedContent().isPresent()) {
 				return MODIFIED;
 			} else {
@@ -44,6 +47,7 @@ public enum ChatTrustLevel {
 	public GuiMessageTag createTag(PlayerChatMessage playerChatMessage) {
 		return switch (this) {
 			case MODIFIED -> GuiMessageTag.chatModified(playerChatMessage.signedContent().plain());
+			case FILTERED -> GuiMessageTag.chatFiltered();
 			case NOT_SECURE -> GuiMessageTag.chatNotSecure();
 			default -> null;
 		};

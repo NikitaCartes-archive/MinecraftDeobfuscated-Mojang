@@ -18,6 +18,7 @@ import javax.crypto.SecretKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ThrowingComponent;
@@ -126,7 +127,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 				this.connection
 					.send(
 						new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()),
-						channelFuture -> this.connection.setupCompression(this.server.getCompressionThreshold(), true)
+						PacketSendListener.thenRun(() -> this.connection.setupCompression(this.server.getCompressionThreshold(), true))
 					);
 			}
 

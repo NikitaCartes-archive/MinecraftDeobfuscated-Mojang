@@ -270,6 +270,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final SearchRegistry searchRegistry = new SearchRegistry();
 	private final User user;
 	public final Font font;
+	public final Font fontFilterFishy;
 	public final GameRenderer gameRenderer;
 	public final DebugRenderer debugRenderer;
 	private final AtomicReference<StoringChunkProgressListener> progressListener = new AtomicReference();
@@ -485,6 +486,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.musicManager = new MusicManager(this);
 		this.fontManager = new FontManager(this.textureManager);
 		this.font = this.fontManager.createFont();
+		this.fontFilterFishy = this.fontManager.createFontFilterFishy();
 		this.resourceManager.registerReloadListener(this.fontManager.getReloadListener());
 		this.selectMainFont(this.isEnforceUnicode());
 		this.resourceManager.registerReloadListener(new GrassColorReloadListener());

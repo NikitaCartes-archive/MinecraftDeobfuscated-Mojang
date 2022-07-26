@@ -114,12 +114,14 @@ public interface ChatLog {
 			return this.ids().mapToObj(this.log::lookup).filter(Objects::nonNull);
 		}
 
-		public Collection<GameProfile> distinctGameProfiles() {
-			return this.events()
-				.map(loggedChatEvent -> loggedChatEvent instanceof LoggedChatMessage.Player player ? player.profile() : null)
-				.filter(Objects::nonNull)
-				.distinct()
-				.toList();
+		public Collection<GameProfile> reportableGameProfiles() {
+			return this.events().map(loggedChatEvent -> {
+				if (loggedChatEvent instanceof LoggedChatMessage.Player player && player.canReport(player.profile().getId())) {
+					return player.profile();
+				}
+
+				return null;
+			}).filter(Objects::nonNull).distinct().toList();
 		}
 
 		public Stream<ChatLog.Entry<LoggedChatEvent>> entries() {

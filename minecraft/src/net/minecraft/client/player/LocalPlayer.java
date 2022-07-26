@@ -328,18 +328,16 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	private void sendChat(String string, @Nullable Component component) {
-		String string2 = StringUtil.trimChatMessage(string);
+		ChatMessageContent chatMessageContent = this.buildSignedContent(string, component);
 		MessageSigner messageSigner = this.createMessageSigner();
 		LastSeenMessages.Update update = this.connection.generateMessageAcknowledgements();
-		if (component != null) {
-			ChatMessageContent chatMessageContent = new ChatMessageContent(string2, component);
-			MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
-			this.connection.send(new ServerboundChatPacket(string2, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, true, update));
-		} else {
-			ChatMessageContent chatMessageContent = new ChatMessageContent(string2);
-			MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
-			this.connection.send(new ServerboundChatPacket(string2, messageSigner.timeStamp(), messageSigner.salt(), messageSignature, false, update));
-		}
+		MessageSignature messageSignature = this.signMessage(messageSigner, chatMessageContent, update.lastSeen());
+		this.connection
+			.send(
+				new ServerboundChatPacket(
+					chatMessageContent.plain(), messageSigner.timeStamp(), messageSigner.salt(), messageSignature, chatMessageContent.isDecorated(), update
+				)
+			);
 	}
 
 	private MessageSignature signMessage(MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages) {
@@ -373,7 +371,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		} else {
 			try {
 				return ArgumentSignatures.signCommand(PreviewableCommand.of(parseResults), (string, string2) -> {
-					ChatMessageContent chatMessageContent = component != null ? new ChatMessageContent(string2, component) : new ChatMessageContent(string2);
+					ChatMessageContent chatMessageContent = this.buildSignedContent(string2, component);
 					return this.connection.signedMessageEncoder().pack(signer, messageSigner, chatMessageContent, lastSeenMessages).signature();
 				});
 			} catch (Exception var7) {
@@ -381,6 +379,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 				return ArgumentSignatures.EMPTY;
 			}
 		}
+	}
+
+	private ChatMessageContent buildSignedContent(String string, @Nullable Component component) {
+		String string2 = StringUtil.trimChatMessage(string);
+		return component != null ? new ChatMessageContent(string2, component) : new ChatMessageContent(string2);
 	}
 
 	private MessageSigner createMessageSigner() {

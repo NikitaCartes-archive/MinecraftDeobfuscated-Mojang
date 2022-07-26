@@ -44,7 +44,7 @@ public class SignedMessageChain {
 	) {
 		SignedMessageHeader signedMessageHeader = new SignedMessageHeader(messageSignature, messageSigner.profileId());
 		SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), lastSeenMessages);
-		return new PlayerChatMessage(signedMessageHeader, link.signature, signedMessageBody, Optional.empty());
+		return new PlayerChatMessage(signedMessageHeader, link.signature, signedMessageBody, Optional.empty(), FilterMask.PASS_THROUGH);
 	}
 
 	public SignedMessageChain.Decoder decoder() {
@@ -57,6 +57,10 @@ public class SignedMessageChain {
 
 	@FunctionalInterface
 	public interface Decoder {
+		SignedMessageChain.Decoder UNSIGNED = (link, messageSigner, chatMessageContent, lastSeenMessages) -> PlayerChatMessage.unsigned(
+				messageSigner, chatMessageContent
+			);
+
 		PlayerChatMessage unpack(SignedMessageChain.Link link, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages);
 	}
 

@@ -62,13 +62,14 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 			PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(uUID);
 			if (playerInfo != null) {
 				UUID uUID2 = playerInfo.getProfile().getId();
-				map.put(uUID2, new PlayerEntry(this.minecraft, this.socialInteractionsScreen, uUID2, playerInfo.getProfile().getName(), playerInfo::getSkinLocation));
+				boolean bl = playerInfo.getProfilePublicKey() != null;
+				map.put(uUID2, new PlayerEntry(this.minecraft, this.socialInteractionsScreen, uUID2, playerInfo.getProfile().getName(), playerInfo::getSkinLocation, bl));
 			}
 		}
 	}
 
 	private void updatePlayersFromChatLog(Map<UUID, PlayerEntry> map, boolean bl) {
-		for (GameProfile gameProfile : this.minecraft.getReportingContext().chatLog().selectAllDescending().distinctGameProfiles()) {
+		for (GameProfile gameProfile : this.minecraft.getReportingContext().chatLog().selectAllDescending().reportableGameProfiles()) {
 			PlayerEntry playerEntry;
 			if (bl) {
 				playerEntry = (PlayerEntry)map.computeIfAbsent(
@@ -79,7 +80,8 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 							this.socialInteractionsScreen,
 							gameProfile.getId(),
 							gameProfile.getName(),
-							Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile))
+							Suppliers.memoize(() -> this.minecraft.getSkinManager().getInsecureSkinLocation(gameProfile)),
+							true
 						);
 						playerEntryx.setRemoved(true);
 						return playerEntryx;
@@ -147,11 +149,12 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 
 		if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().shouldHideMessageFrom(uUID))
 			&& (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).contains(this.filter))) {
-			PlayerEntry playerEntry2 = new PlayerEntry(
-				this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation
+			boolean bl = playerInfo.getProfilePublicKey() != null;
+			PlayerEntry playerEntryx = new PlayerEntry(
+				this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation, bl
 			);
-			this.addEntry(playerEntry2);
-			this.players.add(playerEntry2);
+			this.addEntry(playerEntryx);
+			this.players.add(playerEntryx);
 		}
 	}
 

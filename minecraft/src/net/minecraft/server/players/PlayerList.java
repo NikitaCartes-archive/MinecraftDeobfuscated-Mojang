@@ -68,7 +68,6 @@ import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -104,6 +103,7 @@ public abstract class PlayerList {
 	public static final File IPBANLIST_FILE = new File("banned-ips.json");
 	public static final File OPLIST_FILE = new File("ops.json");
 	public static final File WHITELIST_FILE = new File("whitelist.json");
+	public static final Component CHAT_FILTERED_FULL = Component.translatable("chat.filtered_full");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int SEND_PLAYER_INFO_INTERVAL = 600;
 	private static final SimpleDateFormat BAN_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
@@ -793,36 +793,38 @@ public abstract class PlayerList {
 		}
 	}
 
-	public void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText, CommandSourceStack commandSourceStack, ChatType.Bound bound) {
-		ServerPlayer serverPlayer = commandSourceStack.getPlayer();
-		if (serverPlayer != null) {
-			this.broadcastChatMessage(filteredText, serverPlayer, bound);
-		} else {
-			this.broadcastChatMessage(filteredText.raw(), commandSourceStack.asChatSender(), bound);
-		}
+	public void broadcastChatMessage(PlayerChatMessage playerChatMessage, CommandSourceStack commandSourceStack, ChatType.Bound bound) {
+		this.broadcastChatMessage(
+			playerChatMessage, commandSourceStack::shouldFilterMessageTo, commandSourceStack.getPlayer(), commandSourceStack.asChatSender(), bound
+		);
 	}
 
-	public void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText, ServerPlayer serverPlayer, ChatType.Bound bound) {
-		this.broadcastChatMessage(filteredText, serverPlayer::shouldFilterMessageTo, serverPlayer.asChatSender(), bound);
+	public void broadcastChatMessage(PlayerChatMessage playerChatMessage, ServerPlayer serverPlayer, ChatType.Bound bound) {
+		this.broadcastChatMessage(playerChatMessage, serverPlayer::shouldFilterMessageTo, serverPlayer, serverPlayer.asChatSender(), bound);
 	}
 
-	public void broadcastChatMessage(PlayerChatMessage playerChatMessage, ChatSender chatSender, ChatType.Bound bound) {
-		this.broadcastChatMessage(FilteredText.passThrough(playerChatMessage), serverPlayer -> false, chatSender, bound);
-	}
+	private void broadcastChatMessage(
+		PlayerChatMessage playerChatMessage, Predicate<ServerPlayer> predicate, @Nullable ServerPlayer serverPlayer, ChatSender chatSender, ChatType.Bound bound
+	) {
+		boolean bl = this.verifyChatTrusted(playerChatMessage, chatSender);
+		this.server.logChatMessage(playerChatMessage.serverContent(), bound, bl ? null : "Not Secure");
+		OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(playerChatMessage);
+		boolean bl2 = playerChatMessage.isFullyFiltered();
+		boolean bl3 = false;
 
-	private void broadcastChatMessage(FilteredText<PlayerChatMessage> filteredText, Predicate<ServerPlayer> predicate, ChatSender chatSender, ChatType.Bound bound) {
-		boolean bl = this.verifyChatTrusted(filteredText.raw(), chatSender);
-		this.server.logChatMessage(filteredText.raw().serverContent(), bound, bl ? null : "Not Secure");
-		FilteredText<OutgoingPlayerChatMessage> filteredText2 = OutgoingPlayerChatMessage.createFromFiltered(filteredText);
-
-		for (ServerPlayer serverPlayer : this.players) {
-			OutgoingPlayerChatMessage outgoingPlayerChatMessage = filteredText2.select(predicate.test(serverPlayer));
-			if (outgoingPlayerChatMessage != null) {
-				serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bound);
+		for (ServerPlayer serverPlayer2 : this.players) {
+			boolean bl4 = predicate.test(serverPlayer2);
+			serverPlayer2.sendChatMessage(outgoingPlayerChatMessage, bl4, bound);
+			if (serverPlayer != serverPlayer2) {
+				bl3 |= bl2 && bl4;
 			}
 		}
 
-		filteredText2.raw().sendHeadersToRemainingPlayers(this);
+		if (bl3 && serverPlayer != null) {
+			serverPlayer.sendSystemMessage(CHAT_FILTERED_FULL);
+		}
+
+		outgoingPlayerChatMessage.sendHeadersToRemainingPlayers(this);
 	}
 
 	public void broadcastMessageHeader(PlayerChatMessage playerChatMessage, Set<ServerPlayer> set) {

@@ -8,7 +8,6 @@ import com.mojang.logging.LogUtils;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -45,11 +44,13 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		MessageArgument.Message message = commandContext.getArgument(string, MessageArgument.Message.class);
 		Component component = message.resolveComponent(commandContext.getSource());
 		CommandSigningContext commandSigningContext = commandContext.getSource().getSigningContext();
-		PlayerChatMessage playerChatMessage = (PlayerChatMessage)Objects.requireNonNullElseGet(commandSigningContext.getArgument(string), () -> {
-			ChatMessageContent chatMessageContent = new ChatMessageContent(message.text);
-			return PlayerChatMessage.system(chatMessageContent);
-		});
-		return new MessageArgument.ChatMessage(component, playerChatMessage);
+		PlayerChatMessage playerChatMessage = commandSigningContext.getArgument(string);
+		if (playerChatMessage == null) {
+			ChatMessageContent chatMessageContent = new ChatMessageContent(message.text, component);
+			return new MessageArgument.ChatMessage(PlayerChatMessage.system(chatMessageContent));
+		} else {
+			return new MessageArgument.ChatMessage(ChatDecorator.attachIfNotDecorated(playerChatMessage, component));
+		}
 	}
 
 	public MessageArgument.Message parse(StringReader stringReader) throws CommandSyntaxException {
@@ -81,69 +82,31 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		});
 	}
 
-	public static record ChatMessage(Component formatted, PlayerChatMessage signedArgument) {
-		public void resolve(CommandSourceStack commandSourceStack, Consumer<FilteredText<PlayerChatMessage>> consumer) {
+	public static record ChatMessage(PlayerChatMessage signedArgument) {
+		public void resolve(CommandSourceStack commandSourceStack, Consumer<PlayerChatMessage> consumer) {
 			MinecraftServer minecraftServer = commandSourceStack.getServer();
-			String string = this.signedArgument.signedContent().plain();
-			commandSourceStack.getChatMessageChainer()
-				.append(
-					() -> this.filterPlainText(commandSourceStack, string)
-							.thenComposeAsync(
-								filteredText -> {
-									FilteredText<Component> filteredText2 = filteredText.rebuildIfNeeded(
-										this.formatted, stringxx -> this.rebuildFilteredMessage(commandSourceStack, stringxx)
-									);
-									return this.resolveFiltered(commandSourceStack, filteredText, filteredText2);
-								},
-								minecraftServer
-							)
-							.thenAcceptAsync(consumer, minecraftServer)
-				);
+			commandSourceStack.getChatMessageChainer().append(() -> {
+				CompletableFuture<FilteredText> completableFuture = this.filterPlainText(commandSourceStack, this.signedArgument.signedContent().plain());
+				CompletableFuture<PlayerChatMessage> completableFuture2 = minecraftServer.getChatDecorator().decorate(commandSourceStack.getPlayer(), this.signedArgument);
+				return CompletableFuture.allOf(completableFuture, completableFuture2).thenAcceptAsync(void_ -> {
+					PlayerChatMessage playerChatMessage = ((PlayerChatMessage)completableFuture2.join()).filter(((FilteredText)completableFuture.join()).mask());
+					consumer.accept(playerChatMessage);
+				}, minecraftServer);
+			});
 		}
 
-		@Nullable
-		private Component rebuildFilteredMessage(CommandSourceStack commandSourceStack, String string) {
-			try {
-				MessageArgument.Message message = MessageArgument.Message.parseText(new StringReader(string), true);
-				return message.resolveComponent(commandSourceStack);
-			} catch (CommandSyntaxException var4) {
-				return null;
-			}
-		}
-
-		private CompletableFuture<FilteredText<PlayerChatMessage>> resolveFiltered(
-			CommandSourceStack commandSourceStack, FilteredText<String> filteredText, FilteredText<Component> filteredText2
-		) {
-			MinecraftServer minecraftServer = commandSourceStack.getServer();
-			ChatDecorator chatDecorator = minecraftServer.getChatDecorator();
+		private CompletableFuture<FilteredText> filterPlainText(CommandSourceStack commandSourceStack, String string) {
 			ServerPlayer serverPlayer = commandSourceStack.getPlayer();
-			ChatMessageContent chatMessageContent = this.signedArgument.signedContent();
-			return chatMessageContent.isDecorated()
-				? chatDecorator.rebuildFiltered(serverPlayer, filteredText2, chatMessageContent.decorated()).thenApply(filteredText2x -> {
-					FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText, filteredText2x);
-					return this.signedArgument.withFilteredText(filteredText3);
-				})
-				: chatDecorator.decorate(serverPlayer, filteredText2.raw())
-					.thenComposeAsync(component -> chatDecorator.rebuildFiltered(serverPlayer, filteredText2, component), minecraftServer)
-					.thenApply(filteredText2x -> {
-						FilteredText<ChatMessageContent> filteredText3 = ChatMessageContent.fromFiltered(filteredText);
-						FilteredText<PlayerChatMessage> filteredText4 = this.signedArgument.withFilteredText(filteredText3);
-						return ChatDecorator.attachUnsignedDecoration(filteredText4, filteredText2x);
-					});
-		}
-
-		private CompletableFuture<FilteredText<String>> filterPlainText(CommandSourceStack commandSourceStack, String string) {
-			ServerPlayer serverPlayer = commandSourceStack.getPlayer();
-			return serverPlayer != null && this.signedArgument.hasSignatureFrom(serverPlayer)
+			return serverPlayer != null && this.signedArgument.hasSignatureFrom(serverPlayer.getUUID())
 				? serverPlayer.getTextFilter().processStreamMessage(string)
 				: CompletableFuture.completedFuture(FilteredText.passThrough(string));
 		}
 
 		public void consume(CommandSourceStack commandSourceStack) {
 			if (!this.signedArgument.signer().isSystem()) {
-				this.resolve(commandSourceStack, filteredText -> {
+				this.resolve(commandSourceStack, playerChatMessage -> {
 					PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-					playerList.broadcastMessageHeader((PlayerChatMessage)filteredText.raw(), Set.of());
+					playerList.broadcastMessageHeader(playerChatMessage, Set.of());
 				});
 			}
 		}
