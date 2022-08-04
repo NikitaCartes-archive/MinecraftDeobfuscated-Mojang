@@ -43,17 +43,22 @@ public class ProfileKeyPairManager {
 	public ProfileKeyPairManager(UserApiService userApiService, UUID uUID, Path path) {
 		this.userApiService = userApiService;
 		this.profileKeyPairPath = path.resolve(PROFILE_KEY_PAIR_DIR).resolve(uUID + ".json");
-		this.keyPair = this.readOrFetchProfileKeyPair();
+		this.keyPair = CompletableFuture.supplyAsync(
+				() -> this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired()), Util.backgroundExecutor()
+			)
+			.thenCompose(this::readOrFetchProfileKeyPair);
 	}
 
 	public CompletableFuture<Optional<ProfilePublicKey.Data>> preparePublicKey() {
-		this.keyPair = this.readOrFetchProfileKeyPair();
+		this.keyPair = this.keyPair.thenCompose(optional -> {
+			Optional<ProfileKeyPair> optional2 = optional.map(ProfileKeyPairManager.Result::keyPair);
+			return this.readOrFetchProfileKeyPair(optional2);
+		});
 		return this.keyPair.thenApply(optional -> optional.map(result -> result.keyPair().publicKey().data()));
 	}
 
-	private CompletableFuture<Optional<ProfileKeyPairManager.Result>> readOrFetchProfileKeyPair() {
+	private CompletableFuture<Optional<ProfileKeyPairManager.Result>> readOrFetchProfileKeyPair(Optional<ProfileKeyPair> optional) {
 		return CompletableFuture.supplyAsync(() -> {
-			Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired());
 			if (optional.isPresent() && !((ProfileKeyPair)optional.get()).dueRefresh()) {
 				if (SharedConstants.IS_RUNNING_IN_IDE) {
 					return optional;
@@ -71,13 +76,11 @@ public class ProfileKeyPairManager {
 				this.writeProfileKeyPair(null);
 				return optional;
 			}
-		}, Util.backgroundExecutor()).thenApply(optional -> optional.map(ProfileKeyPairManager.Result::new));
+		}, Util.backgroundExecutor()).thenApply(optionalx -> optionalx.map(ProfileKeyPairManager.Result::new));
 	}
 
 	private Optional<ProfileKeyPair> readProfileKeyPair() {
-		if (this.keyPair.isDone()) {
-			return ((Optional)this.keyPair.join()).map(ProfileKeyPairManager.Result::keyPair);
-		} else if (Files.notExists(this.profileKeyPairPath, new LinkOption[0])) {
+		if (Files.notExists(this.profileKeyPairPath, new LinkOption[0])) {
 			return Optional.empty();
 		} else {
 			try {
