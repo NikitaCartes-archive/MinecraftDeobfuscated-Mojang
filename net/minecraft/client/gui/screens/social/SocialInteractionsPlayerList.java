@@ -98,8 +98,8 @@ extends ContainerObjectSelectionList<PlayerEntry> {
             }
             return 2;
         }).thenComparing(playerEntry -> {
-            int i = playerEntry.getPlayerName().codePointAt(0);
-            if (i == 95 || i >= 97 && i <= 122 || i >= 65 && i <= 90 || i >= 48 && i <= 57) {
+            int i;
+            if (!playerEntry.getPlayerName().isBlank() && ((i = playerEntry.getPlayerName().codePointAt(0)) == 95 || i >= 97 && i <= 122 || i >= 65 && i <= 90 || i >= 48 && i <= 57)) {
                 return 0;
             }
             return 1;

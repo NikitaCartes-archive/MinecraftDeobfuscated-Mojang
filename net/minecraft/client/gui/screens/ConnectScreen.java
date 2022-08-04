@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.net.InetSocketAddress;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -28,6 +29,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -60,6 +62,7 @@ extends Screen {
     }
 
     private void connect(final Minecraft minecraft, final ServerAddress serverAddress) {
+        final CompletableFuture<Optional<ProfilePublicKey.Data>> completableFuture = minecraft.getProfileKeyPairManager().preparePublicKey();
         LOGGER.info("Connecting to {}, {}", (Object)serverAddress.getHost(), (Object)serverAddress.getPort());
         Thread thread = new Thread("Server Connector #" + UNIQUE_THREAD_ID.incrementAndGet()){
 
@@ -82,7 +85,7 @@ extends Screen {
                     ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
                     ConnectScreen.this.connection.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
                     ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-                    ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getProfileKeyPairManager().profilePublicKeyData(), Optional.ofNullable(minecraft.getUser().getProfileId())));
+                    ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), (Optional)completableFuture.join(), Optional.ofNullable(minecraft.getUser().getProfileId())));
                 } catch (Exception exception) {
                     Exception exception2;
                     if (ConnectScreen.this.aborted) {

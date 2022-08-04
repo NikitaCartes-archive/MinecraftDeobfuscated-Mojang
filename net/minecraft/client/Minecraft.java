@@ -241,6 +241,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -1707,6 +1708,7 @@ implements WindowEventHandler {
     }
 
     public void doWorldLoad(String string, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem) {
+        CompletableFuture<Optional<ProfilePublicKey.Data>> completableFuture = this.profileKeyPairManager.preparePublicKey();
         this.clearLevel();
         this.progressListener.set(null);
         try {
@@ -1752,7 +1754,7 @@ implements WindowEventHandler {
         Connection connection = Connection.connectToLocalServer(socketAddress);
         connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, component -> {}));
         connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
-        connection.send(new ServerboundHelloPacket(this.getUser().getName(), this.profileKeyPairManager.profilePublicKeyData(), Optional.ofNullable(this.getUser().getProfileId())));
+        connection.send(new ServerboundHelloPacket(this.getUser().getName(), completableFuture.join(), Optional.ofNullable(this.getUser().getProfileId())));
         this.pendingConnection = connection;
     }
 

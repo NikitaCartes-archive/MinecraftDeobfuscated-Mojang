@@ -6,13 +6,13 @@ package net.minecraft.server.network;
 import com.google.common.primitives.Ints;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
-import com.mojang.authlib.minecraft.InsecurePublicKeyException;
 import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PrivateKey;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.crypto.Cipher;
@@ -24,7 +24,6 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.ThrowingComponent;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
@@ -52,9 +51,6 @@ ServerLoginPacketListener {
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_TICKS_BEFORE_LOGIN = 600;
     private static final RandomSource RANDOM = RandomSource.create();
-    private static final Component MISSING_PROFILE_PUBLIC_KEY = Component.translatable("multiplayer.disconnect.missing_public_key");
-    private static final Component INVALID_SIGNATURE = Component.translatable("multiplayer.disconnect.invalid_public_key_signature");
-    private static final Component INVALID_PUBLIC_KEY = Component.translatable("multiplayer.disconnect.invalid_public_key");
     private final byte[] nonce;
     final MinecraftServer server;
     public final Connection connection;
@@ -114,10 +110,10 @@ ServerLoginPacketListener {
                 try {
                     SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
                     profilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(this.profilePublicKeyData, this.gameProfile.getId(), signatureValidator, this.server.enforceSecureProfile());
-                } catch (PublicKeyValidationException publicKeyValidationException) {
-                    LOGGER.error(publicKeyValidationException.getMessage(), publicKeyValidationException.getCause());
+                } catch (ProfilePublicKey.ValidationException validationException) {
+                    LOGGER.error("Failed to validate profile key: {}", (Object)validationException.getMessage());
                     if (this.connection.isMemoryConnection()) break block11;
-                    this.disconnect(publicKeyValidationException.getComponent());
+                    this.disconnect(validationException.getComponent());
                     return;
                 }
             }
@@ -166,25 +162,14 @@ ServerLoginPacketListener {
     }
 
     @Nullable
-    private static ProfilePublicKey validatePublicKey(@Nullable ProfilePublicKey.Data data, UUID uUID, SignatureValidator signatureValidator, boolean bl) throws PublicKeyValidationException {
-        try {
-            if (data == null) {
-                if (bl) {
-                    throw new PublicKeyValidationException(MISSING_PROFILE_PUBLIC_KEY);
-                }
-                return null;
-            }
-            return ProfilePublicKey.createValidated(signatureValidator, uUID, data);
-        } catch (InsecurePublicKeyException.MissingException missingException) {
+    private static ProfilePublicKey validatePublicKey(@Nullable ProfilePublicKey.Data data, UUID uUID, SignatureValidator signatureValidator, boolean bl) throws ProfilePublicKey.ValidationException {
+        if (data == null) {
             if (bl) {
-                throw new PublicKeyValidationException(INVALID_SIGNATURE, (Throwable)missingException);
+                throw new ProfilePublicKey.ValidationException(ProfilePublicKey.MISSING_PROFILE_PUBLIC_KEY);
             }
             return null;
-        } catch (CryptException cryptException) {
-            throw new PublicKeyValidationException(INVALID_PUBLIC_KEY, (Throwable)cryptException);
-        } catch (Exception exception) {
-            throw new PublicKeyValidationException(INVALID_SIGNATURE, (Throwable)exception);
         }
+        return ProfilePublicKey.createValidated(signatureValidator, uUID, data, Duration.ZERO);
     }
 
     @Override
@@ -218,7 +203,7 @@ ServerLoginPacketListener {
         try {
             ProfilePublicKey profilePublicKey;
             PrivateKey privateKey = this.server.getKeyPair().getPrivate();
-            if (this.profilePublicKeyData != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, profilePublicKey = ProfilePublicKey.createTrusted(this.profilePublicKeyData)) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
+            if (this.profilePublicKeyData != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, profilePublicKey = new ProfilePublicKey(this.profilePublicKeyData)) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
                 throw new IllegalStateException("Protocol error");
             }
             SecretKey secretKey = serverboundKeyPacket.getSecretKey(privateKey);
@@ -288,17 +273,6 @@ ServerLoginPacketListener {
         DELAY_ACCEPT,
         ACCEPTED;
 
-    }
-
-    static class PublicKeyValidationException
-    extends ThrowingComponent {
-        public PublicKeyValidationException(Component component) {
-            super(component);
-        }
-
-        public PublicKeyValidationException(Component component, Throwable throwable) {
-            super(component, throwable);
-        }
     }
 }
 

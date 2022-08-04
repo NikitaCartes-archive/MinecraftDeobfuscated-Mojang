@@ -1290,9 +1290,16 @@ ServerGamePacketListener {
 
     private boolean verifyChatMessage(PlayerChatMessage playerChatMessage) {
         ChatSender chatSender = this.player.asChatSender();
-        if (chatSender.profilePublicKey() != null && !playerChatMessage.verify(chatSender)) {
-            this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
-            return false;
+        ProfilePublicKey profilePublicKey = chatSender.profilePublicKey();
+        if (profilePublicKey != null) {
+            if (profilePublicKey.data().hasExpired()) {
+                this.player.sendSystemMessage(Component.translatable("chat.disabled.expiredProfileKey").withStyle(ChatFormatting.RED));
+                return false;
+            }
+            if (!playerChatMessage.verify(chatSender)) {
+                this.disconnect(Component.translatable("multiplayer.disconnect.unsigned_chat"));
+                return false;
+            }
         }
         if (playerChatMessage.hasExpiredServer(Instant.now())) {
             LOGGER.warn("{} sent expired chat: '{}'. Is the client/server system time unsynchronized?", (Object)this.player.getName().getString(), (Object)playerChatMessage.signedContent().plain());
