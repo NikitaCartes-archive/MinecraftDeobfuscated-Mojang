@@ -221,6 +221,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -1906,6 +1907,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void doWorldLoad(String string, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem) {
+		CompletableFuture<Optional<ProfilePublicKey.Data>> completableFuture = this.profileKeyPairManager.preparePublicKey();
 		this.clearLevel();
 		this.progressListener.set(null);
 
@@ -1922,8 +1924,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				}));
 			this.isLocalServer = true;
 			this.updateReportEnvironment(ReportEnvironment.local());
-		} catch (Throwable var9) {
-			CrashReport crashReport = CrashReport.forThrowable(var9, "Starting integrated server");
+		} catch (Throwable var10) {
+			CrashReport crashReport = CrashReport.forThrowable(var10, "Starting integrated server");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
 			crashReportCategory.setDetail("Level ID", string);
 			crashReportCategory.setDetail("Level Name", (CrashReportDetail<String>)(() -> worldStem.worldData().getLevelName()));
@@ -1944,7 +1946,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			try {
 				Thread.sleep(16L);
-			} catch (InterruptedException var8) {
+			} catch (InterruptedException var9) {
 			}
 
 			if (this.delayedCrash != null) {
@@ -1960,7 +1962,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}));
 		connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
 		connection.send(
-			new ServerboundHelloPacket(this.getUser().getName(), this.profileKeyPairManager.profilePublicKeyData(), Optional.ofNullable(this.getUser().getProfileId()))
+			new ServerboundHelloPacket(
+				this.getUser().getName(), (Optional<ProfilePublicKey.Data>)completableFuture.join(), Optional.ofNullable(this.getUser().getProfileId())
+			)
 		);
 		this.pendingConnection = connection;
 	}
