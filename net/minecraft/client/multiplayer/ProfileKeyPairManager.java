@@ -48,49 +48,48 @@ public class ProfileKeyPairManager {
     public ProfileKeyPairManager(UserApiService userApiService, UUID uUID, Path path) {
         this.userApiService = userApiService;
         this.profileKeyPairPath = path.resolve(PROFILE_KEY_PAIR_DIR).resolve(uUID + ".json");
-        this.keyPair = this.readOrFetchProfileKeyPair();
+        this.keyPair = CompletableFuture.supplyAsync(() -> this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired()), Util.backgroundExecutor()).thenCompose(this::readOrFetchProfileKeyPair);
     }
 
     public CompletableFuture<Optional<ProfilePublicKey.Data>> preparePublicKey() {
-        this.keyPair = this.readOrFetchProfileKeyPair();
+        this.keyPair = this.keyPair.thenCompose(optional -> {
+            Optional<ProfileKeyPair> optional2 = optional.map(Result::keyPair);
+            return this.readOrFetchProfileKeyPair(optional2);
+        });
         return this.keyPair.thenApply(optional -> optional.map(result -> result.keyPair().publicKey().data()));
     }
 
-    private CompletableFuture<Optional<Result>> readOrFetchProfileKeyPair() {
+    private CompletableFuture<Optional<Result>> readOrFetchProfileKeyPair(Optional<ProfileKeyPair> optional2) {
         return CompletableFuture.supplyAsync(() -> {
-            Optional<ProfileKeyPair> optional = this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired());
-            if (optional.isPresent() && !optional.get().dueRefresh()) {
+            if (optional2.isPresent() && !((ProfileKeyPair)optional2.get()).dueRefresh()) {
                 if (!SharedConstants.IS_RUNNING_IN_IDE) {
                     this.writeProfileKeyPair(null);
                 } else {
-                    return optional;
+                    return optional2;
                 }
             }
             try {
-                ProfileKeyPair profileKeyPair2 = this.fetchProfileKeyPair(this.userApiService);
-                this.writeProfileKeyPair(profileKeyPair2);
-                return Optional.of(profileKeyPair2);
+                ProfileKeyPair profileKeyPair = this.fetchProfileKeyPair(this.userApiService);
+                this.writeProfileKeyPair(profileKeyPair);
+                return Optional.of(profileKeyPair);
             } catch (MinecraftClientException | IOException | CryptException exception) {
                 LOGGER.error("Failed to retrieve profile key pair", exception);
                 this.writeProfileKeyPair(null);
-                return optional;
+                return optional2;
             }
         }, Util.backgroundExecutor()).thenApply(optional -> optional.map(Result::new));
     }
 
     private Optional<ProfileKeyPair> readProfileKeyPair() {
         Optional<ProfileKeyPair> optional;
-        block10: {
-            if (this.keyPair.isDone()) {
-                return this.keyPair.join().map(Result::keyPair);
-            }
+        block9: {
             if (Files.notExists(this.profileKeyPairPath, new LinkOption[0])) {
                 return Optional.empty();
             }
             BufferedReader bufferedReader = Files.newBufferedReader(this.profileKeyPairPath);
             try {
                 optional = ProfileKeyPair.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(bufferedReader)).result();
-                if (bufferedReader == null) break block10;
+                if (bufferedReader == null) break block9;
             } catch (Throwable throwable) {
                 try {
                     if (bufferedReader != null) {
