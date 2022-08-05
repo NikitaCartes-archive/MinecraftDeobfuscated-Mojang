@@ -11,13 +11,13 @@ import net.minecraft.world.level.ChunkPos;
 
 public class SharedConstants {
 	@Deprecated
-	public static final boolean SNAPSHOT = true;
+	public static final boolean SNAPSHOT = false;
 	@Deprecated
-	public static final int WORLD_VERSION = 3119;
+	public static final int WORLD_VERSION = 3120;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "1.19.2-rc2";
+	public static final String VERSION_STRING = "1.19.2";
 	@Deprecated
 	public static final String RELEASE_TARGET = "1.19.2";
 	@Deprecated
@@ -171,7 +171,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741927;
+		return 760;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {
