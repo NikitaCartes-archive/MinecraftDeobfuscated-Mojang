@@ -89,6 +89,7 @@ implements MenuAccess<T> {
     @Override
     protected void init() {
         super.init();
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
     }
@@ -223,7 +224,7 @@ implements MenuAccess<T> {
         this.itemRenderer.blitOffset = 100.0f;
         if (itemStack.isEmpty() && slot.isActive() && (pair = slot.getNoItemIcon()) != null) {
             TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
-            RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
+            RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
             AbstractContainerScreen.blit(poseStack, i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
             bl2 = true;
         }
@@ -548,6 +549,7 @@ implements MenuAccess<T> {
         if (this.minecraft.player == null) {
             return;
         }
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
         ((AbstractContainerMenu)this.menu).removed(this.minecraft.player);
     }
 

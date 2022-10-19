@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -15,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Supplier;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -27,6 +27,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerData;
@@ -175,7 +176,7 @@ public abstract class AbstractContainerMenu {
         int i;
         for (i = 0; i < this.slots.size(); ++i) {
             ItemStack itemStack = this.slots.get(i).getItem();
-            Supplier<ItemStack> supplier = Suppliers.memoize(itemStack::copy);
+            com.google.common.base.Supplier<ItemStack> supplier = Suppliers.memoize(itemStack::copy);
             this.triggerSlotListeners(i, itemStack, supplier);
             this.synchronizeSlotToRemote(i, itemStack, supplier);
         }
@@ -210,7 +211,7 @@ public abstract class AbstractContainerMenu {
         }
     }
 
-    private void triggerSlotListeners(int i, ItemStack itemStack, java.util.function.Supplier<ItemStack> supplier) {
+    private void triggerSlotListeners(int i, ItemStack itemStack, Supplier<ItemStack> supplier) {
         ItemStack itemStack2 = this.lastSlots.get(i);
         if (!ItemStack.matches(itemStack2, itemStack)) {
             ItemStack itemStack3 = supplier.get();
@@ -221,7 +222,7 @@ public abstract class AbstractContainerMenu {
         }
     }
 
-    private void synchronizeSlotToRemote(int i, ItemStack itemStack, java.util.function.Supplier<ItemStack> supplier) {
+    private void synchronizeSlotToRemote(int i, ItemStack itemStack, Supplier<ItemStack> supplier) {
         if (this.suppressRemoteUpdates) {
             return;
         }
@@ -419,7 +420,7 @@ public abstract class AbstractContainerMenu {
                                         ItemStack itemStack6 = slot.getItem();
                                         ItemStack itemStack5 = this.getCarried();
                                         player.updateTutorialInventoryAction(itemStack5, slot.getItem(), clickAction);
-                                        if (!itemStack5.overrideStackedOnOther(slot, clickAction, player) && !itemStack6.overrideOtherStackedOnMe(itemStack5, slot, clickAction, player, this.createCarriedSlotAccess())) {
+                                        if (!this.tryItemClickBehaviourOverride(player, clickAction, slot, itemStack6, itemStack5)) {
                                             if (itemStack6.isEmpty()) {
                                                 if (!itemStack5.isEmpty()) {
                                                     int p = clickAction == ClickAction.PRIMARY ? itemStack5.getCount() : 1;
@@ -524,6 +525,14 @@ public abstract class AbstractContainerMenu {
                 }
             }
         }
+    }
+
+    private boolean tryItemClickBehaviourOverride(Player player, ClickAction clickAction, Slot slot, ItemStack itemStack, ItemStack itemStack2) {
+        FeatureFlagSet featureFlagSet = player.getLevel().enabledFeatures();
+        if (itemStack2.isItemEnabled(featureFlagSet) && itemStack2.overrideStackedOnOther(slot, clickAction, player)) {
+            return true;
+        }
+        return itemStack.isItemEnabled(featureFlagSet) && itemStack.overrideOtherStackedOnMe(itemStack2, slot, clickAction, player, this.createCarriedSlotAccess());
     }
 
     private SlotAccess createCarriedSlotAccess() {

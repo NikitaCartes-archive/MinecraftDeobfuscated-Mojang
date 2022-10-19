@@ -37,7 +37,8 @@ extends Llama {
     }
 
     @Override
-    protected Llama makeBabyLlama() {
+    @Nullable
+    protected Llama makeNewLlama() {
         return EntityType.TRADER_LLAMA.create(this.level);
     }
 

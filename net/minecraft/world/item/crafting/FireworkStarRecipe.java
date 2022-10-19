@@ -16,6 +16,7 @@ import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -39,8 +40,8 @@ extends CustomRecipe {
     });
     private static final Ingredient GUNPOWDER_INGREDIENT = Ingredient.of(Items.GUNPOWDER);
 
-    public FireworkStarRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+    public FireworkStarRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+        super(resourceLocation, craftingBookCategory);
     }
 
     @Override

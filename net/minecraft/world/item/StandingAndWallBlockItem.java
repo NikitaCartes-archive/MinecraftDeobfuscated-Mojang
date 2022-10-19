@@ -10,6 +10,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -18,10 +19,16 @@ import org.jetbrains.annotations.Nullable;
 public class StandingAndWallBlockItem
 extends BlockItem {
     protected final Block wallBlock;
+    private final Direction attachmentDirection;
 
-    public StandingAndWallBlockItem(Block block, Block block2, Item.Properties properties) {
+    public StandingAndWallBlockItem(Block block, Block block2, Item.Properties properties, Direction direction) {
         super(block, properties);
         this.wallBlock = block2;
+        this.attachmentDirection = direction;
+    }
+
+    protected boolean canPlace(LevelReader levelReader, BlockState blockState, BlockPos blockPos) {
+        return blockState.canSurvive(levelReader, blockPos);
     }
 
     @Override
@@ -33,9 +40,9 @@ extends BlockItem {
         BlockPos blockPos = blockPlaceContext.getClickedPos();
         for (Direction direction : blockPlaceContext.getNearestLookingDirections()) {
             BlockState blockState3;
-            if (direction == Direction.UP) continue;
-            BlockState blockState4 = blockState3 = direction == Direction.DOWN ? this.getBlock().getStateForPlacement(blockPlaceContext) : blockState;
-            if (blockState3 == null || !blockState3.canSurvive(levelReader, blockPos)) continue;
+            if (direction == this.attachmentDirection.getOpposite()) continue;
+            BlockState blockState4 = blockState3 = direction == this.attachmentDirection ? this.getBlock().getStateForPlacement(blockPlaceContext) : blockState;
+            if (blockState3 == null || !this.canPlace(levelReader, blockState3, blockPos)) continue;
             blockState2 = blockState3;
             break;
         }

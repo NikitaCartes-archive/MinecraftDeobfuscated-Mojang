@@ -3,82 +3,69 @@
  */
 package net.minecraft.client.gui.screens.reporting;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.OptionalInt;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.reporting.ChatLogSegmenter;
 import net.minecraft.client.multiplayer.chat.ChatLog;
+import net.minecraft.client.multiplayer.chat.LoggedChatEvent;
 import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
+import net.minecraft.client.multiplayer.chat.report.ChatReportContextBuilder;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class ChatSelectionLogFiller<T extends LoggedChatMessage> {
-    private static final int CONTEXT_FOLDED_SIZE = 4;
+public class ChatSelectionLogFiller {
     private final ChatLog log;
-    private final Predicate<T> canReport;
-    private int nextMessageId;
-    final Class<T> tClass;
-
-    public ChatSelectionLogFiller(ChatLog chatLog, Predicate<T> predicate, Class<T> class_) {
-        this.log = chatLog;
-        this.canReport = predicate;
-        this.nextMessageId = chatLog.newest();
-        this.tClass = class_;
-    }
-
-    public void fillNextPage(int i, Output<T> output) {
-        ChatLogSegmenter.Results<T> results;
-        int j = 0;
-        while (j < i && (results = this.nextSegment()) != null) {
-            if (results.type().foldable()) {
-                j += this.addFoldedMessagesTo(results.messages(), output);
-                continue;
-            }
-            output.acceptMessages(results.messages());
-            j += results.messages().size();
-        }
-    }
-
-    private int addFoldedMessagesTo(List<ChatLog.Entry<T>> list, Output<T> output) {
-        int i = 8;
-        if (list.size() > 8) {
-            int j = list.size() - 8;
-            output.acceptMessages(list.subList(0, 4));
-            output.acceptDivider(Component.translatable("gui.chatSelection.fold", j));
-            output.acceptMessages(list.subList(list.size() - 4, list.size()));
-            return 9;
-        }
-        output.acceptMessages(list);
-        return list.size();
-    }
-
+    private final ChatReportContextBuilder contextBuilder;
+    private final Predicate<LoggedChatMessage.Player> canReport;
+    private int eventId;
+    private int missedCount;
     @Nullable
-    private ChatLogSegmenter.Results<T> nextSegment() {
-        ChatLogSegmenter chatLogSegmenter = new ChatLogSegmenter(entry -> this.getMessageType((LoggedChatMessage)entry.event()));
-        OptionalInt optionalInt = this.log.selectBefore(this.nextMessageId).entries().map(entry -> entry.tryCast(this.tClass)).filter(Objects::nonNull).takeWhile(chatLogSegmenter::accept).mapToInt(ChatLog.Entry::id).reduce((i, j) -> j);
-        if (optionalInt.isPresent()) {
-            this.nextMessageId = this.log.before(optionalInt.getAsInt());
-        }
-        return chatLogSegmenter.build();
+    private PlayerChatMessage lastMessage;
+
+    public ChatSelectionLogFiller(ReportingContext reportingContext, Predicate<LoggedChatMessage.Player> predicate) {
+        this.log = reportingContext.chatLog();
+        this.contextBuilder = new ChatReportContextBuilder(reportingContext.sender().reportLimits().leadingContextMessageCount());
+        this.canReport = predicate;
+        this.eventId = this.log.end();
     }
 
-    private ChatLogSegmenter.MessageType getMessageType(T loggedChatMessage) {
-        return this.canReport.test(loggedChatMessage) ? ChatLogSegmenter.MessageType.REPORTABLE : ChatLogSegmenter.MessageType.CONTEXT;
+    public void fillNextPage(int i, Output output) {
+        LoggedChatEvent loggedChatEvent;
+        int j = 0;
+        while (j < i && (loggedChatEvent = this.log.lookup(this.eventId)) != null) {
+            LoggedChatMessage.Player player;
+            int k = this.eventId--;
+            if (!(loggedChatEvent instanceof LoggedChatMessage.Player) || (player = (LoggedChatMessage.Player)loggedChatEvent).message().equals(this.lastMessage)) continue;
+            if (this.acceptMessage(player)) {
+                if (this.missedCount > 0) {
+                    output.acceptDivider(Component.translatable("gui.chatSelection.fold", this.missedCount));
+                    this.missedCount = 0;
+                }
+                output.acceptMessage(k, player);
+                ++j;
+            } else {
+                ++this.missedCount;
+            }
+            this.lastMessage = player.message();
+        }
+    }
+
+    private boolean acceptMessage(LoggedChatMessage.Player player) {
+        PlayerChatMessage playerChatMessage = player.message();
+        boolean bl = this.contextBuilder.acceptContext(playerChatMessage);
+        if (this.canReport.test(player)) {
+            this.contextBuilder.trackContext(playerChatMessage);
+            return true;
+        }
+        return bl;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static interface Output<T extends LoggedChatMessage> {
-        default public void acceptMessages(Iterable<ChatLog.Entry<T>> iterable) {
-            for (ChatLog.Entry<T> entry : iterable) {
-                this.acceptMessage(entry.id(), (LoggedChatMessage)entry.event());
-            }
-        }
-
-        public void acceptMessage(int var1, T var2);
+    public static interface Output {
+        public void acceptMessage(int var1, LoggedChatMessage.Player var2);
 
         public void acceptDivider(Component var1);
     }

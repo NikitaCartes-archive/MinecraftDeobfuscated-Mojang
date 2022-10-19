@@ -27,6 +27,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.ByteArrayTag;
@@ -42,6 +44,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.nbt.TagTypes;
 import net.minecraft.nbt.TextComponentTagVisitor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -203,11 +206,16 @@ public final class NbtUtils {
         return compoundTag;
     }
 
-    public static BlockState readBlockState(CompoundTag compoundTag) {
+    public static BlockState readBlockState(HolderLookup<Block> holderLookup, CompoundTag compoundTag) {
         if (!compoundTag.contains("Name", 8)) {
             return Blocks.AIR.defaultBlockState();
         }
-        Block block = Registry.BLOCK.get(new ResourceLocation(compoundTag.getString("Name")));
+        ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("Name"));
+        Optional<Holder.Reference<Block>> optional = holderLookup.get(ResourceKey.create(Registry.BLOCK_REGISTRY, resourceLocation));
+        if (optional.isEmpty()) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        Block block = (Block)((Holder)optional.get()).value();
         BlockState blockState = block.defaultBlockState();
         if (compoundTag.contains("Properties", 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound("Properties");

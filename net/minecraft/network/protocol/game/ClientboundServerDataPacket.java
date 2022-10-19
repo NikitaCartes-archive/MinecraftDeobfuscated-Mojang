@@ -14,20 +14,17 @@ public class ClientboundServerDataPacket
 implements Packet<ClientGamePacketListener> {
     private final Optional<Component> motd;
     private final Optional<String> iconBase64;
-    private final boolean previewsChat;
     private final boolean enforcesSecureChat;
 
-    public ClientboundServerDataPacket(@Nullable Component component, @Nullable String string, boolean bl, boolean bl2) {
+    public ClientboundServerDataPacket(@Nullable Component component, @Nullable String string, boolean bl) {
         this.motd = Optional.ofNullable(component);
         this.iconBase64 = Optional.ofNullable(string);
-        this.previewsChat = bl;
-        this.enforcesSecureChat = bl2;
+        this.enforcesSecureChat = bl;
     }
 
     public ClientboundServerDataPacket(FriendlyByteBuf friendlyByteBuf) {
         this.motd = friendlyByteBuf.readOptional(FriendlyByteBuf::readComponent);
         this.iconBase64 = friendlyByteBuf.readOptional(FriendlyByteBuf::readUtf);
-        this.previewsChat = friendlyByteBuf.readBoolean();
         this.enforcesSecureChat = friendlyByteBuf.readBoolean();
     }
 
@@ -35,7 +32,6 @@ implements Packet<ClientGamePacketListener> {
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeOptional(this.motd, FriendlyByteBuf::writeComponent);
         friendlyByteBuf.writeOptional(this.iconBase64, FriendlyByteBuf::writeUtf);
-        friendlyByteBuf.writeBoolean(this.previewsChat);
         friendlyByteBuf.writeBoolean(this.enforcesSecureChat);
     }
 
@@ -50,10 +46,6 @@ implements Packet<ClientGamePacketListener> {
 
     public Optional<String> getIconBase64() {
         return this.iconBase64;
-    }
-
-    public boolean previewsChat() {
-        return this.previewsChat;
     }
 
     public boolean enforcesSecureChat() {

@@ -7,11 +7,11 @@ import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.blaze3d.platform.DisplayData;
 import java.io.File;
 import java.net.Proxy;
+import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.User;
-import net.minecraft.client.resources.AssetIndex;
-import net.minecraft.client.resources.DirectAssetIndex;
+import net.minecraft.client.resources.IndexedAssetSource;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -60,8 +60,8 @@ public class GameConfig {
             this.assetIndex = string;
         }
 
-        public AssetIndex getAssetIndex() {
-            return this.assetIndex == null ? new DirectAssetIndex(this.assetDirectory) : new AssetIndex(this.assetDirectory, this.assetIndex);
+        public Path getExternalAssetSource() {
+            return this.assetIndex == null ? this.assetDirectory.toPath() : IndexedAssetSource.createIndexFs(this.assetDirectory.toPath(), this.assetIndex);
         }
     }
 

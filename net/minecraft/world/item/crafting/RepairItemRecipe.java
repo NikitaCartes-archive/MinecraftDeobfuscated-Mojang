@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -21,8 +22,8 @@ import net.minecraft.world.level.Level;
 
 public class RepairItemRecipe
 extends CustomRecipe {
-    public RepairItemRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+    public RepairItemRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+        super(resourceLocation, craftingBookCategory);
     }
 
     @Override

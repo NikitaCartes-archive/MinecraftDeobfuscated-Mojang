@@ -41,7 +41,7 @@ public class LevelChunkSection {
     public LevelChunkSection(int i, Registry<Biome> registry) {
         this.bottomBlockY = LevelChunkSection.getBottomBlockY(i);
         this.states = new PalettedContainer<BlockState>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
-        this.biomes = new PalettedContainer<Holder<Biome>>(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+        this.biomes = new PalettedContainer<Holder.Reference<Biome>>(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
     }
 
     public static int getBottomBlockY(int i) {

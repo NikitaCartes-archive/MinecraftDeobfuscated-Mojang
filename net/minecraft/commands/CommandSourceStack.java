@@ -23,11 +23,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
+import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -36,6 +35,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -65,7 +65,7 @@ implements SharedSuggestionProvider {
     private final TaskChainer chatMessageChainer;
 
     public CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i2, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity) {
-        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.ANONYMOUS, TaskChainer.IMMEDIATE);
+        this(commandSource, vec3, vec2, serverLevel, i2, string, component, minecraftServer, entity, false, (commandContext, bl, i) -> {}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.ANONYMOUS, TaskChainer.immediate(minecraftServer));
     }
 
     protected CommandSourceStack(CommandSource commandSource, Vec3 vec3, Vec2 vec2, ServerLevel serverLevel, int i, String string, Component component, MinecraftServer minecraftServer, @Nullable Entity entity, boolean bl, @Nullable ResultConsumer<CommandSourceStack> resultConsumer, EntityAnchorArgument.Anchor anchor, CommandSigningContext commandSigningContext, TaskChainer taskChainer) {
@@ -199,13 +199,6 @@ implements SharedSuggestionProvider {
         return this.textName;
     }
 
-    public ChatSender asChatSender() {
-        if (this.entity != null) {
-            return this.entity.asChatSender();
-        }
-        return ChatSender.SYSTEM;
-    }
-
     @Override
     public boolean hasPermission(int i) {
         return this.permissionLevel >= i;
@@ -279,15 +272,15 @@ implements SharedSuggestionProvider {
         return serverPlayer2 != null && serverPlayer2.isTextFilteringEnabled() || serverPlayer.isTextFilteringEnabled();
     }
 
-    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, boolean bl, ChatType.Bound bound) {
+    public void sendChatMessage(OutgoingChatMessage outgoingChatMessage, boolean bl, ChatType.Bound bound) {
         if (this.silent) {
             return;
         }
         ServerPlayer serverPlayer = this.getPlayer();
         if (serverPlayer != null) {
-            serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl, bound);
+            serverPlayer.sendChatMessage(outgoingChatMessage, bl, bound);
         } else {
-            this.source.sendSystemMessage(bound.decorate(outgoingPlayerChatMessage.serverContent()));
+            this.source.sendSystemMessage(bound.decorate(outgoingChatMessage.content()));
         }
     }
 
@@ -378,6 +371,11 @@ implements SharedSuggestionProvider {
     @Override
     public RegistryAccess registryAccess() {
         return this.server.registryAccess();
+    }
+
+    @Override
+    public FeatureFlagSet enabledFeatures() {
+        return this.level.enabledFeatures();
     }
 }
 

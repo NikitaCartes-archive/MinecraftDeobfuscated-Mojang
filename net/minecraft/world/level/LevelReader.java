@@ -7,10 +7,15 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.QuartPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.CollisionGetter;
@@ -222,6 +227,15 @@ BiomeManager.NoiseBiomeSource {
             }
         }
         return true;
+    }
+
+    public RegistryAccess registryAccess();
+
+    public FeatureFlagSet enabledFeatures();
+
+    default public <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+        Registry registry = this.registryAccess().registryOrThrow(resourceKey);
+        return HolderLookup.forRegistry(registry).filterFeatures(this.enabledFeatures());
     }
 }
 

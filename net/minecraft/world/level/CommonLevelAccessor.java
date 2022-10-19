@@ -6,7 +6,6 @@ package net.minecraft.world.level;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.LevelReader;
@@ -41,7 +40,5 @@ LevelSimulatedRW {
     default public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
         return LevelReader.super.getHeightmapPos(types, blockPos);
     }
-
-    public RegistryAccess registryAccess();
 }
 

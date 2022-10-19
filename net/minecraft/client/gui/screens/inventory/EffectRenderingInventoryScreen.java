@@ -95,7 +95,7 @@ extends AbstractContainerScreen<T> {
         for (MobEffectInstance mobEffectInstance : iterable) {
             MobEffect mobEffect = mobEffectInstance.getEffect();
             TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
-            RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
+            RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
             EffectRenderingInventoryScreen.blit(poseStack, i + (bl ? 6 : 7), k + 7, this.getBlitOffset(), 18, 18, textureAtlasSprite);
             k += j;
         }

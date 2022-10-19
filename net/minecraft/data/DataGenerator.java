@@ -8,46 +8,33 @@ import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.WorldVersion;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.PackOutput;
 import net.minecraft.server.Bootstrap;
 import org.slf4j.Logger;
 
 public class DataGenerator {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final Collection<Path> inputFolders;
-    private final Path outputFolder;
+    private final Path rootOutputFolder;
+    private final PackOutput vanillaPackOutput;
     private final List<DataProvider> allProviders = Lists.newArrayList();
     private final List<DataProvider> providersToRun = Lists.newArrayList();
     private final WorldVersion version;
     private final boolean alwaysGenerate;
 
-    public DataGenerator(Path path, Collection<Path> collection, WorldVersion worldVersion, boolean bl) {
-        this.outputFolder = path;
-        this.inputFolders = collection;
+    public DataGenerator(Path path, WorldVersion worldVersion, boolean bl) {
+        this.rootOutputFolder = path;
+        this.vanillaPackOutput = new PackOutput(this.rootOutputFolder);
         this.version = worldVersion;
         this.alwaysGenerate = bl;
     }
 
-    public Collection<Path> getInputFolders() {
-        return this.inputFolders;
-    }
-
-    public Path getOutputFolder() {
-        return this.outputFolder;
-    }
-
-    public Path getOutputFolder(Target target) {
-        return this.getOutputFolder().resolve(target.directory);
-    }
-
     public void run() throws IOException {
-        HashCache hashCache = new HashCache(this.outputFolder, this.allProviders, this.version);
+        HashCache hashCache = new HashCache(this.rootOutputFolder, this.allProviders, this.version);
         Stopwatch stopwatch = Stopwatch.createStarted();
         Stopwatch stopwatch2 = Stopwatch.createUnstarted();
         for (DataProvider dataProvider : this.providersToRun) {
@@ -73,42 +60,17 @@ public class DataGenerator {
         this.allProviders.add(dataProvider);
     }
 
-    public PathProvider createPathProvider(Target target, String string) {
-        return new PathProvider(this, target, string);
+    public PackOutput getVanillaPackOutput() {
+        return this.vanillaPackOutput;
+    }
+
+    public PackOutput createBuiltinDatapackOutput(String string) {
+        Path path = this.vanillaPackOutput.getOutputFolder(PackOutput.Target.DATA_PACK).resolve("minecraft").resolve("datapacks").resolve(string);
+        return new PackOutput(path);
     }
 
     static {
         Bootstrap.bootStrap();
-    }
-
-    public static enum Target {
-        DATA_PACK("data"),
-        RESOURCE_PACK("assets"),
-        REPORTS("reports");
-
-        final String directory;
-
-        private Target(String string2) {
-            this.directory = string2;
-        }
-    }
-
-    public static class PathProvider {
-        private final Path root;
-        private final String kind;
-
-        PathProvider(DataGenerator dataGenerator, Target target, String string) {
-            this.root = dataGenerator.getOutputFolder(target);
-            this.kind = string;
-        }
-
-        public Path file(ResourceLocation resourceLocation, String string) {
-            return this.root.resolve(resourceLocation.getNamespace()).resolve(this.kind).resolve(resourceLocation.getPath() + "." + string);
-        }
-
-        public Path json(ResourceLocation resourceLocation) {
-            return this.root.resolve(resourceLocation.getNamespace()).resolve(this.kind).resolve(resourceLocation.getPath() + ".json");
-        }
     }
 }
 

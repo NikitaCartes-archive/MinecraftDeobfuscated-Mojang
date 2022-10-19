@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
@@ -62,6 +63,8 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -75,6 +78,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.ServerFunctionManager;
@@ -132,6 +136,8 @@ import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
@@ -141,14 +147,16 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
@@ -188,7 +196,7 @@ AutoCloseable {
     private static final int AUTOSAVE_INTERVAL = 6000;
     private static final int MAX_TICK_LATENCY = 3;
     public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
-    public static final LevelSettings DEMO_SETTINGS = new LevelSettings("Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), DataPackConfig.DEFAULT);
+    public static final LevelSettings DEMO_SETTINGS = new LevelSettings("Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), WorldDataConfiguration.DEFAULT);
     private static final long DELAYED_TASKS_TICK_EXTENSION = 50L;
     public static final GameProfile ANONYMOUS_PLAYER_PROFILE = new GameProfile(Util.NIL_UUID, "Anonymous Player");
     protected final LevelStorageSource.LevelStorageAccess storageSource;
@@ -209,7 +217,7 @@ AutoCloseable {
     private final DataFixer fixerUpper;
     private String localIp;
     private int port = -1;
-    private final RegistryAccess.Frozen registryHolder;
+    private final LayeredRegistryAccess<RegistryLayer> registries;
     private final Map<ResourceKey<Level>, ServerLevel> levels = Maps.newLinkedHashMap();
     private PlayerList playerList;
     private volatile boolean running = true;
@@ -269,9 +277,9 @@ AutoCloseable {
 
     public MinecraftServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, Proxy proxy, DataFixer dataFixer, Services services, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super("Server");
-        this.registryHolder = worldStem.registryAccess();
+        this.registries = worldStem.registries();
         this.worldData = worldStem.worldData();
-        if (!this.worldData.worldGenSettings().dimensions().containsKey(LevelStem.OVERWORLD)) {
+        if (!this.registries.compositeAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY).containsKey(LevelStem.OVERWORLD)) {
             throw new IllegalStateException("Missing Overworld dimension data");
         }
         this.proxy = proxy;
@@ -287,7 +295,8 @@ AutoCloseable {
         this.playerDataStorage = levelStorageAccess.createPlayerStorage();
         this.fixerUpper = dataFixer;
         this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-        this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer);
+        HolderLookup<Block> holderLookup = HolderLookup.forRegistry(this.registries.compositeAccess().registryOrThrow(Registry.BLOCK_REGISTRY)).filterFeatures(this.worldData.enabledFeatures());
+        this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderLookup);
         this.serverThread = thread;
         this.executor = Util.backgroundExecutor();
     }
@@ -326,12 +335,12 @@ AutoCloseable {
 
     protected void createLevels(ChunkProgressListener chunkProgressListener) {
         ServerLevelData serverLevelData = this.worldData.overworldData();
-        WorldGenSettings worldGenSettings = this.worldData.worldGenSettings();
-        boolean bl = worldGenSettings.isDebug();
-        long l = worldGenSettings.seed();
+        boolean bl = this.worldData.isDebugWorld();
+        Registry<LevelStem> registry = this.registries.compositeAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY);
+        WorldOptions worldOptions = this.worldData.worldGenOptions();
+        long l = worldOptions.seed();
         long m = BiomeManager.obfuscateSeed(l);
         ImmutableList<CustomSpawner> list = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData));
-        Registry<LevelStem> registry = worldGenSettings.dimensions();
         LevelStem levelStem = registry.get(LevelStem.OVERWORLD);
         ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, levelStem, chunkProgressListener, bl, m, list, true);
         this.levels.put(Level.OVERWORLD, serverLevel);
@@ -341,7 +350,7 @@ AutoCloseable {
         WorldBorder worldBorder = serverLevel.getWorldBorder();
         if (!serverLevelData.isInitialized()) {
             try {
-                MinecraftServer.setInitialSpawn(serverLevel, serverLevelData, worldGenSettings.generateBonusChest(), bl);
+                MinecraftServer.setInitialSpawn(serverLevel, serverLevelData, worldOptions.generateBonusChest(), bl);
                 serverLevelData.setInitialized(true);
                 if (bl) {
                     this.setupDebugLevel(this.worldData);
@@ -588,7 +597,6 @@ AutoCloseable {
                     this.nextTickTime = Util.getMillis();
                     this.status.setDescription(Component.literal(this.motd));
                     this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
-                    this.status.setPreviewsChat(this.previewsChat());
                     this.status.setEnforcesSecureChat(this.enforceSecureProfile());
                     this.updateStatusIcon(this.status);
                     while (this.running) {
@@ -878,18 +886,8 @@ AutoCloseable {
         if (this.playerList != null) {
             systemReport.setDetail("Player Count", () -> this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers());
         }
-        systemReport.setDetail("Data Packs", () -> {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Pack pack : this.packRepository.getSelectedPacks()) {
-                if (stringBuilder.length() > 0) {
-                    stringBuilder.append(", ");
-                }
-                stringBuilder.append(pack.getId());
-                if (pack.getCompatibility().isCompatible()) continue;
-                stringBuilder.append(" (incompatible)");
-            }
-            return stringBuilder.toString();
-        });
+        systemReport.setDetail("Data Packs", () -> this.packRepository.getSelectedPacks().stream().map(pack -> pack.getId() + (pack.getCompatibility().isCompatible() ? "" : " (incompatible)")).collect(Collectors.joining(", ")));
+        systemReport.setDetail("Enabled Feature Flags", () -> FeatureFlags.REGISTRY.toNames(this.worldData.enabledFeatures()).stream().map(ResourceLocation::toString).collect(Collectors.joining(", ")));
         systemReport.setDetail("World Generation", () -> this.worldData.worldGenSettingsLifecycle().toString());
         if (this.serverId != null) {
             systemReport.setDetail("Server Id", () -> this.serverId);
@@ -1047,10 +1045,6 @@ AutoCloseable {
         this.motd = string;
     }
 
-    public boolean previewsChat() {
-        return false;
-    }
-
     public boolean isStopped() {
         return this.stopped;
     }
@@ -1196,10 +1190,10 @@ AutoCloseable {
     }
 
     public CompletableFuture<Void> reloadResources(Collection<String> collection) {
-        RegistryAccess.Frozen frozen = this.registryAccess();
+        RegistryAccess.Frozen frozen = this.registries.getAccessForLoading(RegistryLayer.RELOADABLE);
         CompletionStage completableFuture = ((CompletableFuture)CompletableFuture.supplyAsync(() -> collection.stream().map(this.packRepository::getPack).filter(Objects::nonNull).map(Pack::open).collect(ImmutableList.toImmutableList()), this).thenCompose(immutableList -> {
             MultiPackResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, (List<PackResources>)immutableList);
-            return ((CompletableFuture)ReloadableServerResources.loadResources(closeableResourceManager, frozen, this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED, this.getFunctionCompilationLevel(), this.executor, this).whenComplete((reloadableServerResources, throwable) -> {
+            return ((CompletableFuture)ReloadableServerResources.loadResources(closeableResourceManager, frozen, this.worldData.enabledFeatures(), this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED, this.getFunctionCompilationLevel(), this.executor, this).whenComplete((reloadableServerResources, throwable) -> {
                 if (throwable != null) {
                     closeableResourceManager.close();
                 }
@@ -1208,7 +1202,8 @@ AutoCloseable {
             this.resources.close();
             this.resources = reloadableResources;
             this.packRepository.setSelected(collection);
-            this.worldData.setDataPackConfig(MinecraftServer.getSelectedPacks(this.packRepository));
+            WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(MinecraftServer.getSelectedPacks(this.packRepository), this.worldData.enabledFeatures());
+            this.worldData.setDataConfiguration(worldDataConfiguration);
             this.resources.managers.updateRegistryTags(this.registryAccess());
             this.getPlayerList().saveAll();
             this.getPlayerList().reloadResources();
@@ -1221,11 +1216,11 @@ AutoCloseable {
         return completableFuture;
     }
 
-    public static DataPackConfig configurePackRepository(PackRepository packRepository, DataPackConfig dataPackConfig, boolean bl) {
+    public static WorldDataConfiguration configurePackRepository(PackRepository packRepository, DataPackConfig dataPackConfig, boolean bl, FeatureFlagSet featureFlagSet) {
         packRepository.reload();
         if (bl) {
             packRepository.setSelected(Collections.singleton(VANILLA_BRAND));
-            return DataPackConfig.DEFAULT;
+            return WorldDataConfiguration.DEFAULT;
         }
         LinkedHashSet<String> set = Sets.newLinkedHashSet();
         for (String string : dataPackConfig.getEnabled()) {
@@ -1237,16 +1232,29 @@ AutoCloseable {
         }
         for (Pack pack : packRepository.getAvailablePacks()) {
             String string2 = pack.getId();
-            if (dataPackConfig.getDisabled().contains(string2) || set.contains(string2)) continue;
-            LOGGER.info("Found new data pack {}, loading it automatically", (Object)string2);
-            set.add(string2);
+            if (dataPackConfig.getDisabled().contains(string2)) continue;
+            FeatureFlagSet featureFlagSet2 = pack.getRequestedFeatures();
+            boolean bl2 = set.contains(string2);
+            if (!bl2 && pack.getPackSource().shouldAddAutomatically()) {
+                if (featureFlagSet2.isSubsetOf(featureFlagSet)) {
+                    LOGGER.info("Found new data pack {}, loading it automatically", (Object)string2);
+                    set.add(string2);
+                } else {
+                    LOGGER.info("Found new data pack {}, but can't load it due to missing features {}", (Object)string2, (Object)FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2));
+                }
+            }
+            if (!bl2 || featureFlagSet2.isSubsetOf(featureFlagSet)) continue;
+            LOGGER.warn("Pack {} requires features {} that are not enabled for this world, disabling pack.", (Object)string2, (Object)FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2));
+            set.remove(string2);
         }
         if (set.isEmpty()) {
             LOGGER.info("No datapacks selected, forcing vanilla");
             set.add(VANILLA_BRAND);
         }
         packRepository.setSelected(set);
-        return MinecraftServer.getSelectedPacks(packRepository);
+        DataPackConfig dataPackConfig2 = MinecraftServer.getSelectedPacks(packRepository);
+        FeatureFlagSet featureFlagSet3 = packRepository.getRequestedFeatureFlags();
+        return new WorldDataConfiguration(dataPackConfig2, featureFlagSet3);
     }
 
     private static DataPackConfig getSelectedPacks(PackRepository packRepository) {
@@ -1532,7 +1540,11 @@ AutoCloseable {
     }
 
     public RegistryAccess.Frozen registryAccess() {
-        return this.registryHolder;
+        return this.registries.compositeAccess();
+    }
+
+    public LayeredRegistryAccess<RegistryLayer> registries() {
+        return this.registries;
     }
 
     public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {

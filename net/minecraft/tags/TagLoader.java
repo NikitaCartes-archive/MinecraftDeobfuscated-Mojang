@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -38,22 +39,20 @@ import org.slf4j.Logger;
 
 public class TagLoader<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String PATH_SUFFIX = ".json";
-    private static final int PATH_SUFFIX_LENGTH = ".json".length();
-    final Function<ResourceLocation, Optional<T>> idToValue;
+    final Function<ResourceLocation, Optional<? extends T>> idToValue;
     private final String directory;
 
-    public TagLoader(Function<ResourceLocation, Optional<T>> function, String string) {
+    public TagLoader(Function<ResourceLocation, Optional<? extends T>> function, String string) {
         this.idToValue = function;
         this.directory = string;
     }
 
     public Map<ResourceLocation, List<EntryWithSource>> load(ResourceManager resourceManager) {
         HashMap<ResourceLocation, List<EntryWithSource>> map = Maps.newHashMap();
-        for (Map.Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
+        FileToIdConverter fileToIdConverter = FileToIdConverter.json(this.directory);
+        for (Map.Entry<ResourceLocation, List<Resource>> entry : fileToIdConverter.listMatchingResourceStacks(resourceManager).entrySet()) {
             ResourceLocation resourceLocation2 = entry.getKey();
-            String string = resourceLocation2.getPath();
-            ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring(this.directory.length() + 1, string.length() - PATH_SUFFIX_LENGTH));
+            ResourceLocation resourceLocation22 = fileToIdConverter.fileToId(resourceLocation2);
             for (Resource resource : entry.getValue()) {
                 try {
                     BufferedReader reader = resource.openAsReader();
@@ -64,8 +63,8 @@ public class TagLoader<T> {
                         if (tagFile.replace()) {
                             list.clear();
                         }
-                        String string2 = resource.sourcePackId();
-                        tagFile.entries().forEach(tagEntry -> list.add(new EntryWithSource((TagEntry)tagEntry, string2)));
+                        String string = resource.sourcePackId();
+                        tagFile.entries().forEach(tagEntry -> list.add(new EntryWithSource((TagEntry)tagEntry, string)));
                     } finally {
                         if (reader == null) continue;
                         ((Reader)reader).close();

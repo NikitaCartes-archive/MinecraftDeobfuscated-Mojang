@@ -11,6 +11,7 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -20,8 +21,8 @@ public class FireworkStarFadeRecipe
 extends CustomRecipe {
     private static final Ingredient STAR_INGREDIENT = Ingredient.of(Items.FIREWORK_STAR);
 
-    public FireworkStarFadeRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+    public FireworkStarFadeRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+        super(resourceLocation, craftingBookCategory);
     }
 
     @Override

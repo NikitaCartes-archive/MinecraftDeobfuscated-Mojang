@@ -14,5 +14,9 @@ extends PlayerRideable {
     public void handleStartJump(int var1);
 
     public void handleStopJump();
+
+    default public int getJumpCooldown() {
+        return 0;
+    }
 }
 

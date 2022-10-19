@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.blockentity.CampfireRenderer;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.blockentity.ConduitRenderer;
 import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
+import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.LecternRenderer;
 import net.minecraft.client.renderer.blockentity.PistonHeadRenderer;
 import net.minecraft.client.renderer.blockentity.ShulkerBoxRenderer;
@@ -53,6 +54,7 @@ public class BlockEntityRenderers {
 
     static {
         BlockEntityRenderers.register(BlockEntityType.SIGN, SignRenderer::new);
+        BlockEntityRenderers.register(BlockEntityType.HANGING_SIGN, HangingSignRenderer::new);
         BlockEntityRenderers.register(BlockEntityType.MOB_SPAWNER, SpawnerRenderer::new);
         BlockEntityRenderers.register(BlockEntityType.PISTON, PistonHeadRenderer::new);
         BlockEntityRenderers.register(BlockEntityType.CHEST, ChestRenderer::new);

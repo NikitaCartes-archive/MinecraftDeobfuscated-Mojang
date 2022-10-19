@@ -14,11 +14,10 @@ import net.minecraft.BlockUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -644,7 +643,7 @@ extends Entity {
     @Override
     protected void readAdditionalSaveData(CompoundTag compoundTag) {
         if (compoundTag.getBoolean("CustomDisplayTile")) {
-            this.setDisplayBlockState(NbtUtils.readBlockState(compoundTag.getCompound("DisplayState")));
+            this.setDisplayBlockState(NbtUtils.readBlockState(this.level.holderLookup(Registry.BLOCK_REGISTRY), compoundTag.getCompound("DisplayState")));
             this.setDisplayOffset(compoundTag.getInt("DisplayOffset"));
         }
     }
@@ -803,11 +802,6 @@ extends Entity {
 
     public void setCustomDisplay(boolean bl) {
         this.getEntityData().set(DATA_ID_CUSTOM_DISPLAY, bl);
-    }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 
     @Override

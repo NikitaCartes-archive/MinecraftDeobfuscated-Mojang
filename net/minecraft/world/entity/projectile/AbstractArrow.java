@@ -418,7 +418,7 @@ extends Projectile {
         super.readAdditionalSaveData(compoundTag);
         this.life = compoundTag.getShort("life");
         if (compoundTag.contains("inBlockState", 10)) {
-            this.lastState = NbtUtils.readBlockState(compoundTag.getCompound("inBlockState"));
+            this.lastState = NbtUtils.readBlockState(this.level.holderLookup(Registry.BLOCK_REGISTRY), compoundTag.getCompound("inBlockState"));
         }
         this.shakeTime = compoundTag.getByte("shake") & 0xFF;
         this.inGround = compoundTag.getBoolean("inGround");

@@ -12,10 +12,10 @@ import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public record GuiMessage(int addedTime, Component content, @Nullable MessageSignature headerSignature, @Nullable GuiMessageTag tag) {
+public record GuiMessage(int addedTime, Component content, @Nullable MessageSignature signature, @Nullable GuiMessageTag tag) {
     @Nullable
-    public MessageSignature headerSignature() {
-        return this.headerSignature;
+    public MessageSignature signature() {
+        return this.signature;
     }
 
     @Nullable

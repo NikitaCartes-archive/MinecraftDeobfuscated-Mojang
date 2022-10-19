@@ -28,7 +28,7 @@ public class ResourceLoadStateTracker {
         if (this.reloadState != null && !this.reloadState.finished) {
             LOGGER.warn("Reload already ongoing, replacing");
         }
-        this.reloadState = new ReloadState(reloadReason, list.stream().map(PackResources::getName).collect(ImmutableList.toImmutableList()));
+        this.reloadState = new ReloadState(reloadReason, list.stream().map(PackResources::packId).collect(ImmutableList.toImmutableList()));
     }
 
     public void startRecovery(Throwable throwable) {

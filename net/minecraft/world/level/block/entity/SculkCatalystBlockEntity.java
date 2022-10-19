@@ -23,6 +23,7 @@ import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.phys.Vec3;
 
 public class SculkCatalystBlockEntity
 extends BlockEntity
@@ -37,11 +38,6 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleEventsImmediately() {
-        return true;
-    }
-
-    @Override
     public PositionSource getListenerSource() {
         return this.blockPosSource;
     }
@@ -52,24 +48,20 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
+    public GameEventListener.DeliveryMode getDeliveryMode() {
+        return GameEventListener.DeliveryMode.BY_DISTANCE;
+    }
+
+    @Override
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
         Entity entity;
-        if (this.isRemoved()) {
-            return false;
-        }
-        GameEvent.Context context = message.context();
-        if (message.gameEvent() == GameEvent.ENTITY_DIE && (entity = context.sourceEntity()) instanceof LivingEntity) {
+        if (gameEvent == GameEvent.ENTITY_DIE && (entity = context.sourceEntity()) instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity;
             if (!livingEntity.wasExperienceConsumed()) {
                 int i = livingEntity.getExperienceReward();
                 if (livingEntity.shouldDropExperience() && i > 0) {
-                    this.sculkSpreader.addCursors(new BlockPos(message.source().relative(Direction.UP, 0.5)), i);
-                    LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
-                    if (livingEntity2 instanceof ServerPlayer) {
-                        ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
-                        DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
-                        CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, context.sourceEntity(), damageSource);
-                    }
+                    this.sculkSpreader.addCursors(new BlockPos(vec3.relative(Direction.UP, 0.5)), i);
+                    this.tryAwardItSpreadsAdvancement(livingEntity);
                 }
                 livingEntity.skipDropExperience();
                 SculkCatalystBlock.bloom(serverLevel, this.worldPosition, this.getBlockState(), serverLevel.getRandom());
@@ -77,6 +69,15 @@ implements GameEventListener {
             return true;
         }
         return false;
+    }
+
+    private void tryAwardItSpreadsAdvancement(LivingEntity livingEntity) {
+        LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
+        if (livingEntity2 instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
+            DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
+            CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, livingEntity, damageSource);
+        }
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, SculkCatalystBlockEntity sculkCatalystBlockEntity) {

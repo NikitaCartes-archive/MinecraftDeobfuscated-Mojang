@@ -72,6 +72,10 @@ implements ResourceManagerReloadListener {
     public static final int ITEM_COUNT_BLIT_OFFSET = 200;
     public static final float COMPASS_FOIL_UI_SCALE = 0.5f;
     public static final float COMPASS_FOIL_FIRST_PERSON_SCALE = 0.75f;
+    private static final ModelResourceLocation TRIDENT_MODEL = ModelResourceLocation.vanilla("trident", "inventory");
+    public static final ModelResourceLocation TRIDENT_IN_HAND_MODEL = ModelResourceLocation.vanilla("trident_in_hand", "inventory");
+    private static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
+    public static final ModelResourceLocation SPYGLASS_IN_HAND_MODEL = ModelResourceLocation.vanilla("spyglass_in_hand", "inventory");
     public float blitOffset;
     private final ItemModelShaper itemModelShaper;
     private final TextureManager textureManager;
@@ -113,9 +117,9 @@ implements ResourceManagerReloadListener {
         boolean bl3 = bl2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
         if (bl2) {
             if (itemStack.is(Items.TRIDENT)) {
-                bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+                bakedModel = this.itemModelShaper.getModelManager().getModel(TRIDENT_MODEL);
             } else if (itemStack.is(Items.SPYGLASS)) {
-                bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+                bakedModel = this.itemModelShaper.getModelManager().getModel(SPYGLASS_MODEL);
             }
         }
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
@@ -193,7 +197,7 @@ implements ResourceManagerReloadListener {
     }
 
     public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity, int i) {
-        BakedModel bakedModel = itemStack.is(Items.TRIDENT) ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory")) : (itemStack.is(Items.SPYGLASS) ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass_in_hand#inventory")) : this.itemModelShaper.getItemModel(itemStack));
+        BakedModel bakedModel = itemStack.is(Items.TRIDENT) ? this.itemModelShaper.getModelManager().getModel(TRIDENT_IN_HAND_MODEL) : (itemStack.is(Items.SPYGLASS) ? this.itemModelShaper.getModelManager().getModel(SPYGLASS_IN_HAND_MODEL) : this.itemModelShaper.getItemModel(itemStack));
         ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
         BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity, i);
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;

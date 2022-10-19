@@ -16,6 +16,7 @@ import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 
@@ -369,8 +370,8 @@ public final class OverworldBiomeBuilder {
         consumer.accept(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.Parameter.point(1.1f), parameter5, f), resourceKey));
     }
 
-    public static boolean isDeepDarkRegion(double d, double e) {
-        return d < (double)-0.225f && e > (double)0.9f;
+    public static boolean isDeepDarkRegion(DensityFunction densityFunction, DensityFunction densityFunction2, DensityFunction.FunctionContext functionContext) {
+        return densityFunction.compute(functionContext) < (double)-0.225f && densityFunction2.compute(functionContext) > (double)0.9f;
     }
 
     public static String getDebugStringForPeaksAndValleys(double d) {

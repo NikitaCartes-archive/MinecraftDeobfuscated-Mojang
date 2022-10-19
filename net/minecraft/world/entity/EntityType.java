@@ -65,6 +65,7 @@ import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.entity.animal.goat.Goat;
@@ -152,6 +153,10 @@ import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.entity.vehicle.MinecartSpawner;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -167,7 +172,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class EntityType<T extends Entity>
-implements EntityTypeTest<Entity, T> {
+implements FeatureElement,
+EntityTypeTest<Entity, T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final String ENTITY_TAG = "EntityTag";
     private final Holder.Reference<EntityType<?>> builtInRegistryHolder = Registry.ENTITY_TYPE.createIntrusiveHolder(this);
@@ -183,6 +189,7 @@ implements EntityTypeTest<Entity, T> {
     public static final EntityType<Boat> BOAT = EntityType.register("boat", Builder.of(Boat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
     public static final EntityType<ChestBoat> CHEST_BOAT = EntityType.register("chest_boat", Builder.of(ChestBoat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
     public static final EntityType<Cat> CAT = EntityType.register("cat", Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(8));
+    public static final EntityType<Camel> CAMEL = EntityType.register("camel", Builder.of(Camel::new, MobCategory.CREATURE).sized(1.7f, 2.375f).clientTrackingRange(10).requiredFeatures(FeatureFlags.UPDATE_1_20));
     public static final EntityType<CaveSpider> CAVE_SPIDER = EntityType.register("cave_spider", Builder.of(CaveSpider::new, MobCategory.MONSTER).sized(0.7f, 0.5f).clientTrackingRange(8));
     public static final EntityType<Chicken> CHICKEN = EntityType.register("chicken", Builder.of(Chicken::new, MobCategory.CREATURE).sized(0.4f, 0.7f).clientTrackingRange(10));
     public static final EntityType<Cod> COD = EntityType.register("cod", Builder.of(Cod::new, MobCategory.WATER_AMBIENT).sized(0.5f, 0.3f).clientTrackingRange(4));
@@ -306,6 +313,7 @@ implements EntityTypeTest<Entity, T> {
     @Nullable
     private ResourceLocation lootTable;
     private final EntityDimensions dimensions;
+    private final FeatureFlagSet requiredFeatures;
 
     private static <T extends Entity> EntityType<T> register(String string, Builder<T> builder) {
         return Registry.register(Registry.ENTITY_TYPE, string, builder.build(string));
@@ -319,7 +327,7 @@ implements EntityTypeTest<Entity, T> {
         return Registry.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
     }
 
-    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j) {
+    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j, FeatureFlagSet featureFlagSet) {
         this.factory = entityFactory;
         this.category = mobCategory;
         this.canSpawnFarFromPlayer = bl4;
@@ -330,6 +338,7 @@ implements EntityTypeTest<Entity, T> {
         this.dimensions = entityDimensions;
         this.clientTrackingRange = i;
         this.updateInterval = j;
+        this.requiredFeatures = featureFlagSet;
     }
 
     @Nullable
@@ -447,7 +456,7 @@ implements EntityTypeTest<Entity, T> {
     public ResourceLocation getDefaultLootTable() {
         if (this.lootTable == null) {
             ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(this);
-            this.lootTable = new ResourceLocation(resourceLocation.getNamespace(), "entities/" + resourceLocation.getPath());
+            this.lootTable = resourceLocation.withPrefix("entities/");
         }
         return this.lootTable;
     }
@@ -460,8 +469,16 @@ implements EntityTypeTest<Entity, T> {
         return this.dimensions.height;
     }
 
+    @Override
+    public FeatureFlagSet requiredFeatures() {
+        return this.requiredFeatures;
+    }
+
     @Nullable
     public T create(Level level) {
+        if (!this.isEnabled(level.enabledFeatures())) {
+            return null;
+        }
         return this.factory.create(this, level);
     }
 
@@ -588,6 +605,7 @@ implements EntityTypeTest<Entity, T> {
         private int clientTrackingRange = 5;
         private int updateInterval = 3;
         private EntityDimensions dimensions = EntityDimensions.scalable(0.6f, 1.8f);
+        private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
         private Builder(EntityFactory<T> entityFactory, MobCategory mobCategory) {
             this.factory = entityFactory;
@@ -643,11 +661,16 @@ implements EntityTypeTest<Entity, T> {
             return this;
         }
 
+        public Builder<T> requiredFeatures(FeatureFlag ... featureFlags) {
+            this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
+            return this;
+        }
+
         public EntityType<T> build(String string) {
             if (this.serialize) {
                 Util.fetchChoiceType(References.ENTITY_TREE, string);
             }
-            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval);
+            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval, this.requiredFeatures);
         }
     }
 

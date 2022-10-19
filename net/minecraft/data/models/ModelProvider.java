@@ -18,8 +18,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.blockstates.BlockStateGenerator;
@@ -33,12 +33,12 @@ import org.slf4j.Logger;
 public class ModelProvider
 implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final DataGenerator.PathProvider blockStatePathProvider;
-    private final DataGenerator.PathProvider modelPathProvider;
+    private final PackOutput.PathProvider blockStatePathProvider;
+    private final PackOutput.PathProvider modelPathProvider;
 
-    public ModelProvider(DataGenerator dataGenerator) {
-        this.blockStatePathProvider = dataGenerator.createPathProvider(DataGenerator.Target.RESOURCE_PACK, "blockstates");
-        this.modelPathProvider = dataGenerator.createPathProvider(DataGenerator.Target.RESOURCE_PACK, "models");
+    public ModelProvider(PackOutput packOutput) {
+        this.blockStatePathProvider = packOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "blockstates");
+        this.modelPathProvider = packOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, "models");
     }
 
     @Override

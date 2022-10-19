@@ -96,6 +96,7 @@ public abstract class ChunkGenerator {
     protected final BiomeSource biomeSource;
     private final Supplier<List<FeatureSorter.StepFeatureData>> featuresPerStep;
     protected final Optional<HolderSet<StructureSet>> structureOverrides;
+    private final Supplier<List<Holder<StructureSet>>> possibleStructureSets;
     private final Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter;
     private final Map<Structure, List<StructurePlacement>> placementsForStructure = new Object2ObjectOpenHashMap<Structure, List<StructurePlacement>>();
     private final Map<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>> ringPositions = new Object2ObjectArrayMap<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>>();
@@ -114,14 +115,20 @@ public abstract class ChunkGenerator {
         this.biomeSource = biomeSource;
         this.generationSettingsGetter = function;
         this.structureOverrides = optional;
+        this.possibleStructureSets = Suppliers.memoize(() -> optional.map(HolderSet::stream).orElseGet(() -> registry.holders().map(Holder::hackyErase)).filter(holder -> this.hasBiomesForStructureSet((StructureSet)holder.value())).toList());
         this.featuresPerStep = Suppliers.memoize(() -> FeatureSorter.buildFeaturesPerStep(List.copyOf(biomeSource.possibleBiomes()), holder -> ((BiomeGenerationSettings)function.apply((Holder<Biome>)holder)).features(), true));
     }
 
-    public Stream<Holder<StructureSet>> possibleStructureSets() {
-        if (this.structureOverrides.isPresent()) {
-            return this.structureOverrides.get().stream();
-        }
-        return this.structureSets.holders().map(Holder::hackyErase);
+    private boolean hasBiomesForStructureSet(StructureSet structureSet) {
+        Stream stream = structureSet.structures().stream().flatMap(structureSelectionEntry -> {
+            Structure structure = structureSelectionEntry.structure().value();
+            return structure.biomes().stream();
+        });
+        return stream.anyMatch(this.biomeSource.possibleBiomes()::contains);
+    }
+
+    public List<Holder<StructureSet>> possibleStructureSets() {
+        return this.possibleStructureSets.get();
     }
 
     private void generatePositions(RandomState randomState) {
@@ -147,40 +154,42 @@ public abstract class ChunkGenerator {
         if (concentricRingsStructurePlacement.count() == 0) {
             return CompletableFuture.completedFuture(List.of());
         }
-        return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("placement calculation", () -> {
-            Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
-            ArrayList<ChunkPos> list = new ArrayList<ChunkPos>();
-            int i = concentricRingsStructurePlacement.distance();
-            int j = concentricRingsStructurePlacement.count();
-            int k = concentricRingsStructurePlacement.spread();
-            HolderSet<Biome> holderSet = concentricRingsStructurePlacement.preferredBiomes();
-            RandomSource randomSource = RandomSource.create();
-            randomSource.setSeed(this instanceof FlatLevelSource ? 0L : randomState.legacyLevelSeed());
-            double d = randomSource.nextDouble() * Math.PI * 2.0;
-            int l = 0;
-            int m = 0;
-            for (int n = 0; n < j; ++n) {
-                double e = (double)(4 * i + i * m * 6) + (randomSource.nextDouble() - 0.5) * ((double)i * 2.5);
-                int o = (int)Math.round(Math.cos(d) * e);
-                int p = (int)Math.round(Math.sin(d) * e);
-                Pair<BlockPos, Holder<Biome>> pair = this.biomeSource.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, holderSet::contains, randomSource, randomState.sampler());
+        Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
+        int i = concentricRingsStructurePlacement.distance();
+        int j = concentricRingsStructurePlacement.count();
+        ArrayList<CompletableFuture<ChunkPos>> list2 = new ArrayList<CompletableFuture<ChunkPos>>(j);
+        int k = concentricRingsStructurePlacement.spread();
+        HolderSet<Biome> holderSet = concentricRingsStructurePlacement.preferredBiomes();
+        RandomSource randomSource = RandomSource.create();
+        randomSource.setSeed(this instanceof FlatLevelSource ? 0L : randomState.legacyLevelSeed());
+        double d = randomSource.nextDouble() * Math.PI * 2.0;
+        int l = 0;
+        int m = 0;
+        for (int n = 0; n < j; ++n) {
+            double e = (double)(4 * i + i * m * 6) + (randomSource.nextDouble() - 0.5) * ((double)i * 2.5);
+            int o = (int)Math.round(Math.cos(d) * e);
+            int p = (int)Math.round(Math.sin(d) * e);
+            RandomSource randomSource2 = randomSource.fork();
+            list2.add(CompletableFuture.supplyAsync(() -> {
+                Pair<BlockPos, Holder<Biome>> pair = this.biomeSource.findBiomeHorizontal(SectionPos.sectionToBlockCoord(o, 8), 0, SectionPos.sectionToBlockCoord(p, 8), 112, holderSet::contains, randomSource2, randomState.sampler());
                 if (pair != null) {
                     BlockPos blockPos = pair.getFirst();
-                    o = SectionPos.blockToSectionCoord(blockPos.getX());
-                    p = SectionPos.blockToSectionCoord(blockPos.getZ());
+                    return new ChunkPos(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
                 }
-                list.add(new ChunkPos(o, p));
-                d += Math.PI * 2 / (double)k;
-                if (++l != k) continue;
-                l = 0;
-                k += 2 * k / (++m + 1);
-                k = Math.min(k, j - n);
-                d += randomSource.nextDouble() * Math.PI * 2.0;
-            }
-            double f = (double)stopwatch.stop().elapsed(TimeUnit.MILLISECONDS) / 1000.0;
-            LOGGER.debug("Calculation for {} took {}s", (Object)holder, (Object)f);
+                return new ChunkPos(o, p);
+            }, Util.backgroundExecutor()));
+            d += Math.PI * 2 / (double)k;
+            if (++l != k) continue;
+            l = 0;
+            k += 2 * k / (++m + 1);
+            k = Math.min(k, j - n);
+            d += randomSource.nextDouble() * Math.PI * 2.0;
+        }
+        return Util.sequence(list2).thenApply(list -> {
+            double d = (double)stopwatch.stop().elapsed(TimeUnit.MILLISECONDS) / 1000.0;
+            LOGGER.debug("Calculation for {} took {}s", (Object)holder, (Object)d);
             return list;
-        }), Util.backgroundExecutor());
+        });
     }
 
     protected abstract Codec<? extends ChunkGenerator> codec();

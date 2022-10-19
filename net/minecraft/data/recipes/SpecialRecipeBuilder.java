@@ -5,29 +5,28 @@ package net.minecraft.data.recipes;
 
 import com.google.gson.JsonObject;
 import java.util.function.Consumer;
+import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import org.jetbrains.annotations.Nullable;
 
-public class SpecialRecipeBuilder {
-    final SimpleRecipeSerializer<?> serializer;
+public class SpecialRecipeBuilder
+extends CraftingRecipeBuilder {
+    final RecipeSerializer<?> serializer;
 
-    public SpecialRecipeBuilder(SimpleRecipeSerializer<?> simpleRecipeSerializer) {
-        this.serializer = simpleRecipeSerializer;
+    public SpecialRecipeBuilder(RecipeSerializer<?> recipeSerializer) {
+        this.serializer = recipeSerializer;
     }
 
-    public static SpecialRecipeBuilder special(SimpleRecipeSerializer<?> simpleRecipeSerializer) {
-        return new SpecialRecipeBuilder(simpleRecipeSerializer);
+    public static SpecialRecipeBuilder special(RecipeSerializer<? extends CraftingRecipe> recipeSerializer) {
+        return new SpecialRecipeBuilder(recipeSerializer);
     }
 
     public void save(Consumer<FinishedRecipe> consumer, final String string) {
-        consumer.accept(new FinishedRecipe(){
-
-            @Override
-            public void serializeRecipeData(JsonObject jsonObject) {
-            }
+        consumer.accept(new CraftingRecipeBuilder.CraftingResult(CraftingBookCategory.MISC){
 
             @Override
             public RecipeSerializer<?> getType() {

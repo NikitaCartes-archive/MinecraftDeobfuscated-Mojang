@@ -6,8 +6,8 @@ package net.minecraft.world.entity.ai.behavior;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -19,7 +19,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.LongJumpToRandomPos;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class LongJumpToPreferredBlock<E extends Mob>
 extends LongJumpToRandomPos<E> {
@@ -28,8 +27,8 @@ extends LongJumpToRandomPos<E> {
     private final List<LongJumpToRandomPos.PossibleJump> notPrefferedJumpCandidates = new ArrayList<LongJumpToRandomPos.PossibleJump>();
     private boolean currentlyWantingPreferredOnes;
 
-    public LongJumpToPreferredBlock(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function, TagKey<Block> tagKey, float g, Predicate<BlockState> predicate) {
-        super(uniformInt, i, j, f, function, predicate);
+    public LongJumpToPreferredBlock(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function, TagKey<Block> tagKey, float g, BiPredicate<E, BlockPos> biPredicate) {
+        super(uniformInt, i, j, f, function, biPredicate);
         this.preferredBlockTag = tagKey;
         this.preferredBlocksChance = g;
     }
@@ -60,15 +59,6 @@ extends LongJumpToRandomPos<E> {
             return Optional.of(this.notPrefferedJumpCandidates.remove(0));
         }
         return Optional.empty();
-    }
-
-    @Override
-    protected boolean isAcceptableLandingPosition(ServerLevel serverLevel, E mob, BlockPos blockPos) {
-        return super.isAcceptableLandingPosition(serverLevel, mob, blockPos) && this.willNotLandInFluid(serverLevel, blockPos);
-    }
-
-    private boolean willNotLandInFluid(ServerLevel serverLevel, BlockPos blockPos) {
-        return serverLevel.getFluidState(blockPos).isEmpty() && serverLevel.getFluidState(blockPos.below()).isEmpty();
     }
 }
 

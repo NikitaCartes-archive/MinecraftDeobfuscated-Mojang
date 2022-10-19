@@ -23,6 +23,7 @@ import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -36,11 +37,9 @@ import org.slf4j.Logger;
 public class ServerFunctionLibrary
 implements PreparableReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String FILE_EXTENSION = ".mcfunction";
-    private static final int PATH_PREFIX_LENGTH = "functions/".length();
-    private static final int PATH_SUFFIX_LENGTH = ".mcfunction".length();
+    private static final FileToIdConverter LISTER = new FileToIdConverter("functions", ".mcfunction");
     private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();
-    private final TagLoader<CommandFunction> tagsLoader = new TagLoader(this::getFunction, "tags/functions");
+    private final TagLoader<CommandFunction> tagsLoader = new TagLoader<CommandFunction>(this::getFunction, "tags/functions");
     private volatile Map<ResourceLocation, Collection<CommandFunction>> tags = Map.of();
     private final int functionCompilationLevel;
     private final CommandDispatcher<CommandSourceStack> dispatcher;
@@ -69,13 +68,12 @@ implements PreparableReloadListener {
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
         CompletableFuture<Map> completableFuture = CompletableFuture.supplyAsync(() -> this.tagsLoader.load(resourceManager), executor);
-        CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", resourceLocation -> resourceLocation.getPath().endsWith(FILE_EXTENSION)), executor).thenCompose(map -> {
+        CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> LISTER.listMatchingResources(resourceManager), executor).thenCompose(map -> {
             HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map2 = Maps.newHashMap();
             CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", CommonComponents.EMPTY, null, null);
             for (Map.Entry entry : map.entrySet()) {
                 ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-                String string = resourceLocation.getPath();
-                ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string.substring(PATH_PREFIX_LENGTH, string.length() - PATH_SUFFIX_LENGTH));
+                ResourceLocation resourceLocation2 = LISTER.fileToId(resourceLocation);
                 map2.put(resourceLocation2, CompletableFuture.supplyAsync(() -> {
                     List<String> list = ServerFunctionLibrary.readLines((Resource)entry.getValue());
                     return CommandFunction.fromLines(resourceLocation2, this.dispatcher, commandSourceStack, list);

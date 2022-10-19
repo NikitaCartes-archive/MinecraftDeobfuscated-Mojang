@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -16,14 +17,16 @@ public abstract class AbstractCookingRecipe
 implements Recipe<Container> {
     protected final RecipeType<?> type;
     protected final ResourceLocation id;
+    private final CookingBookCategory category;
     protected final String group;
     protected final Ingredient ingredient;
     protected final ItemStack result;
     protected final float experience;
     protected final int cookingTime;
 
-    public AbstractCookingRecipe(RecipeType<?> recipeType, ResourceLocation resourceLocation, String string, Ingredient ingredient, ItemStack itemStack, float f, int i) {
+    public AbstractCookingRecipe(RecipeType<?> recipeType, ResourceLocation resourceLocation, String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i) {
         this.type = recipeType;
+        this.category = cookingBookCategory;
         this.id = resourceLocation;
         this.group = string;
         this.ingredient = ingredient;
@@ -80,6 +83,10 @@ implements Recipe<Container> {
     @Override
     public RecipeType<?> getType() {
         return this.type;
+    }
+
+    public CookingBookCategory category() {
+        return this.category;
     }
 }
 

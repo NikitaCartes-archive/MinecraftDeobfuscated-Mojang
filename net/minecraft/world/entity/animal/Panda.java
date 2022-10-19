@@ -245,10 +245,13 @@ extends Animal {
     @Nullable
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Panda panda = EntityType.PANDA.create(serverLevel);
-        if (ageableMob instanceof Panda) {
-            panda.setGeneFromParents(this, (Panda)ageableMob);
+        if (panda != null) {
+            if (ageableMob instanceof Panda) {
+                Panda panda2 = (Panda)ageableMob;
+                panda.setGeneFromParents(this, panda2);
+            }
+            panda.setAttributes();
         }
-        panda.setAttributes();
         return panda;
     }
 

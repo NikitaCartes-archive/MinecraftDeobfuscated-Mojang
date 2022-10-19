@@ -13,6 +13,7 @@ import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -22,19 +23,21 @@ import org.jetbrains.annotations.Nullable;
 public class UpgradeRecipeBuilder {
     private final Ingredient base;
     private final Ingredient addition;
+    private final RecipeCategory category;
     private final Item result;
     private final Advancement.Builder advancement = Advancement.Builder.advancement();
     private final RecipeSerializer<?> type;
 
-    public UpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, Item item) {
+    public UpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+        this.category = recipeCategory;
         this.type = recipeSerializer;
         this.base = ingredient;
         this.addition = ingredient2;
         this.result = item;
     }
 
-    public static UpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, Item item) {
-        return new UpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, item);
+    public static UpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+        return new UpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, recipeCategory, item);
     }
 
     public UpgradeRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
@@ -49,7 +52,7 @@ public class UpgradeRecipeBuilder {
     public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
         this.ensureValid(resourceLocation);
         this.advancement.parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation)).rewards(AdvancementRewards.Builder.recipe(resourceLocation)).requirements(RequirementsStrategy.OR);
-        consumer.accept(new Result(resourceLocation, this.type, this.base, this.addition, this.result, this.advancement, new ResourceLocation(resourceLocation.getNamespace(), "recipes/" + this.result.getItemCategory().getRecipeFolderName() + "/" + resourceLocation.getPath())));
+        consumer.accept(new Result(resourceLocation, this.type, this.base, this.addition, this.result, this.advancement, resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 
     private void ensureValid(ResourceLocation resourceLocation) {

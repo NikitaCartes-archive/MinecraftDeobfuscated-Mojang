@@ -310,14 +310,31 @@ extends Animal {
         return itemStack.is(Items.CARROT) || itemStack.is(Items.GOLDEN_CARROT) || itemStack.is(Blocks.DANDELION.asItem());
     }
 
+    /*
+     * Unable to fully structure code
+     */
     @Override
+    @Nullable
     public Rabbit getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        Rabbit rabbit = EntityType.RABBIT.create(serverLevel);
-        int i = this.getRandomRabbitType(serverLevel);
-        if (this.random.nextInt(20) != 0) {
-            i = ageableMob instanceof Rabbit && this.random.nextBoolean() ? ((Rabbit)ageableMob).getRabbitType() : this.getRabbitType();
+        block2: {
+            block3: {
+                rabbit = EntityType.RABBIT.create(serverLevel);
+                if (rabbit == null) break block2;
+                i = this.getRandomRabbitType(serverLevel);
+                if (this.random.nextInt(20) == 0) break block3;
+                if (!(ageableMob instanceof Rabbit)) ** GOTO lbl-1000
+                rabbit2 = (Rabbit)ageableMob;
+                if (this.random.nextBoolean()) {
+                    i = rabbit2.getRabbitType();
+                } else lbl-1000:
+                // 2 sources
+
+                {
+                    i = this.getRabbitType();
+                }
+            }
+            rabbit.setRabbitType(i);
         }
-        rabbit.setRabbitType(i);
         return rabbit;
     }
 
@@ -374,7 +391,7 @@ extends Animal {
     }
 
     boolean wantsMoreFood() {
-        return this.moreCarrotTicks == 0;
+        return this.moreCarrotTicks <= 0;
     }
 
     @Override
@@ -394,6 +411,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
@@ -511,7 +529,6 @@ extends Animal {
                 }
                 this.canRaid = false;
                 this.wantsToRaid = this.rabbit.wantsMoreFood();
-                this.wantsToRaid = true;
             }
             return super.canUse();
         }

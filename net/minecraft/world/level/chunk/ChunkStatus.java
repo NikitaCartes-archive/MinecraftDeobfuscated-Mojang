@@ -50,7 +50,7 @@ public class ChunkStatus {
     public static final ChunkStatus EMPTY = ChunkStatus.registerSimple("empty", null, -1, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {});
     public static final ChunkStatus STRUCTURE_STARTS = ChunkStatus.register("structure_starts", EMPTY, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess, bl) -> {
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-            if (serverLevel.getServer().getWorldData().worldGenSettings().generateStructures()) {
+            if (serverLevel.getServer().getWorldData().worldGenOptions().generateStructures()) {
                 chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.getChunkSource().randomState(), serverLevel.structureManager(), chunkAccess, structureTemplateManager, serverLevel.getSeed());
             }
             if (chunkAccess instanceof ProtoChunk) {

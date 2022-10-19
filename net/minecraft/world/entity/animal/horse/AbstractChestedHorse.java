@@ -150,16 +150,12 @@ extends AbstractHorse {
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (!this.isBaby()) {
-            if (this.isTamed() && player.isSecondaryUseActive()) {
-                this.openCustomInventoryScreen(player);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
-            }
-            if (this.isVehicle()) {
-                return super.mobInteract(player, interactionHand);
-            }
+        boolean bl;
+        boolean bl2 = bl = !this.isBaby() && this.isTamed() && player.isSecondaryUseActive();
+        if (this.isVehicle() || bl) {
+            return super.mobInteract(player, interactionHand);
         }
+        ItemStack itemStack = player.getItemInHand(interactionHand);
         if (!itemStack.isEmpty()) {
             if (this.isFood(itemStack)) {
                 return this.fedFood(player, itemStack);
@@ -168,25 +164,21 @@ extends AbstractHorse {
                 this.makeMad();
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
-            if (!this.hasChest() && itemStack.is(Blocks.CHEST.asItem())) {
-                this.setChest(true);
-                this.playChestEquipsSound();
-                if (!player.getAbilities().instabuild) {
-                    itemStack.shrink(1);
-                }
-                this.createInventory();
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
-            }
-            if (!this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE)) {
-                this.openCustomInventoryScreen(player);
+            if (!this.hasChest() && itemStack.is(Items.CHEST)) {
+                this.equipChest(player, itemStack);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
         }
-        if (this.isBaby()) {
-            return super.mobInteract(player, interactionHand);
+        return super.mobInteract(player, interactionHand);
+    }
+
+    private void equipChest(Player player, ItemStack itemStack) {
+        this.setChest(true);
+        this.playChestEquipsSound();
+        if (!player.getAbilities().instabuild) {
+            itemStack.shrink(1);
         }
-        this.doPlayerRide(player);
-        return InteractionResult.sidedSuccess(this.level.isClientSide);
+        this.createInventory();
     }
 
     protected void playChestEquipsSound() {

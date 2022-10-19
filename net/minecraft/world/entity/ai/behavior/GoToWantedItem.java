@@ -33,7 +33,8 @@ extends Behavior<E> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
-        return !this.isOnPickupCooldown(livingEntity) && this.predicate.test(livingEntity) && this.getClosestLovedItem(livingEntity).closerThan((Entity)livingEntity, this.maxDistToWalk);
+        ItemEntity itemEntity = this.getClosestLovedItem(livingEntity);
+        return !this.isOnPickupCooldown(livingEntity) && this.predicate.test(livingEntity) && itemEntity.closerThan((Entity)livingEntity, this.maxDistToWalk) && ((LivingEntity)livingEntity).level.getWorldBorder().isWithinBounds(itemEntity.blockPosition());
     }
 
     @Override

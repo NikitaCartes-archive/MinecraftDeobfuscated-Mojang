@@ -18,6 +18,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public interface HolderSet<T>
 extends Iterable<Holder<T>> {
@@ -35,6 +36,14 @@ extends Iterable<Holder<T>> {
 
     public boolean isValidInRegistry(Registry<T> var1);
 
+    public Optional<TagKey<T>> unwrapKey();
+
+    @Deprecated
+    @VisibleForTesting
+    public static <T> Named<T> emptyNamed(Registry<T> registry, TagKey<T> tagKey) {
+        return new Named<T>(registry, tagKey);
+    }
+
     @SafeVarargs
     public static <T> Direct<T> direct(Holder<T> ... holders) {
         return new Direct<T>(List.of(holders));
@@ -51,39 +60,6 @@ extends Iterable<Holder<T>> {
 
     public static <E, T> Direct<T> direct(Function<E, Holder<T>> function, List<E> list) {
         return HolderSet.direct(list.stream().map(function).toList());
-    }
-
-    public static class Direct<T>
-    extends ListBacked<T> {
-        private final List<Holder<T>> contents;
-        @Nullable
-        private Set<Holder<T>> contentsSet;
-
-        Direct(List<Holder<T>> list) {
-            this.contents = list;
-        }
-
-        @Override
-        protected List<Holder<T>> contents() {
-            return this.contents;
-        }
-
-        @Override
-        public Either<TagKey<T>, List<Holder<T>>> unwrap() {
-            return Either.right(this.contents);
-        }
-
-        @Override
-        public boolean contains(Holder<T> holder) {
-            if (this.contentsSet == null) {
-                this.contentsSet = Set.copyOf(this.contents);
-            }
-            return this.contentsSet.contains(holder);
-        }
-
-        public String toString() {
-            return "DirectSet[" + this.contents + "]";
-        }
     }
 
     public static class Named<T>
@@ -116,6 +92,11 @@ extends Iterable<Holder<T>> {
         }
 
         @Override
+        public Optional<TagKey<T>> unwrapKey() {
+            return Optional.of(this.key);
+        }
+
+        @Override
         public boolean contains(Holder<T> holder) {
             return holder.is(this.key);
         }
@@ -127,6 +108,44 @@ extends Iterable<Holder<T>> {
         @Override
         public boolean isValidInRegistry(Registry<T> registry) {
             return this.registry == registry;
+        }
+    }
+
+    public static class Direct<T>
+    extends ListBacked<T> {
+        private final List<Holder<T>> contents;
+        @Nullable
+        private Set<Holder<T>> contentsSet;
+
+        Direct(List<Holder<T>> list) {
+            this.contents = list;
+        }
+
+        @Override
+        protected List<Holder<T>> contents() {
+            return this.contents;
+        }
+
+        @Override
+        public Either<TagKey<T>, List<Holder<T>>> unwrap() {
+            return Either.right(this.contents);
+        }
+
+        @Override
+        public Optional<TagKey<T>> unwrapKey() {
+            return Optional.empty();
+        }
+
+        @Override
+        public boolean contains(Holder<T> holder) {
+            if (this.contentsSet == null) {
+                this.contentsSet = Set.copyOf(this.contents);
+            }
+            return this.contentsSet.contains(holder);
+        }
+
+        public String toString() {
+            return "DirectSet[" + this.contents + "]";
         }
     }
 

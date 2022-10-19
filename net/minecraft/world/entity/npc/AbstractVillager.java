@@ -182,7 +182,9 @@ Merchant {
         if (compoundTag.contains("Offers", 10)) {
             this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));
         }
-        this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+        if (compoundTag.contains("Inventory", 10)) {
+            this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+        }
     }
 
     @Override

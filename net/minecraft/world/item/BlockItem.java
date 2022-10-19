@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -18,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -61,6 +60,9 @@ extends Item {
     }
 
     public InteractionResult place(BlockPlaceContext blockPlaceContext) {
+        if (!this.getBlock().isEnabled(blockPlaceContext.getLevel().enabledFeatures())) {
+            return InteractionResult.FAIL;
+        }
         if (!blockPlaceContext.canPlace()) {
             return InteractionResult.FAIL;
         }
@@ -182,13 +184,6 @@ extends Item {
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (this.allowedIn(creativeModeTab)) {
-            this.getBlock().fillItemCategory(creativeModeTab, nonNullList);
-        }
-    }
-
-    @Override
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         super.appendHoverText(itemStack, level, list, tooltipFlag);
         this.getBlock().appendHoverText(itemStack, level, list, tooltipFlag);
@@ -229,6 +224,11 @@ extends Item {
             BlockEntity.addEntityType(compoundTag, blockEntityType);
             itemStack.addTagElement(BLOCK_ENTITY_TAG, compoundTag);
         }
+    }
+
+    @Override
+    public FeatureFlagSet requiredFeatures() {
+        return this.getBlock().requiredFeatures();
     }
 }
 

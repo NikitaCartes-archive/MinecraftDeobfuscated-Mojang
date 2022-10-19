@@ -32,7 +32,7 @@ public class ReloadCommand {
     private static Collection<String> discoverNewPacks(PackRepository packRepository, WorldData worldData, Collection<String> collection) {
         packRepository.reload();
         ArrayList<String> collection2 = Lists.newArrayList(collection);
-        List<String> collection3 = worldData.getDataPackConfig().getDisabled();
+        List<String> collection3 = worldData.getDataConfiguration().dataPacks().getDisabled();
         for (String string : packRepository.getAvailableIds()) {
             if (collection3.contains(string) || collection2.contains(string)) continue;
             collection2.add(string);

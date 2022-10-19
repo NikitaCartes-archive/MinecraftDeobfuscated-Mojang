@@ -3,30 +3,21 @@
  */
 package net.minecraft.data.loot;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.function.Supplier;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.loot.BlockLoot;
-import net.minecraft.data.loot.ChestLoot;
-import net.minecraft.data.loot.EntityLoot;
-import net.minecraft.data.loot.FishingLoot;
-import net.minecraft.data.loot.GiftLoot;
-import net.minecraft.data.loot.PiglinBarterLoot;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.ValidationContext;
@@ -37,23 +28,28 @@ import org.slf4j.Logger;
 public class LootTableProvider
 implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final DataGenerator.PathProvider pathProvider;
-    private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> subProviders = ImmutableList.of(Pair.of(FishingLoot::new, LootContextParamSets.FISHING), Pair.of(ChestLoot::new, LootContextParamSets.CHEST), Pair.of(EntityLoot::new, LootContextParamSets.ENTITY), Pair.of(BlockLoot::new, LootContextParamSets.BLOCK), Pair.of(PiglinBarterLoot::new, LootContextParamSets.PIGLIN_BARTER), Pair.of(GiftLoot::new, LootContextParamSets.GIFT));
+    private final String name;
+    private final PackOutput.PathProvider pathProvider;
+    private final Set<ResourceLocation> requiredTables;
+    private final List<SubProviderEntry> subProviders;
 
-    public LootTableProvider(DataGenerator dataGenerator) {
-        this.pathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "loot_tables");
+    public LootTableProvider(String string, PackOutput packOutput, Set<ResourceLocation> set, List<SubProviderEntry> list) {
+        this.name = string;
+        this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "loot_tables");
+        this.subProviders = list;
+        this.requiredTables = set;
     }
 
     @Override
     public void run(CachedOutput cachedOutput) {
         HashMap<ResourceLocation, LootTable> map = Maps.newHashMap();
-        this.subProviders.forEach(pair -> ((Consumer)((Supplier)pair.getFirst()).get()).accept((resourceLocation, builder) -> {
-            if (map.put((ResourceLocation)resourceLocation, builder.setParamSet((LootContextParamSet)pair.getSecond()).build()) != null) {
+        this.subProviders.forEach(subProviderEntry -> subProviderEntry.provider().get().generate((resourceLocation, builder) -> {
+            if (map.put((ResourceLocation)resourceLocation, builder.setParamSet(subProviderEntry.paramSet).build()) != null) {
                 throw new IllegalStateException("Duplicate loot table " + resourceLocation);
             }
         }));
         ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, resourceLocation -> null, map::get);
-        Sets.SetView<ResourceLocation> set = Sets.difference(BuiltInLootTables.all(), map.keySet());
+        Sets.SetView<ResourceLocation> set = Sets.difference(this.requiredTables, map.keySet());
         for (ResourceLocation resourceLocation2 : set) {
             validationContext.reportProblem("Missing built-in table: " + resourceLocation2);
         }
@@ -75,7 +71,10 @@ implements DataProvider {
 
     @Override
     public String getName() {
-        return "LootTables";
+        return this.name;
+    }
+
+    public record SubProviderEntry(Supplier<LootTableSubProvider> provider, LootContextParamSet paramSet) {
     }
 }
 

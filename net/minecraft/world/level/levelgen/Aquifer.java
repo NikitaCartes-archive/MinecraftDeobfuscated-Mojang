@@ -79,7 +79,7 @@ public interface Aquifer {
         private final int minGridZ;
         private final int gridSizeX;
         private final int gridSizeZ;
-        private static final int[][] SURFACE_SAMPLING_OFFSETS_IN_CHUNKS = new int[][]{{-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}};
+        private static final int[][] SURFACE_SAMPLING_OFFSETS_IN_CHUNKS = new int[][]{{0, 0}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {-3, 0}, {-2, 0}, {-1, 0}, {1, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}};
 
         NoiseBasedAquifer(NoiseChunk noiseChunk, ChunkPos chunkPos, NoiseRouter noiseRouter, PositionalRandomFactory positionalRandomFactory, int i, int j, FluidPicker fluidPicker) {
             this.noiseChunk = noiseChunk;
@@ -331,7 +331,7 @@ public interface Aquifer {
             double e;
             double d;
             DensityFunction.SinglePointContext singlePointContext = new DensityFunction.SinglePointContext(i, j, k);
-            if (OverworldBiomeBuilder.isDeepDarkRegion(this.erosion.compute(singlePointContext), this.depth.compute(singlePointContext))) {
+            if (OverworldBiomeBuilder.isDeepDarkRegion(this.erosion, this.depth, singlePointContext)) {
                 d = -1.0;
                 e = -1.0;
             } else {

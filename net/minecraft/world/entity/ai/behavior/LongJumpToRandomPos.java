@@ -10,8 +10,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -32,11 +32,10 @@ import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,21 +56,27 @@ extends Behavior<E> {
     protected Vec3 chosenJump;
     protected int findJumpTries;
     protected long prepareJumpStart;
-    private Function<E, SoundEvent> getJumpSound;
-    private final Predicate<BlockState> acceptableLandingSpot;
+    private final Function<E, SoundEvent> getJumpSound;
+    private final BiPredicate<E, BlockPos> acceptableLandingSpot;
 
     public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function) {
-        this(uniformInt, i, j, f, function, blockState -> false);
+        this(uniformInt, i, j, f, function, LongJumpToRandomPos::defaultAcceptableLandingSpot);
     }
 
-    public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function, Predicate<BlockState> predicate) {
+    public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos blockPos) {
+        Level level = mob.level;
+        BlockPos blockPos2 = blockPos.below();
+        return level.getBlockState(blockPos2).isSolidRender(level, blockPos2) && mob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(level, blockPos.mutable())) == 0.0f;
+    }
+
+    public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function, BiPredicate<E, BlockPos> biPredicate) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT), 200);
         this.timeBetweenLongJumps = uniformInt;
         this.maxLongJumpHeight = i;
         this.maxLongJumpWidth = j;
         this.maxJumpVelocity = f;
         this.getJumpSound = function;
-        this.acceptableLandingSpot = predicate;
+        this.acceptableLandingSpot = biPredicate;
     }
 
     @Override
@@ -149,17 +154,14 @@ extends Behavior<E> {
         return optional;
     }
 
-    protected boolean isAcceptableLandingPosition(ServerLevel serverLevel, E mob, BlockPos blockPos) {
+    private boolean isAcceptableLandingPosition(ServerLevel serverLevel, E mob, BlockPos blockPos) {
         BlockPos blockPos2 = ((Entity)mob).blockPosition();
         int i = blockPos2.getX();
         int j = blockPos2.getZ();
         if (i == blockPos.getX() && j == blockPos.getZ()) {
             return false;
         }
-        if (!((Mob)mob).getNavigation().isStableDestination(blockPos) && !this.acceptableLandingSpot.test(serverLevel.getBlockState(blockPos.below()))) {
-            return false;
-        }
-        return ((Mob)mob).getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(((Mob)mob).level, blockPos.mutable())) == 0.0f;
+        return this.acceptableLandingSpot.test(mob, blockPos);
     }
 
     @Nullable
@@ -207,12 +209,13 @@ extends Behavior<E> {
         int u = Mth.ceil(g / s) * 2;
         double v = 0.0;
         Vec3 vec35 = null;
+        EntityDimensions entityDimensions = mob.getDimensions(Pose.LONG_JUMPING);
         for (int w = 0; w < u - 1; ++w) {
             double x = m / n * (v += g / (double)u) - Math.pow(v, 2.0) * 0.08 / (2.0 * q * Math.pow(n, 2.0));
             double y = v * p;
             double z = v * o;
             Vec3 vec36 = new Vec3(vec32.x + y, vec32.y + x, vec32.z + z);
-            if (vec35 != null && !this.isClearTransition(mob, vec35, vec36)) {
+            if (vec35 != null && !this.isClearTransition(mob, entityDimensions, vec35, vec36)) {
                 return null;
             }
             vec35 = vec36;
@@ -220,17 +223,15 @@ extends Behavior<E> {
         return new Vec3(s * p, t, s * o).scale(0.95f);
     }
 
-    private boolean isClearTransition(Mob mob, Vec3 vec3, Vec3 vec32) {
-        EntityDimensions entityDimensions = mob.getDimensions(Pose.LONG_JUMPING);
+    private boolean isClearTransition(Mob mob, EntityDimensions entityDimensions, Vec3 vec3, Vec3 vec32) {
         Vec3 vec33 = vec32.subtract(vec3);
         double d = Math.min(entityDimensions.width, entityDimensions.height);
         int i = Mth.ceil(vec33.length() / d);
         Vec3 vec34 = vec33.normalize();
         Vec3 vec35 = vec3;
         for (int j = 0; j < i; ++j) {
-            vec35 = j == i - 1 ? vec32 : vec35.add(vec34.scale(d * (double)0.9f));
-            AABB aABB = entityDimensions.makeBoundingBox(vec35);
-            if (mob.level.noCollision(mob, aABB)) continue;
+            Vec3 vec36 = vec35 = j == i - 1 ? vec32 : vec35.add(vec34.scale(d * (double)0.9f));
+            if (mob.level.noCollision(mob, entityDimensions.makeBoundingBox(vec35))) continue;
             return false;
         }
         return true;

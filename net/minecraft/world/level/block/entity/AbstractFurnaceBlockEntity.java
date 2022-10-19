@@ -159,6 +159,7 @@ StackedContentsCompatible {
         AbstractFurnaceBlockEntity.add(map, Blocks.MANGROVE_FENCE_GATE, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.NOTE_BLOCK, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.BOOKSHELF, 300);
+        AbstractFurnaceBlockEntity.add(map, Blocks.CHISELED_BOOKSHELF, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.LECTERN, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.JUKEBOX, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.CHEST, 300);
@@ -170,6 +171,7 @@ StackedContentsCompatible {
         AbstractFurnaceBlockEntity.add(map, Items.FISHING_ROD, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.LADDER, 300);
         AbstractFurnaceBlockEntity.add(map, ItemTags.SIGNS, 200);
+        AbstractFurnaceBlockEntity.add(map, ItemTags.HANGING_SIGNS, 800);
         AbstractFurnaceBlockEntity.add(map, Items.WOODEN_SHOVEL, 200);
         AbstractFurnaceBlockEntity.add(map, Items.WOODEN_SWORD, 200);
         AbstractFurnaceBlockEntity.add(map, Items.WOODEN_HOE, 200);

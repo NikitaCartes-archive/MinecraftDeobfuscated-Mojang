@@ -42,7 +42,9 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.WorldPresetTags;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -77,7 +79,7 @@ implements Widget {
     }
 
     private static Optional<Holder<WorldPreset>> findPreset(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional) {
-        return optional.flatMap(resourceKey -> worldCreationContext.registryAccess().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolder((ResourceKey<WorldPreset>)resourceKey));
+        return optional.flatMap(resourceKey -> worldCreationContext.worldgenLoadContext().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolder((ResourceKey<WorldPreset>)resourceKey));
     }
 
     public void init(CreateWorldScreen createWorldScreen, Minecraft minecraft, Font font) {
@@ -86,14 +88,14 @@ implements Widget {
         this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, Component.translatable("selectWorld.enterSeed"));
         this.seedEdit.setValue(WorldGenSettingsComponent.toString(this.seed));
         this.seedEdit.setResponder(string -> {
-            this.seed = WorldGenSettings.parseSeed(this.seedEdit.getValue());
+            this.seed = WorldOptions.parseSeed(this.seedEdit.getValue());
         });
         createWorldScreen.addWidget(this.seedEdit);
         int i = this.width / 2 - 155;
         int j = this.width / 2 + 5;
-        this.featuresButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.worldGenSettings().generateStructures()).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.mapFeatures.info"))).create(i, 100, 150, 20, Component.translatable("selectWorld.mapFeatures"), (cycleButton, boolean_) -> this.updateSettings(WorldGenSettings::withStructuresToggled)));
+        this.featuresButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.options().generateStructures()).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.mapFeatures.info"))).create(i, 100, 150, 20, Component.translatable("selectWorld.mapFeatures"), (cycleButton, boolean_) -> this.updateSettings(worldOptions -> worldOptions.withStructures((boolean)boolean_))));
         this.featuresButton.visible = false;
-        Registry<WorldPreset> registry = this.settings.registryAccess().registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
+        Registry<WorldPreset> registry = this.settings.worldgenLoadContext().registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
         List list = WorldGenSettingsComponent.getNonEmptyList(registry, WorldPresetTags.NORMAL).orElseGet(() -> registry.holders().collect(Collectors.toUnmodifiableList()));
         List<Holder<WorldPreset>> list2 = WorldGenSettingsComponent.getNonEmptyList(registry, WorldPresetTags.EXTENDED).orElse(list);
         this.typeButton = createWorldScreen.addRenderableWidget(CycleButton.builder(WorldGenSettingsComponent::describePreset).withValues(list, list2).withCustomNarration(cycleButton -> {
@@ -103,7 +105,7 @@ implements Widget {
             return cycleButton.createDefaultNarrationMessage();
         }).create(j, 100, 150, 20, Component.translatable("selectWorld.mapType"), (cycleButton, holder) -> {
             this.preset = Optional.of(holder);
-            this.updateSettings(worldGenSettings -> ((WorldPreset)holder.value()).recreateWorldGenSettings((WorldGenSettings)worldGenSettings));
+            this.updateSettings((frozen, worldDimensions) -> ((WorldPreset)holder.value()).createWorldDimensions());
             createWorldScreen.refreshWorldGenSettingsVisibility();
         }));
         this.preset.ifPresent(this.typeButton::setValue);
@@ -118,7 +120,7 @@ implements Widget {
             }
         }));
         this.customizeTypeButton.visible = false;
-        this.bonusItemsButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.worldGenSettings().generateBonusChest() && !createWorldScreen.hardCore).create(i, 151, 150, 20, Component.translatable("selectWorld.bonusItems"), (cycleButton, boolean_) -> this.updateSettings(WorldGenSettings::withBonusChestToggled)));
+        this.bonusItemsButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.options().generateBonusChest() && !createWorldScreen.hardCore).create(i, 151, 150, 20, Component.translatable("selectWorld.bonusItems"), (cycleButton, boolean_) -> this.updateSettings(worldOptions -> worldOptions.withBonusChest((boolean)boolean_))));
         this.bonusItemsButton.visible = false;
         this.importSettingsButton = createWorldScreen.addRenderableWidget(new Button(i, 185, 150, 20, Component.translatable("selectWorld.import_worldgen_settings"), button -> {
             DataResult<Object> dataResult;
@@ -126,7 +128,7 @@ implements Widget {
             if (string == null) {
                 return;
             }
-            RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, this.settings.registryAccess());
+            RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, this.settings.worldgenLoadContext());
             try (BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string, new String[0]));){
                 JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
                 dataResult = WorldGenSettings.CODEC.parse(dynamicOps, jsonElement);
@@ -142,7 +144,7 @@ implements Widget {
                 return;
             }
             Lifecycle lifecycle = dataResult.lifecycle();
-            dataResult.resultOrPartial(LOGGER::error).ifPresent(worldGenSettings -> WorldOpenFlows.confirmWorldCreation(minecraft, createWorldScreen, lifecycle, () -> this.importSettings((WorldGenSettings)worldGenSettings)));
+            dataResult.resultOrPartial(LOGGER::error).ifPresent(worldGenSettings -> WorldOpenFlows.confirmWorldCreation(minecraft, createWorldScreen, lifecycle, () -> this.importSettings(worldGenSettings.options(), worldGenSettings.dimensions())));
         }));
         this.importSettingsButton.visible = false;
         this.amplifiedWorldInfo = MultiLineLabel.create(font, (FormattedText)AMPLIFIED_HELP_TEXT, this.typeButton.getWidth());
@@ -160,11 +162,11 @@ implements Widget {
         return holder.unwrapKey().map(resourceKey -> Component.translatable(resourceKey.location().toLanguageKey("generator"))).orElse(CUSTOM_WORLD_DESCRIPTION);
     }
 
-    private void importSettings(WorldGenSettings worldGenSettings) {
-        this.settings = this.settings.withSettings(worldGenSettings);
-        this.preset = WorldGenSettingsComponent.findPreset(this.settings, WorldPresets.fromSettings(worldGenSettings));
+    private void importSettings(WorldOptions worldOptions, WorldDimensions worldDimensions) {
+        this.settings = this.settings.withSettings(worldOptions, worldDimensions);
+        this.preset = WorldGenSettingsComponent.findPreset(this.settings, WorldPresets.fromSettings(worldDimensions.dimensions()));
         this.selectWorldTypeButton(true);
-        this.seed = OptionalLong.of(worldGenSettings.seed());
+        this.seed = OptionalLong.of(worldOptions.seed());
         this.seedEdit.setValue(WorldGenSettingsComponent.toString(this.seed));
     }
 
@@ -183,12 +185,12 @@ implements Widget {
         }
     }
 
-    void updateSettings(WorldCreationContext.SimpleUpdater simpleUpdater) {
-        this.settings = this.settings.withSettings(simpleUpdater);
+    void updateSettings(WorldCreationContext.DimensionsUpdater dimensionsUpdater) {
+        this.settings = this.settings.withDimensions(dimensionsUpdater);
     }
 
-    void updateSettings(WorldCreationContext.Updater updater) {
-        this.settings = this.settings.withSettings(updater);
+    private void updateSettings(WorldCreationContext.OptionsModifier optionsModifier) {
+        this.settings = this.settings.withOptions(optionsModifier);
     }
 
     void updateSettings(WorldCreationContext worldCreationContext) {
@@ -202,13 +204,20 @@ implements Widget {
         return "";
     }
 
-    public WorldCreationContext createFinalSettings(boolean bl) {
-        OptionalLong optionalLong = WorldGenSettings.parseSeed(this.seedEdit.getValue());
-        return this.settings.withSettings(worldGenSettings -> worldGenSettings.withSeed(bl, optionalLong));
+    public WorldOptions createFinalOptions(boolean bl, boolean bl2) {
+        OptionalLong optionalLong = WorldOptions.parseSeed(this.seedEdit.getValue());
+        WorldOptions worldOptions = this.settings.options();
+        if (bl || bl2) {
+            worldOptions = worldOptions.withBonusChest(false);
+        }
+        if (bl) {
+            worldOptions = worldOptions.withStructures(false);
+        }
+        return worldOptions.withSeed(optionalLong);
     }
 
     public boolean isDebug() {
-        return this.settings.worldGenSettings().isDebug();
+        return this.settings.selectedDimensions().isDebug();
     }
 
     public void setVisibility(boolean bl) {
@@ -242,7 +251,7 @@ implements Widget {
     }
 
     public RegistryAccess registryHolder() {
-        return this.settings.registryAccess();
+        return this.settings.worldgenLoadContext();
     }
 
     public void switchToHardcore() {
@@ -252,7 +261,7 @@ implements Widget {
 
     public void switchOutOfHardcode() {
         this.bonusItemsButton.active = true;
-        this.bonusItemsButton.setValue(this.settings.worldGenSettings().generateBonusChest());
+        this.bonusItemsButton.setValue(this.settings.options().generateBonusChest());
     }
 }
 

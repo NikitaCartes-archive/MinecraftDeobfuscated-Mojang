@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.entity;
 
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,6 +12,10 @@ public interface Saddleable {
     public boolean isSaddleable();
 
     public void equipSaddle(@Nullable SoundSource var1);
+
+    default public SoundEvent getSaddleSoundEvent() {
+        return SoundEvents.HORSE_SADDLE;
+    }
 
     public boolean isSaddled();
 }

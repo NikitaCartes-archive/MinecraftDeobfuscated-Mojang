@@ -33,6 +33,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class Cow
 extends Animal {
@@ -94,6 +95,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public Cow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.COW.create(serverLevel);
     }
@@ -107,6 +109,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

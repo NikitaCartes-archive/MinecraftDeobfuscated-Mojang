@@ -13,46 +13,38 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
+import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.entity.Entity;
 
 public class MsgCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("msg").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.players()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
-            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
-            try {
-                return MsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), chatMessage);
-            } catch (Exception exception) {
-                chatMessage.consume((CommandSourceStack)commandContext.getSource());
-                throw exception;
+            Collection<ServerPlayer> collection = EntityArgument.getPlayers(commandContext, "targets");
+            if (!collection.isEmpty()) {
+                MessageArgument.resolveChatMessage(commandContext, "message", playerChatMessage -> MsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), collection, playerChatMessage));
             }
+            return collection.size();
         }))));
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("tell").redirect(literalCommandNode));
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("w").redirect(literalCommandNode));
     }
 
-    private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, MessageArgument.ChatMessage chatMessage) {
+    private static void sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, PlayerChatMessage playerChatMessage) {
         ChatType.Bound bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, commandSourceStack);
-        chatMessage.resolve(commandSourceStack, playerChatMessage -> {
-            OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(playerChatMessage);
-            boolean bl = playerChatMessage.isFullyFiltered();
-            Entity entity = commandSourceStack.getEntity();
-            boolean bl2 = false;
-            for (ServerPlayer serverPlayer : collection) {
-                ChatType.Bound bound2 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(serverPlayer.getDisplayName());
-                commandSourceStack.sendChatMessage(outgoingPlayerChatMessage, false, bound2);
-                boolean bl3 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
-                serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl3, bound);
-                bl2 |= bl && bl3 && serverPlayer != entity;
-            }
-            if (bl2) {
-                commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
-            }
-            outgoingPlayerChatMessage.sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
-        });
-        return collection.size();
+        OutgoingChatMessage outgoingChatMessage = OutgoingChatMessage.create(playerChatMessage);
+        boolean bl = false;
+        for (ServerPlayer serverPlayer : collection) {
+            ChatType.Bound bound2 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(serverPlayer.getDisplayName());
+            commandSourceStack.sendChatMessage(outgoingChatMessage, false, bound2);
+            boolean bl2 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
+            serverPlayer.sendChatMessage(outgoingChatMessage, bl2, bound);
+            bl |= bl2 && playerChatMessage.isFullyFiltered();
+        }
+        if (bl) {
+            commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+        }
     }
 }
 

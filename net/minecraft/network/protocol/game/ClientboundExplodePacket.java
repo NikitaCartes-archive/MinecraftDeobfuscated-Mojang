@@ -42,9 +42,9 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundExplodePacket(FriendlyByteBuf friendlyByteBuf2) {
-        this.x = friendlyByteBuf2.readFloat();
-        this.y = friendlyByteBuf2.readFloat();
-        this.z = friendlyByteBuf2.readFloat();
+        this.x = friendlyByteBuf2.readDouble();
+        this.y = friendlyByteBuf2.readDouble();
+        this.z = friendlyByteBuf2.readDouble();
         this.power = friendlyByteBuf2.readFloat();
         int i = Mth.floor(this.x);
         int j = Mth.floor(this.y);
@@ -62,9 +62,9 @@ implements Packet<ClientGamePacketListener> {
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeFloat((float)this.x);
-        friendlyByteBuf2.writeFloat((float)this.y);
-        friendlyByteBuf2.writeFloat((float)this.z);
+        friendlyByteBuf2.writeDouble(this.x);
+        friendlyByteBuf2.writeDouble(this.y);
+        friendlyByteBuf2.writeDouble(this.z);
         friendlyByteBuf2.writeFloat(this.power);
         int i = Mth.floor(this.x);
         int j = Mth.floor(this.y);

@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,11 +34,11 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageHeader;
+import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -57,11 +58,11 @@ import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -109,10 +110,10 @@ import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
@@ -201,6 +202,7 @@ extends Player {
     private final TextFilter textFilter;
     private boolean textFilteringEnabled;
     private boolean allowsListing = true;
+    private WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
     private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer(){
 
         @Override
@@ -247,18 +249,20 @@ extends Player {
         public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
         }
     };
+    private final RemoteChatSession chatSession;
     private int containerCounter;
     public int latency;
     public boolean wonGame;
 
-    public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
-        super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile, profilePublicKey);
+    public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, RemoteChatSession remoteChatSession) {
+        super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
         this.textFilter = minecraftServer.createTextFilterForPlayer(this);
         this.gameMode = minecraftServer.createGameModeForPlayer(this);
         this.server = minecraftServer;
         this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
         this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
         this.maxUpStep = 1.0f;
+        this.chatSession = remoteChatSession;
         this.fudgeSpawnLocation(serverLevel);
     }
 
@@ -305,6 +309,11 @@ extends Player {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
+        if (compoundTag.contains("warden_spawn_tracker", 10)) {
+            WardenSpawnTracker.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("warden_spawn_tracker"))).resultOrPartial(LOGGER::error).ifPresent(wardenSpawnTracker -> {
+                this.wardenSpawnTracker = wardenSpawnTracker;
+            });
+        }
         if (compoundTag.contains("enteredNetherPosition", 10)) {
             CompoundTag compoundTag2 = compoundTag.getCompound("enteredNetherPosition");
             this.enteredNetherPosition = new Vec3(compoundTag2.getDouble("x"), compoundTag2.getDouble("y"), compoundTag2.getDouble("z"));
@@ -329,6 +338,7 @@ extends Player {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
+        WardenSpawnTracker.CODEC.encodeStart(NbtOps.INSTANCE, this.wardenSpawnTracker).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("warden_spawn_tracker", (Tag)tag));
         this.storeGameTypes(compoundTag);
         compoundTag.putBoolean("seenCredits", this.seenCredits);
         if (this.enteredNetherPosition != null) {
@@ -419,6 +429,7 @@ extends Player {
     public void tick() {
         Entity entity;
         this.gameMode.tick();
+        this.wardenSpawnTracker.tick();
         --this.spawnInvulnerableTime;
         if (this.invulnerableTime > 0) {
             --this.invulnerableTime;
@@ -701,8 +712,8 @@ extends Player {
             serverLevel2.getProfiler().push("placing");
             this.setLevel(serverLevel);
             serverLevel.addDuringPortalTeleport(this);
-            this.setRot(portalInfo.yRot, portalInfo.xRot);
-            this.moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z);
+            this.connection.teleport(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, portalInfo.xRot);
+            this.connection.resetPosition();
             serverLevel2.getProfiler().pop();
             this.triggerDimensionChangeTriggers(serverLevel2);
             this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
@@ -1067,8 +1078,10 @@ extends Player {
     }
 
     public void restoreFrom(ServerPlayer serverPlayer, boolean bl) {
+        this.wardenSpawnTracker = serverPlayer.wardenSpawnTracker;
         this.textFilteringEnabled = serverPlayer.textFilteringEnabled;
         this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
+        this.onUpdateAbilities();
         if (bl) {
             this.getInventory().replaceWith(serverPlayer.getInventory());
             this.setHealth(serverPlayer.getHealth());
@@ -1129,7 +1142,12 @@ extends Player {
 
     @Override
     public void teleportTo(double d, double e, double f) {
-        this.connection.teleport(d, e, f, this.getYRot(), this.getXRot());
+        this.connection.teleport(d, e, f, this.getYRot(), this.getXRot(), ClientboundPlayerPositionPacket.RelativeArgument.ROTATION);
+    }
+
+    @Override
+    public void teleportRelative(double d, double e, double f) {
+        this.connection.teleport(this.getX() + d, this.getY() + e, this.getZ() + f, this.getYRot(), this.getXRot(), ClientboundPlayerPositionPacket.RelativeArgument.ALL);
     }
 
     @Override
@@ -1208,15 +1226,9 @@ extends Player {
         }));
     }
 
-    public void sendChatMessage(OutgoingPlayerChatMessage outgoingPlayerChatMessage, boolean bl, ChatType.Bound bound) {
+    public void sendChatMessage(OutgoingChatMessage outgoingChatMessage, boolean bl, ChatType.Bound bound) {
         if (this.acceptsChatMessages()) {
-            outgoingPlayerChatMessage.sendToPlayer(this, bl, bound);
-        }
-    }
-
-    public void sendChatHeader(SignedMessageHeader signedMessageHeader, MessageSignature messageSignature, byte[] bs) {
-        if (this.acceptsChatMessages()) {
-            this.connection.send(new ClientboundPlayerChatHeaderPacket(signedMessageHeader, messageSignature, bs));
+            outgoingChatMessage.sendToPlayer(this, bl, bound);
         }
     }
 
@@ -1260,7 +1272,7 @@ extends Player {
     }
 
     public void sendServerStatus(ServerStatus serverStatus) {
-        this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.previewsChat(), serverStatus.enforcesSecureChat()));
+        this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.enforcesSecureChat()));
     }
 
     @Override
@@ -1299,7 +1311,8 @@ extends Player {
         Entity entity3 = this.camera = entity == null ? this : entity;
         if (entity2 != this.camera) {
             this.connection.send(new ClientboundSetCameraPacket(this.camera));
-            this.teleportTo(this.camera.getX(), this.camera.getY(), this.camera.getZ());
+            this.connection.teleport(this.camera.getX(), this.camera.getY(), this.camera.getZ(), this.getYRot(), this.getXRot());
+            this.connection.resetPosition();
         }
     }
 
@@ -1429,7 +1442,7 @@ extends Player {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddPlayerPacket(this);
     }
 
@@ -1484,6 +1497,7 @@ extends Player {
         }
     }
 
+    @Override
     public boolean isTextFilteringEnabled() {
         return this.textFilteringEnabled;
     }
@@ -1518,6 +1532,11 @@ extends Player {
     }
 
     @Override
+    public Optional<WardenSpawnTracker> getWardenSpawnTracker() {
+        return Optional.of(this.wardenSpawnTracker);
+    }
+
+    @Override
     public void onItemPickup(ItemEntity itemEntity) {
         Entity entity;
         super.onItemPickup(itemEntity);
@@ -1525,6 +1544,10 @@ extends Player {
         if (entity != null) {
             CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, itemEntity.getItem(), entity);
         }
+    }
+
+    public RemoteChatSession getChatSession() {
+        return this.chatSession;
     }
 
     @Override

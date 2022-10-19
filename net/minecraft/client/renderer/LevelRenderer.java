@@ -492,7 +492,7 @@ AutoCloseable {
             String string2 = "Failed to " + string + " shader: " + resourceLocation;
             TransparencyShaderException transparencyShaderException = new TransparencyShaderException(string2, exception);
             if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1) {
-                Component component = this.minecraft.getResourceManager().listPacks().findFirst().map(packResources -> Component.literal(packResources.getName())).orElse(null);
+                Component component = this.minecraft.getResourceManager().listPacks().findFirst().map(packResources -> Component.literal(packResources.packId())).orElse(null);
                 this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
                 this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
             }
@@ -1136,6 +1136,7 @@ AutoCloseable {
         bufferSource.endBatch(Sheets.bedSheet());
         bufferSource.endBatch(Sheets.shulkerBoxSheet());
         bufferSource.endBatch(Sheets.signSheet());
+        bufferSource.endBatch(Sheets.hangingSignSheet());
         bufferSource.endBatch(Sheets.chestSheet());
         this.renderBuffers.outlineBufferSource().endOutlineBatch();
         if (bl5) {
@@ -2197,7 +2198,7 @@ AutoCloseable {
             if (recordItem != null) {
                 this.minecraft.gui.setNowPlaying(recordItem.getDisplayName());
             }
-            soundInstance = SimpleSoundInstance.forRecord(soundEvent, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            soundInstance = SimpleSoundInstance.forRecord(soundEvent, Vec3.atCenterOf(blockPos));
             this.playingRecords.put(blockPos, soundInstance);
             this.minecraft.getSoundManager().play(soundInstance);
         }
@@ -2553,46 +2554,6 @@ AutoCloseable {
                 for (int l = 0; l < 8; ++l) {
                     this.level.addParticle(ParticleTypes.CLOUD, (double)blockPos.getX() + randomSource.nextDouble(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + randomSource.nextDouble(), 0.0, 0.0, 0.0);
                 }
-                break;
-            }
-            case 1012: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1036: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1013: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1014: {
-                this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1011: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1006: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1007: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1037: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1008: {
-                this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
-                break;
-            }
-            case 1005: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, randomSource.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1009: {

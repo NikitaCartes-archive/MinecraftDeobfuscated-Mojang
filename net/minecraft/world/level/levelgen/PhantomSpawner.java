@@ -60,11 +60,12 @@ implements CustomSpawner {
             int l = 1 + randomSource.nextInt(difficultyInstance.getDifficulty().getId() + 1);
             for (int m = 0; m < l; ++m) {
                 Phantom phantom = EntityType.PHANTOM.create(serverLevel);
+                if (phantom == null) continue;
                 phantom.moveTo(blockPos2, 0.0f, 0.0f);
                 spawnGroupData = phantom.finalizeSpawn(serverLevel, difficultyInstance, MobSpawnType.NATURAL, spawnGroupData, null);
                 serverLevel.addFreshEntityWithPassengers(phantom);
+                ++i;
             }
-            i += l;
         }
         return i;
     }

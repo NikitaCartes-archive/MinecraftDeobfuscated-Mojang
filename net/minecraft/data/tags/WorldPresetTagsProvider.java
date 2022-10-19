@@ -4,7 +4,7 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.WorldPresetTags;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
 public class WorldPresetTagsProvider
 extends TagsProvider<WorldPreset> {
-    public WorldPresetTagsProvider(DataGenerator dataGenerator) {
-        super(dataGenerator, BuiltinRegistries.WORLD_PRESET);
+    public WorldPresetTagsProvider(PackOutput packOutput) {
+        super(packOutput, BuiltinRegistries.WORLD_PRESET);
     }
 
     @Override

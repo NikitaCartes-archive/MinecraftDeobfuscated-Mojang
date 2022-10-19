@@ -5,8 +5,6 @@ package net.minecraft.world.level.levelgen;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -71,15 +69,15 @@ public final class RandomState {
             public DensityFunction.NoiseHolder visitNoise(DensityFunction.NoiseHolder noiseHolder) {
                 Holder<NormalNoise.NoiseParameters> holder = noiseHolder.noiseData();
                 if (bl) {
-                    if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.TEMPERATURE))) {
+                    if (holder.is(Noises.TEMPERATURE)) {
                         NormalNoise normalNoise = NormalNoise.createLegacyNetherBiome(this.newLegacyInstance(0L), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
                         return new DensityFunction.NoiseHolder(holder, normalNoise);
                     }
-                    if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.VEGETATION))) {
+                    if (holder.is(Noises.VEGETATION)) {
                         NormalNoise normalNoise = NormalNoise.createLegacyNetherBiome(this.newLegacyInstance(1L), new NormalNoise.NoiseParameters(-7, 1.0, 1.0));
                         return new DensityFunction.NoiseHolder(holder, normalNoise);
                     }
-                    if (Objects.equals(holder.unwrapKey(), Optional.of(Noises.SHIFT))) {
+                    if (holder.is(Noises.SHIFT)) {
                         NormalNoise normalNoise = NormalNoise.create(RandomState.this.random.fromHashOf(Noises.SHIFT.location()), new NormalNoise.NoiseParameters(0, 0.0, new double[0]));
                         return new DensityFunction.NoiseHolder(holder, normalNoise);
                     }
@@ -106,7 +104,27 @@ public final class RandomState {
             }
         }
         this.router = noiseGeneratorSettings.noiseRouter().mapAll(new NoiseWiringHelper());
-        this.sampler = new Climate.Sampler(this.router.temperature(), this.router.vegetation(), this.router.continents(), this.router.erosion(), this.router.depth(), this.router.ridges(), noiseGeneratorSettings.spawnTarget());
+        DensityFunction.Visitor visitor = new DensityFunction.Visitor(){
+            private final Map<DensityFunction, DensityFunction> wrapped = new HashMap<DensityFunction, DensityFunction>();
+
+            private DensityFunction wrapNew(DensityFunction densityFunction) {
+                if (densityFunction instanceof DensityFunctions.HolderHolder) {
+                    DensityFunctions.HolderHolder holderHolder = (DensityFunctions.HolderHolder)densityFunction;
+                    return holderHolder.function().value();
+                }
+                if (densityFunction instanceof DensityFunctions.Marker) {
+                    DensityFunctions.Marker marker = (DensityFunctions.Marker)densityFunction;
+                    return marker.wrapped();
+                }
+                return densityFunction;
+            }
+
+            @Override
+            public DensityFunction apply(DensityFunction densityFunction) {
+                return this.wrapped.computeIfAbsent(densityFunction, this::wrapNew);
+            }
+        };
+        this.sampler = new Climate.Sampler(this.router.temperature().mapAll(visitor), this.router.vegetation().mapAll(visitor), this.router.continents().mapAll(visitor), this.router.erosion().mapAll(visitor), this.router.depth().mapAll(visitor), this.router.ridges().mapAll(visitor), noiseGeneratorSettings.spawnTarget());
     }
 
     public NormalNoise getOrCreateNoise(ResourceKey<NormalNoise.NoiseParameters> resourceKey) {

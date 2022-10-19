@@ -203,6 +203,7 @@ extends SpellcasterIllager {
             for (int i = 0; i < 3; ++i) {
                 BlockPos blockPos = Evoker.this.blockPosition().offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
                 Vex vex = EntityType.VEX.create(Evoker.this.level);
+                if (vex == null) continue;
                 vex.moveTo(blockPos, 0.0f, 0.0f);
                 vex.finalizeSpawn(serverLevel, Evoker.this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.MOB_SUMMONED, null, null);
                 vex.setOwner(Evoker.this);

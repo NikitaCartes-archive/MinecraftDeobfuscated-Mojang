@@ -56,7 +56,7 @@ implements Fallable {
 
     public static boolean isFree(BlockState blockState) {
         Material material = blockState.getMaterial();
-        return blockState.isAir() || blockState.is(BlockTags.FIRE) || material.isLiquid() || material.isReplaceable();
+        return blockState.isAir() || blockState.is(BlockTags.FIRE) || material.isLiquid() || blockState.canBeReplaced();
     }
 
     @Override

@@ -23,6 +23,7 @@ import net.minecraft.server.packs.resources.SimpleReloadInstance;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Unit;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.ItemModifierManager;
@@ -43,9 +44,9 @@ public class ReloadableServerResources {
     private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
     private final ServerFunctionLibrary functionLibrary;
 
-    public ReloadableServerResources(RegistryAccess.Frozen frozen, Commands.CommandSelection commandSelection, int i) {
+    public ReloadableServerResources(RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i) {
         this.tagManager = new TagManager(frozen);
-        this.commandBuildContext = new CommandBuildContext(frozen);
+        this.commandBuildContext = new CommandBuildContext(frozen, featureFlagSet);
         this.commands = new Commands(commandSelection, this.commandBuildContext);
         this.commandBuildContext.missingTagAccessPolicy(CommandBuildContext.MissingTagAccessPolicy.CREATE_NEW);
         this.functionLibrary = new ServerFunctionLibrary(i, this.commands.getDispatcher());
@@ -83,8 +84,8 @@ public class ReloadableServerResources {
         return List.of(this.tagManager, this.predicateManager, this.recipes, this.lootTables, this.itemModifierManager, this.functionLibrary, this.advancements);
     }
 
-    public static CompletableFuture<ReloadableServerResources> loadResources(ResourceManager resourceManager, RegistryAccess.Frozen frozen, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2) {
-        ReloadableServerResources reloadableServerResources = new ReloadableServerResources(frozen, commandSelection, i);
+    public static CompletableFuture<ReloadableServerResources> loadResources(ResourceManager resourceManager, RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2) {
+        ReloadableServerResources reloadableServerResources = new ReloadableServerResources(frozen, featureFlagSet, commandSelection, i);
         return ((CompletableFuture)SimpleReloadInstance.create(resourceManager, reloadableServerResources.listeners(), executor, executor2, DATA_RELOAD_INITIAL_TASK, LOGGER.isDebugEnabled()).done().whenComplete((object, throwable) -> reloadableServerResources.commandBuildContext.missingTagAccessPolicy(CommandBuildContext.MissingTagAccessPolicy.FAIL))).thenApply(object -> reloadableServerResources);
     }
 

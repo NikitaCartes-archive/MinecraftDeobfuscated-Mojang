@@ -78,7 +78,7 @@ extends RenderLayer<T, M> {
     }
 
     private ResourceLocation getResourceLocation(String string, ResourceLocation resourceLocation) {
-        return new ResourceLocation(resourceLocation.getNamespace(), "textures/entity/" + this.path + "/" + string + "/" + resourceLocation.getPath() + ".png");
+        return resourceLocation.withPath(string2 -> "textures/entity/" + this.path + "/" + string + "/" + string2 + ".png");
     }
 
     public <K> VillagerMetaDataSection.Hat getHatData(Object2ObjectMap<K, VillagerMetaDataSection.Hat> object2ObjectMap, String string, DefaultedRegistry<K> defaultedRegistry, K object) {

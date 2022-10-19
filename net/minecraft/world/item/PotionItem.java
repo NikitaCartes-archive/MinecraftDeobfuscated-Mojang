@@ -7,8 +7,6 @@ import java.util.List;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -23,14 +21,12 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.UseOnContext;
@@ -96,7 +92,7 @@ extends Item {
         ItemStack itemStack = useOnContext.getItemInHand();
         BlockState blockState = level.getBlockState(blockPos);
         if (useOnContext.getClickedFace() != Direction.DOWN && blockState.is(BlockTags.CONVERTABLE_TO_MUD) && PotionUtils.getPotion(itemStack) == Potions.WATER) {
-            level.playSound(null, blockPos, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.0f, 1.0f);
+            level.playSound(null, blockPos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 1.0f, 1.0f);
             player.setItemInHand(useOnContext.getHand(), ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
             player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
             if (!level.isClientSide) {
@@ -141,16 +137,6 @@ extends Item {
     @Override
     public boolean isFoil(ItemStack itemStack) {
         return super.isFoil(itemStack) || !PotionUtils.getMobEffects(itemStack).isEmpty();
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        if (this.allowedIn(creativeModeTab)) {
-            for (Potion potion : Registry.POTION) {
-                if (potion == Potions.EMPTY) continue;
-                nonNullList.add(PotionUtils.setPotion(new ItemStack(this), potion));
-            }
-        }
     }
 }
 

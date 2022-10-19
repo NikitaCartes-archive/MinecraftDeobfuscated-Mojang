@@ -146,11 +146,11 @@ implements Shearable {
 
     @Override
     public void shear(SoundSource soundSource) {
+        Cow cow;
         this.level.playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, soundSource, 1.0f, 1.0f);
-        if (!this.level.isClientSide()) {
+        if (!this.level.isClientSide() && (cow = EntityType.COW.create(this.level)) != null) {
             ((ServerLevel)this.level).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
             this.discard();
-            Cow cow = EntityType.COW.create(this.level);
             cow.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
             cow.setHealth(this.getHealth());
             cow.yBodyRot = this.yBodyRot;
@@ -215,9 +215,12 @@ implements Shearable {
     }
 
     @Override
+    @Nullable
     public MushroomCow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel);
-        mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)ageableMob));
+        if (mushroomCow != null) {
+            mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)ageableMob));
+        }
         return mushroomCow;
     }
 
@@ -229,11 +232,13 @@ implements Shearable {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ Cow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

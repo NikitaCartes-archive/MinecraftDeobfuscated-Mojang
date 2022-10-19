@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class Chicken
 extends Animal {
@@ -136,6 +137,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public Chicken getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.CHICKEN.create(serverLevel);
     }
@@ -196,6 +198,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

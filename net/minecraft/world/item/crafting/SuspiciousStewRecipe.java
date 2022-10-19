@@ -11,6 +11,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SuspiciousStewItem;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
@@ -19,8 +20,8 @@ import net.minecraft.world.level.block.FlowerBlock;
 
 public class SuspiciousStewRecipe
 extends CustomRecipe {
-    public SuspiciousStewRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+    public SuspiciousStewRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+        super(resourceLocation, craftingBookCategory);
     }
 
     @Override

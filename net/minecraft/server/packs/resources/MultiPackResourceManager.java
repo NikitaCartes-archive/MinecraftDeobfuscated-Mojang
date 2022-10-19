@@ -56,7 +56,7 @@ implements CloseableResourceManager {
                     fallbackResourceManager.push(packResources2);
                     continue;
                 }
-                fallbackResourceManager.pushFilterOnly(packResources2.getName(), predicate);
+                fallbackResourceManager.pushFilterOnly(packResources2.packId(), predicate);
             }
         }
         this.namespacedManagers = map;
@@ -65,9 +65,9 @@ implements CloseableResourceManager {
     @Nullable
     private ResourceFilterSection getPackFilterSection(PackResources packResources) {
         try {
-            return packResources.getMetadataSection(ResourceFilterSection.SERIALIZER);
+            return packResources.getMetadataSection(ResourceFilterSection.TYPE);
         } catch (IOException iOException) {
-            LOGGER.error("Failed to get filter section from pack {}", (Object)packResources.getName());
+            LOGGER.error("Failed to get filter section from pack {}", (Object)packResources.packId());
             return null;
         }
     }
@@ -97,6 +97,7 @@ implements CloseableResourceManager {
 
     @Override
     public Map<ResourceLocation, Resource> listResources(String string, Predicate<ResourceLocation> predicate) {
+        MultiPackResourceManager.checkTrailingDirectoryPath(string);
         TreeMap<ResourceLocation, Resource> map = new TreeMap<ResourceLocation, Resource>();
         for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
             map.putAll(fallbackResourceManager.listResources(string, predicate));
@@ -106,11 +107,18 @@ implements CloseableResourceManager {
 
     @Override
     public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+        MultiPackResourceManager.checkTrailingDirectoryPath(string);
         TreeMap<ResourceLocation, List<Resource>> map = new TreeMap<ResourceLocation, List<Resource>>();
         for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
             map.putAll(fallbackResourceManager.listResourceStacks(string, predicate));
         }
         return map;
+    }
+
+    private static void checkTrailingDirectoryPath(String string) {
+        if (string.endsWith("/")) {
+            throw new IllegalArgumentException("Trailing slash in path " + string);
+        }
     }
 
     @Override

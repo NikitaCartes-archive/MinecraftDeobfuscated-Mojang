@@ -4,6 +4,7 @@
 package net.minecraft.client.resources.model;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Material {
+    public static final Comparator<Material> COMPARATOR = Comparator.comparing(Material::atlasLocation).thenComparing(Material::texture);
     private final ResourceLocation atlasLocation;
     private final ResourceLocation texture;
     @Nullable

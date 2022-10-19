@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -24,8 +25,6 @@ import org.slf4j.Logger;
 public abstract class SimpleJsonResourceReloadListener
 extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String PATH_SUFFIX = ".json";
-    private static final int PATH_SUFFIX_LENGTH = ".json".length();
     private final Gson gson;
     private final String directory;
 
@@ -37,27 +36,26 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     @Override
     protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         HashMap<ResourceLocation, JsonElement> map = Maps.newHashMap();
-        int i = this.directory.length() + 1;
-        for (Map.Entry<ResourceLocation, Resource> entry : resourceManager.listResources(this.directory, resourceLocation -> resourceLocation.getPath().endsWith(PATH_SUFFIX)).entrySet()) {
-            ResourceLocation resourceLocation2 = entry.getKey();
-            String string = resourceLocation2.getPath();
-            ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring(i, string.length() - PATH_SUFFIX_LENGTH));
+        FileToIdConverter fileToIdConverter = FileToIdConverter.json(this.directory);
+        for (Map.Entry<ResourceLocation, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
+            ResourceLocation resourceLocation = entry.getKey();
+            ResourceLocation resourceLocation2 = fileToIdConverter.fileToId(resourceLocation);
             try {
                 BufferedReader reader = entry.getValue().openAsReader();
                 try {
                     JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
                     if (jsonElement != null) {
-                        JsonElement jsonElement2 = map.put(resourceLocation22, jsonElement);
+                        JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
                         if (jsonElement2 == null) continue;
-                        throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation22);
+                        throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
                     }
-                    LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation22, (Object)resourceLocation2);
+                    LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation2, (Object)resourceLocation);
                 } finally {
                     if (reader == null) continue;
                     ((Reader)reader).close();
                 }
             } catch (JsonParseException | IOException | IllegalArgumentException exception) {
-                LOGGER.error("Couldn't parse data file {} from {}", resourceLocation22, resourceLocation2, exception);
+                LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, exception);
             }
         }
         return map;

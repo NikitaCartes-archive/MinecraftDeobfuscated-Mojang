@@ -7,10 +7,12 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.GuiMessageTag;
@@ -18,7 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
@@ -37,99 +38,112 @@ extends GuiComponent {
     private static final int MESSAGE_NOT_FOUND = -1;
     private static final int MESSAGE_INDENT = 4;
     private static final int MESSAGE_TAG_MARGIN_LEFT = 4;
+    private static final int BOTTOM_MARGIN = 40;
+    private static final int TIME_BEFORE_MESSAGE_DELETION = 60;
+    private static final Component DELETED_CHAT_MESSAGE = Component.translatable("chat.deleted_marker").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
     private final Minecraft minecraft;
     private final List<String> recentChat = Lists.newArrayList();
     private final List<GuiMessage> allMessages = Lists.newArrayList();
     private final List<GuiMessage.Line> trimmedMessages = Lists.newArrayList();
     private int chatScrollbarPos;
     private boolean newMessageSinceScroll;
+    private final List<DelayedMessageDeletion> messageDeletionQueue = new ArrayList<DelayedMessageDeletion>();
 
     public ChatComponent(Minecraft minecraft) {
         this.minecraft = minecraft;
     }
 
-    public void render(PoseStack poseStack, int i) {
+    public void tick() {
+        if (!this.messageDeletionQueue.isEmpty()) {
+            this.processMessageDeletionQueue();
+        }
+    }
+
+    public void render(PoseStack poseStack, int i, int j, int k) {
+        int aa;
+        int z;
+        int y;
+        int x;
         int v;
-        int u;
-        int t;
-        int s;
-        int r;
-        int p;
         if (this.isChatHidden()) {
             return;
         }
-        int j = this.getLinesPerPage();
-        int k = this.trimmedMessages.size();
-        if (k <= 0) {
+        int l = this.getLinesPerPage();
+        int m = this.trimmedMessages.size();
+        if (m <= 0) {
             return;
         }
         boolean bl = this.isChatFocused();
         float f = (float)this.getScale();
-        int l = Mth.ceil((float)this.getWidth() / f);
+        int n = Mth.ceil((float)this.getWidth() / f);
+        int o = this.minecraft.getWindow().getGuiScaledHeight();
         poseStack.pushPose();
-        poseStack.translate(4.0, 8.0, 0.0);
+        poseStack.translate(4.0, 0.0, 0.0);
         poseStack.scale(f, f, 1.0f);
+        int p = Mth.floor((float)(o - 40) / f);
+        int q = this.getMessageEndIndexAt(this.screenToChatX(j), this.screenToChatY(k));
         double d = this.minecraft.options.chatOpacity().get() * (double)0.9f + (double)0.1f;
         double e = this.minecraft.options.textBackgroundOpacity().get();
         double g = this.minecraft.options.chatLineSpacing().get();
-        int m = this.getLineHeight();
+        int r = this.getLineHeight();
         double h = -8.0 * (g + 1.0) + 4.0 * g;
-        int n = 0;
-        for (int o = 0; o + this.chatScrollbarPos < this.trimmedMessages.size() && o < j; ++o) {
-            GuiMessage.Line line = this.trimmedMessages.get(o + this.chatScrollbarPos);
-            if (line == null || (p = i - line.addedTime()) >= 200 && !bl) continue;
-            double q = bl ? 1.0 : ChatComponent.getTimeFactor(p);
-            r = (int)(255.0 * q * d);
-            s = (int)(255.0 * q * e);
-            ++n;
-            if (r <= 3) continue;
-            t = 0;
-            u = -o * m;
-            v = (int)((double)u + h);
+        int s = 0;
+        for (int t = 0; t + this.chatScrollbarPos < this.trimmedMessages.size() && t < l; ++t) {
+            int u = t + this.chatScrollbarPos;
+            GuiMessage.Line line = this.trimmedMessages.get(u);
+            if (line == null || (v = i - line.addedTime()) >= 200 && !bl) continue;
+            double w = bl ? 1.0 : ChatComponent.getTimeFactor(v);
+            x = (int)(255.0 * w * d);
+            y = (int)(255.0 * w * e);
+            ++s;
+            if (x <= 3) continue;
+            z = 0;
+            aa = p - t * r;
+            int ab = (int)((double)aa + h);
             poseStack.pushPose();
             poseStack.translate(0.0, 0.0, 50.0);
-            ChatComponent.fill(poseStack, -4, u - m, 0 + l + 4 + 4, u, s << 24);
+            ChatComponent.fill(poseStack, -4, aa - r, 0 + n + 4 + 4, aa, y << 24);
             GuiMessageTag guiMessageTag = line.tag();
             if (guiMessageTag != null) {
-                int w = guiMessageTag.indicatorColor() | r << 24;
-                ChatComponent.fill(poseStack, -4, u - m, -2, u, w);
-                if (bl && line.endOfEntry() && guiMessageTag.icon() != null) {
-                    int x = this.getTagIconLeft(line);
-                    int y = v + this.minecraft.font.lineHeight;
-                    this.drawTagIcon(poseStack, x, y, guiMessageTag.icon());
+                int ac = guiMessageTag.indicatorColor() | x << 24;
+                ChatComponent.fill(poseStack, -4, aa - r, -2, aa, ac);
+                if (u == q && guiMessageTag.icon() != null) {
+                    int ad = this.getTagIconLeft(line);
+                    int ae = ab + this.minecraft.font.lineHeight;
+                    this.drawTagIcon(poseStack, ad, ae, guiMessageTag.icon());
                 }
             }
             RenderSystem.enableBlend();
             poseStack.translate(0.0, 0.0, 50.0);
-            this.minecraft.font.drawShadow(poseStack, line.content(), 0.0f, (float)v, 0xFFFFFF + (r << 24));
+            this.minecraft.font.drawShadow(poseStack, line.content(), 0.0f, (float)ab, 0xFFFFFF + (x << 24));
             RenderSystem.disableBlend();
             poseStack.popPose();
         }
-        long z = this.minecraft.getChatListener().queueSize();
-        if (z > 0L) {
-            p = (int)(128.0 * d);
-            int aa = (int)(255.0 * e);
+        long af = this.minecraft.getChatListener().queueSize();
+        if (af > 0L) {
+            int ag = (int)(128.0 * d);
+            v = (int)(255.0 * e);
             poseStack.pushPose();
-            poseStack.translate(0.0, 0.0, 50.0);
-            ChatComponent.fill(poseStack, -2, 0, l + 4, 9, aa << 24);
+            poseStack.translate(0.0, p, 50.0);
+            ChatComponent.fill(poseStack, -2, 0, n + 4, 9, v << 24);
             RenderSystem.enableBlend();
             poseStack.translate(0.0, 0.0, 50.0);
-            this.minecraft.font.drawShadow(poseStack, Component.translatable("chat.queue", z), 0.0f, 1.0f, 0xFFFFFF + (p << 24));
+            this.minecraft.font.drawShadow(poseStack, Component.translatable("chat.queue", af), 0.0f, 1.0f, 0xFFFFFF + (ag << 24));
             poseStack.popPose();
             RenderSystem.disableBlend();
         }
         if (bl) {
-            p = this.getLineHeight();
-            int aa = k * p;
-            int ab = n * p;
-            r = this.chatScrollbarPos * ab / k;
-            s = ab * ab / aa;
-            if (aa != ab) {
-                t = r > 0 ? 170 : 96;
-                u = this.newMessageSinceScroll ? 0xCC3333 : 0x3333AA;
-                v = l + 4;
-                ChatComponent.fill(poseStack, v, -r, v + 2, -r - s, u + (t << 24));
-                ChatComponent.fill(poseStack, v + 2, -r, v + 1, -r - s, 0xCCCCCC + (t << 24));
+            int ag = this.getLineHeight();
+            v = m * ag;
+            int ah = s * ag;
+            int ai = this.chatScrollbarPos * ah / m - p;
+            x = ah * ah / v;
+            if (v != ah) {
+                y = ai > 0 ? 170 : 96;
+                z = this.newMessageSinceScroll ? 0xCC3333 : 0x3333AA;
+                aa = n + 4;
+                ChatComponent.fill(poseStack, aa, -ai, aa + 2, -ai - x, z + (y << 24));
+                ChatComponent.fill(poseStack, aa + 2, -ai, aa + 1, -ai - x, 0xCCCCCC + (y << 24));
             }
         }
         poseStack.popPose();
@@ -159,6 +173,7 @@ extends GuiComponent {
 
     public void clearMessages(boolean bl) {
         this.minecraft.getChatListener().clearQueue();
+        this.messageDeletionQueue.clear();
         this.trimmedMessages.clear();
         this.allMessages.clear();
         if (bl) {
@@ -171,6 +186,7 @@ extends GuiComponent {
     }
 
     public void addMessage(Component component, @Nullable MessageSignature messageSignature, @Nullable GuiMessageTag guiMessageTag) {
+        this.logChatMessage(component, guiMessageTag);
         this.addMessage(component, messageSignature, this.minecraft.gui.getGuiTicks(), guiMessageTag, false);
     }
 
@@ -185,7 +201,6 @@ extends GuiComponent {
     }
 
     private void addMessage(Component component, @Nullable MessageSignature messageSignature, int i, @Nullable GuiMessageTag guiMessageTag, boolean bl) {
-        this.logChatMessage(component, guiMessageTag);
         int j = Mth.floor((double)this.getWidth() / this.getScale());
         if (guiMessageTag != null && guiMessageTag.icon() != null) {
             j -= guiMessageTag.icon().width + 4 + 2;
@@ -212,15 +227,43 @@ extends GuiComponent {
         }
     }
 
+    private void processMessageDeletionQueue() {
+        int i = this.minecraft.gui.getGuiTicks();
+        this.messageDeletionQueue.removeIf(delayedMessageDeletion -> {
+            if (i >= delayedMessageDeletion.deletableAfter()) {
+                return this.deleteMessageOrDelay(delayedMessageDeletion.signature()) == null;
+            }
+            return false;
+        });
+    }
+
     public void deleteMessage(MessageSignature messageSignature) {
-        Iterator<GuiMessage> iterator = this.allMessages.iterator();
-        while (iterator.hasNext()) {
-            MessageSignature messageSignature2 = iterator.next().headerSignature();
-            if (messageSignature2 == null || !messageSignature2.equals(messageSignature)) continue;
-            iterator.remove();
-            break;
+        DelayedMessageDeletion delayedMessageDeletion = this.deleteMessageOrDelay(messageSignature);
+        if (delayedMessageDeletion != null) {
+            this.messageDeletionQueue.add(delayedMessageDeletion);
         }
-        this.refreshTrimmedMessage();
+    }
+
+    @Nullable
+    private DelayedMessageDeletion deleteMessageOrDelay(MessageSignature messageSignature) {
+        int i = this.minecraft.gui.getGuiTicks();
+        ListIterator<GuiMessage> listIterator = this.allMessages.listIterator();
+        while (listIterator.hasNext()) {
+            GuiMessage guiMessage = listIterator.next();
+            if (!messageSignature.equals(guiMessage.signature())) continue;
+            int j = guiMessage.addedTime() + 60;
+            if (i >= j) {
+                listIterator.set(this.createDeletedMarker(guiMessage));
+                this.refreshTrimmedMessage();
+                return null;
+            }
+            return new DelayedMessageDeletion(messageSignature, j);
+        }
+        return null;
+    }
+
+    private GuiMessage createDeletedMarker(GuiMessage guiMessage) {
+        return new GuiMessage(guiMessage.addedTime(), DELETED_CHAT_MESSAGE, null, GuiMessageTag.system());
     }
 
     public void rescaleChat() {
@@ -232,7 +275,7 @@ extends GuiComponent {
         this.trimmedMessages.clear();
         for (int i = this.allMessages.size() - 1; i >= 0; --i) {
             GuiMessage guiMessage = this.allMessages.get(i);
-            this.addMessage(guiMessage.content(), guiMessage.headerSignature(), guiMessage.addedTime(), guiMessage.tag(), true);
+            this.addMessage(guiMessage.content(), guiMessage.signature(), guiMessage.addedTime(), guiMessage.tag(), true);
         }
     }
 
@@ -282,12 +325,9 @@ extends GuiComponent {
 
     @Nullable
     public Style getClickedComponentStyleAt(double d, double e) {
+        double g;
         double f = this.screenToChatX(d);
-        if (f < 0.0 || f > (double)Mth.floor((double)this.getWidth() / this.getScale())) {
-            return null;
-        }
-        double g = this.screenToChatY(e);
-        int i = this.getMessageIndexAt(g);
+        int i = this.getMessageLineIndexAt(f, g = this.screenToChatY(e));
         if (i >= 0 && i < this.trimmedMessages.size()) {
             GuiMessage.Line line = this.trimmedMessages.get(i);
             return this.minecraft.font.getSplitter().componentStyleAtWidth(line.content(), Mth.floor(f));
@@ -299,9 +339,9 @@ extends GuiComponent {
     public GuiMessageTag getMessageTagAt(double d, double e) {
         GuiMessage.Line line;
         GuiMessageTag guiMessageTag;
+        double g;
         double f = this.screenToChatX(d);
-        double g = this.screenToChatY(e);
-        int i = this.getMessageIndexAt(g);
+        int i = this.getMessageEndIndexAt(f, g = this.screenToChatY(e));
         if (i >= 0 && i < this.trimmedMessages.size() && (guiMessageTag = (line = this.trimmedMessages.get(i)).tag()) != null && this.hasSelectedMessageTag(f, line, guiMessageTag)) {
             return guiMessageTag;
         }
@@ -330,30 +370,37 @@ extends GuiComponent {
         return e / (this.getScale() * (this.minecraft.options.chatLineSpacing().get() + 1.0));
     }
 
-    private int getMessageIndexAt(double d) {
+    private int getMessageEndIndexAt(double d, double e) {
+        int i = this.getMessageLineIndexAt(d, e);
+        if (i == -1) {
+            return -1;
+        }
+        while (i >= 0) {
+            if (this.trimmedMessages.get(i).endOfEntry()) {
+                return i;
+            }
+            --i;
+        }
+        return i;
+    }
+
+    private int getMessageLineIndexAt(double d, double e) {
         int j;
         if (!this.isChatFocused() || this.minecraft.options.hideGui || this.isChatHidden()) {
             return -1;
         }
+        if (d < -4.0 || d > (double)Mth.floor((double)this.getWidth() / this.getScale())) {
+            return -1;
+        }
         int i = Math.min(this.getLinesPerPage(), this.trimmedMessages.size());
-        if (d >= 0.0 && d < (double)(this.minecraft.font.lineHeight * i + i) && (j = Mth.floor(d / (double)this.minecraft.font.lineHeight + (double)this.chatScrollbarPos)) >= 0 && j < this.trimmedMessages.size()) {
+        if (e >= 0.0 && e < (double)(this.minecraft.font.lineHeight * i + i) && (j = Mth.floor(e / (double)this.minecraft.font.lineHeight + (double)this.chatScrollbarPos)) >= 0 && j < this.trimmedMessages.size()) {
             return j;
         }
         return -1;
     }
 
-    @Nullable
-    public ChatScreen getFocusedChat() {
-        Screen screen = this.minecraft.screen;
-        if (screen instanceof ChatScreen) {
-            ChatScreen chatScreen = (ChatScreen)screen;
-            return chatScreen;
-        }
-        return null;
-    }
-
     private boolean isChatFocused() {
-        return this.getFocusedChat() != null;
+        return this.minecraft.screen instanceof ChatScreen;
     }
 
     public int getWidth() {
@@ -392,6 +439,10 @@ extends GuiComponent {
 
     private int getLineHeight() {
         return (int)((double)this.minecraft.font.lineHeight * (this.minecraft.options.chatLineSpacing().get() + 1.0));
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    record DelayedMessageDeletion(MessageSignature signature, int deletableAfter) {
     }
 }
 

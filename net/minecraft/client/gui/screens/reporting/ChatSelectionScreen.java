@@ -52,7 +52,7 @@ extends Screen {
     private ChatSelectionList chatSelectionList;
     final ChatReportBuilder report;
     private final Consumer<ChatReportBuilder> onSelected;
-    private ChatSelectionLogFiller<LoggedChatMessage.Player> chatLogFiller;
+    private ChatSelectionLogFiller chatLogFiller;
     @Nullable
     private List<FormattedCharSequence> tooltip;
 
@@ -66,7 +66,7 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.chatLogFiller = new ChatSelectionLogFiller<LoggedChatMessage.Player>(this.reportingContext.chatLog(), this::canReport, LoggedChatMessage.Player.class);
+        this.chatLogFiller = new ChatSelectionLogFiller(this.reportingContext, this::canReport);
         this.contextInfoLabel = MultiLineLabel.create(this.font, (FormattedText)CONTEXT_INFO, this.width - 16);
         this.chatSelectionList = new ChatSelectionList(this.minecraft, (this.contextInfoLabel.getLineCount() + 1) * this.font.lineHeight);
         this.chatSelectionList.setRenderBackground(false);
@@ -133,7 +133,7 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     public class ChatSelectionList
     extends ObjectSelectionList<Entry>
-    implements ChatSelectionLogFiller.Output<LoggedChatMessage.Player> {
+    implements ChatSelectionLogFiller.Output {
         @Nullable
         private Heading previousHeading;
 
@@ -247,7 +247,7 @@ extends Screen {
         @Environment(value=EnvType.CLIENT)
         public class MessageEntry
         extends Entry {
-            private static final ResourceLocation CHECKMARK_TEXTURE = new ResourceLocation("realms", "textures/gui/realms/checkmark.png");
+            private static final ResourceLocation CHECKMARK_TEXTURE = new ResourceLocation("minecraft", "textures/gui/checkmark.png");
             private static final int CHECKMARK_WIDTH = 9;
             private static final int CHECKMARK_HEIGHT = 8;
             private static final int INDENT_AMOUNT = 11;

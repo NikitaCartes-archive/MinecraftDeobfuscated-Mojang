@@ -112,7 +112,7 @@ extends BlockEntity {
     public void generate(ServerLevel serverLevel, int i, boolean bl) {
         BlockPos blockPos = this.getBlockPos().relative(this.getBlockState().getValue(JigsawBlock.ORIENTATION).front());
         Registry<StructureTemplatePool> registry = serverLevel.registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-        Holder<StructureTemplatePool> holder = registry.getHolderOrThrow(this.pool);
+        Holder.Reference<StructureTemplatePool> holder = registry.getHolderOrThrow(this.pool);
         JigsawPlacement.generateJigsaw(serverLevel, holder, this.target, i, blockPos, bl);
     }
 

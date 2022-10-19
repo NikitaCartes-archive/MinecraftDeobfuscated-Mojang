@@ -36,7 +36,7 @@ extends LongRunningTask {
     @Override
     public void abortTask() {
         this.realmsConnect.abort();
-        Minecraft.getInstance().getClientPackSource().clearServerPack();
+        Minecraft.getInstance().getDownloadedPackSource().clearServerPack();
     }
 
     @Override

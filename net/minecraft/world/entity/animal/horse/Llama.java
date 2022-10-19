@@ -231,7 +231,7 @@ implements RangedAttackMob {
     }
 
     @Override
-    protected boolean isImmobile() {
+    public boolean isImmobile() {
         return this.isDeadOrDying() || this.isEating();
     }
 
@@ -249,6 +249,11 @@ implements RangedAttackMob {
         }
         this.setVariant(i);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
+
+    @Override
+    protected boolean canPerformRearing() {
+        return false;
     }
 
     @Override
@@ -285,14 +290,6 @@ implements RangedAttackMob {
     @Override
     protected void playChestEquipsSound() {
         this.playSound(SoundEvents.LLAMA_CHEST, 1.0f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
-    }
-
-    @Override
-    public void makeMad() {
-        SoundEvent soundEvent = this.getAngrySound();
-        if (soundEvent != null) {
-            this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-        }
     }
 
     @Override
@@ -369,20 +366,24 @@ implements RangedAttackMob {
     }
 
     @Override
+    @Nullable
     public Llama getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        Llama llama = this.makeBabyLlama();
-        this.setOffspringAttributes(ageableMob, llama);
-        Llama llama2 = (Llama)ageableMob;
-        int i = this.random.nextInt(Math.max(this.getStrength(), llama2.getStrength())) + 1;
-        if (this.random.nextFloat() < 0.03f) {
-            ++i;
+        Llama llama = this.makeNewLlama();
+        if (llama != null) {
+            this.setOffspringAttributes(ageableMob, llama);
+            Llama llama2 = (Llama)ageableMob;
+            int i = this.random.nextInt(Math.max(this.getStrength(), llama2.getStrength())) + 1;
+            if (this.random.nextFloat() < 0.03f) {
+                ++i;
+            }
+            llama.setStrength(i);
+            llama.setVariant(this.random.nextBoolean() ? this.getVariant() : llama2.getVariant());
         }
-        llama.setStrength(i);
-        llama.setVariant(this.random.nextBoolean() ? this.getVariant() : llama2.getVariant());
         return llama;
     }
 
-    protected Llama makeBabyLlama() {
+    @Nullable
+    protected Llama makeNewLlama() {
         return EntityType.LLAMA.create(this.level);
     }
 
@@ -475,6 +476,7 @@ implements RangedAttackMob {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

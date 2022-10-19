@@ -43,9 +43,9 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
-import net.minecraft.world.level.gameevent.EuclideanGameEventDispatcher;
-import net.minecraft.world.level.gameevent.GameEventDispatcher;
+import net.minecraft.world.level.gameevent.EuclideanGameEventListenerRegistry;
 import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.GameEventListenerRegistry;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
@@ -90,7 +90,7 @@ extends ChunkAccess {
     private Supplier<ChunkHolder.FullChunkStatus> fullStatus;
     @Nullable
     private PostLoadProcessor postLoad;
-    private final Int2ObjectMap<GameEventDispatcher> gameEventDispatcherSections;
+    private final Int2ObjectMap<GameEventListenerRegistry> gameEventListenerRegistrySections;
     private final LevelChunkTicks<Block> blockTicks;
     private final LevelChunkTicks<Fluid> fluidTicks;
 
@@ -101,7 +101,7 @@ extends ChunkAccess {
     public LevelChunk(Level level, ChunkPos chunkPos, UpgradeData upgradeData, LevelChunkTicks<Block> levelChunkTicks, LevelChunkTicks<Fluid> levelChunkTicks2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable PostLoadProcessor postLoadProcessor, @Nullable BlendingData blendingData) {
         super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), l, levelChunkSections, blendingData);
         this.level = level;
-        this.gameEventDispatcherSections = new Int2ObjectOpenHashMap<GameEventDispatcher>();
+        this.gameEventListenerRegistrySections = new Int2ObjectOpenHashMap<GameEventListenerRegistry>();
         for (Heightmap.Types types : Heightmap.Types.values()) {
             if (!ChunkStatus.FULL.heightmapsAfter().contains(types)) continue;
             this.heightmaps.put(types, new Heightmap(this, types));
@@ -146,13 +146,13 @@ extends ChunkAccess {
     }
 
     @Override
-    public GameEventDispatcher getEventDispatcher(int i2) {
+    public GameEventListenerRegistry getListenerRegistry(int i2) {
         Level level = this.level;
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            return this.gameEventDispatcherSections.computeIfAbsent(i2, i -> new EuclideanGameEventDispatcher(serverLevel));
+            return this.gameEventListenerRegistrySections.computeIfAbsent(i2, i -> new EuclideanGameEventListenerRegistry(serverLevel));
         }
-        return super.getEventDispatcher(i2);
+        return super.getListenerRegistry(i2);
     }
 
     @Override
@@ -376,10 +376,10 @@ extends ChunkAccess {
         Block block = blockEntity.getBlockState().getBlock();
         if (block instanceof EntityBlock && (gameEventListener = ((EntityBlock)((Object)block)).getListener(serverLevel, blockEntity)) != null) {
             int i = SectionPos.blockToSectionCoord(blockEntity.getBlockPos().getY());
-            GameEventDispatcher gameEventDispatcher = this.getEventDispatcher(i);
-            gameEventDispatcher.unregister(gameEventListener);
-            if (gameEventDispatcher.isEmpty()) {
-                this.gameEventDispatcherSections.remove(i);
+            GameEventListenerRegistry gameEventListenerRegistry = this.getListenerRegistry(i);
+            gameEventListenerRegistry.unregister(gameEventListener);
+            if (gameEventListenerRegistry.isEmpty()) {
+                this.gameEventListenerRegistrySections.remove(i);
             }
         }
     }
@@ -537,8 +537,7 @@ extends ChunkAccess {
         GameEventListener gameEventListener;
         Block block = blockEntity.getBlockState().getBlock();
         if (block instanceof EntityBlock && (gameEventListener = ((EntityBlock)((Object)block)).getListener(serverLevel, blockEntity)) != null) {
-            GameEventDispatcher gameEventDispatcher = this.getEventDispatcher(SectionPos.blockToSectionCoord(blockEntity.getBlockPos().getY()));
-            gameEventDispatcher.register(gameEventListener);
+            this.getListenerRegistry(SectionPos.blockToSectionCoord(blockEntity.getBlockPos().getY())).register(gameEventListener);
         }
     }
 

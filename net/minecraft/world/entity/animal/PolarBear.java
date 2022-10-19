@@ -73,6 +73,7 @@ implements NeutralMob {
     }
 
     @Override
+    @Nullable
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.POLAR_BEAR.create(serverLevel);
     }

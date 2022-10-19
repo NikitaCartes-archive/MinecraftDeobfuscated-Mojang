@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BlockFamily;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -24,6 +25,8 @@ public class BlockFamilies {
     public static final BlockFamily SPRUCE_PLANKS = BlockFamilies.familyBuilder(Blocks.SPRUCE_PLANKS).button(Blocks.SPRUCE_BUTTON).fence(Blocks.SPRUCE_FENCE).fenceGate(Blocks.SPRUCE_FENCE_GATE).pressurePlate(Blocks.SPRUCE_PRESSURE_PLATE).sign(Blocks.SPRUCE_SIGN, Blocks.SPRUCE_WALL_SIGN).slab(Blocks.SPRUCE_SLAB).stairs(Blocks.SPRUCE_STAIRS).door(Blocks.SPRUCE_DOOR).trapdoor(Blocks.SPRUCE_TRAPDOOR).recipeGroupPrefix("wooden").recipeUnlockedBy("has_planks").getFamily();
     public static final BlockFamily WARPED_PLANKS = BlockFamilies.familyBuilder(Blocks.WARPED_PLANKS).button(Blocks.WARPED_BUTTON).fence(Blocks.WARPED_FENCE).fenceGate(Blocks.WARPED_FENCE_GATE).pressurePlate(Blocks.WARPED_PRESSURE_PLATE).sign(Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN).slab(Blocks.WARPED_SLAB).stairs(Blocks.WARPED_STAIRS).door(Blocks.WARPED_DOOR).trapdoor(Blocks.WARPED_TRAPDOOR).recipeGroupPrefix("wooden").recipeUnlockedBy("has_planks").getFamily();
     public static final BlockFamily MANGROVE_PLANKS = BlockFamilies.familyBuilder(Blocks.MANGROVE_PLANKS).button(Blocks.MANGROVE_BUTTON).slab(Blocks.MANGROVE_SLAB).stairs(Blocks.MANGROVE_STAIRS).fence(Blocks.MANGROVE_FENCE).fenceGate(Blocks.MANGROVE_FENCE_GATE).pressurePlate(Blocks.MANGROVE_PRESSURE_PLATE).sign(Blocks.MANGROVE_SIGN, Blocks.MANGROVE_WALL_SIGN).door(Blocks.MANGROVE_DOOR).trapdoor(Blocks.MANGROVE_TRAPDOOR).recipeGroupPrefix("wooden").recipeUnlockedBy("has_planks").getFamily();
+    public static final BlockFamily BAMBOO_PLANKS = BlockFamilies.familyBuilder(Blocks.BAMBOO_PLANKS).button(Blocks.BAMBOO_BUTTON).slab(Blocks.BAMBOO_SLAB).stairs(Blocks.BAMBOO_STAIRS).customFence(Blocks.BAMBOO_FENCE).customFenceGate(Blocks.BAMBOO_FENCE_GATE).pressurePlate(Blocks.BAMBOO_PRESSURE_PLATE).sign(Blocks.BAMBOO_SIGN, Blocks.BAMBOO_WALL_SIGN).door(Blocks.BAMBOO_DOOR).trapdoor(Blocks.BAMBOO_TRAPDOOR).mosaic(Blocks.BAMBOO_MOSAIC).recipeGroupPrefix("wooden").recipeUnlockedBy("has_planks").featureLockedBehind(FeatureFlags.UPDATE_1_20).getFamily();
+    public static final BlockFamily BAMBOO_MOSAIC = BlockFamilies.familyBuilder(Blocks.BAMBOO_MOSAIC).slab(Blocks.BAMBOO_MOSAIC_SLAB).stairs(Blocks.BAMBOO_MOSAIC_STAIRS).featureLockedBehind(FeatureFlags.UPDATE_1_20).getFamily();
     public static final BlockFamily MUD_BRICKS = BlockFamilies.familyBuilder(Blocks.MUD_BRICKS).wall(Blocks.MUD_BRICK_WALL).stairs(Blocks.MUD_BRICK_STAIRS).slab(Blocks.MUD_BRICK_SLAB).getFamily();
     public static final BlockFamily ANDESITE = BlockFamilies.familyBuilder(Blocks.ANDESITE).wall(Blocks.ANDESITE_WALL).stairs(Blocks.ANDESITE_STAIRS).slab(Blocks.ANDESITE_SLAB).polished(Blocks.POLISHED_ANDESITE).getFamily();
     public static final BlockFamily POLISHED_ANDESITE = BlockFamilies.familyBuilder(Blocks.POLISHED_ANDESITE).stairs(Blocks.POLISHED_ANDESITE_STAIRS).slab(Blocks.POLISHED_ANDESITE_SLAB).getFamily();

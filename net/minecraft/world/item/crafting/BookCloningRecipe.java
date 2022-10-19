@@ -10,14 +10,15 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 public class BookCloningRecipe
 extends CustomRecipe {
-    public BookCloningRecipe(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+    public BookCloningRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+        super(resourceLocation, craftingBookCategory);
     }
 
     @Override

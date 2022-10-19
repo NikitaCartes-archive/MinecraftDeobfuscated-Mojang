@@ -8,6 +8,7 @@ import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelResourceLocation
@@ -16,39 +17,26 @@ extends ResourceLocation {
     static final char VARIANT_SEPARATOR = '#';
     private final String variant;
 
-    protected ModelResourceLocation(String[] strings) {
-        super(strings);
-        this.variant = strings[2].toLowerCase(Locale.ROOT);
+    private ModelResourceLocation(String string, String string2, String string3, @Nullable ResourceLocation.Dummy dummy) {
+        super(string, string2, dummy);
+        this.variant = string3;
     }
 
     public ModelResourceLocation(String string, String string2, String string3) {
-        this(new String[]{string, string2, string3});
-    }
-
-    public ModelResourceLocation(String string) {
-        this(ModelResourceLocation.decompose(string));
+        super(string, string2);
+        this.variant = ModelResourceLocation.lowercaseVariant(string3);
     }
 
     public ModelResourceLocation(ResourceLocation resourceLocation, String string) {
-        this(resourceLocation.toString(), string);
+        this(resourceLocation.getNamespace(), resourceLocation.getPath(), ModelResourceLocation.lowercaseVariant(string), null);
     }
 
-    public ModelResourceLocation(String string, String string2) {
-        this(ModelResourceLocation.decompose(string + "#" + string2));
+    public static ModelResourceLocation vanilla(String string, String string2) {
+        return new ModelResourceLocation("minecraft", string, string2);
     }
 
-    protected static String[] decompose(String string) {
-        String[] strings = new String[]{null, string, ""};
-        int i = string.indexOf(35);
-        String string2 = string;
-        if (i >= 0) {
-            strings[2] = string.substring(i + 1, string.length());
-            if (i > 1) {
-                string2 = string.substring(0, i);
-            }
-        }
-        System.arraycopy(ResourceLocation.decompose(string2, ':'), 0, strings, 0, 2);
-        return strings;
+    private static String lowercaseVariant(String string) {
+        return string.toLowerCase(Locale.ROOT);
     }
 
     public String getVariant() {

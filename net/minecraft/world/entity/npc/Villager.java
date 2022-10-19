@@ -581,7 +581,7 @@ VillagerDataHolder {
 
     @Override
     public boolean canBreed() {
-        return this.foodLevel + this.countFoodPointsInInventory() >= 12 && this.getAge() == 0;
+        return this.foodLevel + this.countFoodPointsInInventory() >= 12 && !this.isSleeping() && this.getAge() == 0;
     }
 
     private boolean hungry() {
@@ -669,6 +669,7 @@ VillagerDataHolder {
     }
 
     @Override
+    @Nullable
     public Villager getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         double d = this.random.nextDouble();
         VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiome(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)ageableMob).getVillagerData().getType());
@@ -682,17 +683,21 @@ VillagerDataHolder {
         if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
             LOGGER.info("Villager {} was struck by lightning {}.", (Object)this, (Object)lightningBolt);
             Witch witch = EntityType.WITCH.create(serverLevel);
-            witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-            witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
-            witch.setNoAi(this.isNoAi());
-            if (this.hasCustomName()) {
-                witch.setCustomName(this.getCustomName());
-                witch.setCustomNameVisible(this.isCustomNameVisible());
+            if (witch != null) {
+                witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+                witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+                witch.setNoAi(this.isNoAi());
+                if (this.hasCustomName()) {
+                    witch.setCustomName(this.getCustomName());
+                    witch.setCustomNameVisible(this.isCustomNameVisible());
+                }
+                witch.setPersistenceRequired();
+                serverLevel.addFreshEntityWithPassengers(witch);
+                this.releaseAllPois();
+                this.discard();
+            } else {
+                super.thunderHit(serverLevel, lightningBolt);
             }
-            witch.setPersistenceRequired();
-            serverLevel.addFreshEntityWithPassengers(witch);
-            this.releaseAllPois();
-            this.discard();
         } else {
             super.thunderHit(serverLevel, lightningBolt);
         }
@@ -852,6 +857,7 @@ VillagerDataHolder {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

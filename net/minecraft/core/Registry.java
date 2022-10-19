@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -146,7 +145,7 @@ IdMap<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<ResourceLocation, Supplier<?>> LOADERS = Maps.newLinkedHashMap();
     public static final ResourceLocation ROOT_REGISTRY_NAME = new ResourceLocation("root");
-    protected static final WritableRegistry<WritableRegistry<?>> WRITABLE_REGISTRY = new MappedRegistry(Registry.createRegistryKey("root"), Lifecycle.experimental(), null);
+    protected static final WritableRegistry<WritableRegistry<?>> WRITABLE_REGISTRY = new MappedRegistry(Registry.createRegistryKey("root"), Lifecycle.stable());
     public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
     public static final ResourceKey<Registry<SoundEvent>> SOUND_EVENT_REGISTRY = Registry.createRegistryKey("sound_event");
     public static final ResourceKey<Registry<Fluid>> FLUID_REGISTRY = Registry.createRegistryKey("fluid");
@@ -187,14 +186,14 @@ IdMap<T> {
     public static final ResourceKey<Registry<DimensionType>> DIMENSION_TYPE_REGISTRY = Registry.createRegistryKey("dimension_type");
     public static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY = Registry.createRegistryKey("dimension");
     public static final ResourceKey<Registry<LevelStem>> LEVEL_STEM_REGISTRY = Registry.createRegistryKey("dimension");
-    public static final DefaultedRegistry<GameEvent> GAME_EVENT = Registry.registerDefaulted(GAME_EVENT_REGISTRY, "step", GameEvent::builtInRegistryHolder, (Registry<T> registry) -> GameEvent.STEP);
+    public static final DefaultedRegistry<GameEvent> GAME_EVENT = Registry.registerDefaultedWithIntrusiveHolders(GAME_EVENT_REGISTRY, "step", registry -> GameEvent.STEP);
     public static final Registry<SoundEvent> SOUND_EVENT = Registry.registerSimple(SOUND_EVENT_REGISTRY, registry -> SoundEvents.ITEM_PICKUP);
-    public static final DefaultedRegistry<Fluid> FLUID = Registry.registerDefaulted(FLUID_REGISTRY, "empty", Fluid::builtInRegistryHolder, (Registry<T> registry) -> Fluids.EMPTY);
+    public static final DefaultedRegistry<Fluid> FLUID = Registry.registerDefaultedWithIntrusiveHolders(FLUID_REGISTRY, "empty", registry -> Fluids.EMPTY);
     public static final Registry<MobEffect> MOB_EFFECT = Registry.registerSimple(MOB_EFFECT_REGISTRY, registry -> MobEffects.LUCK);
-    public static final DefaultedRegistry<Block> BLOCK = Registry.registerDefaulted(BLOCK_REGISTRY, "air", Block::builtInRegistryHolder, (Registry<T> registry) -> Blocks.AIR);
+    public static final DefaultedRegistry<Block> BLOCK = Registry.registerDefaultedWithIntrusiveHolders(BLOCK_REGISTRY, "air", registry -> Blocks.AIR);
     public static final Registry<Enchantment> ENCHANTMENT = Registry.registerSimple(ENCHANTMENT_REGISTRY, registry -> Enchantments.BLOCK_FORTUNE);
-    public static final DefaultedRegistry<EntityType<?>> ENTITY_TYPE = Registry.registerDefaulted(ENTITY_TYPE_REGISTRY, "pig", EntityType::builtInRegistryHolder, (Registry<T> registry) -> EntityType.PIG);
-    public static final DefaultedRegistry<Item> ITEM = Registry.registerDefaulted(ITEM_REGISTRY, "air", Item::builtInRegistryHolder, (Registry<T> registry) -> Items.AIR);
+    public static final DefaultedRegistry<EntityType<?>> ENTITY_TYPE = Registry.registerDefaultedWithIntrusiveHolders(ENTITY_TYPE_REGISTRY, "pig", registry -> EntityType.PIG);
+    public static final DefaultedRegistry<Item> ITEM = Registry.registerDefaultedWithIntrusiveHolders(ITEM_REGISTRY, "air", registry -> Items.AIR);
     public static final DefaultedRegistry<Potion> POTION = Registry.registerDefaulted(POTION_REGISTRY, "empty", registry -> Potions.EMPTY);
     public static final Registry<ParticleType<?>> PARTICLE_TYPE = Registry.registerSimple(PARTICLE_TYPE_REGISTRY, registry -> ParticleTypes.BLOCK);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = Registry.registerSimple(BLOCK_ENTITY_TYPE_REGISTRY, registry -> BlockEntityType.FURNACE);
@@ -292,7 +291,15 @@ IdMap<T> {
     public static final ResourceKey<Registry<Instrument>> INSTRUMENT_REGISTRY = Registry.createRegistryKey("instrument");
     public static final Registry<Instrument> INSTRUMENT = Registry.registerSimple(INSTRUMENT_REGISTRY, Instruments::bootstrap);
     private final ResourceKey<? extends Registry<T>> key;
-    private final Lifecycle lifecycle;
+    private final Lifecycle initialLifecycle;
+
+    public static ResourceKey<Level> levelStemToLevel(ResourceKey<LevelStem> resourceKey) {
+        return ResourceKey.create(DIMENSION_REGISTRY, resourceKey.location());
+    }
+
+    public static ResourceKey<LevelStem> levelToLevelStem(ResourceKey<Level> resourceKey) {
+        return ResourceKey.create(LEVEL_STEM_REGISTRY, resourceKey.location());
+    }
 
     private static <T> ResourceKey<Registry<T>> createRegistryKey(String string) {
         return ResourceKey.createRegistryKey(new ResourceLocation(string));
@@ -311,31 +318,27 @@ IdMap<T> {
     }
 
     private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.registerSimple(resourceKey, Lifecycle.experimental(), registryBootstrap);
+        return Registry.registerSimple(resourceKey, Lifecycle.stable(), registryBootstrap);
     }
 
     private static <T> DefaultedRegistry<T> registerDefaulted(ResourceKey<? extends Registry<T>> resourceKey, String string, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.registerDefaulted(resourceKey, string, Lifecycle.experimental(), registryBootstrap);
+        return Registry.registerDefaulted(resourceKey, string, Lifecycle.stable(), registryBootstrap);
     }
 
-    private static <T> DefaultedRegistry<T> registerDefaulted(ResourceKey<? extends Registry<T>> resourceKey, String string, Function<T, Holder.Reference<T>> function, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.registerDefaulted(resourceKey, string, Lifecycle.experimental(), function, registryBootstrap);
+    private static <T> DefaultedRegistry<T> registerDefaultedWithIntrusiveHolders(ResourceKey<? extends Registry<T>> resourceKey, String string, RegistryBootstrap<T> registryBootstrap) {
+        return Registry.registerDefaultedWithIntrusiveHolders(resourceKey, string, Lifecycle.stable(), registryBootstrap);
     }
 
     private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.internalRegister(resourceKey, new MappedRegistry(resourceKey, lifecycle, null), registryBootstrap, lifecycle);
-    }
-
-    private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Function<T, Holder.Reference<T>> function, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.internalRegister(resourceKey, new MappedRegistry<T>(resourceKey, lifecycle, function), registryBootstrap, lifecycle);
+        return Registry.internalRegister(resourceKey, new MappedRegistry(resourceKey, lifecycle, false), registryBootstrap, lifecycle);
     }
 
     private static <T> DefaultedRegistry<T> registerDefaulted(ResourceKey<? extends Registry<T>> resourceKey, String string, Lifecycle lifecycle, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.internalRegister(resourceKey, new DefaultedRegistry(string, resourceKey, lifecycle, null), registryBootstrap, lifecycle);
+        return Registry.internalRegister(resourceKey, new DefaultedRegistry(string, resourceKey, lifecycle, false), registryBootstrap, lifecycle);
     }
 
-    private static <T> DefaultedRegistry<T> registerDefaulted(ResourceKey<? extends Registry<T>> resourceKey, String string, Lifecycle lifecycle, Function<T, Holder.Reference<T>> function, RegistryBootstrap<T> registryBootstrap) {
-        return Registry.internalRegister(resourceKey, new DefaultedRegistry<T>(string, resourceKey, lifecycle, function), registryBootstrap, lifecycle);
+    private static <T> DefaultedRegistry<T> registerDefaultedWithIntrusiveHolders(ResourceKey<? extends Registry<T>> resourceKey, String string, Lifecycle lifecycle, RegistryBootstrap<T> registryBootstrap) {
+        return Registry.internalRegister(resourceKey, new DefaultedRegistry(string, resourceKey, lifecycle, true), registryBootstrap, lifecycle);
     }
 
     private static <T, R extends WritableRegistry<T>> R internalRegister(ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, RegistryBootstrap<T> registryBootstrap, Lifecycle lifecycle) {
@@ -348,10 +351,11 @@ IdMap<T> {
     protected Registry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
         Bootstrap.checkBootstrapCalled(() -> "registry " + resourceKey);
         this.key = resourceKey;
-        this.lifecycle = lifecycle;
+        this.initialLifecycle = lifecycle;
     }
 
     public static void freezeBuiltins() {
+        REGISTRY.freeze();
         for (Registry registry : REGISTRY) {
             registry.freeze();
         }
@@ -361,23 +365,19 @@ IdMap<T> {
         return this.key;
     }
 
-    public Lifecycle lifecycle() {
-        return this.lifecycle;
-    }
-
     public String toString() {
-        return "Registry[" + this.key + " (" + this.lifecycle + ")]";
+        return "Registry[" + this.key + " (" + this.initialLifecycle + "->" + this.elementsLifecycle() + ")]";
     }
 
     public Codec<T> byNameCodec() {
         Codec<Object> codec = ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(this.get((ResourceLocation)resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry key in " + this.key + ": " + resourceLocation)), object -> this.getResourceKey(object).map(ResourceKey::location).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry element in " + this.key + ":" + object)));
         Codec<Object> codec2 = ExtraCodecs.idResolverCodec(object -> this.getResourceKey(object).isPresent() ? this.getId(object) : -1, this::byId, -1);
-        return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, object -> this.lifecycle);
+        return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, object -> this.initialLifecycle);
     }
 
     public Codec<Holder<T>> holderByNameCodec() {
         Codec<Holder> codec = ResourceLocation.CODEC.flatXmap(resourceLocation -> this.getHolder(ResourceKey.create(this.key, resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry key in " + this.key + ": " + resourceLocation)), holder -> holder.unwrapKey().map(ResourceKey::location).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry element in " + this.key + ":" + holder)));
-        return ExtraCodecs.overrideLifecycle(codec, holder -> this.lifecycle(holder.value()), holder -> this.lifecycle);
+        return ExtraCodecs.overrideLifecycle(codec, holder -> this.lifecycle(holder.value()), holder -> this.initialLifecycle);
     }
 
     public <U> Stream<U> keys(DynamicOps<U> dynamicOps) {
@@ -454,17 +454,17 @@ IdMap<T> {
 
     public abstract Registry<T> freeze();
 
-    public abstract Holder<T> getOrCreateHolderOrThrow(ResourceKey<T> var1);
+    public abstract Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> var1);
 
-    public abstract DataResult<Holder<T>> getOrCreateHolder(ResourceKey<T> var1);
+    public abstract DataResult<Holder.Reference<T>> getOrCreateHolder(ResourceKey<T> var1);
 
     public abstract Holder.Reference<T> createIntrusiveHolder(T var1);
 
-    public abstract Optional<Holder<T>> getHolder(int var1);
+    public abstract Optional<Holder.Reference<T>> getHolder(int var1);
 
-    public abstract Optional<Holder<T>> getHolder(ResourceKey<T> var1);
+    public abstract Optional<Holder.Reference<T>> getHolder(ResourceKey<T> var1);
 
-    public Holder<T> getHolderOrThrow(ResourceKey<T> resourceKey) {
+    public Holder.Reference<T> getHolderOrThrow(ResourceKey<T> resourceKey) {
         return this.getHolder(resourceKey).orElseThrow(() -> new IllegalStateException("Missing key in " + this.key + ": " + resourceKey));
     }
 
@@ -527,7 +527,6 @@ IdMap<T> {
                 LOGGER.error("Unable to bootstrap registry '{}'", resourceLocation);
             }
         });
-        Registry.checkRegistry(WRITABLE_REGISTRY);
     }
 
     @FunctionalInterface

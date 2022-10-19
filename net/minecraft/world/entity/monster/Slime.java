@@ -194,6 +194,7 @@ implements Enemy {
                 float g = ((float)(l % 2) - 0.5f) * f;
                 float h = ((float)(l / 2) - 0.5f) * f;
                 Slime slime = this.getType().create(this.level);
+                if (slime == null) continue;
                 if (this.isPersistenceRequired()) {
                     slime.setPersistenceRequired();
                 }

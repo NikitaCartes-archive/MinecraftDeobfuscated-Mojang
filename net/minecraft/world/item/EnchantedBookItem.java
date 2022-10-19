@@ -4,18 +4,14 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
@@ -77,27 +73,6 @@ extends Item {
         ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
         EnchantedBookItem.addEnchantment(itemStack, enchantmentInstance);
         return itemStack;
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-        block4: {
-            block3: {
-                if (creativeModeTab != CreativeModeTab.TAB_SEARCH) break block3;
-                for (Enchantment enchantment : Registry.ENCHANTMENT) {
-                    if (enchantment.category == null) continue;
-                    for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); ++i) {
-                        nonNullList.add(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i)));
-                    }
-                }
-                break block4;
-            }
-            if (creativeModeTab.getEnchantmentCategories().length == 0) break block4;
-            for (Enchantment enchantment : Registry.ENCHANTMENT) {
-                if (!creativeModeTab.hasEnchantmentCategory(enchantment.category)) continue;
-                nonNullList.add(EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, enchantment.getMaxLevel())));
-            }
-        }
     }
 }
 

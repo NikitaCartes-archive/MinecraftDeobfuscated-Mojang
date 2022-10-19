@@ -7,24 +7,28 @@ import com.mojang.logging.LogUtils;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import net.minecraft.util.TaskChainer;
 import org.slf4j.Logger;
 
 public class FutureChain
-implements TaskChainer {
+implements TaskChainer,
+AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private CompletableFuture<?> head = CompletableFuture.completedFuture(null);
-    private final Executor executor;
+    private final Executor checkedExecutor = runnable -> {
+        if (!this.closed) {
+            executor.execute(runnable);
+        }
+    };
+    private volatile boolean closed;
 
     public FutureChain(Executor executor) {
-        this.executor = executor;
     }
 
     @Override
     public void append(TaskChainer.DelayedTask delayedTask) {
-        this.head = ((CompletableFuture)this.head.thenComposeAsync(object -> (CompletionStage)delayedTask.get(), this.executor)).exceptionally(throwable -> {
+        this.head = ((CompletableFuture)this.head.thenComposeAsync(object -> delayedTask.submit(this.checkedExecutor), this.checkedExecutor)).exceptionally(throwable -> {
             if (throwable instanceof CompletionException) {
                 CompletionException completionException = (CompletionException)throwable;
                 throwable = completionException.getCause();
@@ -36,6 +40,11 @@ implements TaskChainer {
             LOGGER.error("Chain link failed, continuing to next one", (Throwable)throwable);
             return null;
         });
+    }
+
+    @Override
+    public void close() {
+        this.closed = true;
     }
 }
 

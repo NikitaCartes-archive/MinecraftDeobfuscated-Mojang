@@ -207,6 +207,7 @@ StackedContentsCompatible {
     }
 
     public void fromTag(ListTag listTag) {
+        this.clearContent();
         for (int i = 0; i < listTag.size(); ++i) {
             ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
             if (itemStack.isEmpty()) continue;

@@ -29,9 +29,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
-import net.minecraft.util.Signer;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ public class ProfileKeyPairManager {
     private static final Path PROFILE_KEY_PAIR_DIR = Path.of("profilekeys", new String[0]);
     private final UserApiService userApiService;
     private final Path profileKeyPairPath;
-    private CompletableFuture<Optional<Result>> keyPair;
+    private CompletableFuture<Optional<ProfileKeyPair>> keyPair;
 
     public ProfileKeyPairManager(UserApiService userApiService, UUID uUID, Path path) {
         this.userApiService = userApiService;
@@ -51,21 +51,18 @@ public class ProfileKeyPairManager {
         this.keyPair = CompletableFuture.supplyAsync(() -> this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired()), Util.backgroundExecutor()).thenCompose(this::readOrFetchProfileKeyPair);
     }
 
-    public CompletableFuture<Optional<ProfilePublicKey.Data>> preparePublicKey() {
-        this.keyPair = this.keyPair.thenCompose(optional -> {
-            Optional<ProfileKeyPair> optional2 = optional.map(Result::keyPair);
-            return this.readOrFetchProfileKeyPair(optional2);
-        });
-        return this.keyPair.thenApply(optional -> optional.map(result -> result.keyPair().publicKey().data()));
+    public CompletableFuture<LocalChatSession> prepareChatSession() {
+        this.keyPair = this.keyPair.thenCompose(this::readOrFetchProfileKeyPair);
+        return this.keyPair.thenApply(optional -> LocalChatSession.create(optional.orElse(null)));
     }
 
-    private CompletableFuture<Optional<Result>> readOrFetchProfileKeyPair(Optional<ProfileKeyPair> optional2) {
+    private CompletableFuture<Optional<ProfileKeyPair>> readOrFetchProfileKeyPair(Optional<ProfileKeyPair> optional) {
         return CompletableFuture.supplyAsync(() -> {
-            if (optional2.isPresent() && !((ProfileKeyPair)optional2.get()).dueRefresh()) {
+            if (optional.isPresent() && !((ProfileKeyPair)optional.get()).dueRefresh()) {
                 if (!SharedConstants.IS_RUNNING_IN_IDE) {
                     this.writeProfileKeyPair(null);
                 } else {
-                    return optional2;
+                    return optional;
                 }
             }
             try {
@@ -75,9 +72,9 @@ public class ProfileKeyPairManager {
             } catch (MinecraftClientException | IOException | CryptException exception) {
                 LOGGER.error("Failed to retrieve profile key pair", exception);
                 this.writeProfileKeyPair(null);
-                return optional2;
+                return optional;
             }
-        }, Util.backgroundExecutor()).thenApply(optional -> optional.map(Result::new));
+        }, Util.backgroundExecutor());
     }
 
     private Optional<ProfileKeyPair> readProfileKeyPair() {
@@ -152,22 +149,6 @@ public class ProfileKeyPairManager {
             return new ProfilePublicKey.Data(instant, publicKey, byteBuffer.array());
         } catch (IllegalArgumentException | DateTimeException runtimeException) {
             throw new CryptException(runtimeException);
-        }
-    }
-
-    @Nullable
-    public Signer signer() {
-        return this.keyPair.join().map(Result::signer).orElse(null);
-    }
-
-    public Optional<ProfilePublicKey> profilePublicKey() {
-        return this.keyPair.join().map(result -> result.keyPair().publicKey());
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    record Result(ProfileKeyPair keyPair, Signer signer) {
-        public Result(ProfileKeyPair profileKeyPair) {
-            this(profileKeyPair, Signer.from(profileKeyPair.privateKey(), "SHA256withRSA"));
         }
     }
 }

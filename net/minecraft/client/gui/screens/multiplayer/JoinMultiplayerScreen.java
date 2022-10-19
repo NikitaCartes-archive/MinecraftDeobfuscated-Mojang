@@ -110,9 +110,8 @@ extends Screen {
     @Override
     public void tick() {
         super.tick();
-        if (this.lanServerList.isDirty()) {
-            List<LanServer> list = this.lanServerList.getServers();
-            this.lanServerList.markClean();
+        List<LanServer> list = this.lanServerList.takeDirtyServers();
+        if (list != null) {
             this.serverSelectionList.updateNetworkServers(list);
         }
         this.pinger.tick();

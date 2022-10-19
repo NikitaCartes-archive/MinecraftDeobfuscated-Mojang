@@ -14,7 +14,6 @@ import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -26,6 +25,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.SilentInitException;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.Callbacks;
@@ -137,20 +137,14 @@ implements AutoCloseable {
         }
     }
 
-    public void setIcon(InputStream inputStream, InputStream inputStream2) {
+    public void setIcon(IoSupplier<InputStream> ioSupplier, IoSupplier<InputStream> ioSupplier2) {
         RenderSystem.assertInInitPhase();
         try (MemoryStack memoryStack = MemoryStack.stackPush();){
-            if (inputStream == null) {
-                throw new FileNotFoundException("icons/icon_16x16.png");
-            }
-            if (inputStream2 == null) {
-                throw new FileNotFoundException("icons/icon_32x32.png");
-            }
             IntBuffer intBuffer = memoryStack.mallocInt(1);
             IntBuffer intBuffer2 = memoryStack.mallocInt(1);
             IntBuffer intBuffer3 = memoryStack.mallocInt(1);
-            GLFWImage.Buffer buffer = GLFWImage.mallocStack(2, memoryStack);
-            ByteBuffer byteBuffer = this.readIconPixels(inputStream, intBuffer, intBuffer2, intBuffer3);
+            GLFWImage.Buffer buffer = GLFWImage.malloc(2, memoryStack);
+            ByteBuffer byteBuffer = this.readIconPixels(ioSupplier, intBuffer, intBuffer2, intBuffer3);
             if (byteBuffer == null) {
                 throw new IllegalStateException("Could not load icon: " + STBImage.stbi_failure_reason());
             }
@@ -158,8 +152,9 @@ implements AutoCloseable {
             buffer.width(intBuffer.get(0));
             buffer.height(intBuffer2.get(0));
             buffer.pixels(byteBuffer);
-            ByteBuffer byteBuffer2 = this.readIconPixels(inputStream2, intBuffer, intBuffer2, intBuffer3);
+            ByteBuffer byteBuffer2 = this.readIconPixels(ioSupplier2, intBuffer, intBuffer2, intBuffer3);
             if (byteBuffer2 == null) {
+                STBImage.stbi_image_free(byteBuffer);
                 throw new IllegalStateException("Could not load icon: " + STBImage.stbi_failure_reason());
             }
             buffer.position(1);
@@ -176,20 +171,45 @@ implements AutoCloseable {
     }
 
     /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+     * Loose catch block
      */
     @Nullable
-    private ByteBuffer readIconPixels(InputStream inputStream, IntBuffer intBuffer, IntBuffer intBuffer2, IntBuffer intBuffer3) throws IOException {
-        RenderSystem.assertInInitPhase();
-        ByteBuffer byteBuffer = null;
-        try {
-            byteBuffer = TextureUtil.readResource(inputStream);
-            byteBuffer.rewind();
-            ByteBuffer byteBuffer2 = STBImage.stbi_load_from_memory(byteBuffer, intBuffer, intBuffer2, intBuffer3, 0);
-            return byteBuffer2;
-        } finally {
-            if (byteBuffer != null) {
-                MemoryUtil.memFree(byteBuffer);
+    private ByteBuffer readIconPixels(IoSupplier<InputStream> ioSupplier, IntBuffer intBuffer, IntBuffer intBuffer2, IntBuffer intBuffer3) throws IOException {
+        ByteBuffer byteBuffer;
+        InputStream inputStream;
+        ByteBuffer byteBuffer2;
+        block10: {
+            block9: {
+                RenderSystem.assertInInitPhase();
+                byteBuffer2 = null;
+                inputStream = ioSupplier.get();
+                byteBuffer2 = TextureUtil.readResource(inputStream);
+                byteBuffer2.rewind();
+                byteBuffer = STBImage.stbi_load_from_memory(byteBuffer2, intBuffer, intBuffer2, intBuffer3, 0);
+                if (inputStream == null) break block9;
+                inputStream.close();
+            }
+            if (byteBuffer2 == null) break block10;
+            MemoryUtil.memFree(byteBuffer2);
+        }
+        return byteBuffer;
+        {
+            catch (Throwable throwable) {
+                try {
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                } catch (Throwable throwable3) {
+                    if (byteBuffer2 != null) {
+                        MemoryUtil.memFree(byteBuffer2);
+                    }
+                    throw throwable3;
+                }
             }
         }
     }

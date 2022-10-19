@@ -98,6 +98,8 @@ implements Packet<ClientGamePacketListener> {
         Y_ROT(3),
         X_ROT(4);
 
+        public static final Set<RelativeArgument> ALL;
+        public static final Set<RelativeArgument> ROTATION;
         private final int bit;
 
         private RelativeArgument(int j) {
@@ -127,6 +129,11 @@ implements Packet<ClientGamePacketListener> {
                 i |= relativeArgument.getMask();
             }
             return i;
+        }
+
+        static {
+            ALL = Set.of(RelativeArgument.values());
+            ROTATION = Set.of(X_ROT, Y_ROT);
         }
     }
 }

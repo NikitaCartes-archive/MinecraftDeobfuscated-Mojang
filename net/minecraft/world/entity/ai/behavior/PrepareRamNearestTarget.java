@@ -79,7 +79,7 @@ extends Behavior<E> {
     @Override
     protected void tick(ServerLevel serverLevel, E pathfinderMob, long l) {
         boolean bl;
-        if (!this.ramCandidate.isPresent()) {
+        if (this.ramCandidate.isEmpty()) {
             return;
         }
         ((LivingEntity)pathfinderMob).getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.ramCandidate.get().getStartPosition(), this.walkSpeed, 0));
@@ -93,7 +93,7 @@ extends Behavior<E> {
             BlockPos blockPos = ((Entity)pathfinderMob).blockPosition();
             if (blockPos.equals(this.ramCandidate.get().getStartPosition())) {
                 serverLevel.broadcastEntityEvent((Entity)pathfinderMob, (byte)58);
-                if (!this.reachedRamPositionTimestamp.isPresent()) {
+                if (this.reachedRamPositionTimestamp.isEmpty()) {
                     this.reachedRamPositionTimestamp = Optional.of(l);
                 }
                 if (l - this.reachedRamPositionTimestamp.get() >= (long)this.ramPrepareTime) {

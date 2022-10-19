@@ -9,21 +9,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.util.StringUtil;
 
-public record ServerboundChatCommandPacket(String command, Instant timeStamp, long salt, ArgumentSignatures argumentSignatures, boolean signedPreview, LastSeenMessages.Update lastSeenMessages) implements Packet<ServerGamePacketListener>
+public record ServerboundChatCommandPacket(String command, Instant timeStamp, long salt, ArgumentSignatures argumentSignatures, LastSeenMessages.Update lastSeenMessages) implements Packet<ServerGamePacketListener>
 {
-    public ServerboundChatCommandPacket(String string, Instant instant, long l, ArgumentSignatures argumentSignatures, boolean bl, LastSeenMessages.Update update) {
-        this.command = string = StringUtil.trimChatMessage(string);
-        this.timeStamp = instant;
-        this.salt = l;
-        this.argumentSignatures = argumentSignatures;
-        this.signedPreview = bl;
-        this.lastSeenMessages = update;
-    }
-
     public ServerboundChatCommandPacket(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readUtf(256), friendlyByteBuf.readInstant(), friendlyByteBuf.readLong(), new ArgumentSignatures(friendlyByteBuf), friendlyByteBuf.readBoolean(), new LastSeenMessages.Update(friendlyByteBuf));
+        this(friendlyByteBuf.readUtf(256), friendlyByteBuf.readInstant(), friendlyByteBuf.readLong(), new ArgumentSignatures(friendlyByteBuf), new LastSeenMessages.Update(friendlyByteBuf));
     }
 
     @Override
@@ -32,7 +22,6 @@ public record ServerboundChatCommandPacket(String command, Instant timeStamp, lo
         friendlyByteBuf.writeInstant(this.timeStamp);
         friendlyByteBuf.writeLong(this.salt);
         this.argumentSignatures.write(friendlyByteBuf);
-        friendlyByteBuf.writeBoolean(this.signedPreview);
         this.lastSeenMessages.write(friendlyByteBuf);
     }
 

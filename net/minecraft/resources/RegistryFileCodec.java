@@ -11,7 +11,6 @@ import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryLoader;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -67,10 +66,6 @@ implements Codec<Holder<E>> {
             }
             Pair pair2 = dataResult.result().get();
             ResourceKey resourceKey = ResourceKey.create(this.registryKey, (ResourceLocation)pair2.getFirst());
-            Optional<RegistryLoader.Bound> optional2 = registryOps.registryLoader();
-            if (optional2.isPresent()) {
-                return optional2.get().overrideElementFromResources(this.registryKey, this.elementCodec, resourceKey, registryOps.getAsJson()).map((? super R holder) -> Pair.of(holder, pair2.getSecond()));
-            }
             DataResult dataResult2 = registry.getOrCreateHolder(resourceKey);
             return dataResult2.map((? super R holder) -> Pair.of(holder, pair2.getSecond())).setLifecycle(Lifecycle.stable());
         }

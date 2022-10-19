@@ -12,14 +12,12 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.player.ProfilePublicKey;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RemotePlayer
 extends AbstractClientPlayer {
-    public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
-        super(clientLevel, gameProfile, profilePublicKey);
+    public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile) {
+        super(clientLevel, gameProfile);
         this.maxUpStep = 1.0f;
         this.noPhysics = true;
     }

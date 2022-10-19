@@ -48,14 +48,14 @@ implements Clearable {
     public static void cookTick(Level level, BlockPos blockPos, BlockState blockState, CampfireBlockEntity campfireBlockEntity) {
         boolean bl = false;
         for (int i = 0; i < campfireBlockEntity.items.size(); ++i) {
+            SimpleContainer container;
+            ItemStack itemStack2;
             ItemStack itemStack = campfireBlockEntity.items.get(i);
             if (itemStack.isEmpty()) continue;
             bl = true;
             int n = i;
             campfireBlockEntity.cookingProgress[n] = campfireBlockEntity.cookingProgress[n] + 1;
-            if (campfireBlockEntity.cookingProgress[i] < campfireBlockEntity.cookingTime[i]) continue;
-            SimpleContainer container = new SimpleContainer(itemStack);
-            ItemStack itemStack2 = campfireBlockEntity.quickCheck.getRecipeFor(container, level).map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container)).orElse(itemStack);
+            if (campfireBlockEntity.cookingProgress[i] < campfireBlockEntity.cookingTime[i] || !(itemStack2 = campfireBlockEntity.quickCheck.getRecipeFor(container = new SimpleContainer(itemStack), level).map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container)).orElse(itemStack)).isItemEnabled(level.enabledFeatures())) continue;
             Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack2);
             campfireBlockEntity.items.set(i, ItemStack.EMPTY);
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);

@@ -21,7 +21,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.StructureAccess;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
@@ -31,12 +31,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class StructureManager {
     private final LevelAccessor level;
-    private final WorldGenSettings worldGenSettings;
+    private final WorldOptions worldOptions;
     private final StructureCheck structureCheck;
 
-    public StructureManager(LevelAccessor levelAccessor, WorldGenSettings worldGenSettings, StructureCheck structureCheck) {
+    public StructureManager(LevelAccessor levelAccessor, WorldOptions worldOptions, StructureCheck structureCheck) {
         this.level = levelAccessor;
-        this.worldGenSettings = worldGenSettings;
+        this.worldOptions = worldOptions;
         this.structureCheck = structureCheck;
     }
 
@@ -44,7 +44,7 @@ public class StructureManager {
         if (worldGenRegion.getLevel() != this.level) {
             throw new IllegalStateException("Using invalid structure manager (source level: " + worldGenRegion.getLevel() + ", region: " + worldGenRegion);
         }
-        return new StructureManager(worldGenRegion, this.worldGenSettings, this.structureCheck);
+        return new StructureManager(worldGenRegion, this.worldOptions, this.structureCheck);
     }
 
     public List<StructureStart> startsForStructure(ChunkPos chunkPos, Predicate<Structure> predicate) {
@@ -90,7 +90,7 @@ public class StructureManager {
     }
 
     public boolean shouldGenerateStructures() {
-        return this.worldGenSettings.generateStructures();
+        return this.worldOptions.generateStructures();
     }
 
     public StructureStart getStructureAt(BlockPos blockPos, Structure structure) {
@@ -111,7 +111,7 @@ public class StructureManager {
 
     public StructureStart getStructureWithPieceAt(BlockPos blockPos, TagKey<Structure> tagKey) {
         Registry<Structure> registry = this.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
-        for (StructureStart structureStart : this.startsForStructure(new ChunkPos(blockPos), (Structure structure) -> registry.getHolder(registry.getId((Structure)structure)).map(holder -> holder.is(tagKey)).orElse(false))) {
+        for (StructureStart structureStart : this.startsForStructure(new ChunkPos(blockPos), (Structure structure) -> registry.getHolder(registry.getId((Structure)structure)).map(reference -> reference.is(tagKey)).orElse(false))) {
             if (!this.structureHasPieceAt(blockPos, structureStart)) continue;
             return structureStart;
         }

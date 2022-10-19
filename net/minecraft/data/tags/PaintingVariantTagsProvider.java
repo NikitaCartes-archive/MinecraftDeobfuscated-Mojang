@@ -4,7 +4,7 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.decoration.PaintingVariant;
@@ -12,8 +12,8 @@ import net.minecraft.world.entity.decoration.PaintingVariants;
 
 public class PaintingVariantTagsProvider
 extends TagsProvider<PaintingVariant> {
-    public PaintingVariantTagsProvider(DataGenerator dataGenerator) {
-        super(dataGenerator, Registry.PAINTING_VARIANT);
+    public PaintingVariantTagsProvider(PackOutput packOutput) {
+        super(packOutput, Registry.PAINTING_VARIANT);
     }
 
     @Override

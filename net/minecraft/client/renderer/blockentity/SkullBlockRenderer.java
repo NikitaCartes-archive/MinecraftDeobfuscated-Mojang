@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.WallSkullBlock;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -69,7 +70,8 @@ implements BlockEntityRenderer<SkullBlockEntity> {
         BlockState blockState = skullBlockEntity.getBlockState();
         boolean bl = blockState.getBlock() instanceof WallSkullBlock;
         Direction direction = bl ? blockState.getValue(WallSkullBlock.FACING) : null;
-        float h = 22.5f * (float)(bl ? (2 + direction.get2DDataValue()) * 4 : blockState.getValue(SkullBlock.ROTATION));
+        int k = bl ? RotationSegment.convertToSegment(direction) : blockState.getValue(SkullBlock.ROTATION);
+        float h = RotationSegment.convertToDegrees(k);
         SkullBlock.Type type = ((AbstractSkullBlock)blockState.getBlock()).getType();
         SkullModelBase skullModelBase = this.modelByType.get(type);
         RenderType renderType = SkullBlockRenderer.getRenderType(type, skullBlockEntity.getOwnerProfile());

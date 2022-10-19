@@ -6,16 +6,13 @@ package net.minecraft.server.packs;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -23,50 +20,20 @@ import org.slf4j.Logger;
 public abstract class AbstractPackResources
 implements PackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
-    protected final File file;
+    private final String name;
 
-    public AbstractPackResources(File file) {
-        this.file = file;
-    }
-
-    private static String getPathFromLocation(PackType packType, ResourceLocation resourceLocation) {
-        return String.format(Locale.ROOT, "%s/%s/%s", packType.getDirectory(), resourceLocation.getNamespace(), resourceLocation.getPath());
-    }
-
-    protected static String getRelativePath(File file, File file2) {
-        return file.toURI().relativize(file2.toURI()).getPath();
-    }
-
-    @Override
-    public InputStream getResource(PackType packType, ResourceLocation resourceLocation) throws IOException {
-        return this.getResource(AbstractPackResources.getPathFromLocation(packType, resourceLocation));
-    }
-
-    @Override
-    public boolean hasResource(PackType packType, ResourceLocation resourceLocation) {
-        return this.hasResource(AbstractPackResources.getPathFromLocation(packType, resourceLocation));
-    }
-
-    protected abstract InputStream getResource(String var1) throws IOException;
-
-    @Override
-    public InputStream getRootResource(String string) throws IOException {
-        if (string.contains("/") || string.contains("\\")) {
-            throw new IllegalArgumentException("Root resources can only be filenames, not paths (no / allowed!)");
-        }
-        return this.getResource(string);
-    }
-
-    protected abstract boolean hasResource(String var1);
-
-    protected void logWarning(String string) {
-        LOGGER.warn("ResourcePack: ignored non-lowercase namespace: {} in {}", (Object)string, (Object)this.file);
+    protected AbstractPackResources(String string) {
+        this.name = string;
     }
 
     @Override
     @Nullable
     public <T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException {
-        try (InputStream inputStream = this.getResource("pack.mcmeta");){
+        IoSupplier<InputStream> ioSupplier = this.getRootResource("pack.mcmeta");
+        if (ioSupplier == null) {
+            return null;
+        }
+        try (InputStream inputStream = ioSupplier.get();){
             T t = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
             return t;
         }
@@ -93,8 +60,8 @@ implements PackResources {
     }
 
     @Override
-    public String getName() {
-        return this.file.getName();
+    public String packId() {
+        return this.name;
     }
 }
 

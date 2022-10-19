@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 public final class ItemTags {
     public static final TagKey<Item> WOOL = ItemTags.bind("wool");
     public static final TagKey<Item> PLANKS = ItemTags.bind("planks");
+    public static final TagKey<Item> STRIPPED_LOGS = ItemTags.bind("stripped_logs");
     public static final TagKey<Item> STONE_BRICKS = ItemTags.bind("stone_bricks");
     public static final TagKey<Item> WOODEN_BUTTONS = ItemTags.bind("wooden_buttons");
     public static final TagKey<Item> BUTTONS = ItemTags.bind("buttons");
@@ -78,6 +79,7 @@ public final class ItemTags {
     public static final TagKey<Item> COALS = ItemTags.bind("coals");
     public static final TagKey<Item> ARROWS = ItemTags.bind("arrows");
     public static final TagKey<Item> LECTERN_BOOKS = ItemTags.bind("lectern_books");
+    public static final TagKey<Item> BOOKSHELF_BOOKS = ItemTags.bind("bookshelf_books");
     public static final TagKey<Item> BEACON_PAYMENT_ITEMS = ItemTags.bind("beacon_payment_items");
     public static final TagKey<Item> STONE_TOOL_MATERIALS = ItemTags.bind("stone_tool_materials");
     public static final TagKey<Item> STONE_CRAFTING_MATERIALS = ItemTags.bind("stone_crafting_materials");
@@ -86,6 +88,7 @@ public final class ItemTags {
     public static final TagKey<Item> DAMPENS_VIBRATIONS = ItemTags.bind("dampens_vibrations");
     public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = ItemTags.bind("cluster_max_harvestables");
     public static final TagKey<Item> COMPASSES = ItemTags.bind("compasses");
+    public static final TagKey<Item> HANGING_SIGNS = ItemTags.bind("hanging_signs");
 
     private ItemTags() {
     }

@@ -21,7 +21,7 @@ extends SimpleOptionsSubScreen {
     private static final String GUIDE_LINK = "https://aka.ms/MinecraftJavaAccessibility";
 
     private static OptionInstance<?>[] options(Options options) {
-        return new OptionInstance[]{options.narrator(), options.showSubtitles(), options.textBackgroundOpacity(), options.backgroundForChatOnly(), options.chatOpacity(), options.chatLineSpacing(), options.chatDelay(), options.autoJump(), options.toggleCrouch(), options.toggleSprint(), options.screenEffectScale(), options.fovEffectScale(), options.darkMojangStudiosBackground(), options.hideLightningFlash(), options.darknessEffectScale()};
+        return new OptionInstance[]{options.narrator(), options.showSubtitles(), options.textBackgroundOpacity(), options.backgroundForChatOnly(), options.chatOpacity(), options.chatLineSpacing(), options.chatDelay(), options.autoJump(), options.toggleCrouch(), options.toggleSprint(), options.screenEffectScale(), options.fovEffectScale(), options.darkMojangStudiosBackground(), options.hideLightningFlash(), options.darknessEffectScale(), options.panoramaSpeed()};
     }
 
     public AccessibilityOptionsScreen(Screen screen, Options options) {

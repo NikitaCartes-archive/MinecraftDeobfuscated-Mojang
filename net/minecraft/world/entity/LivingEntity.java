@@ -27,6 +27,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -35,7 +36,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -1644,8 +1644,16 @@ extends Entity {
         return this.getAttributes().getInstance(attribute);
     }
 
+    public double getAttributeValue(Holder<Attribute> holder) {
+        return this.getAttributeValue(holder.value());
+    }
+
     public double getAttributeValue(Attribute attribute) {
         return this.getAttributes().getValue(attribute);
+    }
+
+    public double getAttributeBaseValue(Holder<Attribute> holder) {
+        return this.getAttributeBaseValue(holder.value());
     }
 
     public double getAttributeBaseValue(Attribute attribute) {
@@ -1878,10 +1886,8 @@ extends Entity {
                 double n;
                 float o;
                 double m;
+                this.checkSlowFallDistance();
                 Vec3 vec35 = this.getDeltaMovement();
-                if (vec35.y > -0.5) {
-                    this.fallDistance = 1.0f;
-                }
                 Vec3 vec36 = this.getLookAngle();
                 float f = this.getXRot() * ((float)Math.PI / 180);
                 double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
@@ -2126,7 +2132,7 @@ extends Entity {
                 }
             }
             ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-            if (ItemStack.matches(itemStack2, itemStack)) continue;
+            if (!this.equipmentHasChanged(itemStack, itemStack2)) continue;
             if (map == null) {
                 map = Maps.newEnumMap(EquipmentSlot.class);
             }
@@ -2138,6 +2144,10 @@ extends Entity {
             this.getAttributes().addTransientAttributeModifiers(itemStack2.getAttributeModifiers(equipmentSlot));
         }
         return map;
+    }
+
+    public boolean equipmentHasChanged(ItemStack itemStack, ItemStack itemStack2) {
+        return !ItemStack.matches(itemStack2, itemStack);
     }
 
     private void handleHandSwap(Map<EquipmentSlot, ItemStack> map) {
@@ -2789,11 +2799,6 @@ extends Entity {
 
     public boolean canTakeItem(ItemStack itemStack) {
         return false;
-    }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
     }
 
     @Override

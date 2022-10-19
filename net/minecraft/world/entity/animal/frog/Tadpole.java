@@ -217,17 +217,19 @@ extends AbstractFish {
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
             Frog frog = EntityType.FROG.create(this.level);
-            frog.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-            frog.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(frog.blockPosition()), MobSpawnType.CONVERSION, null, null);
-            frog.setNoAi(this.isNoAi());
-            if (this.hasCustomName()) {
-                frog.setCustomName(this.getCustomName());
-                frog.setCustomNameVisible(this.isCustomNameVisible());
+            if (frog != null) {
+                frog.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+                frog.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(frog.blockPosition()), MobSpawnType.CONVERSION, null, null);
+                frog.setNoAi(this.isNoAi());
+                if (this.hasCustomName()) {
+                    frog.setCustomName(this.getCustomName());
+                    frog.setCustomNameVisible(this.isCustomNameVisible());
+                }
+                frog.setPersistenceRequired();
+                this.playSound(SoundEvents.TADPOLE_GROW_UP, 0.15f, 1.0f);
+                serverLevel.addFreshEntityWithPassengers(frog);
+                this.discard();
             }
-            frog.setPersistenceRequired();
-            this.playSound(SoundEvents.TADPOLE_GROW_UP, 0.15f, 1.0f);
-            serverLevel.addFreshEntityWithPassengers(frog);
-            this.discard();
         }
     }
 

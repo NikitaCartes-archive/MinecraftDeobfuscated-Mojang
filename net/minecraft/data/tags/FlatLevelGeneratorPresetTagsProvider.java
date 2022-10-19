@@ -4,7 +4,7 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.FlatLevelGeneratorPresetTags;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
 
 public class FlatLevelGeneratorPresetTagsProvider
 extends TagsProvider<FlatLevelGeneratorPreset> {
-    public FlatLevelGeneratorPresetTagsProvider(DataGenerator dataGenerator) {
-        super(dataGenerator, BuiltinRegistries.FLAT_LEVEL_GENERATOR_PRESET);
+    public FlatLevelGeneratorPresetTagsProvider(PackOutput packOutput) {
+        super(packOutput, BuiltinRegistries.FLAT_LEVEL_GENERATOR_PRESET);
     }
 
     @Override

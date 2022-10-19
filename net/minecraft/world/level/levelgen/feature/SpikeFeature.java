@@ -68,6 +68,7 @@ extends Feature<SpikeConfiguration> {
     }
 
     private void placeSpike(ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, SpikeConfiguration spikeConfiguration, EndSpike endSpike) {
+        EndCrystal endCrystal;
         int i = endSpike.getRadius();
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(endSpike.getCenterX() - i, serverLevelAccessor.getMinBuildHeight(), endSpike.getCenterZ() - i), new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i))) {
             if (blockPos.distToLowCornerSqr(endSpike.getCenterX(), blockPos.getY(), endSpike.getCenterZ()) <= (double)(i * i + 1) && blockPos.getY() < endSpike.getHeight()) {
@@ -98,12 +99,13 @@ extends Feature<SpikeConfiguration> {
                 }
             }
         }
-        EndCrystal endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel());
-        endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
-        endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
-        endCrystal.moveTo((double)endSpike.getCenterX() + 0.5, endSpike.getHeight() + 1, (double)endSpike.getCenterZ() + 0.5, randomSource.nextFloat() * 360.0f, 0.0f);
-        serverLevelAccessor.addFreshEntity(endCrystal);
-        this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
+        if ((endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel())) != null) {
+            endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
+            endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
+            endCrystal.moveTo((double)endSpike.getCenterX() + 0.5, endSpike.getHeight() + 1, (double)endSpike.getCenterZ() + 0.5, randomSource.nextFloat() * 360.0f, 0.0f);
+            serverLevelAccessor.addFreshEntity(endCrystal);
+            this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
+        }
     }
 
     public static class EndSpike {

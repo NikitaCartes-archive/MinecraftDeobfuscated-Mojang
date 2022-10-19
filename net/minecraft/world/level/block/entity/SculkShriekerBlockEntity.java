@@ -65,7 +65,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     public SculkShriekerBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(BlockEntityType.SCULK_SHRIEKER, blockPos, blockState);
-        this.listener = new VibrationListener(new BlockPositionSource(this.worldPosition), 8, this, null, 0.0f, 0);
+        this.listener = new VibrationListener(new BlockPositionSource(this.worldPosition), 8, this);
     }
 
     public VibrationListener getListener() {
@@ -99,7 +99,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
-        return !this.isRemoved() && this.getBlockState().getValue(SculkShriekerBlock.SHRIEKING) == false && SculkShriekerBlockEntity.tryGetPlayer(context.sourceEntity()) != null;
+        return this.getBlockState().getValue(SculkShriekerBlock.SHRIEKING) == false && SculkShriekerBlockEntity.tryGetPlayer(context.sourceEntity()) != null;
     }
 
     @Nullable

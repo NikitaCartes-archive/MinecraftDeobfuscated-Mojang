@@ -14,18 +14,23 @@ import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.Registry;
+import net.minecraft.data.recipes.CraftingRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
 public class ShapelessRecipeBuilder
+extends CraftingRecipeBuilder
 implements RecipeBuilder {
+    private final RecipeCategory category;
     private final Item result;
     private final int count;
     private final List<Ingredient> ingredients = Lists.newArrayList();
@@ -33,17 +38,18 @@ implements RecipeBuilder {
     @Nullable
     private String group;
 
-    public ShapelessRecipeBuilder(ItemLike itemLike, int i) {
+    public ShapelessRecipeBuilder(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+        this.category = recipeCategory;
         this.result = itemLike.asItem();
         this.count = i;
     }
 
-    public static ShapelessRecipeBuilder shapeless(ItemLike itemLike) {
-        return new ShapelessRecipeBuilder(itemLike, 1);
+    public static ShapelessRecipeBuilder shapeless(RecipeCategory recipeCategory, ItemLike itemLike) {
+        return new ShapelessRecipeBuilder(recipeCategory, itemLike, 1);
     }
 
-    public static ShapelessRecipeBuilder shapeless(ItemLike itemLike, int i) {
-        return new ShapelessRecipeBuilder(itemLike, i);
+    public static ShapelessRecipeBuilder shapeless(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+        return new ShapelessRecipeBuilder(recipeCategory, itemLike, i);
     }
 
     public ShapelessRecipeBuilder requires(TagKey<Item> tagKey) {
@@ -93,7 +99,7 @@ implements RecipeBuilder {
     public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
         this.ensureValid(resourceLocation);
         this.advancement.parent(ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation)).rewards(AdvancementRewards.Builder.recipe(resourceLocation)).requirements(RequirementsStrategy.OR);
-        consumer.accept(new Result(resourceLocation, this.result, this.count, this.group == null ? "" : this.group, this.ingredients, this.advancement, new ResourceLocation(resourceLocation.getNamespace(), "recipes/" + this.result.getItemCategory().getRecipeFolderName() + "/" + resourceLocation.getPath())));
+        consumer.accept(new Result(resourceLocation, this.result, this.count, this.group == null ? "" : this.group, ShapelessRecipeBuilder.determineBookCategory(this.category), this.ingredients, this.advancement, resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 
     private void ensureValid(ResourceLocation resourceLocation) {
@@ -113,7 +119,7 @@ implements RecipeBuilder {
     }
 
     public static class Result
-    implements FinishedRecipe {
+    extends CraftingRecipeBuilder.CraftingResult {
         private final ResourceLocation id;
         private final Item result;
         private final int count;
@@ -122,7 +128,8 @@ implements RecipeBuilder {
         private final Advancement.Builder advancement;
         private final ResourceLocation advancementId;
 
-        public Result(ResourceLocation resourceLocation, Item item, int i, String string, List<Ingredient> list, Advancement.Builder builder, ResourceLocation resourceLocation2) {
+        public Result(ResourceLocation resourceLocation, Item item, int i, String string, CraftingBookCategory craftingBookCategory, List<Ingredient> list, Advancement.Builder builder, ResourceLocation resourceLocation2) {
+            super(craftingBookCategory);
             this.id = resourceLocation;
             this.result = item;
             this.count = i;
@@ -134,6 +141,7 @@ implements RecipeBuilder {
 
         @Override
         public void serializeRecipeData(JsonObject jsonObject) {
+            super.serializeRecipeData(jsonObject);
             if (!this.group.isEmpty()) {
                 jsonObject.addProperty("group", this.group);
             }

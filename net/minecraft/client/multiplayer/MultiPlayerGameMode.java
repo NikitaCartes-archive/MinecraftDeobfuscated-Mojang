@@ -287,7 +287,7 @@ public class MultiPlayerGameMode {
     }
 
     private InteractionResult performUseItemOn(LocalPlayer localPlayer, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        InteractionResult interactionResult;
+        InteractionResult interactionResult2;
         boolean bl2;
         BlockPos blockPos = blockHitResult.getBlockPos();
         ItemStack itemStack = localPlayer.getItemInHand(interactionHand);
@@ -296,8 +296,15 @@ public class MultiPlayerGameMode {
         }
         boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
         boolean bl3 = bl2 = localPlayer.isSecondaryUseActive() && bl;
-        if (!bl2 && (interactionResult = this.minecraft.level.getBlockState(blockPos).use(this.minecraft.level, localPlayer, interactionHand, blockHitResult)).consumesAction()) {
-            return interactionResult;
+        if (!bl2) {
+            BlockState blockState = this.minecraft.level.getBlockState(blockPos);
+            if (!this.connection.isFeatureEnabled(blockState.getBlock().requiredFeatures())) {
+                return InteractionResult.FAIL;
+            }
+            InteractionResult interactionResult = blockState.use(this.minecraft.level, localPlayer, interactionHand, blockHitResult);
+            if (interactionResult.consumesAction()) {
+                return interactionResult;
+            }
         }
         if (itemStack.isEmpty() || localPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
             return InteractionResult.PASS;
@@ -305,12 +312,12 @@ public class MultiPlayerGameMode {
         UseOnContext useOnContext = new UseOnContext(localPlayer, interactionHand, blockHitResult);
         if (this.localPlayerMode.isCreative()) {
             int i = itemStack.getCount();
-            interactionResult = itemStack.useOn(useOnContext);
+            interactionResult2 = itemStack.useOn(useOnContext);
             itemStack.setCount(i);
         } else {
-            interactionResult = itemStack.useOn(useOnContext);
+            interactionResult2 = itemStack.useOn(useOnContext);
         }
-        return interactionResult;
+        return interactionResult2;
     }
 
     public InteractionResult useItem(Player player, InteractionHand interactionHand) {
@@ -406,13 +413,13 @@ public class MultiPlayerGameMode {
     }
 
     public void handleCreativeModeItemAdd(ItemStack itemStack, int i) {
-        if (this.localPlayerMode.isCreative()) {
+        if (this.localPlayerMode.isCreative() && this.connection.isFeatureEnabled(itemStack.getItem().requiredFeatures())) {
             this.connection.send(new ServerboundSetCreativeModeSlotPacket(i, itemStack));
         }
     }
 
     public void handleCreativeModeItemDrop(ItemStack itemStack) {
-        if (this.localPlayerMode.isCreative() && !itemStack.isEmpty()) {
+        if (this.localPlayerMode.isCreative() && !itemStack.isEmpty() && this.connection.isFeatureEnabled(itemStack.getItem().requiredFeatures())) {
             this.connection.send(new ServerboundSetCreativeModeSlotPacket(-1, itemStack));
         }
     }

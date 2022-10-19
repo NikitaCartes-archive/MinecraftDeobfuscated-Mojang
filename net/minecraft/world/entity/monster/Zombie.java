@@ -386,20 +386,22 @@ extends Monster {
     public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
         boolean bl = super.wasKilled(serverLevel, livingEntity);
         if ((serverLevel.getDifficulty() == Difficulty.NORMAL || serverLevel.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
+            Villager villager = (Villager)livingEntity;
             if (serverLevel.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
                 return bl;
             }
-            Villager villager = (Villager)livingEntity;
             ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
-            zombieVillager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false, true), null);
-            zombieVillager.setVillagerData(villager.getVillagerData());
-            zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
-            zombieVillager.setTradeOffers(villager.getOffers().createTag());
-            zombieVillager.setVillagerXp(villager.getVillagerXp());
-            if (!this.isSilent()) {
-                serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
+            if (zombieVillager != null) {
+                zombieVillager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false, true), null);
+                zombieVillager.setVillagerData(villager.getVillagerData());
+                zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
+                zombieVillager.setTradeOffers(villager.getOffers().createTag());
+                zombieVillager.setVillagerXp(villager.getVillagerXp());
+                if (!this.isSilent()) {
+                    serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
+                }
+                bl = false;
             }
-            bl = false;
         }
         return bl;
     }
@@ -440,6 +442,7 @@ extends Monster {
             if (zombieGroupData.isBaby) {
                 this.setBaby(true);
                 if (zombieGroupData.canSpawnJockey) {
+                    Chicken chicken2;
                     if ((double)randomSource.nextFloat() < 0.05) {
                         List<Entity> list = serverLevelAccessor.getEntitiesOfClass(Chicken.class, this.getBoundingBox().inflate(5.0, 3.0, 5.0), EntitySelector.ENTITY_NOT_BEING_RIDDEN);
                         if (!list.isEmpty()) {
@@ -447,8 +450,7 @@ extends Monster {
                             chicken.setChickenJockey(true);
                             this.startRiding(chicken);
                         }
-                    } else if ((double)randomSource.nextFloat() < 0.05) {
-                        Chicken chicken2 = EntityType.CHICKEN.create(this.level);
+                    } else if ((double)randomSource.nextFloat() < 0.05 && (chicken2 = EntityType.CHICKEN.create(this.level)) != null) {
                         chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
                         chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
                         chicken2.setChickenJockey(true);

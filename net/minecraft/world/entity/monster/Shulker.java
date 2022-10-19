@@ -49,6 +49,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -250,7 +251,7 @@ implements Enemy {
     @Override
     public double getMyRidingOffset() {
         EntityType<?> entityType = this.getVehicle().getType();
-        if (entityType == EntityType.BOAT || entityType == EntityType.MINECART) {
+        if (this.getVehicle() instanceof Boat || entityType == EntityType.MINECART) {
             return 0.1875 - this.getVehicle().getPassengersRidingOffset();
         }
         return super.getMyRidingOffset();
@@ -419,12 +420,14 @@ implements Enemy {
             return;
         }
         Shulker shulker = EntityType.SHULKER.create(this.level);
-        DyeColor dyeColor = this.getColor();
-        if (dyeColor != null) {
-            shulker.setColor(dyeColor);
+        if (shulker != null) {
+            DyeColor dyeColor = this.getColor();
+            if (dyeColor != null) {
+                shulker.setColor(dyeColor);
+            }
+            shulker.moveTo(vec3);
+            this.level.addFreshEntity(shulker);
         }
-        shulker.moveTo(vec3);
-        this.level.addFreshEntity(shulker);
     }
 
     @Override

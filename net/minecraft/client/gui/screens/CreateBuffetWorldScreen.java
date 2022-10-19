@@ -41,9 +41,9 @@ extends Screen {
         super(Component.translatable("createWorld.customize.buffet.title"));
         this.parent = screen;
         this.applySettings = consumer;
-        this.biomes = worldCreationContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-        Holder<Biome> holder = this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
-        this.biome = worldCreationContext.worldGenSettings().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
+        this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registry.BIOME_REGISTRY);
+        Holder holder = this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
+        this.biome = worldCreationContext.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
     }
 
     @Override

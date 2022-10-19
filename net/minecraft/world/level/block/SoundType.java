@@ -94,6 +94,9 @@ public class SoundType {
     public static final SoundType MUD = new SoundType(1.0f, 1.0f, SoundEvents.MUD_BREAK, SoundEvents.MUD_STEP, SoundEvents.MUD_PLACE, SoundEvents.MUD_HIT, SoundEvents.MUD_FALL);
     public static final SoundType MUD_BRICKS = new SoundType(1.0f, 1.0f, SoundEvents.MUD_BRICKS_BREAK, SoundEvents.MUD_BRICKS_STEP, SoundEvents.MUD_BRICKS_PLACE, SoundEvents.MUD_BRICKS_HIT, SoundEvents.MUD_BRICKS_FALL);
     public static final SoundType PACKED_MUD = new SoundType(1.0f, 1.0f, SoundEvents.PACKED_MUD_BREAK, SoundEvents.PACKED_MUD_STEP, SoundEvents.PACKED_MUD_PLACE, SoundEvents.PACKED_MUD_HIT, SoundEvents.PACKED_MUD_FALL);
+    public static final SoundType HANGING_SIGN = new SoundType(1.0f, 1.0f, SoundEvents.HANGING_SIGN_BREAK, SoundEvents.HANGING_SIGN_STEP, SoundEvents.HANGING_SIGN_PLACE, SoundEvents.HANGING_SIGN_HIT, SoundEvents.HANGING_SIGN_FALL);
+    public static final SoundType BAMBOO_WOOD = new SoundType(1.0f, 1.0f, SoundEvents.BAMBOO_WOOD_BREAK, SoundEvents.BAMBOO_WOOD_STEP, SoundEvents.BAMBOO_WOOD_PLACE, SoundEvents.BAMBOO_WOOD_HIT, SoundEvents.BAMBOO_WOOD_FALL);
+    public static final SoundType NETHER_WOOD = new SoundType(1.0f, 1.0f, SoundEvents.NETHER_WOOD_BREAK, SoundEvents.NETHER_WOOD_STEP, SoundEvents.NETHER_WOOD_PLACE, SoundEvents.NETHER_WOOD_HIT, SoundEvents.NETHER_WOOD_FALL);
     public final float volume;
     public final float pitch;
     private final SoundEvent breakSound;

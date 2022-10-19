@@ -1039,6 +1039,7 @@ public class WoodlandMansionPieces {
                     }
                 }
                 for (Mob mob : list) {
+                    if (mob == null) continue;
                     mob.setPersistenceRequired();
                     mob.moveTo(blockPos, 0.0f, 0.0f);
                     mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.STRUCTURE, null, null);

@@ -28,6 +28,7 @@ public class RenderBuffers {
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.bedSheet());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.shulkerBoxSheet());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.signSheet());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.hangingSignSheet());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.chestSheet());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.translucentNoCrumbling());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.armorGlint());

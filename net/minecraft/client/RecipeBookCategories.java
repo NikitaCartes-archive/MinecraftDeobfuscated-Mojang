@@ -47,21 +47,13 @@ public enum RecipeBookCategories {
     }
 
     public static List<RecipeBookCategories> getCategories(RecipeBookType recipeBookType) {
-        switch (recipeBookType) {
-            case CRAFTING: {
-                return CRAFTING_CATEGORIES;
-            }
-            case FURNACE: {
-                return FURNACE_CATEGORIES;
-            }
-            case BLAST_FURNACE: {
-                return BLAST_FURNACE_CATEGORIES;
-            }
-            case SMOKER: {
-                return SMOKER_CATEGORIES;
-            }
-        }
-        return ImmutableList.of();
+        return switch (recipeBookType) {
+            default -> throw new IncompatibleClassChangeError();
+            case RecipeBookType.CRAFTING -> CRAFTING_CATEGORIES;
+            case RecipeBookType.FURNACE -> FURNACE_CATEGORIES;
+            case RecipeBookType.BLAST_FURNACE -> BLAST_FURNACE_CATEGORIES;
+            case RecipeBookType.SMOKER -> SMOKER_CATEGORIES;
+        };
     }
 
     public List<ItemStack> getIconItems() {

@@ -59,7 +59,7 @@ implements Toast {
 
     @Override
     public int height() {
-        return 20 + this.messageLines.size() * 12;
+        return 20 + Math.max(this.messageLines.size(), 1) * 12;
     }
 
     @Override
@@ -155,7 +155,6 @@ implements Toast {
         WORLD_ACCESS_FAILURE,
         PACK_COPY_FAILURE,
         PERIODIC_NOTIFICATION,
-        CHAT_PREVIEW_WARNING(10000L),
         UNSECURE_SERVER_WARNING(10000L);
 
         final long displayTime;

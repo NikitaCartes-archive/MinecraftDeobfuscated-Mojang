@@ -115,12 +115,6 @@ implements RecipeUpdateListener {
     }
 
     @Override
-    public void removed() {
-        this.recipeBookComponent.removed();
-        super.removed();
-    }
-
-    @Override
     public RecipeBookComponent getRecipeBookComponent() {
         return this.recipeBookComponent;
     }

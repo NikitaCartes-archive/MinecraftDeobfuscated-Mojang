@@ -14,7 +14,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
-import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.util.SignatureValidator;
 
 public class ServerboundKeyPacket
 implements Packet<ServerLoginPacketListener> {
@@ -51,8 +51,8 @@ implements Packet<ServerLoginPacketListener> {
         return Crypt.decryptByteToSecretKey(privateKey, this.keybytes);
     }
 
-    public boolean isChallengeSignatureValid(byte[] bs2, ProfilePublicKey profilePublicKey) {
-        return this.nonceOrSaltSignature.map(bs -> false, saltSignaturePair -> profilePublicKey.createSignatureValidator().validate(output -> {
+    public boolean isChallengeSignatureValid(byte[] bs2, SignatureValidator signatureValidator) {
+        return this.nonceOrSaltSignature.map(bs -> false, saltSignaturePair -> signatureValidator.validate(output -> {
             output.update(bs2);
             output.update(saltSignaturePair.saltAsBytes());
         }, saltSignaturePair.signature()));

@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -197,7 +198,7 @@ implements NeutralMob {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         BlockState blockState = null;
-        if (compoundTag.contains("carriedBlockState", 10) && (blockState = NbtUtils.readBlockState(compoundTag.getCompound("carriedBlockState"))).isAir()) {
+        if (compoundTag.contains("carriedBlockState", 10) && (blockState = NbtUtils.readBlockState(this.level.holderLookup(Registry.BLOCK_REGISTRY), compoundTag.getCompound("carriedBlockState"))).isAir()) {
             blockState = null;
         }
         this.setCarriedBlock(blockState);

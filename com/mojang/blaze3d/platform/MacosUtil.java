@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 
 @Environment(value=EnvType.CLIENT)
@@ -38,12 +39,14 @@ public class MacosUtil {
         nSObject.send("toggleFullScreen:", new Object[]{Pointer.NULL});
     }
 
-    public static void loadIcon(InputStream inputStream) throws IOException {
-        String string = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
-        Client client = Client.getInstance();
-        Object object = client.sendProxy("NSData", "alloc", new Object[0]).send("initWithBase64Encoding:", new Object[]{string});
-        Object object2 = client.sendProxy("NSImage", "alloc", new Object[0]).send("initWithData:", new Object[]{object});
-        client.sendProxy("NSApplication", "sharedApplication", new Object[0]).send("setApplicationIconImage:", new Object[]{object2});
+    public static void loadIcon(IoSupplier<InputStream> ioSupplier) throws IOException {
+        try (InputStream inputStream = ioSupplier.get();){
+            String string = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
+            Client client = Client.getInstance();
+            Object object = client.sendProxy("NSData", "alloc", new Object[0]).send("initWithBase64Encoding:", new Object[]{string});
+            Object object2 = client.sendProxy("NSImage", "alloc", new Object[0]).send("initWithData:", new Object[]{object});
+            client.sendProxy("NSApplication", "sharedApplication", new Object[0]).send("setApplicationIconImage:", new Object[]{object2});
+        }
     }
 }
 

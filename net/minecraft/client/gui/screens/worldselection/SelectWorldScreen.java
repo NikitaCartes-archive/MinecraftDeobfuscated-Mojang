@@ -15,16 +15,15 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -33,6 +32,7 @@ import org.slf4j.Logger;
 public class SelectWorldScreen
 extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
+    public static final WorldOptions TEST_OPTIONS = new WorldOptions("test1".hashCode(), true, false);
     protected final Screen lastScreen;
     @Nullable
     private List<FormattedCharSequence> toolTip;
@@ -132,11 +132,9 @@ extends Screen {
             if (!this.list.children().isEmpty() && (entry = (WorldSelectionList.Entry)this.list.children().get(0)) instanceof WorldSelectionList.WorldListEntry && (worldListEntry = (WorldSelectionList.WorldListEntry)entry).getLevelName().equals("DEBUG world")) {
                 worldListEntry.doDeleteWorld();
             }
-            RegistryAccess.Frozen registryAccess = RegistryAccess.builtinCopy().freeze();
-            WorldGenSettings worldGenSettings = WorldPresets.createNormalWorldFromPreset(registryAccess, "test1".hashCode());
-            LevelSettings levelSettings = new LevelSettings("DEBUG world", GameType.SPECTATOR, false, Difficulty.NORMAL, true, new GameRules(), DataPackConfig.DEFAULT);
+            LevelSettings levelSettings = new LevelSettings("DEBUG world", GameType.SPECTATOR, false, Difficulty.NORMAL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
             String string2 = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), "DEBUG world", "");
-            this.minecraft.createWorldOpenFlows().createFreshLevel(string2, levelSettings, registryAccess, worldGenSettings);
+            this.minecraft.createWorldOpenFlows().createFreshLevel(string2, levelSettings, TEST_OPTIONS, WorldPresets::createNormalWorldDimensions);
         } catch (IOException iOException) {
             LOGGER.error("Failed to recreate the debug world", iOException);
         }

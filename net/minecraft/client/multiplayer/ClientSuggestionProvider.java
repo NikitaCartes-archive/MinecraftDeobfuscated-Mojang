@@ -30,6 +30,7 @@ import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacke
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -155,6 +156,11 @@ implements SharedSuggestionProvider {
     @Override
     public RegistryAccess registryAccess() {
         return this.connection.registryAccess();
+    }
+
+    @Override
+    public FeatureFlagSet enabledFeatures() {
+        return this.connection.enabledFeatures();
     }
 
     public void completeCustomSuggestions(int i, Suggestions suggestions) {

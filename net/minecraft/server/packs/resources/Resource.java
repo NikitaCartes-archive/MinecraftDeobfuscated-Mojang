@@ -8,31 +8,41 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.ResourceMetadata;
 import org.jetbrains.annotations.Nullable;
 
 public class Resource {
-    private final String packId;
+    private final PackResources source;
     private final IoSupplier<InputStream> streamSupplier;
     private final IoSupplier<ResourceMetadata> metadataSupplier;
     @Nullable
     private ResourceMetadata cachedMetadata;
 
-    public Resource(String string, IoSupplier<InputStream> ioSupplier, IoSupplier<ResourceMetadata> ioSupplier2) {
-        this.packId = string;
+    public Resource(PackResources packResources, IoSupplier<InputStream> ioSupplier, IoSupplier<ResourceMetadata> ioSupplier2) {
+        this.source = packResources;
         this.streamSupplier = ioSupplier;
         this.metadataSupplier = ioSupplier2;
     }
 
-    public Resource(String string, IoSupplier<InputStream> ioSupplier) {
-        this.packId = string;
+    public Resource(PackResources packResources, IoSupplier<InputStream> ioSupplier) {
+        this.source = packResources;
         this.streamSupplier = ioSupplier;
-        this.metadataSupplier = () -> ResourceMetadata.EMPTY;
+        this.metadataSupplier = ResourceMetadata.EMPTY_SUPPLIER;
         this.cachedMetadata = ResourceMetadata.EMPTY;
     }
 
+    public PackResources source() {
+        return this.source;
+    }
+
     public String sourcePackId() {
-        return this.packId;
+        return this.source.packId();
+    }
+
+    public boolean isBuiltin() {
+        return this.source.isBuiltin();
     }
 
     public InputStream open() throws IOException {
@@ -48,11 +58,6 @@ public class Resource {
             this.cachedMetadata = this.metadataSupplier.get();
         }
         return this.cachedMetadata;
-    }
-
-    @FunctionalInterface
-    public static interface IoSupplier<T> {
-        public T get() throws IOException;
     }
 }
 

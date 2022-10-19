@@ -50,19 +50,19 @@ extends SimpleReloadInstance<State> {
 
     private List<State> finish(List<State> list) {
         this.total.stop();
-        int i = 0;
+        long l = 0L;
         LOGGER.info("Resource reload finished after {} ms", (Object)this.total.elapsed(TimeUnit.MILLISECONDS));
         for (State state : list) {
             ProfileResults profileResults = state.preparationResult;
             ProfileResults profileResults2 = state.reloadResult;
-            int j = (int)((double)state.preparationNanos.get() / 1000000.0);
-            int k = (int)((double)state.reloadNanos.get() / 1000000.0);
-            int l = j + k;
+            long m = TimeUnit.NANOSECONDS.toMillis(state.preparationNanos.get());
+            long n = TimeUnit.NANOSECONDS.toMillis(state.reloadNanos.get());
+            long o = m + n;
             String string = state.name;
-            LOGGER.info("{} took approximately {} ms ({} ms preparing, {} ms applying)", string, l, j, k);
-            i += k;
+            LOGGER.info("{} took approximately {} ms ({} ms preparing, {} ms applying)", string, o, m, n);
+            l += n;
         }
-        LOGGER.info("Total blocking time: {} ms", (Object)i);
+        LOGGER.info("Total blocking time: {} ms", (Object)l);
         return list;
     }
 

@@ -8,8 +8,6 @@ import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
@@ -46,6 +44,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -66,16 +65,16 @@ extends Screen {
     private long ticksToReload;
     private TransferableSelectionList availablePackList;
     private TransferableSelectionList selectedPackList;
-    private final File packDir;
+    private final Path packDir;
     private Button doneButton;
     private final Map<String, ResourceLocation> packIcons = Maps.newHashMap();
 
-    public PackSelectionScreen(Screen screen, PackRepository packRepository, Consumer<PackRepository> consumer, File file, Component component) {
+    public PackSelectionScreen(Screen screen, PackRepository packRepository, Consumer<PackRepository> consumer, Path path, Component component) {
         super(component);
         this.lastScreen = screen;
         this.model = new PackSelectionModel(this::populateLists, this::getPackIcon, packRepository, consumer);
-        this.packDir = file;
-        this.watcher = Watcher.create(file);
+        this.packDir = path;
+        this.watcher = Watcher.create(path);
     }
 
     @Override
@@ -99,7 +98,7 @@ extends Screen {
     @Override
     protected void init() {
         this.doneButton = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> this.onClose()));
-        this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 48, 150, 20, Component.translatable("pack.openFolder"), button -> Util.getPlatform().openFile(this.packDir), new Button.OnTooltip(){
+        this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 48, 150, 20, Component.translatable("pack.openFolder"), button -> Util.getPlatform().openUri(this.packDir.toUri()), new Button.OnTooltip(){
 
             @Override
             public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
@@ -192,7 +191,7 @@ extends Screen {
         String string = list.stream().map(Path::getFileName).map(Path::toString).collect(Collectors.joining(", "));
         this.minecraft.setScreen(new ConfirmScreen(bl -> {
             if (bl) {
-                PackSelectionScreen.copyPacks(this.minecraft, list, this.packDir.toPath());
+                PackSelectionScreen.copyPacks(this.minecraft, list, this.packDir);
                 this.reload();
             }
             this.minecraft.setScreen(this);
@@ -203,46 +202,39 @@ extends Screen {
      * Enabled aggressive exception aggregation
      */
     private ResourceLocation loadPackIcon(TextureManager textureManager, Pack pack) {
-        try (PackResources packResources2 = pack.open();){
+        try (PackResources packResources = pack.open();){
             ResourceLocation resourceLocation;
-            block19: {
-                InputStream inputStream;
-                block17: {
-                    ResourceLocation resourceLocation2;
-                    block18: {
-                        inputStream = packResources2.getRootResource("pack.png");
-                        try {
-                            if (inputStream != null) break block17;
-                            resourceLocation2 = DEFAULT_ICON;
-                            if (inputStream == null) break block18;
-                        } catch (Throwable throwable) {
-                            if (inputStream != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (Throwable throwable2) {
-                                    throwable.addSuppressed(throwable2);
-                                }
-                            }
-                            throw throwable;
-                        }
-                        inputStream.close();
-                    }
+            block16: {
+                IoSupplier<InputStream> ioSupplier = packResources.getRootResource("pack.png");
+                if (ioSupplier == null) {
+                    ResourceLocation resourceLocation2 = DEFAULT_ICON;
                     return resourceLocation2;
                 }
                 String string = pack.getId();
                 ResourceLocation resourceLocation3 = new ResourceLocation("minecraft", "pack/" + Util.sanitizeName(string, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon");
-                NativeImage nativeImage = NativeImage.read(inputStream);
-                textureManager.register(resourceLocation3, (AbstractTexture)new DynamicTexture(nativeImage));
-                resourceLocation = resourceLocation3;
-                if (inputStream == null) break block19;
+                InputStream inputStream = ioSupplier.get();
+                try {
+                    NativeImage nativeImage = NativeImage.read(inputStream);
+                    textureManager.register(resourceLocation3, (AbstractTexture)new DynamicTexture(nativeImage));
+                    resourceLocation = resourceLocation3;
+                    if (inputStream == null) break block16;
+                } catch (Throwable throwable) {
+                    if (inputStream != null) {
+                        try {
+                            inputStream.close();
+                        } catch (Throwable throwable2) {
+                            throwable.addSuppressed(throwable2);
+                        }
+                    }
+                    throw throwable;
+                }
                 inputStream.close();
             }
             return resourceLocation;
-        } catch (FileNotFoundException packResources2) {
         } catch (Exception exception) {
             LOGGER.warn("Failed to load icon from pack {}", (Object)pack.getId(), (Object)exception);
+            return DEFAULT_ICON;
         }
-        return DEFAULT_ICON;
     }
 
     private ResourceLocation getPackIcon(Pack pack) {
@@ -255,15 +247,15 @@ extends Screen {
         private final WatchService watcher;
         private final Path packPath;
 
-        public Watcher(File file) throws IOException {
-            this.packPath = file.toPath();
-            this.watcher = this.packPath.getFileSystem().newWatchService();
+        public Watcher(Path path) throws IOException {
+            this.packPath = path;
+            this.watcher = path.getFileSystem().newWatchService();
             try {
-                this.watchDir(this.packPath);
-                try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(this.packPath);){
-                    for (Path path : directoryStream) {
-                        if (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) continue;
-                        this.watchDir(path);
+                this.watchDir(path);
+                try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path);){
+                    for (Path path2 : directoryStream) {
+                        if (!Files.isDirectory(path2, LinkOption.NOFOLLOW_LINKS)) continue;
+                        this.watchDir(path2);
                     }
                 }
             } catch (Exception exception) {
@@ -273,11 +265,11 @@ extends Screen {
         }
 
         @Nullable
-        public static Watcher create(File file) {
+        public static Watcher create(Path path) {
             try {
-                return new Watcher(file);
+                return new Watcher(path);
             } catch (IOException iOException) {
-                LOGGER.warn("Failed to initialize pack directory {} monitoring", (Object)file, (Object)iOException);
+                LOGGER.warn("Failed to initialize pack directory {} monitoring", (Object)path, (Object)iOException);
                 return null;
             }
         }

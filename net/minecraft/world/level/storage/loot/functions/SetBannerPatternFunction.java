@@ -129,7 +129,7 @@ extends LootItemConditionalFunction {
             for (int i = 0; i < jsonArray.size(); ++i) {
                 JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonArray.get(i), "pattern[" + i + "]");
                 String string = GsonHelper.getAsString(jsonObject2, "pattern");
-                Optional<Holder<BannerPattern>> optional = Registry.BANNER_PATTERN.getHolder(ResourceKey.create(Registry.BANNER_PATTERN_REGISTRY, new ResourceLocation(string)));
+                Optional<Holder.Reference<BannerPattern>> optional = Registry.BANNER_PATTERN.getHolder(ResourceKey.create(Registry.BANNER_PATTERN_REGISTRY, new ResourceLocation(string)));
                 if (optional.isEmpty()) {
                     throw new JsonSyntaxException("Unknown pattern: " + string);
                 }
@@ -138,7 +138,7 @@ extends LootItemConditionalFunction {
                 if (dyeColor == null) {
                     throw new JsonSyntaxException("Unknown color: " + string2);
                 }
-                builder.add(Pair.of(optional.get(), dyeColor));
+                builder.add(Pair.of((Holder)optional.get(), dyeColor));
             }
             boolean bl = GsonHelper.getAsBoolean(jsonObject, "append");
             return new SetBannerPatternFunction(lootItemConditions, (List<Pair<Holder<BannerPattern>, DyeColor>>)((Object)builder.build()), bl);

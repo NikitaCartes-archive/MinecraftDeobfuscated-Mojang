@@ -149,11 +149,19 @@ public class TextureMapping {
     }
 
     public static TextureMapping logColumn(Block block) {
-        return new TextureMapping().put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block)).put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top"));
+        return new TextureMapping().put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block)).put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top")).put(TextureSlot.PARTICLE, TextureMapping.getBlockTexture(block));
     }
 
     public static TextureMapping column(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
         return new TextureMapping().put(TextureSlot.SIDE, resourceLocation).put(TextureSlot.END, resourceLocation2);
+    }
+
+    public static TextureMapping fence(Block block) {
+        return new TextureMapping().put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(block)).put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side")).put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"));
+    }
+
+    public static TextureMapping customParticle(Block block) {
+        return new TextureMapping().put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(block)).put(TextureSlot.PARTICLE, TextureMapping.getBlockTexture(block, "_particle"));
     }
 
     public static TextureMapping cubeBottomTop(Block block) {
@@ -167,7 +175,7 @@ public class TextureMapping {
 
     public static TextureMapping columnWithWall(Block block) {
         ResourceLocation resourceLocation = TextureMapping.getBlockTexture(block);
-        return new TextureMapping().put(TextureSlot.WALL, resourceLocation).put(TextureSlot.SIDE, resourceLocation).put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top"));
+        return new TextureMapping().put(TextureSlot.TEXTURE, resourceLocation).put(TextureSlot.WALL, resourceLocation).put(TextureSlot.SIDE, resourceLocation).put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top"));
     }
 
     public static TextureMapping door(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
@@ -269,22 +277,22 @@ public class TextureMapping {
 
     public static ResourceLocation getBlockTexture(Block block) {
         ResourceLocation resourceLocation = Registry.BLOCK.getKey(block);
-        return new ResourceLocation(resourceLocation.getNamespace(), "block/" + resourceLocation.getPath());
+        return resourceLocation.withPrefix("block/");
     }
 
     public static ResourceLocation getBlockTexture(Block block, String string) {
         ResourceLocation resourceLocation = Registry.BLOCK.getKey(block);
-        return new ResourceLocation(resourceLocation.getNamespace(), "block/" + resourceLocation.getPath() + string);
+        return resourceLocation.withPath(string2 -> "block/" + string2 + string);
     }
 
     public static ResourceLocation getItemTexture(Item item) {
         ResourceLocation resourceLocation = Registry.ITEM.getKey(item);
-        return new ResourceLocation(resourceLocation.getNamespace(), "item/" + resourceLocation.getPath());
+        return resourceLocation.withPrefix("item/");
     }
 
     public static ResourceLocation getItemTexture(Item item, String string) {
         ResourceLocation resourceLocation = Registry.ITEM.getKey(item);
-        return new ResourceLocation(resourceLocation.getNamespace(), "item/" + resourceLocation.getPath() + string);
+        return resourceLocation.withPath(string2 -> "item/" + string2 + string);
     }
 }
 

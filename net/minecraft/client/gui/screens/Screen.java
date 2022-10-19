@@ -215,7 +215,7 @@ implements Widget {
         m = k;
         int p = l;
         if (n + k > this.width) {
-            n -= 28 + k;
+            n = Math.max(n - 24 - 4 - k, 4);
         }
         if (o + p + 6 > this.height) {
             o = this.height - p - 6;
@@ -334,7 +334,7 @@ implements Widget {
                 } else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
                     String string2 = SharedConstants.filterText(clickEvent.getValue());
                     if (string2.startsWith("/")) {
-                        if (!this.minecraft.player.commandUnsigned(string2.substring(1))) {
+                        if (!this.minecraft.player.connection.sendUnsignedCommand(string2.substring(1))) {
                             LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", (Object)string2);
                         }
                     } else {

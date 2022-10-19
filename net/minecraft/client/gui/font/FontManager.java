@@ -27,6 +27,7 @@ import net.minecraft.client.gui.font.AllMissingGlyphProvider;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilderType;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -42,6 +43,7 @@ implements AutoCloseable {
     static final Logger LOGGER = LogUtils.getLogger();
     private static final String FONTS_PATH = "fonts.json";
     public static final ResourceLocation MISSING_FONT = new ResourceLocation("minecraft", "missing");
+    static final FileToIdConverter FONT_DEFINITIONS = FileToIdConverter.json("font");
     private final FontSet missingFontSet;
     final Map<ResourceLocation, FontSet> fontSets = Maps.newHashMap();
     final TextureManager textureManager;
@@ -56,10 +58,9 @@ implements AutoCloseable {
             profilerFiller.startTick();
             Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
             HashMap<ResourceLocation, List<GlyphProvider>> map = Maps.newHashMap();
-            for (Map.Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks("font", resourceLocation -> resourceLocation.getPath().endsWith(".json")).entrySet()) {
+            for (Map.Entry<ResourceLocation, List<Resource>> entry : FONT_DEFINITIONS.listMatchingResourceStacks(resourceManager).entrySet()) {
                 ResourceLocation resourceLocation2 = entry.getKey();
-                String string = resourceLocation2.getPath();
-                ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), string.substring("font/".length(), string.length() - ".json".length()));
+                ResourceLocation resourceLocation22 = FONT_DEFINITIONS.fileToId(resourceLocation2);
                 List list = map.computeIfAbsent(resourceLocation22, resourceLocation -> Lists.newArrayList(new AllMissingGlyphProvider()));
                 profilerFiller.push(resourceLocation22::toString);
                 for (Resource resource : entry.getValue()) {
@@ -71,10 +72,10 @@ implements AutoCloseable {
                             profilerFiller.popPush("parsing");
                             for (int i2 = jsonArray.size() - 1; i2 >= 0; --i2) {
                                 JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonArray.get(i2), "providers[" + i2 + "]");
-                                String string2 = GsonHelper.getAsString(jsonObject, "type");
-                                GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string2);
+                                String string = GsonHelper.getAsString(jsonObject, "type");
+                                GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string);
                                 try {
-                                    profilerFiller.push(string2);
+                                    profilerFiller.push(string);
                                     GlyphProvider glyphProvider = glyphProviderBuilderType.create(jsonObject).create(resourceManager);
                                     if (glyphProvider == null) continue;
                                     list.add(glyphProvider);

@@ -172,7 +172,7 @@ implements WorldlyContainerHolder {
 
     public static void handleFill(Level level, BlockPos blockPos, boolean bl) {
         BlockState blockState = level.getBlockState(blockPos);
-        level.playLocalSound(blockPos.getX(), blockPos.getY(), blockPos.getZ(), bl ? SoundEvents.COMPOSTER_FILL_SUCCESS : SoundEvents.COMPOSTER_FILL, SoundSource.BLOCKS, 1.0f, 1.0f, false);
+        level.playLocalSound(blockPos, bl ? SoundEvents.COMPOSTER_FILL_SUCCESS : SoundEvents.COMPOSTER_FILL, SoundSource.BLOCKS, 1.0f, 1.0f, false);
         double d = blockState.getShape(level, blockPos).max(Direction.Axis.Y, 0.5, 0.5) + 0.03125;
         double e = 0.13125f;
         double f = 0.7375f;

@@ -104,6 +104,7 @@ extends Block {
         int i = randomSource.nextInt(2, 6);
         for (int j = 1; j <= i; ++j) {
             Tadpole tadpole = EntityType.TADPOLE.create(serverLevel);
+            if (tadpole == null) continue;
             double d = (double)blockPos.getX() + this.getRandomTadpolePositionOffset(randomSource);
             double e = (double)blockPos.getZ() + this.getRandomTadpolePositionOffset(randomSource);
             int k = randomSource.nextInt(1, 361);

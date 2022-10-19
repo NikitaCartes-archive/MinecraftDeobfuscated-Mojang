@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.WallBannerBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 
 @Environment(value=EnvType.CLIENT)
 public class BannerRenderer
@@ -79,7 +80,7 @@ implements BlockEntityRenderer<BannerBlockEntity> {
             BlockState blockState = bannerBlockEntity.getBlockState();
             if (blockState.getBlock() instanceof BannerBlock) {
                 poseStack.translate(0.5, 0.5, 0.5);
-                h = (float)(-blockState.getValue(BannerBlock.ROTATION).intValue() * 360) / 16.0f;
+                h = -RotationSegment.convertToDegrees(blockState.getValue(BannerBlock.ROTATION));
                 poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
                 this.pole.visible = true;
             } else {

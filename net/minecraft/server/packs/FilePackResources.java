@@ -12,19 +12,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.ResourcePackFileNotFoundException;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -33,46 +31,66 @@ public class FilePackResources
 extends AbstractPackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Splitter SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
+    private final File file;
     @Nullable
     private ZipFile zipFile;
+    private boolean failedToLoad;
 
-    public FilePackResources(File file) {
-        super(file);
+    public FilePackResources(String string, File file) {
+        super(string);
+        this.file = file;
     }
 
-    private ZipFile getOrCreateZipFile() throws IOException {
+    @Nullable
+    private ZipFile getOrCreateZipFile() {
+        if (this.failedToLoad) {
+            return null;
+        }
         if (this.zipFile == null) {
-            this.zipFile = new ZipFile(this.file);
+            try {
+                this.zipFile = new ZipFile(this.file);
+            } catch (IOException iOException) {
+                LOGGER.error("Failed to open pack {}", (Object)this.file, (Object)iOException);
+                this.failedToLoad = true;
+                return null;
+            }
         }
         return this.zipFile;
     }
 
-    @Override
-    protected InputStream getResource(String string) throws IOException {
-        ZipFile zipFile = this.getOrCreateZipFile();
-        ZipEntry zipEntry = zipFile.getEntry(string);
-        if (zipEntry == null) {
-            throw new ResourcePackFileNotFoundException(this.file, string);
-        }
-        return zipFile.getInputStream(zipEntry);
+    private static String getPathFromLocation(PackType packType, ResourceLocation resourceLocation) {
+        return String.format(Locale.ROOT, "%s/%s/%s", packType.getDirectory(), resourceLocation.getNamespace(), resourceLocation.getPath());
     }
 
     @Override
-    public boolean hasResource(String string) {
-        try {
-            return this.getOrCreateZipFile().getEntry(string) != null;
-        } catch (IOException iOException) {
-            return false;
+    @Nullable
+    public IoSupplier<InputStream> getRootResource(String ... strings) {
+        return this.getResource(String.join((CharSequence)"/", strings));
+    }
+
+    @Override
+    public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation resourceLocation) {
+        return this.getResource(FilePackResources.getPathFromLocation(packType, resourceLocation));
+    }
+
+    @Nullable
+    private IoSupplier<InputStream> getResource(String string) {
+        ZipFile zipFile = this.getOrCreateZipFile();
+        if (zipFile == null) {
+            return null;
         }
+        ZipEntry zipEntry = zipFile.getEntry(string);
+        if (zipEntry == null) {
+            return null;
+        }
+        return IoSupplier.create(zipFile, zipEntry);
     }
 
     @Override
     public Set<String> getNamespaces(PackType packType) {
-        ZipFile zipFile;
-        try {
-            zipFile = this.getOrCreateZipFile();
-        } catch (IOException iOException) {
-            return Collections.emptySet();
+        ZipFile zipFile = this.getOrCreateZipFile();
+        if (zipFile == null) {
+            return Set.of();
         }
         Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
         HashSet<String> set = Sets.newHashSet();
@@ -86,7 +104,7 @@ extends AbstractPackResources {
                 set.add(string2);
                 continue;
             }
-            this.logWarning(string2);
+            LOGGER.warn("Ignored non-lowercase namespace: {} in {}", (Object)string2, (Object)this.file);
         }
         return set;
     }
@@ -105,31 +123,26 @@ extends AbstractPackResources {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
-        ZipFile zipFile;
-        try {
-            zipFile = this.getOrCreateZipFile();
-        } catch (IOException iOException) {
-            return Collections.emptySet();
+    public void listResources(PackType packType, String string, String string2, PackResources.ResourceOutput resourceOutput) {
+        ZipFile zipFile = this.getOrCreateZipFile();
+        if (zipFile == null) {
+            return;
         }
         Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
-        ArrayList<ResourceLocation> list = Lists.newArrayList();
         String string3 = packType.getDirectory() + "/" + string + "/";
         String string4 = string3 + string2 + "/";
         while (enumeration.hasMoreElements()) {
             String string5;
             ZipEntry zipEntry = enumeration.nextElement();
-            if (zipEntry.isDirectory() || (string5 = zipEntry.getName()).endsWith(".mcmeta") || !string5.startsWith(string4)) continue;
+            if (zipEntry.isDirectory() || !(string5 = zipEntry.getName()).startsWith(string4)) continue;
             String string6 = string5.substring(string3.length());
             ResourceLocation resourceLocation = ResourceLocation.tryBuild(string, string6);
-            if (resourceLocation == null) {
-                LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", (Object)string, (Object)string6);
+            if (resourceLocation != null) {
+                resourceOutput.accept(resourceLocation, IoSupplier.create(zipFile, zipEntry));
                 continue;
             }
-            if (!predicate.test(resourceLocation)) continue;
-            list.add(resourceLocation);
+            LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", (Object)string, (Object)string6);
         }
-        return list;
     }
 }
 

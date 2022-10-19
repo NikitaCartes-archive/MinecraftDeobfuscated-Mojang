@@ -4,15 +4,19 @@
 package net.minecraft.network.chat;
 
 import java.util.BitSet;
-import net.minecraft.Util;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class FilterMask {
     public static final FilterMask FULLY_FILTERED = new FilterMask(new BitSet(0), Type.FULLY_FILTERED);
     public static final FilterMask PASS_THROUGH = new FilterMask(new BitSet(0), Type.PASS_THROUGH);
+    public static final Style FILTERED_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_GRAY).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.filtered")));
     private static final char HASH = '#';
     private final BitSet mask;
     private final Type type;
@@ -65,9 +69,30 @@ public class FilterMask {
     }
 
     @Nullable
-    public Component apply(ChatMessageContent chatMessageContent) {
-        String string = chatMessageContent.plain();
-        return Util.mapNullable(this.apply(string), Component::literal);
+    public Component applyWithFormatting(String string) {
+        return switch (this.type) {
+            default -> throw new IncompatibleClassChangeError();
+            case Type.FULLY_FILTERED -> null;
+            case Type.PASS_THROUGH -> Component.literal(string);
+            case Type.PARTIALLY_FILTERED -> {
+                MutableComponent mutableComponent = Component.empty();
+                int i = 0;
+                boolean bl = this.mask.get(0);
+                while (true) {
+                    int j = bl ? this.mask.nextClearBit(i) : this.mask.nextSetBit(i);
+                    int v1 = j = j < 0 ? string.length() : j;
+                    if (j == i) break;
+                    if (bl) {
+                        mutableComponent.append(Component.literal(StringUtils.repeat('#', j - i)).withStyle(FILTERED_STYLE));
+                    } else {
+                        mutableComponent.append(string.substring(i, j));
+                    }
+                    bl = !bl;
+                    i = j;
+                }
+                yield mutableComponent;
+            }
+        };
     }
 
     public boolean isEmpty() {

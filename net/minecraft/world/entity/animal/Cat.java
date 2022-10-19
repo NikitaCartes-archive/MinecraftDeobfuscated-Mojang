@@ -311,13 +311,15 @@ extends TamableAnimal {
     }
 
     @Override
+    @Nullable
     public Cat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Cat cat = EntityType.CAT.create(serverLevel);
-        if (ageableMob instanceof Cat) {
+        if (cat != null && ageableMob instanceof Cat) {
+            Cat cat2 = (Cat)ageableMob;
             if (this.random.nextBoolean()) {
                 cat.setCatVariant(this.getCatVariant());
             } else {
-                cat.setCatVariant(((Cat)ageableMob).getCatVariant());
+                cat.setCatVariant(cat2.getCatVariant());
             }
             if (this.isTame()) {
                 cat.setOwnerUUID(this.getOwnerUUID());
@@ -325,7 +327,7 @@ extends TamableAnimal {
                 if (this.random.nextBoolean()) {
                     cat.setCollarColor(this.getCollarColor());
                 } else {
-                    cat.setCollarColor(((Cat)ageableMob).getCollarColor());
+                    cat.setCollarColor(cat2.getCollarColor());
                 }
             }
         }
@@ -451,6 +453,7 @@ extends TamableAnimal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
@@ -567,7 +570,7 @@ extends TamableAnimal {
         private void giveMorningGift() {
             RandomSource randomSource = this.cat.getRandom();
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-            mutableBlockPos.set(this.cat.blockPosition());
+            mutableBlockPos.set(this.cat.isLeashed() ? this.cat.getLeashHolder().blockPosition() : this.cat.blockPosition());
             this.cat.randomTeleport(mutableBlockPos.getX() + randomSource.nextInt(11) - 5, mutableBlockPos.getY() + randomSource.nextInt(5) - 2, mutableBlockPos.getZ() + randomSource.nextInt(11) - 5, false);
             mutableBlockPos.set(this.cat.blockPosition());
             LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);

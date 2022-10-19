@@ -73,6 +73,7 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Integer> PLAY_DEAD_TICKS = MemoryModuleType.register("play_dead_ticks", Codec.INT);
     public static final MemoryModuleType<Player> TEMPTING_PLAYER = MemoryModuleType.register("tempting_player");
     public static final MemoryModuleType<Integer> TEMPTATION_COOLDOWN_TICKS = MemoryModuleType.register("temptation_cooldown_ticks", Codec.INT);
+    public static final MemoryModuleType<Integer> GAZE_COOLDOWN_TICKS = MemoryModuleType.register("gaze_cooldown_ticks", Codec.INT);
     public static final MemoryModuleType<Boolean> IS_TEMPTED = MemoryModuleType.register("is_tempted", Codec.BOOL);
     public static final MemoryModuleType<Integer> LONG_JUMP_COOLDOWN_TICKS = MemoryModuleType.register("long_jump_cooling_down", Codec.INT);
     public static final MemoryModuleType<Boolean> LONG_JUMP_MID_JUMP = MemoryModuleType.register("long_jump_mid_jump");

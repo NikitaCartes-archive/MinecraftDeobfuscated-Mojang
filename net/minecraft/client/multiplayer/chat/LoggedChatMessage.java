@@ -9,19 +9,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Objects;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
 import net.minecraft.client.multiplayer.chat.LoggedChatEvent;
-import net.minecraft.client.multiplayer.chat.LoggedChatMessageLink;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageHeader;
 
 @Environment(value=EnvType.CLIENT)
 public interface LoggedChatMessage
@@ -43,18 +38,17 @@ extends LoggedChatEvent {
     public boolean canReport(UUID var1);
 
     @Environment(value=EnvType.CLIENT)
-    public record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChatMessage,
-    LoggedChatMessageLink
+    public record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChatMessage
     {
         private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
         @Override
         public Component toContentComponent() {
             if (!this.message.filterMask().isEmpty()) {
-                Component component = this.message.filterMask().apply(this.message.signedContent());
-                return Objects.requireNonNullElse(component, CommonComponents.EMPTY);
+                Component component = this.message.filterMask().applyWithFormatting(this.message.signedContent());
+                return component != null ? component : Component.empty();
             }
-            return this.message.serverContent();
+            return this.message.decoratedContent();
         }
 
         @Override
@@ -77,21 +71,6 @@ extends LoggedChatEvent {
         @Override
         public boolean canReport(UUID uUID) {
             return this.message.hasSignatureFrom(uUID);
-        }
-
-        @Override
-        public SignedMessageHeader header() {
-            return this.message.signedHeader();
-        }
-
-        @Override
-        public byte[] bodyDigest() {
-            return this.message.signedBody().hash().asBytes();
-        }
-
-        @Override
-        public MessageSignature headerSignature() {
-            return this.message.headerSignature();
         }
 
         public UUID profileId() {

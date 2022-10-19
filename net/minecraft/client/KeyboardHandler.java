@@ -160,9 +160,9 @@ public class KeyboardHandler {
                 if (!this.minecraft.player.hasPermissions(2)) {
                     this.debugFeedbackTranslated("debug.creative_spectator.error", new Object[0]);
                 } else if (!this.minecraft.player.isSpectator()) {
-                    this.minecraft.player.commandUnsigned("gamemode spectator");
+                    this.minecraft.player.connection.sendUnsignedCommand("gamemode spectator");
                 } else {
-                    this.minecraft.player.commandUnsigned("gamemode " + MoreObjects.firstNonNull(this.minecraft.gameMode.getPreviousPlayerMode(), GameType.CREATIVE).getName());
+                    this.minecraft.player.connection.sendUnsignedCommand("gamemode " + MoreObjects.firstNonNull(this.minecraft.gameMode.getPreviousPlayerMode(), GameType.CREATIVE).getName());
                 }
                 return true;
             }

@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -34,11 +34,13 @@ implements DataProvider {
     @Nullable
     private static final Path DUMP_SNBT_TO = null;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final DataGenerator generator;
+    private final PackOutput output;
+    private final Iterable<Path> inputFolders;
     private final List<Filter> filters = Lists.newArrayList();
 
-    public SnbtToNbt(DataGenerator dataGenerator) {
-        this.generator = dataGenerator;
+    public SnbtToNbt(PackOutput packOutput, Iterable<Path> iterable) {
+        this.output = packOutput;
+        this.inputFolders = iterable;
     }
 
     public SnbtToNbt addFilter(Filter filter) {
@@ -56,9 +58,9 @@ implements DataProvider {
 
     @Override
     public void run(CachedOutput cachedOutput) throws IOException {
-        Path path3 = this.generator.getOutputFolder();
+        Path path3 = this.output.getOutputFolder();
         ArrayList<CompletableFuture> list = Lists.newArrayList();
-        for (Path path22 : this.generator.getInputFolders()) {
+        for (Path path22 : this.inputFolders) {
             Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".snbt")).forEach(path2 -> list.add(CompletableFuture.supplyAsync(() -> this.readStructure((Path)path2, this.getName(path22, (Path)path2)), Util.backgroundExecutor())));
         }
         boolean bl = false;

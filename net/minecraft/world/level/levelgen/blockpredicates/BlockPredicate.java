@@ -30,6 +30,7 @@ import net.minecraft.world.level.levelgen.blockpredicates.SolidPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.TrueBlockPredicate;
 import net.minecraft.world.level.levelgen.blockpredicates.WouldSurvivePredicate;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 public interface BlockPredicate
 extends BiPredicate<WorldGenLevel, BlockPos> {
@@ -129,6 +130,14 @@ extends BiPredicate<WorldGenLevel, BlockPos> {
 
     public static BlockPredicate solid() {
         return BlockPredicate.solid(Vec3i.ZERO);
+    }
+
+    public static BlockPredicate noFluid() {
+        return BlockPredicate.noFluid(Vec3i.ZERO);
+    }
+
+    public static BlockPredicate noFluid(Vec3i vec3i) {
+        return BlockPredicate.matchesFluids(vec3i, Fluids.EMPTY);
     }
 
     public static BlockPredicate insideWorld(Vec3i vec3i) {

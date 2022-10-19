@@ -455,10 +455,10 @@ public class Raid {
         DifficultyInstance difficultyInstance = this.level.getCurrentDifficultyAt(blockPos);
         boolean bl2 = this.shouldSpawnBonusGroup();
         for (RaiderType raiderType : RaiderType.VALUES) {
+            Raider raider;
             int j = this.getDefaultNumSpawns(raiderType, i, bl2) + this.getPotentialBonusSpawns(raiderType, this.random, i, difficultyInstance, bl2);
             int k = 0;
-            for (int l = 0; l < j; ++l) {
-                Raider raider = raiderType.entityType.create(this.level);
+            for (int l = 0; l < j && (raider = raiderType.entityType.create(this.level)) != null; ++l) {
                 if (!bl && raider.canBeLeader()) {
                     raider.setPatrolLeader(true);
                     this.setLeader(i, raider);

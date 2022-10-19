@@ -258,9 +258,12 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public Fox getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Fox fox = EntityType.FOX.create(serverLevel);
-        fox.setFoxType(this.random.nextBoolean() ? this.getFoxType() : ((Fox)ageableMob).getFoxType());
+        if (fox != null) {
+            fox.setFoxType(this.random.nextBoolean() ? this.getFoxType() : ((Fox)ageableMob).getFoxType());
+        }
         return fox;
     }
 
@@ -641,7 +644,7 @@ extends Animal {
             double g = f == 0.0 ? 0.0 : d * (double)((float)j / 6.0f);
             double h = f == 0.0 ? e * (double)((float)j / 6.0f) : g / f;
             for (int k = 1; k < 4; ++k) {
-                if (fox.level.getBlockState(new BlockPos(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).getMaterial().isReplaceable()) continue;
+                if (fox.level.getBlockState(new BlockPos(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) continue;
                 return false;
             }
         }
@@ -654,6 +657,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

@@ -7,12 +7,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.util.GsonHelper;
 
 public class PackMetadataSectionSerializer
-implements MetadataSectionSerializer<PackMetadataSection> {
+implements MetadataSectionType<PackMetadataSection> {
     @Override
     public PackMetadataSection fromJson(JsonObject jsonObject) {
         MutableComponent component = Component.Serializer.fromJson(jsonObject.get("description"));
@@ -21,6 +21,14 @@ implements MetadataSectionSerializer<PackMetadataSection> {
         }
         int i = GsonHelper.getAsInt(jsonObject, "pack_format");
         return new PackMetadataSection(component, i);
+    }
+
+    @Override
+    public JsonObject toJson(PackMetadataSection packMetadataSection) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("description", Component.Serializer.toJsonTree(packMetadataSection.getDescription()));
+        jsonObject.addProperty("pack_format", packMetadataSection.getPackFormat());
+        return jsonObject;
     }
 
     @Override

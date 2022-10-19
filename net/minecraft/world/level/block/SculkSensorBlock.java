@@ -3,10 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMaps;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustColorTransitionOptions;
@@ -53,50 +49,6 @@ extends BaseEntityBlock
 implements SimpleWaterloggedBlock {
     public static final int ACTIVE_TICKS = 40;
     public static final int COOLDOWN_TICKS = 1;
-    public static final Object2IntMap<GameEvent> VIBRATION_FREQUENCY_FOR_EVENT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
-        object2IntOpenHashMap.put(GameEvent.STEP, 1);
-        object2IntOpenHashMap.put(GameEvent.FLAP, 2);
-        object2IntOpenHashMap.put(GameEvent.SWIM, 3);
-        object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
-        object2IntOpenHashMap.put(GameEvent.HIT_GROUND, 5);
-        object2IntOpenHashMap.put(GameEvent.TELEPORT, 5);
-        object2IntOpenHashMap.put(GameEvent.SPLASH, 6);
-        object2IntOpenHashMap.put(GameEvent.ENTITY_SHAKE, 6);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_CHANGE, 6);
-        object2IntOpenHashMap.put(GameEvent.NOTE_BLOCK_PLAY, 6);
-        object2IntOpenHashMap.put(GameEvent.PROJECTILE_SHOOT, 7);
-        object2IntOpenHashMap.put(GameEvent.DRINK, 7);
-        object2IntOpenHashMap.put(GameEvent.PRIME_FUSE, 7);
-        object2IntOpenHashMap.put(GameEvent.PROJECTILE_LAND, 8);
-        object2IntOpenHashMap.put(GameEvent.EAT, 8);
-        object2IntOpenHashMap.put(GameEvent.ENTITY_INTERACT, 8);
-        object2IntOpenHashMap.put(GameEvent.ENTITY_DAMAGE, 8);
-        object2IntOpenHashMap.put(GameEvent.EQUIP, 9);
-        object2IntOpenHashMap.put(GameEvent.SHEAR, 9);
-        object2IntOpenHashMap.put(GameEvent.ENTITY_ROAR, 9);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_CLOSE, 10);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_DEACTIVATE, 10);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_DETACH, 10);
-        object2IntOpenHashMap.put(GameEvent.DISPENSE_FAIL, 10);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_OPEN, 11);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_ACTIVATE, 11);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_ATTACH, 11);
-        object2IntOpenHashMap.put(GameEvent.ENTITY_PLACE, 12);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_PLACE, 12);
-        object2IntOpenHashMap.put(GameEvent.FLUID_PLACE, 12);
-        object2IntOpenHashMap.put(GameEvent.ENTITY_DIE, 13);
-        object2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY, 13);
-        object2IntOpenHashMap.put(GameEvent.FLUID_PICKUP, 13);
-        object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 14);
-        object2IntOpenHashMap.put(GameEvent.CONTAINER_CLOSE, 14);
-        object2IntOpenHashMap.put(GameEvent.PISTON_CONTRACT, 14);
-        object2IntOpenHashMap.put(GameEvent.PISTON_EXTEND, 15);
-        object2IntOpenHashMap.put(GameEvent.CONTAINER_OPEN, 15);
-        object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_START, 15);
-        object2IntOpenHashMap.put(GameEvent.EXPLODE, 15);
-        object2IntOpenHashMap.put(GameEvent.LIGHTNING_STRIKE, 15);
-        object2IntOpenHashMap.put(GameEvent.INSTRUMENT_PLAY, 15);
-    }));
     public static final EnumProperty<SculkSensorPhase> PHASE = BlockStateProperties.SCULK_SENSOR_PHASE;
     public static final IntegerProperty POWER = BlockStateProperties.POWER;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -142,13 +94,13 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
-        if (!level.isClientSide() && SculkSensorBlock.canActivate(blockState) && entity.getType() != EntityType.WARDEN) {
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof SculkSensorBlockEntity) {
-                SculkSensorBlockEntity sculkSensorBlockEntity = (SculkSensorBlockEntity)blockEntity;
-                sculkSensorBlockEntity.setLastVibrationFrequency(VIBRATION_FREQUENCY_FOR_EVENT.get(GameEvent.STEP));
+        BlockEntity blockEntity;
+        if (!level.isClientSide() && SculkSensorBlock.canActivate(blockState) && entity.getType() != EntityType.WARDEN && (blockEntity = level.getBlockEntity(blockPos)) instanceof SculkSensorBlockEntity) {
+            SculkSensorBlockEntity sculkSensorBlockEntity = (SculkSensorBlockEntity)blockEntity;
+            if (level instanceof ServerLevel) {
+                ServerLevel serverLevel = (ServerLevel)level;
+                sculkSensorBlockEntity.getListener().forceGameEvent(serverLevel, GameEvent.STEP, GameEvent.Context.of(entity), entity.position());
             }
-            SculkSensorBlock.activate(entity, level, blockPos, blockState, 15);
         }
         super.stepOn(level, blockPos, blockState, entity);
     }

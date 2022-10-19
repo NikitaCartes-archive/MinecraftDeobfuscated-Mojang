@@ -49,7 +49,7 @@ extends EntityRenderer<Painting> {
 
     @Override
     public ResourceLocation getTextureLocation(Painting painting) {
-        return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlas().location();
+        return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlasLocation();
     }
 
     private void renderPainting(PoseStack poseStack, VertexConsumer vertexConsumer, Painting painting, int i, int j, TextureAtlasSprite textureAtlasSprite, TextureAtlasSprite textureAtlasSprite2) {

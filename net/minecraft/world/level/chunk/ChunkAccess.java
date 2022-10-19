@@ -46,7 +46,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.StructureAccess;
 import net.minecraft.world.level.chunk.UpgradeData;
-import net.minecraft.world.level.gameevent.GameEventDispatcher;
+import net.minecraft.world.level.gameevent.GameEventListenerRegistry;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
@@ -111,8 +111,8 @@ StructureAccess {
         }
     }
 
-    public GameEventDispatcher getEventDispatcher(int i) {
-        return GameEventDispatcher.NOOP;
+    public GameEventListenerRegistry getListenerRegistry(int i) {
+        return GameEventListenerRegistry.NOOP;
     }
 
     @Nullable

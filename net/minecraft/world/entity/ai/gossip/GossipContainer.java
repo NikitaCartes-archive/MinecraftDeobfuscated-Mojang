@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.gossip.GossipType;
@@ -223,7 +224,7 @@ public class GossipContainer {
         }
 
         public static DataResult<GossipEntry> load(Dynamic<?> dynamic) {
-            return DataResult.unbox(DataResult.instance().group(dynamic.get(TAG_TARGET).read(UUIDUtil.CODEC), dynamic.get(TAG_TYPE).asString().map(GossipType::byId), dynamic.get(TAG_VALUE).asNumber().map(Number::intValue)).apply(DataResult.instance(), GossipEntry::new));
+            return DataResult.unbox(DataResult.instance().group(dynamic.get(TAG_TARGET).read(UUIDUtil.CODEC), dynamic.get(TAG_TYPE).asString().map(GossipType::byId), dynamic.get(TAG_VALUE).read(ExtraCodecs.POSITIVE_INT)).apply(DataResult.instance(), GossipEntry::new));
         }
     }
 }

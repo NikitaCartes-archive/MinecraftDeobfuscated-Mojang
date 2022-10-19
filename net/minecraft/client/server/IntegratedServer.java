@@ -54,7 +54,7 @@ extends MinecraftServer {
         super(thread, levelStorageAccess, packRepository, worldStem, minecraft.getProxy(), minecraft.getFixerUpper(), services, chunkProgressListenerFactory);
         this.setSingleplayerProfile(minecraft.getUser().getGameProfile());
         this.setDemo(minecraft.isDemo());
-        this.setPlayerList(new IntegratedPlayerList(this, this.registryAccess(), this.playerDataStorage));
+        this.setPlayerList(new IntegratedPlayerList(this, this.registries(), this.playerDataStorage));
         this.minecraft = minecraft;
     }
 

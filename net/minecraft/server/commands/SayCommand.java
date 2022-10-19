@@ -15,10 +15,11 @@ import net.minecraft.server.players.PlayerList;
 public class SayCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("say").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
-            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
-            CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
-            PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-            chatMessage.resolve(commandSourceStack, playerChatMessage -> playerList.broadcastChatMessage((PlayerChatMessage)playerChatMessage, commandSourceStack, ChatType.bind(ChatType.SAY_COMMAND, commandSourceStack)));
+            MessageArgument.resolveChatMessage(commandContext, "message", playerChatMessage -> {
+                CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
+                PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+                playerList.broadcastChatMessage((PlayerChatMessage)playerChatMessage, commandSourceStack, ChatType.bind(ChatType.SAY_COMMAND, commandSourceStack));
+            });
             return 1;
         })));
     }

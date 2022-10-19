@@ -94,10 +94,12 @@ extends ScatteredFeaturePiece {
         if (!this.spawnedWitch && boundingBox.isInside(blockPos2 = this.getWorldPos(2, 2, 5))) {
             this.spawnedWitch = true;
             Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel());
-            witch.setPersistenceRequired();
-            witch.moveTo((double)blockPos2.getX() + 0.5, blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0f, 0.0f);
-            witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
-            worldGenLevel.addFreshEntityWithPassengers(witch);
+            if (witch != null) {
+                witch.setPersistenceRequired();
+                witch.moveTo((double)blockPos2.getX() + 0.5, blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0f, 0.0f);
+                witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
+                worldGenLevel.addFreshEntityWithPassengers(witch);
+            }
         }
         this.spawnCat(worldGenLevel, boundingBox);
     }
@@ -107,10 +109,12 @@ extends ScatteredFeaturePiece {
         if (!this.spawnedCat && boundingBox.isInside(blockPos = this.getWorldPos(2, 2, 5))) {
             this.spawnedCat = true;
             Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel());
-            cat.setPersistenceRequired();
-            cat.moveTo((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0f, 0.0f);
-            cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
-            serverLevelAccessor.addFreshEntityWithPassengers(cat);
+            if (cat != null) {
+                cat.setPersistenceRequired();
+                cat.moveTo((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0f, 0.0f);
+                cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
+                serverLevelAccessor.addFreshEntityWithPassengers(cat);
+            }
         }
     }
 }

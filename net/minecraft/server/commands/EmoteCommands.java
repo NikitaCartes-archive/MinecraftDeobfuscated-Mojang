@@ -16,10 +16,11 @@ import net.minecraft.server.players.PlayerList;
 public class EmoteCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("me").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("action", MessageArgument.message()).executes(commandContext -> {
-            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "action");
-            CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
-            PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-            chatMessage.resolve(commandSourceStack, playerChatMessage -> playerList.broadcastChatMessage((PlayerChatMessage)playerChatMessage, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack)));
+            MessageArgument.resolveChatMessage(commandContext, "action", playerChatMessage -> {
+                CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
+                PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+                playerList.broadcastChatMessage((PlayerChatMessage)playerChatMessage, commandSourceStack, ChatType.bind(ChatType.EMOTE_COMMAND, commandSourceStack));
+            });
             return 1;
         })));
     }

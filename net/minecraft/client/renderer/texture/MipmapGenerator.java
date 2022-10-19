@@ -20,33 +20,40 @@ public class MipmapGenerator {
     private MipmapGenerator() {
     }
 
-    public static NativeImage[] generateMipLevels(NativeImage nativeImage, int i) {
-        NativeImage[] nativeImages = new NativeImage[i + 1];
-        nativeImages[0] = nativeImage;
-        if (i > 0) {
-            int j;
-            boolean bl = false;
-            block0: for (j = 0; j < nativeImage.getWidth(); ++j) {
-                for (int k = 0; k < nativeImage.getHeight(); ++k) {
-                    if (nativeImage.getPixelRGBA(j, k) >> 24 != 0) continue;
-                    bl = true;
-                    break block0;
+    public static NativeImage[] generateMipLevels(NativeImage[] nativeImages, int i) {
+        if (i + 1 <= nativeImages.length) {
+            return nativeImages;
+        }
+        NativeImage[] nativeImages2 = new NativeImage[i + 1];
+        nativeImages2[0] = nativeImages[0];
+        boolean bl = MipmapGenerator.hasTransparentPixel(nativeImages2[0]);
+        for (int j = 1; j <= i; ++j) {
+            if (j < nativeImages.length) {
+                nativeImages2[j] = nativeImages[j];
+                continue;
+            }
+            NativeImage nativeImage = nativeImages2[j - 1];
+            NativeImage nativeImage2 = new NativeImage(nativeImage.getWidth() >> 1, nativeImage.getHeight() >> 1, false);
+            int k = nativeImage2.getWidth();
+            int l = nativeImage2.getHeight();
+            for (int m = 0; m < k; ++m) {
+                for (int n = 0; n < l; ++n) {
+                    nativeImage2.setPixelRGBA(m, n, MipmapGenerator.alphaBlend(nativeImage.getPixelRGBA(m * 2 + 0, n * 2 + 0), nativeImage.getPixelRGBA(m * 2 + 1, n * 2 + 0), nativeImage.getPixelRGBA(m * 2 + 0, n * 2 + 1), nativeImage.getPixelRGBA(m * 2 + 1, n * 2 + 1), bl));
                 }
             }
-            for (j = 1; j <= i; ++j) {
-                NativeImage nativeImage2 = nativeImages[j - 1];
-                NativeImage nativeImage3 = new NativeImage(nativeImage2.getWidth() >> 1, nativeImage2.getHeight() >> 1, false);
-                int l = nativeImage3.getWidth();
-                int m = nativeImage3.getHeight();
-                for (int n = 0; n < l; ++n) {
-                    for (int o = 0; o < m; ++o) {
-                        nativeImage3.setPixelRGBA(n, o, MipmapGenerator.alphaBlend(nativeImage2.getPixelRGBA(n * 2 + 0, o * 2 + 0), nativeImage2.getPixelRGBA(n * 2 + 1, o * 2 + 0), nativeImage2.getPixelRGBA(n * 2 + 0, o * 2 + 1), nativeImage2.getPixelRGBA(n * 2 + 1, o * 2 + 1), bl));
-                    }
-                }
-                nativeImages[j] = nativeImage3;
+            nativeImages2[j] = nativeImage2;
+        }
+        return nativeImages2;
+    }
+
+    private static boolean hasTransparentPixel(NativeImage nativeImage) {
+        for (int i = 0; i < nativeImage.getWidth(); ++i) {
+            for (int j = 0; j < nativeImage.getHeight(); ++j) {
+                if (nativeImage.getPixelRGBA(i, j) >> 24 != 0) continue;
+                return true;
             }
         }
-        return nativeImages;
+        return false;
     }
 
     private static int alphaBlend(int i, int j, int k, int l, boolean bl) {

@@ -8,7 +8,6 @@ import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.chat.ChatLog;
-import net.minecraft.client.multiplayer.chat.RollingMemoryChatLog;
 import net.minecraft.client.multiplayer.chat.report.AbuseReportSender;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 
@@ -17,9 +16,9 @@ public record ReportingContext(AbuseReportSender sender, ReportEnvironment envir
     private static final int LOG_CAPACITY = 1024;
 
     public static ReportingContext create(ReportEnvironment reportEnvironment, UserApiService userApiService) {
-        RollingMemoryChatLog rollingMemoryChatLog = new RollingMemoryChatLog(1024);
+        ChatLog chatLog = new ChatLog(1024);
         AbuseReportSender abuseReportSender = AbuseReportSender.create(reportEnvironment, userApiService);
-        return new ReportingContext(abuseReportSender, reportEnvironment, rollingMemoryChatLog);
+        return new ReportingContext(abuseReportSender, reportEnvironment, chatLog);
     }
 
     public boolean matches(ReportEnvironment reportEnvironment) {

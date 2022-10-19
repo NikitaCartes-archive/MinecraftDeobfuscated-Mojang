@@ -150,55 +150,25 @@ implements Shearable {
         if (this.isSheared()) {
             return this.getType().getDefaultLootTable();
         }
-        switch (this.getColor()) {
-            default: {
-                return BuiltInLootTables.SHEEP_WHITE;
-            }
-            case ORANGE: {
-                return BuiltInLootTables.SHEEP_ORANGE;
-            }
-            case MAGENTA: {
-                return BuiltInLootTables.SHEEP_MAGENTA;
-            }
-            case LIGHT_BLUE: {
-                return BuiltInLootTables.SHEEP_LIGHT_BLUE;
-            }
-            case YELLOW: {
-                return BuiltInLootTables.SHEEP_YELLOW;
-            }
-            case LIME: {
-                return BuiltInLootTables.SHEEP_LIME;
-            }
-            case PINK: {
-                return BuiltInLootTables.SHEEP_PINK;
-            }
-            case GRAY: {
-                return BuiltInLootTables.SHEEP_GRAY;
-            }
-            case LIGHT_GRAY: {
-                return BuiltInLootTables.SHEEP_LIGHT_GRAY;
-            }
-            case CYAN: {
-                return BuiltInLootTables.SHEEP_CYAN;
-            }
-            case PURPLE: {
-                return BuiltInLootTables.SHEEP_PURPLE;
-            }
-            case BLUE: {
-                return BuiltInLootTables.SHEEP_BLUE;
-            }
-            case BROWN: {
-                return BuiltInLootTables.SHEEP_BROWN;
-            }
-            case GREEN: {
-                return BuiltInLootTables.SHEEP_GREEN;
-            }
-            case RED: {
-                return BuiltInLootTables.SHEEP_RED;
-            }
-            case BLACK: 
-        }
-        return BuiltInLootTables.SHEEP_BLACK;
+        return switch (this.getColor()) {
+            default -> throw new IncompatibleClassChangeError();
+            case DyeColor.WHITE -> BuiltInLootTables.SHEEP_WHITE;
+            case DyeColor.ORANGE -> BuiltInLootTables.SHEEP_ORANGE;
+            case DyeColor.MAGENTA -> BuiltInLootTables.SHEEP_MAGENTA;
+            case DyeColor.LIGHT_BLUE -> BuiltInLootTables.SHEEP_LIGHT_BLUE;
+            case DyeColor.YELLOW -> BuiltInLootTables.SHEEP_YELLOW;
+            case DyeColor.LIME -> BuiltInLootTables.SHEEP_LIME;
+            case DyeColor.PINK -> BuiltInLootTables.SHEEP_PINK;
+            case DyeColor.GRAY -> BuiltInLootTables.SHEEP_GRAY;
+            case DyeColor.LIGHT_GRAY -> BuiltInLootTables.SHEEP_LIGHT_GRAY;
+            case DyeColor.CYAN -> BuiltInLootTables.SHEEP_CYAN;
+            case DyeColor.PURPLE -> BuiltInLootTables.SHEEP_PURPLE;
+            case DyeColor.BLUE -> BuiltInLootTables.SHEEP_BLUE;
+            case DyeColor.BROWN -> BuiltInLootTables.SHEEP_BROWN;
+            case DyeColor.GREEN -> BuiltInLootTables.SHEEP_GREEN;
+            case DyeColor.RED -> BuiltInLootTables.SHEEP_RED;
+            case DyeColor.BLACK -> BuiltInLootTables.SHEEP_BLACK;
+        };
     }
 
     @Override
@@ -343,11 +313,13 @@ implements Shearable {
     }
 
     @Override
+    @Nullable
     public Sheep getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        Sheep sheep = (Sheep)ageableMob;
-        Sheep sheep2 = EntityType.SHEEP.create(serverLevel);
-        sheep2.setColor(this.getOffspringColor(this, sheep));
-        return sheep2;
+        Sheep sheep = EntityType.SHEEP.create(serverLevel);
+        if (sheep != null) {
+            sheep.setColor(this.getOffspringColor(this, (Sheep)ageableMob));
+        }
+        return sheep;
     }
 
     @Override
@@ -397,6 +369,7 @@ implements Shearable {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

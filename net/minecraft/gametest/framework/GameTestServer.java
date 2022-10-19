@@ -6,10 +6,10 @@ package net.minecraft.gametest.framework;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -19,8 +19,8 @@ import net.minecraft.SystemReport;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.gametest.framework.GameTestBatch;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.GameTestRunner;
@@ -38,12 +38,16 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -61,7 +65,7 @@ extends MinecraftServer {
         gameRules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
         gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
     });
-    private static final LevelSettings TEST_SETTINGS = new LevelSettings("Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, TEST_GAME_RULES, DataPackConfig.DEFAULT);
+    private static final WorldOptions WORLD_OPTIONS = new WorldOptions(0L, false, false);
     @Nullable
     private MultipleTestTracker testTracker;
 
@@ -69,17 +73,19 @@ extends MinecraftServer {
         if (collection.isEmpty()) {
             throw new IllegalArgumentException("No test batches were given!");
         }
-        WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, DataPackConfig.DEFAULT, false);
+        packRepository.reload();
+        WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(new DataPackConfig(new ArrayList<String>(packRepository.getAvailableIds()), List.of()), FeatureFlags.REGISTRY.allFlags());
+        LevelSettings levelSettings = new LevelSettings("Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, TEST_GAME_RULES, worldDataConfiguration);
+        WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, true);
         WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.DEDICATED, 4);
         try {
             LOGGER.debug("Starting resource loading");
             Stopwatch stopwatch = Stopwatch.createStarted();
-            WorldStem worldStem = (WorldStem)Util.blockUntilDone(executor -> WorldStem.load(initConfig, (resourceManager, dataPackConfig) -> {
-                RegistryAccess.Frozen frozen = RegistryAccess.BUILTIN.get();
-                WorldGenSettings worldGenSettings = frozen.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldGenSettings(0L, false, false);
-                PrimaryLevelData worldData = new PrimaryLevelData(TEST_SETTINGS, worldGenSettings, Lifecycle.stable());
-                return Pair.of(worldData, frozen);
-            }, Util.backgroundExecutor(), executor)).get();
+            WorldStem worldStem = (WorldStem)Util.blockUntilDone(executor -> WorldLoader.load(initConfig, dataLoadContext -> {
+                Registry<LevelStem> registry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()).freeze();
+                WorldDimensions.Complete complete = dataLoadContext.datapackWorldgen().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions().bake(registry);
+                return new WorldLoader.DataLoadOutput<PrimaryLevelData>(new PrimaryLevelData(levelSettings, WORLD_OPTIONS, complete.specialWorldProperty(), complete.lifecycle()), complete.dimensionsRegistryAccess());
+            }, WorldStem::new, Util.backgroundExecutor(), executor)).get();
             stopwatch.stop();
             LOGGER.debug("Finished resource loading after {} ms", (Object)stopwatch.elapsed(TimeUnit.MILLISECONDS));
             return new GameTestServer(thread, levelStorageAccess, packRepository, worldStem, collection, blockPos);
@@ -98,7 +104,7 @@ extends MinecraftServer {
 
     @Override
     public boolean initServer() {
-        this.setPlayerList(new PlayerList(this, this.registryAccess(), this.playerDataStorage, 1){});
+        this.setPlayerList(new PlayerList(this, this.registries(), this.playerDataStorage, 1){});
         this.loadLevel();
         ServerLevel serverLevel = this.overworld();
         serverLevel.setDefaultSpawnPos(this.spawnPos, 0.0f);

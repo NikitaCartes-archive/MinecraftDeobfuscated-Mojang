@@ -15,8 +15,8 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -60,31 +60,22 @@ extends SkullBlock {
         if (!bl || blockPos.getY() < level.getMinBuildHeight() || level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }
-        BlockPattern blockPattern = WitherSkullBlock.getOrCreateWitherFull();
-        BlockPattern.BlockPatternMatch blockPatternMatch = blockPattern.find(level, blockPos);
+        BlockPattern.BlockPatternMatch blockPatternMatch = WitherSkullBlock.getOrCreateWitherFull().find(level, blockPos);
         if (blockPatternMatch == null) {
             return;
         }
-        for (int i = 0; i < blockPattern.getWidth(); ++i) {
-            for (int j = 0; j < blockPattern.getHeight(); ++j) {
-                BlockInWorld blockInWorld = blockPatternMatch.getBlock(i, j, 0);
-                level.setBlock(blockInWorld.getPos(), Blocks.AIR.defaultBlockState(), 2);
-                level.levelEvent(2001, blockInWorld.getPos(), Block.getId(blockInWorld.getState()));
-            }
-        }
         WitherBoss witherBoss = EntityType.WITHER.create(level);
-        BlockPos blockPos2 = blockPatternMatch.getBlock(1, 2, 0).getPos();
-        witherBoss.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.55, (double)blockPos2.getZ() + 0.5, blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? 0.0f : 90.0f, 0.0f);
-        witherBoss.yBodyRot = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? 0.0f : 90.0f;
-        witherBoss.makeInvulnerable();
-        for (ServerPlayer serverPlayer : level.getEntitiesOfClass(ServerPlayer.class, witherBoss.getBoundingBox().inflate(50.0))) {
-            CriteriaTriggers.SUMMONED_ENTITY.trigger(serverPlayer, witherBoss);
-        }
-        level.addFreshEntity(witherBoss);
-        for (int k = 0; k < blockPattern.getWidth(); ++k) {
-            for (int l = 0; l < blockPattern.getHeight(); ++l) {
-                level.blockUpdated(blockPatternMatch.getBlock(k, l, 0).getPos(), Blocks.AIR);
+        if (witherBoss != null) {
+            CarvedPumpkinBlock.clearPatternBlocks(level, blockPatternMatch);
+            BlockPos blockPos2 = blockPatternMatch.getBlock(1, 2, 0).getPos();
+            witherBoss.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.55, (double)blockPos2.getZ() + 0.5, blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? 0.0f : 90.0f, 0.0f);
+            witherBoss.yBodyRot = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? 0.0f : 90.0f;
+            witherBoss.makeInvulnerable();
+            for (ServerPlayer serverPlayer : level.getEntitiesOfClass(ServerPlayer.class, witherBoss.getBoundingBox().inflate(50.0))) {
+                CriteriaTriggers.SUMMONED_ENTITY.trigger(serverPlayer, witherBoss);
             }
+            level.addFreshEntity(witherBoss);
+            CarvedPumpkinBlock.updatePatternBlocks(level, blockPatternMatch);
         }
     }
 

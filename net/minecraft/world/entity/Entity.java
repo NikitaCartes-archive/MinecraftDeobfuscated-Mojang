@@ -43,11 +43,11 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -854,8 +854,8 @@ CommandSource {
 
     protected void checkInsideBlocks() {
         AABB aABB = this.getBoundingBox();
-        BlockPos blockPos = new BlockPos(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
-        BlockPos blockPos2 = new BlockPos(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
+        BlockPos blockPos = new BlockPos(aABB.minX + 1.0E-7, aABB.minY + 1.0E-7, aABB.minZ + 1.0E-7);
+        BlockPos blockPos2 = new BlockPos(aABB.maxX - 1.0E-7, aABB.maxY - 1.0E-7, aABB.maxZ - 1.0E-7);
         if (this.level.hasChunksAt(blockPos, blockPos2)) {
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
             for (int i = blockPos.getX(); i <= blockPos2.getX(); ++i) {
@@ -1009,10 +1009,6 @@ CommandSource {
 
     public boolean isUnderWater() {
         return this.wasEyeInWater && this.isInWater();
-    }
-
-    public ChatSender asChatSender() {
-        return ChatSender.SYSTEM;
     }
 
     public void updateSwimming() {
@@ -1705,6 +1701,10 @@ CommandSource {
         }
     }
 
+    public boolean allowsDismounting(Entity entity) {
+        return true;
+    }
+
     public void stopRiding() {
         this.removeVehicle();
     }
@@ -2042,6 +2042,12 @@ CommandSource {
         return true;
     }
 
+    public void checkSlowFallDistance() {
+        if (this.deltaMovement.y() > -0.5 && this.fallDistance > 1.0f) {
+            this.fallDistance = 1.0f;
+        }
+    }
+
     public void resetFallDistance() {
         this.fallDistance = 0.0f;
     }
@@ -2351,6 +2357,10 @@ CommandSource {
         });
     }
 
+    public void teleportRelative(double d, double e, double f) {
+        this.teleportTo(this.getX() + d, this.getY() + e, this.getZ() + f);
+    }
+
     public boolean shouldShowName() {
         return this.isCustomNameVisible();
     }
@@ -2428,7 +2438,11 @@ CommandSource {
         return this.eyeHeight;
     }
 
-    public Vec3 getLeashOffset() {
+    public Vec3 getLeashOffset(float f) {
+        return this.getLeashOffset();
+    }
+
+    protected Vec3 getLeashOffset() {
         return new Vec3(0.0, this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
 
@@ -2726,7 +2740,9 @@ CommandSource {
         return this.dimensions.height;
     }
 
-    public abstract Packet<?> getAddEntityPacket();
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this);
+    }
 
     public EntityDimensions getDimensions(Pose pose) {
         return this.type.getDimensions();
@@ -2762,6 +2778,10 @@ CommandSource {
 
     public void setDeltaMovement(Vec3 vec3) {
         this.deltaMovement = vec3;
+    }
+
+    public void addDeltaMovement(Vec3 vec3) {
+        this.deltaMovement = this.deltaMovement.add(vec3);
     }
 
     public void setDeltaMovement(double d, double e, double f) {

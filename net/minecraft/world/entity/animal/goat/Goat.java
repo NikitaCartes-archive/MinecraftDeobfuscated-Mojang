@@ -152,12 +152,15 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public Goat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Goat goat = EntityType.GOAT.create(serverLevel);
         if (goat != null) {
+            AgeableMob goat2;
             GoatAi.initMemories(goat, serverLevel.getRandom());
-            boolean bl = ageableMob instanceof Goat && ((Goat)ageableMob).isScreamingGoat();
-            goat.setScreamingGoat(bl || serverLevel.getRandom().nextDouble() < 0.02);
+            AgeableMob ageableMob2 = serverLevel.getRandom().nextBoolean() ? this : ageableMob;
+            boolean bl = ageableMob2 instanceof Goat && ((Goat)(goat2 = ageableMob2)).isScreamingGoat() || serverLevel.getRandom().nextDouble() < 0.02;
+            goat.setScreamingGoat(bl);
         }
         return goat;
     }
@@ -330,6 +333,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

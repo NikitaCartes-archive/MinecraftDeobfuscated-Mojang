@@ -22,6 +22,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -45,7 +46,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class BeaconBlockEntity
 extends BlockEntity
-implements MenuProvider {
+implements MenuProvider,
+Nameable {
     private static final int MAX_LEVELS = 4;
     public static final MobEffect[][] BEACON_EFFECTS = new MobEffect[][]{{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}};
     private static final Set<MobEffect> VALID_EFFECTS = Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
@@ -54,6 +56,7 @@ implements MenuProvider {
     public static final int DATA_SECONDARY = 2;
     public static final int NUM_DATA_VALUES = 3;
     private static final int BLOCKS_CHECK_PER_TICK = 10;
+    private static final Component DEFAULT_NAME = Component.translatable("container.beacon");
     List<BeaconBeamSection> beamSections = Lists.newArrayList();
     private List<BeaconBeamSection> checkingBeamSections = Lists.newArrayList();
     int levels;
@@ -285,6 +288,12 @@ implements MenuProvider {
 
     @Override
     @Nullable
+    public Component getCustomName() {
+        return this.name;
+    }
+
+    @Override
+    @Nullable
     public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
         if (BaseContainerBlockEntity.canUnlock(player, this.lockKey, this.getDisplayName())) {
             return new BeaconMenu(i, inventory, this.dataAccess, ContainerLevelAccess.create(this.level, this.getBlockPos()));
@@ -294,7 +303,15 @@ implements MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return this.name != null ? this.name : Component.translatable("container.beacon");
+        return this.getName();
+    }
+
+    @Override
+    public Component getName() {
+        if (this.name != null) {
+            return this.name;
+        }
+        return DEFAULT_NAME;
     }
 
     @Override

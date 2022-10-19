@@ -11,7 +11,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
@@ -26,7 +25,7 @@ import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
@@ -48,35 +47,25 @@ public class WorldPresets {
         return ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, new ResourceLocation(string));
     }
 
-    public static Optional<ResourceKey<WorldPreset>> fromSettings(WorldGenSettings worldGenSettings) {
-        ChunkGenerator chunkGenerator = worldGenSettings.overworld();
-        if (chunkGenerator instanceof FlatLevelSource) {
-            return Optional.of(FLAT);
-        }
-        if (chunkGenerator instanceof DebugLevelSource) {
-            return Optional.of(DEBUG);
-        }
-        return Optional.empty();
+    public static Optional<ResourceKey<WorldPreset>> fromSettings(Registry<LevelStem> registry) {
+        return registry.getOptional(LevelStem.OVERWORLD).flatMap(levelStem -> {
+            ChunkGenerator chunkGenerator = levelStem.generator();
+            if (chunkGenerator instanceof FlatLevelSource) {
+                return Optional.of(FLAT);
+            }
+            if (chunkGenerator instanceof DebugLevelSource) {
+                return Optional.of(DEBUG);
+            }
+            return Optional.empty();
+        });
     }
 
-    public static WorldGenSettings createNormalWorldFromPreset(RegistryAccess registryAccess, long l, boolean bl, boolean bl2) {
-        return registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(NORMAL).value().createWorldGenSettings(l, bl, bl2);
-    }
-
-    public static WorldGenSettings createNormalWorldFromPreset(RegistryAccess registryAccess, long l) {
-        return WorldPresets.createNormalWorldFromPreset(registryAccess, l, true, false);
-    }
-
-    public static WorldGenSettings createNormalWorldFromPreset(RegistryAccess registryAccess) {
-        return WorldPresets.createNormalWorldFromPreset(registryAccess, RandomSource.create().nextLong());
-    }
-
-    public static WorldGenSettings demoSettings(RegistryAccess registryAccess) {
-        return WorldPresets.createNormalWorldFromPreset(registryAccess, "North Carolina".hashCode(), true, true);
+    public static WorldDimensions createNormalWorldDimensions(RegistryAccess registryAccess) {
+        return registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(NORMAL).value().createWorldDimensions();
     }
 
     public static LevelStem getNormalOverworld(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(NORMAL).value().overworldOrThrow();
+        return registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(NORMAL).value().overworld().orElseThrow();
     }
 
     static class Bootstrap {
@@ -116,11 +105,11 @@ public class WorldPresets {
 
         public Holder<WorldPreset> run() {
             MultiNoiseBiomeSource multiNoiseBiomeSource = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.biomes);
-            Holder<NoiseGeneratorSettings> holder = this.noiseSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
+            Holder.Reference<NoiseGeneratorSettings> holder = this.noiseSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
             this.registerCustomOverworldPreset(NORMAL, this.makeNoiseBasedOverworld(multiNoiseBiomeSource, holder));
-            Holder<NoiseGeneratorSettings> holder2 = this.noiseSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.LARGE_BIOMES);
+            Holder.Reference<NoiseGeneratorSettings> holder2 = this.noiseSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.LARGE_BIOMES);
             this.registerCustomOverworldPreset(LARGE_BIOMES, this.makeNoiseBasedOverworld(multiNoiseBiomeSource, holder2));
-            Holder<NoiseGeneratorSettings> holder3 = this.noiseSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.AMPLIFIED);
+            Holder.Reference<NoiseGeneratorSettings> holder3 = this.noiseSettings.getOrCreateHolderOrThrow(NoiseGeneratorSettings.AMPLIFIED);
             this.registerCustomOverworldPreset(AMPLIFIED, this.makeNoiseBasedOverworld(multiNoiseBiomeSource, holder3));
             this.registerCustomOverworldPreset(SINGLE_BIOME_SURFACE, this.makeNoiseBasedOverworld(new FixedBiomeSource(this.biomes.getOrCreateHolderOrThrow(Biomes.PLAINS)), holder));
             this.registerCustomOverworldPreset(FLAT, this.makeOverworld(new FlatLevelSource(this.structureSets, FlatLevelGeneratorSettings.getDefault(this.biomes, this.structureSets))));

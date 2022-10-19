@@ -29,11 +29,11 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Markings;
+import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
@@ -151,13 +151,11 @@ extends AbstractHorse {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        super.getAmbientSound();
         return SoundEvents.HORSE_AMBIENT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        super.getDeathSound();
         return SoundEvents.HORSE_DEATH;
     }
 
@@ -169,52 +167,32 @@ extends AbstractHorse {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
-        super.getHurtSound(damageSource);
         return SoundEvents.HORSE_HURT;
     }
 
     @Override
     protected SoundEvent getAngrySound() {
-        super.getAngrySound();
         return SoundEvents.HORSE_ANGRY;
     }
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (!this.isBaby()) {
-            if (this.isTamed() && player.isSecondaryUseActive()) {
-                this.openCustomInventoryScreen(player);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
-            }
-            if (this.isVehicle()) {
-                return super.mobInteract(player, interactionHand);
-            }
+        boolean bl;
+        boolean bl2 = bl = !this.isBaby() && this.isTamed() && player.isSecondaryUseActive();
+        if (this.isVehicle() || bl) {
+            return super.mobInteract(player, interactionHand);
         }
+        ItemStack itemStack = player.getItemInHand(interactionHand);
         if (!itemStack.isEmpty()) {
-            boolean bl;
             if (this.isFood(itemStack)) {
                 return this.fedFood(player, itemStack);
-            }
-            InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
-            if (interactionResult.consumesAction()) {
-                return interactionResult;
             }
             if (!this.isTamed()) {
                 this.makeMad();
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
-            boolean bl2 = bl = !this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE);
-            if (this.isArmor(itemStack) || bl) {
-                this.openCustomInventoryScreen(player);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
-            }
         }
-        if (this.isBaby()) {
-            return super.mobInteract(player, interactionHand);
-        }
-        this.doPlayerRide(player);
-        return InteractionResult.sidedSuccess(this.level.isClientSide);
+        return super.mobInteract(player, interactionHand);
     }
 
     @Override
@@ -229,21 +207,26 @@ extends AbstractHorse {
     }
 
     @Override
+    @Nullable
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        AbstractHorse abstractHorse;
         if (ageableMob instanceof Donkey) {
-            abstractHorse = EntityType.MULE.create(serverLevel);
-        } else {
-            Horse horse = (Horse)ageableMob;
-            abstractHorse = EntityType.HORSE.create(serverLevel);
+            Mule mule = EntityType.MULE.create(serverLevel);
+            if (mule != null) {
+                this.setOffspringAttributes(ageableMob, mule);
+            }
+            return mule;
+        }
+        Horse horse = (Horse)ageableMob;
+        Horse horse2 = EntityType.HORSE.create(serverLevel);
+        if (horse2 != null) {
             int i = this.random.nextInt(9);
             Variant variant = i < 4 ? this.getVariant() : (i < 8 ? horse.getVariant() : Util.getRandom(Variant.values(), this.random));
             int j = this.random.nextInt(5);
             Markings markings = j < 2 ? this.getMarkings() : (j < 4 ? horse.getMarkings() : Util.getRandom(Markings.values(), this.random));
-            ((Horse)abstractHorse).setVariantAndMarkings(variant, markings);
+            horse2.setVariantAndMarkings(variant, markings);
+            this.setOffspringAttributes(ageableMob, horse2);
         }
-        this.setOffspringAttributes(ageableMob, abstractHorse);
-        return abstractHorse;
+        return horse2;
     }
 
     @Override

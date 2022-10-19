@@ -20,8 +20,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.SkeletonTrapGoal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +49,6 @@ extends AbstractHorse {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        super.getAmbientSound();
         if (this.isEyeInFluid(FluidTags.WATER)) {
             return SoundEvents.SKELETON_HORSE_AMBIENT_WATER;
         }
@@ -60,13 +57,11 @@ extends AbstractHorse {
 
     @Override
     protected SoundEvent getDeathSound() {
-        super.getDeathSound();
         return SoundEvents.SKELETON_HORSE_DEATH;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
-        super.getHurtSound(damageSource);
         return SoundEvents.SKELETON_HORSE_HURT;
     }
 
@@ -172,32 +167,10 @@ extends AbstractHorse {
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = player.getItemInHand(interactionHand);
         if (!this.isTamed()) {
             return InteractionResult.PASS;
         }
-        if (this.isBaby()) {
-            return super.mobInteract(player, interactionHand);
-        }
-        if (player.isSecondaryUseActive()) {
-            this.openCustomInventoryScreen(player);
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
-        }
-        if (this.isVehicle()) {
-            return super.mobInteract(player, interactionHand);
-        }
-        if (!itemStack.isEmpty()) {
-            if (itemStack.is(Items.SADDLE) && !this.isSaddled()) {
-                this.openCustomInventoryScreen(player);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
-            }
-            InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
-            if (interactionResult.consumesAction()) {
-                return interactionResult;
-            }
-        }
-        this.doPlayerRide(player);
-        return InteractionResult.sidedSuccess(this.level.isClientSide);
+        return super.mobInteract(player, interactionHand);
     }
 }
 

@@ -80,7 +80,7 @@ implements GlyphProviderBuilder {
         block10: {
             Struct sTBTTFontinfo = null;
             ByteBuffer byteBuffer = null;
-            InputStream inputStream = resourceManager.open(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
+            InputStream inputStream = resourceManager.open(this.location.withPrefix("font/"));
             try {
                 LOGGER.debug("Loading font {}", (Object)this.location);
                 sTBTTFontinfo = STBTTFontinfo.malloc();

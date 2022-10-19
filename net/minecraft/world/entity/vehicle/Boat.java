@@ -11,8 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundPaddleBoatPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -153,7 +151,7 @@ extends Entity {
 
     @Override
     public double getPassengersRidingOffset() {
-        return -0.1;
+        return this.getBoatType() == Type.BAMBOO ? 0.3 : -0.1;
     }
 
     @Override
@@ -212,28 +210,16 @@ extends Entity {
     }
 
     public Item getDropItem() {
-        switch (this.getBoatType()) {
-            default: {
-                return Items.OAK_BOAT;
-            }
-            case SPRUCE: {
-                return Items.SPRUCE_BOAT;
-            }
-            case BIRCH: {
-                return Items.BIRCH_BOAT;
-            }
-            case JUNGLE: {
-                return Items.JUNGLE_BOAT;
-            }
-            case ACACIA: {
-                return Items.ACACIA_BOAT;
-            }
-            case DARK_OAK: {
-                return Items.DARK_OAK_BOAT;
-            }
-            case MANGROVE: 
-        }
-        return Items.MANGROVE_BOAT;
+        return switch (this.getBoatType()) {
+            case Type.SPRUCE -> Items.SPRUCE_BOAT;
+            case Type.BIRCH -> Items.BIRCH_BOAT;
+            case Type.JUNGLE -> Items.JUNGLE_BOAT;
+            case Type.ACACIA -> Items.ACACIA_BOAT;
+            case Type.DARK_OAK -> Items.DARK_OAK_BOAT;
+            case Type.MANGROVE -> Items.MANGROVE_BOAT;
+            case Type.BAMBOO -> Items.BAMBOO_RAFT;
+            default -> Items.OAK_BOAT;
+        };
     }
 
     @Override
@@ -794,11 +780,6 @@ extends Entity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
-    }
-
-    @Override
     public boolean isUnderWater() {
         return this.status == Status.UNDER_WATER || this.status == Status.UNDER_FLOWING_WATER;
     }
@@ -815,7 +796,8 @@ extends Entity {
         JUNGLE(Blocks.JUNGLE_PLANKS, "jungle"),
         ACACIA(Blocks.ACACIA_PLANKS, "acacia"),
         DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak"),
-        MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove");
+        MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove"),
+        BAMBOO(Blocks.BAMBOO_PLANKS, "bamboo");
 
         private final String name;
         private final Block planks;

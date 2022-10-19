@@ -14,31 +14,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
+import net.minecraft.world.flag.FeatureFlagSet;
 import org.jetbrains.annotations.Nullable;
 
 public class PackRepository {
     private final Set<RepositorySource> sources;
     private Map<String, Pack> available = ImmutableMap.of();
     private List<Pack> selected = ImmutableList.of();
-    private final Pack.PackConstructor constructor;
 
-    public PackRepository(Pack.PackConstructor packConstructor, RepositorySource ... repositorySources) {
-        this.constructor = packConstructor;
+    public PackRepository(RepositorySource ... repositorySources) {
         this.sources = ImmutableSet.copyOf(repositorySources);
-    }
-
-    public PackRepository(PackType packType, RepositorySource ... repositorySources) {
-        this((String string, Component component, boolean bl, Supplier<PackResources> supplier, PackMetadataSection packMetadataSection, Pack.Position position, PackSource packSource) -> new Pack(string, component, bl, supplier, packMetadataSection, packType, position, packSource), repositorySources);
     }
 
     public void reload() {
@@ -50,7 +40,7 @@ public class PackRepository {
     private Map<String, Pack> discoverAvailable() {
         TreeMap map = Maps.newTreeMap();
         for (RepositorySource repositorySource : this.sources) {
-            repositorySource.loadPacks(pack -> map.put(pack.getId(), pack), this.constructor);
+            repositorySource.loadPacks(pack -> map.put(pack.getId(), pack));
         }
         return ImmutableMap.copyOf(map);
     }
@@ -82,6 +72,10 @@ public class PackRepository {
 
     public Collection<String> getSelectedIds() {
         return this.selected.stream().map(Pack::getId).collect(ImmutableSet.toImmutableSet());
+    }
+
+    public FeatureFlagSet getRequestedFeatureFlags() {
+        return this.getSelectedPacks().stream().map(Pack::getRequestedFeatures).reduce(FeatureFlagSet::join).orElse(FeatureFlagSet.of());
     }
 
     public Collection<Pack> getSelectedPacks() {

@@ -3,14 +3,12 @@
  */
 package net.minecraft.client;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -138,12 +136,6 @@ public class StringSplitter {
                 return Optional.empty();
             }
         }, style).orElse(formattedText);
-    }
-
-    public List<Span> findSpans(FormattedCharSequence formattedCharSequence, Predicate<Style> predicate) {
-        SpanBuilder spanBuilder = new SpanBuilder(predicate);
-        formattedCharSequence.accept(spanBuilder);
-        return spanBuilder.build();
     }
 
     public int findLineBreak(String string, int i, Style style) {
@@ -292,52 +284,6 @@ public class StringSplitter {
 
         public void resetPosition() {
             this.position = 0;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    class SpanBuilder
-    implements FormattedCharSink {
-        private final Predicate<Style> predicate;
-        private float cursor;
-        private final ImmutableList.Builder<Span> spans = ImmutableList.builder();
-        private float spanStart;
-        private boolean buildingSpan;
-
-        SpanBuilder(Predicate<Style> predicate) {
-            this.predicate = predicate;
-        }
-
-        @Override
-        public boolean accept(int i, Style style, int j) {
-            boolean bl = this.predicate.test(style);
-            if (this.buildingSpan != bl) {
-                if (bl) {
-                    this.startSpan();
-                } else {
-                    this.endSpan();
-                }
-            }
-            this.cursor += StringSplitter.this.widthProvider.getWidth(j, style);
-            return true;
-        }
-
-        private void startSpan() {
-            this.buildingSpan = true;
-            this.spanStart = this.cursor;
-        }
-
-        private void endSpan() {
-            float f = this.cursor;
-            this.spans.add((Object)new Span(this.spanStart, f));
-            this.buildingSpan = false;
-        }
-
-        public List<Span> build() {
-            if (this.buildingSpan) {
-                this.endSpan();
-            }
-            return this.spans.build();
         }
     }
 
@@ -497,10 +443,6 @@ public class StringSplitter {
         public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
             return styledContentConsumer.accept(this.style.applyTo(style), this.contents);
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public record Span(float left, float right) {
     }
 }
 

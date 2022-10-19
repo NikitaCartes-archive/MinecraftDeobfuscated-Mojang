@@ -189,6 +189,8 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.MAGMA_CREAM, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MANGROVE_BOAT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MANGROVE_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.BAMBOO_RAFT, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.BAMBOO_CHEST_RAFT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MAP, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MELON_SLICE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MILK_BUCKET, ModelTemplates.FLAT_ITEM);

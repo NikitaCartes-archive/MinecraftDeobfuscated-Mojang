@@ -33,7 +33,7 @@ SpectatorMenuItem {
     private final List<SpectatorMenuItem> items = Lists.newArrayList();
 
     public TeleportToPlayerMenuCategory() {
-        this(PROFILE_ORDER.sortedCopy(Minecraft.getInstance().getConnection().getOnlinePlayers()));
+        this(PROFILE_ORDER.sortedCopy(Minecraft.getInstance().getConnection().getListedOnlinePlayers()));
     }
 
     public TeleportToPlayerMenuCategory(Collection<PlayerInfo> collection) {

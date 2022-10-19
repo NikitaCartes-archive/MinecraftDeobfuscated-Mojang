@@ -47,7 +47,8 @@ import org.slf4j.Logger;
 public class ShaderInstance
 implements Shader,
 AutoCloseable {
-    private static final String SHADER_PATH = "shaders/core/";
+    public static final String SHADER_PATH = "shaders";
+    private static final String SHADER_CORE_PATH = "shaders/core/";
     private static final String SHADER_INCLUDE_PATH = "shaders/include/";
     static final Logger LOGGER = LogUtils.getLogger();
     private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
@@ -103,7 +104,7 @@ AutoCloseable {
     public ShaderInstance(ResourceProvider resourceProvider, String string, VertexFormat vertexFormat) throws IOException {
         this.name = string;
         this.vertexFormat = vertexFormat;
-        ResourceLocation resourceLocation = new ResourceLocation(SHADER_PATH + string + ".json");
+        ResourceLocation resourceLocation = new ResourceLocation(SHADER_CORE_PATH + string + ".json");
         try (BufferedReader reader = resourceProvider.openAsReader(resourceLocation);){
             JsonArray jsonArray3;
             JsonArray jsonArray2;
@@ -196,7 +197,7 @@ AutoCloseable {
         Program program2;
         Program program = type.getPrograms().get(string);
         if (program == null) {
-            String string2 = SHADER_PATH + string + type.getExtension();
+            String string2 = SHADER_CORE_PATH + string + type.getExtension();
             Resource resource = resourceProvider.getResourceOrThrow(new ResourceLocation(string2));
             try (InputStream inputStream = resource.open();){
                 final String string3 = FileUtil.getFullResourcePath(string2);

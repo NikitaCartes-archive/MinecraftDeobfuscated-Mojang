@@ -20,15 +20,15 @@ import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.sounds.AudioStream;
 import net.minecraft.client.sounds.LoopingAudioStream;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 
 @Environment(value=EnvType.CLIENT)
 public class SoundBufferLibrary {
-    private final ResourceManager resourceManager;
+    private final ResourceProvider resourceManager;
     private final Map<ResourceLocation, CompletableFuture<SoundBuffer>> cache = Maps.newHashMap();
 
-    public SoundBufferLibrary(ResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
+    public SoundBufferLibrary(ResourceProvider resourceProvider) {
+        this.resourceManager = resourceProvider;
     }
 
     public CompletableFuture<SoundBuffer> getCompleteBuffer(ResourceLocation resourceLocation2) {

@@ -5,7 +5,6 @@ package net.minecraft.core;
 
 import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
-import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -20,8 +19,8 @@ extends MappedRegistry<T> {
     private final ResourceLocation defaultKey;
     private Holder<T> defaultValue;
 
-    public DefaultedRegistry(String string, ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, @Nullable Function<T, Holder.Reference<T>> function) {
-        super(resourceKey, lifecycle, function);
+    public DefaultedRegistry(String string, ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, boolean bl) {
+        super(resourceKey, lifecycle, bl);
         this.defaultKey = new ResourceLocation(string);
     }
 

@@ -4,25 +4,22 @@
 package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.StitcherException;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class Stitcher {
-    private static final Comparator<Holder> HOLDER_COMPARATOR = Comparator.comparing(holder -> -holder.height).thenComparing(holder -> -holder.width).thenComparing(holder -> holder.spriteInfo.name());
+public class Stitcher<T extends Entry> {
+    private static final Comparator<Holder<?>> HOLDER_COMPARATOR = Comparator.comparing(holder -> -holder.height).thenComparing(holder -> -holder.width).thenComparing(holder -> holder.entry.name());
     private final int mipLevel;
-    private final Set<Holder> texturesToBeStitched = Sets.newHashSetWithExpectedSize(256);
-    private final List<Region> storage = Lists.newArrayListWithCapacity(256);
+    private final List<Holder<T>> texturesToBeStitched = new ArrayList<Holder<T>>();
+    private final List<Region<T>> storage = new ArrayList<Region<T>>();
     private int storageX;
     private int storageY;
     private final int maxWidth;
@@ -42,29 +39,25 @@ public class Stitcher {
         return this.storageY;
     }
 
-    public void registerSprite(TextureAtlasSprite.Info info) {
-        Holder holder = new Holder(info, this.mipLevel);
+    public void registerSprite(T entry) {
+        Holder<T> holder = new Holder<T>(entry, this.mipLevel);
         this.texturesToBeStitched.add(holder);
     }
 
     public void stitch() {
-        ArrayList<Holder> list = Lists.newArrayList(this.texturesToBeStitched);
+        ArrayList<Holder<T>> list = new ArrayList<Holder<T>>(this.texturesToBeStitched);
         list.sort(HOLDER_COMPARATOR);
         for (Holder holder2 : list) {
             if (this.addToStorage(holder2)) continue;
-            throw new StitcherException(holder2.spriteInfo, list.stream().map(holder -> holder.spriteInfo).collect(ImmutableList.toImmutableList()));
+            throw new StitcherException((Entry)holder2.entry, list.stream().map(holder -> holder.entry).collect(ImmutableList.toImmutableList()));
         }
         this.storageX = Mth.smallestEncompassingPowerOfTwo(this.storageX);
         this.storageY = Mth.smallestEncompassingPowerOfTwo(this.storageY);
     }
 
-    public void gatherSprites(SpriteLoader spriteLoader) {
-        for (Region region2 : this.storage) {
-            region2.walk(region -> {
-                Holder holder = region.getHolder();
-                TextureAtlasSprite.Info info = holder.spriteInfo;
-                spriteLoader.load(info, this.storageX, this.storageY, region.getX(), region.getY());
-            });
+    public void gatherSprites(SpriteLoader<T> spriteLoader) {
+        for (Region<T> region : this.storage) {
+            region.walk(spriteLoader);
         }
     }
 
@@ -72,16 +65,16 @@ public class Stitcher {
         return (i >> j) + ((i & (1 << j) - 1) == 0 ? 0 : 1) << j;
     }
 
-    private boolean addToStorage(Holder holder) {
-        for (Region region : this.storage) {
+    private boolean addToStorage(Holder<T> holder) {
+        for (Region<T> region : this.storage) {
             if (!region.add(holder)) continue;
             return true;
         }
         return this.expand(holder);
     }
 
-    private boolean expand(Holder holder) {
-        Region region;
+    private boolean expand(Holder<T> holder) {
+        Region<T> region;
         boolean bl5;
         boolean bl4;
         boolean bl2;
@@ -108,7 +101,7 @@ public class Stitcher {
             region = new Region(this.storageX, 0, holder.width, this.storageY);
             this.storageX += holder.width;
         } else {
-            region = new Region(0, this.storageY, this.storageX, holder.height);
+            region = new Region<T>(0, this.storageY, this.storageX, holder.height);
             this.storageY += holder.height;
         }
         region.add(holder);
@@ -117,40 +110,37 @@ public class Stitcher {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class Holder {
-        public final TextureAtlasSprite.Info spriteInfo;
-        public final int width;
-        public final int height;
-
-        public Holder(TextureAtlasSprite.Info info, int i) {
-            this.spriteInfo = info;
-            this.width = Stitcher.smallestFittingMinTexel(info.width(), i);
-            this.height = Stitcher.smallestFittingMinTexel(info.height(), i);
-        }
-
-        public String toString() {
-            return "Holder{width=" + this.width + ", height=" + this.height + "}";
+    record Holder<T extends Entry>(T entry, int width, int height) {
+        public Holder(T entry, int i) {
+            this(entry, Stitcher.smallestFittingMinTexel(entry.width(), i), Stitcher.smallestFittingMinTexel(entry.height(), i));
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Region {
+    public static interface Entry {
+        public int width();
+
+        public int height();
+
+        public ResourceLocation name();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class Region<T extends Entry> {
         private final int originX;
         private final int originY;
         private final int width;
         private final int height;
-        private List<Region> subSlots;
-        private Holder holder;
+        @Nullable
+        private List<Region<T>> subSlots;
+        @Nullable
+        private Holder<T> holder;
 
         public Region(int i, int j, int k, int l) {
             this.originX = i;
             this.originY = j;
             this.width = k;
             this.height = l;
-        }
-
-        public Holder getHolder() {
-            return this.holder;
         }
 
         public int getX() {
@@ -161,7 +151,7 @@ public class Stitcher {
             return this.originY;
         }
 
-        public boolean add(Holder holder) {
+        public boolean add(Holder<T> holder) {
             if (this.holder != null) {
                 return false;
             }
@@ -175,39 +165,39 @@ public class Stitcher {
                 return true;
             }
             if (this.subSlots == null) {
-                this.subSlots = Lists.newArrayListWithCapacity(1);
-                this.subSlots.add(new Region(this.originX, this.originY, i, j));
+                this.subSlots = new ArrayList<Region<T>>(1);
+                this.subSlots.add(new Region<T>(this.originX, this.originY, i, j));
                 int k = this.width - i;
                 int l = this.height - j;
                 if (l > 0 && k > 0) {
                     int n;
                     int m = Math.max(this.height, k);
                     if (m >= (n = Math.max(this.width, l))) {
-                        this.subSlots.add(new Region(this.originX, this.originY + j, i, l));
-                        this.subSlots.add(new Region(this.originX + i, this.originY, k, this.height));
+                        this.subSlots.add(new Region<T>(this.originX, this.originY + j, i, l));
+                        this.subSlots.add(new Region<T>(this.originX + i, this.originY, k, this.height));
                     } else {
-                        this.subSlots.add(new Region(this.originX + i, this.originY, k, j));
-                        this.subSlots.add(new Region(this.originX, this.originY + j, this.width, l));
+                        this.subSlots.add(new Region<T>(this.originX + i, this.originY, k, j));
+                        this.subSlots.add(new Region<T>(this.originX, this.originY + j, this.width, l));
                     }
                 } else if (k == 0) {
-                    this.subSlots.add(new Region(this.originX, this.originY + j, i, l));
+                    this.subSlots.add(new Region<T>(this.originX, this.originY + j, i, l));
                 } else if (l == 0) {
-                    this.subSlots.add(new Region(this.originX + i, this.originY, k, j));
+                    this.subSlots.add(new Region<T>(this.originX + i, this.originY, k, j));
                 }
             }
-            for (Region region : this.subSlots) {
+            for (Region<T> region : this.subSlots) {
                 if (!region.add(holder)) continue;
                 return true;
             }
             return false;
         }
 
-        public void walk(Consumer<Region> consumer) {
+        public void walk(SpriteLoader<T> spriteLoader) {
             if (this.holder != null) {
-                consumer.accept(this);
+                spriteLoader.load(this.holder.entry, this.getX(), this.getY());
             } else if (this.subSlots != null) {
                 for (Region region : this.subSlots) {
-                    region.walk(consumer);
+                    region.walk(spriteLoader);
                 }
             }
         }
@@ -218,8 +208,8 @@ public class Stitcher {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static interface SpriteLoader {
-        public void load(TextureAtlasSprite.Info var1, int var2, int var3, int var4, int var5);
+    public static interface SpriteLoader<T extends Entry> {
+        public void load(T var1, int var2, int var3);
     }
 }
 

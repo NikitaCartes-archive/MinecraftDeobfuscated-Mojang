@@ -12,6 +12,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -115,8 +116,8 @@ extends HangingEntity {
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
-        ResourceKey<PaintingVariant> resourceKey = ResourceKey.create(Registry.PAINTING_VARIANT_REGISTRY, ResourceLocation.tryParse(compoundTag.getString("variant")));
-        this.setVariant(Registry.PAINTING_VARIANT.getHolder(resourceKey).orElseGet(Painting::getDefaultVariant));
+        Holder holder = Optional.ofNullable(ResourceLocation.tryParse(compoundTag.getString("variant"))).map(resourceLocation -> ResourceKey.create(Registry.PAINTING_VARIANT_REGISTRY, resourceLocation)).flatMap(Registry.PAINTING_VARIANT::getHolder).map(reference -> reference).orElseGet(Painting::getDefaultVariant);
+        this.setVariant(holder);
         this.direction = Direction.from2DDataValue(compoundTag.getByte("facing"));
         super.readAdditionalSaveData(compoundTag);
         this.setDirection(this.direction);
@@ -168,7 +169,7 @@ extends HangingEntity {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this, this.direction.get3DDataValue(), this.getPos());
     }
 

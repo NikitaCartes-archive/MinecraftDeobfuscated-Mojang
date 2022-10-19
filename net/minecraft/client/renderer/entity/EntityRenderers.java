@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.entity.BatRenderer;
 import net.minecraft.client.renderer.entity.BeeRenderer;
 import net.minecraft.client.renderer.entity.BlazeRenderer;
 import net.minecraft.client.renderer.entity.BoatRenderer;
+import net.minecraft.client.renderer.entity.CamelRenderer;
 import net.minecraft.client.renderer.entity.CatRenderer;
 import net.minecraft.client.renderer.entity.CaveSpiderRenderer;
 import net.minecraft.client.renderer.entity.ChestedHorseRenderer;
@@ -175,6 +176,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.BLAZE, BlazeRenderer::new);
         EntityRenderers.register(EntityType.BOAT, context -> new BoatRenderer(context, false));
         EntityRenderers.register(EntityType.CAT, CatRenderer::new);
+        EntityRenderers.register(EntityType.CAMEL, context -> new CamelRenderer(context, ModelLayers.CAMEL));
         EntityRenderers.register(EntityType.CAVE_SPIDER, CaveSpiderRenderer::new);
         EntityRenderers.register(EntityType.CHEST_BOAT, context -> new BoatRenderer(context, true));
         EntityRenderers.register(EntityType.CHEST_MINECART, context -> new MinecartRenderer(context, ModelLayers.CHEST_MINECART));

@@ -4,6 +4,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -13,5 +14,7 @@ extends Recipe<CraftingContainer> {
     default public RecipeType<?> getType() {
         return RecipeType.CRAFTING;
     }
+
+    public CraftingBookCategory category();
 }
 

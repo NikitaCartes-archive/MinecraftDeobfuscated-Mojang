@@ -21,6 +21,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -32,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 public class SignBlockEntity
 extends BlockEntity {
     public static final int LINES = 4;
+    private static final int MAX_TEXT_LINE_WIDTH = 90;
+    private static final int TEXT_LINE_HEIGHT = 10;
     private static final String[] RAW_TEXT_FIELD_NAMES = new String[]{"Text1", "Text2", "Text3", "Text4"};
     private static final String[] FILTERED_TEXT_FIELD_NAMES = new String[]{"FilteredText1", "FilteredText2", "FilteredText3", "FilteredText4"};
     private final Component[] messages = new Component[]{CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY};
@@ -47,6 +50,18 @@ extends BlockEntity {
 
     public SignBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(BlockEntityType.SIGN, blockPos, blockState);
+    }
+
+    public SignBlockEntity(BlockEntityType blockEntityType, BlockPos blockPos, BlockState blockState) {
+        super(blockEntityType, blockPos, blockState);
+    }
+
+    public int getTextLineHeight() {
+        return 10;
+    }
+
+    public int getMaxTextLineWidth() {
+        return 90;
     }
 
     @Override
@@ -165,6 +180,16 @@ extends BlockEntity {
     @Nullable
     public UUID getPlayerWhoMayEdit() {
         return this.playerWhoMayEdit;
+    }
+
+    public boolean hasAnyClickCommands(Player player) {
+        for (Component component : this.getMessages(player.isTextFilteringEnabled())) {
+            Style style = component.getStyle();
+            ClickEvent clickEvent = style.getClickEvent();
+            if (clickEvent == null || clickEvent.getAction() != ClickEvent.Action.RUN_COMMAND) continue;
+            return true;
+        }
+        return false;
     }
 
     public boolean executeClickCommands(ServerPlayer serverPlayer) {

@@ -20,7 +20,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.warden.Warden;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -67,14 +66,17 @@ public class WardenSpawnTracker {
         if (!list.contains(serverPlayer2)) {
             list.add(serverPlayer2);
         }
-        if (list.stream().anyMatch(serverPlayer -> serverPlayer.getWardenSpawnTracker().onCooldown())) {
+        if (list.stream().anyMatch(serverPlayer -> serverPlayer.getWardenSpawnTracker().map(WardenSpawnTracker::onCooldown).orElse(false))) {
             return OptionalInt.empty();
         }
-        Optional<WardenSpawnTracker> optional = list.stream().map(Player::getWardenSpawnTracker).max(Comparator.comparingInt(wardenSpawnTracker -> wardenSpawnTracker.warningLevel));
-        WardenSpawnTracker wardenSpawnTracker2 = optional.get();
-        wardenSpawnTracker2.increaseWarningLevel();
-        list.forEach(serverPlayer -> serverPlayer.getWardenSpawnTracker().copyData(wardenSpawnTracker2));
-        return OptionalInt.of(wardenSpawnTracker2.warningLevel);
+        Optional<WardenSpawnTracker> optional = list.stream().flatMap(serverPlayer -> serverPlayer.getWardenSpawnTracker().stream()).max(Comparator.comparingInt(WardenSpawnTracker::getWarningLevel));
+        if (optional.isPresent()) {
+            WardenSpawnTracker wardenSpawnTracker = optional.get();
+            wardenSpawnTracker.increaseWarningLevel();
+            list.forEach(serverPlayer -> serverPlayer.getWardenSpawnTracker().ifPresent(wardenSpawnTracker2 -> wardenSpawnTracker2.copyData(wardenSpawnTracker)));
+            return OptionalInt.of(wardenSpawnTracker.warningLevel);
+        }
+        return OptionalInt.empty();
     }
 
     private boolean onCooldown() {

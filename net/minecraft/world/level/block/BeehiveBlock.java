@@ -121,14 +121,14 @@ extends BaseEntityBlock {
         if (i >= 5) {
             Item item = itemStack.getItem();
             if (itemStack.is(Items.SHEARS)) {
-                level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 1.0f, 1.0f);
+                level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0f, 1.0f);
                 BeehiveBlock.dropHoneycomb(level, blockPos);
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
                 bl = true;
                 level.gameEvent((Entity)player2, GameEvent.SHEAR, blockPos);
             } else if (itemStack.is(Items.GLASS_BOTTLE)) {
                 itemStack.shrink(1);
-                level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0f, 1.0f);
+                level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 if (itemStack.isEmpty()) {
                     player2.setItemInHand(interactionHand, new ItemStack(Items.HONEY_BOTTLE));
                 } else if (!player2.getInventory().add(new ItemStack(Items.HONEY_BOTTLE))) {

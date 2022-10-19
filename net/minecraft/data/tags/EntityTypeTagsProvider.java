@@ -4,15 +4,15 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 
 public class EntityTypeTagsProvider
 extends TagsProvider<EntityType<?>> {
-    public EntityTypeTagsProvider(DataGenerator dataGenerator) {
-        super(dataGenerator, Registry.ENTITY_TYPE);
+    public EntityTypeTagsProvider(PackOutput packOutput) {
+        super(packOutput, Registry.ENTITY_TYPE);
     }
 
     @Override

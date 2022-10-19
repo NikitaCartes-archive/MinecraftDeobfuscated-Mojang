@@ -34,8 +34,8 @@ extends Behavior<E> {
     private final Function<LivingEntity, Optional<PositionTracker>> targetPositionGetter;
     private final float speedModifier;
 
-    public GoAndGiveItemsToTarget(Function<LivingEntity, Optional<PositionTracker>> function, float f) {
-        super(Map.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryStatus.REGISTERED));
+    public GoAndGiveItemsToTarget(Function<LivingEntity, Optional<PositionTracker>> function, float f, int i) {
+        super(Map.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryStatus.REGISTERED), i);
         this.targetPositionGetter = function;
         this.speedModifier = f;
     }

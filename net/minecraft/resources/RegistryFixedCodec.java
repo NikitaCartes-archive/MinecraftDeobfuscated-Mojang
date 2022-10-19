@@ -47,7 +47,7 @@ implements Codec<Holder<E>> {
         if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
             return ResourceLocation.CODEC.decode(dynamicOps, object).flatMap((? super R pair) -> {
                 ResourceLocation resourceLocation = (ResourceLocation)pair.getFirst();
-                DataResult<Holder<Pair>> dataResult = ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation));
+                DataResult<Holder.Reference<Pair>> dataResult = ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation));
                 return dataResult.map((? super R holder) -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
             });
         }

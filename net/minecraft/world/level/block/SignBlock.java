@@ -129,5 +129,10 @@ implements SimpleWaterloggedBlock {
     public WoodType type() {
         return this.type;
     }
+
+    public static WoodType getWoodType(Block block) {
+        WoodType woodType = block instanceof SignBlock ? ((SignBlock)block).type() : WoodType.OAK;
+        return woodType;
+    }
 }
 

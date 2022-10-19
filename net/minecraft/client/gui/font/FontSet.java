@@ -140,7 +140,7 @@ implements AutoCloseable {
             if (bakedGlyph == null) continue;
             return bakedGlyph;
         }
-        FontTexture fontTexture2 = new FontTexture(new ResourceLocation(this.name.getNamespace(), this.name.getPath() + "/" + this.textures.size()), sheetGlyphInfo.isColored());
+        FontTexture fontTexture2 = new FontTexture(this.name.withPath(string -> string + "/" + this.textures.size()), sheetGlyphInfo.isColored());
         this.textures.add(fontTexture2);
         this.textureManager.register(fontTexture2.getName(), fontTexture2);
         BakedGlyph bakedGlyph2 = fontTexture2.add(sheetGlyphInfo);

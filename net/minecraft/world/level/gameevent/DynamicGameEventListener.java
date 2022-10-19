@@ -10,8 +10,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.GameEventListenerRegistry;
 import org.jetbrains.annotations.Nullable;
 
 public class DynamicGameEventListener<T extends GameEventListener> {
@@ -34,8 +34,8 @@ public class DynamicGameEventListener<T extends GameEventListener> {
         }
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventDispatcher -> gameEventDispatcher.unregister((GameEventListener)gameEventListener2));
-            DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventDispatcher -> gameEventDispatcher.register((GameEventListener)gameEventListener));
+            DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventListenerRegistry -> gameEventListenerRegistry.unregister((GameEventListener)gameEventListener2));
+            DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventListenerRegistry -> gameEventListenerRegistry.register((GameEventListener)gameEventListener));
         }
         this.listener = gameEventListener;
     }
@@ -45,26 +45,26 @@ public class DynamicGameEventListener<T extends GameEventListener> {
     }
 
     public void remove(ServerLevel serverLevel) {
-        DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventDispatcher -> gameEventDispatcher.unregister((GameEventListener)this.listener));
+        DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventListenerRegistry -> gameEventListenerRegistry.unregister((GameEventListener)this.listener));
     }
 
     public void move(ServerLevel serverLevel) {
         this.listener.getListenerSource().getPosition(serverLevel).map(SectionPos::of).ifPresent(sectionPos -> {
             if (this.lastSection == null || !this.lastSection.equals(sectionPos)) {
-                DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventDispatcher -> gameEventDispatcher.unregister((GameEventListener)this.listener));
+                DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventListenerRegistry -> gameEventListenerRegistry.unregister((GameEventListener)this.listener));
                 this.lastSection = sectionPos;
-                DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventDispatcher -> gameEventDispatcher.register((GameEventListener)this.listener));
+                DynamicGameEventListener.ifChunkExists(serverLevel, this.lastSection, gameEventListenerRegistry -> gameEventListenerRegistry.register((GameEventListener)this.listener));
             }
         });
     }
 
-    private static void ifChunkExists(LevelReader levelReader, @Nullable SectionPos sectionPos, Consumer<GameEventDispatcher> consumer) {
+    private static void ifChunkExists(LevelReader levelReader, @Nullable SectionPos sectionPos, Consumer<GameEventListenerRegistry> consumer) {
         if (sectionPos == null) {
             return;
         }
         ChunkAccess chunkAccess = levelReader.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.FULL, false);
         if (chunkAccess != null) {
-            consumer.accept(chunkAccess.getEventDispatcher(sectionPos.y()));
+            consumer.accept(chunkAccess.getListenerRegistry(sectionPos.y()));
         }
     }
 }

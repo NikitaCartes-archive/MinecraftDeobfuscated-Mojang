@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +30,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -84,7 +82,6 @@ import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.PlayerModelPart;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -150,7 +147,6 @@ extends LivingEntity {
     public final InventoryMenu inventoryMenu;
     public AbstractContainerMenu containerMenu;
     protected FoodData foodData = new FoodData();
-    protected WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
     protected int jumpTriggerTime;
     public float oBob;
     public float bob;
@@ -171,8 +167,6 @@ extends LivingEntity {
     protected final float defaultFlySpeed = 0.02f;
     private int lastLevelUpTime;
     private final GameProfile gameProfile;
-    @Nullable
-    private final ProfilePublicKey profilePublicKey;
     private boolean reducedDebugInfo;
     private ItemStack lastItemInMainHand = ItemStack.EMPTY;
     private final ItemCooldowns cooldowns = this.createItemCooldowns();
@@ -180,11 +174,10 @@ extends LivingEntity {
     @Nullable
     public FishingHook fishing;
 
-    public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+    public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super((EntityType<? extends LivingEntity>)EntityType.PLAYER, level);
         this.setUUID(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
         this.gameProfile = gameProfile;
-        this.profilePublicKey = profilePublicKey;
         this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
         this.containerMenu = this.inventoryMenu;
         this.moveTo((double)blockPos.getX() + 0.5, blockPos.getY() + 1, (double)blockPos.getZ() + 0.5, f, 0.0f);
@@ -252,7 +245,6 @@ extends LivingEntity {
         this.moveCloak();
         if (!this.level.isClientSide) {
             this.foodData.tick(this);
-            this.wardenSpawnTracker.tick();
             this.awardStat(Stats.PLAY_TIME);
             this.awardStat(Stats.TOTAL_WORLD_TIME);
             if (this.isAlive()) {
@@ -674,11 +666,6 @@ extends LivingEntity {
         }
         this.setScore(compoundTag.getInt("Score"));
         this.foodData.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("warden_spawn_tracker", 10)) {
-            WardenSpawnTracker.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("warden_spawn_tracker"))).resultOrPartial(LOGGER::error).ifPresent(wardenSpawnTracker -> {
-                this.wardenSpawnTracker = wardenSpawnTracker;
-            });
-        }
         this.abilities.loadSaveData(compoundTag);
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.abilities.getWalkingSpeed());
         if (compoundTag.contains("EnderItems", 9)) {
@@ -708,7 +695,6 @@ extends LivingEntity {
         compoundTag.putInt("XpSeed", this.enchantmentSeed);
         compoundTag.putInt("Score", this.getScore());
         this.foodData.addAdditionalSaveData(compoundTag);
-        WardenSpawnTracker.CODEC.encodeStart(NbtOps.INSTANCE, this.wardenSpawnTracker).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("warden_spawn_tracker", (Tag)tag));
         this.abilities.addSaveData(compoundTag);
         compoundTag.put("EnderItems", this.enderChestInventory.createTag());
         if (!this.getShoulderEntityLeft().isEmpty()) {
@@ -859,6 +845,10 @@ extends LivingEntity {
     @Override
     protected boolean onSoulSpeedBlock() {
         return !this.abilities.flying && super.onSoulSpeedBlock();
+    }
+
+    public boolean isTextFilteringEnabled() {
+        return false;
     }
 
     public void openTextEdit(SignBlockEntity signBlockEntity) {
@@ -1164,11 +1154,6 @@ extends LivingEntity {
         return this.gameProfile;
     }
 
-    @Nullable
-    public ProfilePublicKey getProfilePublicKey() {
-        return this.profilePublicKey;
-    }
-
     public Inventory getInventory() {
         return this.inventory;
     }
@@ -1206,9 +1191,9 @@ extends LivingEntity {
     public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, float f, boolean bl, boolean bl2) {
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Block block = blockState.getBlock();
-        if (block instanceof RespawnAnchorBlock && blockState.getValue(RespawnAnchorBlock.CHARGE) > 0 && RespawnAnchorBlock.canSetSpawn(serverLevel)) {
+        if (block instanceof RespawnAnchorBlock && (bl || blockState.getValue(RespawnAnchorBlock.CHARGE) > 0) && RespawnAnchorBlock.canSetSpawn(serverLevel)) {
             Optional<Vec3> optional = RespawnAnchorBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos);
-            if (!bl2 && optional.isPresent()) {
+            if (!bl && !bl2 && optional.isPresent()) {
                 serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(RespawnAnchorBlock.CHARGE, blockState.getValue(RespawnAnchorBlock.CHARGE) - 1), 3);
             }
             return optional;
@@ -1407,11 +1392,6 @@ extends LivingEntity {
         return super.causeFallDamage(f, g, damageSource);
     }
 
-    @Override
-    public ChatSender asChatSender() {
-        return new ChatSender(this.getGameProfile().getId(), this.getProfilePublicKey());
-    }
-
     public boolean tryToStartFallFlying() {
         ItemStack itemStack;
         if (!this.onGround && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION) && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
@@ -1523,8 +1503,8 @@ extends LivingEntity {
         }
     }
 
-    public WardenSpawnTracker getWardenSpawnTracker() {
-        return this.wardenSpawnTracker;
+    public Optional<WardenSpawnTracker> getWardenSpawnTracker() {
+        return Optional.empty();
     }
 
     public FoodData getFoodData() {

@@ -13,16 +13,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.tags.TagKey;
 
 public class TagNetworkSerialization {
-    public static Map<ResourceKey<? extends Registry<?>>, NetworkPayload> serializeTagsToNetwork(RegistryAccess registryAccess) {
-        return registryAccess.networkSafeRegistries().map(registryEntry -> Pair.of(registryEntry.key(), TagNetworkSerialization.serializeToNetwork(registryEntry.value()))).filter(pair -> !((NetworkPayload)pair.getSecond()).isEmpty()).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+    public static Map<ResourceKey<? extends Registry<?>>, NetworkPayload> serializeTagsToNetwork(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess) {
+        return RegistrySynchronization.networkSafeRegistries(layeredRegistryAccess).map(registryEntry -> Pair.of(registryEntry.key(), TagNetworkSerialization.serializeToNetwork(registryEntry.value()))).filter(pair -> !((NetworkPayload)pair.getSecond()).isEmpty()).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
     private static <T> NetworkPayload serializeToNetwork(Registry<T> registry) {
@@ -44,7 +46,7 @@ public class TagNetworkSerialization {
     public static <T> void deserializeTagsFromNetwork(ResourceKey<? extends Registry<T>> resourceKey, Registry<T> registry, NetworkPayload networkPayload, TagOutput<T> tagOutput) {
         networkPayload.tags.forEach((resourceLocation, intList) -> {
             TagKey tagKey = TagKey.create(resourceKey, resourceLocation);
-            List list = intList.intStream().mapToObj(registry::getHolder).flatMap(Optional::stream).toList();
+            List list = intList.intStream().mapToObj(registry::getHolder).flatMap(Optional::stream).collect(Collectors.toUnmodifiableList());
             tagOutput.accept(tagKey, list);
         });
     }

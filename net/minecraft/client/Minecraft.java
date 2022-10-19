@@ -34,9 +34,9 @@ import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Matrix4f;
 import com.mojang.realmsclient.client.RealmsClient;
-import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -154,11 +154,10 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.ClientPackSource;
+import net.minecraft.client.resources.DownloadedPackSource;
 import net.minecraft.client.resources.FoliageColorReloadListener;
 import net.minecraft.client.resources.GrassColorReloadListener;
-import net.minecraft.client.resources.LegacyPackResourcesAdapter;
 import net.minecraft.client.resources.MobEffectTextureManager;
-import net.minecraft.client.resources.PackResourcesAdapterV4;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.resources.SplashManager;
@@ -177,7 +176,6 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -187,6 +185,7 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.KeybindResolver;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -201,11 +200,11 @@ import net.minecraft.server.level.progress.ProcessorChunkProgressListener;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -241,10 +240,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlayerHeadItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -279,7 +277,7 @@ implements WindowEventHandler {
     private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK;
     private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE;
     public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
-    private final File resourcePackDirectory;
+    private final Path resourcePackDirectory;
     private final PropertyMap profileProperties;
     private final TextureManager textureManager;
     private final DataFixer fixerUpper;
@@ -314,7 +312,8 @@ implements WindowEventHandler {
     private final boolean allowsMultiplayer;
     private final boolean allowsChat;
     private final ReloadableResourceManager resourceManager;
-    private final ClientPackSource clientPackSource;
+    private final VanillaPackResources vanillaPackResources;
+    private final DownloadedPackSource downloadedPackSource;
     private final PackRepository resourcePackRepository;
     private final LanguageManager languageManager;
     private final BlockColors blockColors;
@@ -352,8 +351,6 @@ implements WindowEventHandler {
     public LocalPlayer player;
     @Nullable
     private IntegratedServer singleplayerServer;
-    @Nullable
-    private ServerData currentServer;
     @Nullable
     private Connection pendingConnection;
     private boolean isLocalServer;
@@ -416,12 +413,15 @@ implements WindowEventHandler {
         instance = this;
         this.gameDirectory = gameConfig.location.gameDirectory;
         File file = gameConfig.location.assetDirectory;
-        this.resourcePackDirectory = gameConfig.location.resourcePackDirectory;
+        this.resourcePackDirectory = gameConfig.location.resourcePackDirectory.toPath();
         this.launchedVersion = gameConfig.game.launchVersion;
         this.versionType = gameConfig.game.versionType;
         this.profileProperties = gameConfig.user.profileProperties;
-        this.clientPackSource = new ClientPackSource(new File(this.gameDirectory, "server-resource-packs"), gameConfig.location.getAssetIndex());
-        this.resourcePackRepository = new PackRepository(Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT));
+        ClientPackSource clientPackSource = new ClientPackSource(gameConfig.location.getExternalAssetSource());
+        this.downloadedPackSource = new DownloadedPackSource(new File(this.gameDirectory, "server-resource-packs"));
+        FolderRepositorySource repositorySource = new FolderRepositorySource(this.resourcePackDirectory, PackType.CLIENT_RESOURCES, PackSource.DEFAULT);
+        this.resourcePackRepository = new PackRepository(clientPackSource, this.downloadedPackSource, repositorySource);
+        this.vanillaPackResources = clientPackSource.getVanillaPack();
         this.proxy = gameConfig.user.proxy;
         this.authenticationService = new YggdrasilAuthenticationService(this.proxy);
         this.minecraftSessionService = this.authenticationService.createMinecraftSessionService();
@@ -458,12 +458,9 @@ implements WindowEventHandler {
         this.setWindowActive(true);
         try {
             if (ON_OSX) {
-                inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/minecraft.icns"));
-                MacosUtil.loadIcon(inputStream);
+                MacosUtil.loadIcon(this.getIconFile("icons", "minecraft.icns"));
             } else {
-                inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_16x16.png"));
-                InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
-                this.window.setIcon(inputStream, inputStream2);
+                this.window.setIcon(this.getIconFile("icons", "icon_16x16.png"), this.getIconFile("icons", "icon_32x32.png"));
             }
         } catch (IOException iOException) {
             LOGGER.error("Couldn't set icon", iOException);
@@ -486,7 +483,7 @@ implements WindowEventHandler {
         this.resourceManager.registerReloadListener(this.textureManager);
         this.skinManager = new SkinManager(this.textureManager, new File(file, "skins"), this.minecraftSessionService);
         this.levelSource = new LevelStorageSource(this.gameDirectory.toPath().resolve("saves"), this.gameDirectory.toPath().resolve("backups"), this.fixerUpper);
-        this.soundManager = new SoundManager(this.resourceManager, this.options);
+        this.soundManager = new SoundManager(this.options);
         this.resourceManager.registerReloadListener(this.soundManager);
         this.splashManager = new SplashManager(this.user);
         this.resourceManager.registerReloadListener(this.splashManager);
@@ -520,7 +517,7 @@ implements WindowEventHandler {
         this.entityRenderDispatcher = new EntityRenderDispatcher(this, this.textureManager, this.itemRenderer, this.blockRenderer, this.font, this.options, this.entityModels);
         this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
         this.gameRenderer = new GameRenderer(this, this.entityRenderDispatcher.getItemInHandRenderer(), this.resourceManager, this.renderBuffers);
-        this.resourceManager.registerReloadListener(this.gameRenderer);
+        this.resourceManager.registerReloadListener(this.gameRenderer.createReloadListener());
         this.levelRenderer = new LevelRenderer(this, this.entityRenderDispatcher, this.blockEntityRenderDispatcher, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.levelRenderer);
         this.createSearchTrees();
@@ -553,7 +550,7 @@ implements WindowEventHandler {
         this.window.updateRawMouseInput(this.options.rawMouseInput().get());
         this.window.setDefaultErrorCallback();
         this.resizeDisplay();
-        this.gameRenderer.preloadUiShader(this.getClientPackSource().getVanillaPack().asProvider());
+        this.gameRenderer.preloadUiShader(this.vanillaPackResources.asProvider());
         this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
         this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
         this.narrator = new GameNarrator(this);
@@ -584,6 +581,14 @@ implements WindowEventHandler {
         }
     }
 
+    private IoSupplier<InputStream> getIconFile(String ... strings) throws IOException {
+        IoSupplier<InputStream> ioSupplier = this.vanillaPackResources.getRootResource(strings);
+        if (ioSupplier == null) {
+            throw new FileNotFoundException(String.join((CharSequence)"/", strings));
+        }
+        return ioSupplier;
+    }
+
     private static boolean countryEqualsISO3(Object object) {
         try {
             return Locale.getDefault().getISO3Country().equals(object);
@@ -610,7 +615,7 @@ implements WindowEventHandler {
                 stringBuilder.append(I18n.get("title.singleplayer", new Object[0]));
             } else if (this.isConnectedToRealms()) {
                 stringBuilder.append(I18n.get("title.multiplayer.realms", new Object[0]));
-            } else if (this.singleplayerServer != null || this.currentServer != null && this.currentServer.isLan()) {
+            } else if (this.singleplayerServer != null || this.getCurrentServer() != null && this.getCurrentServer().isLan()) {
                 stringBuilder.append(I18n.get("title.multiplayer.lan", new Object[0]));
             } else {
                 stringBuilder.append(I18n.get("title.multiplayer.other", new Object[0]));
@@ -811,16 +816,11 @@ implements WindowEventHandler {
                 bl = true;
             }
         }
-        NonNullList<ItemStack> nonNullList = NonNullList.create();
-        for (Item item : Registry.ITEM) {
-            nonNullList.clear();
-            item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
-            for (ItemStack itemStack : nonNullList) {
-                String string = itemStack.getDescriptionId();
-                String string2 = Component.translatable(string).getString();
-                if (!string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) continue;
-                LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
-            }
+        for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags())) {
+            String string = itemStack.getDescriptionId();
+            String string2 = Component.translatable(string).getString();
+            if (!string2.toLowerCase(Locale.ROOT).equals(itemStack.getItem().getDescriptionId())) continue;
+            LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
         }
         bl |= MenuScreens.selfTest();
         if (bl |= EntityRenderers.validateRegistrations()) {
@@ -1202,7 +1202,8 @@ implements WindowEventHandler {
      */
     private Path archiveProfilingReport(SystemReport systemReport, List<Path> list) {
         Path path;
-        String string = this.isLocalServer() ? this.getSingleplayerServer().getWorldData().getLevelName() : this.getCurrentServer().name;
+        ServerData serverData;
+        String string = this.isLocalServer() ? this.getSingleplayerServer().getWorldData().getLevelName() : ((serverData = this.getCurrentServer()) != null ? serverData.name : "unknown");
         try {
             String string2 = String.format(Locale.ROOT, "%s-%s-%s", Util.getFilenameFormattedDateTime(), string, SharedConstants.getCurrentVersion().getId());
             String string3 = FileUtil.findAvailableName(MetricsPersister.PROFILING_RESULTS_DIR, string2, ".zip");
@@ -1393,6 +1394,10 @@ implements WindowEventHandler {
         if (this.player.isHandsBusy()) {
             return false;
         }
+        ItemStack itemStack = this.player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (!itemStack.isItemEnabled(this.level.enabledFeatures())) {
+            return false;
+        }
         boolean bl = false;
         switch (this.hitResult.getType()) {
             case ENTITY: {
@@ -1434,6 +1439,9 @@ implements WindowEventHandler {
         for (InteractionHand interactionHand : InteractionHand.values()) {
             InteractionResult interactionResult3;
             ItemStack itemStack = this.player.getItemInHand(interactionHand);
+            if (!itemStack.isItemEnabled(this.level.enabledFeatures())) {
+                return;
+            }
             if (this.hitResult != null) {
                 switch (this.hitResult.getType()) {
                     case ENTITY: {
@@ -1708,11 +1716,11 @@ implements WindowEventHandler {
     }
 
     public void doWorldLoad(String string, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem) {
-        CompletableFuture<Optional<ProfilePublicKey.Data>> completableFuture = this.profileKeyPairManager.preparePublicKey();
+        CompletableFuture<LocalChatSession> completableFuture = this.profileKeyPairManager.prepareChatSession();
         this.clearLevel();
         this.progressListener.set(null);
         try {
-            levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldStem.worldData());
+            levelStorageAccess.saveDataTag(worldStem.registries().compositeAccess(), worldStem.worldData());
             Services services = Services.create(this.authenticationService, this.gameDirectory);
             services.profileCache().setExecutor(this);
             SkullBlockEntity.setup(services, this);
@@ -1752,9 +1760,10 @@ implements WindowEventHandler {
         this.profiler.pop();
         SocketAddress socketAddress = this.singleplayerServer.getConnection().startMemoryChannel();
         Connection connection = Connection.connectToLocalServer(socketAddress);
-        connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, component -> {}));
+        LocalChatSession localChatSession = completableFuture.join();
+        connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, localChatSession, null, null, component -> {}));
         connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
-        connection.send(new ServerboundHelloPacket(this.getUser().getName(), completableFuture.join(), Optional.ofNullable(this.getUser().getProfileId())));
+        connection.send(new ServerboundHelloPacket(this.getUser().getName(), localChatSession.asRemote().asData(), Optional.ofNullable(this.getUser().getProfileId())));
         this.pendingConnection = connection;
     }
 
@@ -1800,9 +1809,8 @@ implements WindowEventHandler {
                 }
                 this.profiler.pop();
             }
-            this.clientPackSource.clearServerPack();
+            this.downloadedPackSource.clearServerPack();
             this.gui.onDisconnected();
-            this.currentServer = null;
             this.isLocalServer = false;
             this.game.onLeaveGameSession();
         }
@@ -2034,18 +2042,7 @@ implements WindowEventHandler {
         return this.submit(this::reloadResourcePacks).thenCompose(completableFuture -> completableFuture);
     }
 
-    public void setCurrentServer(@Nullable ServerData serverData) {
-        this.currentServer = serverData;
-        ReportEnvironment reportEnvironment = serverData != null ? ReportEnvironment.thirdParty(serverData.ip) : ReportEnvironment.local();
-        this.updateReportEnvironment(reportEnvironment);
-    }
-
-    public void setCurrentServer(RealmsServer realmsServer, String string) {
-        this.currentServer = realmsServer.toServerData(string);
-        this.updateReportEnvironment(ReportEnvironment.realm(realmsServer));
-    }
-
-    private void updateReportEnvironment(ReportEnvironment reportEnvironment) {
+    public void updateReportEnvironment(ReportEnvironment reportEnvironment) {
         if (!this.reportingContext.matches(reportEnvironment)) {
             this.reportingContext = ReportingContext.create(reportEnvironment, this.userApiService);
         }
@@ -2053,7 +2050,7 @@ implements WindowEventHandler {
 
     @Nullable
     public ServerData getCurrentServer() {
-        return this.currentServer;
+        return Util.mapNullable(this.getConnection(), ClientPacketListener::getServerData);
     }
 
     public boolean isLocalServer() {
@@ -2097,11 +2094,15 @@ implements WindowEventHandler {
         return this.resourcePackRepository;
     }
 
-    public ClientPackSource getClientPackSource() {
-        return this.clientPackSource;
+    public VanillaPackResources getVanillaPackResources() {
+        return this.vanillaPackResources;
     }
 
-    public File getResourcePackDirectory() {
+    public DownloadedPackSource getDownloadedPackSource() {
+        return this.downloadedPackSource;
+    }
+
+    public Path getResourcePackDirectory() {
         return this.resourcePackDirectory;
     }
 
@@ -2427,26 +2428,6 @@ implements WindowEventHandler {
 
     public RenderBuffers renderBuffers() {
         return this.renderBuffers;
-    }
-
-    private static Pack createClientPackAdapter(String string, Component component, boolean bl, Supplier<PackResources> supplier, PackMetadataSection packMetadataSection, Pack.Position position, PackSource packSource) {
-        int i = packMetadataSection.getPackFormat();
-        Supplier<PackResources> supplier2 = supplier;
-        if (i <= 3) {
-            supplier2 = Minecraft.adaptV3(supplier2);
-        }
-        if (i <= 4) {
-            supplier2 = Minecraft.adaptV4(supplier2);
-        }
-        return new Pack(string, component, bl, supplier2, packMetadataSection, PackType.CLIENT_RESOURCES, position, packSource);
-    }
-
-    private static Supplier<PackResources> adaptV3(Supplier<PackResources> supplier) {
-        return () -> new LegacyPackResourcesAdapter((PackResources)supplier.get(), LegacyPackResourcesAdapter.V3);
-    }
-
-    private static Supplier<PackResources> adaptV4(Supplier<PackResources> supplier) {
-        return () -> new PackResourcesAdapterV4((PackResources)supplier.get());
     }
 
     public void updateMaxMipLevel(int i) {

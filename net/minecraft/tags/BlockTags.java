@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 public final class BlockTags {
     public static final TagKey<Block> WOOL = BlockTags.create("wool");
     public static final TagKey<Block> PLANKS = BlockTags.create("planks");
+    public static final TagKey<Block> STRIPPED_LOGS = BlockTags.create("stripped_logs");
     public static final TagKey<Block> STONE_BRICKS = BlockTags.create("stone_bricks");
     public static final TagKey<Block> WOODEN_BUTTONS = BlockTags.create("wooden_buttons");
     public static final TagKey<Block> BUTTONS = BlockTags.create("buttons");
@@ -80,6 +81,9 @@ public final class BlockTags {
     public static final TagKey<Block> STANDING_SIGNS = BlockTags.create("standing_signs");
     public static final TagKey<Block> WALL_SIGNS = BlockTags.create("wall_signs");
     public static final TagKey<Block> SIGNS = BlockTags.create("signs");
+    public static final TagKey<Block> CEILING_HANGING_SIGNS = BlockTags.create("ceiling_hanging_signs");
+    public static final TagKey<Block> WALL_HANGING_SIGNS = BlockTags.create("wall_hanging_signs");
+    public static final TagKey<Block> ALL_HANGING_SIGNS = BlockTags.create("all_hanging_signs");
     public static final TagKey<Block> DRAGON_IMMUNE = BlockTags.create("dragon_immune");
     public static final TagKey<Block> DRAGON_TRANSPARENT = BlockTags.create("dragon_transparent");
     public static final TagKey<Block> WITHER_IMMUNE = BlockTags.create("wither_immune");
@@ -161,6 +165,7 @@ public final class BlockTags {
     public static final TagKey<Block> SNAPS_GOAT_HORN = BlockTags.create("snaps_goat_horn");
     public static final TagKey<Block> SNOW_LAYER_CANNOT_SURVIVE_ON = BlockTags.create("snow_layer_cannot_survive_on");
     public static final TagKey<Block> SNOW_LAYER_CAN_SURVIVE_ON = BlockTags.create("snow_layer_can_survive_on");
+    public static final TagKey<Block> INVALID_SPAWN_INSIDE = BlockTags.create("invalid_spawn_inside");
 
     private BlockTags() {
     }

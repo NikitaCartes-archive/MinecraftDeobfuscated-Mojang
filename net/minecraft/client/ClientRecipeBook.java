@@ -20,9 +20,10 @@ import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.core.Registry;
 import net.minecraft.stats.RecipeBook;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.slf4j.Logger;
@@ -67,44 +68,40 @@ extends RecipeBook {
     }
 
     private static RecipeBookCategories getCategory(Recipe<?> recipe) {
+        if (recipe instanceof CraftingRecipe) {
+            CraftingRecipe craftingRecipe = (CraftingRecipe)recipe;
+            return switch (craftingRecipe.category()) {
+                default -> throw new IncompatibleClassChangeError();
+                case CraftingBookCategory.BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+                case CraftingBookCategory.EQUIPMENT -> RecipeBookCategories.CRAFTING_EQUIPMENT;
+                case CraftingBookCategory.REDSTONE -> RecipeBookCategories.CRAFTING_REDSTONE;
+                case CraftingBookCategory.MISC -> RecipeBookCategories.CRAFTING_MISC;
+            };
+        }
         RecipeType<?> recipeType = recipe.getType();
-        if (recipeType == RecipeType.CRAFTING) {
-            ItemStack itemStack = recipe.getResultItem();
-            CreativeModeTab creativeModeTab = itemStack.getItem().getItemCategory();
-            if (creativeModeTab == CreativeModeTab.TAB_BUILDING_BLOCKS) {
-                return RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+        if (recipe instanceof AbstractCookingRecipe) {
+            AbstractCookingRecipe abstractCookingRecipe = (AbstractCookingRecipe)recipe;
+            CookingBookCategory cookingBookCategory = abstractCookingRecipe.category();
+            if (recipeType == RecipeType.SMELTING) {
+                return switch (cookingBookCategory) {
+                    default -> throw new IncompatibleClassChangeError();
+                    case CookingBookCategory.BLOCKS -> RecipeBookCategories.FURNACE_BLOCKS;
+                    case CookingBookCategory.FOOD -> RecipeBookCategories.FURNACE_FOOD;
+                    case CookingBookCategory.MISC -> RecipeBookCategories.FURNACE_MISC;
+                };
             }
-            if (creativeModeTab == CreativeModeTab.TAB_TOOLS || creativeModeTab == CreativeModeTab.TAB_COMBAT) {
-                return RecipeBookCategories.CRAFTING_EQUIPMENT;
+            if (recipeType == RecipeType.BLASTING) {
+                return cookingBookCategory == CookingBookCategory.BLOCKS ? RecipeBookCategories.BLAST_FURNACE_BLOCKS : RecipeBookCategories.BLAST_FURNACE_MISC;
             }
-            if (creativeModeTab == CreativeModeTab.TAB_REDSTONE) {
-                return RecipeBookCategories.CRAFTING_REDSTONE;
+            if (recipeType == RecipeType.SMOKING) {
+                return RecipeBookCategories.SMOKER_FOOD;
             }
-            return RecipeBookCategories.CRAFTING_MISC;
-        }
-        if (recipeType == RecipeType.SMELTING) {
-            if (recipe.getResultItem().getItem().isEdible()) {
-                return RecipeBookCategories.FURNACE_FOOD;
+            if (recipeType == RecipeType.CAMPFIRE_COOKING) {
+                return RecipeBookCategories.CAMPFIRE;
             }
-            if (recipe.getResultItem().getItem() instanceof BlockItem) {
-                return RecipeBookCategories.FURNACE_BLOCKS;
-            }
-            return RecipeBookCategories.FURNACE_MISC;
-        }
-        if (recipeType == RecipeType.BLASTING) {
-            if (recipe.getResultItem().getItem() instanceof BlockItem) {
-                return RecipeBookCategories.BLAST_FURNACE_BLOCKS;
-            }
-            return RecipeBookCategories.BLAST_FURNACE_MISC;
-        }
-        if (recipeType == RecipeType.SMOKING) {
-            return RecipeBookCategories.SMOKER_FOOD;
         }
         if (recipeType == RecipeType.STONECUTTING) {
             return RecipeBookCategories.STONECUTTER;
-        }
-        if (recipeType == RecipeType.CAMPFIRE_COOKING) {
-            return RecipeBookCategories.CAMPFIRE;
         }
         if (recipeType == RecipeType.SMITHING) {
             return RecipeBookCategories.SMITHING;

@@ -8,6 +8,7 @@ import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -55,9 +57,8 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.WorldStem;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -467,14 +468,15 @@ extends ObjectSelectionList<Entry> {
 
         public void recreateWorld() {
             this.queueLoadScreen();
-            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
-                 WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false);){
-                WorldGenSettings worldGenSettings = worldStem.worldData().worldGenSettings();
+            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());){
+                Pair<LevelSettings, WorldCreationContext> pair = this.minecraft.createWorldOpenFlows().recreateWorldData(levelStorageAccess);
+                LevelSettings levelSettings = pair.getFirst();
+                WorldCreationContext worldCreationContext = pair.getSecond();
                 Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
-                if (worldGenSettings.isOldCustomizedWorld()) {
-                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? CreateWorldScreen.createFromExisting(this.screen, worldStem, path) : this.screen), Component.translatable("selectWorld.recreate.customized.title"), Component.translatable("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+                if (worldCreationContext.options().isOldCustomizedWorld()) {
+                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? CreateWorldScreen.createFromExisting(this.screen, levelSettings, worldCreationContext, path) : this.screen), Component.translatable("selectWorld.recreate.customized.title"), Component.translatable("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
                 } else {
-                    this.minecraft.setScreen(CreateWorldScreen.createFromExisting(this.screen, worldStem, path));
+                    this.minecraft.setScreen(CreateWorldScreen.createFromExisting(this.screen, levelSettings, worldCreationContext, path));
                 }
             } catch (Exception exception) {
                 LOGGER.error("Unable to recreate world", exception);

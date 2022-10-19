@@ -233,6 +233,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public Ocelot getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.OCELOT.create(serverLevel);
     }
@@ -281,6 +282,7 @@ extends Animal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

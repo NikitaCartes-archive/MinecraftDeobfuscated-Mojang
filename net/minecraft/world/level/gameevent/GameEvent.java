@@ -98,15 +98,15 @@ public class GameEvent {
         return this.builtInRegistryHolder.is(tagKey);
     }
 
-    public static final class Message
-    implements Comparable<Message> {
+    public static final class ListenerInfo
+    implements Comparable<ListenerInfo> {
         private final GameEvent gameEvent;
         private final Vec3 source;
         private final Context context;
         private final GameEventListener recipient;
         private final double distanceToRecipient;
 
-        public Message(GameEvent gameEvent, Vec3 vec3, Context context, GameEventListener gameEventListener, Vec3 vec32) {
+        public ListenerInfo(GameEvent gameEvent, Vec3 vec3, Context context, GameEventListener gameEventListener, Vec3 vec32) {
             this.gameEvent = gameEvent;
             this.source = vec3;
             this.context = context;
@@ -115,8 +115,8 @@ public class GameEvent {
         }
 
         @Override
-        public int compareTo(Message message) {
-            return Double.compare(this.distanceToRecipient, message.distanceToRecipient);
+        public int compareTo(ListenerInfo listenerInfo) {
+            return Double.compare(this.distanceToRecipient, listenerInfo.distanceToRecipient);
         }
 
         public GameEvent gameEvent() {
@@ -137,7 +137,7 @@ public class GameEvent {
 
         @Override
         public /* synthetic */ int compareTo(Object object) {
-            return this.compareTo((Message)object);
+            return this.compareTo((ListenerInfo)object);
         }
     }
 

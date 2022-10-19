@@ -67,10 +67,13 @@ extends ItemCombinerMenu {
         if (list.isEmpty()) {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
         } else {
-            this.selectedRecipe = list.get(0);
-            ItemStack itemStack = this.selectedRecipe.assemble(this.inputSlots);
-            this.resultSlots.setRecipeUsed(this.selectedRecipe);
-            this.resultSlots.setItem(0, itemStack);
+            UpgradeRecipe upgradeRecipe = list.get(0);
+            ItemStack itemStack = upgradeRecipe.assemble(this.inputSlots);
+            if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
+                this.selectedRecipe = upgradeRecipe;
+                this.resultSlots.setRecipeUsed(upgradeRecipe);
+                this.resultSlots.setItem(0, itemStack);
+            }
         }
     }
 

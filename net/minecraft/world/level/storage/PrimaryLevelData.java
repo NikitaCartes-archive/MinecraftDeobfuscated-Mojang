@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import java.util.Set;
@@ -28,14 +29,14 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelVersion;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -51,7 +52,8 @@ WorldData {
     protected static final String PLAYER = "Player";
     protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
     private LevelSettings settings;
-    private final WorldGenSettings worldGenSettings;
+    private final WorldOptions worldOptions;
+    private final SpecialWorldProperty specialWorldProperty;
     private final Lifecycle worldGenSettingsLifecycle;
     private int xSpawn;
     private int ySpawn;
@@ -85,10 +87,7 @@ WorldData {
     private boolean wasModded;
     private final TimerQueue<MinecraftServer> scheduledEvents;
 
-    private PrimaryLevelData(@Nullable DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, boolean bl, int j, int k, int l, float f, long m, long n, int o, int p, int q, boolean bl2, int r, boolean bl3, boolean bl4, boolean bl5, WorldBorder.Settings settings, int s, int t, @Nullable UUID uUID, Set<String> set, TimerQueue<MinecraftServer> timerQueue, @Nullable CompoundTag compoundTag2, CompoundTag compoundTag3, LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
-        if (!worldGenSettings.dimensions().containsKey(LevelStem.OVERWORLD)) {
-            throw new IllegalStateException("Missing Overworld dimension data");
-        }
+    private PrimaryLevelData(@Nullable DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, boolean bl, int j, int k, int l, float f, long m, long n, int o, int p, int q, boolean bl2, int r, boolean bl3, boolean bl4, boolean bl5, WorldBorder.Settings settings, int s, int t, @Nullable UUID uUID, Set<String> set, TimerQueue<MinecraftServer> timerQueue, @Nullable CompoundTag compoundTag2, CompoundTag compoundTag3, LevelSettings levelSettings, WorldOptions worldOptions, SpecialWorldProperty specialWorldProperty, Lifecycle lifecycle) {
         this.fixerUpper = dataFixer;
         this.wasModded = bl;
         this.xSpawn = j;
@@ -116,18 +115,19 @@ WorldData {
         this.customBossEvents = compoundTag2;
         this.endDragonFightData = compoundTag3;
         this.settings = levelSettings;
-        this.worldGenSettings = worldGenSettings;
+        this.worldOptions = worldOptions;
+        this.specialWorldProperty = specialWorldProperty;
         this.worldGenSettingsLifecycle = lifecycle;
     }
 
-    public PrimaryLevelData(LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
-        this(null, SharedConstants.getCurrentVersion().getWorldVersion(), null, false, 0, 0, 0, 0.0f, 0L, 0L, 19133, 0, 0, false, 0, false, false, false, WorldBorder.DEFAULT_SETTINGS, 0, 0, null, Sets.newLinkedHashSet(), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS), null, new CompoundTag(), levelSettings.copy(), worldGenSettings, lifecycle);
+    public PrimaryLevelData(LevelSettings levelSettings, WorldOptions worldOptions, SpecialWorldProperty specialWorldProperty, Lifecycle lifecycle) {
+        this(null, SharedConstants.getCurrentVersion().getWorldVersion(), null, false, 0, 0, 0, 0.0f, 0L, 0L, 19133, 0, 0, false, 0, false, false, false, WorldBorder.DEFAULT_SETTINGS, 0, 0, null, Sets.newLinkedHashSet(), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS), null, new CompoundTag(), levelSettings.copy(), worldOptions, specialWorldProperty, lifecycle);
     }
 
-    public static PrimaryLevelData parse(Dynamic<Tag> dynamic2, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
+    public static PrimaryLevelData parse(Dynamic<Tag> dynamic2, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle) {
         long l = dynamic2.get("Time").asLong(0L);
         CompoundTag compoundTag2 = (CompoundTag)dynamic2.get("DragonFight").result().map(Dynamic::getValue).orElseGet(() -> (Tag)dynamic2.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap().getValue());
-        return new PrimaryLevelData(dataFixer, i, compoundTag, dynamic2.get("WasModded").asBoolean(false), dynamic2.get("SpawnX").asInt(0), dynamic2.get("SpawnY").asInt(0), dynamic2.get("SpawnZ").asInt(0), dynamic2.get("SpawnAngle").asFloat(0.0f), l, dynamic2.get("DayTime").asLong(l), levelVersion.levelDataVersion(), dynamic2.get("clearWeatherTime").asInt(0), dynamic2.get("rainTime").asInt(0), dynamic2.get("raining").asBoolean(false), dynamic2.get("thunderTime").asInt(0), dynamic2.get("thundering").asBoolean(false), dynamic2.get("initialized").asBoolean(true), dynamic2.get("DifficultyLocked").asBoolean(false), WorldBorder.Settings.read(dynamic2, WorldBorder.DEFAULT_SETTINGS), dynamic2.get("WanderingTraderSpawnDelay").asInt(0), dynamic2.get("WanderingTraderSpawnChance").asInt(0), dynamic2.get("WanderingTraderId").read(UUIDUtil.CODEC).result().orElse(null), dynamic2.get("ServerBrands").asStream().flatMap(dynamic -> dynamic.asString().result().stream()).collect(Collectors.toCollection(Sets::newLinkedHashSet)), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS, dynamic2.get("ScheduledEvents").asStream()), (CompoundTag)dynamic2.get("CustomBossEvents").orElseEmptyMap().getValue(), compoundTag2, levelSettings, worldGenSettings, lifecycle);
+        return new PrimaryLevelData(dataFixer, i, compoundTag, dynamic2.get("WasModded").asBoolean(false), dynamic2.get("SpawnX").asInt(0), dynamic2.get("SpawnY").asInt(0), dynamic2.get("SpawnZ").asInt(0), dynamic2.get("SpawnAngle").asFloat(0.0f), l, dynamic2.get("DayTime").asLong(l), levelVersion.levelDataVersion(), dynamic2.get("clearWeatherTime").asInt(0), dynamic2.get("rainTime").asInt(0), dynamic2.get("raining").asBoolean(false), dynamic2.get("thunderTime").asInt(0), dynamic2.get("thundering").asBoolean(false), dynamic2.get("initialized").asBoolean(true), dynamic2.get("DifficultyLocked").asBoolean(false), WorldBorder.Settings.read(dynamic2, WorldBorder.DEFAULT_SETTINGS), dynamic2.get("WanderingTraderSpawnDelay").asInt(0), dynamic2.get("WanderingTraderSpawnChance").asInt(0), dynamic2.get("WanderingTraderId").read(UUIDUtil.CODEC).result().orElse(null), dynamic2.get("ServerBrands").asStream().flatMap(dynamic -> dynamic.asString().result().stream()).collect(Collectors.toCollection(Sets::newLinkedHashSet)), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS, dynamic2.get("ScheduledEvents").asStream()), (CompoundTag)dynamic2.get("CustomBossEvents").orElseEmptyMap().getValue(), compoundTag2, levelSettings, worldOptions, specialWorldProperty, lifecycle);
     }
 
     @Override
@@ -154,7 +154,7 @@ WorldData {
         compoundTag.put("Version", compoundTag3);
         compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         RegistryOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, registryAccess);
-        WorldGenSettings.CODEC.encodeStart(dynamicOps, this.worldGenSettings).resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).ifPresent(tag -> compoundTag.put(WORLD_GEN_SETTINGS, (Tag)tag));
+        WorldGenSettings.encode(dynamicOps, this.worldOptions, registryAccess).resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).ifPresent(tag -> compoundTag.put(WORLD_GEN_SETTINGS, (Tag)tag));
         compoundTag.putInt("GameType", this.settings.gameType().getId());
         compoundTag.putInt("SpawnX", this.xSpawn);
         compoundTag.putInt("SpawnY", this.ySpawn);
@@ -181,7 +181,8 @@ WorldData {
         if (compoundTag2 != null) {
             compoundTag.put(PLAYER, compoundTag2);
         }
-        DataPackConfig.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataPackConfig()).result().ifPresent(tag -> compoundTag.put("DataPacks", (Tag)tag));
+        DataResult<Tag> dataResult = WorldDataConfiguration.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataConfiguration());
+        dataResult.get().ifLeft(tag -> compoundTag.merge((CompoundTag)tag)).ifRight(partialResult -> LOGGER.warn("Failed to encode configuration {}", (Object)partialResult.message()));
         if (this.customBossEvents != null) {
             compoundTag.put("CustomBossEvents", this.customBossEvents);
         }
@@ -417,8 +418,18 @@ WorldData {
     }
 
     @Override
-    public WorldGenSettings worldGenSettings() {
-        return this.worldGenSettings;
+    public WorldOptions worldGenOptions() {
+        return this.worldOptions;
+    }
+
+    @Override
+    public boolean isFlatWorld() {
+        return this.specialWorldProperty == SpecialWorldProperty.FLAT;
+    }
+
+    @Override
+    public boolean isDebugWorld() {
+        return this.specialWorldProperty == SpecialWorldProperty.DEBUG;
     }
 
     @Override
@@ -437,13 +448,13 @@ WorldData {
     }
 
     @Override
-    public DataPackConfig getDataPackConfig() {
-        return this.settings.getDataPackConfig();
+    public WorldDataConfiguration getDataConfiguration() {
+        return this.settings.getDataConfiguration();
     }
 
     @Override
-    public void setDataPackConfig(DataPackConfig dataPackConfig) {
-        this.settings = this.settings.withDataPackConfig(dataPackConfig);
+    public void setDataConfiguration(WorldDataConfiguration worldDataConfiguration) {
+        this.settings = this.settings.withDataConfiguration(worldDataConfiguration);
     }
 
     @Override
@@ -512,6 +523,14 @@ WorldData {
     @Override
     public LevelSettings getLevelSettings() {
         return this.settings.copy();
+    }
+
+    @Deprecated
+    public static enum SpecialWorldProperty {
+        NONE,
+        FLAT,
+        DEBUG;
+
     }
 }
 

@@ -34,7 +34,7 @@ extends Sensor<PathfinderMob> {
     @Override
     protected void doTick(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
         Brain<?> brain = pathfinderMob.getBrain();
-        List list = serverLevel.players().stream().filter(EntitySelector.NO_SPECTATORS).filter(serverPlayer -> TEMPT_TARGETING.test(pathfinderMob, (LivingEntity)serverPlayer)).filter(serverPlayer -> pathfinderMob.closerThan((Entity)serverPlayer, 10.0)).filter(this::playerHoldingTemptation).sorted(Comparator.comparingDouble(pathfinderMob::distanceToSqr)).collect(Collectors.toList());
+        List list = serverLevel.players().stream().filter(EntitySelector.NO_SPECTATORS).filter(serverPlayer -> TEMPT_TARGETING.test(pathfinderMob, (LivingEntity)serverPlayer)).filter(serverPlayer -> pathfinderMob.closerThan((Entity)serverPlayer, 10.0)).filter(this::playerHoldingTemptation).filter(serverPlayer -> !pathfinderMob.hasPassenger((Entity)serverPlayer)).sorted(Comparator.comparingDouble(pathfinderMob::distanceToSqr)).collect(Collectors.toList());
         if (!list.isEmpty()) {
             Player player = (Player)list.get(0);
             brain.setMemory(MemoryModuleType.TEMPTING_PLAYER, player);

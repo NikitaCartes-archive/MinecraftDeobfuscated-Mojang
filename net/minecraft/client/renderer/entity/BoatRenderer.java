@@ -14,8 +14,14 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.ChestBoatModel;
+import net.minecraft.client.model.ChestRaftModel;
+import net.minecraft.client.model.ListModel;
+import net.minecraft.client.model.RaftModel;
+import net.minecraft.client.model.WaterPatchModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -28,7 +34,7 @@ import net.minecraft.world.entity.vehicle.Boat;
 @Environment(value=EnvType.CLIENT)
 public class BoatRenderer
 extends EntityRenderer<Boat> {
-    private final Map<Boat.Type, Pair<ResourceLocation, BoatModel>> boatResources;
+    private final Map<Boat.Type, Pair<ResourceLocation, ListModel<Boat>>> boatResources;
 
     public BoatRenderer(EntityRendererProvider.Context context, boolean bl) {
         super(context);
@@ -36,9 +42,13 @@ extends EntityRenderer<Boat> {
         this.boatResources = Stream.of(Boat.Type.values()).collect(ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(new ResourceLocation(BoatRenderer.getTextureLocation(type, bl)), this.createBoatModel(context, (Boat.Type)((Object)type), bl))));
     }
 
-    private BoatModel createBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean bl) {
+    private ListModel<Boat> createBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean bl) {
         ModelLayerLocation modelLayerLocation = bl ? ModelLayers.createChestBoatModelName(type) : ModelLayers.createBoatModelName(type);
-        return new BoatModel(context.bakeLayer(modelLayerLocation), bl);
+        ModelPart modelPart = context.bakeLayer(modelLayerLocation);
+        if (type == Boat.Type.BAMBOO) {
+            return bl ? new ChestRaftModel(modelPart) : new RaftModel(modelPart);
+        }
+        return bl ? new ChestBoatModel(modelPart) : new BoatModel(modelPart);
     }
 
     private static String getTextureLocation(Boat.Type type, boolean bl) {
@@ -65,17 +75,20 @@ extends EntityRenderer<Boat> {
         if (!Mth.equal(k = boat.getBubbleAngle(g), 0.0f)) {
             poseStack.mulPose(new Quaternion(new Vector3f(1.0f, 0.0f, 1.0f), boat.getBubbleAngle(g), true));
         }
-        Pair<ResourceLocation, BoatModel> pair = this.boatResources.get((Object)boat.getBoatType());
+        Pair<ResourceLocation, ListModel<Boat>> pair = this.boatResources.get((Object)boat.getBoatType());
         ResourceLocation resourceLocation = pair.getFirst();
-        BoatModel boatModel = pair.getSecond();
+        ListModel<Boat> listModel = pair.getSecond();
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
-        boatModel.setupAnim(boat, g, 0.0f, -0.1f, 0.0f, 0.0f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(boatModel.renderType(resourceLocation));
-        boatModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+        listModel.setupAnim(boat, g, 0.0f, -0.1f, 0.0f, 0.0f);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(listModel.renderType(resourceLocation));
+        listModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         if (!boat.isUnderWater()) {
             VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
-            boatModel.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
+            if (listModel instanceof WaterPatchModel) {
+                WaterPatchModel waterPatchModel = (WaterPatchModel)((Object)listModel);
+                waterPatchModel.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
+            }
         }
         poseStack.popPose();
         super.render(boat, f, g, poseStack, multiBufferSource, i);

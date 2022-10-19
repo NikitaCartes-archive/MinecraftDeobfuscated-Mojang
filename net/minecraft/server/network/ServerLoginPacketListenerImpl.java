@@ -24,6 +24,7 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
@@ -45,8 +46,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class ServerLoginPacketListenerImpl
-implements TickablePacketListener,
-ServerLoginPacketListener {
+implements ServerLoginPacketListener,
+TickablePacketListener {
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int MAX_TICKS_BEFORE_LOGIN = 600;
@@ -61,8 +62,7 @@ ServerLoginPacketListener {
     private final String serverId = "";
     @Nullable
     private ServerPlayer delayedAcceptPlayer;
-    @Nullable
-    private ProfilePublicKey.Data profilePublicKeyData;
+    private RemoteChatSession.Data chatSessionData = RemoteChatSession.Data.UNVERIFIED;
 
     public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
         this.server = minecraftServer;
@@ -101,15 +101,15 @@ ServerLoginPacketListener {
     }
 
     public void handleAcceptedLogin() {
-        ProfilePublicKey profilePublicKey;
+        RemoteChatSession remoteChatSession;
         block11: {
-            profilePublicKey = null;
+            remoteChatSession = RemoteChatSession.UNVERIFIED;
             if (!this.gameProfile.isComplete()) {
                 this.gameProfile = this.createFakeProfile(this.gameProfile);
             } else {
                 try {
                     SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
-                    profilePublicKey = ServerLoginPacketListenerImpl.validatePublicKey(this.profilePublicKeyData, this.gameProfile.getId(), signatureValidator, this.server.enforceSecureProfile());
+                    remoteChatSession = ServerLoginPacketListenerImpl.validateChatSession(this.chatSessionData, this.gameProfile, signatureValidator, this.server.enforceSecureProfile());
                 } catch (ProfilePublicKey.ValidationException validationException) {
                     LOGGER.error("Failed to validate profile key: {}", (Object)validationException.getMessage());
                     if (this.connection.isMemoryConnection()) break block11;
@@ -129,7 +129,7 @@ ServerLoginPacketListener {
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
             ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
             try {
-                ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, profilePublicKey);
+                ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, remoteChatSession);
                 if (serverPlayer != null) {
                     this.state = State.DELAY_ACCEPT;
                     this.delayedAcceptPlayer = serverPlayer2;
@@ -161,22 +161,19 @@ ServerLoginPacketListener {
         return String.valueOf(this.connection.getRemoteAddress());
     }
 
-    @Nullable
-    private static ProfilePublicKey validatePublicKey(@Nullable ProfilePublicKey.Data data, UUID uUID, SignatureValidator signatureValidator, boolean bl) throws ProfilePublicKey.ValidationException {
-        if (data == null) {
-            if (bl) {
-                throw new ProfilePublicKey.ValidationException(ProfilePublicKey.MISSING_PROFILE_PUBLIC_KEY);
-            }
-            return null;
+    private static RemoteChatSession validateChatSession(RemoteChatSession.Data data, GameProfile gameProfile, SignatureValidator signatureValidator, boolean bl) throws ProfilePublicKey.ValidationException {
+        RemoteChatSession remoteChatSession = data.validate(gameProfile, signatureValidator, Duration.ZERO);
+        if (!remoteChatSession.verifiable() && bl) {
+            throw new ProfilePublicKey.ValidationException(ProfilePublicKey.MISSING_PROFILE_PUBLIC_KEY);
         }
-        return ProfilePublicKey.createValidated(signatureValidator, uUID, data, Duration.ZERO);
+        return remoteChatSession;
     }
 
     @Override
     public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
         Validate.validState(this.state == State.HELLO, "Unexpected hello packet", new Object[0]);
         Validate.validState(ServerLoginPacketListenerImpl.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username", new Object[0]);
-        this.profilePublicKeyData = serverboundHelloPacket.publicKey().orElse(null);
+        this.chatSessionData = serverboundHelloPacket.chatSession();
         GameProfile gameProfile = this.server.getSingleplayerProfile();
         if (gameProfile != null && serverboundHelloPacket.name().equalsIgnoreCase(gameProfile.getName())) {
             this.gameProfile = gameProfile;
@@ -203,7 +200,7 @@ ServerLoginPacketListener {
         try {
             ProfilePublicKey profilePublicKey;
             PrivateKey privateKey = this.server.getKeyPair().getPrivate();
-            if (this.profilePublicKeyData != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, profilePublicKey = new ProfilePublicKey(this.profilePublicKeyData)) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
+            if (this.chatSessionData.profilePublicKey() != null ? !serverboundKeyPacket.isChallengeSignatureValid(this.nonce, (profilePublicKey = new ProfilePublicKey(this.chatSessionData.profilePublicKey())).createSignatureValidator()) : !serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {
                 throw new IllegalStateException("Protocol error");
             }
             SecretKey secretKey = serverboundKeyPacket.getSecretKey(privateKey);

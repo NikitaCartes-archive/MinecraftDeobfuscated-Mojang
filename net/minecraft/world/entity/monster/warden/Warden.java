@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -118,7 +119,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     public Warden(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
-        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this, null, 0.0f, 0));
+        this.dynamicGameEventListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this));
         this.xpReward = 5;
         this.getNavigation().setCanFloat(true);
         this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0f);
@@ -130,7 +131,7 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     @Override
-    public Packet<?> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return new ClientboundAddEntityPacket(this, this.hasPose(Pose.EMERGING) ? 1 : 0);
     }
 
@@ -560,7 +561,7 @@ implements VibrationListener.VibrationListenerConfig {
     @Override
     public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
         LivingEntity livingEntity;
-        if (this.isNoAi() || this.isDeadOrDying() || this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN) || this.isDiggingOrEmerging() || !serverLevel.getWorldBorder().isWithinBounds(blockPos) || this.isRemoved() || this.level != serverLevel) {
+        if (this.isNoAi() || this.isDeadOrDying() || this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN) || this.isDiggingOrEmerging() || !serverLevel.getWorldBorder().isWithinBounds(blockPos)) {
             return false;
         }
         Entity entity = context.sourceEntity();

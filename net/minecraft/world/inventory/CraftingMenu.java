@@ -67,6 +67,7 @@ extends RecipeBookMenu<CraftingContainer> {
     }
 
     protected static void slotChangedCraftingGrid(AbstractContainerMenu abstractContainerMenu, Level level, Player player, CraftingContainer craftingContainer, ResultContainer resultContainer) {
+        ItemStack itemStack2;
         CraftingRecipe craftingRecipe;
         if (level.isClientSide) {
             return;
@@ -74,8 +75,8 @@ extends RecipeBookMenu<CraftingContainer> {
         ServerPlayer serverPlayer = (ServerPlayer)player;
         ItemStack itemStack = ItemStack.EMPTY;
         Optional<CraftingRecipe> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
-        if (optional.isPresent() && resultContainer.setRecipeUsed(level, serverPlayer, craftingRecipe = optional.get())) {
-            itemStack = craftingRecipe.assemble(craftingContainer);
+        if (optional.isPresent() && resultContainer.setRecipeUsed(level, serverPlayer, craftingRecipe = optional.get()) && (itemStack2 = craftingRecipe.assemble(craftingContainer)).isItemEnabled(level.enabledFeatures())) {
+            itemStack = itemStack2;
         }
         resultContainer.setItem(0, itemStack);
         abstractContainerMenu.setRemoteSlot(0, itemStack);

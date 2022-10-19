@@ -86,6 +86,7 @@ implements InventoryCarrier {
     private static final Ingredient DUPLICATION_ITEM = Ingredient.of(Items.AMETHYST_SHARD);
     private static final int DUPLICATION_COOLDOWN_TICKS = 6000;
     private static final int NUM_OF_DUPLICATION_HEARTS = 3;
+    private static final double RIDING_OFFSET = 0.4;
     private static final EntityDataAccessor<Boolean> DATA_DANCING = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_CAN_DUPLICATE = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
     protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HURT_BY, SensorType.NEAREST_ITEMS);
@@ -110,7 +111,7 @@ implements InventoryCarrier {
         this.setCanPickUpLoot(this.canPickUpLoot());
         EntityPositionSource positionSource = new EntityPositionSource(this, this.getEyeHeight());
         this.vibrationListenerConfig = new AllayVibrationListenerConfig();
-        this.dynamicVibrationListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig, null, 0.0f, 0));
+        this.dynamicVibrationListener = new DynamicGameEventListener<VibrationListener>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig));
         this.dynamicJukeboxListener = new DynamicGameEventListener<JukeboxListener>(new JukeboxListener(positionSource, GameEvent.JUKEBOX_PLAY.getNotificationRadius()));
     }
 
@@ -260,6 +261,9 @@ implements InventoryCarrier {
             }
         } else {
             this.dynamicVibrationListener.getListener().tick(this.level);
+            if (this.isPanicking()) {
+                this.setDancing(false);
+            }
         }
     }
 
@@ -340,7 +344,29 @@ implements InventoryCarrier {
     @Override
     public boolean wantsToPickUp(ItemStack itemStack) {
         ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-        return !itemStack2.isEmpty() && itemStack2.sameItemStackIgnoreDurability(itemStack) && this.inventory.canAddItem(itemStack) && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+        return !itemStack2.isEmpty() && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.inventory.canAddItem(itemStack) && this.allayConsidersItemEqual(itemStack2, itemStack);
+    }
+
+    private boolean allayConsidersItemEqual(ItemStack itemStack, ItemStack itemStack2) {
+        return itemStack.sameItemStackIgnoreDurability(itemStack2) && !this.hasNonMatchingPotion(itemStack, itemStack2);
+    }
+
+    private boolean hasNonMatchingPotion(ItemStack itemStack, ItemStack itemStack2) {
+        boolean bl2;
+        boolean bl;
+        CompoundTag compoundTag = itemStack.getTag();
+        boolean bl3 = bl = compoundTag != null && compoundTag.contains("Potion");
+        if (!bl) {
+            return false;
+        }
+        CompoundTag compoundTag2 = itemStack2.getTag();
+        boolean bl4 = bl2 = compoundTag2 != null && compoundTag2.contains("Potion");
+        if (!bl2) {
+            return true;
+        }
+        Tag tag = compoundTag.get("Potion");
+        Tag tag2 = compoundTag2.get("Potion");
+        return tag != null && tag2 != null && !tag.equals(tag2);
     }
 
     @Override
@@ -373,8 +399,12 @@ implements InventoryCarrier {
         return this.entityData.get(DATA_DANCING);
     }
 
+    public boolean isPanicking() {
+        return this.brain.getMemory(MemoryModuleType.IS_PANICKING).isPresent();
+    }
+
     public void setDancing(boolean bl) {
-        if (this.level.isClientSide) {
+        if (this.level.isClientSide || !this.isEffectiveAi() || bl && this.isPanicking()) {
             return;
         }
         this.entityData.set(DATA_DANCING, bl);
@@ -395,6 +425,11 @@ implements InventoryCarrier {
 
     public float getSpinningProgress(float f) {
         return Mth.lerp(f, this.spinningAnimationTicks0, this.spinningAnimationTicks) / 15.0f;
+    }
+
+    @Override
+    public boolean equipmentHasChanged(ItemStack itemStack, ItemStack itemStack2) {
+        return !this.allayConsidersItemEqual(itemStack, itemStack2);
     }
 
     @Override
@@ -425,7 +460,9 @@ implements InventoryCarrier {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+        if (compoundTag.contains("Inventory", 10)) {
+            this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+        }
         if (compoundTag.contains("listener", 10)) {
             VibrationListener.codec(this.vibrationListenerConfig).parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("listener"))).resultOrPartial(LOGGER::error).ifPresent(vibrationListener -> this.dynamicVibrationListener.updateListener((VibrationListener)vibrationListener, this.level));
         }
@@ -495,6 +532,11 @@ implements InventoryCarrier {
     }
 
     @Override
+    public double getMyRidingOffset() {
+        return 0.4;
+    }
+
+    @Override
     public void handleEntityEvent(byte b) {
         if (b == 18) {
             for (int i = 0; i < 3; ++i) {
@@ -519,7 +561,7 @@ implements InventoryCarrier {
 
         @Override
         public boolean shouldListen(ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
-            if (Allay.this.getLevel() != serverLevel || Allay.this.isRemoved() || Allay.this.isNoAi()) {
+            if (Allay.this.isNoAi()) {
                 return false;
             }
             Optional<GlobalPos> optional = Allay.this.getBrain().getMemory(MemoryModuleType.LIKED_NOTEBLOCK_POSITION);
@@ -564,13 +606,13 @@ implements InventoryCarrier {
         }
 
         @Override
-        public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
-            if (message.gameEvent() == GameEvent.JUKEBOX_PLAY) {
-                Allay.this.setJukeboxPlaying(new BlockPos(message.source()), true);
+        public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+            if (gameEvent == GameEvent.JUKEBOX_PLAY) {
+                Allay.this.setJukeboxPlaying(new BlockPos(vec3), true);
                 return true;
             }
-            if (message.gameEvent() == GameEvent.JUKEBOX_STOP_PLAY) {
-                Allay.this.setJukeboxPlaying(new BlockPos(message.source()), false);
+            if (gameEvent == GameEvent.JUKEBOX_STOP_PLAY) {
+                Allay.this.setJukeboxPlaying(new BlockPos(vec3), false);
                 return true;
             }
             return false;

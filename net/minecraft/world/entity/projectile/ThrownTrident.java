@@ -112,6 +112,7 @@ extends AbstractArrow {
 
     @Override
     protected void onHitEntity(EntityHitResult entityHitResult) {
+        LightningBolt lightningBolt;
         BlockPos blockPos;
         Entity entity2;
         Entity entity = entityHitResult.getEntity();
@@ -138,8 +139,7 @@ extends AbstractArrow {
         }
         this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
         float g = 1.0f;
-        if (this.level instanceof ServerLevel && this.level.isThundering() && this.isChanneling() && this.level.canSeeSky(blockPos = entity.blockPosition())) {
-            LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level);
+        if (this.level instanceof ServerLevel && this.level.isThundering() && this.isChanneling() && this.level.canSeeSky(blockPos = entity.blockPosition()) && (lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level)) != null) {
             lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
             lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
             this.level.addFreshEntity(lightningBolt);

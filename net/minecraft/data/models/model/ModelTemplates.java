@@ -34,6 +34,12 @@ public class ModelTemplates {
     public static final ModelTemplate DOOR_TOP_LEFT_OPEN = ModelTemplates.create("door_top_left_open", "_top_left_open", TextureSlot.TOP, TextureSlot.BOTTOM);
     public static final ModelTemplate DOOR_TOP_RIGHT = ModelTemplates.create("door_top_right", "_top_right", TextureSlot.TOP, TextureSlot.BOTTOM);
     public static final ModelTemplate DOOR_TOP_RIGHT_OPEN = ModelTemplates.create("door_top_right_open", "_top_right_open", TextureSlot.TOP, TextureSlot.BOTTOM);
+    public static final ModelTemplate CUSTOM_FENCE_POST = ModelTemplates.create("custom_fence_post", "_post", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+    public static final ModelTemplate CUSTOM_FENCE_SIDE_NORTH = ModelTemplates.create("custom_fence_side_north", "_side_north", TextureSlot.TEXTURE);
+    public static final ModelTemplate CUSTOM_FENCE_SIDE_EAST = ModelTemplates.create("custom_fence_side_east", "_side_east", TextureSlot.TEXTURE);
+    public static final ModelTemplate CUSTOM_FENCE_SIDE_SOUTH = ModelTemplates.create("custom_fence_side_south", "_side_south", TextureSlot.TEXTURE);
+    public static final ModelTemplate CUSTOM_FENCE_SIDE_WEST = ModelTemplates.create("custom_fence_side_west", "_side_west", TextureSlot.TEXTURE);
+    public static final ModelTemplate CUSTOM_FENCE_INVENTORY = ModelTemplates.create("custom_fence_inventory", "_inventory", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_POST = ModelTemplates.create("fence_post", "_post", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_SIDE = ModelTemplates.create("fence_side", "_side", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_INVENTORY = ModelTemplates.create("fence_inventory", "_inventory", TextureSlot.TEXTURE);
@@ -41,6 +47,10 @@ public class ModelTemplates {
     public static final ModelTemplate WALL_LOW_SIDE = ModelTemplates.create("template_wall_side", "_side", TextureSlot.WALL);
     public static final ModelTemplate WALL_TALL_SIDE = ModelTemplates.create("template_wall_side_tall", "_side_tall", TextureSlot.WALL);
     public static final ModelTemplate WALL_INVENTORY = ModelTemplates.create("wall_inventory", "_inventory", TextureSlot.WALL);
+    public static final ModelTemplate CUSTOM_FENCE_GATE_CLOSED = ModelTemplates.create("template_custom_fence_gate", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+    public static final ModelTemplate CUSTOM_FENCE_GATE_OPEN = ModelTemplates.create("template_custom_fence_gate_open", "_open", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+    public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_CLOSED = ModelTemplates.create("template_custom_fence_gate_wall", "_wall", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+    public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_OPEN = ModelTemplates.create("template_custom_fence_gate_wall_open", "_wall_open", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
     public static final ModelTemplate FENCE_GATE_CLOSED = ModelTemplates.create("template_fence_gate", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_GATE_OPEN = ModelTemplates.create("template_fence_gate_open", "_open", TextureSlot.TEXTURE);
     public static final ModelTemplate FENCE_GATE_WALL_CLOSED = ModelTemplates.create("template_fence_gate_wall", "_wall", TextureSlot.TEXTURE);
@@ -81,6 +91,7 @@ public class ModelTemplates {
     public static final ModelTemplate STAINED_GLASS_PANE_SIDE = ModelTemplates.create("template_glass_pane_side", "_side", TextureSlot.PANE, TextureSlot.EDGE);
     public static final ModelTemplate STAINED_GLASS_PANE_SIDE_ALT = ModelTemplates.create("template_glass_pane_side_alt", "_side_alt", TextureSlot.PANE, TextureSlot.EDGE);
     public static final ModelTemplate COMMAND_BLOCK = ModelTemplates.create("template_command_block", TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.SIDE);
+    public static final ModelTemplate CHISELED_BOOKSHELF_BLOCK = ModelTemplates.create("template_chiseled_bookshelf", TextureSlot.FRONT, TextureSlot.SIDE, TextureSlot.TOP);
     public static final ModelTemplate ANVIL = ModelTemplates.create("template_anvil", TextureSlot.TOP);
     public static final ModelTemplate[] STEMS = (ModelTemplate[])IntStream.range(0, 8).mapToObj(i -> ModelTemplates.create("stem_growth" + i, "_stage" + i, TextureSlot.STEM)).toArray(ModelTemplate[]::new);
     public static final ModelTemplate ATTACHED_STEM = ModelTemplates.create("stem_fruit", TextureSlot.STEM, TextureSlot.UPPER_STEM);

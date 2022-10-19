@@ -3,10 +3,9 @@
  */
 package net.minecraft.commands.arguments;
 
-import net.minecraft.commands.arguments.PreviewedArgument;
+import com.mojang.brigadier.arguments.ArgumentType;
 
 public interface SignedArgument<T>
-extends PreviewedArgument<T> {
-    public String getSignableText(T var1);
+extends ArgumentType<T> {
 }
 

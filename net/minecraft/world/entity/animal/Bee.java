@@ -576,6 +576,7 @@ FlyingAnimal {
     }
 
     @Override
+    @Nullable
     public Bee getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.BEE.create(serverLevel);
     }
@@ -643,6 +644,7 @@ FlyingAnimal {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

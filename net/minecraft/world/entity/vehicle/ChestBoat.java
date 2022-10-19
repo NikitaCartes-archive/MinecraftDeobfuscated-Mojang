@@ -113,6 +113,7 @@ ContainerEntity {
             case Boat.Type.ACACIA -> Items.ACACIA_CHEST_BOAT;
             case Boat.Type.DARK_OAK -> Items.DARK_OAK_CHEST_BOAT;
             case Boat.Type.MANGROVE -> Items.MANGROVE_CHEST_BOAT;
+            case Boat.Type.BAMBOO -> Items.BAMBOO_CHEST_RAFT;
             default -> Items.OAK_CHEST_BOAT;
         };
     }

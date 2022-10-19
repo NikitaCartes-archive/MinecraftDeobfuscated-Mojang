@@ -32,6 +32,7 @@ public class ModelLayers {
     public static final ModelLayerLocation BOOK = ModelLayers.register("book");
     public static final ModelLayerLocation CAT = ModelLayers.register("cat");
     public static final ModelLayerLocation CAT_COLLAR = ModelLayers.register("cat", "collar");
+    public static final ModelLayerLocation CAMEL = ModelLayers.register("camel");
     public static final ModelLayerLocation CAVE_SPIDER = ModelLayers.register("cave_spider");
     public static final ModelLayerLocation CHEST = ModelLayers.register("chest");
     public static final ModelLayerLocation CHEST_MINECART = ModelLayers.register("chest_minecart");
@@ -201,6 +202,14 @@ public class ModelLayers {
         return ModelLayers.register(string, "outer_armor");
     }
 
+    public static ModelLayerLocation createRaftModelName(Boat.Type type) {
+        return ModelLayers.createLocation("raft/" + type.getName(), DEFAULT_LAYER);
+    }
+
+    public static ModelLayerLocation createChestRaftModelName(Boat.Type type) {
+        return ModelLayers.createLocation("chest_raft/" + type.getName(), DEFAULT_LAYER);
+    }
+
     public static ModelLayerLocation createBoatModelName(Boat.Type type) {
         return ModelLayers.createLocation("boat/" + type.getName(), DEFAULT_LAYER);
     }
@@ -211,6 +220,10 @@ public class ModelLayers {
 
     public static ModelLayerLocation createSignModelName(WoodType woodType) {
         return ModelLayers.createLocation("sign/" + woodType.name(), DEFAULT_LAYER);
+    }
+
+    public static ModelLayerLocation createHangingSignModelName(WoodType woodType) {
+        return ModelLayers.createLocation("hanging_sign/" + woodType.name(), DEFAULT_LAYER);
     }
 
     public static Stream<ModelLayerLocation> getKnownLocations() {

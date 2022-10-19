@@ -57,6 +57,7 @@ extends ThrowableItemProjectile {
                 }
                 for (int j = 0; j < i; ++j) {
                     Chicken chicken = EntityType.CHICKEN.create(this.level);
+                    if (chicken == null) continue;
                     chicken.setAge(-24000);
                     chicken.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
                     this.level.addFreshEntity(chicken);

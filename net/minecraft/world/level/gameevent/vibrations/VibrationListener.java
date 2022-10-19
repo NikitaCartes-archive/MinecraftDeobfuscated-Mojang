@@ -3,16 +3,19 @@
  */
 package net.minecraft.world.level.gameevent.vibrations;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Optional;
-import java.util.UUID;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,48 +25,111 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipBlockStateContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
+import net.minecraft.world.level.gameevent.vibrations.VibrationInfo;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSelector;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class VibrationListener
 implements GameEventListener {
+    @VisibleForTesting
+    public static final Object2IntMap<GameEvent> VIBRATION_FREQUENCY_FOR_EVENT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
+        object2IntOpenHashMap.put(GameEvent.STEP, 1);
+        object2IntOpenHashMap.put(GameEvent.FLAP, 2);
+        object2IntOpenHashMap.put(GameEvent.SWIM, 3);
+        object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
+        object2IntOpenHashMap.put(GameEvent.HIT_GROUND, 5);
+        object2IntOpenHashMap.put(GameEvent.TELEPORT, 5);
+        object2IntOpenHashMap.put(GameEvent.SPLASH, 6);
+        object2IntOpenHashMap.put(GameEvent.ENTITY_SHAKE, 6);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_CHANGE, 6);
+        object2IntOpenHashMap.put(GameEvent.NOTE_BLOCK_PLAY, 6);
+        object2IntOpenHashMap.put(GameEvent.PROJECTILE_SHOOT, 7);
+        object2IntOpenHashMap.put(GameEvent.DRINK, 7);
+        object2IntOpenHashMap.put(GameEvent.PRIME_FUSE, 7);
+        object2IntOpenHashMap.put(GameEvent.PROJECTILE_LAND, 8);
+        object2IntOpenHashMap.put(GameEvent.EAT, 8);
+        object2IntOpenHashMap.put(GameEvent.ENTITY_INTERACT, 8);
+        object2IntOpenHashMap.put(GameEvent.ENTITY_DAMAGE, 8);
+        object2IntOpenHashMap.put(GameEvent.EQUIP, 9);
+        object2IntOpenHashMap.put(GameEvent.SHEAR, 9);
+        object2IntOpenHashMap.put(GameEvent.ENTITY_ROAR, 9);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_CLOSE, 10);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_DEACTIVATE, 10);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_DETACH, 10);
+        object2IntOpenHashMap.put(GameEvent.DISPENSE_FAIL, 10);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_OPEN, 11);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_ACTIVATE, 11);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_ATTACH, 11);
+        object2IntOpenHashMap.put(GameEvent.ENTITY_PLACE, 12);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_PLACE, 12);
+        object2IntOpenHashMap.put(GameEvent.FLUID_PLACE, 12);
+        object2IntOpenHashMap.put(GameEvent.ENTITY_DIE, 13);
+        object2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY, 13);
+        object2IntOpenHashMap.put(GameEvent.FLUID_PICKUP, 13);
+        object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 14);
+        object2IntOpenHashMap.put(GameEvent.CONTAINER_CLOSE, 14);
+        object2IntOpenHashMap.put(GameEvent.PISTON_CONTRACT, 14);
+        object2IntOpenHashMap.put(GameEvent.PISTON_EXTEND, 15);
+        object2IntOpenHashMap.put(GameEvent.CONTAINER_OPEN, 15);
+        object2IntOpenHashMap.put(GameEvent.EXPLODE, 15);
+        object2IntOpenHashMap.put(GameEvent.LIGHTNING_STRIKE, 15);
+        object2IntOpenHashMap.put(GameEvent.INSTRUMENT_PLAY, 15);
+    }));
     protected final PositionSource listenerSource;
     protected final int listenerRange;
     protected final VibrationListenerConfig config;
     @Nullable
-    protected ReceivingEvent receivingEvent;
-    protected float receivingDistance;
+    protected VibrationInfo currentVibration;
     protected int travelTimeInTicks;
+    private final VibrationSelector selectionStrategy;
 
     public static Codec<VibrationListener> codec(VibrationListenerConfig vibrationListenerConfig) {
-        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)PositionSource.CODEC.fieldOf("source")).forGetter(vibrationListener -> vibrationListener.listenerSource), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range")).forGetter(vibrationListener -> vibrationListener.listenerRange), ReceivingEvent.CODEC.optionalFieldOf("event").forGetter(vibrationListener -> Optional.ofNullable(vibrationListener.receivingEvent)), ((MapCodec)Codec.floatRange(0.0f, Float.MAX_VALUE).fieldOf("event_distance")).orElse(Float.valueOf(0.0f)).forGetter(vibrationListener -> Float.valueOf(vibrationListener.receivingDistance)), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay")).orElse(0).forGetter(vibrationListener -> vibrationListener.travelTimeInTicks)).apply((Applicative<VibrationListener, ?>)instance, (positionSource, integer, optional, float_, integer2) -> new VibrationListener((PositionSource)positionSource, (int)integer, vibrationListenerConfig, optional.orElse(null), float_.floatValue(), (int)integer2)));
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)PositionSource.CODEC.fieldOf("source")).forGetter(vibrationListener -> vibrationListener.listenerSource), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("range")).forGetter(vibrationListener -> vibrationListener.listenerRange), VibrationInfo.CODEC.optionalFieldOf("event").forGetter(vibrationListener -> Optional.ofNullable(vibrationListener.currentVibration)), ((MapCodec)VibrationSelector.CODEC.fieldOf("selector")).forGetter(vibrationListener -> vibrationListener.selectionStrategy), ((MapCodec)ExtraCodecs.NON_NEGATIVE_INT.fieldOf("event_delay")).orElse(0).forGetter(vibrationListener -> vibrationListener.travelTimeInTicks)).apply((Applicative<VibrationListener, ?>)instance, (positionSource, integer, optional, vibrationSelector, integer2) -> new VibrationListener((PositionSource)positionSource, (int)integer, vibrationListenerConfig, optional.orElse(null), (VibrationSelector)vibrationSelector, (int)integer2)));
     }
 
-    public VibrationListener(PositionSource positionSource, int i, VibrationListenerConfig vibrationListenerConfig, @Nullable ReceivingEvent receivingEvent, float f, int j) {
+    private VibrationListener(PositionSource positionSource, int i, VibrationListenerConfig vibrationListenerConfig, @Nullable VibrationInfo vibrationInfo, VibrationSelector vibrationSelector, int j) {
         this.listenerSource = positionSource;
         this.listenerRange = i;
         this.config = vibrationListenerConfig;
-        this.receivingEvent = receivingEvent;
-        this.receivingDistance = f;
+        this.currentVibration = vibrationInfo;
         this.travelTimeInTicks = j;
+        this.selectionStrategy = vibrationSelector;
+    }
+
+    public VibrationListener(PositionSource positionSource, int i, VibrationListenerConfig vibrationListenerConfig) {
+        this(positionSource, i, vibrationListenerConfig, null, new VibrationSelector(), 0);
+    }
+
+    public static int getGameEventFrequency(GameEvent gameEvent) {
+        return VIBRATION_FREQUENCY_FOR_EVENT.getOrDefault((Object)gameEvent, 0);
     }
 
     public void tick(Level level) {
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            if (this.receivingEvent != null) {
+            if (this.currentVibration == null) {
+                this.selectionStrategy.chosenCandidate(serverLevel.getGameTime()).ifPresent(vibrationInfo -> {
+                    this.currentVibration = vibrationInfo;
+                    Vec3 vec3 = this.currentVibration.pos();
+                    this.travelTimeInTicks = Mth.floor(this.currentVibration.distance());
+                    serverLevel.sendParticles(new VibrationParticleOption(this.listenerSource, this.travelTimeInTicks), vec3.x, vec3.y, vec3.z, 1, 0.0, 0.0, 0.0, 0.0);
+                    this.config.onSignalSchedule();
+                    this.selectionStrategy.startOver();
+                });
+            }
+            if (this.currentVibration != null) {
                 --this.travelTimeInTicks;
                 if (this.travelTimeInTicks <= 0) {
                     this.travelTimeInTicks = 0;
-                    this.config.onSignalReceive(serverLevel, this, new BlockPos(this.receivingEvent.pos), this.receivingEvent.gameEvent, this.receivingEvent.getEntity(serverLevel).orElse(null), this.receivingEvent.getProjectileOwner(serverLevel).orElse(null), this.receivingDistance);
-                    this.receivingEvent = null;
+                    this.config.onSignalReceive(serverLevel, this, new BlockPos(this.currentVibration.pos()), this.currentVibration.gameEvent(), this.currentVibration.getEntity(serverLevel).orElse(null), this.currentVibration.getProjectileOwner(serverLevel).orElse(null), this.currentVibration.distance());
+                    this.currentVibration = null;
                 }
             }
         }
@@ -80,20 +146,17 @@ implements GameEventListener {
     }
 
     @Override
-    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent.Message message) {
-        GameEvent.Context context;
-        if (this.receivingEvent != null) {
+    public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+        if (this.currentVibration != null) {
             return false;
         }
-        GameEvent gameEvent = message.gameEvent();
-        if (!this.config.isValidVibration(gameEvent, context = message.context())) {
+        if (!this.config.isValidVibration(gameEvent, context)) {
             return false;
         }
         Optional<Vec3> optional = this.listenerSource.getPosition(serverLevel);
         if (optional.isEmpty()) {
             return false;
         }
-        Vec3 vec3 = message.source();
         Vec3 vec32 = optional.get();
         if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
             return false;
@@ -101,16 +164,16 @@ implements GameEventListener {
         if (VibrationListener.isOccluded(serverLevel, vec3, vec32)) {
             return false;
         }
-        this.scheduleSignal(serverLevel, gameEvent, context, vec3, vec32);
+        this.scheduleVibration(serverLevel, gameEvent, context, vec3, vec32);
         return true;
     }
 
-    private void scheduleSignal(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
-        this.receivingDistance = (float)vec3.distanceTo(vec32);
-        this.receivingEvent = new ReceivingEvent(gameEvent, this.receivingDistance, vec3, context.sourceEntity());
-        this.travelTimeInTicks = Mth.floor(this.receivingDistance);
-        serverLevel.sendParticles(new VibrationParticleOption(this.listenerSource, this.travelTimeInTicks), vec3.x, vec3.y, vec3.z, 1, 0.0, 0.0, 0.0, 0.0);
-        this.config.onSignalSchedule();
+    public void forceGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+        this.listenerSource.getPosition(serverLevel).ifPresent(vec32 -> this.scheduleVibration(serverLevel, gameEvent, context, vec3, (Vec3)vec32));
+    }
+
+    public void scheduleVibration(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
+        this.selectionStrategy.addCandidate(new VibrationInfo(gameEvent, (float)vec3.distanceTo(vec32), vec3, context.sourceEntity()), serverLevel.getGameTime());
     }
 
     private static boolean isOccluded(Level level, Vec3 vec3, Vec3 vec32) {
@@ -164,50 +227,6 @@ implements GameEventListener {
         public void onSignalReceive(ServerLevel var1, GameEventListener var2, BlockPos var3, GameEvent var4, @Nullable Entity var5, @Nullable Entity var6, float var7);
 
         default public void onSignalSchedule() {
-        }
-    }
-
-    public record ReceivingEvent(GameEvent gameEvent, float distance, Vec3 pos, @Nullable UUID uuid, @Nullable UUID projectileOwnerUuid, @Nullable Entity entity) {
-        public static final Codec<ReceivingEvent> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.GAME_EVENT.byNameCodec().fieldOf("game_event")).forGetter(ReceivingEvent::gameEvent), ((MapCodec)Codec.floatRange(0.0f, Float.MAX_VALUE).fieldOf("distance")).forGetter(ReceivingEvent::distance), ((MapCodec)Vec3.CODEC.fieldOf("pos")).forGetter(ReceivingEvent::pos), ExtraCodecs.UUID.optionalFieldOf("source").forGetter(receivingEvent -> Optional.ofNullable(receivingEvent.uuid())), ExtraCodecs.UUID.optionalFieldOf("projectile_owner").forGetter(receivingEvent -> Optional.ofNullable(receivingEvent.projectileOwnerUuid()))).apply((Applicative<ReceivingEvent, ?>)instance, (gameEvent, float_, vec3, optional, optional2) -> new ReceivingEvent((GameEvent)gameEvent, float_.floatValue(), (Vec3)vec3, optional.orElse(null), optional2.orElse(null))));
-
-        public ReceivingEvent(GameEvent gameEvent, float f, Vec3 vec3, @Nullable UUID uUID, @Nullable UUID uUID2) {
-            this(gameEvent, f, vec3, uUID, uUID2, null);
-        }
-
-        public ReceivingEvent(GameEvent gameEvent, float f, Vec3 vec3, @Nullable Entity entity) {
-            this(gameEvent, f, vec3, entity == null ? null : entity.getUUID(), ReceivingEvent.getProjectileOwner(entity), entity);
-        }
-
-        @Nullable
-        private static UUID getProjectileOwner(@Nullable Entity entity) {
-            Projectile projectile;
-            if (entity instanceof Projectile && (projectile = (Projectile)entity).getOwner() != null) {
-                return projectile.getOwner().getUUID();
-            }
-            return null;
-        }
-
-        public Optional<Entity> getEntity(ServerLevel serverLevel) {
-            return Optional.ofNullable(this.entity).or(() -> Optional.ofNullable(this.uuid).map(serverLevel::getEntity));
-        }
-
-        public Optional<Entity> getProjectileOwner(ServerLevel serverLevel) {
-            return this.getEntity(serverLevel).filter(entity -> entity instanceof Projectile).map(entity -> (Projectile)entity).map(Projectile::getOwner).or(() -> Optional.ofNullable(this.projectileOwnerUuid).map(serverLevel::getEntity));
-        }
-
-        @Nullable
-        public UUID uuid() {
-            return this.uuid;
-        }
-
-        @Nullable
-        public UUID projectileOwnerUuid() {
-            return this.projectileOwnerUuid;
-        }
-
-        @Nullable
-        public Entity entity() {
-            return this.entity;
         }
     }
 }

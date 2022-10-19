@@ -10,7 +10,6 @@ import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,7 +26,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 
 @Environment(value=EnvType.CLIENT)
 public class VideoSettingsScreen
@@ -142,28 +140,8 @@ extends OptionsSubScreen {
     }
 
     @Override
-    public boolean mouseReleased(double d, double e, int i) {
-        int j = this.options.guiScale().get();
-        if (super.mouseReleased(d, e, i)) {
-            return true;
-        }
-        if (this.list.mouseReleased(d, e, i)) {
-            if (this.options.guiScale().get() != j) {
-                this.minecraft.resizeDisplay();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderBackground(poseStack);
-        this.list.render(poseStack, i, j, f);
-        VideoSettingsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 0xFFFFFF);
-        super.render(poseStack, i, j, f);
-        List<FormattedCharSequence> list = VideoSettingsScreen.tooltipAt(this.list, i, j);
-        this.renderTooltip(poseStack, list, i, j);
+        this.basicListRender(poseStack, this.list, i, j, f);
     }
 }
 

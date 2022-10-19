@@ -6,7 +6,6 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.List;
@@ -18,7 +17,8 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
+import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -31,43 +31,36 @@ public class TeamMsgCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("teammsg").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
-            MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
-            try {
-                return TeamMsgCommand.sendMessage((CommandSourceStack)commandContext.getSource(), chatMessage);
-            } catch (Exception exception) {
-                chatMessage.consume((CommandSourceStack)commandContext.getSource());
-                throw exception;
+            CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
+            Entity entity = commandSourceStack.getEntityOrException();
+            PlayerTeam playerTeam = (PlayerTeam)entity.getTeam();
+            if (playerTeam == null) {
+                throw ERROR_NOT_ON_TEAM.create();
             }
+            List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers().stream().filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam).toList();
+            if (!list.isEmpty()) {
+                MessageArgument.resolveChatMessage(commandContext, "message", playerChatMessage -> TeamMsgCommand.sendMessage(commandSourceStack, entity, playerTeam, list, playerChatMessage));
+            }
+            return list.size();
         })));
         commandDispatcher.register((LiteralArgumentBuilder)Commands.literal("tm").redirect(literalCommandNode));
     }
 
-    private static int sendMessage(CommandSourceStack commandSourceStack, MessageArgument.ChatMessage chatMessage) throws CommandSyntaxException {
-        Entity entity = commandSourceStack.getEntityOrException();
-        PlayerTeam playerTeam = (PlayerTeam)entity.getTeam();
-        if (playerTeam == null) {
-            throw ERROR_NOT_ON_TEAM.create();
-        }
+    private static void sendMessage(CommandSourceStack commandSourceStack, Entity entity, PlayerTeam playerTeam, List<ServerPlayer> list, PlayerChatMessage playerChatMessage) {
         MutableComponent component = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
         ChatType.Bound bound = ChatType.bind(ChatType.TEAM_MSG_COMMAND_INCOMING, commandSourceStack).withTargetName(component);
         ChatType.Bound bound2 = ChatType.bind(ChatType.TEAM_MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(component);
-        List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers().stream().filter(serverPlayer -> serverPlayer == entity || serverPlayer.getTeam() == playerTeam).toList();
-        chatMessage.resolve(commandSourceStack, playerChatMessage -> {
-            OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(playerChatMessage);
-            boolean bl = playerChatMessage.isFullyFiltered();
-            boolean bl2 = false;
-            for (ServerPlayer serverPlayer : list) {
-                ChatType.Bound bound3 = serverPlayer == entity ? bound2 : bound;
-                boolean bl3 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
-                serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl3, bound3);
-                bl2 |= bl && bl3 && serverPlayer != entity;
-            }
-            if (bl2) {
-                commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
-            }
-            outgoingPlayerChatMessage.sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
-        });
-        return list.size();
+        OutgoingChatMessage outgoingChatMessage = OutgoingChatMessage.create(playerChatMessage);
+        boolean bl = false;
+        for (ServerPlayer serverPlayer : list) {
+            ChatType.Bound bound3 = serverPlayer == entity ? bound2 : bound;
+            boolean bl2 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
+            serverPlayer.sendChatMessage(outgoingChatMessage, bl2, bound3);
+            bl |= bl2 && playerChatMessage.isFullyFiltered();
+        }
+        if (bl) {
+            commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+        }
     }
 }
 

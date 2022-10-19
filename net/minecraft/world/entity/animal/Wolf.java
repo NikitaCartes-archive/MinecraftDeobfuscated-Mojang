@@ -451,10 +451,11 @@ implements NeutralMob {
     }
 
     @Override
+    @Nullable
     public Wolf getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        UUID uUID;
         Wolf wolf = EntityType.WOLF.create(serverLevel);
-        UUID uUID = this.getOwnerUUID();
-        if (uUID != null) {
+        if (wolf != null && (uUID = this.getOwnerUUID()) != null) {
             wolf.setOwnerUUID(uUID);
             wolf.setTame(true);
         }
@@ -523,6 +524,7 @@ implements NeutralMob {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

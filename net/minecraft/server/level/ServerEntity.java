@@ -192,7 +192,7 @@ public class ServerEntity {
         if (this.entity.isRemoved()) {
             LOGGER.warn("Fetching packet for removed entity {}", (Object)this.entity);
         }
-        Packet<?> packet = this.entity.getAddEntityPacket();
+        Packet<ClientGamePacketListener> packet = this.entity.getAddEntityPacket();
         this.yHeadRotp = Mth.floor(this.entity.getYHeadRot() * 256.0f / 360.0f);
         consumer.accept(packet);
         if (!this.entity.getEntityData().isEmpty()) {

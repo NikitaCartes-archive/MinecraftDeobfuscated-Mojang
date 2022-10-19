@@ -200,18 +200,17 @@ public final class NaturalSpawner {
 
     @Nullable
     private static Mob getMobForSpawn(ServerLevel serverLevel, EntityType<?> entityType) {
-        Mob mob;
         try {
-            Object entity = entityType.create(serverLevel);
-            if (!(entity instanceof Mob)) {
-                throw new IllegalStateException("Trying to spawn a non-mob: " + Registry.ENTITY_TYPE.getKey(entityType));
+            Object obj = entityType.create(serverLevel);
+            if (obj instanceof Mob) {
+                Mob mob = (Mob)obj;
+                return mob;
             }
-            mob = (Mob)entity;
+            LOGGER.warn("Can't spawn entity of type: {}", (Object)Registry.ENTITY_TYPE.getKey(entityType));
         } catch (Exception exception) {
             LOGGER.warn("Failed to create mob", exception);
-            return null;
         }
-        return mob;
+        return null;
     }
 
     private static boolean isValidPositionForMob(ServerLevel serverLevel, Mob mob, double d) {
@@ -337,6 +336,7 @@ public final class NaturalSpawner {
                             LOGGER.warn("Failed to create mob", exception);
                             continue;
                         }
+                        if (entity == null) continue;
                         ((Entity)entity).moveTo(d, blockPos.getY(), e, randomSource.nextFloat() * 360.0f, 0.0f);
                         if (entity instanceof Mob && (mob = (Mob)entity).checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(serverLevelAccessor)) {
                             spawnGroupData = mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null);

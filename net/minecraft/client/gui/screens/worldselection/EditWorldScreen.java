@@ -31,6 +31,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.OptimizeWorldScreen;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -97,8 +98,9 @@ extends Screen {
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, Component.translatable("selectWorld.edit.export_worldgen_settings"), button -> {
             DataResult<Object> dataResult2;
             try (WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(this.levelAccess, false);){
-                RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldStem.registryAccess());
-                DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, worldStem.worldData().worldGenSettings());
+                RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
+                RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, frozen);
+                DataResult<JsonElement> dataResult = WorldGenSettings.encode(dynamicOps, worldStem.worldData().worldGenOptions(), frozen);
                 dataResult2 = dataResult.flatMap(jsonElement -> {
                     Path path = this.levelAccess.getLevelPath(LevelResource.ROOT).resolve("worldgen_settings_export.json");
                     try (JsonWriter jsonWriter = WORLD_GEN_SETTINGS_GSON.newJsonWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8, new OpenOption[0]));){

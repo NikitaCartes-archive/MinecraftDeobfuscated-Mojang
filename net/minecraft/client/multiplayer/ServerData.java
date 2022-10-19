@@ -3,27 +3,18 @@
  */
 package net.minecraft.client.multiplayer;
 
-import com.mojang.datafixers.kinds.Applicative;
-import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class ServerData {
-    private static final Logger LOGGER = LogUtils.getLogger();
     public String name;
     public String ip;
     public Component status;
@@ -37,9 +28,6 @@ public class ServerData {
     @Nullable
     private String iconB64;
     private boolean lan;
-    @Nullable
-    private ChatPreview chatPreview;
-    private boolean chatPreviewEnabled = true;
     private boolean enforcesSecureChat;
 
     public ServerData(String string, String string2, boolean bl) {
@@ -59,9 +47,6 @@ public class ServerData {
             compoundTag.putBoolean("acceptTextures", true);
         } else if (this.packStatus == ServerPackStatus.DISABLED) {
             compoundTag.putBoolean("acceptTextures", false);
-        }
-        if (this.chatPreview != null) {
-            ChatPreview.CODEC.encodeStart(NbtOps.INSTANCE, this.chatPreview).result().ifPresent(tag -> compoundTag.put("chatPreview", (Tag)tag));
         }
         return compoundTag;
     }
@@ -88,11 +73,6 @@ public class ServerData {
         } else {
             serverData.setResourcePackStatus(ServerPackStatus.PROMPT);
         }
-        if (compoundTag.contains("chatPreview", 10)) {
-            ChatPreview.CODEC.parse(NbtOps.INSTANCE, compoundTag.getCompound("chatPreview")).resultOrPartial(LOGGER::error).ifPresent(chatPreview -> {
-                serverData.chatPreview = chatPreview;
-            });
-        }
         return serverData;
     }
 
@@ -116,27 +96,6 @@ public class ServerData {
         return this.lan;
     }
 
-    public void setPreviewsChat(boolean bl) {
-        if (bl && this.chatPreview == null) {
-            this.chatPreview = new ChatPreview(false, false);
-        } else if (!bl && this.chatPreview != null) {
-            this.chatPreview = null;
-        }
-    }
-
-    @Nullable
-    public ChatPreview getChatPreview() {
-        return this.chatPreview;
-    }
-
-    public void setChatPreviewEnabled(boolean bl) {
-        this.chatPreviewEnabled = bl;
-    }
-
-    public boolean previewsChat() {
-        return this.chatPreviewEnabled && this.chatPreview != null;
-    }
-
     public void setEnforcesSecureChat(boolean bl) {
         this.enforcesSecureChat = bl;
     }
@@ -155,7 +114,6 @@ public class ServerData {
         this.copyNameIconFrom(serverData);
         this.setResourcePackStatus(serverData.getResourcePackStatus());
         this.lan = serverData.lan;
-        this.chatPreview = Util.mapNullable(serverData.chatPreview, ChatPreview::copy);
         this.enforcesSecureChat = serverData.enforcesSecureChat;
     }
 
@@ -173,38 +131,6 @@ public class ServerData {
 
         public Component getName() {
             return this.name;
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class ChatPreview {
-        public static final Codec<ChatPreview> CODEC = RecordCodecBuilder.create(instance -> instance.group(Codec.BOOL.optionalFieldOf("acknowledged", false).forGetter(chatPreview -> chatPreview.acknowledged), Codec.BOOL.optionalFieldOf("toastShown", false).forGetter(chatPreview -> chatPreview.toastShown)).apply((Applicative<ChatPreview, ?>)instance, ChatPreview::new));
-        private boolean acknowledged;
-        private boolean toastShown;
-
-        ChatPreview(boolean bl, boolean bl2) {
-            this.acknowledged = bl;
-            this.toastShown = bl2;
-        }
-
-        public void acknowledge() {
-            this.acknowledged = true;
-        }
-
-        public boolean showToast() {
-            if (!this.toastShown) {
-                this.toastShown = true;
-                return true;
-            }
-            return false;
-        }
-
-        public boolean isAcknowledged() {
-            return this.acknowledged;
-        }
-
-        private ChatPreview copy() {
-            return new ChatPreview(this.acknowledged, this.toastShown);
         }
     }
 }

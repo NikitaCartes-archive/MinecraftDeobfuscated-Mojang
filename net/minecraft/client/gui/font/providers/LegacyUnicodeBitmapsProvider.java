@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.font.providers;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphInfo;
@@ -15,19 +14,27 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -39,58 +46,103 @@ implements GlyphProvider {
     private static final int CODEPOINTS_PER_SHEET = 256;
     private static final int TEXTURE_SIZE = 256;
     private static final byte NO_GLYPH = 0;
-    private final ResourceManager resourceManager;
+    private static final int TOTAL_CODEPOINTS = 65536;
     private final byte[] sizes;
-    private final String texturePattern;
-    private final Map<ResourceLocation, NativeImage> textures = Maps.newHashMap();
+    private final Sheet[] sheets = new Sheet[256];
 
     public LegacyUnicodeBitmapsProvider(ResourceManager resourceManager, byte[] bs, String string) {
-        this.resourceManager = resourceManager;
         this.sizes = bs;
-        this.texturePattern = string;
+        HashSet<ResourceLocation> set = new HashSet<ResourceLocation>();
         for (int i = 0; i < 256; ++i) {
             int j = i * 256;
-            ResourceLocation resourceLocation = this.getSheetLocation(j);
-            try (InputStream inputStream = this.resourceManager.open(resourceLocation);
-                 NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);){
+            set.add(LegacyUnicodeBitmapsProvider.getSheetLocation(string, j));
+        }
+        String string2 = LegacyUnicodeBitmapsProvider.getCommonSearchPrefix(set);
+        HashMap map = new HashMap();
+        resourceManager.listResources(string2, set::contains).forEach((resourceLocation, resource) -> map.put(resourceLocation, CompletableFuture.supplyAsync(() -> {
+            NativeImage nativeImage;
+            block8: {
+                InputStream inputStream = resource.open();
+                try {
+                    nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
+                    if (inputStream == null) break block8;
+                } catch (Throwable throwable) {
+                    try {
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (Throwable throwable2) {
+                                throwable.addSuppressed(throwable2);
+                            }
+                        }
+                        throw throwable;
+                    } catch (IOException iOException) {
+                        LOGGER.error("Failed to read resource {} from pack {}", resourceLocation, (Object)resource.sourcePackId());
+                        return null;
+                    }
+                }
+                inputStream.close();
+            }
+            return nativeImage;
+        }, Util.backgroundExecutor())));
+        ArrayList<CompletionStage> list = new ArrayList<CompletionStage>(256);
+        for (int k = 0; k < 256; ++k) {
+            int l = k * 256;
+            int m = k;
+            ResourceLocation resourceLocation2 = LegacyUnicodeBitmapsProvider.getSheetLocation(string, l);
+            CompletableFuture completableFuture = (CompletableFuture)map.get(resourceLocation2);
+            if (completableFuture == null) continue;
+            list.add(completableFuture.thenAcceptAsync(nativeImage -> {
+                if (nativeImage == null) {
+                    return;
+                }
                 if (nativeImage.getWidth() == 256 && nativeImage.getHeight() == 256) {
                     for (int k = 0; k < 256; ++k) {
-                        byte b = bs[j + k];
+                        byte b = bs[l + k];
                         if (b == 0 || LegacyUnicodeBitmapsProvider.getLeft(b) <= LegacyUnicodeBitmapsProvider.getRight(b)) continue;
-                        bs[j + k] = 0;
+                        bs[i + k] = 0;
                     }
-                    continue;
+                    this.sheets[j] = new Sheet(bs, (NativeImage)nativeImage);
+                } else {
+                    nativeImage.close();
+                    Arrays.fill(bs, l, l + 256, (byte)0);
                 }
-            } catch (IOException iOException) {
-                // empty catch block
-            }
-            Arrays.fill(bs, j, j + 256, (byte)0);
+            }, (Executor)Util.backgroundExecutor()));
         }
+        CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new)).join();
+    }
+
+    private static String getCommonSearchPrefix(Set<ResourceLocation> set) {
+        String string = StringUtils.getCommonPrefix((String[])set.stream().map(ResourceLocation::getPath).toArray(String[]::new));
+        int i = string.lastIndexOf("/");
+        if (i == -1) {
+            return "";
+        }
+        return string.substring(0, i);
     }
 
     @Override
     public void close() {
-        this.textures.values().forEach(NativeImage::close);
+        for (Sheet sheet : this.sheets) {
+            if (sheet == null) continue;
+            sheet.close();
+        }
     }
 
-    private ResourceLocation getSheetLocation(int i) {
-        ResourceLocation resourceLocation = new ResourceLocation(String.format(Locale.ROOT, this.texturePattern, String.format(Locale.ROOT, "%02x", i / 256)));
-        return new ResourceLocation(resourceLocation.getNamespace(), "textures/" + resourceLocation.getPath());
+    private static ResourceLocation getSheetLocation(String string, int i) {
+        ResourceLocation resourceLocation = new ResourceLocation(String.format(Locale.ROOT, string, String.format("%02x", i / 256)));
+        return resourceLocation.withPrefix("textures/");
     }
 
     @Override
     @Nullable
     public GlyphInfo getGlyph(int i) {
-        NativeImage nativeImage;
         if (i < 0 || i >= this.sizes.length) {
             return null;
         }
-        byte b = this.sizes[i];
-        if (b != 0 && (nativeImage = this.textures.computeIfAbsent(this.getSheetLocation(i), this::loadTexture)) != null) {
-            int j = LegacyUnicodeBitmapsProvider.getLeft(b);
-            return new Glyph(i % 16 * 16 + j, (i & 0xFF) / 16 * 16, LegacyUnicodeBitmapsProvider.getRight(b) - j, 16, nativeImage);
-        }
-        return null;
+        int j = i / 256;
+        Sheet sheet = this.sheets[j];
+        return sheet != null ? sheet.getGlyph(i) : null;
     }
 
     @Override
@@ -103,40 +155,39 @@ implements GlyphProvider {
         return intSet;
     }
 
-    @Nullable
-    private NativeImage loadTexture(ResourceLocation resourceLocation) {
-        NativeImage nativeImage;
-        block8: {
-            InputStream inputStream = this.resourceManager.open(resourceLocation);
-            try {
-                nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
-                if (inputStream == null) break block8;
-            } catch (Throwable throwable) {
-                try {
-                    if (inputStream != null) {
-                        try {
-                            inputStream.close();
-                        } catch (Throwable throwable2) {
-                            throwable.addSuppressed(throwable2);
-                        }
-                    }
-                    throw throwable;
-                } catch (IOException iOException) {
-                    LOGGER.error("Couldn't load texture {}", (Object)resourceLocation, (Object)iOException);
-                    return null;
-                }
-            }
-            inputStream.close();
-        }
-        return nativeImage;
-    }
-
-    private static int getLeft(byte b) {
+    static int getLeft(byte b) {
         return b >> 4 & 0xF;
     }
 
-    private static int getRight(byte b) {
+    static int getRight(byte b) {
         return (b & 0xF) + 1;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class Sheet
+    implements AutoCloseable {
+        private final byte[] sizes;
+        private final NativeImage source;
+
+        Sheet(byte[] bs, NativeImage nativeImage) {
+            this.sizes = bs;
+            this.source = nativeImage;
+        }
+
+        @Override
+        public void close() {
+            this.source.close();
+        }
+
+        @Nullable
+        public GlyphInfo getGlyph(int i) {
+            byte b = this.sizes[i];
+            if (b != 0) {
+                int j = LegacyUnicodeBitmapsProvider.getLeft(b);
+                return new Glyph(i % 16 * 16 + j, (i & 0xFF) / 16 * 16, LegacyUnicodeBitmapsProvider.getRight(b) - j, 16, this.source);
+            }
+            return null;
+        }
     }
 
     @Environment(value=EnvType.CLIENT)

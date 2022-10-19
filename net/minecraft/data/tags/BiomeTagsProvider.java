@@ -4,7 +4,7 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
@@ -13,8 +13,8 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 public class BiomeTagsProvider
 extends TagsProvider<Biome> {
-    public BiomeTagsProvider(DataGenerator dataGenerator) {
-        super(dataGenerator, BuiltinRegistries.BIOME);
+    public BiomeTagsProvider(PackOutput packOutput) {
+        super(packOutput, BuiltinRegistries.BIOME);
     }
 
     @Override

@@ -15,6 +15,8 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -23,7 +25,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.jetbrains.annotations.Nullable;
@@ -47,8 +49,9 @@ extends Screen {
         WorldStem worldStem = minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false);
         try {
             WorldData worldData = worldStem.worldData();
-            levelStorageAccess.saveDataTag(worldStem.registryAccess(), worldData);
-            OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, worldData.worldGenSettings());
+            RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
+            levelStorageAccess.saveDataTag(frozen, worldData);
+            OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, frozen.registryOrThrow(Registry.LEVEL_STEM_REGISTRY));
             if (worldStem != null) {
                 worldStem.close();
             }
@@ -70,10 +73,10 @@ extends Screen {
         }
     }
 
-    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelSettings levelSettings, boolean bl, WorldGenSettings worldGenSettings) {
+    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelSettings levelSettings, boolean bl, Registry<LevelStem> registry) {
         super(Component.translatable("optimizeWorld.title", levelSettings.levelName()));
         this.callback = booleanConsumer;
-        this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldGenSettings, bl);
+        this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registry, bl);
     }
 
     @Override
@@ -117,7 +120,7 @@ extends Screen {
             OptimizeWorldScreen.drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
             OptimizeWorldScreen.drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
             int o = 0;
-            for (ResourceKey resourceKey : this.upgrader.levels()) {
+            for (ResourceKey<Level> resourceKey : this.upgrader.levels()) {
                 int p = Mth.floor(this.upgrader.dimensionProgress(resourceKey) * (float)(l - k));
                 OptimizeWorldScreen.fill(poseStack, k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(resourceKey));
                 o += p;

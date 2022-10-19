@@ -1094,6 +1094,9 @@ extends LivingEntity {
             return null;
         }
         Mob mob = (Mob)entityType.create(this.level);
+        if (mob == null) {
+            return null;
+        }
         mob.copyPosition(this);
         mob.setBaby(this.isBaby());
         mob.setNoAi(this.isNoAi());

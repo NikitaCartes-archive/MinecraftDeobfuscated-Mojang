@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -48,7 +49,7 @@ import org.slf4j.Logger;
 public class BuiltinRegistries {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<ResourceLocation, Supplier<? extends Holder<?>>> LOADERS = Maps.newLinkedHashMap();
-    private static final WritableRegistry<WritableRegistry<?>> WRITABLE_REGISTRY = new MappedRegistry(ResourceKey.createRegistryKey(new ResourceLocation("root")), Lifecycle.experimental(), null);
+    private static final WritableRegistry<WritableRegistry<?>> WRITABLE_REGISTRY = new MappedRegistry(ResourceKey.createRegistryKey(new ResourceLocation("root")), Lifecycle.experimental());
     public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
     public static final Registry<DimensionType> DIMENSION_TYPE = BuiltinRegistries.registerSimple(Registry.DIMENSION_TYPE_REGISTRY, DimensionTypes::bootstrap);
     public static final Registry<ConfiguredWorldCarver<?>> CONFIGURED_CARVER = BuiltinRegistries.registerSimple(Registry.CONFIGURED_CARVER_REGISTRY, registry -> Carvers.CAVE);
@@ -65,14 +66,13 @@ public class BuiltinRegistries {
     public static final Registry<WorldPreset> WORLD_PRESET = BuiltinRegistries.registerSimple(Registry.WORLD_PRESET_REGISTRY, WorldPresets::bootstrap);
     public static final Registry<FlatLevelGeneratorPreset> FLAT_LEVEL_GENERATOR_PRESET = BuiltinRegistries.registerSimple(Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY, FlatLevelGeneratorPresets::bootstrap);
     public static final Registry<ChatType> CHAT_TYPE = BuiltinRegistries.registerSimple(Registry.CHAT_TYPE_REGISTRY, ChatType::bootstrap);
-    public static final RegistryAccess ACCESS;
 
     private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, RegistryBootstrap<T> registryBootstrap) {
         return BuiltinRegistries.registerSimple(resourceKey, Lifecycle.stable(), registryBootstrap);
     }
 
     private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, RegistryBootstrap<T> registryBootstrap) {
-        return BuiltinRegistries.internalRegister(resourceKey, new MappedRegistry(resourceKey, lifecycle, null), registryBootstrap, lifecycle);
+        return BuiltinRegistries.internalRegister(resourceKey, new MappedRegistry(resourceKey, lifecycle), registryBootstrap, lifecycle);
     }
 
     private static <T, R extends WritableRegistry<T>> R internalRegister(ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, RegistryBootstrap<T> registryBootstrap, Lifecycle lifecycle) {
@@ -80,6 +80,12 @@ public class BuiltinRegistries {
         LOADERS.put(resourceLocation, () -> registryBootstrap.run(writableRegistry));
         WRITABLE_REGISTRY.register(resourceKey, writableRegistry, lifecycle);
         return writableRegistry;
+    }
+
+    public static RegistryAccess.Frozen createAccess() {
+        RegistryAccess.Frozen frozen = RegistryAccess.fromRegistryOfRegistries(Registry.REGISTRY);
+        RegistryAccess.Frozen frozen2 = RegistryAccess.fromRegistryOfRegistries(REGISTRY);
+        return new RegistryAccess.ImmutableRegistryAccess(Stream.concat(frozen.registries(), frozen2.registries())).freeze();
     }
 
     public static <V extends T, T> Holder<V> registerExact(Registry<T> registry, String string, V object) {
@@ -104,12 +110,15 @@ public class BuiltinRegistries {
 
     static {
         LOADERS.forEach((resourceLocation, supplier) -> {
-            if (!((Holder)supplier.get()).isBound()) {
+            if (supplier.get() == null) {
                 LOGGER.error("Unable to bootstrap registry '{}'", resourceLocation);
             }
         });
-        Registry.checkRegistry(WRITABLE_REGISTRY);
-        ACCESS = RegistryAccess.fromRegistryOfRegistries(REGISTRY);
+        REGISTRY.freeze();
+        for (Registry registry2 : REGISTRY) {
+            registry2.freeze();
+        }
+        Registry.checkRegistry(REGISTRY);
     }
 
     @FunctionalInterface

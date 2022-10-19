@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -48,7 +49,7 @@ extends Behavior<LivingEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
         NearestVisibleLivingEntities nearestVisibleLivingEntities = livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get();
-        this.nearestEntityMatchingTest = nearestVisibleLivingEntities.findClosest(this.predicate.and(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr));
+        this.nearestEntityMatchingTest = nearestVisibleLivingEntities.findClosest(this.predicate.and(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr && !livingEntity.hasPassenger((Entity)livingEntity2)));
         return this.nearestEntityMatchingTest.isPresent();
     }
 

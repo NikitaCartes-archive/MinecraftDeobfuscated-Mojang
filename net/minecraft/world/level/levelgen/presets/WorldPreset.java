@@ -17,7 +17,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 
 public class WorldPreset {
     public static final Codec<WorldPreset> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.unboundedMap(ResourceKey.codec(Registry.LEVEL_STEM_REGISTRY), LevelStem.CODEC).fieldOf("dimensions")).forGetter(worldPreset -> worldPreset.dimensions)).apply((Applicative<WorldPreset, ?>)instance, WorldPreset::new)).flatXmap(WorldPreset::requireOverworld, WorldPreset::requireOverworld);
@@ -29,8 +29,8 @@ public class WorldPreset {
     }
 
     private Registry<LevelStem> createRegistry() {
-        MappedRegistry<LevelStem> writableRegistry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
-        LevelStem.keysInOrder(this.dimensions.keySet().stream()).forEach(resourceKey -> {
+        MappedRegistry<LevelStem> writableRegistry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+        WorldDimensions.keysInOrder(this.dimensions.keySet().stream()).forEach(resourceKey -> {
             LevelStem levelStem = this.dimensions.get(resourceKey);
             if (levelStem != null) {
                 writableRegistry.register((ResourceKey<LevelStem>)resourceKey, levelStem, Lifecycle.stable());
@@ -39,20 +39,12 @@ public class WorldPreset {
         return ((Registry)writableRegistry).freeze();
     }
 
-    public WorldGenSettings createWorldGenSettings(long l, boolean bl, boolean bl2) {
-        return new WorldGenSettings(l, bl, bl2, this.createRegistry());
-    }
-
-    public WorldGenSettings recreateWorldGenSettings(WorldGenSettings worldGenSettings) {
-        return this.createWorldGenSettings(worldGenSettings.seed(), worldGenSettings.generateStructures(), worldGenSettings.generateBonusChest());
+    public WorldDimensions createWorldDimensions() {
+        return new WorldDimensions(this.createRegistry());
     }
 
     public Optional<LevelStem> overworld() {
         return Optional.ofNullable(this.dimensions.get(LevelStem.OVERWORLD));
-    }
-
-    public LevelStem overworldOrThrow() {
-        return this.overworld().orElseThrow(() -> new IllegalStateException("Can't find overworld in this preset"));
     }
 
     private static DataResult<WorldPreset> requireOverworld(WorldPreset worldPreset) {

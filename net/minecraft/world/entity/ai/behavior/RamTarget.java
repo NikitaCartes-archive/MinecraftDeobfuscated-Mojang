@@ -96,7 +96,7 @@ extends Behavior<Goat> {
             boolean bl2;
             Optional<WalkTarget> optional = brain.getMemory(MemoryModuleType.WALK_TARGET);
             Optional<Vec3> optional2 = brain.getMemory(MemoryModuleType.RAM_TARGET);
-            boolean bl = bl2 = !optional.isPresent() || !optional2.isPresent() || optional.get().getTarget().currentPosition().closerThan(optional2.get(), 0.25);
+            boolean bl = bl2 = optional.isEmpty() || optional2.isEmpty() || optional.get().getTarget().currentPosition().closerThan(optional2.get(), 0.25);
             if (bl2) {
                 this.finishRam(serverLevel, goat);
             }

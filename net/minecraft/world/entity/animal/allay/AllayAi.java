@@ -51,6 +51,7 @@ public class AllayAi {
     private static final int MAX_WAIT_DURATION = 60;
     private static final int TIME_TO_FORGET_NOTEBLOCK = 600;
     private static final int DISTANCE_TO_WANTED_ITEM = 32;
+    private static final int GIVE_ITEM_TIMEOUT_DURATION = 20;
 
     protected static Brain<?> makeBrain(Brain<Allay> brain) {
         AllayAi.initCoreActivity(brain);
@@ -66,7 +67,7 @@ public class AllayAi {
     }
 
     private static void initIdleActivity(Brain<Allay> brain) {
-        brain.addActivityWithConditions(Activity.IDLE, ImmutableList.of(Pair.of(0, new GoToWantedItem<Allay>(allay -> true, 1.75f, true, 32)), Pair.of(1, new GoAndGiveItemsToTarget(AllayAi::getItemDepositPosition, 2.25f)), Pair.of(2, new StayCloseToTarget(AllayAi::getItemDepositPosition, 4, 16, 2.25f)), Pair.of(3, new RunSometimes<LivingEntity>(new SetEntityLookTarget(livingEntity -> true, 6.0f), UniformInt.of(30, 60))), Pair.of(4, new RunOne(ImmutableList.of(Pair.of(new FlyingRandomStroll(1.0f), 2), Pair.of(new SetWalkTargetFromLookTarget(1.0f, 3), 2), Pair.of(new DoNothing(30, 60), 1))))), ImmutableSet.of());
+        brain.addActivityWithConditions(Activity.IDLE, ImmutableList.of(Pair.of(0, new GoToWantedItem<Allay>(allay -> true, 1.75f, true, 32)), Pair.of(1, new GoAndGiveItemsToTarget(AllayAi::getItemDepositPosition, 2.25f, 20)), Pair.of(2, new StayCloseToTarget(AllayAi::getItemDepositPosition, 4, 16, 2.25f)), Pair.of(3, new RunSometimes<LivingEntity>(new SetEntityLookTarget(livingEntity -> true, 6.0f), UniformInt.of(30, 60))), Pair.of(4, new RunOne(ImmutableList.of(Pair.of(new FlyingRandomStroll(1.0f), 2), Pair.of(new SetWalkTargetFromLookTarget(1.0f, 3), 2), Pair.of(new DoNothing(30, 60), 1))))), ImmutableSet.of());
     }
 
     public static void updateActivity(Allay allay) {

@@ -4,7 +4,7 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.InstrumentTags;
 import net.minecraft.world.item.Instrument;
@@ -12,8 +12,8 @@ import net.minecraft.world.item.Instruments;
 
 public class InstrumentTagsProvider
 extends TagsProvider<Instrument> {
-    public InstrumentTagsProvider(DataGenerator dataGenerator) {
-        super(dataGenerator, Registry.INSTRUMENT);
+    public InstrumentTagsProvider(PackOutput packOutput) {
+        super(packOutput, Registry.INSTRUMENT);
     }
 
     @Override

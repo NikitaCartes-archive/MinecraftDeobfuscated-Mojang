@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerPlayer;
@@ -285,7 +287,8 @@ extends BlockEntity {
     @Override
     public void load(CompoundTag compoundTag) {
         super.load(compoundTag);
-        this.movedState = NbtUtils.readBlockState(compoundTag.getCompound("blockState"));
+        HolderLookup.RegistryLookup<Block> holderLookup = this.level != null ? this.level.holderLookup(Registry.BLOCK_REGISTRY) : HolderLookup.forRegistry(Registry.BLOCK);
+        this.movedState = NbtUtils.readBlockState(holderLookup, compoundTag.getCompound("blockState"));
         this.direction = Direction.from3DDataValue(compoundTag.getInt("facing"));
         this.progressO = this.progress = compoundTag.getFloat("progress");
         this.extending = compoundTag.getBoolean("extending");
@@ -318,6 +321,14 @@ extends BlockEntity {
 
     public long getLastTicked() {
         return this.lastTicked;
+    }
+
+    @Override
+    public void setLevel(Level level) {
+        super.setLevel(level);
+        if (level.holderLookup(Registry.BLOCK_REGISTRY).get(this.movedState.getBlock().builtInRegistryHolder().key()).isEmpty()) {
+            this.movedState = Blocks.AIR.defaultBlockState();
+        }
     }
 }
 

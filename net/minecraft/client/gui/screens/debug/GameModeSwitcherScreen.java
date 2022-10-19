@@ -112,7 +112,7 @@ extends Screen {
         Optional<GameModeIcon> optional2 = GameModeIcon.getFromGameType(minecraft.gameMode.getPlayerMode());
         GameModeIcon gameModeIcon = optional.get();
         if (optional2.isPresent() && minecraft.player.hasPermissions(2) && gameModeIcon != optional2.get()) {
-            minecraft.player.commandUnsigned(gameModeIcon.getCommand());
+            minecraft.player.connection.sendUnsignedCommand(gameModeIcon.getCommand());
         }
     }
 

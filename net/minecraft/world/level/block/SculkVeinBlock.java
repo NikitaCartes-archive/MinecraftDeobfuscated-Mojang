@@ -194,7 +194,7 @@ SimpleWaterloggedBlock {
             if (material == Material.FIRE) {
                 return false;
             }
-            return material.isReplaceable() || super.stateCanBeReplaced(blockGetter, blockPos, blockPos2, direction, blockState);
+            return blockState.canBeReplaced() || super.stateCanBeReplaced(blockGetter, blockPos, blockPos2, direction, blockState);
         }
 
         @Override

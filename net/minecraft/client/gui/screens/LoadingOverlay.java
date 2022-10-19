@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
+import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
@@ -167,13 +169,16 @@ extends Overlay {
         @Override
         protected SimpleTexture.TextureImage getTextureImage(ResourceManager resourceManager) {
             SimpleTexture.TextureImage textureImage;
-            block8: {
-                Minecraft minecraft = Minecraft.getInstance();
-                VanillaPackResources vanillaPackResources = minecraft.getClientPackSource().getVanillaPack();
-                InputStream inputStream = vanillaPackResources.getResource(PackType.CLIENT_RESOURCES, MOJANG_STUDIOS_LOGO_LOCATION);
+            block9: {
+                VanillaPackResources vanillaPackResources = Minecraft.getInstance().getVanillaPackResources();
+                IoSupplier<InputStream> ioSupplier = vanillaPackResources.getResource(PackType.CLIENT_RESOURCES, MOJANG_STUDIOS_LOGO_LOCATION);
+                if (ioSupplier == null) {
+                    return new SimpleTexture.TextureImage(new FileNotFoundException(MOJANG_STUDIOS_LOGO_LOCATION.toString()));
+                }
+                InputStream inputStream = ioSupplier.get();
                 try {
                     textureImage = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
-                    if (inputStream == null) break block8;
+                    if (inputStream == null) break block9;
                 } catch (Throwable throwable) {
                     try {
                         if (inputStream != null) {

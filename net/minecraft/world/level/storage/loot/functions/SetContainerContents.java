@@ -52,7 +52,7 @@ extends LootItemConditionalFunction {
             return itemStack;
         }
         NonNullList<ItemStack> nonNullList = NonNullList.create();
-        this.entries.forEach(lootPoolEntryContainer -> lootPoolEntryContainer.expand(lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(nonNullList::add), lootContext)));
+        this.entries.forEach(lootPoolEntryContainer -> lootPoolEntryContainer.expand(lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(lootContext, nonNullList::add), lootContext)));
         CompoundTag compoundTag = new CompoundTag();
         ContainerHelper.saveAllItems(compoundTag, nonNullList);
         CompoundTag compoundTag2 = BlockItem.getBlockEntityData(itemStack);

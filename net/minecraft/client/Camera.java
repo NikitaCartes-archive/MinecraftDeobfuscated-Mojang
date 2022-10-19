@@ -79,7 +79,7 @@ public class Camera {
             float g = (i >> 1 & 1) * 2 - 1;
             float h = (i >> 2 & 1) * 2 - 1;
             Vec3 vec3 = this.position.add(f *= 0.1f, g *= 0.1f, h *= 0.1f);
-            if (((HitResult)(hitResult = this.level.clip(new ClipContext(vec3, vec32 = new Vec3(this.position.x - (double)this.forwards.x() * d + (double)f + (double)h, this.position.y - (double)this.forwards.y() * d + (double)g, this.position.z - (double)this.forwards.z() * d + (double)h), ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, this.entity)))).getType() == HitResult.Type.MISS || !((e = hitResult.getLocation().distanceTo(this.position)) < d)) continue;
+            if (((HitResult)(hitResult = this.level.clip(new ClipContext(vec3, vec32 = new Vec3(this.position.x - (double)this.forwards.x() * d + (double)f, this.position.y - (double)this.forwards.y() * d + (double)g, this.position.z - (double)this.forwards.z() * d + (double)h), ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, this.entity)))).getType() == HitResult.Type.MISS || !((e = hitResult.getLocation().distanceTo(this.position)) < d)) continue;
             d = e;
         }
         return d;

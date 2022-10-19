@@ -84,6 +84,9 @@ public class DismountHelper {
             if (voxelShape.isEmpty()) continue;
             return null;
         }
+        if (entityType == EntityType.PLAYER && (collisionGetter.getBlockState(blockPos).is(BlockTags.INVALID_SPAWN_INSIDE) || collisionGetter.getBlockState(blockPos.above()).is(BlockTags.INVALID_SPAWN_INSIDE))) {
+            return null;
+        }
         if (!collisionGetter.getWorldBorder().isWithinBounds(aABB)) {
             return null;
         }

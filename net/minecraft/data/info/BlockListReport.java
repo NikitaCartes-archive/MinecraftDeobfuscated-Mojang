@@ -10,8 +10,8 @@ import java.nio.file.Path;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,10 +20,10 @@ import net.minecraft.world.level.block.state.properties.Property;
 
 public class BlockListReport
 implements DataProvider {
-    private final DataGenerator generator;
+    private final PackOutput output;
 
-    public BlockListReport(DataGenerator dataGenerator) {
-        this.generator = dataGenerator;
+    public BlockListReport(PackOutput packOutput) {
+        this.output = packOutput;
     }
 
     @Override
@@ -63,7 +63,7 @@ implements DataProvider {
             jsonObject2.add("states", jsonArray2);
             jsonObject.add(resourceLocation.toString(), jsonObject2);
         }
-        Path path = this.generator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("blocks.json");
+        Path path = this.output.getOutputFolder(PackOutput.Target.REPORTS).resolve("blocks.json");
         DataProvider.saveStable(cachedOutput, jsonObject, path);
     }
 

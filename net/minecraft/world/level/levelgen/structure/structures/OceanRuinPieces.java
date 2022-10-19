@@ -157,14 +157,14 @@ public class OceanRuinPieces {
 
         @Override
         protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
+            Drowned drowned;
             if ("chest".equals(string)) {
                 serverLevelAccessor.setBlock(blockPos, (BlockState)Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER)), 2);
                 BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
                 if (blockEntity instanceof ChestBlockEntity) {
                     ((ChestBlockEntity)blockEntity).setLootTable(this.isLarge ? BuiltInLootTables.UNDERWATER_RUIN_BIG : BuiltInLootTables.UNDERWATER_RUIN_SMALL, randomSource.nextLong());
                 }
-            } else if ("drowned".equals(string)) {
-                Drowned drowned = EntityType.DROWNED.create(serverLevelAccessor.getLevel());
+            } else if ("drowned".equals(string) && (drowned = EntityType.DROWNED.create(serverLevelAccessor.getLevel())) != null) {
                 drowned.setPersistenceRequired();
                 drowned.moveTo(blockPos, 0.0f, 0.0f);
                 drowned.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);

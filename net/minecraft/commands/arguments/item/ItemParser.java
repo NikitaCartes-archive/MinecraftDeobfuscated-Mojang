@@ -88,8 +88,8 @@ public class ItemParser {
     private void readItem() throws CommandSyntaxException {
         int i = this.reader.getCursor();
         ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-        Optional<Holder<Item>> optional = this.items.get(ResourceKey.create(Registry.ITEM_REGISTRY, resourceLocation));
-        this.result = Either.left(optional.orElseThrow(() -> {
+        Optional<Holder.Reference<Item>> optional = this.items.get(ResourceKey.create(Registry.ITEM_REGISTRY, resourceLocation));
+        this.result = Either.left((Holder)optional.orElseThrow(() -> {
             this.reader.setCursor(i);
             return ERROR_UNKNOWN_ITEM.createWithContext(this.reader, resourceLocation);
         }));
@@ -103,8 +103,8 @@ public class ItemParser {
         this.reader.expect('#');
         this.suggestions = this::suggestTag;
         ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-        Optional<HolderSet<Item>> optional = this.items.get(TagKey.create(Registry.ITEM_REGISTRY, resourceLocation));
-        this.result = Either.right(optional.orElseThrow(() -> {
+        Optional<HolderSet.Named<Item>> optional = this.items.get(TagKey.create(Registry.ITEM_REGISTRY, resourceLocation));
+        this.result = Either.right((HolderSet)optional.orElseThrow(() -> {
             this.reader.setCursor(i);
             return ERROR_UNKNOWN_TAG.createWithContext(this.reader, resourceLocation);
         }));

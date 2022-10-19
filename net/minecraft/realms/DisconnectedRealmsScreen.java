@@ -33,7 +33,7 @@ extends RealmsScreen {
     public void init() {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.setConnectedToRealms(false);
-        minecraft.getClientPackSource().clearServerPack();
+        minecraft.getDownloadedPackSource().clearServerPack();
         this.message = MultiLineLabel.create(this.font, (FormattedText)this.reason, this.width - 50);
         this.textHeight = this.message.getLineCount() * this.font.lineHeight;
         this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 2 + this.textHeight / 2 + this.font.lineHeight, 200, 20, CommonComponents.GUI_BACK, button -> minecraft.setScreen(this.parent)));

@@ -157,10 +157,10 @@ extends Monster {
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         MobEffect mobEffect;
+        Skeleton skeleton;
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         RandomSource randomSource = serverLevelAccessor.getRandom();
-        if (randomSource.nextInt(100) == 0) {
-            Skeleton skeleton = EntityType.SKELETON.create(this.level);
+        if (randomSource.nextInt(100) == 0 && (skeleton = EntityType.SKELETON.create(this.level)) != null) {
             skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
             skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
             skeleton.startRiding(this);

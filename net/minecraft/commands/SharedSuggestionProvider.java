@@ -24,6 +24,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
 
 public interface SharedSuggestionProvider {
@@ -56,6 +57,8 @@ public interface SharedSuggestionProvider {
     public Set<ResourceKey<Level>> levels();
 
     public RegistryAccess registryAccess();
+
+    public FeatureFlagSet enabledFeatures();
 
     default public void suggestRegistryElements(Registry<?> registry, ElementSuggestionType elementSuggestionType, SuggestionsBuilder suggestionsBuilder) {
         if (elementSuggestionType.shouldSuggestTags()) {

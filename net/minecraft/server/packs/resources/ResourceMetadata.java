@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.util.GsonHelper;
 
 public interface ResourceMetadata {
@@ -21,6 +22,7 @@ public interface ResourceMetadata {
             return Optional.empty();
         }
     };
+    public static final IoSupplier<ResourceMetadata> EMPTY_SUPPLIER = () -> EMPTY;
 
     public static ResourceMetadata fromJsonStream(InputStream inputStream) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));){

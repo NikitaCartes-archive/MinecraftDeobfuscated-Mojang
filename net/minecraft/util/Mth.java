@@ -43,6 +43,11 @@ public class Mth {
     private static final double[] ASIN_TAB = new double[257];
     private static final double[] COS_TAB = new double[257];
 
+    public static float truncate(float f, float g) {
+        float h = (float)Math.pow(10.0, g);
+        return (float)((int)(f * h)) / h;
+    }
+
     public static float sin(float f) {
         return SIN[(int)(f * 10430.378f) & 0xFFFF];
     }
@@ -227,6 +232,10 @@ public class Mth {
 
     public static double positiveModulo(double d, double e) {
         return (d % e + e) % e;
+    }
+
+    public static boolean isDivisionInteger(int i, int j) {
+        return i / j * j == i;
     }
 
     public static int wrapDegrees(int i) {

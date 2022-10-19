@@ -9,6 +9,7 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
@@ -17,8 +18,8 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 
 public class ShulkerBoxColoring
 extends CustomRecipe {
-    public ShulkerBoxColoring(ResourceLocation resourceLocation) {
-        super(resourceLocation);
+    public ShulkerBoxColoring(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+        super(resourceLocation, craftingBookCategory);
     }
 
     @Override

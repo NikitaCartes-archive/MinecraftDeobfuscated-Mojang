@@ -3,41 +3,56 @@
  */
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.mojang.serialization.Lifecycle;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 
 @Environment(value=EnvType.CLIENT)
-public record WorldCreationContext(WorldGenSettings worldGenSettings, Lifecycle worldSettingsStability, RegistryAccess.Frozen registryAccess, ReloadableServerResources dataPackResources) {
-    public WorldCreationContext withSettings(WorldGenSettings worldGenSettings) {
-        return new WorldCreationContext(worldGenSettings, this.worldSettingsStability, this.registryAccess, this.dataPackResources);
+public record WorldCreationContext(WorldOptions options, Registry<LevelStem> datapackDimensions, WorldDimensions selectedDimensions, LayeredRegistryAccess<RegistryLayer> worldgenRegistries, ReloadableServerResources dataPackResources, WorldDataConfiguration dataConfiguration) {
+    public WorldCreationContext(WorldGenSettings worldGenSettings, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, ReloadableServerResources reloadableServerResources, WorldDataConfiguration worldDataConfiguration) {
+        this(worldGenSettings.options(), worldGenSettings.dimensions(), layeredRegistryAccess, reloadableServerResources, worldDataConfiguration);
     }
 
-    public WorldCreationContext withSettings(SimpleUpdater simpleUpdater) {
-        WorldGenSettings worldGenSettings = (WorldGenSettings)simpleUpdater.apply(this.worldGenSettings);
-        return this.withSettings(worldGenSettings);
+    public WorldCreationContext(WorldOptions worldOptions, WorldDimensions worldDimensions, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, ReloadableServerResources reloadableServerResources, WorldDataConfiguration worldDataConfiguration) {
+        this(worldOptions, layeredRegistryAccess.getLayer(RegistryLayer.DIMENSIONS).registryOrThrow(Registry.LEVEL_STEM_REGISTRY), worldDimensions, layeredRegistryAccess.replaceFrom(RegistryLayer.DIMENSIONS, new RegistryAccess.Frozen[0]), reloadableServerResources, worldDataConfiguration);
     }
 
-    public WorldCreationContext withSettings(Updater updater) {
-        WorldGenSettings worldGenSettings = (WorldGenSettings)updater.apply(this.registryAccess, this.worldGenSettings);
-        return this.withSettings(worldGenSettings);
+    public WorldCreationContext withSettings(WorldOptions worldOptions, WorldDimensions worldDimensions) {
+        return new WorldCreationContext(worldOptions, this.datapackDimensions, worldDimensions, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration);
+    }
+
+    public WorldCreationContext withOptions(OptionsModifier optionsModifier) {
+        return new WorldCreationContext((WorldOptions)optionsModifier.apply(this.options), this.datapackDimensions, this.selectedDimensions, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration);
+    }
+
+    public WorldCreationContext withDimensions(DimensionsUpdater dimensionsUpdater) {
+        return new WorldCreationContext(this.options, this.datapackDimensions, (WorldDimensions)dimensionsUpdater.apply(this.worldgenLoadContext(), this.selectedDimensions), this.worldgenRegistries, this.dataPackResources, this.dataConfiguration);
+    }
+
+    public RegistryAccess.Frozen worldgenLoadContext() {
+        return this.worldgenRegistries.compositeAccess();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static interface OptionsModifier
+    extends UnaryOperator<WorldOptions> {
     }
 
     @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    public static interface SimpleUpdater
-    extends UnaryOperator<WorldGenSettings> {
-    }
-
-    @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
-    public static interface Updater
-    extends BiFunction<RegistryAccess.Frozen, WorldGenSettings, WorldGenSettings> {
+    public static interface DimensionsUpdater
+    extends BiFunction<RegistryAccess.Frozen, WorldDimensions, WorldDimensions> {
     }
 }
 

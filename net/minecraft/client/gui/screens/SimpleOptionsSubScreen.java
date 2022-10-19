@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.OptionInstance;
@@ -17,7 +16,6 @@ import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -51,12 +49,7 @@ extends OptionsSubScreen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderBackground(poseStack);
-        this.list.render(poseStack, i, j, f);
-        SimpleOptionsSubScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
-        super.render(poseStack, i, j, f);
-        List<FormattedCharSequence> list = SimpleOptionsSubScreen.tooltipAt(this.list, i, j);
-        this.renderTooltip(poseStack, list, i, j);
+        this.basicListRender(poseStack, this.list, i, j, f);
     }
 
     public void updateNarratorButton() {

@@ -35,7 +35,7 @@ extends StructureProcessor {
         }
         String string = structureBlockInfo2.nbt.getString("final_state");
         try {
-            BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(Registry.BLOCK, string, true);
+            BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(levelReader.holderLookup(Registry.BLOCK_REGISTRY), string, true);
             blockState2 = blockResult.blockState();
         } catch (CommandSyntaxException commandSyntaxException) {
             throw new RuntimeException(commandSyntaxException);

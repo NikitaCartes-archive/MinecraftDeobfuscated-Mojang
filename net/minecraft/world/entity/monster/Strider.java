@@ -377,6 +377,7 @@ Saddleable {
     }
 
     @Override
+    @Nullable
     public Strider getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return EntityType.STRIDER.create(serverLevel);
     }
@@ -431,13 +432,17 @@ Saddleable {
         RandomSource randomSource = serverLevelAccessor.getRandom();
         if (randomSource.nextInt(30) == 0) {
             Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
-            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
-            mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
-            this.equipSaddle(null);
+            if (mob != null) {
+                spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
+                mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
+                this.equipSaddle(null);
+            }
         } else if (randomSource.nextInt(10) == 0) {
             AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
-            ageableMob.setAge(-24000);
-            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);
+            if (ageableMob != null) {
+                ageableMob.setAge(-24000);
+                spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);
+            }
         } else {
             spawnGroupData = new AgeableMob.AgeableMobGroupData(0.5f);
         }
@@ -452,6 +457,7 @@ Saddleable {
     }
 
     @Override
+    @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }

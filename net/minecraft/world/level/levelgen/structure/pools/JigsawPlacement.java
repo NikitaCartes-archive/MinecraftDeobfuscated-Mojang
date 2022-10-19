@@ -69,7 +69,7 @@ public class JigsawPlacement {
             ResourceLocation resourceLocation = optional.get();
             Optional<BlockPos> optional3 = JigsawPlacement.getRandomNamedJigsaw(structurePoolElement, resourceLocation, blockPos, rotation, structureTemplateManager, worldgenRandom);
             if (optional3.isEmpty()) {
-                LOGGER.error("No starting jigsaw {} found in start pool {}", (Object)resourceLocation, (Object)holder.unwrapKey().get().location());
+                LOGGER.error("No starting jigsaw {} found in start pool {}", (Object)resourceLocation, (Object)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("<unregistered>"));
                 return Optional.empty();
             }
             blockPos2 = optional3.get();

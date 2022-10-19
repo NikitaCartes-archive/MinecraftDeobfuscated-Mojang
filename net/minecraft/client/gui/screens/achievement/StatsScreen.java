@@ -35,10 +35,10 @@ import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
@@ -242,7 +242,7 @@ implements StatsUpdateListener {
             }
             for (Block block : Registry.BLOCK) {
                 bl = false;
-                for (StatType<ItemLike> statType : this.blockColumns) {
+                for (StatType<FeatureElement> statType : this.blockColumns) {
                     if (!statType.contains(block) || StatsScreen.this.stats.getValue(statType.get(block)) <= 0) continue;
                     bl = true;
                 }

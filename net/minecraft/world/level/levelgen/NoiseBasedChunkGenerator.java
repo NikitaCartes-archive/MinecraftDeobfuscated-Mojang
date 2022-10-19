@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
@@ -17,6 +18,7 @@ import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -74,22 +76,23 @@ public final class NoiseBasedChunkGenerator
 extends ChunkGenerator {
     public static final Codec<NoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> NoiseBasedChunkGenerator.commonCodec(instance).and(instance.group(RegistryOps.retrieveRegistry(Registry.NOISE_REGISTRY).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.noises), ((MapCodec)BiomeSource.CODEC.fieldOf("biome_source")).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.biomeSource), ((MapCodec)NoiseGeneratorSettings.CODEC.fieldOf("settings")).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.settings))).apply((Applicative<NoiseBasedChunkGenerator, ?>)instance, instance.stable(NoiseBasedChunkGenerator::new)));
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
-    protected final BlockState defaultBlock;
     private final Registry<NormalNoise.NoiseParameters> noises;
-    protected final Holder<NoiseGeneratorSettings> settings;
-    private final Aquifer.FluidPicker globalFluidPicker;
+    private final Holder<NoiseGeneratorSettings> settings;
+    private final Supplier<Aquifer.FluidPicker> globalFluidPicker;
 
     public NoiseBasedChunkGenerator(Registry<StructureSet> registry, Registry<NormalNoise.NoiseParameters> registry2, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> holder) {
         super(registry, Optional.empty(), biomeSource);
         this.noises = registry2;
         this.settings = holder;
-        NoiseGeneratorSettings noiseGeneratorSettings = this.settings.value();
-        this.defaultBlock = noiseGeneratorSettings.defaultBlock();
+        this.globalFluidPicker = Suppliers.memoize(() -> NoiseBasedChunkGenerator.createFluidPicker((NoiseGeneratorSettings)holder.value()));
+    }
+
+    private static Aquifer.FluidPicker createFluidPicker(NoiseGeneratorSettings noiseGeneratorSettings) {
         Aquifer.FluidStatus fluidStatus = new Aquifer.FluidStatus(-54, Blocks.LAVA.defaultBlockState());
         int i = noiseGeneratorSettings.seaLevel();
         Aquifer.FluidStatus fluidStatus2 = new Aquifer.FluidStatus(i, noiseGeneratorSettings.defaultFluid());
         Aquifer.FluidStatus fluidStatus3 = new Aquifer.FluidStatus(DimensionType.MIN_Y * 2, Blocks.AIR.defaultBlockState());
-        this.globalFluidPicker = (j, k, l) -> {
+        return (j, k, l) -> {
             if (k < Math.min(-54, i)) {
                 return fluidStatus;
             }
@@ -112,7 +115,7 @@ extends ChunkGenerator {
     }
 
     private NoiseChunk createNoiseChunk(ChunkAccess chunkAccess, StructureManager structureManager, Blender blender, RandomState randomState) {
-        return NoiseChunk.forChunk(chunkAccess, randomState, Beardifier.forStructuresInChunk(structureManager, chunkAccess.getPos()), this.settings.value(), this.globalFluidPicker, blender);
+        return NoiseChunk.forChunk(chunkAccess, randomState, Beardifier.forStructuresInChunk(structureManager, chunkAccess.getPos()), this.settings.value(), this.globalFluidPicker.get(), blender);
     }
 
     @Override
@@ -174,7 +177,7 @@ extends ChunkGenerator {
         int u = q * o;
         double d = (double)r / (double)o;
         double e = (double)s / (double)o;
-        NoiseChunk noiseChunk = new NoiseChunk(1, randomState, t, u, noiseSettings, DensityFunctions.BeardifierMarker.INSTANCE, this.settings.value(), this.globalFluidPicker, Blender.empty());
+        NoiseChunk noiseChunk = new NoiseChunk(1, randomState, t, u, noiseSettings, DensityFunctions.BeardifierMarker.INSTANCE, this.settings.value(), this.globalFluidPicker.get(), Blender.empty());
         noiseChunk.initializeForFirstCellX();
         noiseChunk.advanceCellX(0);
         for (int v = n - 1; v >= 0; --v) {
@@ -187,7 +190,7 @@ extends ChunkGenerator {
                 noiseChunk.updateForX(i, d);
                 noiseChunk.updateForZ(j, e);
                 BlockState blockState = noiseChunk.getInterpolatedState();
-                BlockState blockState3 = blockState2 = blockState == null ? this.defaultBlock : blockState;
+                BlockState blockState3 = blockState2 = blockState == null ? this.settings.value().defaultBlock() : blockState;
                 if (blockStates != null) {
                     int y = v * k + w;
                     blockStates[y] = blockState2;
@@ -311,7 +314,7 @@ extends ChunkGenerator {
                                 noiseChunk.updateForZ(ab, f);
                                 BlockState blockState = noiseChunk.getInterpolatedState();
                                 if (blockState == null) {
-                                    blockState = this.defaultBlock;
+                                    blockState = this.settings.value().defaultBlock();
                                 }
                                 if ((blockState = this.debugPreliminarySurfaceLevel(noiseChunk, y, u, ab, blockState)) == AIR || SharedConstants.debugVoidTerrain(chunkAccess2.getPos())) continue;
                                 if (blockState.getLightEmission() != 0 && chunkAccess2 instanceof ProtoChunk) {

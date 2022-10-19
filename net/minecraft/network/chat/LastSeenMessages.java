@@ -3,57 +3,63 @@
  */
 package net.minecraft.network.chat;
 
-import java.io.DataOutput;
-import java.io.IOException;
+import com.google.common.primitives.Ints;
+import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.util.SignatureUpdater;
 
-public record LastSeenMessages(List<Entry> entries) {
+public record LastSeenMessages(List<MessageSignature> entries) {
     public static LastSeenMessages EMPTY = new LastSeenMessages(List.of());
-    public static final int LAST_SEEN_MESSAGES_MAX_LENGTH = 5;
+    public static final int LAST_SEEN_MESSAGES_MAX_LENGTH = 20;
 
-    public LastSeenMessages(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 5), Entry::new));
-    }
-
-    public void write(FriendlyByteBuf friendlyByteBuf2) {
-        friendlyByteBuf2.writeCollection(this.entries, (friendlyByteBuf, entry) -> entry.write((FriendlyByteBuf)friendlyByteBuf));
-    }
-
-    public void updateHash(DataOutput dataOutput) throws IOException {
-        for (Entry entry : this.entries) {
-            UUID uUID = entry.profileId();
-            MessageSignature messageSignature = entry.lastSignature();
-            dataOutput.writeByte(70);
-            dataOutput.writeLong(uUID.getMostSignificantBits());
-            dataOutput.writeLong(uUID.getLeastSignificantBits());
-            dataOutput.write(messageSignature.bytes());
+    public void updateSignature(SignatureUpdater.Output output) throws SignatureException {
+        output.update(Ints.toByteArray(this.entries.size()));
+        for (MessageSignature messageSignature : this.entries) {
+            output.update(messageSignature.bytes());
         }
     }
 
-    public record Entry(UUID profileId, MessageSignature lastSignature) {
-        public Entry(FriendlyByteBuf friendlyByteBuf) {
-            this(friendlyByteBuf.readUUID(), new MessageSignature(friendlyByteBuf));
+    public Packed pack(MessageSignature.Packer packer) {
+        return new Packed(this.entries.stream().map(messageSignature -> messageSignature.pack(packer)).toList());
+    }
+
+    public record Packed(List<MessageSignature.Packed> entries) {
+        public static final Packed EMPTY = new Packed(List.of());
+
+        public Packed(FriendlyByteBuf friendlyByteBuf) {
+            this(friendlyByteBuf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 20), MessageSignature.Packed::read));
         }
 
         public void write(FriendlyByteBuf friendlyByteBuf) {
-            friendlyByteBuf.writeUUID(this.profileId);
-            this.lastSignature.write(friendlyByteBuf);
+            friendlyByteBuf.writeCollection(this.entries, MessageSignature.Packed::write);
+        }
+
+        public Optional<LastSeenMessages> unpack(MessageSignature.Unpacker unpacker) {
+            ArrayList<MessageSignature> list = new ArrayList<MessageSignature>(this.entries.size());
+            for (MessageSignature.Packed packed : this.entries) {
+                Optional<MessageSignature> optional = packed.unpack(unpacker);
+                if (optional.isEmpty()) {
+                    return Optional.empty();
+                }
+                list.add(optional.get());
+            }
+            return Optional.of(new LastSeenMessages(list));
         }
     }
 
-    public record Update(LastSeenMessages lastSeen, Optional<Entry> lastReceived) {
+    public record Update(int offset, BitSet acknowledged) {
         public Update(FriendlyByteBuf friendlyByteBuf) {
-            this(new LastSeenMessages(friendlyByteBuf), friendlyByteBuf.readOptional(Entry::new));
+            this(friendlyByteBuf.readVarInt(), friendlyByteBuf.readFixedBitSet(20));
         }
 
-        public void write(FriendlyByteBuf friendlyByteBuf2) {
-            this.lastSeen.write(friendlyByteBuf2);
-            friendlyByteBuf2.writeOptional(this.lastReceived, (friendlyByteBuf, entry) -> entry.write((FriendlyByteBuf)friendlyByteBuf));
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            friendlyByteBuf.writeVarInt(this.offset);
+            friendlyByteBuf.writeFixedBitSet(this.acknowledged, 20);
         }
     }
 }

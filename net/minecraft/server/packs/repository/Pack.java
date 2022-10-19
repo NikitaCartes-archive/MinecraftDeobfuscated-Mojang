@@ -5,33 +5,57 @@ package net.minecraft.server.packs.repository;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.logging.LogUtils;
-import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.packs.FeatureFlagsMetadataSection;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.world.flag.FeatureFlagSet;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class Pack {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final String id;
-    private final Supplier<PackResources> supplier;
+    private final ResourcesSupplier resources;
     private final Component title;
     private final Component description;
     private final PackCompatibility compatibility;
+    private final FeatureFlagSet requestedFeatures;
     private final Position defaultPosition;
     private final boolean required;
     private final boolean fixedPosition;
     private final PackSource packSource;
+
+    @Nullable
+    public static Pack readMetaAndCreate(String string, Component component, boolean bl, ResourcesSupplier resourcesSupplier, PackType packType, Position position, PackSource packSource) {
+        Info info = Pack.readPackInfo(string, resourcesSupplier);
+        return info != null ? Pack.create(string, component, bl, resourcesSupplier, info, packType, position, false, packSource) : null;
+    }
+
+    public static Pack create(String string, Component component, boolean bl, ResourcesSupplier resourcesSupplier, Info info, PackType packType, Position position, boolean bl2, PackSource packSource) {
+        return new Pack(string, bl, resourcesSupplier, component, info, info.compatibility(packType), position, bl2, packSource);
+    }
+
+    private Pack(String string, boolean bl, ResourcesSupplier resourcesSupplier, Component component, Info info, PackCompatibility packCompatibility, Position position, boolean bl2, PackSource packSource) {
+        this.id = string;
+        this.resources = resourcesSupplier;
+        this.title = component;
+        this.description = info.description();
+        this.compatibility = packCompatibility;
+        this.requestedFeatures = info.requestedFeatures();
+        this.required = bl;
+        this.defaultPosition = position;
+        this.fixedPosition = bl2;
+        this.packSource = packSource;
+    }
 
     /*
      * Enabled aggressive block sorting
@@ -39,35 +63,22 @@ public class Pack {
      * Enabled aggressive exception aggregation
      */
     @Nullable
-    public static Pack create(String string, boolean bl, Supplier<PackResources> supplier, PackConstructor packConstructor, Position position, PackSource packSource) {
-        try (PackResources packResources = supplier.get();){
-            PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
-            if (packMetadataSection != null) {
-                Pack pack = packConstructor.create(string, Component.literal(packResources.getName()), bl, supplier, packMetadataSection, position, packSource);
-                return pack;
+    public static Info readPackInfo(String string, ResourcesSupplier resourcesSupplier) {
+        try (PackResources packResources = resourcesSupplier.open(string);){
+            PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.TYPE);
+            if (packMetadataSection == null) {
+                LOGGER.warn("Missing metadata in pack {}", (Object)string);
+                Info info = null;
+                return info;
             }
-            LOGGER.warn("Couldn't find pack meta for pack {}", (Object)string);
+            FeatureFlagsMetadataSection featureFlagsMetadataSection = packResources.getMetadataSection(FeatureFlagsMetadataSection.TYPE);
+            FeatureFlagSet featureFlagSet = featureFlagsMetadataSection != null ? featureFlagsMetadataSection.flags() : FeatureFlagSet.of();
+            Info info = new Info(packMetadataSection.getDescription(), packMetadataSection.getPackFormat(), featureFlagSet);
+            return info;
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to read pack metadata", exception);
             return null;
-        } catch (IOException iOException) {
-            LOGGER.warn("Couldn't get pack info for: {}", (Object)iOException.toString());
         }
-        return null;
-    }
-
-    public Pack(String string, boolean bl, Supplier<PackResources> supplier, Component component, Component component2, PackCompatibility packCompatibility, Position position, boolean bl2, PackSource packSource) {
-        this.id = string;
-        this.supplier = supplier;
-        this.title = component;
-        this.description = component2;
-        this.compatibility = packCompatibility;
-        this.required = bl;
-        this.defaultPosition = position;
-        this.fixedPosition = bl2;
-        this.packSource = packSource;
-    }
-
-    public Pack(String string, Component component, boolean bl, Supplier<PackResources> supplier, PackMetadataSection packMetadataSection, PackType packType, Position position, PackSource packSource) {
-        this(string, bl, supplier, component, packMetadataSection.getDescription(), PackCompatibility.forMetadata(packMetadataSection, packType), position, false, packSource);
     }
 
     public Component getTitle() {
@@ -86,8 +97,12 @@ public class Pack {
         return this.compatibility;
     }
 
+    public FeatureFlagSet getRequestedFeatures() {
+        return this.requestedFeatures;
+    }
+
     public PackResources open() {
-        return this.supplier.get();
+        return this.resources.open(this.id);
     }
 
     public String getId() {
@@ -126,9 +141,14 @@ public class Pack {
     }
 
     @FunctionalInterface
-    public static interface PackConstructor {
-        @Nullable
-        public Pack create(String var1, Component var2, boolean var3, Supplier<PackResources> var4, PackMetadataSection var5, Position var6, PackSource var7);
+    public static interface ResourcesSupplier {
+        public PackResources open(String var1);
+    }
+
+    public record Info(Component description, int format, FeatureFlagSet requestedFeatures) {
+        public PackCompatibility compatibility(PackType packType) {
+            return PackCompatibility.forFormat(this.format, packType);
+        }
     }
 
     public static enum Position {

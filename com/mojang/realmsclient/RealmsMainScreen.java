@@ -52,6 +52,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
@@ -1124,7 +1125,12 @@ extends RealmsScreen {
                 if (realmsMainScreen.newsLink == null) {
                     return;
                 }
-                Util.getPlatform().openUri(realmsMainScreen.newsLink);
+                RealmsMainScreen.this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+                    if (bl) {
+                        Util.getPlatform().openUri(realmsMainScreen.newsLink);
+                    }
+                    RealmsMainScreen.this.minecraft.setScreen(RealmsMainScreen.this);
+                }, realmsMainScreen.newsLink, true));
                 if (realmsMainScreen.hasUnreadNews) {
                     RealmsPersistence.RealmsPersistenceData realmsPersistenceData = RealmsPersistence.readFile();
                     realmsPersistenceData.hasUnreadNews = false;
