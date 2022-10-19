@@ -21,6 +21,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.providers.GlyphProviderBuilderType;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -35,6 +36,7 @@ public class FontManager implements AutoCloseable {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String FONTS_PATH = "fonts.json";
 	public static final ResourceLocation MISSING_FONT = new ResourceLocation("minecraft", "missing");
+	static final FileToIdConverter FONT_DEFINITIONS = FileToIdConverter.json("font");
 	private final FontSet missingFontSet;
 	final Map<ResourceLocation, FontSet> fontSets = Maps.<ResourceLocation, FontSet>newHashMap();
 	final TextureManager textureManager;
@@ -45,15 +47,9 @@ public class FontManager implements AutoCloseable {
 			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 			Map<ResourceLocation, List<GlyphProvider>> map = Maps.<ResourceLocation, List<GlyphProvider>>newHashMap();
 
-			for (Entry<ResourceLocation, List<Resource>> entry : resourceManager.listResourceStacks(
-					"font", resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
-				)
-				.entrySet()) {
+			for (Entry<ResourceLocation, List<Resource>> entry : FontManager.FONT_DEFINITIONS.listMatchingResourceStacks(resourceManager).entrySet()) {
 				ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-				String string = resourceLocation.getPath();
-				ResourceLocation resourceLocation2 = new ResourceLocation(
-					resourceLocation.getNamespace(), string.substring("font/".length(), string.length() - ".json".length())
-				);
+				ResourceLocation resourceLocation2 = FontManager.FONT_DEFINITIONS.fileToId(resourceLocation);
 				List<GlyphProvider> list = (List<GlyphProvider>)map.computeIfAbsent(
 					resourceLocation2, resourceLocationx -> Lists.<GlyphProvider>newArrayList(new AllMissingGlyphProvider())
 				);
@@ -73,11 +69,11 @@ public class FontManager implements AutoCloseable {
 
 								for (int i = jsonArray.size() - 1; i >= 0; i--) {
 									JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonArray.get(i), "providers[" + i + "]");
-									String string2 = GsonHelper.getAsString(jsonObject, "type");
-									GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string2);
+									String string = GsonHelper.getAsString(jsonObject, "type");
+									GlyphProviderBuilderType glyphProviderBuilderType = GlyphProviderBuilderType.byName(string);
 
 									try {
-										profilerFiller.push(string2);
+										profilerFiller.push(string);
 										GlyphProvider glyphProvider = glyphProviderBuilderType.create(jsonObject).create(resourceManager);
 										if (glyphProvider != null) {
 											list.add(glyphProvider);
@@ -89,23 +85,23 @@ public class FontManager implements AutoCloseable {
 							} finally {
 								profilerFiller.pop();
 							}
-						} catch (Throwable var35) {
+						} catch (Throwable var34) {
 							if (reader != null) {
 								try {
 									reader.close();
-								} catch (Throwable var32) {
-									var35.addSuppressed(var32);
+								} catch (Throwable var31) {
+									var34.addSuppressed(var31);
 								}
 							}
 
-							throw var35;
+							throw var34;
 						}
 
 						if (reader != null) {
 							reader.close();
 						}
-					} catch (Exception var36) {
-						FontManager.LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation2, "fonts.json", resource.sourcePackId(), var36);
+					} catch (Exception var35) {
+						FontManager.LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", resourceLocation2, "fonts.json", resource.sourcePackId(), var35);
 					}
 
 					profilerFiller.pop();

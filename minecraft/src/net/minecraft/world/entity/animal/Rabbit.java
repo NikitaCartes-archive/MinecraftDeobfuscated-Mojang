@@ -316,18 +316,25 @@ public class Rabbit extends Animal {
 		return itemStack.is(Items.CARROT) || itemStack.is(Items.GOLDEN_CARROT) || itemStack.is(Blocks.DANDELION.asItem());
 	}
 
+	@Nullable
 	public Rabbit getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Rabbit rabbit = EntityType.RABBIT.create(serverLevel);
-		int i = this.getRandomRabbitType(serverLevel);
-		if (this.random.nextInt(20) != 0) {
-			if (ageableMob instanceof Rabbit && this.random.nextBoolean()) {
-				i = ((Rabbit)ageableMob).getRabbitType();
-			} else {
+		if (rabbit != null) {
+			int i;
+			i = this.getRandomRabbitType(serverLevel);
+			label16:
+			if (this.random.nextInt(20) != 0) {
+				if (ageableMob instanceof Rabbit rabbit2 && this.random.nextBoolean()) {
+					i = rabbit2.getRabbitType();
+					break label16;
+				}
+
 				i = this.getRabbitType();
 			}
+
+			rabbit.setRabbitType(i);
 		}
 
-		rabbit.setRabbitType(i);
 		return rabbit;
 	}
 
@@ -394,7 +401,7 @@ public class Rabbit extends Animal {
 	}
 
 	boolean wantsMoreFood() {
-		return this.moreCarrotTicks == 0;
+		return this.moreCarrotTicks <= 0;
 	}
 
 	@Override
@@ -544,7 +551,6 @@ public class Rabbit extends Animal {
 
 				this.canRaid = false;
 				this.wantsToRaid = this.rabbit.wantsMoreFood();
-				this.wantsToRaid = true;
 			}
 
 			return super.canUse();

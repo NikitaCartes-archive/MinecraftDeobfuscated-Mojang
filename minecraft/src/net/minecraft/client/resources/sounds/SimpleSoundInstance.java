@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class SimpleSoundInstance extends AbstractSoundInstance {
@@ -30,9 +31,9 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 		);
 	}
 
-	public static SimpleSoundInstance forRecord(SoundEvent soundEvent, double d, double e, double f) {
+	public static SimpleSoundInstance forRecord(SoundEvent soundEvent, Vec3 vec3) {
 		return new SimpleSoundInstance(
-			soundEvent, SoundSource.RECORDS, 4.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.LINEAR, d, e, f
+			soundEvent, SoundSource.RECORDS, 4.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.LINEAR, vec3.x, vec3.y, vec3.z
 		);
 	}
 

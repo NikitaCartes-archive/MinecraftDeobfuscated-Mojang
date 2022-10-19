@@ -179,7 +179,9 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 			this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));
 		}
 
-		this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+		if (compoundTag.contains("Inventory", 10)) {
+			this.inventory.fromTag(compoundTag.getList("Inventory", 10));
+		}
 	}
 
 	@Nullable

@@ -17,19 +17,21 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 public class UpgradeRecipeBuilder {
 	private final Ingredient base;
 	private final Ingredient addition;
+	private final RecipeCategory category;
 	private final Item result;
 	private final Advancement.Builder advancement = Advancement.Builder.advancement();
 	private final RecipeSerializer<?> type;
 
-	public UpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, Item item) {
+	public UpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+		this.category = recipeCategory;
 		this.type = recipeSerializer;
 		this.base = ingredient;
 		this.addition = ingredient2;
 		this.result = item;
 	}
 
-	public static UpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, Item item) {
-		return new UpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, item);
+	public static UpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+		return new UpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, recipeCategory, item);
 	}
 
 	public UpgradeRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
@@ -56,7 +58,7 @@ public class UpgradeRecipeBuilder {
 				this.addition,
 				this.result,
 				this.advancement,
-				new ResourceLocation(resourceLocation.getNamespace(), "recipes/" + this.result.getItemCategory().getRecipeFolderName() + "/" + resourceLocation.getPath())
+				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")
 			)
 		);
 	}

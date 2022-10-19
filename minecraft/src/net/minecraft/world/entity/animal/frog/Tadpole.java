@@ -226,18 +226,20 @@ public class Tadpole extends AbstractFish {
 	private void ageUp() {
 		if (this.level instanceof ServerLevel serverLevel) {
 			Frog frog = EntityType.FROG.create(this.level);
-			frog.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-			frog.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(frog.blockPosition()), MobSpawnType.CONVERSION, null, null);
-			frog.setNoAi(this.isNoAi());
-			if (this.hasCustomName()) {
-				frog.setCustomName(this.getCustomName());
-				frog.setCustomNameVisible(this.isCustomNameVisible());
-			}
+			if (frog != null) {
+				frog.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+				frog.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(frog.blockPosition()), MobSpawnType.CONVERSION, null, null);
+				frog.setNoAi(this.isNoAi());
+				if (this.hasCustomName()) {
+					frog.setCustomName(this.getCustomName());
+					frog.setCustomNameVisible(this.isCustomNameVisible());
+				}
 
-			frog.setPersistenceRequired();
-			this.playSound(SoundEvents.TADPOLE_GROW_UP, 0.15F, 1.0F);
-			serverLevel.addFreshEntityWithPassengers(frog);
-			this.discard();
+				frog.setPersistenceRequired();
+				this.playSound(SoundEvents.TADPOLE_GROW_UP, 0.15F, 1.0F);
+				serverLevel.addFreshEntityWithPassengers(frog);
+				this.discard();
+			}
 		}
 	}
 

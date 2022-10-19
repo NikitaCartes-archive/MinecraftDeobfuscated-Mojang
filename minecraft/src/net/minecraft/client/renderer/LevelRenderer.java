@@ -541,7 +541,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					.getResourceManager()
 					.listPacks()
 					.findFirst()
-					.map(packResources -> Component.literal(packResources.getName()))
+					.map(packResources -> Component.literal(packResources.packId()))
 					.orElse(null);
 				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
 				this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
@@ -1291,6 +1291,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		bufferSource.endBatch(Sheets.bedSheet());
 		bufferSource.endBatch(Sheets.shulkerBoxSheet());
 		bufferSource.endBatch(Sheets.signSheet());
+		bufferSource.endBatch(Sheets.hangingSignSheet());
 		bufferSource.endBatch(Sheets.chestSheet());
 		this.renderBuffers.outlineBufferSource().endOutlineBatch();
 		if (bl5) {
@@ -2608,7 +2609,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.minecraft.gui.setNowPlaying(recordItem.getDisplayName());
 			}
 
-			SoundInstance var5 = SimpleSoundInstance.forRecord(soundEvent, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+			SoundInstance var5 = SimpleSoundInstance.forRecord(soundEvent, Vec3.atCenterOf(blockPos));
 			this.playingRecords.put(blockPos, var5);
 			this.minecraft.getSoundManager().play(var5);
 		}
@@ -2730,18 +2731,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1004:
 				this.level.playLocalSound(blockPos, SoundEvents.FIREWORK_ROCKET_SHOOT, SoundSource.NEUTRAL, 1.0F, 1.2F, false);
 				break;
-			case 1005:
-				this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1006:
-				this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1007:
-				this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1008:
-				this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
 			case 1009:
 				if (j == 0) {
 					this.level
@@ -2761,18 +2750,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				} else {
 					this.playStreamingMusic(null, blockPos);
 				}
-				break;
-			case 1011:
-				this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1012:
-				this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1013:
-				this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1014:
-				this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
 				break;
 			case 1015:
 				this.level
@@ -2854,12 +2831,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 1035:
 				this.level.playLocalSound(blockPos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 1.0F, false);
-				break;
-			case 1036:
-				this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
-				break;
-			case 1037:
-				this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
 				break;
 			case 1039:
 				this.level.playLocalSound(blockPos, SoundEvents.PHANTOM_BITE, SoundSource.HOSTILE, 0.3F, this.level.random.nextFloat() * 0.1F + 0.9F, false);

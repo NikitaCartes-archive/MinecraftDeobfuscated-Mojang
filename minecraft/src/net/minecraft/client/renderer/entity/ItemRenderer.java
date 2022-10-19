@@ -69,6 +69,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	public static final int ITEM_COUNT_BLIT_OFFSET = 200;
 	public static final float COMPASS_FOIL_UI_SCALE = 0.5F;
 	public static final float COMPASS_FOIL_FIRST_PERSON_SCALE = 0.75F;
+	private static final ModelResourceLocation TRIDENT_MODEL = ModelResourceLocation.vanilla("trident", "inventory");
+	public static final ModelResourceLocation TRIDENT_IN_HAND_MODEL = ModelResourceLocation.vanilla("trident_in_hand", "inventory");
+	private static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
+	public static final ModelResourceLocation SPYGLASS_IN_HAND_MODEL = ModelResourceLocation.vanilla("spyglass_in_hand", "inventory");
 	public float blitOffset;
 	private final ItemModelShaper itemModelShaper;
 	private final TextureManager textureManager;
@@ -125,9 +129,9 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				|| transformType == ItemTransforms.TransformType.FIXED;
 			if (bl2) {
 				if (itemStack.is(Items.TRIDENT)) {
-					bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
+					bakedModel = this.itemModelShaper.getModelManager().getModel(TRIDENT_MODEL);
 				} else if (itemStack.is(Items.SPYGLASS)) {
-					bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+					bakedModel = this.itemModelShaper.getModelManager().getModel(SPYGLASS_MODEL);
 				}
 			}
 
@@ -233,9 +237,9 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity, int i) {
 		BakedModel bakedModel;
 		if (itemStack.is(Items.TRIDENT)) {
-			bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory"));
+			bakedModel = this.itemModelShaper.getModelManager().getModel(TRIDENT_IN_HAND_MODEL);
 		} else if (itemStack.is(Items.SPYGLASS)) {
-			bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass_in_hand#inventory"));
+			bakedModel = this.itemModelShaper.getModelManager().getModel(SPYGLASS_IN_HAND_MODEL);
 		} else {
 			bakedModel = this.itemModelShaper.getItemModel(itemStack);
 		}

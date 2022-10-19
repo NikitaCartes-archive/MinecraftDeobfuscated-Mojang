@@ -169,27 +169,29 @@ public class MushroomCow extends Cow implements Shearable {
 	public void shear(SoundSource soundSource) {
 		this.level.playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, soundSource, 1.0F, 1.0F);
 		if (!this.level.isClientSide()) {
-			((ServerLevel)this.level).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-			this.discard();
 			Cow cow = EntityType.COW.create(this.level);
-			cow.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-			cow.setHealth(this.getHealth());
-			cow.yBodyRot = this.yBodyRot;
-			if (this.hasCustomName()) {
-				cow.setCustomName(this.getCustomName());
-				cow.setCustomNameVisible(this.isCustomNameVisible());
-			}
+			if (cow != null) {
+				((ServerLevel)this.level).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				this.discard();
+				cow.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+				cow.setHealth(this.getHealth());
+				cow.yBodyRot = this.yBodyRot;
+				if (this.hasCustomName()) {
+					cow.setCustomName(this.getCustomName());
+					cow.setCustomNameVisible(this.isCustomNameVisible());
+				}
 
-			if (this.isPersistenceRequired()) {
-				cow.setPersistenceRequired();
-			}
+				if (this.isPersistenceRequired()) {
+					cow.setPersistenceRequired();
+				}
 
-			cow.setInvulnerable(this.isInvulnerable());
-			this.level.addFreshEntity(cow);
+				cow.setInvulnerable(this.isInvulnerable());
+				this.level.addFreshEntity(cow);
 
-			for (int i = 0; i < 5; i++) {
-				this.level
-					.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getMushroomType().blockState.getBlock())));
+				for (int i = 0; i < 5; i++) {
+					this.level
+						.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getMushroomType().blockState.getBlock())));
+				}
 			}
 		}
 	}
@@ -237,9 +239,13 @@ public class MushroomCow extends Cow implements Shearable {
 		return MushroomCow.MushroomType.byType(this.entityData.get(DATA_TYPE));
 	}
 
+	@Nullable
 	public MushroomCow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel);
-		mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)ageableMob));
+		if (mushroomCow != null) {
+			mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)ageableMob));
+		}
+
 		return mushroomCow;
 	}
 

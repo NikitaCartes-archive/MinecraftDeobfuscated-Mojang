@@ -85,7 +85,7 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 		ByteBuffer byteBuffer = null;
 
 		try {
-			InputStream inputStream = resourceManager.open(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));
+			InputStream inputStream = resourceManager.open(this.location.withPrefix("font/"));
 
 			TrueTypeGlyphProvider var5;
 			try {

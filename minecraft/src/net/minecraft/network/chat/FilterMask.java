@@ -2,12 +2,16 @@ package net.minecraft.network.chat;
 
 import java.util.BitSet;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
+import org.apache.commons.lang3.StringUtils;
 
 public class FilterMask {
 	public static final FilterMask FULLY_FILTERED = new FilterMask(new BitSet(0), FilterMask.Type.FULLY_FILTERED);
 	public static final FilterMask PASS_THROUGH = new FilterMask(new BitSet(0), FilterMask.Type.PASS_THROUGH);
+	public static final Style FILTERED_STYLE = Style.EMPTY
+		.withColor(ChatFormatting.DARK_GRAY)
+		.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.filtered")));
 	private static final char HASH = '#';
 	private final BitSet mask;
 	private final FilterMask.Type type;
@@ -62,9 +66,33 @@ public class FilterMask {
 	}
 
 	@Nullable
-	public Component apply(ChatMessageContent chatMessageContent) {
-		String string = chatMessageContent.plain();
-		return Util.mapNullable(this.apply(string), Component::literal);
+	public Component applyWithFormatting(String string) {
+		return switch (this.type) {
+			case PASS_THROUGH -> Component.literal(string);
+			case FULLY_FILTERED -> null;
+			case PARTIALLY_FILTERED -> {
+				MutableComponent mutableComponent = Component.empty();
+				int i = 0;
+				boolean bl = this.mask.get(0);
+
+				while (true) {
+					int j = bl ? this.mask.nextClearBit(i) : this.mask.nextSetBit(i);
+					j = j < 0 ? string.length() : j;
+					if (j == i) {
+						yield mutableComponent;
+					}
+
+					if (bl) {
+						mutableComponent.append(Component.literal(StringUtils.repeat('#', j - i)).withStyle(FILTERED_STYLE));
+					} else {
+						mutableComponent.append(string.substring(i, j));
+					}
+
+					bl = !bl;
+					i = j;
+				}
+			}
+		};
 	}
 
 	public boolean isEmpty() {

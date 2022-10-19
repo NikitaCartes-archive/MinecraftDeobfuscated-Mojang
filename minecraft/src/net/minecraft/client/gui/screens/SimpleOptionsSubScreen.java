@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +12,6 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
@@ -47,12 +45,7 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.list.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
-		super.render(poseStack, i, j, f);
-		List<FormattedCharSequence> list = tooltipAt(this.list, i, j);
-		this.renderTooltip(poseStack, list, i, j);
+		this.basicListRender(poseStack, this.list, i, j, f);
 	}
 
 	public void updateNarratorButton() {

@@ -16,6 +16,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 
 public class SingleItemRecipeBuilder implements RecipeBuilder {
+	private final RecipeCategory category;
 	private final Item result;
 	private final Ingredient ingredient;
 	private final int count;
@@ -24,19 +25,20 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 	private String group;
 	private final RecipeSerializer<?> type;
 
-	public SingleItemRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, ItemLike itemLike, int i) {
+	public SingleItemRecipeBuilder(RecipeCategory recipeCategory, RecipeSerializer<?> recipeSerializer, Ingredient ingredient, ItemLike itemLike, int i) {
+		this.category = recipeCategory;
 		this.type = recipeSerializer;
 		this.result = itemLike.asItem();
 		this.ingredient = ingredient;
 		this.count = i;
 	}
 
-	public static SingleItemRecipeBuilder stonecutting(Ingredient ingredient, ItemLike itemLike) {
-		return new SingleItemRecipeBuilder(RecipeSerializer.STONECUTTER, ingredient, itemLike, 1);
+	public static SingleItemRecipeBuilder stonecutting(Ingredient ingredient, RecipeCategory recipeCategory, ItemLike itemLike) {
+		return new SingleItemRecipeBuilder(recipeCategory, RecipeSerializer.STONECUTTER, ingredient, itemLike, 1);
 	}
 
-	public static SingleItemRecipeBuilder stonecutting(Ingredient ingredient, ItemLike itemLike, int i) {
-		return new SingleItemRecipeBuilder(RecipeSerializer.STONECUTTER, ingredient, itemLike, i);
+	public static SingleItemRecipeBuilder stonecutting(Ingredient ingredient, RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+		return new SingleItemRecipeBuilder(recipeCategory, RecipeSerializer.STONECUTTER, ingredient, itemLike, i);
 	}
 
 	public SingleItemRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
@@ -71,7 +73,7 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 				this.result,
 				this.count,
 				this.advancement,
-				new ResourceLocation(resourceLocation.getNamespace(), "recipes/" + this.result.getItemCategory().getRecipeFolderName() + "/" + resourceLocation.getPath())
+				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")
 			)
 		);
 	}

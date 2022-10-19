@@ -19,7 +19,6 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -95,6 +94,7 @@ import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
@@ -128,7 +128,7 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.GameEventDispatcher;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -169,6 +169,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final ServerLevelData serverLevelData;
 	final EntityTickList entityTickList = new EntityTickList();
 	private final PersistentEntitySectionManager<Entity> entityManager;
+	private final GameEventDispatcher gameEventDispatcher;
 	public boolean noSave;
 	private final SleepStatus sleepStatus;
 	private int emptyTime;
@@ -180,7 +181,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	protected final Raids raids;
 	private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet<>();
 	private final List<BlockEventData> blockEventsToReschedule = new ArrayList(64);
-	private List<GameEvent.Message> gameEventMessages = new ArrayList();
 	private boolean handlingTick;
 	private final List<CustomSpawner> customSpawners;
 	@Nullable
@@ -203,7 +203,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		List<CustomSpawner> list,
 		boolean bl2
 	) {
-		super(serverLevelData, resourceKey, levelStem.typeHolder(), minecraftServer::getProfiler, false, bl, l, minecraftServer.getMaxChainedNeighborUpdates());
+		super(serverLevelData, resourceKey, levelStem.type(), minecraftServer::getProfiler, false, bl, l, minecraftServer.getMaxChainedNeighborUpdates());
 		this.tickTime = bl2;
 		this.server = minecraftServer;
 		this.customSpawners = list;
@@ -240,7 +240,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			serverLevelData.setGameType(minecraftServer.getDefaultGameType());
 		}
 
-		long m = minecraftServer.getWorldData().worldGenSettings().seed();
+		long m = minecraftServer.getWorldData().worldGenOptions().seed();
 		this.structureCheck = new StructureCheck(
 			this.chunkSource.chunkScanner(),
 			this.registryAccess(),
@@ -253,7 +253,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			m,
 			dataFixer
 		);
-		this.structureManager = new StructureManager(this, minecraftServer.getWorldData().worldGenSettings(), this.structureCheck);
+		this.structureManager = new StructureManager(this, minecraftServer.getWorldData().worldGenOptions(), this.structureCheck);
 		if (this.dimension() == Level.END && this.dimensionTypeRegistration().is(BuiltinDimensionTypes.END)) {
 			this.dragonFight = new EndDragonFight(this, m, minecraftServer.getWorldData().endDragonFightData());
 		} else {
@@ -261,6 +261,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		this.sleepStatus = new SleepStatus();
+		this.gameEventDispatcher = new GameEventDispatcher(this);
 	}
 
 	public void setWeatherParameters(int i, int j, boolean bl, boolean bl2) {
@@ -364,8 +365,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		profilerFiller.push("entityManagement");
 		this.entityManager.tick();
-		profilerFiller.popPush("gameEvents");
-		this.sendGameEvents();
 		profilerFiller.pop();
 	}
 
@@ -423,16 +422,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					&& !this.getBlockState(blockPos.below()).is(Blocks.LIGHTNING_ROD);
 				if (bl2) {
 					SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this);
-					skeletonHorse.setTrap(true);
-					skeletonHorse.setAge(0);
-					skeletonHorse.setPos((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
-					this.addFreshEntity(skeletonHorse);
+					if (skeletonHorse != null) {
+						skeletonHorse.setTrap(true);
+						skeletonHorse.setAge(0);
+						skeletonHorse.setPos((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+						this.addFreshEntity(skeletonHorse);
+					}
 				}
 
 				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this);
-				lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
-				lightningBolt.setVisualOnly(bl2);
-				this.addFreshEntity(lightningBolt);
+				if (lightningBolt != null) {
+					lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
+					lightningBolt.setVisualOnly(bl2);
+					this.addFreshEntity(lightningBolt);
+				}
 			}
 		}
 
@@ -894,59 +897,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Override
 	public void gameEvent(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
-		int i = gameEvent.getNotificationRadius();
-		BlockPos blockPos = new BlockPos(vec3);
-		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
-		int k = SectionPos.blockToSectionCoord(blockPos.getY() - i);
-		int l = SectionPos.blockToSectionCoord(blockPos.getZ() - i);
-		int m = SectionPos.blockToSectionCoord(blockPos.getX() + i);
-		int n = SectionPos.blockToSectionCoord(blockPos.getY() + i);
-		int o = SectionPos.blockToSectionCoord(blockPos.getZ() + i);
-		List<GameEvent.Message> list = new ArrayList();
-		boolean bl = false;
-
-		for (int p = j; p <= m; p++) {
-			for (int q = l; q <= o; q++) {
-				ChunkAccess chunkAccess = this.getChunkSource().getChunkNow(p, q);
-				if (chunkAccess != null) {
-					for (int r = k; r <= n; r++) {
-						bl |= chunkAccess.getEventDispatcher(r)
-							.walkListeners(
-								gameEvent,
-								vec3,
-								context,
-								(gameEventListener, vec32) -> (gameEventListener.handleEventsImmediately() ? list : this.gameEventMessages)
-										.add(new GameEvent.Message(gameEvent, vec3, context, gameEventListener, vec32))
-							);
-					}
-				}
-			}
-		}
-
-		if (!list.isEmpty()) {
-			this.handleGameEventMessagesInQueue(list);
-		}
-
-		if (bl) {
-			DebugPackets.sendGameEventInfo(this, gameEvent, vec3);
-		}
-	}
-
-	private void sendGameEvents() {
-		if (!this.gameEventMessages.isEmpty()) {
-			List<GameEvent.Message> list = this.gameEventMessages;
-			this.gameEventMessages = new ArrayList();
-			this.handleGameEventMessagesInQueue(list);
-		}
-	}
-
-	private void handleGameEventMessagesInQueue(List<GameEvent.Message> list) {
-		Collections.sort(list);
-
-		for (GameEvent.Message message : list) {
-			GameEventListener gameEventListener = message.recipient();
-			gameEventListener.handleGameEvent(this, message);
-		}
+		this.gameEventDispatcher.post(gameEvent, vec3, context);
 	}
 
 	@Override
@@ -1154,7 +1105,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Nullable
 	public BlockPos findNearestMapStructure(TagKey<Structure> tagKey, BlockPos blockPos, int i, boolean bl) {
-		if (!this.server.getWorldData().worldGenSettings().generateStructures()) {
+		if (!this.server.getWorldData().worldGenOptions().generateStructures()) {
 			return null;
 		} else {
 			Optional<HolderSet.Named<Structure>> optional = this.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).getTag(tagKey);
@@ -1511,12 +1462,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public boolean isFlat() {
-		return this.server.getWorldData().worldGenSettings().isFlatWorld();
+		return this.server.getWorldData().isFlatWorld();
 	}
 
 	@Override
 	public long getSeed() {
-		return this.server.getWorldData().worldGenSettings().seed();
+		return this.server.getWorldData().worldGenOptions().seed();
 	}
 
 	@Nullable
@@ -1625,6 +1576,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public boolean isNaturalSpawningAllowed(ChunkPos chunkPos) {
 		return this.entityManager.canPositionTick(chunkPos);
+	}
+
+	@Override
+	public FeatureFlagSet enabledFeatures() {
+		return this.server.getWorldData().enabledFeatures();
 	}
 
 	final class EntityCallbacks implements LevelCallback<Entity> {

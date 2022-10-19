@@ -573,12 +573,12 @@ public final class DensityFunctions {
 
 		@Override
 		public double minValue() {
-			return this.function.value().minValue();
+			return this.function.isBound() ? this.function.value().minValue() : Double.NEGATIVE_INFINITY;
 		}
 
 		@Override
 		public double maxValue() {
-			return this.function.value().maxValue();
+			return this.function.isBound() ? this.function.value().maxValue() : Double.POSITIVE_INFINITY;
 		}
 
 		@Override
@@ -1099,12 +1099,12 @@ public final class DensityFunctions {
 
 			@Override
 			public float minValue() {
-				return (float)this.function.value().minValue();
+				return this.function.isBound() ? (float)this.function.value().minValue() : Float.NEGATIVE_INFINITY;
 			}
 
 			@Override
 			public float maxValue() {
-				return (float)this.function.value().maxValue();
+				return this.function.isBound() ? (float)this.function.value().maxValue() : Float.POSITIVE_INFINITY;
 			}
 
 			public DensityFunctions.Spline.Coordinate mapAll(DensityFunction.Visitor visitor) {

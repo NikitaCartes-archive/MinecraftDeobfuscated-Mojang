@@ -64,7 +64,10 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 			if (optional.isPresent()) {
 				CraftingRecipe craftingRecipe = (CraftingRecipe)optional.get();
 				if (resultContainer.setRecipeUsed(level, serverPlayer, craftingRecipe)) {
-					itemStack = craftingRecipe.assemble(craftingContainer);
+					ItemStack itemStack2 = craftingRecipe.assemble(craftingContainer);
+					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
+						itemStack = itemStack2;
+					}
 				}
 			}
 

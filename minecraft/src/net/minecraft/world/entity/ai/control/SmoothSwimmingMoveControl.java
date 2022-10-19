@@ -5,6 +5,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class SmoothSwimmingMoveControl extends MoveControl {
+	private static final float FULL_SPEED_TURN_THRESHOLD = 10.0F;
+	private static final float STOP_TURN_THRESHOLD = 60.0F;
 	private final int maxTurnX;
 	private final int maxTurnY;
 	private final float inWaterSpeedModifier;
@@ -53,7 +55,9 @@ public class SmoothSwimmingMoveControl extends MoveControl {
 					this.mob.zza = k * i;
 					this.mob.yya = -l * i;
 				} else {
-					this.mob.setSpeed(i * this.outsideWaterSpeedModifier);
+					float m = Math.abs(Mth.wrapDegrees(this.mob.getYRot() - h));
+					float n = getTurningSpeedFactor(m);
+					this.mob.setSpeed(i * this.outsideWaterSpeedModifier * n);
 				}
 			}
 		} else {
@@ -62,5 +66,9 @@ public class SmoothSwimmingMoveControl extends MoveControl {
 			this.mob.setYya(0.0F);
 			this.mob.setZza(0.0F);
 		}
+	}
+
+	private static float getTurningSpeedFactor(float f) {
+		return 1.0F - Mth.clamp((f - 10.0F) / 50.0F, 0.0F, 1.0F);
 	}
 }

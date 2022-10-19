@@ -63,15 +63,8 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 				} else {
 					Pair<ResourceLocation, T> pair = (Pair<ResourceLocation, T>)dataResult.result().get();
 					ResourceKey<E> resourceKey = ResourceKey.create(this.registryKey, pair.getFirst());
-					Optional<RegistryLoader.Bound> optional2 = registryOps.registryLoader();
-					if (optional2.isPresent()) {
-						return ((RegistryLoader.Bound)optional2.get())
-							.overrideElementFromResources(this.registryKey, this.elementCodec, resourceKey, registryOps.getAsJson())
-							.map(holder -> Pair.of(holder, pair.getSecond()));
-					} else {
-						DataResult<Holder<E>> dataResult2 = registry.getOrCreateHolder(resourceKey);
-						return dataResult2.<Pair<Holder<E>, T>>map(holder -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
-					}
+					DataResult<? extends Holder<E>> dataResult2 = registry.getOrCreateHolder(resourceKey);
+					return dataResult2.<Pair<Holder<E>, T>>map(holder -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
 				}
 			}
 		} else {

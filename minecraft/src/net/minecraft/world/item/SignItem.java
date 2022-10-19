@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -10,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SignItem extends StandingAndWallBlockItem {
 	public SignItem(Item.Properties properties, Block block, Block block2) {
-		super(block, block2, properties);
+		super(block, block2, properties, Direction.DOWN);
 	}
 
 	@Override

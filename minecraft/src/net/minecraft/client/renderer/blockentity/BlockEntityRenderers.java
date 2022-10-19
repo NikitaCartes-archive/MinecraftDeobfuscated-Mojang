@@ -32,6 +32,7 @@ public class BlockEntityRenderers {
 
 	static {
 		register(BlockEntityType.SIGN, SignRenderer::new);
+		register(BlockEntityType.HANGING_SIGN, HangingSignRenderer::new);
 		register(BlockEntityType.MOB_SPAWNER, SpawnerRenderer::new);
 		register(BlockEntityType.PISTON, PistonHeadRenderer::new);
 		register(BlockEntityType.CHEST, ChestRenderer::new);

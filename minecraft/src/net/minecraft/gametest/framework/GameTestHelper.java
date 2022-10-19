@@ -77,6 +77,10 @@ public class GameTestHelper {
 		return itemEntity;
 	}
 
+	public ItemEntity spawnItem(Item item, BlockPos blockPos) {
+		return this.spawnItem(item, (float)blockPos.getX(), (float)blockPos.getY(), (float)blockPos.getZ());
+	}
+
 	public <E extends Entity> E spawn(EntityType<E> entityType, BlockPos blockPos) {
 		return this.spawn(entityType, Vec3.atBottomCenterOf(blockPos));
 	}
@@ -84,14 +88,18 @@ public class GameTestHelper {
 	public <E extends Entity> E spawn(EntityType<E> entityType, Vec3 vec3) {
 		ServerLevel serverLevel = this.getLevel();
 		E entity = entityType.create(serverLevel);
-		if (entity instanceof Mob) {
-			((Mob)entity).setPersistenceRequired();
-		}
+		if (entity == null) {
+			throw new NullPointerException("Failed to create entity " + entityType.builtInRegistryHolder().key().location());
+		} else {
+			if (entity instanceof Mob mob) {
+				mob.setPersistenceRequired();
+			}
 
-		Vec3 vec32 = this.absoluteVec(vec3);
-		entity.moveTo(vec32.x, vec32.y, vec32.z, entity.getYRot(), entity.getXRot());
-		serverLevel.addFreshEntity(entity);
-		return entity;
+			Vec3 vec32 = this.absoluteVec(vec3);
+			entity.moveTo(vec32.x, vec32.y, vec32.z, entity.getYRot(), entity.getXRot());
+			serverLevel.addFreshEntity(entity);
+			return entity;
+		}
 	}
 
 	public <E extends Entity> E spawn(EntityType<E> entityType, int i, int j, int k) {
@@ -142,11 +150,13 @@ public class GameTestHelper {
 	}
 
 	public void useBlock(BlockPos blockPos) {
+		this.useBlock(blockPos, this.makeMockPlayer());
+	}
+
+	public void useBlock(BlockPos blockPos, Player player) {
 		BlockPos blockPos2 = this.absolutePos(blockPos);
 		BlockState blockState = this.getLevel().getBlockState(blockPos2);
-		blockState.use(
-			this.getLevel(), this.makeMockPlayer(), InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(blockPos2), Direction.NORTH, blockPos2, true)
-		);
+		blockState.use(this.getLevel(), player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(blockPos2), Direction.NORTH, blockPos2, true));
 	}
 
 	public LivingEntity makeAboutToDrown(LivingEntity livingEntity) {
@@ -155,8 +165,8 @@ public class GameTestHelper {
 		return livingEntity;
 	}
 
-	public Player makeMockPlayer() {
-		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player"), null) {
+	public Player makeMockSurvivalPlayer() {
+		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
 			@Override
 			public boolean isSpectator() {
 				return false;
@@ -164,6 +174,25 @@ public class GameTestHelper {
 
 			@Override
 			public boolean isCreative() {
+				return false;
+			}
+		};
+	}
+
+	public Player makeMockPlayer() {
+		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
+			@Override
+			public boolean isSpectator() {
+				return false;
+			}
+
+			@Override
+			public boolean isCreative() {
+				return true;
+			}
+
+			@Override
+			public boolean isLocalPlayer() {
 				return true;
 			}
 		};
@@ -248,11 +277,13 @@ public class GameTestHelper {
 	}
 
 	public <T extends Comparable<T>> void assertBlockProperty(BlockPos blockPos, Property<T> property, T comparable) {
-		this.assertBlockState(
-			blockPos,
-			blockState -> blockState.hasProperty(property) && blockState.getValue(property).equals(comparable),
-			() -> "Expected property " + property.getName() + " to be " + comparable
-		);
+		BlockState blockState = this.getBlockState(blockPos);
+		boolean bl = blockState.hasProperty(property);
+		if (!bl || !blockState.getValue(property).equals(comparable)) {
+			String string = bl ? "was %s".formatted(blockState.getValue(property)) : "property %s is missing".formatted(property.getName());
+			String string2 = "Expected property %s to be %s, %s".formatted(property.getName(), comparable, string);
+			throw new GameTestAssertPosException(string2, this.absolutePos(blockPos), blockPos, this.testInfo.getTick());
+		}
 	}
 
 	public <T extends Comparable<T>> void assertBlockProperty(BlockPos blockPos, Property<T> property, Predicate<T> predicate, String string) {
@@ -282,6 +313,15 @@ public class GameTestHelper {
 		List<? extends Entity> list = this.getLevel().getEntities(entityType, new AABB(blockPos2), Entity::isAlive);
 		if (list.isEmpty()) {
 			throw new GameTestAssertPosException("Expected " + entityType.toShortString(), blockPos2, blockPos, this.testInfo.getTick());
+		}
+	}
+
+	public void assertEntityPresent(EntityType<?> entityType, Vec3 vec3, Vec3 vec32) {
+		List<? extends Entity> list = this.getLevel().getEntities(entityType, new AABB(vec3, vec32), Entity::isAlive);
+		if (list.isEmpty()) {
+			throw new GameTestAssertPosException(
+				"Expected " + entityType.toShortString() + " between ", new BlockPos(vec3), new BlockPos(vec32), this.testInfo.getTick()
+			);
 		}
 	}
 
@@ -585,6 +625,17 @@ public class GameTestHelper {
 	public Vec3 absoluteVec(Vec3 vec3) {
 		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getStructureBlockPos());
 		return StructureTemplate.transform(vec32.add(vec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getStructureBlockPos());
+	}
+
+	public Vec3 relativeVec(Vec3 vec3) {
+		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getStructureBlockPos());
+		return StructureTemplate.transform(vec3.subtract(vec32), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getStructureBlockPos());
+	}
+
+	public void assertTrue(boolean bl, String string) {
+		if (!bl) {
+			throw new GameTestAssertException(string);
+		}
 	}
 
 	public long getTick() {

@@ -10,9 +10,10 @@ import java.nio.file.Path;
 import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -23,15 +24,15 @@ public class BiomeParametersDumpReport implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Path topPath;
 
-	public BiomeParametersDumpReport(DataGenerator dataGenerator) {
-		this.topPath = dataGenerator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("biome_parameters");
+	public BiomeParametersDumpReport(PackOutput packOutput) {
+		this.topPath = packOutput.getOutputFolder(PackOutput.Target.REPORTS).resolve("biome_parameters");
 	}
 
 	@Override
 	public void run(CachedOutput cachedOutput) {
-		RegistryAccess.Frozen frozen = (RegistryAccess.Frozen)RegistryAccess.BUILTIN.get();
-		DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, frozen);
-		Registry<Biome> registry = frozen.registryOrThrow(Registry.BIOME_REGISTRY);
+		RegistryAccess registryAccess = BuiltinRegistries.createAccess();
+		DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+		Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
 		MultiNoiseBiomeSource.Preset.getPresets().forEach(pair -> {
 			MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(registry, false);
 			dumpValue(this.createPath((ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);

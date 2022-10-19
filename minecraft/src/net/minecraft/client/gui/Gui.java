@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -55,6 +56,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
@@ -144,8 +146,9 @@ public class Gui extends GuiComponent {
 	}
 
 	public void render(PoseStack poseStack, float f) {
-		this.screenWidth = this.minecraft.getWindow().getGuiScaledWidth();
-		this.screenHeight = this.minecraft.getWindow().getGuiScaledHeight();
+		Window window = this.minecraft.getWindow();
+		this.screenWidth = window.getGuiScaledWidth();
+		this.screenHeight = window.getGuiScaledHeight();
 		Font font = this.getFont();
 		RenderSystem.enableBlend();
 		if (Minecraft.useFancyGraphics()) {
@@ -205,8 +208,9 @@ public class Gui extends GuiComponent {
 			this.renderVehicleHealth(poseStack);
 			RenderSystem.disableBlend();
 			int i = this.screenWidth / 2 - 91;
-			if (this.minecraft.player.isRidingJumpable()) {
-				this.renderJumpMeter(poseStack, i);
+			PlayerRideableJumping playerRideableJumping = this.minecraft.player.jumpableVehicle();
+			if (playerRideableJumping != null) {
+				this.renderJumpMeter(playerRideableJumping, poseStack, i);
 			} else if (this.minecraft.gameMode.hasExperience()) {
 				this.renderExperienceBar(poseStack, i);
 			}
@@ -333,15 +337,14 @@ public class Gui extends GuiComponent {
 
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
-			poseStack.pushPose();
-			poseStack.translate(0.0, (double)(this.screenHeight - 48), 0.0);
+			int o = Mth.floor(this.minecraft.mouseHandler.xpos() * (double)window.getGuiScaledWidth() / (double)window.getScreenWidth());
+			int q = Mth.floor(this.minecraft.mouseHandler.ypos() * (double)window.getGuiScaledHeight() / (double)window.getScreenHeight());
 			this.minecraft.getProfiler().push("chat");
-			this.chat.render(poseStack, this.tickCount);
+			this.chat.render(poseStack, this.tickCount, o, q);
 			this.minecraft.getProfiler().pop();
-			poseStack.popPose();
 			objective2 = scoreboard.getDisplayObjective(0);
 			if (!this.minecraft.options.keyPlayerList.isDown()
-				|| this.minecraft.isLocalServer() && this.minecraft.player.connection.getOnlinePlayers().size() <= 1 && objective2 == null) {
+				|| this.minecraft.isLocalServer() && this.minecraft.player.connection.getListedOnlinePlayers().size() <= 1 && objective2 == null) {
 				this.tabList.setVisible(false);
 			} else {
 				this.tabList.setVisible(true);
@@ -474,7 +477,7 @@ public class Gui extends GuiComponent {
 					int o = l;
 					float g = f;
 					list.add((Runnable)() -> {
-						RenderSystem.setShaderTexture(0, textureAtlasSprite.atlas().location());
+						RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
 						RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, g);
 						blit(poseStack, n + 3, o + 3, this.getBlitOffset(), 18, 18, textureAtlasSprite);
 					});
@@ -550,7 +553,7 @@ public class Gui extends GuiComponent {
 		}
 	}
 
-	public void renderJumpMeter(PoseStack poseStack, int i) {
+	public void renderJumpMeter(PlayerRideableJumping playerRideableJumping, PoseStack poseStack, int i) {
 		this.minecraft.getProfiler().push("jumpBar");
 		RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
 		float f = this.minecraft.player.getJumpRidingScale();
@@ -558,7 +561,9 @@ public class Gui extends GuiComponent {
 		int k = (int)(f * 183.0F);
 		int l = this.screenHeight - 32 + 3;
 		this.blit(poseStack, i, l, 0, 84, 182, 5);
-		if (k > 0) {
+		if (playerRideableJumping.getJumpCooldown() > 0) {
+			this.blit(poseStack, i, l, 0, 74, 182, 5);
+		} else if (k > 0) {
 			this.blit(poseStack, i, l, 0, 89, k, 5);
 		}
 
@@ -1140,6 +1145,8 @@ public class Gui extends GuiComponent {
 
 			this.lastToolHighlight = itemStack;
 		}
+
+		this.chat.tick();
 	}
 
 	private void tickAutosaveIndicator() {

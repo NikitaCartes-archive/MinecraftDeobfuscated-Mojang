@@ -11,28 +11,28 @@ import net.minecraft.world.level.ChunkPos;
 
 public class SharedConstants {
 	@Deprecated
-	public static final boolean SNAPSHOT = false;
+	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3120;
+	public static final int WORLD_VERSION = 3205;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "1.19.2";
+	public static final String VERSION_STRING = "22w42a";
 	@Deprecated
-	public static final String RELEASE_TARGET = "1.19.2";
+	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 761;
 	@Deprecated
-	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 760;
-	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 103;
-	public static final int SNBT_NAG_VERSION = 3075;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 104;
+	public static final int SNBT_NAG_VERSION = 3200;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
-	public static final boolean THROW_ON_TASK_FAILURE = false;
+	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 9;
+	public static final int RESOURCE_PACK_FORMAT = 11;
 	@Deprecated
 	public static final int DATA_PACK_FORMAT = 10;
+	@Deprecated
+	public static final int LANGUAGE_FORMAT = 1;
+	public static final int REPORT_FORMAT_VERSION = 1;
 	public static final String DATA_VERSION_TAG = "DataVersion";
-	public static final boolean CNC_PART_2_ITEMS_AND_BLOCKS = false;
 	public static final boolean USE_NEW_RENDERSYSTEM = false;
 	public static final boolean MULTITHREADED_RENDERING = false;
 	public static final boolean FIX_TNT_DUPE = false;
@@ -79,6 +79,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_SCULK_CATALYST = false;
 	public static final boolean DEBUG_BYPASS_REALMS_VERSION_CHECK = false;
 	public static final boolean DEBUG_SOCIAL_INTERACTIONS = false;
+	public static final boolean DEBUG_VALIDATE_RESOURCE_PATH_CASE = false;
 	public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
 	public static final boolean DEBUG_SMALL_SPAWN = false;
 	public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;
@@ -107,6 +108,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_SHOW_SERVER_DEBUG_VALUES = false;
 	public static final boolean DEBUG_STORE_CHUNK_STACKTRACES = false;
 	public static final boolean DEBUG_FEATURE_COUNT = false;
+	public static final boolean DEBUG_RESOURCE_GENERATION_OVERRIDE = false;
 	public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
 	public static boolean CHECK_DATA_FIXER_SCHEMA = true;
 	public static boolean IS_RUNNING_IN_IDE;
@@ -171,7 +173,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 760;
+		return 1073741928;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

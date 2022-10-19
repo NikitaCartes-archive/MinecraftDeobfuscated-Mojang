@@ -100,12 +100,14 @@ public class FrogspawnBlock extends Block {
 
 		for (int j = 1; j <= i; j++) {
 			Tadpole tadpole = EntityType.TADPOLE.create(serverLevel);
-			double d = (double)blockPos.getX() + this.getRandomTadpolePositionOffset(randomSource);
-			double e = (double)blockPos.getZ() + this.getRandomTadpolePositionOffset(randomSource);
-			int k = randomSource.nextInt(1, 361);
-			tadpole.moveTo(d, (double)blockPos.getY() - 0.5, e, (float)k, 0.0F);
-			tadpole.setPersistenceRequired();
-			serverLevel.addFreshEntity(tadpole);
+			if (tadpole != null) {
+				double d = (double)blockPos.getX() + this.getRandomTadpolePositionOffset(randomSource);
+				double e = (double)blockPos.getZ() + this.getRandomTadpolePositionOffset(randomSource);
+				int k = randomSource.nextInt(1, 361);
+				tadpole.moveTo(d, (double)blockPos.getY() - 0.5, e, (float)k, 0.0F);
+				tadpole.setPersistenceRequired();
+				serverLevel.addFreshEntity(tadpole);
+			}
 		}
 	}
 

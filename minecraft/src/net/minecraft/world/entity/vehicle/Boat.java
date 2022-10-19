@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundPaddleBoatPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -147,7 +145,7 @@ public class Boat extends Entity {
 
 	@Override
 	public double getPassengersRidingOffset() {
-		return -0.1;
+		return this.getBoatType() == Boat.Type.BAMBOO ? 0.3 : -0.1;
 	}
 
 	@Override
@@ -212,23 +210,16 @@ public class Boat extends Entity {
 	}
 
 	public Item getDropItem() {
-		switch (this.getBoatType()) {
-			case OAK:
-			default:
-				return Items.OAK_BOAT;
-			case SPRUCE:
-				return Items.SPRUCE_BOAT;
-			case BIRCH:
-				return Items.BIRCH_BOAT;
-			case JUNGLE:
-				return Items.JUNGLE_BOAT;
-			case ACACIA:
-				return Items.ACACIA_BOAT;
-			case DARK_OAK:
-				return Items.DARK_OAK_BOAT;
-			case MANGROVE:
-				return Items.MANGROVE_BOAT;
-		}
+		return switch (this.getBoatType()) {
+			case SPRUCE -> Items.SPRUCE_BOAT;
+			case BIRCH -> Items.BIRCH_BOAT;
+			case JUNGLE -> Items.JUNGLE_BOAT;
+			case ACACIA -> Items.ACACIA_BOAT;
+			case DARK_OAK -> Items.DARK_OAK_BOAT;
+			case MANGROVE -> Items.MANGROVE_BOAT;
+			case BAMBOO -> Items.BAMBOO_RAFT;
+			default -> Items.OAK_BOAT;
+		};
 	}
 
 	@Override
@@ -859,11 +850,6 @@ public class Boat extends Entity {
 	}
 
 	@Override
-	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
-	}
-
-	@Override
 	public boolean isUnderWater() {
 		return this.status == Boat.Status.UNDER_WATER || this.status == Boat.Status.UNDER_FLOWING_WATER;
 	}
@@ -888,7 +874,8 @@ public class Boat extends Entity {
 		JUNGLE(Blocks.JUNGLE_PLANKS, "jungle"),
 		ACACIA(Blocks.ACACIA_PLANKS, "acacia"),
 		DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak"),
-		MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove");
+		MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove"),
+		BAMBOO(Blocks.BAMBOO_PLANKS, "bamboo");
 
 		private final String name;
 		private final Block planks;

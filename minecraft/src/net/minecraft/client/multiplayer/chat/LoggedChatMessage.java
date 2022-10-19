@@ -6,16 +6,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Objects;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.SignedMessageHeader;
 
 @Environment(EnvType.CLIENT)
 public interface LoggedChatMessage extends LoggedChatEvent {
@@ -36,18 +32,16 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 	boolean canReport(UUID uUID);
 
 	@Environment(EnvType.CLIENT)
-	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel)
-		implements LoggedChatMessage,
-		LoggedChatMessageLink {
+	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChatMessage {
 		private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
 		@Override
 		public Component toContentComponent() {
 			if (!this.message.filterMask().isEmpty()) {
-				Component component = this.message.filterMask().apply(this.message.signedContent());
-				return (Component)Objects.requireNonNullElse(component, CommonComponents.EMPTY);
+				Component component = this.message.filterMask().applyWithFormatting(this.message.signedContent());
+				return (Component)(component != null ? component : Component.empty());
 			} else {
-				return this.message.serverContent();
+				return this.message.decoratedContent();
 			}
 		}
 
@@ -71,21 +65,6 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 		@Override
 		public boolean canReport(UUID uUID) {
 			return this.message.hasSignatureFrom(uUID);
-		}
-
-		@Override
-		public SignedMessageHeader header() {
-			return this.message.signedHeader();
-		}
-
-		@Override
-		public byte[] bodyDigest() {
-			return this.message.signedBody().hash().asBytes();
-		}
-
-		@Override
-		public MessageSignature headerSignature() {
-			return this.message.headerSignature();
 		}
 
 		public UUID profileId() {

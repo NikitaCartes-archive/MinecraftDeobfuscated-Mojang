@@ -7,22 +7,22 @@ import java.nio.file.Path;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 
 public class RegistryDumpReport implements DataProvider {
-	private final DataGenerator generator;
+	private final PackOutput output;
 
-	public RegistryDumpReport(DataGenerator dataGenerator) {
-		this.generator = dataGenerator;
+	public RegistryDumpReport(PackOutput packOutput) {
+		this.output = packOutput;
 	}
 
 	@Override
 	public void run(CachedOutput cachedOutput) throws IOException {
 		JsonObject jsonObject = new JsonObject();
 		Registry.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), dumpRegistry((Registry)reference.value())));
-		Path path = this.generator.getOutputFolder(DataGenerator.Target.REPORTS).resolve("registries.json");
+		Path path = this.output.getOutputFolder(PackOutput.Target.REPORTS).resolve("registries.json");
 		DataProvider.saveStable(cachedOutput, jsonObject, path);
 	}
 

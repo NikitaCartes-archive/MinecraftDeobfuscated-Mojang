@@ -196,16 +196,18 @@ public class Slime extends Mob implements Enemy {
 				float g = ((float)(l % 2) - 0.5F) * f;
 				float h = ((float)(l / 2) - 0.5F) * f;
 				Slime slime = this.getType().create(this.level);
-				if (this.isPersistenceRequired()) {
-					slime.setPersistenceRequired();
-				}
+				if (slime != null) {
+					if (this.isPersistenceRequired()) {
+						slime.setPersistenceRequired();
+					}
 
-				slime.setCustomName(component);
-				slime.setNoAi(bl);
-				slime.setInvulnerable(this.isInvulnerable());
-				slime.setSize(j, true);
-				slime.moveTo(this.getX() + (double)g, this.getY() + 0.5, this.getZ() + (double)h, this.random.nextFloat() * 360.0F, 0.0F);
-				this.level.addFreshEntity(slime);
+					slime.setCustomName(component);
+					slime.setNoAi(bl);
+					slime.setInvulnerable(this.isInvulnerable());
+					slime.setSize(j, true);
+					slime.moveTo(this.getX() + (double)g, this.getY() + 0.5, this.getZ() + (double)h, this.random.nextFloat() * 360.0F, 0.0F);
+					this.level.addFreshEntity(slime);
+				}
 			}
 		}
 

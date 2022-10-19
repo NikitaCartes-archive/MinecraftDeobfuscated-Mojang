@@ -262,14 +262,16 @@ public class OceanRuinPieces {
 				}
 			} else if ("drowned".equals(string)) {
 				Drowned drowned = EntityType.DROWNED.create(serverLevelAccessor.getLevel());
-				drowned.setPersistenceRequired();
-				drowned.moveTo(blockPos, 0.0F, 0.0F);
-				drowned.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
-				serverLevelAccessor.addFreshEntityWithPassengers(drowned);
-				if (blockPos.getY() > serverLevelAccessor.getSeaLevel()) {
-					serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
-				} else {
-					serverLevelAccessor.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 2);
+				if (drowned != null) {
+					drowned.setPersistenceRequired();
+					drowned.moveTo(blockPos, 0.0F, 0.0F);
+					drowned.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
+					serverLevelAccessor.addFreshEntityWithPassengers(drowned);
+					if (blockPos.getY() > serverLevelAccessor.getSeaLevel()) {
+						serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+					} else {
+						serverLevelAccessor.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 2);
+					}
 				}
 			}
 		}

@@ -35,13 +35,13 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -245,10 +245,9 @@ public class TitleScreen extends Screen {
 					if (bl) {
 						this.minecraft.createWorldOpenFlows().loadLevel(this, "Demo_World");
 					} else {
-						RegistryAccess registryAccess = RegistryAccess.builtinCopy().freeze();
 						this.minecraft
 							.createWorldOpenFlows()
-							.createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryAccess, WorldPresets.demoSettings(registryAccess));
+							.createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, WorldOptions.DEMO_OPTIONS, WorldPresets::createNormalWorldDimensions);
 					}
 				}
 			)

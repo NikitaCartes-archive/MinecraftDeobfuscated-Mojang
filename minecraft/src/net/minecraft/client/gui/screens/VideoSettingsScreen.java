@@ -20,7 +20,6 @@ import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class VideoSettingsScreen extends OptionsSubScreen {
@@ -170,28 +169,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public boolean mouseReleased(double d, double e, int i) {
-		int j = this.options.guiScale().get();
-		if (super.mouseReleased(d, e, i)) {
-			return true;
-		} else if (this.list.mouseReleased(d, e, i)) {
-			if (this.options.guiScale().get() != j) {
-				this.minecraft.resizeDisplay();
-			}
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.list.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 16777215);
-		super.render(poseStack, i, j, f);
-		List<FormattedCharSequence> list = tooltipAt(this.list, i, j);
-		this.renderTooltip(poseStack, list, i, j);
+		this.basicListRender(poseStack, this.list, i, j, f);
 	}
 }

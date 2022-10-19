@@ -26,7 +26,7 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
 	private final Function<LivingEntity, Optional<PositionTracker>> targetPositionGetter;
 	private final float speedModifier;
 
-	public GoAndGiveItemsToTarget(Function<LivingEntity, Optional<PositionTracker>> function, float f) {
+	public GoAndGiveItemsToTarget(Function<LivingEntity, Optional<PositionTracker>> function, float f, int i) {
 		super(
 			Map.of(
 				MemoryModuleType.LOOK_TARGET,
@@ -35,7 +35,8 @@ public class GoAndGiveItemsToTarget<E extends LivingEntity & InventoryCarrier> e
 				MemoryStatus.REGISTERED,
 				MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS,
 				MemoryStatus.REGISTERED
-			)
+			),
+			i
 		);
 		this.targetPositionGetter = function;
 		this.speedModifier = f;

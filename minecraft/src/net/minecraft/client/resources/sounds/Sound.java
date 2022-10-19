@@ -5,12 +5,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.Weighted;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.SampledFloat;
 
 @Environment(EnvType.CLIENT)
 public class Sound implements Weighted<Sound> {
+	public static final FileToIdConverter SOUND_LISTER = new FileToIdConverter("sounds", ".ogg");
 	private final ResourceLocation location;
 	private final SampledFloat volume;
 	private final SampledFloat pitch;
@@ -36,7 +38,7 @@ public class Sound implements Weighted<Sound> {
 	}
 
 	public ResourceLocation getPath() {
-		return new ResourceLocation(this.location.getNamespace(), "sounds/" + this.location.getPath() + ".ogg");
+		return SOUND_LISTER.idToFile(this.location);
 	}
 
 	public SampledFloat getVolume() {

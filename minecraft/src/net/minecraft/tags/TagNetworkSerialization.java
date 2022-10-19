@@ -10,15 +10,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.RegistryLayer;
 
 public class TagNetworkSerialization {
-	public static Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> serializeTagsToNetwork(RegistryAccess registryAccess) {
-		return (Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload>)registryAccess.networkSafeRegistries()
+	public static Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> serializeTagsToNetwork(
+		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess
+	) {
+		return (Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload>)RegistrySynchronization.networkSafeRegistries(layeredRegistryAccess)
 			.map(registryEntry -> Pair.of(registryEntry.key(), serializeToNetwork(registryEntry.value())))
 			.filter(pair -> !((TagNetworkSerialization.NetworkPayload)pair.getSecond()).isEmpty())
 			.collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
@@ -51,7 +55,7 @@ public class TagNetworkSerialization {
 	) {
 		networkPayload.tags.forEach((resourceLocation, intList) -> {
 			TagKey<T> tagKey = TagKey.create(resourceKey, resourceLocation);
-			List<Holder<T>> list = intList.intStream().mapToObj(registry::getHolder).flatMap(Optional::stream).toList();
+			List<Holder<T>> list = (List<Holder<T>>)intList.intStream().mapToObj(registry::getHolder).flatMap(Optional::stream).collect(Collectors.toUnmodifiableList());
 			tagOutput.accept(tagKey, list);
 		});
 	}

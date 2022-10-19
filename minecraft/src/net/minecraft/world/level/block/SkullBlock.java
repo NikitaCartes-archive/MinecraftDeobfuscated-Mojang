@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -9,13 +8,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SkullBlock extends AbstractSkullBlock {
-	public static final int MAX = 15;
-	private static final int ROTATIONS = 16;
+	public static final int MAX = RotationSegment.getMaxSegmentIndex();
+	private static final int ROTATIONS = MAX + 1;
 	public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0);
 
@@ -36,17 +36,17 @@ public class SkullBlock extends AbstractSkullBlock {
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		return this.defaultBlockState().setValue(ROTATION, Integer.valueOf(Mth.floor((double)(blockPlaceContext.getRotation() * 16.0F / 360.0F) + 0.5) & 15));
+		return this.defaultBlockState().setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(blockPlaceContext.getRotation())));
 	}
 
 	@Override
 	public BlockState rotate(BlockState blockState, Rotation rotation) {
-		return blockState.setValue(ROTATION, Integer.valueOf(rotation.rotate((Integer)blockState.getValue(ROTATION), 16)));
+		return blockState.setValue(ROTATION, Integer.valueOf(rotation.rotate((Integer)blockState.getValue(ROTATION), ROTATIONS)));
 	}
 
 	@Override
 	public BlockState mirror(BlockState blockState, Mirror mirror) {
-		return blockState.setValue(ROTATION, Integer.valueOf(mirror.mirror((Integer)blockState.getValue(ROTATION), 16)));
+		return blockState.setValue(ROTATION, Integer.valueOf(mirror.mirror((Integer)blockState.getValue(ROTATION), ROTATIONS)));
 	}
 
 	@Override

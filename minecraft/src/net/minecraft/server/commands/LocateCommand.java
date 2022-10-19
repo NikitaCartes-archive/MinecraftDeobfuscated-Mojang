@@ -6,9 +6,11 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
+import net.minecraft.commands.arguments.ResourceOrTagArgument;
+import net.minecraft.commands.arguments.ResourceOrTagKeyArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -34,14 +36,8 @@ public class LocateCommand {
 	private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(
 		object -> Component.translatable("commands.locate.biome.not_found", object)
 	);
-	private static final DynamicCommandExceptionType ERROR_BIOME_INVALID = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.locate.biome.invalid", object)
-	);
 	private static final DynamicCommandExceptionType ERROR_POI_NOT_FOUND = new DynamicCommandExceptionType(
 		object -> Component.translatable("commands.locate.poi.not_found", object)
-	);
-	private static final DynamicCommandExceptionType ERROR_POI_INVALID = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.locate.poi.invalid", object)
 	);
 	private static final int MAX_STRUCTURE_SEARCH_RADIUS = 100;
 	private static final int MAX_BIOME_SEARCH_RADIUS = 6400;
@@ -49,18 +45,18 @@ public class LocateCommand {
 	private static final int BIOME_SAMPLE_RESOLUTION_VERTICAL = 64;
 	private static final int POI_SEARCH_RADIUS = 256;
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("locate")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
 					Commands.literal("structure")
 						.then(
-							Commands.argument("structure", ResourceOrTagLocationArgument.resourceOrTag(Registry.STRUCTURE_REGISTRY))
+							Commands.argument("structure", ResourceOrTagKeyArgument.resourceOrTagKey(Registry.STRUCTURE_REGISTRY))
 								.executes(
 									commandContext -> locateStructure(
 											commandContext.getSource(),
-											ResourceOrTagLocationArgument.getRegistryType(commandContext, "structure", Registry.STRUCTURE_REGISTRY, ERROR_STRUCTURE_INVALID)
+											ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registry.STRUCTURE_REGISTRY, ERROR_STRUCTURE_INVALID)
 										)
 								)
 						)
@@ -68,22 +64,19 @@ public class LocateCommand {
 				.then(
 					Commands.literal("biome")
 						.then(
-							Commands.argument("biome", ResourceOrTagLocationArgument.resourceOrTag(Registry.BIOME_REGISTRY))
+							Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registry.BIOME_REGISTRY))
 								.executes(
-									commandContext -> locateBiome(
-											commandContext.getSource(), ResourceOrTagLocationArgument.getRegistryType(commandContext, "biome", Registry.BIOME_REGISTRY, ERROR_BIOME_INVALID)
-										)
+									commandContext -> locateBiome(commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "biome", Registry.BIOME_REGISTRY))
 								)
 						)
 				)
 				.then(
 					Commands.literal("poi")
 						.then(
-							Commands.argument("poi", ResourceOrTagLocationArgument.resourceOrTag(Registry.POINT_OF_INTEREST_TYPE_REGISTRY))
+							Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registry.POINT_OF_INTEREST_TYPE_REGISTRY))
 								.executes(
 									commandContext -> locatePoi(
-											commandContext.getSource(),
-											ResourceOrTagLocationArgument.getRegistryType(commandContext, "poi", Registry.POINT_OF_INTEREST_TYPE_REGISTRY, ERROR_POI_INVALID)
+											commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "poi", Registry.POINT_OF_INTEREST_TYPE_REGISTRY)
 										)
 								)
 						)
@@ -91,13 +84,11 @@ public class LocateCommand {
 		);
 	}
 
-	private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(
-		ResourceOrTagLocationArgument.Result<Structure> result, Registry<Structure> registry
-	) {
+	private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(ResourceOrTagKeyArgument.Result<Structure> result, Registry<Structure> registry) {
 		return result.unwrap().map(resourceKey -> registry.getHolder(resourceKey).map(holder -> HolderSet.direct(holder)), registry::getTag);
 	}
 
-	private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Structure> result) throws CommandSyntaxException {
+	private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagKeyArgument.Result<Structure> result) throws CommandSyntaxException {
 		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
 		HolderSet<Structure> holderSet = (HolderSet<Structure>)getHolders(result, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(result.asPrintable()));
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
@@ -110,7 +101,7 @@ public class LocateCommand {
 		}
 	}
 
-	private static int locateBiome(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<Biome> result) throws CommandSyntaxException {
+	private static int locateBiome(CommandSourceStack commandSourceStack, ResourceOrTagArgument.Result<Biome> result) throws CommandSyntaxException {
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 		Pair<BlockPos, Holder<Biome>> pair = commandSourceStack.getLevel().findClosestBiome3d(result, blockPos, 6400, 32, 64);
 		if (pair == null) {
@@ -120,7 +111,7 @@ public class LocateCommand {
 		}
 	}
 
-	private static int locatePoi(CommandSourceStack commandSourceStack, ResourceOrTagLocationArgument.Result<PoiType> result) throws CommandSyntaxException {
+	private static int locatePoi(CommandSourceStack commandSourceStack, ResourceOrTagArgument.Result<PoiType> result) throws CommandSyntaxException {
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Optional<Pair<Holder<PoiType>, BlockPos>> optional = serverLevel.getPoiManager().findClosestWithType(result, blockPos, 256, PoiManager.Occupancy.ANY);
@@ -131,24 +122,38 @@ public class LocateCommand {
 		}
 	}
 
+	private static String getElementName(Pair<BlockPos, ? extends Holder<?>> pair) {
+		return (String)pair.getSecond().unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]");
+	}
+
 	public static int showLocateResult(
 		CommandSourceStack commandSourceStack,
-		ResourceOrTagLocationArgument.Result<?> result,
+		ResourceOrTagArgument.Result<?> result,
 		BlockPos blockPos,
 		Pair<BlockPos, ? extends Holder<?>> pair,
 		String string,
 		boolean bl
 	) {
+		String string2 = result.unwrap().map(reference -> result.asPrintable(), named -> result.asPrintable() + " (" + getElementName(pair) + ")");
+		return showLocateResult(commandSourceStack, blockPos, pair, string, bl, string2);
+	}
+
+	public static int showLocateResult(
+		CommandSourceStack commandSourceStack,
+		ResourceOrTagKeyArgument.Result<?> result,
+		BlockPos blockPos,
+		Pair<BlockPos, ? extends Holder<?>> pair,
+		String string,
+		boolean bl
+	) {
+		String string2 = result.unwrap().map(resourceKey -> resourceKey.location().toString(), tagKey -> "#" + tagKey.location() + " (" + getElementName(pair) + ")");
+		return showLocateResult(commandSourceStack, blockPos, pair, string, bl, string2);
+	}
+
+	private static int showLocateResult(
+		CommandSourceStack commandSourceStack, BlockPos blockPos, Pair<BlockPos, ? extends Holder<?>> pair, String string, boolean bl, String string2
+	) {
 		BlockPos blockPos2 = pair.getFirst();
-		String string2 = result.unwrap()
-			.map(
-				resourceKey -> resourceKey.location().toString(),
-				tagKey -> "#"
-						+ tagKey.location()
-						+ " ("
-						+ (String)pair.getSecond().unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]")
-						+ ")"
-			);
 		int i = bl ? Mth.floor(Mth.sqrt((float)blockPos.distSqr(blockPos2))) : Mth.floor(dist(blockPos.getX(), blockPos.getZ(), blockPos2.getX(), blockPos2.getZ()));
 		String string3 = bl ? String.valueOf(blockPos2.getY()) : "~";
 		Component component = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockPos2.getX(), string3, blockPos2.getZ()))

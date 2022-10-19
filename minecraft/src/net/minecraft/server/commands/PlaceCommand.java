@@ -229,15 +229,15 @@ public class PlaceCommand {
 		);
 	}
 
-	public static int placeFeature(CommandSourceStack commandSourceStack, Holder<ConfiguredFeature<?, ?>> holder, BlockPos blockPos) throws CommandSyntaxException {
+	public static int placeFeature(CommandSourceStack commandSourceStack, Holder.Reference<ConfiguredFeature<?, ?>> reference, BlockPos blockPos) throws CommandSyntaxException {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		ConfiguredFeature<?, ?> configuredFeature = holder.value();
+		ConfiguredFeature<?, ?> configuredFeature = reference.value();
 		ChunkPos chunkPos = new ChunkPos(blockPos);
 		checkLoaded(serverLevel, new ChunkPos(chunkPos.x - 1, chunkPos.z - 1), new ChunkPos(chunkPos.x + 1, chunkPos.z + 1));
 		if (!configuredFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), serverLevel.getRandom(), blockPos)) {
 			throw ERROR_FEATURE_FAILED.create();
 		} else {
-			String string = (String)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]");
+			String string = reference.key().location().toString();
 			commandSourceStack.sendSuccess(Component.translatable("commands.place.feature.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
 			return 1;
 		}
@@ -255,9 +255,9 @@ public class PlaceCommand {
 		}
 	}
 
-	public static int placeStructure(CommandSourceStack commandSourceStack, Holder<Structure> holder, BlockPos blockPos) throws CommandSyntaxException {
+	public static int placeStructure(CommandSourceStack commandSourceStack, Holder.Reference<Structure> reference, BlockPos blockPos) throws CommandSyntaxException {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		Structure structure = holder.value();
+		Structure structure = reference.value();
 		ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
 		StructureStart structureStart = structure.generate(
 			commandSourceStack.registryAccess(),
@@ -269,7 +269,7 @@ public class PlaceCommand {
 			new ChunkPos(blockPos),
 			0,
 			serverLevel,
-			holderx -> true
+			holder -> true
 		);
 		if (!structureStart.isValid()) {
 			throw ERROR_STRUCTURE_FAILED.create();
@@ -296,7 +296,7 @@ public class PlaceCommand {
 							chunkPosx
 						)
 				);
-			String string = (String)holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("[unregistered]");
+			String string = reference.key().location().toString();
 			commandSourceStack.sendSuccess(Component.translatable("commands.place.structure.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
 			return 1;
 		}

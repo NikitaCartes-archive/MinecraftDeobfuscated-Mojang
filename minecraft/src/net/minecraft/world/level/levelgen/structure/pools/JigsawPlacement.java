@@ -14,7 +14,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.Pools;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -71,7 +70,11 @@ public class JigsawPlacement {
 				ResourceLocation resourceLocation = (ResourceLocation)optional.get();
 				Optional<BlockPos> optional3 = getRandomNamedJigsaw(structurePoolElement, resourceLocation, blockPos, rotation, structureTemplateManager, worldgenRandom);
 				if (optional3.isEmpty()) {
-					LOGGER.error("No starting jigsaw {} found in start pool {}", resourceLocation, ((ResourceKey)holder.unwrapKey().get()).location());
+					LOGGER.error(
+						"No starting jigsaw {} found in start pool {}",
+						resourceLocation,
+						holder.unwrapKey().map(resourceKey -> resourceKey.location().toString()).orElse("<unregistered>")
+					);
 					return Optional.empty();
 				}
 

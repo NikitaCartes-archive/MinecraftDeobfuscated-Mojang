@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -11,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -32,7 +32,7 @@ public class StandingSignBlock extends SignBlock {
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
 		return this.defaultBlockState()
-			.setValue(ROTATION, Integer.valueOf(Mth.floor((double)((180.0F + blockPlaceContext.getRotation()) * 16.0F / 360.0F) + 0.5) & 15))
+			.setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(blockPlaceContext.getRotation())))
 			.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER));
 	}
 

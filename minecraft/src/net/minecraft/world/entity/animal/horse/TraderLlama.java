@@ -31,8 +31,9 @@ public class TraderLlama extends Llama {
 		return true;
 	}
 
+	@Nullable
 	@Override
-	protected Llama makeBabyLlama() {
+	protected Llama makeNewLlama() {
 		return EntityType.TRADER_LLAMA.create(this.level);
 	}
 

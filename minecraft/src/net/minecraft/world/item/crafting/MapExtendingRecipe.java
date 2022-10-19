@@ -10,10 +10,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class MapExtendingRecipe extends ShapedRecipe {
-	public MapExtendingRecipe(ResourceLocation resourceLocation) {
+	public MapExtendingRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
 		super(
 			resourceLocation,
 			"",
+			craftingBookCategory,
 			3,
 			3,
 			NonNullList.of(

@@ -21,6 +21,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
@@ -40,7 +41,7 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
-public class ServerLoginPacketListenerImpl implements TickablePacketListener, ServerLoginPacketListener {
+public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener, TickablePacketListener {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_TICKS_BEFORE_LOGIN = 600;
@@ -55,8 +56,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 	private final String serverId = "";
 	@Nullable
 	private ServerPlayer delayedAcceptPlayer;
-	@Nullable
-	private ProfilePublicKey.Data profilePublicKeyData;
+	private RemoteChatSession.Data chatSessionData = RemoteChatSession.Data.UNVERIFIED;
 
 	public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
 		this.server = minecraftServer;
@@ -98,13 +98,13 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 	}
 
 	public void handleAcceptedLogin() {
-		ProfilePublicKey profilePublicKey = null;
+		RemoteChatSession remoteChatSession = RemoteChatSession.UNVERIFIED;
 		if (!this.gameProfile.isComplete()) {
 			this.gameProfile = this.createFakeProfile(this.gameProfile);
 		} else {
 			try {
 				SignatureValidator signatureValidator = this.server.getServiceSignatureValidator();
-				profilePublicKey = validatePublicKey(this.profilePublicKeyData, this.gameProfile.getId(), signatureValidator, this.server.enforceSecureProfile());
+				remoteChatSession = validateChatSession(this.chatSessionData, this.gameProfile, signatureValidator, this.server.enforceSecureProfile());
 			} catch (ProfilePublicKey.ValidationException var7) {
 				LOGGER.error("Failed to validate profile key: {}", var7.getMessage());
 				if (!this.connection.isMemoryConnection()) {
@@ -131,7 +131,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 			ServerPlayer serverPlayer = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
 
 			try {
-				ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, profilePublicKey);
+				ServerPlayer serverPlayer2 = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, remoteChatSession);
 				if (serverPlayer != null) {
 					this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
 					this.delayedAcceptPlayer = serverPlayer2;
@@ -160,16 +160,12 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 		return this.gameProfile != null ? this.gameProfile + " (" + this.connection.getRemoteAddress() + ")" : String.valueOf(this.connection.getRemoteAddress());
 	}
 
-	@Nullable
-	private static ProfilePublicKey validatePublicKey(@Nullable ProfilePublicKey.Data data, UUID uUID, SignatureValidator signatureValidator, boolean bl) throws ProfilePublicKey.ValidationException {
-		if (data == null) {
-			if (bl) {
-				throw new ProfilePublicKey.ValidationException(ProfilePublicKey.MISSING_PROFILE_PUBLIC_KEY);
-			} else {
-				return null;
-			}
+	private static RemoteChatSession validateChatSession(RemoteChatSession.Data data, GameProfile gameProfile, SignatureValidator signatureValidator, boolean bl) throws ProfilePublicKey.ValidationException {
+		RemoteChatSession remoteChatSession = data.validate(gameProfile, signatureValidator, Duration.ZERO);
+		if (!remoteChatSession.verifiable() && bl) {
+			throw new ProfilePublicKey.ValidationException(ProfilePublicKey.MISSING_PROFILE_PUBLIC_KEY);
 		} else {
-			return ProfilePublicKey.createValidated(signatureValidator, uUID, data, Duration.ZERO);
+			return remoteChatSession;
 		}
 	}
 
@@ -177,7 +173,7 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 	public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
 		Validate.validState(this.state == ServerLoginPacketListenerImpl.State.HELLO, "Unexpected hello packet");
 		Validate.validState(isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username");
-		this.profilePublicKeyData = (ProfilePublicKey.Data)serverboundHelloPacket.publicKey().orElse(null);
+		this.chatSessionData = serverboundHelloPacket.chatSession();
 		GameProfile gameProfile = this.server.getSingleplayerProfile();
 		if (gameProfile != null && serverboundHelloPacket.name().equalsIgnoreCase(gameProfile.getName())) {
 			this.gameProfile = gameProfile;
@@ -204,9 +200,9 @@ public class ServerLoginPacketListenerImpl implements TickablePacketListener, Se
 		final String string;
 		try {
 			PrivateKey privateKey = this.server.getKeyPair().getPrivate();
-			if (this.profilePublicKeyData != null) {
-				ProfilePublicKey profilePublicKey = new ProfilePublicKey(this.profilePublicKeyData);
-				if (!serverboundKeyPacket.isChallengeSignatureValid(this.nonce, profilePublicKey)) {
+			if (this.chatSessionData.profilePublicKey() != null) {
+				ProfilePublicKey profilePublicKey = new ProfilePublicKey(this.chatSessionData.profilePublicKey());
+				if (!serverboundKeyPacket.isChallengeSignatureValid(this.nonce, profilePublicKey.createSignatureValidator())) {
 					throw new IllegalStateException("Protocol error");
 				}
 			} else if (!serverboundKeyPacket.isNonceValid(this.nonce, privateKey)) {

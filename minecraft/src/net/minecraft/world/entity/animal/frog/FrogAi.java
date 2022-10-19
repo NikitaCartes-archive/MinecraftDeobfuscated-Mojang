@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.ai.behavior.FollowTemptation;
 import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.behavior.LongJumpMidJump;
 import net.minecraft.world.entity.ai.behavior.LongJumpToPreferredBlock;
+import net.minecraft.world.entity.ai.behavior.LongJumpToRandomPos;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
@@ -39,7 +42,11 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class FrogAi {
 	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0F;
@@ -170,14 +177,7 @@ public class FrogAi {
 				Pair.of(
 					1,
 					new LongJumpToPreferredBlock<>(
-						TIME_BETWEEN_LONG_JUMPS,
-						2,
-						4,
-						1.5F,
-						frog -> SoundEvents.FROG_LONG_JUMP,
-						BlockTags.FROG_PREFER_JUMP_TO,
-						0.5F,
-						blockState -> blockState.is(Blocks.LILY_PAD)
+						TIME_BETWEEN_LONG_JUMPS, 2, 4, 1.5F, frog -> SoundEvents.FROG_LONG_JUMP, BlockTags.FROG_PREFER_JUMP_TO, 0.5F, FrogAi::isAcceptableLandingSpot
 					)
 				)
 			),
@@ -197,6 +197,26 @@ public class FrogAi {
 			ImmutableList.of(new StopAttackingIfTargetInvalid<>(), new ShootTongue(SoundEvents.FROG_TONGUE, SoundEvents.FROG_EAT)),
 			MemoryModuleType.ATTACK_TARGET
 		);
+	}
+
+	private static <E extends Mob> boolean isAcceptableLandingSpot(E mob, BlockPos blockPos) {
+		Level level = mob.level;
+		BlockPos blockPos2 = blockPos.below();
+		if (level.getFluidState(blockPos).isEmpty() && level.getFluidState(blockPos2).isEmpty() && level.getFluidState(blockPos.above()).isEmpty()) {
+			BlockState blockState = level.getBlockState(blockPos);
+			BlockState blockState2 = level.getBlockState(blockPos2);
+			if (!blockState.is(BlockTags.FROG_PREFER_JUMP_TO) && !blockState2.is(BlockTags.FROG_PREFER_JUMP_TO)) {
+				BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(level, blockPos.mutable());
+				BlockPathTypes blockPathTypes2 = WalkNodeEvaluator.getBlockPathTypeStatic(level, blockPos2.mutable());
+				return blockPathTypes != BlockPathTypes.TRAPDOOR && (!blockState.isAir() || blockPathTypes2 != BlockPathTypes.TRAPDOOR)
+					? LongJumpToRandomPos.defaultAcceptableLandingSpot(mob, blockPos)
+					: true;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 
 	private static boolean canAttack(Frog frog) {

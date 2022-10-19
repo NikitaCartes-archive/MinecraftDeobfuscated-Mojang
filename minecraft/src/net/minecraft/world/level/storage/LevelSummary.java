@@ -18,15 +18,17 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	private final String levelId;
 	private final boolean requiresManualConversion;
 	private final boolean locked;
+	private final boolean experimental;
 	private final Path icon;
 	@Nullable
 	private Component info;
 
-	public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, Path path) {
+	public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, boolean bl3, Path path) {
 		this.settings = levelSettings;
 		this.levelVersion = levelVersion;
 		this.levelId = string;
 		this.locked = bl2;
+		this.experimental = bl3;
 		this.icon = path;
 		this.requiresManualConversion = bl;
 	}
@@ -45,6 +47,10 @@ public class LevelSummary implements Comparable<LevelSummary> {
 
 	public boolean requiresManualConversion() {
 		return this.requiresManualConversion;
+	}
+
+	public boolean isExperimental() {
+		return this.experimental;
 	}
 
 	public long getLastPlayed() {
@@ -137,6 +143,10 @@ public class LevelSummary implements Comparable<LevelSummary> {
 				: Component.translatable("gameMode." + this.getGameMode().getName());
 			if (this.hasCheats()) {
 				mutableComponent.append(", ").append(Component.translatable("selectWorld.cheats"));
+			}
+
+			if (this.isExperimental()) {
+				mutableComponent.append(", ").append(Component.translatable("selectWorld.experimental").withStyle(ChatFormatting.YELLOW));
 			}
 
 			MutableComponent mutableComponent2 = this.getWorldVersionName();

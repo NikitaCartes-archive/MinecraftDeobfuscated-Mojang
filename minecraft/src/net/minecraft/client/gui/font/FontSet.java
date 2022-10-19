@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -150,7 +151,7 @@ public class FontSet implements AutoCloseable {
 		}
 
 		FontTexture fontTexture2 = new FontTexture(
-			new ResourceLocation(this.name.getNamespace(), this.name.getPath() + "/" + this.textures.size()), sheetGlyphInfo.isColored()
+			this.name.withPath((UnaryOperator<String>)(string -> string + "/" + this.textures.size())), sheetGlyphInfo.isColored()
 		);
 		this.textures.add(fontTexture2);
 		this.textureManager.register(fontTexture2.getName(), fontTexture2);

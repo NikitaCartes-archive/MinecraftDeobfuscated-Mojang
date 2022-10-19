@@ -201,6 +201,22 @@ public interface Holder<T> {
 			}
 		}
 
+		void bindKey(ResourceKey<T> resourceKey) {
+			if (this.key != null && resourceKey != this.key) {
+				throw new IllegalStateException("Can't change holder key: existing=" + this.key + ", new=" + resourceKey);
+			} else {
+				this.key = resourceKey;
+			}
+		}
+
+		void bindValue(T object) {
+			if (this.type == Holder.Reference.Type.INTRUSIVE && this.value != object) {
+				throw new IllegalStateException("Can't change holder " + this.key + " value: existing=" + this.value + ", new=" + object);
+			} else {
+				this.value = object;
+			}
+		}
+
 		void bindTags(Collection<TagKey<T>> collection) {
 			this.tags = Set.copyOf(collection);
 		}

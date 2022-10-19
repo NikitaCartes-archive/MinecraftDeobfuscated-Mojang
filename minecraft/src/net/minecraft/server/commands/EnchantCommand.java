@@ -7,10 +7,13 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.Collection;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ItemEnchantmentArgument;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,20 +36,17 @@ public class EnchantCommand {
 	);
 	private static final SimpleCommandExceptionType ERROR_NOTHING_HAPPENED = new SimpleCommandExceptionType(Component.translatable("commands.enchant.failed"));
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("enchant")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
 					Commands.argument("targets", EntityArgument.entities())
 						.then(
-							Commands.argument("enchantment", ItemEnchantmentArgument.enchantment())
+							Commands.argument("enchantment", ResourceArgument.resource(commandBuildContext, Registry.ENCHANTMENT_REGISTRY))
 								.executes(
 									commandContext -> enchant(
-											commandContext.getSource(),
-											EntityArgument.getEntities(commandContext, "targets"),
-											ItemEnchantmentArgument.getEnchantment(commandContext, "enchantment"),
-											1
+											commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ResourceArgument.getEnchantment(commandContext, "enchantment"), 1
 										)
 								)
 								.then(
@@ -55,7 +55,7 @@ public class EnchantCommand {
 											commandContext -> enchant(
 													commandContext.getSource(),
 													EntityArgument.getEntities(commandContext, "targets"),
-													ItemEnchantmentArgument.getEnchantment(commandContext, "enchantment"),
+													ResourceArgument.getEnchantment(commandContext, "enchantment"),
 													IntegerArgumentType.getInteger(commandContext, "level")
 												)
 										)
@@ -65,7 +65,8 @@ public class EnchantCommand {
 		);
 	}
 
-	private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Enchantment enchantment, int i) throws CommandSyntaxException {
+	private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Holder<Enchantment> holder, int i) throws CommandSyntaxException {
+		Enchantment enchantment = holder.value();
 		if (i > enchantment.getMaxLevel()) {
 			throw ERROR_LEVEL_TOO_HIGH.create(i, enchantment.getMaxLevel());
 		} else {

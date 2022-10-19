@@ -6,9 +6,11 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -266,7 +268,7 @@ public class FallingBlockEntity extends Entity {
 
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
-		this.blockState = NbtUtils.readBlockState(compoundTag.getCompound("BlockState"));
+		this.blockState = NbtUtils.readBlockState(this.level.holderLookup(Registry.BLOCK_REGISTRY), compoundTag.getCompound("BlockState"));
 		this.time = compoundTag.getInt("Time");
 		if (compoundTag.contains("HurtEntities", 99)) {
 			this.hurtEntities = compoundTag.getBoolean("HurtEntities");
@@ -316,7 +318,7 @@ public class FallingBlockEntity extends Entity {
 	}
 
 	@Override
-	public Packet<?> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this, Block.getId(this.getBlockState()));
 	}
 

@@ -79,7 +79,7 @@ public class Camera {
 			h *= 0.1F;
 			Vec3 vec3 = this.position.add((double)f, (double)g, (double)h);
 			Vec3 vec32 = new Vec3(
-				this.position.x - (double)this.forwards.x() * d + (double)f + (double)h,
+				this.position.x - (double)this.forwards.x() * d + (double)f,
 				this.position.y - (double)this.forwards.y() * d + (double)g,
 				this.position.z - (double)this.forwards.z() * d + (double)h
 			);

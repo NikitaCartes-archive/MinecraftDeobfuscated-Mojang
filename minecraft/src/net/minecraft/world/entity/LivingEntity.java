@@ -23,6 +23,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -31,7 +32,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -1840,8 +1840,16 @@ public abstract class LivingEntity extends Entity {
 		return this.getAttributes().getInstance(attribute);
 	}
 
+	public double getAttributeValue(Holder<Attribute> holder) {
+		return this.getAttributeValue(holder.value());
+	}
+
 	public double getAttributeValue(Attribute attribute) {
 		return this.getAttributes().getValue(attribute);
+	}
+
+	public double getAttributeBaseValue(Holder<Attribute> holder) {
+		return this.getAttributeBaseValue(holder.value());
 	}
 
 	public double getAttributeBaseValue(Attribute attribute) {
@@ -2082,11 +2090,8 @@ public abstract class LivingEntity extends Entity {
 					this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
 				}
 			} else if (this.isFallFlying()) {
+				this.checkSlowFallDistance();
 				Vec3 vec35 = this.getDeltaMovement();
-				if (vec35.y > -0.5) {
-					this.fallDistance = 1.0F;
-				}
-
 				Vec3 vec36 = this.getLookAngle();
 				float fx = this.getXRot() * (float) (Math.PI / 180.0);
 				double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
@@ -2380,7 +2385,7 @@ public abstract class LivingEntity extends Entity {
 			}
 
 			ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-			if (!ItemStack.matches(itemStack2, itemStack)) {
+			if (this.equipmentHasChanged(itemStack, itemStack2)) {
 				if (map == null) {
 					map = Maps.newEnumMap(EquipmentSlot.class);
 				}
@@ -2397,6 +2402,10 @@ public abstract class LivingEntity extends Entity {
 		}
 
 		return map;
+	}
+
+	public boolean equipmentHasChanged(ItemStack itemStack, ItemStack itemStack2) {
+		return !ItemStack.matches(itemStack2, itemStack);
 	}
 
 	private void handleHandSwap(Map<EquipmentSlot, ItemStack> map) {
@@ -3094,11 +3103,6 @@ public abstract class LivingEntity extends Entity {
 
 	public boolean canTakeItem(ItemStack itemStack) {
 		return false;
-	}
-
-	@Override
-	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
 	}
 
 	@Override

@@ -96,7 +96,13 @@ public class DismountHelper {
 					}
 				}
 
-				return !collisionGetter.getWorldBorder().isWithinBounds(aABB) ? null : vec3;
+				if (entityType != EntityType.PLAYER
+					|| !collisionGetter.getBlockState(blockPos).is(BlockTags.INVALID_SPAWN_INSIDE)
+						&& !collisionGetter.getBlockState(blockPos.above()).is(BlockTags.INVALID_SPAWN_INSIDE)) {
+					return !collisionGetter.getWorldBorder().isWithinBounds(aABB) ? null : vec3;
+				} else {
+					return null;
+				}
 			}
 		}
 	}

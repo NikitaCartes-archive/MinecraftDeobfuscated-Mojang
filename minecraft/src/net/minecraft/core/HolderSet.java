@@ -13,6 +13,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public interface HolderSet<T> extends Iterable<Holder<T>> {
 	Stream<Holder<T>> stream();
@@ -28,6 +29,14 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 	boolean contains(Holder<T> holder);
 
 	boolean isValidInRegistry(Registry<T> registry);
+
+	Optional<TagKey<T>> unwrapKey();
+
+	@Deprecated
+	@VisibleForTesting
+	static <T> HolderSet.Named<T> emptyNamed(Registry<T> registry, TagKey<T> tagKey) {
+		return new HolderSet.Named<>(registry, tagKey);
+	}
 
 	@SafeVarargs
 	static <T> HolderSet.Direct<T> direct(Holder<T>... holders) {
@@ -64,6 +73,11 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 		@Override
 		public Either<TagKey<T>, List<Holder<T>>> unwrap() {
 			return Either.right(this.contents);
+		}
+
+		@Override
+		public Optional<TagKey<T>> unwrapKey() {
+			return Optional.empty();
 		}
 
 		@Override
@@ -144,6 +158,11 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 		@Override
 		public Either<TagKey<T>, List<Holder<T>>> unwrap() {
 			return Either.left(this.key);
+		}
+
+		@Override
+		public Optional<TagKey<T>> unwrapKey() {
+			return Optional.of(this.key);
 		}
 
 		@Override

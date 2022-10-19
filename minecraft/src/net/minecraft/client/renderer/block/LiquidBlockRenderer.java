@@ -168,30 +168,28 @@ public class LiquidBlockRenderer {
 
 				float al = (z + ab + ad + af) / 4.0F;
 				float ah = (aa + ac + ae + ag) / 4.0F;
-				float ai = (float)textureAtlasSprites[0].getWidth() / (textureAtlasSprites[0].getU1() - textureAtlasSprites[0].getU0());
-				float aj = (float)textureAtlasSprites[0].getHeight() / (textureAtlasSprites[0].getV1() - textureAtlasSprites[0].getV0());
-				float ak = 4.0F / Math.max(aj, ai);
-				z = Mth.lerp(ak, z, al);
-				ab = Mth.lerp(ak, ab, al);
-				ad = Mth.lerp(ak, ad, al);
-				af = Mth.lerp(ak, af, al);
-				aa = Mth.lerp(ak, aa, ah);
-				ac = Mth.lerp(ak, ac, ah);
-				ae = Mth.lerp(ak, ae, ah);
-				ag = Mth.lerp(ak, ag, ah);
+				float ai = textureAtlasSprites[0].uvShrinkRatio();
+				z = Mth.lerp(ai, z, al);
+				ab = Mth.lerp(ai, ab, al);
+				ad = Mth.lerp(ai, ad, al);
+				af = Mth.lerp(ai, af, al);
+				aa = Mth.lerp(ai, aa, ah);
+				ac = Mth.lerp(ai, ac, ah);
+				ae = Mth.lerp(ai, ae, ah);
+				ag = Mth.lerp(ai, ag, ah);
 				int am = this.getLightColor(blockAndTintGetter, blockPos);
-				float an = k * f;
-				float ao = k * g;
-				float ap = k * h;
-				this.vertex(vertexConsumer, d + 0.0, e + (double)p, w + 0.0, an, ao, ap, z, aa, am);
-				this.vertex(vertexConsumer, d + 0.0, e + (double)r, w + 1.0, an, ao, ap, ab, ac, am);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)q, w + 1.0, an, ao, ap, ad, ae, am);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)o, w + 0.0, an, ao, ap, af, ag, am);
+				float ak = k * f;
+				float an = k * g;
+				float ao = k * h;
+				this.vertex(vertexConsumer, d + 0.0, e + (double)p, w + 0.0, ak, an, ao, z, aa, am);
+				this.vertex(vertexConsumer, d + 0.0, e + (double)r, w + 1.0, ak, an, ao, ab, ac, am);
+				this.vertex(vertexConsumer, d + 1.0, e + (double)q, w + 1.0, ak, an, ao, ad, ae, am);
+				this.vertex(vertexConsumer, d + 1.0, e + (double)o, w + 0.0, ak, an, ao, af, ag, am);
 				if (fluidState.shouldRenderBackwardUpFace(blockAndTintGetter, blockPos.above())) {
-					this.vertex(vertexConsumer, d + 0.0, e + (double)p, w + 0.0, an, ao, ap, z, aa, am);
-					this.vertex(vertexConsumer, d + 1.0, e + (double)o, w + 0.0, an, ao, ap, af, ag, am);
-					this.vertex(vertexConsumer, d + 1.0, e + (double)q, w + 1.0, an, ao, ap, ad, ae, am);
-					this.vertex(vertexConsumer, d + 0.0, e + (double)r, w + 1.0, an, ao, ap, ab, ac, am);
+					this.vertex(vertexConsumer, d + 0.0, e + (double)p, w + 0.0, ak, an, ao, z, aa, am);
+					this.vertex(vertexConsumer, d + 1.0, e + (double)o, w + 0.0, ak, an, ao, af, ag, am);
+					this.vertex(vertexConsumer, d + 1.0, e + (double)q, w + 1.0, ak, an, ao, ad, ae, am);
+					this.vertex(vertexConsumer, d + 0.0, e + (double)r, w + 1.0, ak, an, ao, ab, ac, am);
 				}
 			}
 
@@ -200,61 +198,61 @@ public class LiquidBlockRenderer {
 				float abx = textureAtlasSprites[0].getU1();
 				float adx = textureAtlasSprites[0].getV0();
 				float afx = textureAtlasSprites[0].getV1();
-				int aq = this.getLightColor(blockAndTintGetter, blockPos.below());
+				int ap = this.getLightColor(blockAndTintGetter, blockPos.below());
 				float acx = j * f;
 				float aex = j * g;
 				float agx = j * h;
-				this.vertex(vertexConsumer, d, e + (double)y, w + 1.0, acx, aex, agx, zx, afx, aq);
-				this.vertex(vertexConsumer, d, e + (double)y, w, acx, aex, agx, zx, adx, aq);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w, acx, aex, agx, abx, adx, aq);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w + 1.0, acx, aex, agx, abx, afx, aq);
+				this.vertex(vertexConsumer, d, e + (double)y, w + 1.0, acx, aex, agx, zx, afx, ap);
+				this.vertex(vertexConsumer, d, e + (double)y, w, acx, aex, agx, zx, adx, ap);
+				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w, acx, aex, agx, abx, adx, ap);
+				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w + 1.0, acx, aex, agx, abx, afx, ap);
 			}
 
-			int ar = this.getLightColor(blockAndTintGetter, blockPos);
+			int aq = this.getLightColor(blockAndTintGetter, blockPos);
 
 			for (Direction direction : Direction.Plane.HORIZONTAL) {
 				float afx;
 				float aax;
+				double ar;
+				double at;
 				double as;
 				double au;
-				double at;
-				double av;
 				boolean bl8;
 				switch (direction) {
 					case NORTH:
 						afx = p;
 						aax = o;
-						as = d;
-						at = d + 1.0;
+						ar = d;
+						as = d + 1.0;
+						at = w + 0.001F;
 						au = w + 0.001F;
-						av = w + 0.001F;
 						bl8 = bl4;
 						break;
 					case SOUTH:
 						afx = q;
 						aax = r;
-						as = d + 1.0;
-						at = d;
+						ar = d + 1.0;
+						as = d;
+						at = w + 1.0 - 0.001F;
 						au = w + 1.0 - 0.001F;
-						av = w + 1.0 - 0.001F;
 						bl8 = bl5;
 						break;
 					case WEST:
 						afx = r;
 						aax = p;
+						ar = d + 0.001F;
 						as = d + 0.001F;
-						at = d + 0.001F;
-						au = w + 1.0;
-						av = w;
+						at = w + 1.0;
+						au = w;
 						bl8 = bl6;
 						break;
 					default:
 						afx = o;
 						aax = q;
+						ar = d + 1.0 - 0.001F;
 						as = d + 1.0 - 0.001F;
-						at = d + 1.0 - 0.001F;
-						au = w;
-						av = w + 1.0;
+						at = w;
+						au = w + 1.0;
 						bl8 = bl7;
 				}
 
@@ -269,24 +267,24 @@ public class LiquidBlockRenderer {
 						}
 					}
 
-					float ao = textureAtlasSprite2.getU(0.0);
-					float ap = textureAtlasSprite2.getU(8.0);
-					float aw = textureAtlasSprite2.getV((double)((1.0F - afx) * 16.0F * 0.5F));
-					float ax = textureAtlasSprite2.getV((double)((1.0F - aax) * 16.0F * 0.5F));
-					float ay = textureAtlasSprite2.getV(8.0);
-					float az = direction.getAxis() == Direction.Axis.Z ? l : m;
-					float ba = k * az * f;
-					float bb = k * az * g;
-					float bc = k * az * h;
-					this.vertex(vertexConsumer, as, e + (double)afx, au, ba, bb, bc, ao, aw, ar);
-					this.vertex(vertexConsumer, at, e + (double)aax, av, ba, bb, bc, ap, ax, ar);
-					this.vertex(vertexConsumer, at, e + (double)y, av, ba, bb, bc, ap, ay, ar);
-					this.vertex(vertexConsumer, as, e + (double)y, au, ba, bb, bc, ao, ay, ar);
+					float av = textureAtlasSprite2.getU(0.0);
+					float aw = textureAtlasSprite2.getU(8.0);
+					float ax = textureAtlasSprite2.getV((double)((1.0F - afx) * 16.0F * 0.5F));
+					float ay = textureAtlasSprite2.getV((double)((1.0F - aax) * 16.0F * 0.5F));
+					float az = textureAtlasSprite2.getV(8.0);
+					float ba = direction.getAxis() == Direction.Axis.Z ? l : m;
+					float bb = k * ba * f;
+					float bc = k * ba * g;
+					float bd = k * ba * h;
+					this.vertex(vertexConsumer, ar, e + (double)afx, at, bb, bc, bd, av, ax, aq);
+					this.vertex(vertexConsumer, as, e + (double)aax, au, bb, bc, bd, aw, ay, aq);
+					this.vertex(vertexConsumer, as, e + (double)y, au, bb, bc, bd, aw, az, aq);
+					this.vertex(vertexConsumer, ar, e + (double)y, at, bb, bc, bd, av, az, aq);
 					if (textureAtlasSprite2 != this.waterOverlay) {
-						this.vertex(vertexConsumer, as, e + (double)y, au, ba, bb, bc, ao, ay, ar);
-						this.vertex(vertexConsumer, at, e + (double)y, av, ba, bb, bc, ap, ay, ar);
-						this.vertex(vertexConsumer, at, e + (double)aax, av, ba, bb, bc, ap, ax, ar);
-						this.vertex(vertexConsumer, as, e + (double)afx, au, ba, bb, bc, ao, aw, ar);
+						this.vertex(vertexConsumer, ar, e + (double)y, at, bb, bc, bd, av, az, aq);
+						this.vertex(vertexConsumer, as, e + (double)y, au, bb, bc, bd, aw, az, aq);
+						this.vertex(vertexConsumer, as, e + (double)aax, au, bb, bc, bd, aw, ay, aq);
+						this.vertex(vertexConsumer, ar, e + (double)afx, at, bb, bc, bd, av, ax, aq);
 					}
 				}
 			}

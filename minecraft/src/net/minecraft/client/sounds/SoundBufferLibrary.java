@@ -15,15 +15,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 
 @Environment(EnvType.CLIENT)
 public class SoundBufferLibrary {
-	private final ResourceManager resourceManager;
+	private final ResourceProvider resourceManager;
 	private final Map<ResourceLocation, CompletableFuture<SoundBuffer>> cache = Maps.<ResourceLocation, CompletableFuture<SoundBuffer>>newHashMap();
 
-	public SoundBufferLibrary(ResourceManager resourceManager) {
-		this.resourceManager = resourceManager;
+	public SoundBufferLibrary(ResourceProvider resourceProvider) {
+		this.resourceManager = resourceProvider;
 	}
 
 	public CompletableFuture<SoundBuffer> getCompleteBuffer(ResourceLocation resourceLocation) {

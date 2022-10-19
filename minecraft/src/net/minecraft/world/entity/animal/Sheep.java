@@ -149,41 +149,24 @@ public class Sheep extends Animal implements Shearable {
 		if (this.isSheared()) {
 			return this.getType().getDefaultLootTable();
 		} else {
-			switch (this.getColor()) {
-				case WHITE:
-				default:
-					return BuiltInLootTables.SHEEP_WHITE;
-				case ORANGE:
-					return BuiltInLootTables.SHEEP_ORANGE;
-				case MAGENTA:
-					return BuiltInLootTables.SHEEP_MAGENTA;
-				case LIGHT_BLUE:
-					return BuiltInLootTables.SHEEP_LIGHT_BLUE;
-				case YELLOW:
-					return BuiltInLootTables.SHEEP_YELLOW;
-				case LIME:
-					return BuiltInLootTables.SHEEP_LIME;
-				case PINK:
-					return BuiltInLootTables.SHEEP_PINK;
-				case GRAY:
-					return BuiltInLootTables.SHEEP_GRAY;
-				case LIGHT_GRAY:
-					return BuiltInLootTables.SHEEP_LIGHT_GRAY;
-				case CYAN:
-					return BuiltInLootTables.SHEEP_CYAN;
-				case PURPLE:
-					return BuiltInLootTables.SHEEP_PURPLE;
-				case BLUE:
-					return BuiltInLootTables.SHEEP_BLUE;
-				case BROWN:
-					return BuiltInLootTables.SHEEP_BROWN;
-				case GREEN:
-					return BuiltInLootTables.SHEEP_GREEN;
-				case RED:
-					return BuiltInLootTables.SHEEP_RED;
-				case BLACK:
-					return BuiltInLootTables.SHEEP_BLACK;
-			}
+			return switch (this.getColor()) {
+				case WHITE -> BuiltInLootTables.SHEEP_WHITE;
+				case ORANGE -> BuiltInLootTables.SHEEP_ORANGE;
+				case MAGENTA -> BuiltInLootTables.SHEEP_MAGENTA;
+				case LIGHT_BLUE -> BuiltInLootTables.SHEEP_LIGHT_BLUE;
+				case YELLOW -> BuiltInLootTables.SHEEP_YELLOW;
+				case LIME -> BuiltInLootTables.SHEEP_LIME;
+				case PINK -> BuiltInLootTables.SHEEP_PINK;
+				case GRAY -> BuiltInLootTables.SHEEP_GRAY;
+				case LIGHT_GRAY -> BuiltInLootTables.SHEEP_LIGHT_GRAY;
+				case CYAN -> BuiltInLootTables.SHEEP_CYAN;
+				case PURPLE -> BuiltInLootTables.SHEEP_PURPLE;
+				case BLUE -> BuiltInLootTables.SHEEP_BLUE;
+				case BROWN -> BuiltInLootTables.SHEEP_BROWN;
+				case GREEN -> BuiltInLootTables.SHEEP_GREEN;
+				case RED -> BuiltInLootTables.SHEEP_RED;
+				case BLACK -> BuiltInLootTables.SHEEP_BLACK;
+			};
 		}
 	}
 
@@ -329,11 +312,14 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
+	@Nullable
 	public Sheep getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Sheep sheep = (Sheep)ageableMob;
-		Sheep sheep2 = EntityType.SHEEP.create(serverLevel);
-		sheep2.setColor(this.getOffspringColor(this, sheep));
-		return sheep2;
+		Sheep sheep = EntityType.SHEEP.create(serverLevel);
+		if (sheep != null) {
+			sheep.setColor(this.getOffspringColor(this, (Sheep)ageableMob));
+		}
+
+		return sheep;
 	}
 
 	@Override

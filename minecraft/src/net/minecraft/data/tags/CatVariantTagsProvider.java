@@ -1,13 +1,13 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.CatVariantTags;
 import net.minecraft.world.entity.animal.CatVariant;
 
 public class CatVariantTagsProvider extends TagsProvider<CatVariant> {
-	public CatVariantTagsProvider(DataGenerator dataGenerator) {
-		super(dataGenerator, Registry.CAT_VARIANT);
+	public CatVariantTagsProvider(PackOutput packOutput) {
+		super(packOutput, Registry.CAT_VARIANT);
 	}
 
 	@Override

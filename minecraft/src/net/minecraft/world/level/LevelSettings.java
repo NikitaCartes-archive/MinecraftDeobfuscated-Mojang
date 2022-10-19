@@ -10,19 +10,21 @@ public final class LevelSettings {
 	private final Difficulty difficulty;
 	private final boolean allowCommands;
 	private final GameRules gameRules;
-	private final DataPackConfig dataPackConfig;
+	private final WorldDataConfiguration dataConfiguration;
 
-	public LevelSettings(String string, GameType gameType, boolean bl, Difficulty difficulty, boolean bl2, GameRules gameRules, DataPackConfig dataPackConfig) {
+	public LevelSettings(
+		String string, GameType gameType, boolean bl, Difficulty difficulty, boolean bl2, GameRules gameRules, WorldDataConfiguration worldDataConfiguration
+	) {
 		this.levelName = string;
 		this.gameType = gameType;
 		this.hardcore = bl;
 		this.difficulty = difficulty;
 		this.allowCommands = bl2;
 		this.gameRules = gameRules;
-		this.dataPackConfig = dataPackConfig;
+		this.dataConfiguration = worldDataConfiguration;
 	}
 
-	public static LevelSettings parse(Dynamic<?> dynamic, DataPackConfig dataPackConfig) {
+	public static LevelSettings parse(Dynamic<?> dynamic, WorldDataConfiguration worldDataConfiguration) {
 		GameType gameType = GameType.byId(dynamic.get("GameType").asInt(0));
 		return new LevelSettings(
 			dynamic.get("LevelName").asString(""),
@@ -31,7 +33,7 @@ public final class LevelSettings {
 			(Difficulty)dynamic.get("Difficulty").asNumber().map(number -> Difficulty.byId(number.byteValue())).result().orElse(Difficulty.NORMAL),
 			dynamic.get("allowCommands").asBoolean(gameType == GameType.CREATIVE),
 			new GameRules(dynamic.get("GameRules")),
-			dataPackConfig
+			worldDataConfiguration
 		);
 	}
 
@@ -59,23 +61,23 @@ public final class LevelSettings {
 		return this.gameRules;
 	}
 
-	public DataPackConfig getDataPackConfig() {
-		return this.dataPackConfig;
+	public WorldDataConfiguration getDataConfiguration() {
+		return this.dataConfiguration;
 	}
 
 	public LevelSettings withGameType(GameType gameType) {
-		return new LevelSettings(this.levelName, gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, this.dataPackConfig);
+		return new LevelSettings(this.levelName, gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, this.dataConfiguration);
 	}
 
 	public LevelSettings withDifficulty(Difficulty difficulty) {
-		return new LevelSettings(this.levelName, this.gameType, this.hardcore, difficulty, this.allowCommands, this.gameRules, this.dataPackConfig);
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, difficulty, this.allowCommands, this.gameRules, this.dataConfiguration);
 	}
 
-	public LevelSettings withDataPackConfig(DataPackConfig dataPackConfig) {
-		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, dataPackConfig);
+	public LevelSettings withDataConfiguration(WorldDataConfiguration worldDataConfiguration) {
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, worldDataConfiguration);
 	}
 
 	public LevelSettings copy() {
-		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.dataPackConfig);
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.dataConfiguration);
 	}
 }

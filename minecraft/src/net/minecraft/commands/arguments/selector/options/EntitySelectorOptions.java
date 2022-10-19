@@ -490,7 +490,7 @@ public class EntitySelectorOptions {
 	public static EntitySelectorOptions.Modifier get(EntitySelectorParser entitySelectorParser, String string, int i) throws CommandSyntaxException {
 		EntitySelectorOptions.Option option = (EntitySelectorOptions.Option)OPTIONS.get(string);
 		if (option != null) {
-			if (option.predicate.test(entitySelectorParser)) {
+			if (option.canUse.test(entitySelectorParser)) {
 				return option.modifier;
 			} else {
 				throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), string);
@@ -505,7 +505,7 @@ public class EntitySelectorOptions {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
 		for (Entry<String, EntitySelectorOptions.Option> entry : OPTIONS.entrySet()) {
-			if (((EntitySelectorOptions.Option)entry.getValue()).predicate.test(entitySelectorParser)
+			if (((EntitySelectorOptions.Option)entry.getValue()).canUse.test(entitySelectorParser)
 				&& ((String)entry.getKey()).toLowerCase(Locale.ROOT).startsWith(string)) {
 				suggestionsBuilder.suggest((String)entry.getKey() + "=", ((EntitySelectorOptions.Option)entry.getValue()).description);
 			}
@@ -516,15 +516,6 @@ public class EntitySelectorOptions {
 		void handle(EntitySelectorParser entitySelectorParser) throws CommandSyntaxException;
 	}
 
-	static class Option {
-		public final EntitySelectorOptions.Modifier modifier;
-		public final Predicate<EntitySelectorParser> predicate;
-		public final Component description;
-
-		Option(EntitySelectorOptions.Modifier modifier, Predicate<EntitySelectorParser> predicate, Component component) {
-			this.modifier = modifier;
-			this.predicate = predicate;
-			this.description = component;
-		}
+	static record Option(EntitySelectorOptions.Modifier modifier, Predicate<EntitySelectorParser> canUse, Component description) {
 	}
 }

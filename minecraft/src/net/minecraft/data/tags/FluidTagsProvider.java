@@ -1,14 +1,14 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 public class FluidTagsProvider extends TagsProvider<Fluid> {
-	public FluidTagsProvider(DataGenerator dataGenerator) {
-		super(dataGenerator, Registry.FLUID);
+	public FluidTagsProvider(PackOutput packOutput) {
+		super(packOutput, Registry.FLUID);
 	}
 
 	@Override

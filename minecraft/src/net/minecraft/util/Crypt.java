@@ -33,6 +33,7 @@ public class Crypt {
 	private static final String BYTE_ENCODING = "ISO_8859_1";
 	private static final String HASH_ALGORITHM = "SHA-1";
 	public static final String SIGNING_ALGORITHM = "SHA256withRSA";
+	public static final int SIGNATURE_BYTES = 256;
 	private static final String PEM_RSA_PRIVATE_KEY_HEADER = "-----BEGIN RSA PRIVATE KEY-----";
 	private static final String PEM_RSA_PRIVATE_KEY_FOOTER = "-----END RSA PRIVATE KEY-----";
 	public static final String RSA_PUBLIC_KEY_HEADER = "-----BEGIN RSA PUBLIC KEY-----";

@@ -52,7 +52,7 @@ public class ChunkStatus {
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess, bl) -> {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-				if (serverLevel.getServer().getWorldData().worldGenSettings().generateStructures()) {
+				if (serverLevel.getServer().getWorldData().worldGenOptions().generateStructures()) {
 					chunkGenerator.createStructures(
 						serverLevel.registryAccess(),
 						serverLevel.getChunkSource().randomState(),

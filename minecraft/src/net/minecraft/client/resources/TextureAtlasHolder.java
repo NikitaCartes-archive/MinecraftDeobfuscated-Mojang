@@ -1,18 +1,20 @@
 package net.minecraft.client.resources;
 
-import java.util.stream.Stream;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 @Environment(EnvType.CLIENT)
-public abstract class TextureAtlasHolder extends SimplePreparableReloadListener<TextureAtlas.Preparations> implements AutoCloseable {
+public abstract class TextureAtlasHolder implements PreparableReloadListener, AutoCloseable {
 	private final TextureAtlas textureAtlas;
 	private final String prefix;
 
@@ -22,30 +24,34 @@ public abstract class TextureAtlasHolder extends SimplePreparableReloadListener<
 		textureManager.register(this.textureAtlas.location(), this.textureAtlas);
 	}
 
-	protected abstract Stream<ResourceLocation> getResourcesToLoad();
-
 	protected TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
 		return this.textureAtlas.getSprite(this.resolveLocation(resourceLocation));
 	}
 
 	private ResourceLocation resolveLocation(ResourceLocation resourceLocation) {
-		return new ResourceLocation(resourceLocation.getNamespace(), this.prefix + "/" + resourceLocation.getPath());
+		return resourceLocation.withPrefix(this.prefix + "/");
 	}
 
-	protected TextureAtlas.Preparations prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		profilerFiller.startTick();
-		profilerFiller.push("stitching");
-		TextureAtlas.Preparations preparations = this.textureAtlas
-			.prepareToStitch(resourceManager, this.getResourcesToLoad().map(this::resolveLocation), profilerFiller, 0);
-		profilerFiller.pop();
-		profilerFiller.endTick();
-		return preparations;
+	@Override
+	public final CompletableFuture<Void> reload(
+		PreparableReloadListener.PreparationBarrier preparationBarrier,
+		ResourceManager resourceManager,
+		ProfilerFiller profilerFiller,
+		ProfilerFiller profilerFiller2,
+		Executor executor,
+		Executor executor2
+	) {
+		return CompletableFuture.supplyAsync(() -> SpriteLoader.listSprites(resourceManager, this.prefix), executor)
+			.thenCompose(map -> SpriteLoader.create(this.textureAtlas).stitch(map, 0, executor))
+			.thenCompose(SpriteLoader.Preparations::waitForUpload)
+			.thenCompose(preparationBarrier::wait)
+			.thenAcceptAsync(preparations -> this.apply(preparations, profilerFiller2), executor2);
 	}
 
-	protected void apply(TextureAtlas.Preparations preparations, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+	private void apply(SpriteLoader.Preparations preparations, ProfilerFiller profilerFiller) {
 		profilerFiller.startTick();
 		profilerFiller.push("upload");
-		this.textureAtlas.reload(preparations);
+		this.textureAtlas.upload(preparations);
 		profilerFiller.pop();
 		profilerFiller.endTick();
 	}

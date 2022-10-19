@@ -52,6 +52,7 @@ import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.entity.animal.goat.Goat;
@@ -139,6 +140,10 @@ import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.entity.vehicle.MinecartSpawner;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -152,7 +157,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.slf4j.Logger;
 
-public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
+public class EntityType<T extends Entity> implements FeatureElement, EntityTypeTest<Entity, T> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String ENTITY_TAG = "EntityTag";
 	private final Holder.Reference<EntityType<?>> builtInRegistryHolder = Registry.ENTITY_TYPE.createIntrusiveHolder(this);
@@ -189,6 +194,9 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		"chest_boat", EntityType.Builder.<ChestBoat>of(ChestBoat::new, MobCategory.MISC).sized(1.375F, 0.5625F).clientTrackingRange(10)
 	);
 	public static final EntityType<Cat> CAT = register("cat", EntityType.Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6F, 0.7F).clientTrackingRange(8));
+	public static final EntityType<Camel> CAMEL = register(
+		"camel", EntityType.Builder.of(Camel::new, MobCategory.CREATURE).sized(1.7F, 2.375F).clientTrackingRange(10).requiredFeatures(FeatureFlags.UPDATE_1_20)
+	);
 	public static final EntityType<CaveSpider> CAVE_SPIDER = register(
 		"cave_spider", EntityType.Builder.of(CaveSpider::new, MobCategory.MONSTER).sized(0.7F, 0.5F).clientTrackingRange(8)
 	);
@@ -524,6 +532,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	@Nullable
 	private ResourceLocation lootTable;
 	private final EntityDimensions dimensions;
+	private final FeatureFlagSet requiredFeatures;
 
 	private static <T extends Entity> EntityType<T> register(String string, EntityType.Builder<T> builder) {
 		return Registry.register(Registry.ENTITY_TYPE, string, builder.build(string));
@@ -547,7 +556,8 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		ImmutableSet<Block> immutableSet,
 		EntityDimensions entityDimensions,
 		int i,
-		int j
+		int j,
+		FeatureFlagSet featureFlagSet
 	) {
 		this.factory = entityFactory;
 		this.category = mobCategory;
@@ -559,6 +569,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		this.dimensions = entityDimensions;
 		this.clientTrackingRange = i;
 		this.updateInterval = j;
+		this.requiredFeatures = featureFlagSet;
 	}
 
 	@Nullable
@@ -711,7 +722,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 	public ResourceLocation getDefaultLootTable() {
 		if (this.lootTable == null) {
 			ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(this);
-			this.lootTable = new ResourceLocation(resourceLocation.getNamespace(), "entities/" + resourceLocation.getPath());
+			this.lootTable = resourceLocation.withPrefix("entities/");
 		}
 
 		return this.lootTable;
@@ -725,9 +736,14 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		return this.dimensions.height;
 	}
 
+	@Override
+	public FeatureFlagSet requiredFeatures() {
+		return this.requiredFeatures;
+	}
+
 	@Nullable
 	public T create(Level level) {
-		return this.factory.create(this, level);
+		return !this.isEnabled(level.enabledFeatures()) ? null : this.factory.create(this, level);
 	}
 
 	public static Optional<Entity> create(CompoundTag compoundTag, Level level) {
@@ -863,6 +879,7 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 		private int clientTrackingRange = 5;
 		private int updateInterval = 3;
 		private EntityDimensions dimensions = EntityDimensions.scalable(0.6F, 1.8F);
+		private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
 		private Builder(EntityType.EntityFactory<T> entityFactory, MobCategory mobCategory) {
 			this.factory = entityFactory;
@@ -918,6 +935,11 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 			return this;
 		}
 
+		public EntityType.Builder<T> requiredFeatures(FeatureFlag... featureFlags) {
+			this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
+			return this;
+		}
+
 		public EntityType<T> build(String string) {
 			if (this.serialize) {
 				Util.fetchChoiceType(References.ENTITY_TREE, string);
@@ -933,7 +955,8 @@ public class EntityType<T extends Entity> implements EntityTypeTest<Entity, T> {
 				this.immuneTo,
 				this.dimensions,
 				this.clientTrackingRange,
-				this.updateInterval
+				this.updateInterval,
+				this.requiredFeatures
 			);
 		}
 	}

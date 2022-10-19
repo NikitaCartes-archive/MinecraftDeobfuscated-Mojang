@@ -30,12 +30,15 @@ import java.util.stream.Stream;
 import net.minecraft.FileUtil;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.commons.io.IOUtils;
@@ -52,11 +55,16 @@ public class StructureTemplateManager {
 	private ResourceManager resourceManager;
 	private final Path generatedDir;
 	private final List<StructureTemplateManager.Source> sources;
+	private final HolderLookup<Block> blockLookup;
+	private static final FileToIdConverter LISTER = new FileToIdConverter("structures", ".nbt");
 
-	public StructureTemplateManager(ResourceManager resourceManager, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer) {
+	public StructureTemplateManager(
+		ResourceManager resourceManager, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, HolderLookup<Block> holderLookup
+	) {
 		this.resourceManager = resourceManager;
 		this.fixerUpper = dataFixer;
 		this.generatedDir = levelStorageAccess.getLevelPath(LevelResource.GENERATED_DIR).normalize();
+		this.blockLookup = holderLookup;
 		Builder<StructureTemplateManager.Source> builder = ImmutableList.builder();
 		builder.add(new StructureTemplateManager.Source(this::loadFromGenerated, this::listGenerated));
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
@@ -106,20 +114,12 @@ public class StructureTemplateManager {
 	}
 
 	private Optional<StructureTemplate> loadFromResource(ResourceLocation resourceLocation) {
-		ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + ".nbt");
+		ResourceLocation resourceLocation2 = LISTER.idToFile(resourceLocation);
 		return this.load(() -> this.resourceManager.open(resourceLocation2), throwable -> LOGGER.error("Couldn't load structure {}", resourceLocation, throwable));
 	}
 
 	private Stream<ResourceLocation> listResources() {
-		return this.resourceManager
-			.listResources("structures", resourceLocation -> true)
-			.keySet()
-			.stream()
-			.map(
-				resourceLocation -> new ResourceLocation(
-						resourceLocation.getNamespace(), resourceLocation.getPath().substring("structures".length() + 1, resourceLocation.getPath().length() - ".nbt".length())
-					)
-			);
+		return LISTER.listMatchingResources(this.resourceManager).keySet().stream().map(LISTER::fileToId);
 	}
 
 	private Optional<StructureTemplate> loadFromTestStructures(ResourceLocation resourceLocation) {
@@ -264,7 +264,7 @@ public class StructureTemplateManager {
 		}
 
 		StructureTemplate structureTemplate = new StructureTemplate();
-		structureTemplate.load(NbtUtils.update(this.fixerUpper, DataFixTypes.STRUCTURE, compoundTag, compoundTag.getInt("DataVersion")));
+		structureTemplate.load(this.blockLookup, NbtUtils.update(this.fixerUpper, DataFixTypes.STRUCTURE, compoundTag, compoundTag.getInt("DataVersion")));
 		return structureTemplate;
 	}
 

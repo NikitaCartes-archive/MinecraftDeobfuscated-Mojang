@@ -3,9 +3,9 @@
 		"name": "Java 17"
 	},
 	{
-		"sha1sum": "2e3055ec2a017c7f94b79744b4a68b65695a118c",
-		"name": "authlib-3.11.49.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.11.49/authlib-3.11.49.jar"
+		"sha1sum": "88c5e6091e52fd76e2ee73420957a4cc74deab8d",
+		"name": "authlib-3.13.56.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.13.56/authlib-3.13.56.jar"
 	},
 	{
 		"sha1sum": "5c685c5ffa94c4cd39496c7184c1d122e515ecef",
@@ -83,9 +83,9 @@
 		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/70.1/icu4j-70.1.jar"
 	},
 	{
-		"sha1sum": "0c876796229b2ef5120f186eab5acc870699d3b9",
-		"name": "javabridge-1.2.24.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/javabridge/1.2.24/javabridge-1.2.24.jar"
+		"sha1sum": "bfa589b0bd71588fa7e594640114b0cda0cff5f6",
+		"name": "javabridge-2.0.25.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/javabridge/2.0.25/javabridge-2.0.25.jar"
 	},
 	{
 		"sha1sum": "1227f9e0666314f9de41477e3ec277e542ed7f7b",

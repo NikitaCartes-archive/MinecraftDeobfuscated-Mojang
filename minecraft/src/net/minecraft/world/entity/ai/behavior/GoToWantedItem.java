@@ -35,9 +35,11 @@ public class GoToWantedItem<E extends LivingEntity> extends Behavior<E> {
 
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
+		ItemEntity itemEntity = this.getClosestLovedItem(livingEntity);
 		return !this.isOnPickupCooldown(livingEntity)
 			&& this.predicate.test(livingEntity)
-			&& this.getClosestLovedItem(livingEntity).closerThan(livingEntity, (double)this.maxDistToWalk);
+			&& itemEntity.closerThan(livingEntity, (double)this.maxDistToWalk)
+			&& livingEntity.level.getWorldBorder().isWithinBounds(itemEntity.blockPosition());
 	}
 
 	@Override

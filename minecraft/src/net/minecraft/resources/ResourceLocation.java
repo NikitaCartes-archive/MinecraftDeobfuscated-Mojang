@@ -13,6 +13,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.lang.reflect.Type;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
@@ -25,25 +26,24 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 	public static final char NAMESPACE_SEPARATOR = ':';
 	public static final String DEFAULT_NAMESPACE = "minecraft";
 	public static final String REALMS_NAMESPACE = "realms";
-	protected final String namespace;
-	protected final String path;
+	private final String namespace;
+	private final String path;
 
-	protected ResourceLocation(String[] strings) {
-		this.namespace = StringUtils.isEmpty(strings[0]) ? "minecraft" : strings[0];
-		this.path = strings[1];
-		if (!isValidNamespace(this.namespace)) {
-			throw new ResourceLocationException("Non [a-z0-9_.-] character in namespace of location: " + this.namespace + ":" + this.path);
-		} else if (!isValidPath(this.path)) {
-			throw new ResourceLocationException("Non [a-z0-9/._-] character in path of location: " + this.namespace + ":" + this.path);
-		}
+	protected ResourceLocation(String string, String string2, @Nullable ResourceLocation.Dummy dummy) {
+		this.namespace = string;
+		this.path = string2;
+	}
+
+	public ResourceLocation(String string, String string2) {
+		this(assertValidNamespace(string, string2), assertValidPath(string, string2), null);
+	}
+
+	private ResourceLocation(String[] strings) {
+		this(strings[0], strings[1]);
 	}
 
 	public ResourceLocation(String string) {
 		this(decompose(string, ':'));
-	}
-
-	public ResourceLocation(String string, String string2) {
-		this(new String[]{string, string2});
 	}
 
 	public static ResourceLocation of(String string, char c) {
@@ -72,7 +72,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		String[] strings = new String[]{"minecraft", string};
 		int i = string.indexOf(c);
 		if (i >= 0) {
-			strings[1] = string.substring(i + 1, string.length());
+			strings[1] = string.substring(i + 1);
 			if (i >= 1) {
 				strings[0] = string.substring(0, i);
 			}
@@ -95,6 +95,18 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 
 	public String getNamespace() {
 		return this.namespace;
+	}
+
+	public ResourceLocation withPath(String string) {
+		return new ResourceLocation(this.namespace, assertValidPath(this.namespace, string), null);
+	}
+
+	public ResourceLocation withPath(UnaryOperator<String> unaryOperator) {
+		return this.withPath((String)unaryOperator.apply(this.path));
+	}
+
+	public ResourceLocation withPrefix(String string) {
+		return this.withPath(string + this.path);
 	}
 
 	public String toString() {
@@ -181,6 +193,14 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		return true;
 	}
 
+	private static String assertValidNamespace(String string, String string2) {
+		if (!isValidNamespace(string)) {
+			throw new ResourceLocationException("Non [a-z0-9_.-] character in namespace of location: " + string + ":" + string2);
+		} else {
+			return string;
+		}
+	}
+
 	public static boolean validPathChar(char c) {
 		return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '/' || c == '.';
 	}
@@ -192,6 +212,17 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 	public static boolean isValidResourceLocation(String string) {
 		String[] strings = decompose(string, ':');
 		return isValidNamespace(StringUtils.isEmpty(strings[0]) ? "minecraft" : strings[0]) && isValidPath(strings[1]);
+	}
+
+	private static String assertValidPath(String string, String string2) {
+		if (!isValidPath(string2)) {
+			throw new ResourceLocationException("Non [a-z0-9/._-] character in path of location: " + string + ":" + string2);
+		} else {
+			return string2;
+		}
+	}
+
+	protected interface Dummy {
 	}
 
 	public static class Serializer implements JsonDeserializer<ResourceLocation>, JsonSerializer<ResourceLocation> {

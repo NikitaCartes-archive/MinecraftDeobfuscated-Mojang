@@ -46,7 +46,7 @@ public final class RegistryFixedCodec<E> implements Codec<Holder<E>> {
 			if (optional.isPresent()) {
 				return ResourceLocation.CODEC.decode(dynamicOps, object).flatMap(pair -> {
 					ResourceLocation resourceLocation = (ResourceLocation)pair.getFirst();
-					DataResult<Holder<E>> dataResult = ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation));
+					DataResult<? extends Holder<E>> dataResult = ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation));
 					return dataResult.map(holder -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
 				});
 			}

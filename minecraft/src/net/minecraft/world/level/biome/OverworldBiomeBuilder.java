@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
 import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 
@@ -933,8 +934,8 @@ public final class OverworldBiomeBuilder {
 		consumer.accept(Pair.of(Climate.parameters(parameter, parameter2, parameter3, parameter4, Climate.Parameter.point(1.1F), parameter5, f), resourceKey));
 	}
 
-	public static boolean isDeepDarkRegion(double d, double e) {
-		return d < -0.225F && e > 0.9F;
+	public static boolean isDeepDarkRegion(DensityFunction densityFunction, DensityFunction densityFunction2, DensityFunction.FunctionContext functionContext) {
+		return densityFunction.compute(functionContext) < -0.225F && densityFunction2.compute(functionContext) > 0.9F;
 	}
 
 	public static String getDebugStringForPeaksAndValleys(double d) {

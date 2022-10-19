@@ -1,9 +1,10 @@
 package net.minecraft.server.packs.metadata.pack;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 
 public class PackMetadataSection {
-	public static final PackMetadataSectionSerializer SERIALIZER = new PackMetadataSectionSerializer();
+	public static final MetadataSectionType<PackMetadataSection> TYPE = new PackMetadataSectionSerializer();
 	private final Component description;
 	private final int packFormat;
 

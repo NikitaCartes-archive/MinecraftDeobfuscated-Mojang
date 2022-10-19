@@ -203,7 +203,7 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 					return false;
 				} else {
 					Material material = blockState.getMaterial();
-					return material == Material.FIRE ? false : material.isReplaceable() || super.stateCanBeReplaced(blockGetter, blockPos, blockPos2, direction, blockState);
+					return material == Material.FIRE ? false : blockState.canBeReplaced() || super.stateCanBeReplaced(blockGetter, blockPos, blockPos2, direction, blockState);
 				}
 			} else {
 				return false;

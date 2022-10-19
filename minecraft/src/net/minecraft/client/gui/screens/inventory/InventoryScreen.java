@@ -41,7 +41,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	@Override
 	public void containerTick() {
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
-			this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player));
+			this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures()));
 		} else {
 			this.recipeBookComponent.tick();
 		}
@@ -50,7 +50,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	@Override
 	protected void init() {
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
-			this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player));
+			this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures()));
 		} else {
 			super.init();
 			this.widthTooNarrow = this.width < 379;
@@ -186,15 +186,6 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	@Override
 	public void recipesUpdated() {
 		this.recipeBookComponent.recipesUpdated();
-	}
-
-	@Override
-	public void removed() {
-		if (this.recipeBookComponentInitialized) {
-			this.recipeBookComponent.removed();
-		}
-
-		super.removed();
 	}
 
 	@Override

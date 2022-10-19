@@ -118,8 +118,7 @@ public class BlockStateProperties {
 	public static final int MIN_RESPAWN_ANCHOR_CHARGES = 0;
 	public static final int MAX_RESPAWN_ANCHOR_CHARGES = 4;
 	public static final IntegerProperty RESPAWN_ANCHOR_CHARGES = IntegerProperty.create("charges", 0, 4);
-	public static final int MAX_ROTATIONS_16 = 15;
-	public static final IntegerProperty ROTATION_16 = IntegerProperty.create("rotation", 0, 15);
+	public static final IntegerProperty ROTATION_16 = IntegerProperty.create("rotation", 0, RotationSegment.getMaxSegmentIndex());
 	public static final EnumProperty<BedPart> BED_PART = EnumProperty.create("part", BedPart.class);
 	public static final EnumProperty<ChestType> CHEST_TYPE = EnumProperty.create("type", ChestType.class);
 	public static final EnumProperty<ComparatorMode> MODE_COMPARATOR = EnumProperty.create("mode", ComparatorMode.class);
@@ -134,4 +133,6 @@ public class BlockStateProperties {
 	public static final DirectionProperty VERTICAL_DIRECTION = DirectionProperty.create("vertical_direction", Direction.UP, Direction.DOWN);
 	public static final EnumProperty<DripstoneThickness> DRIPSTONE_THICKNESS = EnumProperty.create("thickness", DripstoneThickness.class);
 	public static final EnumProperty<SculkSensorPhase> SCULK_SENSOR_PHASE = EnumProperty.create("sculk_sensor_phase", SculkSensorPhase.class);
+	public static final IntegerProperty BOOKS_STORED = IntegerProperty.create("books_stored", 0, 6);
+	public static final IntegerProperty LAST_INTERACTION_BOOK_SLOT = IntegerProperty.create("last_interaction_book_slot", 0, 6);
 }

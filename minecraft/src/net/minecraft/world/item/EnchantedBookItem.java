@@ -2,13 +2,10 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
@@ -70,24 +67,5 @@ public class EnchantedBookItem extends Item {
 		ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
 		addEnchantment(itemStack, enchantmentInstance);
 		return itemStack;
-	}
-
-	@Override
-	public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-		if (creativeModeTab == CreativeModeTab.TAB_SEARCH) {
-			for (Enchantment enchantment : Registry.ENCHANTMENT) {
-				if (enchantment.category != null) {
-					for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); i++) {
-						nonNullList.add(createForEnchantment(new EnchantmentInstance(enchantment, i)));
-					}
-				}
-			}
-		} else if (creativeModeTab.getEnchantmentCategories().length != 0) {
-			for (Enchantment enchantmentx : Registry.ENCHANTMENT) {
-				if (creativeModeTab.hasEnchantmentCategory(enchantmentx.category)) {
-					nonNullList.add(createForEnchantment(new EnchantmentInstance(enchantmentx, enchantmentx.getMaxLevel())));
-				}
-			}
-		}
 	}
 }

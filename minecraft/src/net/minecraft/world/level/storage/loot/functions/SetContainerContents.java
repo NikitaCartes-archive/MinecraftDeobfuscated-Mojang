@@ -47,7 +47,7 @@ public class SetContainerContents extends LootItemConditionalFunction {
 			this.entries
 				.forEach(
 					lootPoolEntryContainer -> lootPoolEntryContainer.expand(
-							lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(nonNullList::add), lootContext)
+							lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(lootContext, nonNullList::add), lootContext)
 						)
 				);
 			CompoundTag compoundTag = new CompoundTag();

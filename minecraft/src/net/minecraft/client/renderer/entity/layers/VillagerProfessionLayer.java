@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -72,7 +73,7 @@ public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder
 	}
 
 	private ResourceLocation getResourceLocation(String string, ResourceLocation resourceLocation) {
-		return new ResourceLocation(resourceLocation.getNamespace(), "textures/entity/" + this.path + "/" + string + "/" + resourceLocation.getPath() + ".png");
+		return resourceLocation.withPath((UnaryOperator<String>)(string2 -> "textures/entity/" + this.path + "/" + string + "/" + string2 + ".png"));
 	}
 
 	public <K> VillagerMetaDataSection.Hat getHatData(

@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -89,6 +90,7 @@ public class Cow extends Animal {
 		}
 	}
 
+	@Nullable
 	public Cow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return EntityType.COW.create(serverLevel);
 	}

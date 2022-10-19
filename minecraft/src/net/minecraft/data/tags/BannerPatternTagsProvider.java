@@ -1,14 +1,14 @@
 package net.minecraft.data.tags;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BannerPatternTags;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatterns;
 
 public class BannerPatternTagsProvider extends TagsProvider<BannerPattern> {
-	public BannerPatternTagsProvider(DataGenerator dataGenerator) {
-		super(dataGenerator, Registry.BANNER_PATTERN);
+	public BannerPatternTagsProvider(PackOutput packOutput) {
+		super(packOutput, Registry.BANNER_PATTERN);
 	}
 
 	@Override

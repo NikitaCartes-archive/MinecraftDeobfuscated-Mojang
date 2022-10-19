@@ -13,8 +13,8 @@ import net.minecraft.world.level.Level;
 public class FireworkStarFadeRecipe extends CustomRecipe {
 	private static final Ingredient STAR_INGREDIENT = Ingredient.of(Items.FIREWORK_STAR);
 
-	public FireworkStarFadeRecipe(ResourceLocation resourceLocation) {
-		super(resourceLocation);
+	public FireworkStarFadeRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+		super(resourceLocation, craftingBookCategory);
 	}
 
 	public boolean matches(CraftingContainer craftingContainer, Level level) {

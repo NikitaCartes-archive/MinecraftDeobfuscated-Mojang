@@ -28,7 +28,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -42,6 +41,7 @@ import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
@@ -64,12 +64,12 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerChatHeaderPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
@@ -92,7 +92,6 @@ import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetDisplayChatPreviewPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
@@ -119,6 +118,7 @@ import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
@@ -128,7 +128,6 @@ import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
-import net.minecraft.network.protocol.game.ServerboundChatPreviewPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -208,7 +207,6 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundBlockUpdatePacket.class, ClientboundBlockUpdatePacket::new)
 					.addPacket(ClientboundBossEventPacket.class, ClientboundBossEventPacket::new)
 					.addPacket(ClientboundChangeDifficultyPacket.class, ClientboundChangeDifficultyPacket::new)
-					.addPacket(ClientboundChatPreviewPacket.class, ClientboundChatPreviewPacket::new)
 					.addPacket(ClientboundClearTitlesPacket.class, ClientboundClearTitlesPacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
 					.addPacket(ClientboundCommandsPacket.class, ClientboundCommandsPacket::new)
@@ -222,6 +220,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundCustomSoundPacket.class, ClientboundCustomSoundPacket::new)
 					.addPacket(ClientboundDeleteChatPacket.class, ClientboundDeleteChatPacket::new)
 					.addPacket(ClientboundDisconnectPacket.class, ClientboundDisconnectPacket::new)
+					.addPacket(ClientboundDisguisedChatPacket.class, ClientboundDisguisedChatPacket::new)
 					.addPacket(ClientboundEntityEventPacket.class, ClientboundEntityEventPacket::new)
 					.addPacket(ClientboundExplodePacket.class, ClientboundExplodePacket::new)
 					.addPacket(ClientboundForgetLevelChunkPacket.class, ClientboundForgetLevelChunkPacket::new)
@@ -246,12 +245,12 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundPingPacket.class, ClientboundPingPacket::new)
 					.addPacket(ClientboundPlaceGhostRecipePacket.class, ClientboundPlaceGhostRecipePacket::new)
 					.addPacket(ClientboundPlayerAbilitiesPacket.class, ClientboundPlayerAbilitiesPacket::new)
-					.addPacket(ClientboundPlayerChatHeaderPacket.class, ClientboundPlayerChatHeaderPacket::new)
 					.addPacket(ClientboundPlayerChatPacket.class, ClientboundPlayerChatPacket::new)
 					.addPacket(ClientboundPlayerCombatEndPacket.class, ClientboundPlayerCombatEndPacket::new)
 					.addPacket(ClientboundPlayerCombatEnterPacket.class, ClientboundPlayerCombatEnterPacket::new)
 					.addPacket(ClientboundPlayerCombatKillPacket.class, ClientboundPlayerCombatKillPacket::new)
-					.addPacket(ClientboundPlayerInfoPacket.class, ClientboundPlayerInfoPacket::new)
+					.addPacket(ClientboundPlayerInfoRemovePacket.class, ClientboundPlayerInfoRemovePacket::new)
+					.addPacket(ClientboundPlayerInfoUpdatePacket.class, ClientboundPlayerInfoUpdatePacket::new)
 					.addPacket(ClientboundPlayerLookAtPacket.class, ClientboundPlayerLookAtPacket::new)
 					.addPacket(ClientboundPlayerPositionPacket.class, ClientboundPlayerPositionPacket::new)
 					.addPacket(ClientboundRecipePacket.class, ClientboundRecipePacket::new)
@@ -274,7 +273,6 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundSetChunkCacheCenterPacket.class, ClientboundSetChunkCacheCenterPacket::new)
 					.addPacket(ClientboundSetChunkCacheRadiusPacket.class, ClientboundSetChunkCacheRadiusPacket::new)
 					.addPacket(ClientboundSetDefaultSpawnPositionPacket.class, ClientboundSetDefaultSpawnPositionPacket::new)
-					.addPacket(ClientboundSetDisplayChatPreviewPacket.class, ClientboundSetDisplayChatPreviewPacket::new)
 					.addPacket(ClientboundSetDisplayObjectivePacket.class, ClientboundSetDisplayObjectivePacket::new)
 					.addPacket(ClientboundSetEntityDataPacket.class, ClientboundSetEntityDataPacket::new)
 					.addPacket(ClientboundSetEntityLinkPacket.class, ClientboundSetEntityLinkPacket::new)
@@ -301,6 +299,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundTeleportEntityPacket.class, ClientboundTeleportEntityPacket::new)
 					.addPacket(ClientboundUpdateAdvancementsPacket.class, ClientboundUpdateAdvancementsPacket::new)
 					.addPacket(ClientboundUpdateAttributesPacket.class, ClientboundUpdateAttributesPacket::new)
+					.addPacket(ClientboundUpdateEnabledFeaturesPacket.class, ClientboundUpdateEnabledFeaturesPacket::new)
 					.addPacket(ClientboundUpdateMobEffectPacket.class, ClientboundUpdateMobEffectPacket::new)
 					.addPacket(ClientboundUpdateRecipesPacket.class, ClientboundUpdateRecipesPacket::new)
 					.addPacket(ClientboundUpdateTagsPacket.class, ClientboundUpdateTagsPacket::new)
@@ -314,7 +313,6 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundChatAckPacket.class, ServerboundChatAckPacket::new)
 					.addPacket(ServerboundChatCommandPacket.class, ServerboundChatCommandPacket::new)
 					.addPacket(ServerboundChatPacket.class, ServerboundChatPacket::new)
-					.addPacket(ServerboundChatPreviewPacket.class, ServerboundChatPreviewPacket::new)
 					.addPacket(ServerboundClientCommandPacket.class, ServerboundClientCommandPacket::new)
 					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)
 					.addPacket(ServerboundCommandSuggestionPacket.class, ServerboundCommandSuggestionPacket::new)

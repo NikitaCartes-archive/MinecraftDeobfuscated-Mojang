@@ -136,6 +136,7 @@ import net.minecraft.util.datafix.fixes.OptionsForceVBOFix;
 import net.minecraft.util.datafix.fixes.OptionsKeyLwjgl3Fix;
 import net.minecraft.util.datafix.fixes.OptionsKeyTranslationFix;
 import net.minecraft.util.datafix.fixes.OptionsLowerCaseLanguageFix;
+import net.minecraft.util.datafix.fixes.OptionsProgrammerArtFix;
 import net.minecraft.util.datafix.fixes.OptionsRenameFieldFix;
 import net.minecraft.util.datafix.fixes.OverreachingTickFix;
 import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
@@ -232,6 +233,9 @@ import net.minecraft.util.datafix.schemas.V3078;
 import net.minecraft.util.datafix.schemas.V3081;
 import net.minecraft.util.datafix.schemas.V3082;
 import net.minecraft.util.datafix.schemas.V3083;
+import net.minecraft.util.datafix.schemas.V3202;
+import net.minecraft.util.datafix.schemas.V3203;
+import net.minecraft.util.datafix.schemas.V3204;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1019,6 +1023,14 @@ public class DataFixers {
 		);
 		Schema schema170 = dataFixerBuilder.addSchema(3108, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new BlendingDataRemoveFromNetherEndFix(schema170));
+		Schema schema171 = dataFixerBuilder.addSchema(3201, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new OptionsProgrammerArtFix(schema171));
+		Schema schema172 = dataFixerBuilder.addSchema(3202, V3202::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema172, "Added Hanging Sign", References.BLOCK_ENTITY));
+		Schema schema173 = dataFixerBuilder.addSchema(3203, V3203::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema173, "Added Camel", References.ENTITY));
+		Schema schema174 = dataFixerBuilder.addSchema(3204, V3204::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema174, "Added Chiseled Bookshelf", References.BLOCK_ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

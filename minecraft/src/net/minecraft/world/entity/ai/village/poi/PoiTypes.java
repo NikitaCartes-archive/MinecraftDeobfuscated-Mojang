@@ -82,12 +82,12 @@ public class PoiTypes {
 	private static PoiType register(Registry<PoiType> registry, ResourceKey<PoiType> resourceKey, Set<BlockState> set, int i, int j) {
 		PoiType poiType = new PoiType(set, i, j);
 		Registry.register(registry, resourceKey, poiType);
-		registerBlockStates(registry.getHolderOrThrow(resourceKey));
+		registerBlockStates(registry.getHolderOrThrow(resourceKey), set);
 		return poiType;
 	}
 
-	private static void registerBlockStates(Holder<PoiType> holder) {
-		holder.value().matchingStates().forEach(blockState -> {
+	private static void registerBlockStates(Holder<PoiType> holder, Set<BlockState> set) {
+		set.forEach(blockState -> {
 			Holder<PoiType> holder2 = (Holder<PoiType>)TYPE_BY_STATE.put(blockState, holder);
 			if (holder2 != null) {
 				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException(String.format(Locale.ROOT, "%s is defined in more than one PoI type", blockState)));

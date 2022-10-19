@@ -124,4 +124,15 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	public WoodType type() {
 		return this.type;
 	}
+
+	public static WoodType getWoodType(Block block) {
+		WoodType woodType;
+		if (block instanceof SignBlock) {
+			woodType = ((SignBlock)block).type();
+		} else {
+			woodType = WoodType.OAK;
+		}
+
+		return woodType;
+	}
 }

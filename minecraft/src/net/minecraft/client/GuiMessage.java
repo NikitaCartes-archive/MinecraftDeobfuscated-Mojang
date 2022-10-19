@@ -8,7 +8,7 @@ import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
-public record GuiMessage(int addedTime, Component content, @Nullable MessageSignature headerSignature, @Nullable GuiMessageTag tag) {
+public record GuiMessage(int addedTime, Component content, @Nullable MessageSignature signature, @Nullable GuiMessageTag tag) {
 	@Environment(EnvType.CLIENT)
 	public static record Line(int addedTime, FormattedCharSequence content, @Nullable GuiMessageTag tag, boolean endOfEntry) {
 	}

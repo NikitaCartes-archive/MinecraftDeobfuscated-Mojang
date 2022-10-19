@@ -12,10 +12,16 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class StandingAndWallBlockItem extends BlockItem {
 	protected final Block wallBlock;
+	private final Direction attachmentDirection;
 
-	public StandingAndWallBlockItem(Block block, Block block2, Item.Properties properties) {
+	public StandingAndWallBlockItem(Block block, Block block2, Item.Properties properties, Direction direction) {
 		super(block, properties);
 		this.wallBlock = block2;
+		this.attachmentDirection = direction;
+	}
+
+	protected boolean canPlace(LevelReader levelReader, BlockState blockState, BlockPos blockPos) {
+		return blockState.canSurvive(levelReader, blockPos);
 	}
 
 	@Nullable
@@ -27,9 +33,9 @@ public class StandingAndWallBlockItem extends BlockItem {
 		BlockPos blockPos = blockPlaceContext.getClickedPos();
 
 		for (Direction direction : blockPlaceContext.getNearestLookingDirections()) {
-			if (direction != Direction.UP) {
-				BlockState blockState3 = direction == Direction.DOWN ? this.getBlock().getStateForPlacement(blockPlaceContext) : blockState;
-				if (blockState3 != null && blockState3.canSurvive(levelReader, blockPos)) {
+			if (direction != this.attachmentDirection.getOpposite()) {
+				BlockState blockState3 = direction == this.attachmentDirection ? this.getBlock().getStateForPlacement(blockPlaceContext) : blockState;
+				if (blockState3 != null && this.canPlace(levelReader, blockState3, blockPos)) {
 					blockState2 = blockState3;
 					break;
 				}

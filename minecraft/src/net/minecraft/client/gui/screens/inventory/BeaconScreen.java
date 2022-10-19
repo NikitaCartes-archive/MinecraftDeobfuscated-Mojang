@@ -240,7 +240,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		protected void renderIcon(PoseStack poseStack) {
-			RenderSystem.setShaderTexture(0, this.sprite.atlas().location());
+			RenderSystem.setShaderTexture(0, this.sprite.atlasLocation());
 			blit(poseStack, this.x + 2, this.y + 2, this.getBlitOffset(), 18, 18, this.sprite);
 		}
 

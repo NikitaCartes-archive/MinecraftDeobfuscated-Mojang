@@ -12,6 +12,7 @@ import com.mojang.serialization.Lifecycle;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -30,14 +31,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.Nullable;
 import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -47,17 +51,21 @@ import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.nbt.visitors.SkipFields;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
-import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.slf4j.Logger;
 
 public class LevelStorageSource {
@@ -100,7 +108,7 @@ public class LevelStorageSource {
 		return new LevelStorageSource(path, path.resolve("../backups"), DataFixers.getDataFixer());
 	}
 
-	private static <T> Pair<WorldGenSettings, Lifecycle> readWorldGenSettings(Dynamic<T> dynamic, DataFixer dataFixer, int i) {
+	private static <T> DataResult<WorldGenSettings> readWorldGenSettings(Dynamic<T> dynamic, DataFixer dataFixer, int i) {
 		Dynamic<T> dynamic2 = dynamic.get("WorldGenSettings").orElseEmptyMap();
 
 		for (String string : OLD_SETTINGS_KEYS) {
@@ -111,15 +119,11 @@ public class LevelStorageSource {
 		}
 
 		Dynamic<T> dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
-		DataResult<WorldGenSettings> dataResult = WorldGenSettings.CODEC.parse(dynamic3);
-		return Pair.of((WorldGenSettings)dataResult.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(() -> {
-			RegistryAccess registryAccess = RegistryAccess.readFromDisk(dynamic3);
-			return WorldPresets.createNormalWorldFromPreset(registryAccess);
-		}), dataResult.lifecycle());
+		return WorldGenSettings.CODEC.parse(dynamic3);
 	}
 
-	private static DataPackConfig readDataPackConfig(Dynamic<?> dynamic) {
-		return (DataPackConfig)DataPackConfig.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElse(DataPackConfig.DEFAULT);
+	private static WorldDataConfiguration readDataConfig(Dynamic<?> dynamic) {
+		return (WorldDataConfiguration)WorldDataConfiguration.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElse(WorldDataConfiguration.DEFAULT);
 	}
 
 	public String getName() {
@@ -210,7 +214,7 @@ public class LevelStorageSource {
 	}
 
 	@Nullable
-	private static DataPackConfig getDataPacks(Path path, DataFixer dataFixer) {
+	private static WorldDataConfiguration getDataConfiguration(Path path, DataFixer dataFixer) {
 		try {
 			if (readLightweightData(path) instanceof CompoundTag compoundTag) {
 				CompoundTag compoundTag2 = compoundTag.getCompound("Data");
@@ -218,7 +222,7 @@ public class LevelStorageSource {
 				Dynamic<Tag> dynamic = dataFixer.update(
 					DataFixTypes.LEVEL.getType(), new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
 				);
-				return (DataPackConfig)dynamic.get("DataPacks").result().map(LevelStorageSource::readDataPackConfig).orElse(DataPackConfig.DEFAULT);
+				return readDataConfig(dynamic);
 			}
 		} catch (Exception var7) {
 			LOGGER.error("Exception reading {}", path, var7);
@@ -227,26 +231,33 @@ public class LevelStorageSource {
 		return null;
 	}
 
-	static BiFunction<Path, DataFixer, PrimaryLevelData> getLevelData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig, Lifecycle lifecycle) {
+	static BiFunction<Path, DataFixer, Pair<WorldData, WorldDimensions.Complete>> getLevelData(
+		DynamicOps<Tag> dynamicOps, WorldDataConfiguration worldDataConfiguration, Registry<LevelStem> registry, Lifecycle lifecycle
+	) {
 		return (path, dataFixer) -> {
+			CompoundTag compoundTag;
 			try {
-				CompoundTag compoundTag = NbtIo.readCompressed(path.toFile());
-				CompoundTag compoundTag2 = compoundTag.getCompound("Data");
-				CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
-				compoundTag2.remove("Player");
-				int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-				Dynamic<Tag> dynamic = dataFixer.update(
-					DataFixTypes.LEVEL.getType(), new Dynamic<>(dynamicOps, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
-				);
-				Pair<WorldGenSettings, Lifecycle> pair = readWorldGenSettings(dynamic, dataFixer, i);
-				LevelVersion levelVersion = LevelVersion.parse(dynamic);
-				LevelSettings levelSettings = LevelSettings.parse(dynamic, dataPackConfig);
-				Lifecycle lifecycle2 = pair.getSecond().add(lifecycle);
-				return PrimaryLevelData.parse(dynamic, dataFixer, i, compoundTag3, levelSettings, levelVersion, pair.getFirst(), lifecycle2);
-			} catch (Exception var14) {
-				LOGGER.error("Exception reading {}", path, var14);
-				return null;
+				compoundTag = NbtIo.readCompressed(path.toFile());
+			} catch (IOException var17) {
+				throw new UncheckedIOException(var17);
 			}
+
+			CompoundTag compoundTag2 = compoundTag.getCompound("Data");
+			CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
+			compoundTag2.remove("Player");
+			int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
+			Dynamic<Tag> dynamic = dataFixer.update(
+				DataFixTypes.LEVEL.getType(), new Dynamic<>(dynamicOps, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
+			);
+			WorldGenSettings worldGenSettings = readWorldGenSettings(dynamic, dataFixer, i).getOrThrow(false, Util.prefix("WorldGenSettings: ", LOGGER::error));
+			LevelVersion levelVersion = LevelVersion.parse(dynamic);
+			LevelSettings levelSettings = LevelSettings.parse(dynamic, worldDataConfiguration);
+			WorldDimensions.Complete complete = worldGenSettings.dimensions().bake(registry);
+			Lifecycle lifecycle2 = complete.lifecycle().add(lifecycle);
+			PrimaryLevelData primaryLevelData = PrimaryLevelData.parse(
+				dynamic, dataFixer, i, compoundTag3, levelSettings, levelVersion, complete.specialWorldProperty(), worldGenSettings.options(), lifecycle2
+			);
+			return Pair.of(primaryLevelData, complete);
 		};
 	}
 
@@ -264,23 +275,31 @@ public class LevelStorageSource {
 					if (j == 19132 || j == 19133) {
 						boolean bl2 = j != this.getStorageVersion();
 						Path path2 = levelDirectory.iconFile();
-						DataPackConfig dataPackConfig = (DataPackConfig)dynamic.get("DataPacks")
-							.result()
-							.map(LevelStorageSource::readDataPackConfig)
-							.orElse(DataPackConfig.DEFAULT);
-						LevelSettings levelSettings = LevelSettings.parse(dynamic, dataPackConfig);
-						return new LevelSummary(levelSettings, levelVersion, levelDirectory.directoryName(), bl2, bl, path2);
+						WorldDataConfiguration worldDataConfiguration = readDataConfig(dynamic);
+						LevelSettings levelSettings = LevelSettings.parse(dynamic, worldDataConfiguration);
+						FeatureFlagSet featureFlagSet = parseFeatureFlagsFromSummary(dynamic);
+						boolean bl3 = FeatureFlags.isExperimental(featureFlagSet);
+						return new LevelSummary(levelSettings, levelVersion, levelDirectory.directoryName(), bl2, bl, bl3, path2);
 					}
 				} else {
 					LOGGER.warn("Invalid root tag in {}", path);
 				}
 
 				return null;
-			} catch (Exception var16) {
-				LOGGER.error("Exception reading {}", path, var16);
+			} catch (Exception var18) {
+				LOGGER.error("Exception reading {}", path, var18);
 				return null;
 			}
 		};
+	}
+
+	private static FeatureFlagSet parseFeatureFlagsFromSummary(Dynamic<Tag> dynamic) {
+		Set<ResourceLocation> set = (Set<ResourceLocation>)dynamic.get("enabled_features")
+			.asStream()
+			.flatMap(dynamicx -> dynamicx.asString().result().map(ResourceLocation::tryParse).stream())
+			.collect(Collectors.toSet());
+		return FeatureFlags.REGISTRY.fromNames(set, resourceLocation -> {
+		});
 	}
 
 	@Nullable
@@ -400,15 +419,17 @@ public class LevelStorageSource {
 		}
 
 		@Nullable
-		public WorldData getDataTag(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig, Lifecycle lifecycle) {
+		public Pair<WorldData, WorldDimensions.Complete> getDataTag(
+			DynamicOps<Tag> dynamicOps, WorldDataConfiguration worldDataConfiguration, Registry<LevelStem> registry, Lifecycle lifecycle
+		) {
 			this.checkLock();
-			return LevelStorageSource.this.readLevelData(this.levelDirectory, LevelStorageSource.getLevelData(dynamicOps, dataPackConfig, lifecycle));
+			return LevelStorageSource.this.readLevelData(this.levelDirectory, LevelStorageSource.getLevelData(dynamicOps, worldDataConfiguration, registry, lifecycle));
 		}
 
 		@Nullable
-		public DataPackConfig getDataPacks() {
+		public WorldDataConfiguration getDataConfiguration() {
 			this.checkLock();
-			return LevelStorageSource.this.readLevelData(this.levelDirectory, LevelStorageSource::getDataPacks);
+			return LevelStorageSource.this.readLevelData(this.levelDirectory, LevelStorageSource::getDataConfiguration);
 		}
 
 		public void saveDataTag(RegistryAccess registryAccess, WorldData worldData) {

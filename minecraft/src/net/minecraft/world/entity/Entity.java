@@ -41,11 +41,11 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -886,8 +886,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	protected void checkInsideBlocks() {
 		AABB aABB = this.getBoundingBox();
-		BlockPos blockPos = new BlockPos(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
-		BlockPos blockPos2 = new BlockPos(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
+		BlockPos blockPos = new BlockPos(aABB.minX + 1.0E-7, aABB.minY + 1.0E-7, aABB.minZ + 1.0E-7);
+		BlockPos blockPos2 = new BlockPos(aABB.maxX - 1.0E-7, aABB.maxY - 1.0E-7, aABB.maxZ - 1.0E-7);
 		if (this.level.hasChunksAt(blockPos, blockPos2)) {
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
@@ -1043,10 +1043,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public boolean isUnderWater() {
 		return this.wasEyeInWater && this.isInWater();
-	}
-
-	public ChatSender asChatSender() {
-		return ChatSender.SYSTEM;
 	}
 
 	public void updateSwimming() {
@@ -1782,6 +1778,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 	}
 
+	public boolean allowsDismounting(Entity entity) {
+		return true;
+	}
+
 	public void stopRiding() {
 		this.removeVehicle();
 	}
@@ -2131,6 +2131,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
 		return true;
+	}
+
+	public void checkSlowFallDistance() {
+		if (this.deltaMovement.y() > -0.5 && this.fallDistance > 1.0F) {
+			this.fallDistance = 1.0F;
+		}
 	}
 
 	public void resetFallDistance() {
@@ -2490,6 +2496,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 	}
 
+	public void teleportRelative(double d, double e, double f) {
+		this.teleportTo(this.getX() + d, this.getY() + e, this.getZ() + f);
+	}
+
 	public boolean shouldShowName() {
 		return this.isCustomNameVisible();
 	}
@@ -2573,7 +2583,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.eyeHeight;
 	}
 
-	public Vec3 getLeashOffset() {
+	public Vec3 getLeashOffset(float f) {
+		return this.getLeashOffset();
+	}
+
+	protected Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)this.getEyeHeight(), (double)(this.getBbWidth() * 0.4F));
 	}
 
@@ -2894,7 +2908,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.dimensions.height;
 	}
 
-	public abstract Packet<?> getAddEntityPacket();
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
+		return new ClientboundAddEntityPacket(this);
+	}
 
 	public EntityDimensions getDimensions(Pose pose) {
 		return this.type.getDimensions();
@@ -2931,6 +2947,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setDeltaMovement(Vec3 vec3) {
 		this.deltaMovement = vec3;
+	}
+
+	public void addDeltaMovement(Vec3 vec3) {
+		this.deltaMovement = this.deltaMovement.add(vec3);
 	}
 
 	public void setDeltaMovement(double d, double e, double f) {

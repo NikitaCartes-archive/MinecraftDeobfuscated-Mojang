@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
@@ -197,7 +198,7 @@ public class ServerEntity {
 			LOGGER.warn("Fetching packet for removed entity {}", this.entity);
 		}
 
-		Packet<?> packet = this.entity.getAddEntityPacket();
+		Packet<ClientGamePacketListener> packet = this.entity.getAddEntityPacket();
 		this.yHeadRotp = Mth.floor(this.entity.getYHeadRot() * 256.0F / 360.0F);
 		consumer.accept(packet);
 		if (!this.entity.getEntityData().isEmpty()) {

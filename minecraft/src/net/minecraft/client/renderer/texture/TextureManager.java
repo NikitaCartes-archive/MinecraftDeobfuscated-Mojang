@@ -178,7 +178,8 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		Executor executor,
 		Executor executor2
 	) {
-		return CompletableFuture.allOf(TitleScreen.preloadResources(this, executor), this.preload(AbstractWidget.WIDGETS_LOCATION, executor))
+		CompletableFuture<Void> completableFuture = new CompletableFuture();
+		CompletableFuture.allOf(TitleScreen.preloadResources(this, executor), this.preload(AbstractWidget.WIDGETS_LOCATION, executor))
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(void_ -> {
 				MissingTextureAtlasSprite.getTexture();
@@ -195,6 +196,9 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 						abstractTexture.reset(this, resourceManager, resourceLocation, executor2);
 					}
 				}
+
+				Minecraft.getInstance().tell(() -> completableFuture.complete(null));
 			}, runnable -> RenderSystem.recordRenderCall(runnable::run));
+		return completableFuture;
 	}
 }

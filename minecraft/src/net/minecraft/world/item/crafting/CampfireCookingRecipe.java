@@ -5,8 +5,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 public class CampfireCookingRecipe extends AbstractCookingRecipe {
-	public CampfireCookingRecipe(ResourceLocation resourceLocation, String string, Ingredient ingredient, ItemStack itemStack, float f, int i) {
-		super(RecipeType.CAMPFIRE_COOKING, resourceLocation, string, ingredient, itemStack, f, i);
+	public CampfireCookingRecipe(
+		ResourceLocation resourceLocation, String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i
+	) {
+		super(RecipeType.CAMPFIRE_COOKING, resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	@Override

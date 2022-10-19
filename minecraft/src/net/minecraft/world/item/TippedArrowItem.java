@@ -2,10 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
@@ -18,17 +15,6 @@ public class TippedArrowItem extends ArrowItem {
 	@Override
 	public ItemStack getDefaultInstance() {
 		return PotionUtils.setPotion(super.getDefaultInstance(), Potions.POISON);
-	}
-
-	@Override
-	public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-		if (this.allowedIn(creativeModeTab)) {
-			for (Potion potion : Registry.POTION) {
-				if (!potion.getEffects().isEmpty()) {
-					nonNullList.add(PotionUtils.setPotion(new ItemStack(this), potion));
-				}
-			}
-		}
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class CubeMap {
 
 	public CubeMap(ResourceLocation resourceLocation) {
 		for (int i = 0; i < 6; i++) {
-			this.images[i] = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath() + "_" + i + ".png");
+			this.images[i] = resourceLocation.withPath(resourceLocation.getPath() + "_" + i + ".png");
 		}
 	}
 

@@ -135,7 +135,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 		} else {
 			for (Entity entity : levelAccessor.getEntities(null, voxelShape.bounds())) {
 				double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), List.of(voxelShape), -1.0);
-				entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());
+				entity.teleportRelative(0.0, 1.0 + d, 0.0);
 			}
 
 			return blockState2;

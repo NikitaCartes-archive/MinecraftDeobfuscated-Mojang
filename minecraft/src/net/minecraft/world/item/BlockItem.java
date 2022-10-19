@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -16,6 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -53,7 +53,9 @@ public class BlockItem extends Item {
 	}
 
 	public InteractionResult place(BlockPlaceContext blockPlaceContext) {
-		if (!blockPlaceContext.canPlace()) {
+		if (!this.getBlock().isEnabled(blockPlaceContext.getLevel().enabledFeatures())) {
+			return InteractionResult.FAIL;
+		} else if (!blockPlaceContext.canPlace()) {
 			return InteractionResult.FAIL;
 		} else {
 			BlockPlaceContext blockPlaceContext2 = this.updatePlacementContext(blockPlaceContext);
@@ -188,13 +190,6 @@ public class BlockItem extends Item {
 	}
 
 	@Override
-	public void fillItemCategory(CreativeModeTab creativeModeTab, NonNullList<ItemStack> nonNullList) {
-		if (this.allowedIn(creativeModeTab)) {
-			this.getBlock().fillItemCategory(creativeModeTab, nonNullList);
-		}
-	}
-
-	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, level, list, tooltipFlag);
 		this.getBlock().appendHoverText(itemStack, level, list, tooltipFlag);
@@ -237,5 +232,10 @@ public class BlockItem extends Item {
 			BlockEntity.addEntityType(compoundTag, blockEntityType);
 			itemStack.addTagElement("BlockEntityTag", compoundTag);
 		}
+	}
+
+	@Override
+	public FeatureFlagSet requiredFeatures() {
+		return this.getBlock().requiredFeatures();
 	}
 }

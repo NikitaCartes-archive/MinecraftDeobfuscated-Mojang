@@ -25,9 +25,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -212,25 +215,31 @@ public final class NbtUtils {
 		return compoundTag;
 	}
 
-	public static BlockState readBlockState(CompoundTag compoundTag) {
+	public static BlockState readBlockState(HolderLookup<Block> holderLookup, CompoundTag compoundTag) {
 		if (!compoundTag.contains("Name", 8)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-			Block block = Registry.BLOCK.get(new ResourceLocation(compoundTag.getString("Name")));
-			BlockState blockState = block.defaultBlockState();
-			if (compoundTag.contains("Properties", 10)) {
-				CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
-				StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
+			ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("Name"));
+			Optional<? extends Holder<Block>> optional = holderLookup.get(ResourceKey.create(Registry.BLOCK_REGISTRY, resourceLocation));
+			if (optional.isEmpty()) {
+				return Blocks.AIR.defaultBlockState();
+			} else {
+				Block block = (Block)((Holder)optional.get()).value();
+				BlockState blockState = block.defaultBlockState();
+				if (compoundTag.contains("Properties", 10)) {
+					CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
+					StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
 
-				for (String string : compoundTag2.getAllKeys()) {
-					Property<?> property = stateDefinition.getProperty(string);
-					if (property != null) {
-						blockState = setValueHelper(blockState, property, string, compoundTag2, compoundTag);
+					for (String string : compoundTag2.getAllKeys()) {
+						Property<?> property = stateDefinition.getProperty(string);
+						if (property != null) {
+							blockState = setValueHelper(blockState, property, string, compoundTag2, compoundTag);
+						}
 					}
 				}
-			}
 
-			return blockState;
+				return blockState;
+			}
 		}
 	}
 

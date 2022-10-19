@@ -30,7 +30,6 @@ public class ChatOptionsScreen extends SimpleOptionsSubScreen {
 				options.autoSuggestions(),
 				options.hideMatchedNames(),
 				options.reducedDebugInfo(),
-				options.chatPreview(),
 				options.onlyShowSecureChat()
 			}
 		);

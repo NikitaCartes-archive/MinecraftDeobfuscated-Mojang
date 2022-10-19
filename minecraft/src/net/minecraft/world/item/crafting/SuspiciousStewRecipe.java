@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerBlock;
 
 public class SuspiciousStewRecipe extends CustomRecipe {
-	public SuspiciousStewRecipe(ResourceLocation resourceLocation) {
-		super(resourceLocation);
+	public SuspiciousStewRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+		super(resourceLocation, craftingBookCategory);
 	}
 
 	public boolean matches(CraftingContainer craftingContainer, Level level) {

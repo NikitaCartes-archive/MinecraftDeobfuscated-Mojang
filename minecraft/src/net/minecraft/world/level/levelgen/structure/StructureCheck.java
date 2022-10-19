@@ -75,8 +75,8 @@ public class StructureCheck {
 		this.biomeSource = biomeSource;
 		this.seed = l;
 		this.fixerUpper = dataFixer;
-		this.biomes = registryAccess.ownedRegistryOrThrow(Registry.BIOME_REGISTRY);
-		this.structureConfigs = registryAccess.ownedRegistryOrThrow(Registry.STRUCTURE_REGISTRY);
+		this.biomes = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+		this.structureConfigs = registryAccess.registryOrThrow(Registry.STRUCTURE_REGISTRY);
 	}
 
 	public StructureCheckResult checkStart(ChunkPos chunkPos, Structure structure, boolean bl) {

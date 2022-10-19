@@ -6,16 +6,8 @@ public class LevelEvent {
 	public static final int SOUND_DISPENSER_PROJECTILE_LAUNCH = 1002;
 	public static final int SOUND_ENDER_EYE_LAUNCH = 1003;
 	public static final int SOUND_FIREWORK_SHOOT = 1004;
-	public static final int SOUND_OPEN_IRON_DOOR = 1005;
-	public static final int SOUND_OPEN_WOODEN_DOOR = 1006;
-	public static final int SOUND_OPEN_WOODEN_TRAP_DOOR = 1007;
-	public static final int SOUND_OPEN_FENCE_GATE = 1008;
 	public static final int SOUND_EXTINGUISH_FIRE = 1009;
 	public static final int SOUND_PLAY_RECORDING = 1010;
-	public static final int SOUND_CLOSE_IRON_DOOR = 1011;
-	public static final int SOUND_CLOSE_WOODEN_DOOR = 1012;
-	public static final int SOUND_CLOSE_WOODEN_TRAP_DOOR = 1013;
-	public static final int SOUND_CLOSE_FENCE_GATE = 1014;
 	public static final int SOUND_GHAST_WARNING = 1015;
 	public static final int SOUND_GHAST_FIREBALL = 1016;
 	public static final int SOUND_DRAGON_FIREBALL = 1017;
@@ -37,8 +29,6 @@ public class LevelEvent {
 	public static final int SOUND_CHORUS_GROW = 1033;
 	public static final int SOUND_CHORUS_DEATH = 1034;
 	public static final int SOUND_BREWING_STAND_BREW = 1035;
-	public static final int SOUND_CLOSE_IRON_TRAP_DOOR = 1036;
-	public static final int SOUND_OPEN_IRON_TRAP_DOOR = 1037;
 	public static final int SOUND_END_PORTAL_SPAWN = 1038;
 	public static final int SOUND_PHANTOM_BITE = 1039;
 	public static final int SOUND_ZOMBIE_TO_DROWNED = 1040;

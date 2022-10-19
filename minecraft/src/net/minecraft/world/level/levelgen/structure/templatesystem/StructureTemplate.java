@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -654,7 +655,7 @@ public class StructureTemplate {
 		return compoundTag;
 	}
 
-	public void load(CompoundTag compoundTag) {
+	public void load(HolderLookup<Block> holderLookup, CompoundTag compoundTag) {
 		this.palettes.clear();
 		this.entityInfoList.clear();
 		ListTag listTag = compoundTag.getList("size", 3);
@@ -664,10 +665,10 @@ public class StructureTemplate {
 			ListTag listTag3 = compoundTag.getList("palettes", 9);
 
 			for (int i = 0; i < listTag3.size(); i++) {
-				this.loadPalette(listTag3.getList(i), listTag2);
+				this.loadPalette(holderLookup, listTag3.getList(i), listTag2);
 			}
 		} else {
-			this.loadPalette(compoundTag.getList("palette", 10), listTag2);
+			this.loadPalette(holderLookup, compoundTag.getList("palette", 10), listTag2);
 		}
 
 		ListTag listTag3 = compoundTag.getList("entities", 10);
@@ -685,11 +686,11 @@ public class StructureTemplate {
 		}
 	}
 
-	private void loadPalette(ListTag listTag, ListTag listTag2) {
+	private void loadPalette(HolderLookup<Block> holderLookup, ListTag listTag, ListTag listTag2) {
 		StructureTemplate.SimplePalette simplePalette = new StructureTemplate.SimplePalette();
 
 		for (int i = 0; i < listTag.size(); i++) {
-			simplePalette.addMapping(NbtUtils.readBlockState(listTag.getCompound(i)), i);
+			simplePalette.addMapping(NbtUtils.readBlockState(holderLookup, listTag.getCompound(i)), i);
 		}
 
 		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();

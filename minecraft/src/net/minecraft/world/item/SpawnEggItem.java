@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ClipContext;
@@ -157,6 +158,11 @@ public class SpawnEggItem extends Item {
 		}
 
 		return this.defaultType;
+	}
+
+	@Override
+	public FeatureFlagSet requiredFeatures() {
+		return this.defaultType.requiredFeatures();
 	}
 
 	public Optional<Mob> spawnOffspringFromSpawnEgg(

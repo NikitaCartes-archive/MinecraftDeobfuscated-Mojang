@@ -51,10 +51,12 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 						.getRecipeFor(container, level)
 						.map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container))
 						.orElse(itemStack);
-					Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack2);
-					campfireBlockEntity.items.set(i, ItemStack.EMPTY);
-					level.sendBlockUpdated(blockPos, blockState, blockState, 3);
-					level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState));
+					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
+						Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack2);
+						campfireBlockEntity.items.set(i, ItemStack.EMPTY);
+						level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+						level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(blockState));
+					}
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal.horse;
 
+import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
@@ -32,61 +33,77 @@ public class SkeletonTrapGoal extends Goal {
 		this.horse.setTamed(true);
 		this.horse.setAge(0);
 		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(serverLevel);
-		lightningBolt.moveTo(this.horse.getX(), this.horse.getY(), this.horse.getZ());
-		lightningBolt.setVisualOnly(true);
-		serverLevel.addFreshEntity(lightningBolt);
-		Skeleton skeleton = this.createSkeleton(difficultyInstance, this.horse);
-		skeleton.startRiding(this.horse);
-		serverLevel.addFreshEntityWithPassengers(skeleton);
+		if (lightningBolt != null) {
+			lightningBolt.moveTo(this.horse.getX(), this.horse.getY(), this.horse.getZ());
+			lightningBolt.setVisualOnly(true);
+			serverLevel.addFreshEntity(lightningBolt);
+			Skeleton skeleton = this.createSkeleton(difficultyInstance, this.horse);
+			if (skeleton != null) {
+				skeleton.startRiding(this.horse);
+				serverLevel.addFreshEntityWithPassengers(skeleton);
 
-		for (int i = 0; i < 3; i++) {
-			AbstractHorse abstractHorse = this.createHorse(difficultyInstance);
-			Skeleton skeleton2 = this.createSkeleton(difficultyInstance, abstractHorse);
-			skeleton2.startRiding(abstractHorse);
-			abstractHorse.push(this.horse.getRandom().triangle(0.0, 1.1485), 0.0, this.horse.getRandom().triangle(0.0, 1.1485));
-			serverLevel.addFreshEntityWithPassengers(abstractHorse);
+				for (int i = 0; i < 3; i++) {
+					AbstractHorse abstractHorse = this.createHorse(difficultyInstance);
+					if (abstractHorse != null) {
+						Skeleton skeleton2 = this.createSkeleton(difficultyInstance, abstractHorse);
+						if (skeleton2 != null) {
+							skeleton2.startRiding(abstractHorse);
+							abstractHorse.push(this.horse.getRandom().triangle(0.0, 1.1485), 0.0, this.horse.getRandom().triangle(0.0, 1.1485));
+							serverLevel.addFreshEntityWithPassengers(abstractHorse);
+						}
+					}
+				}
+			}
 		}
 	}
 
+	@Nullable
 	private AbstractHorse createHorse(DifficultyInstance difficultyInstance) {
 		SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this.horse.level);
-		skeletonHorse.finalizeSpawn((ServerLevel)this.horse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
-		skeletonHorse.setPos(this.horse.getX(), this.horse.getY(), this.horse.getZ());
-		skeletonHorse.invulnerableTime = 60;
-		skeletonHorse.setPersistenceRequired();
-		skeletonHorse.setTamed(true);
-		skeletonHorse.setAge(0);
+		if (skeletonHorse != null) {
+			skeletonHorse.finalizeSpawn((ServerLevel)this.horse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
+			skeletonHorse.setPos(this.horse.getX(), this.horse.getY(), this.horse.getZ());
+			skeletonHorse.invulnerableTime = 60;
+			skeletonHorse.setPersistenceRequired();
+			skeletonHorse.setTamed(true);
+			skeletonHorse.setAge(0);
+		}
+
 		return skeletonHorse;
 	}
 
+	@Nullable
 	private Skeleton createSkeleton(DifficultyInstance difficultyInstance, AbstractHorse abstractHorse) {
 		Skeleton skeleton = EntityType.SKELETON.create(abstractHorse.level);
-		skeleton.finalizeSpawn((ServerLevel)abstractHorse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
-		skeleton.setPos(abstractHorse.getX(), abstractHorse.getY(), abstractHorse.getZ());
-		skeleton.invulnerableTime = 60;
-		skeleton.setPersistenceRequired();
-		if (skeleton.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-			skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+		if (skeleton != null) {
+			skeleton.finalizeSpawn((ServerLevel)abstractHorse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
+			skeleton.setPos(abstractHorse.getX(), abstractHorse.getY(), abstractHorse.getZ());
+			skeleton.invulnerableTime = 60;
+			skeleton.setPersistenceRequired();
+			if (skeleton.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+			}
+
+			skeleton.setItemSlot(
+				EquipmentSlot.MAINHAND,
+				EnchantmentHelper.enchantItem(
+					skeleton.getRandom(),
+					this.disenchant(skeleton.getMainHandItem()),
+					(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
+					false
+				)
+			);
+			skeleton.setItemSlot(
+				EquipmentSlot.HEAD,
+				EnchantmentHelper.enchantItem(
+					skeleton.getRandom(),
+					this.disenchant(skeleton.getItemBySlot(EquipmentSlot.HEAD)),
+					(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
+					false
+				)
+			);
 		}
 
-		skeleton.setItemSlot(
-			EquipmentSlot.MAINHAND,
-			EnchantmentHelper.enchantItem(
-				skeleton.getRandom(),
-				this.disenchant(skeleton.getMainHandItem()),
-				(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
-				false
-			)
-		);
-		skeleton.setItemSlot(
-			EquipmentSlot.HEAD,
-			EnchantmentHelper.enchantItem(
-				skeleton.getRandom(),
-				this.disenchant(skeleton.getItemBySlot(EquipmentSlot.HEAD)),
-				(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
-				false
-			)
-		);
 		return skeleton;
 	}
 

@@ -42,7 +42,8 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ShaderInstance implements Shader, AutoCloseable {
-	private static final String SHADER_PATH = "shaders/core/";
+	public static final String SHADER_PATH = "shaders";
+	private static final String SHADER_CORE_PATH = "shaders/core/";
 	private static final String SHADER_INCLUDE_PATH = "shaders/include/";
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();

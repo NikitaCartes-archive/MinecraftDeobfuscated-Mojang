@@ -1141,41 +1141,45 @@ public abstract class Mob extends LivingEntity {
 			return null;
 		} else {
 			T mob = (T)entityType.create(this.level);
-			mob.copyPosition(this);
-			mob.setBaby(this.isBaby());
-			mob.setNoAi(this.isNoAi());
-			if (this.hasCustomName()) {
-				mob.setCustomName(this.getCustomName());
-				mob.setCustomNameVisible(this.isCustomNameVisible());
-			}
+			if (mob == null) {
+				return null;
+			} else {
+				mob.copyPosition(this);
+				mob.setBaby(this.isBaby());
+				mob.setNoAi(this.isNoAi());
+				if (this.hasCustomName()) {
+					mob.setCustomName(this.getCustomName());
+					mob.setCustomNameVisible(this.isCustomNameVisible());
+				}
 
-			if (this.isPersistenceRequired()) {
-				mob.setPersistenceRequired();
-			}
+				if (this.isPersistenceRequired()) {
+					mob.setPersistenceRequired();
+				}
 
-			mob.setInvulnerable(this.isInvulnerable());
-			if (bl) {
-				mob.setCanPickUpLoot(this.canPickUpLoot());
+				mob.setInvulnerable(this.isInvulnerable());
+				if (bl) {
+					mob.setCanPickUpLoot(this.canPickUpLoot());
 
-				for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-					ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-					if (!itemStack.isEmpty()) {
-						mob.setItemSlot(equipmentSlot, itemStack.copy());
-						mob.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
-						itemStack.setCount(0);
+					for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+						ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+						if (!itemStack.isEmpty()) {
+							mob.setItemSlot(equipmentSlot, itemStack.copy());
+							mob.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
+							itemStack.setCount(0);
+						}
 					}
 				}
-			}
 
-			this.level.addFreshEntity(mob);
-			if (this.isPassenger()) {
-				Entity entity = this.getVehicle();
-				this.stopRiding();
-				mob.startRiding(entity, true);
-			}
+				this.level.addFreshEntity(mob);
+				if (this.isPassenger()) {
+					Entity entity = this.getVehicle();
+					this.stopRiding();
+					mob.startRiding(entity, true);
+				}
 
-			this.discard();
-			return mob;
+				this.discard();
+				return mob;
+			}
 		}
 	}
 

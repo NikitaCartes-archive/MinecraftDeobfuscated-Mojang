@@ -25,6 +25,7 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
@@ -44,15 +45,27 @@ import org.slf4j.Logger;
 public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Minecraft minecraft;
+	private final LocalChatSession chatSession;
+	@Nullable
+	private final ServerData serverData;
 	@Nullable
 	private final Screen parent;
 	private final Consumer<Component> updateStatus;
 	private final Connection connection;
 	private GameProfile localGameProfile;
 
-	public ClientHandshakePacketListenerImpl(Connection connection, Minecraft minecraft, @Nullable Screen screen, Consumer<Component> consumer) {
+	public ClientHandshakePacketListenerImpl(
+		Connection connection,
+		Minecraft minecraft,
+		LocalChatSession localChatSession,
+		@Nullable ServerData serverData,
+		@Nullable Screen screen,
+		Consumer<Component> consumer
+	) {
 		this.connection = connection;
 		this.minecraft = minecraft;
+		this.chatSession = localChatSession;
+		this.serverData = serverData;
 		this.parent = screen;
 		this.updateStatus = consumer;
 	}
@@ -70,7 +83,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 			cipher = Crypt.getCipher(2, secretKey);
 			cipher2 = Crypt.getCipher(1, secretKey);
 			byte[] bs = clientboundHelloPacket.getNonce();
-			Signer signer = this.minecraft.getProfileKeyPairManager().signer();
+			Signer signer = this.chatSession.createSigner();
 			if (signer == null) {
 				serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, bs);
 			} else {
@@ -89,7 +102,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 		HttpUtil.DOWNLOAD_EXECUTOR.submit((Runnable)(() -> {
 			Component component = this.authenticateServer(string);
 			if (component != null) {
-				if (this.minecraft.getCurrentServer() == null || !this.minecraft.getCurrentServer().isLan()) {
+				if (this.serverData == null || !this.serverData.isLan()) {
 					this.connection.disconnect(component);
 					return;
 				}
@@ -130,7 +143,11 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 		this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
 		this.connection.setProtocol(ConnectionProtocol.PLAY);
 		this.connection
-			.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.localGameProfile, this.minecraft.createTelemetryManager()));
+			.setListener(
+				new ClientPacketListener(
+					this.minecraft, this.parent, this.connection, this.chatSession, this.serverData, this.localGameProfile, this.minecraft.createTelemetryManager()
+				)
+			);
 	}
 
 	@Override

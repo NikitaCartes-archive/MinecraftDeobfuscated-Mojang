@@ -2,6 +2,7 @@ package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.Objects;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,9 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 
 	public T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
 		String string = GsonHelper.getAsString(jsonObject, "group", "");
+		CookingBookCategory cookingBookCategory = (CookingBookCategory)Objects.requireNonNullElse(
+			(CookingBookCategory)CookingBookCategory.CODEC.byName(GsonHelper.getAsString(jsonObject, "category", null)), CookingBookCategory.MISC
+		);
 		JsonElement jsonElement = (JsonElement)(GsonHelper.isArrayNode(jsonObject, "ingredient")
 			? GsonHelper.getAsJsonArray(jsonObject, "ingredient")
 			: GsonHelper.getAsJsonObject(jsonObject, "ingredient"));
@@ -31,20 +35,22 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 		);
 		float f = GsonHelper.getAsFloat(jsonObject, "experience", 0.0F);
 		int i = GsonHelper.getAsInt(jsonObject, "cookingtime", this.defaultCookingTime);
-		return this.factory.create(resourceLocation, string, ingredient, itemStack, f, i);
+		return this.factory.create(resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	public T fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
 		String string = friendlyByteBuf.readUtf();
+		CookingBookCategory cookingBookCategory = friendlyByteBuf.readEnum(CookingBookCategory.class);
 		Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
 		ItemStack itemStack = friendlyByteBuf.readItem();
 		float f = friendlyByteBuf.readFloat();
 		int i = friendlyByteBuf.readVarInt();
-		return this.factory.create(resourceLocation, string, ingredient, itemStack, f, i);
+		return this.factory.create(resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	public void toNetwork(FriendlyByteBuf friendlyByteBuf, T abstractCookingRecipe) {
 		friendlyByteBuf.writeUtf(abstractCookingRecipe.group);
+		friendlyByteBuf.writeEnum(abstractCookingRecipe.category());
 		abstractCookingRecipe.ingredient.toNetwork(friendlyByteBuf);
 		friendlyByteBuf.writeItem(abstractCookingRecipe.result);
 		friendlyByteBuf.writeFloat(abstractCookingRecipe.experience);
@@ -52,6 +58,8 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 	}
 
 	interface CookieBaker<T extends AbstractCookingRecipe> {
-		T create(ResourceLocation resourceLocation, String string, Ingredient ingredient, ItemStack itemStack, float f, int i);
+		T create(
+			ResourceLocation resourceLocation, String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i
+		);
 	}
 }

@@ -84,8 +84,6 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 		if (this.visible) {
 			this.initVisuals();
 		}
-
-		minecraft.keyboardHandler.setSendRepeatsToGui(true);
 	}
 
 	public void initVisuals() {
@@ -136,10 +134,6 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 
 	protected void initFilterButtonTextures() {
 		this.filterButton.initTextureValues(152, 41, 28, 18, RECIPE_BOOK_LOCATION);
-	}
-
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	public int updateScreenPosition(int i, int j) {

@@ -64,6 +64,7 @@ public class PolarBear extends Animal implements NeutralMob {
 		super(entityType, level);
 	}
 
+	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return EntityType.POLAR_BEAR.create(serverLevel);

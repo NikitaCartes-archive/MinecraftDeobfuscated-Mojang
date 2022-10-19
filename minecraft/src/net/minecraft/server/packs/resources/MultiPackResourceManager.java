@@ -48,7 +48,7 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 					} else if (bl) {
 						fallbackResourceManager.push(packResources);
 					} else {
-						fallbackResourceManager.pushFilterOnly(packResources.getName(), predicate);
+						fallbackResourceManager.pushFilterOnly(packResources.packId(), predicate);
 					}
 				}
 			}
@@ -60,9 +60,9 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 	@Nullable
 	private ResourceFilterSection getPackFilterSection(PackResources packResources) {
 		try {
-			return packResources.getMetadataSection(ResourceFilterSection.SERIALIZER);
+			return packResources.getMetadataSection(ResourceFilterSection.TYPE);
 		} catch (IOException var3) {
-			LOGGER.error("Failed to get filter section from pack {}", packResources.getName());
+			LOGGER.error("Failed to get filter section from pack {}", packResources.packId());
 			return null;
 		}
 	}
@@ -86,6 +86,7 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 
 	@Override
 	public Map<ResourceLocation, Resource> listResources(String string, Predicate<ResourceLocation> predicate) {
+		checkTrailingDirectoryPath(string);
 		Map<ResourceLocation, Resource> map = new TreeMap();
 
 		for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
@@ -97,6 +98,7 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 
 	@Override
 	public Map<ResourceLocation, List<Resource>> listResourceStacks(String string, Predicate<ResourceLocation> predicate) {
+		checkTrailingDirectoryPath(string);
 		Map<ResourceLocation, List<Resource>> map = new TreeMap();
 
 		for (FallbackResourceManager fallbackResourceManager : this.namespacedManagers.values()) {
@@ -104,6 +106,12 @@ public class MultiPackResourceManager implements CloseableResourceManager {
 		}
 
 		return map;
+	}
+
+	private static void checkTrailingDirectoryPath(String string) {
+		if (string.endsWith("/")) {
+			throw new IllegalArgumentException("Trailing slash in path " + string);
+		}
 	}
 
 	@Override

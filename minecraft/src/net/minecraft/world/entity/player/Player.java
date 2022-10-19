@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -148,7 +146,6 @@ public abstract class Player extends LivingEntity {
 	public final InventoryMenu inventoryMenu;
 	public AbstractContainerMenu containerMenu;
 	protected FoodData foodData = new FoodData();
-	protected WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
 	protected int jumpTriggerTime;
 	public float oBob;
 	public float bob;
@@ -169,8 +166,6 @@ public abstract class Player extends LivingEntity {
 	protected final float defaultFlySpeed = 0.02F;
 	private int lastLevelUpTime;
 	private final GameProfile gameProfile;
-	@Nullable
-	private final ProfilePublicKey profilePublicKey;
 	private boolean reducedDebugInfo;
 	private ItemStack lastItemInMainHand = ItemStack.EMPTY;
 	private final ItemCooldowns cooldowns = this.createItemCooldowns();
@@ -178,11 +173,10 @@ public abstract class Player extends LivingEntity {
 	@Nullable
 	public FishingHook fishing;
 
-	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile, @Nullable ProfilePublicKey profilePublicKey) {
+	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
 		super(EntityType.PLAYER, level);
 		this.setUUID(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
 		this.gameProfile = gameProfile;
-		this.profilePublicKey = profilePublicKey;
 		this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
 		this.containerMenu = this.inventoryMenu;
 		this.moveTo((double)blockPos.getX() + 0.5, (double)(blockPos.getY() + 1), (double)blockPos.getZ() + 0.5, f, 0.0F);
@@ -259,7 +253,6 @@ public abstract class Player extends LivingEntity {
 		this.moveCloak();
 		if (!this.level.isClientSide) {
 			this.foodData.tick(this);
-			this.wardenSpawnTracker.tick();
 			this.awardStat(Stats.PLAY_TIME);
 			this.awardStat(Stats.TOTAL_WORLD_TIME);
 			if (this.isAlive()) {
@@ -769,13 +762,6 @@ public abstract class Player extends LivingEntity {
 
 		this.setScore(compoundTag.getInt("Score"));
 		this.foodData.readAdditionalSaveData(compoundTag);
-		if (compoundTag.contains("warden_spawn_tracker", 10)) {
-			WardenSpawnTracker.CODEC
-				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("warden_spawn_tracker")))
-				.resultOrPartial(LOGGER::error)
-				.ifPresent(wardenSpawnTracker -> this.wardenSpawnTracker = wardenSpawnTracker);
-		}
-
 		this.abilities.loadSaveData(compoundTag);
 		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue((double)this.abilities.getWalkingSpeed());
 		if (compoundTag.contains("EnderItems", 9)) {
@@ -808,10 +794,6 @@ public abstract class Player extends LivingEntity {
 		compoundTag.putInt("XpSeed", this.enchantmentSeed);
 		compoundTag.putInt("Score", this.getScore());
 		this.foodData.addAdditionalSaveData(compoundTag);
-		WardenSpawnTracker.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.wardenSpawnTracker)
-			.resultOrPartial(LOGGER::error)
-			.ifPresent(tag -> compoundTag.put("warden_spawn_tracker", tag));
 		this.abilities.addSaveData(compoundTag);
 		compoundTag.put("EnderItems", this.enderChestInventory.createTag());
 		if (!this.getShoulderEntityLeft().isEmpty()) {
@@ -961,6 +943,10 @@ public abstract class Player extends LivingEntity {
 	@Override
 	protected boolean onSoulSpeedBlock() {
 		return !this.abilities.flying && super.onSoulSpeedBlock();
+	}
+
+	public boolean isTextFilteringEnabled() {
+		return false;
 	}
 
 	public void openTextEdit(SignBlockEntity signBlockEntity) {
@@ -1332,11 +1318,6 @@ public abstract class Player extends LivingEntity {
 		return this.gameProfile;
 	}
 
-	@Nullable
-	public ProfilePublicKey getProfilePublicKey() {
-		return this.profilePublicKey;
-	}
-
 	public Inventory getInventory() {
 		return this.inventory;
 	}
@@ -1375,9 +1356,11 @@ public abstract class Player extends LivingEntity {
 	public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, float f, boolean bl, boolean bl2) {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		Block block = blockState.getBlock();
-		if (block instanceof RespawnAnchorBlock && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) > 0 && RespawnAnchorBlock.canSetSpawn(serverLevel)) {
+		if (block instanceof RespawnAnchorBlock && (bl || (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) > 0) && RespawnAnchorBlock.canSetSpawn(serverLevel)
+			)
+		 {
 			Optional<Vec3> optional = RespawnAnchorBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos);
-			if (!bl2 && optional.isPresent()) {
+			if (!bl && !bl2 && optional.isPresent()) {
 				serverLevel.setBlock(
 					blockPos, blockState.setValue(RespawnAnchorBlock.CHARGE, Integer.valueOf((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) - 1)), 3
 				);
@@ -1578,11 +1561,6 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	@Override
-	public ChatSender asChatSender() {
-		return new ChatSender(this.getGameProfile().getId(), this.getProfilePublicKey());
-	}
-
 	public boolean tryToStartFallFlying() {
 		if (!this.onGround && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION)) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
@@ -1698,8 +1676,8 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	public WardenSpawnTracker getWardenSpawnTracker() {
-		return this.wardenSpawnTracker;
+	public Optional<WardenSpawnTracker> getWardenSpawnTracker() {
+		return Optional.empty();
 	}
 
 	public FoodData getFoodData() {

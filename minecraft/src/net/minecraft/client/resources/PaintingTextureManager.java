@@ -1,6 +1,5 @@
 package net.minecraft.client.resources;
 
-import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -15,11 +14,6 @@ public class PaintingTextureManager extends TextureAtlasHolder {
 
 	public PaintingTextureManager(TextureManager textureManager) {
 		super(textureManager, new ResourceLocation("textures/atlas/paintings.png"), "painting");
-	}
-
-	@Override
-	protected Stream<ResourceLocation> getResourcesToLoad() {
-		return Stream.concat(Registry.PAINTING_VARIANT.keySet().stream(), Stream.of(BACK_SPRITE_LOCATION));
 	}
 
 	public TextureAtlasSprite get(PaintingVariant paintingVariant) {

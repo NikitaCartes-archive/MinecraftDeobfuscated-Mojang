@@ -141,6 +141,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Blocks.MANGROVE_FENCE_GATE, 300);
 		add(map, Blocks.NOTE_BLOCK, 300);
 		add(map, Blocks.BOOKSHELF, 300);
+		add(map, Blocks.CHISELED_BOOKSHELF, 300);
 		add(map, Blocks.LECTERN, 300);
 		add(map, Blocks.JUKEBOX, 300);
 		add(map, Blocks.CHEST, 300);
@@ -152,6 +153,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		add(map, Items.FISHING_ROD, 300);
 		add(map, Blocks.LADDER, 300);
 		add(map, ItemTags.SIGNS, 200);
+		add(map, ItemTags.HANGING_SIGNS, 800);
 		add(map, Items.WOODEN_SHOVEL, 200);
 		add(map, Items.WOODEN_SWORD, 200);
 		add(map, Items.WOODEN_HOE, 200);

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.block;
 
-import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,7 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
+public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private static final int PRESSED_DEPTH = 1;
 	private static final int UNPRESSED_DEPTH = 2;
@@ -49,18 +48,20 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 	protected static final VoxelShape PRESSED_SOUTH_AABB = Block.box(5.0, 6.0, 0.0, 11.0, 10.0, 1.0);
 	protected static final VoxelShape PRESSED_WEST_AABB = Block.box(15.0, 6.0, 5.0, 16.0, 10.0, 11.0);
 	protected static final VoxelShape PRESSED_EAST_AABB = Block.box(0.0, 6.0, 5.0, 1.0, 10.0, 11.0);
-	private final boolean sensitive;
+	private final SoundEvent soundOff;
+	private final SoundEvent soundOn;
+	private final int ticksToStayPressed;
+	private final boolean arrowsCanPress;
 
-	protected ButtonBlock(boolean bl, BlockBehaviour.Properties properties) {
+	protected ButtonBlock(BlockBehaviour.Properties properties, int i, boolean bl, SoundEvent soundEvent, SoundEvent soundEvent2) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(FACE, AttachFace.WALL)
 		);
-		this.sensitive = bl;
-	}
-
-	private int getPressDuration() {
-		return this.sensitive ? 30 : 20;
+		this.ticksToStayPressed = i;
+		this.arrowsCanPress = bl;
+		this.soundOff = soundEvent;
+		this.soundOn = soundEvent2;
 	}
 
 	@Override
@@ -75,17 +76,12 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 
 				return bl ? PRESSED_FLOOR_AABB_Z : FLOOR_AABB_Z;
 			case WALL:
-				switch (direction) {
-					case EAST:
-						return bl ? PRESSED_EAST_AABB : EAST_AABB;
-					case WEST:
-						return bl ? PRESSED_WEST_AABB : WEST_AABB;
-					case SOUTH:
-						return bl ? PRESSED_SOUTH_AABB : SOUTH_AABB;
-					case NORTH:
-					default:
-						return bl ? PRESSED_NORTH_AABB : NORTH_AABB;
-				}
+				return switch (direction) {
+					case EAST -> bl ? PRESSED_EAST_AABB : EAST_AABB;
+					case WEST -> bl ? PRESSED_WEST_AABB : WEST_AABB;
+					case SOUTH -> bl ? PRESSED_SOUTH_AABB : SOUTH_AABB;
+					case NORTH, UP, DOWN -> bl ? PRESSED_NORTH_AABB : NORTH_AABB;
+				};
 			case CEILING:
 			default:
 				if (direction.getAxis() == Direction.Axis.X) {
@@ -113,14 +109,16 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 	public void press(BlockState blockState, Level level, BlockPos blockPos) {
 		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 3);
 		this.updateNeighbours(blockState, level, blockPos);
-		level.scheduleTick(blockPos, this, this.getPressDuration());
+		level.scheduleTick(blockPos, this, this.ticksToStayPressed);
 	}
 
 	protected void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
-		levelAccessor.playSound(bl ? player : null, blockPos, this.getSound(bl), SoundSource.BLOCKS, 0.3F, bl ? 0.6F : 0.5F);
+		levelAccessor.playSound(bl ? player : null, blockPos, this.getSound(bl), SoundSource.BLOCKS);
 	}
 
-	protected abstract SoundEvent getSound(boolean bl);
+	protected SoundEvent getSound(boolean bl) {
+		return bl ? this.soundOn : this.soundOff;
+	}
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
@@ -151,37 +149,35 @@ public abstract class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(POWERED)) {
-			if (this.sensitive) {
-				this.checkPressed(blockState, serverLevel, blockPos);
-			} else {
-				serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 3);
-				this.updateNeighbours(blockState, serverLevel, blockPos);
-				this.playSound(null, serverLevel, blockPos, false);
-				serverLevel.gameEvent(null, GameEvent.BLOCK_DEACTIVATE, blockPos);
-			}
+			this.checkPressed(blockState, serverLevel, blockPos);
 		}
 	}
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (!level.isClientSide && this.sensitive && !(Boolean)blockState.getValue(POWERED)) {
+		if (!level.isClientSide && this.arrowsCanPress && !(Boolean)blockState.getValue(POWERED)) {
 			this.checkPressed(blockState, level, blockPos);
 		}
 	}
 
-	private void checkPressed(BlockState blockState, Level level, BlockPos blockPos) {
-		List<? extends Entity> list = level.getEntitiesOfClass(AbstractArrow.class, blockState.getShape(level, blockPos).bounds().move(blockPos));
-		boolean bl = !list.isEmpty();
+	protected void checkPressed(BlockState blockState, Level level, BlockPos blockPos) {
+		AbstractArrow abstractArrow = this.arrowsCanPress
+			? (AbstractArrow)level.getEntitiesOfClass(AbstractArrow.class, blockState.getShape(level, blockPos).bounds().move(blockPos))
+				.stream()
+				.findFirst()
+				.orElse(null)
+			: null;
+		boolean bl = abstractArrow != null;
 		boolean bl2 = (Boolean)blockState.getValue(POWERED);
 		if (bl != bl2) {
 			level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl)), 3);
 			this.updateNeighbours(blockState, level, blockPos);
 			this.playSound(null, level, blockPos, bl);
-			level.gameEvent((Entity)list.stream().findFirst().orElse(null), bl ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
+			level.gameEvent(abstractArrow, bl ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
 		}
 
 		if (bl) {
-			level.scheduleTick(new BlockPos(blockPos), this, this.getPressDuration());
+			level.scheduleTick(new BlockPos(blockPos), this, this.ticksToStayPressed);
 		}
 	}
 

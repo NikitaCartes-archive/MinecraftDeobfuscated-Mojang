@@ -3,6 +3,8 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -38,8 +40,10 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	protected static final VoxelShape NORTH_OPEN_AABB = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape BOTTOM_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 3.0, 16.0);
 	protected static final VoxelShape TOP_AABB = Block.box(0.0, 13.0, 0.0, 16.0, 16.0, 16.0);
+	private final SoundEvent closeSound;
+	private final SoundEvent openSound;
 
-	protected TrapDoorBlock(BlockBehaviour.Properties properties) {
+	protected TrapDoorBlock(BlockBehaviour.Properties properties, SoundEvent soundEvent, SoundEvent soundEvent2) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -50,6 +54,8 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 				.setValue(POWERED, Boolean.valueOf(false))
 				.setValue(WATERLOGGED, Boolean.valueOf(false))
 		);
+		this.closeSound = soundEvent;
+		this.openSound = soundEvent2;
 	}
 
 	@Override
@@ -104,14 +110,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	protected void playSound(@Nullable Player player, Level level, BlockPos blockPos, boolean bl) {
-		if (bl) {
-			int i = this.material == Material.METAL ? 1037 : 1007;
-			level.levelEvent(player, i, blockPos, 0);
-		} else {
-			int i = this.material == Material.METAL ? 1036 : 1013;
-			level.levelEvent(player, i, blockPos, 0);
-		}
-
+		level.playSound(player, blockPos, bl ? this.openSound : this.closeSound, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
 		level.gameEvent(player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 	}
 

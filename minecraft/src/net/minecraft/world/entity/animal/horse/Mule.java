@@ -16,19 +16,16 @@ public class Mule extends AbstractChestedHorse {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		super.getAmbientSound();
 		return SoundEvents.MULE_AMBIENT;
 	}
 
 	@Override
 	protected SoundEvent getAngrySound() {
-		super.getAngrySound();
 		return SoundEvents.MULE_ANGRY;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		super.getDeathSound();
 		return SoundEvents.MULE_DEATH;
 	}
 
@@ -40,7 +37,6 @@ public class Mule extends AbstractChestedHorse {
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		super.getHurtSound(damageSource);
 		return SoundEvents.MULE_HURT;
 	}
 
@@ -49,6 +45,7 @@ public class Mule extends AbstractChestedHorse {
 		this.playSound(SoundEvents.MULE_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 	}
 
+	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return EntityType.MULE.create(serverLevel);

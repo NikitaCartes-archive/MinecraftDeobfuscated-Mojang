@@ -1,25 +1,24 @@
 package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class Stitcher {
-	private static final Comparator<Stitcher.Holder> HOLDER_COMPARATOR = Comparator.comparing(holder -> -holder.height)
+public class Stitcher<T extends Stitcher.Entry> {
+	private static final Comparator<Stitcher.Holder<?>> HOLDER_COMPARATOR = Comparator.comparing(holder -> -holder.height)
 		.thenComparing(holder -> -holder.width)
-		.thenComparing(holder -> holder.spriteInfo.name());
+		.thenComparing(holder -> holder.entry.name());
 	private final int mipLevel;
-	private final Set<Stitcher.Holder> texturesToBeStitched = Sets.<Stitcher.Holder>newHashSetWithExpectedSize(256);
-	private final List<Stitcher.Region> storage = Lists.<Stitcher.Region>newArrayListWithCapacity(256);
+	private final List<Stitcher.Holder<T>> texturesToBeStitched = new ArrayList();
+	private final List<Stitcher.Region<T>> storage = new ArrayList();
 	private int storageX;
 	private int storageY;
 	private final int maxWidth;
@@ -39,20 +38,18 @@ public class Stitcher {
 		return this.storageY;
 	}
 
-	public void registerSprite(TextureAtlasSprite.Info info) {
-		Stitcher.Holder holder = new Stitcher.Holder(info, this.mipLevel);
+	public void registerSprite(T entry) {
+		Stitcher.Holder<T> holder = new Stitcher.Holder<>(entry, this.mipLevel);
 		this.texturesToBeStitched.add(holder);
 	}
 
 	public void stitch() {
-		List<Stitcher.Holder> list = Lists.<Stitcher.Holder>newArrayList(this.texturesToBeStitched);
+		List<Stitcher.Holder<T>> list = new ArrayList(this.texturesToBeStitched);
 		list.sort(HOLDER_COMPARATOR);
 
-		for (Stitcher.Holder holder : list) {
+		for (Stitcher.Holder<T> holder : list) {
 			if (!this.addToStorage(holder)) {
-				throw new StitcherException(
-					holder.spriteInfo, (Collection<TextureAtlasSprite.Info>)list.stream().map(holderx -> holderx.spriteInfo).collect(ImmutableList.toImmutableList())
-				);
+				throw new StitcherException(holder.entry, (Collection<Stitcher.Entry>)list.stream().map(holderx -> holderx.entry).collect(ImmutableList.toImmutableList()));
 			}
 		}
 
@@ -60,13 +57,9 @@ public class Stitcher {
 		this.storageY = Mth.smallestEncompassingPowerOfTwo(this.storageY);
 	}
 
-	public void gatherSprites(Stitcher.SpriteLoader spriteLoader) {
-		for (Stitcher.Region region : this.storage) {
-			region.walk(regionx -> {
-				Stitcher.Holder holder = regionx.getHolder();
-				TextureAtlasSprite.Info info = holder.spriteInfo;
-				spriteLoader.load(info, this.storageX, this.storageY, regionx.getX(), regionx.getY());
-			});
+	public void gatherSprites(Stitcher.SpriteLoader<T> spriteLoader) {
+		for (Stitcher.Region<T> region : this.storage) {
+			region.walk(spriteLoader);
 		}
 	}
 
@@ -74,8 +67,8 @@ public class Stitcher {
 		return (i >> j) + ((i & (1 << j) - 1) == 0 ? 0 : 1) << j;
 	}
 
-	private boolean addToStorage(Stitcher.Holder holder) {
-		for (Stitcher.Region region : this.storage) {
+	private boolean addToStorage(Stitcher.Holder<T> holder) {
+		for (Stitcher.Region<T> region : this.storage) {
 			if (region.add(holder)) {
 				return true;
 			}
@@ -84,7 +77,7 @@ public class Stitcher {
 		return this.expand(holder);
 	}
 
-	private boolean expand(Stitcher.Holder holder) {
+	private boolean expand(Stitcher.Holder<T> holder) {
 		int i = Mth.smallestEncompassingPowerOfTwo(this.storageX);
 		int j = Mth.smallestEncompassingPowerOfTwo(this.storageY);
 		int k = Mth.smallestEncompassingPowerOfTwo(this.storageX + holder.width);
@@ -103,16 +96,16 @@ public class Stitcher {
 				bl5 = bl && i <= j;
 			}
 
-			Stitcher.Region region;
+			Stitcher.Region<T> region;
 			if (bl5) {
 				if (this.storageY == 0) {
 					this.storageY = holder.height;
 				}
 
-				region = new Stitcher.Region(this.storageX, 0, holder.width, this.storageY);
+				region = new Stitcher.Region<>(this.storageX, 0, holder.width, this.storageY);
 				this.storageX = this.storageX + holder.width;
 			} else {
-				region = new Stitcher.Region(0, this.storageY, this.storageX, holder.height);
+				region = new Stitcher.Region<>(0, this.storageY, this.storageX, holder.height);
 				this.storageY = this.storageY + holder.height;
 			}
 
@@ -123,40 +116,38 @@ public class Stitcher {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class Holder {
-		public final TextureAtlasSprite.Info spriteInfo;
-		public final int width;
-		public final int height;
+	public interface Entry {
+		int width();
 
-		public Holder(TextureAtlasSprite.Info info, int i) {
-			this.spriteInfo = info;
-			this.width = Stitcher.smallestFittingMinTexel(info.width(), i);
-			this.height = Stitcher.smallestFittingMinTexel(info.height(), i);
-		}
+		int height();
 
-		public String toString() {
-			return "Holder{width=" + this.width + ", height=" + this.height + "}";
+		ResourceLocation name();
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record Holder<T extends Stitcher.Entry>(T entry, int width, int height) {
+
+		public Holder(T entry, int i) {
+			this(entry, Stitcher.smallestFittingMinTexel(entry.width(), i), Stitcher.smallestFittingMinTexel(entry.height(), i));
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Region {
+	public static class Region<T extends Stitcher.Entry> {
 		private final int originX;
 		private final int originY;
 		private final int width;
 		private final int height;
-		private List<Stitcher.Region> subSlots;
-		private Stitcher.Holder holder;
+		@Nullable
+		private List<Stitcher.Region<T>> subSlots;
+		@Nullable
+		private Stitcher.Holder<T> holder;
 
 		public Region(int i, int j, int k, int l) {
 			this.originX = i;
 			this.originY = j;
 			this.width = k;
 			this.height = l;
-		}
-
-		public Stitcher.Holder getHolder() {
-			return this.holder;
 		}
 
 		public int getX() {
@@ -167,7 +158,7 @@ public class Stitcher {
 			return this.originY;
 		}
 
-		public boolean add(Stitcher.Holder holder) {
+		public boolean add(Stitcher.Holder<T> holder) {
 			if (this.holder != null) {
 				return false;
 			} else {
@@ -179,7 +170,7 @@ public class Stitcher {
 						return true;
 					} else {
 						if (this.subSlots == null) {
-							this.subSlots = Lists.<Stitcher.Region>newArrayListWithCapacity(1);
+							this.subSlots = new ArrayList(1);
 							this.subSlots.add(new Stitcher.Region(this.originX, this.originY, i, j));
 							int k = this.width - i;
 							int l = this.height - j;
@@ -200,7 +191,7 @@ public class Stitcher {
 							}
 						}
 
-						for (Stitcher.Region region : this.subSlots) {
+						for (Stitcher.Region<T> region : this.subSlots) {
 							if (region.add(holder)) {
 								return true;
 							}
@@ -214,12 +205,12 @@ public class Stitcher {
 			}
 		}
 
-		public void walk(Consumer<Stitcher.Region> consumer) {
+		public void walk(Stitcher.SpriteLoader<T> spriteLoader) {
 			if (this.holder != null) {
-				consumer.accept(this);
+				spriteLoader.load(this.holder.entry, this.getX(), this.getY());
 			} else if (this.subSlots != null) {
-				for (Stitcher.Region region : this.subSlots) {
-					region.walk(consumer);
+				for (Stitcher.Region<T> region : this.subSlots) {
+					region.walk(spriteLoader);
 				}
 			}
 		}
@@ -242,7 +233,7 @@ public class Stitcher {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public interface SpriteLoader {
-		void load(TextureAtlasSprite.Info info, int i, int j, int k, int l);
+	public interface SpriteLoader<T extends Stitcher.Entry> {
+		void load(T entry, int i, int j);
 	}
 }

@@ -8,65 +8,53 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.LazyLoadedValue;
 
 @Environment(EnvType.CLIENT)
-public final class MissingTextureAtlasSprite extends TextureAtlasSprite {
+public final class MissingTextureAtlasSprite {
 	private static final int MISSING_IMAGE_WIDTH = 16;
 	private static final int MISSING_IMAGE_HEIGHT = 16;
 	private static final String MISSING_TEXTURE_NAME = "missingno";
 	private static final ResourceLocation MISSING_TEXTURE_LOCATION = new ResourceLocation("missingno");
+	private static final AnimationMetadataSection EMPTY_ANIMATION_META = new AnimationMetadataSection(
+		ImmutableList.of(new AnimationFrame(0, -1)), 16, 16, 1, false
+	);
 	@Nullable
 	private static DynamicTexture missingTexture;
-	private static final LazyLoadedValue<NativeImage> MISSING_IMAGE_DATA = new LazyLoadedValue<>(() -> {
-		NativeImage nativeImage = new NativeImage(16, 16, false);
-		int i = -16777216;
-		int j = -524040;
 
-		for (int k = 0; k < 16; k++) {
-			for (int l = 0; l < 16; l++) {
-				if (k < 8 ^ l < 8) {
-					nativeImage.setPixelRGBA(l, k, -524040);
+	private static NativeImage generateMissingImage(int i, int j) {
+		NativeImage nativeImage = new NativeImage(i, j, false);
+		int k = -16777216;
+		int l = -524040;
+
+		for (int m = 0; m < j; m++) {
+			for (int n = 0; n < i; n++) {
+				if (m < j / 2 ^ n < i / 2) {
+					nativeImage.setPixelRGBA(n, m, -524040);
 				} else {
-					nativeImage.setPixelRGBA(l, k, -16777216);
+					nativeImage.setPixelRGBA(n, m, -16777216);
 				}
 			}
 		}
 
-		nativeImage.untrack();
 		return nativeImage;
-	});
-	private static final TextureAtlasSprite.Info INFO = new TextureAtlasSprite.Info(
-		MISSING_TEXTURE_LOCATION, 16, 16, new AnimationMetadataSection(ImmutableList.of(new AnimationFrame(0, -1)), 16, 16, 1, false)
-	);
-
-	private MissingTextureAtlasSprite(TextureAtlas textureAtlas, int i, int j, int k, int l, int m) {
-		super(textureAtlas, INFO, i, j, k, l, m, MISSING_IMAGE_DATA.get());
 	}
 
-	public static MissingTextureAtlasSprite newInstance(TextureAtlas textureAtlas, int i, int j, int k, int l, int m) {
-		return new MissingTextureAtlasSprite(textureAtlas, i, j, k, l, m);
+	public static SpriteContents create() {
+		NativeImage nativeImage = generateMissingImage(16, 16);
+		return new SpriteContents(MISSING_TEXTURE_LOCATION, new FrameSize(16, 16), nativeImage, EMPTY_ANIMATION_META);
 	}
 
 	public static ResourceLocation getLocation() {
 		return MISSING_TEXTURE_LOCATION;
 	}
 
-	public static TextureAtlasSprite.Info info() {
-		return INFO;
-	}
-
-	@Override
-	public void close() {
-		for (int i = 1; i < this.mainImage.length; i++) {
-			this.mainImage[i].close();
-		}
-	}
-
 	public static DynamicTexture getTexture() {
 		if (missingTexture == null) {
-			missingTexture = new DynamicTexture(MISSING_IMAGE_DATA.get());
+			NativeImage nativeImage = generateMissingImage(16, 16);
+			nativeImage.untrack();
+			missingTexture = new DynamicTexture(nativeImage);
 			Minecraft.getInstance().getTextureManager().register(MISSING_TEXTURE_LOCATION, missingTexture);
 		}
 

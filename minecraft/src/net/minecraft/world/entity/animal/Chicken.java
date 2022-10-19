@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -132,6 +133,7 @@ public class Chicken extends Animal {
 		this.playSound(SoundEvents.CHICKEN_STEP, 0.15F, 1.0F);
 	}
 
+	@Nullable
 	public Chicken getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return EntityType.CHICKEN.create(serverLevel);
 	}

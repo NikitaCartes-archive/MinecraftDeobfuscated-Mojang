@@ -40,7 +40,7 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEventDispatcher;
+import net.minecraft.world.level.gameevent.GameEventListenerRegistry;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
@@ -111,8 +111,8 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		}
 	}
 
-	public GameEventDispatcher getEventDispatcher(int i) {
-		return GameEventDispatcher.NOOP;
+	public GameEventListenerRegistry getListenerRegistry(int i) {
+		return GameEventListenerRegistry.NOOP;
 	}
 
 	@Nullable

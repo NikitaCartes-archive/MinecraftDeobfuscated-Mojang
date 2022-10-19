@@ -146,8 +146,13 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	void setupResultSlot() {
 		if (!this.recipes.isEmpty() && this.isValidRecipeIndex(this.selectedRecipeIndex.get())) {
 			StonecutterRecipe stonecutterRecipe = (StonecutterRecipe)this.recipes.get(this.selectedRecipeIndex.get());
-			this.resultContainer.setRecipeUsed(stonecutterRecipe);
-			this.resultSlot.set(stonecutterRecipe.assemble(this.container));
+			ItemStack itemStack = stonecutterRecipe.assemble(this.container);
+			if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
+				this.resultContainer.setRecipeUsed(stonecutterRecipe);
+				this.resultSlot.set(itemStack);
+			} else {
+				this.resultSlot.set(ItemStack.EMPTY);
+			}
 		} else {
 			this.resultSlot.set(ItemStack.EMPTY);
 		}

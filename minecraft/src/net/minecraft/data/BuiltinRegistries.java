@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -46,17 +47,17 @@ public class BuiltinRegistries {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<ResourceLocation, Supplier<? extends Holder<?>>> LOADERS = Maps.<ResourceLocation, Supplier<? extends Holder<?>>>newLinkedHashMap();
 	private static final WritableRegistry<WritableRegistry<?>> WRITABLE_REGISTRY = new MappedRegistry<>(
-		ResourceKey.createRegistryKey(new ResourceLocation("root")), Lifecycle.experimental(), null
+		ResourceKey.createRegistryKey(new ResourceLocation("root")), Lifecycle.experimental()
 	);
 	public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
 	public static final Registry<DimensionType> DIMENSION_TYPE = registerSimple(Registry.DIMENSION_TYPE_REGISTRY, DimensionTypes::bootstrap);
-	public static final Registry<ConfiguredWorldCarver<?>> CONFIGURED_CARVER = registerSimple(Registry.CONFIGURED_CARVER_REGISTRY, registry -> Carvers.CAVE);
+	public static final Registry<ConfiguredWorldCarver<?>> CONFIGURED_CARVER = registerSimple(Registry.CONFIGURED_CARVER_REGISTRY, registryx -> Carvers.CAVE);
 	public static final Registry<ConfiguredFeature<?, ?>> CONFIGURED_FEATURE = registerSimple(Registry.CONFIGURED_FEATURE_REGISTRY, FeatureUtils::bootstrap);
 	public static final Registry<PlacedFeature> PLACED_FEATURE = registerSimple(Registry.PLACED_FEATURE_REGISTRY, PlacementUtils::bootstrap);
 	public static final Registry<Structure> STRUCTURES = registerSimple(Registry.STRUCTURE_REGISTRY, Structures::bootstrap);
 	public static final Registry<StructureSet> STRUCTURE_SETS = registerSimple(Registry.STRUCTURE_SET_REGISTRY, StructureSets::bootstrap);
 	public static final Registry<StructureProcessorList> PROCESSOR_LIST = registerSimple(
-		Registry.PROCESSOR_LIST_REGISTRY, registry -> ProcessorLists.ZOMBIE_PLAINS
+		Registry.PROCESSOR_LIST_REGISTRY, registryx -> ProcessorLists.ZOMBIE_PLAINS
 	);
 	public static final Registry<StructureTemplatePool> TEMPLATE_POOL = registerSimple(Registry.TEMPLATE_POOL_REGISTRY, Pools::bootstrap);
 	public static final Registry<Biome> BIOME = registerSimple(Registry.BIOME_REGISTRY, Biomes::bootstrap);
@@ -70,7 +71,6 @@ public class BuiltinRegistries {
 		Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY, FlatLevelGeneratorPresets::bootstrap
 	);
 	public static final Registry<ChatType> CHAT_TYPE = registerSimple(Registry.CHAT_TYPE_REGISTRY, ChatType::bootstrap);
-	public static final RegistryAccess ACCESS = RegistryAccess.fromRegistryOfRegistries(REGISTRY);
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, BuiltinRegistries.RegistryBootstrap<T> registryBootstrap) {
 		return registerSimple(resourceKey, Lifecycle.stable(), registryBootstrap);
@@ -79,7 +79,7 @@ public class BuiltinRegistries {
 	private static <T> Registry<T> registerSimple(
 		ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, BuiltinRegistries.RegistryBootstrap<T> registryBootstrap
 	) {
-		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, lifecycle, null), registryBootstrap, lifecycle);
+		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, lifecycle), registryBootstrap, lifecycle);
 	}
 
 	private static <T, R extends WritableRegistry<T>> R internalRegister(
@@ -89,6 +89,12 @@ public class BuiltinRegistries {
 		LOADERS.put(resourceLocation, (Supplier)() -> registryBootstrap.run(writableRegistry));
 		WRITABLE_REGISTRY.register((ResourceKey<WritableRegistry<?>>)resourceKey, writableRegistry, lifecycle);
 		return writableRegistry;
+	}
+
+	public static RegistryAccess.Frozen createAccess() {
+		RegistryAccess.Frozen frozen = RegistryAccess.fromRegistryOfRegistries(Registry.REGISTRY);
+		RegistryAccess.Frozen frozen2 = RegistryAccess.fromRegistryOfRegistries(REGISTRY);
+		return new RegistryAccess.ImmutableRegistryAccess(Stream.concat(frozen.registries(), frozen2.registries())).freeze();
 	}
 
 	public static <V extends T, T> Holder<V> registerExact(Registry<T> registry, String string, V object) {
@@ -112,11 +118,17 @@ public class BuiltinRegistries {
 
 	static {
 		LOADERS.forEach((resourceLocation, supplier) -> {
-			if (!((Holder)supplier.get()).isBound()) {
+			if (supplier.get() == null) {
 				LOGGER.error("Unable to bootstrap registry '{}'", resourceLocation);
 			}
 		});
-		Registry.checkRegistry(WRITABLE_REGISTRY);
+		REGISTRY.freeze();
+
+		for (Registry<?> registry : REGISTRY) {
+			registry.freeze();
+		}
+
+		Registry.checkRegistry(REGISTRY);
 	}
 
 	@FunctionalInterface

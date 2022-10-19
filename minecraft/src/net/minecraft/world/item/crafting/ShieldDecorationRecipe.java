@@ -11,8 +11,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class ShieldDecorationRecipe extends CustomRecipe {
-	public ShieldDecorationRecipe(ResourceLocation resourceLocation) {
-		super(resourceLocation);
+	public ShieldDecorationRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+		super(resourceLocation, craftingBookCategory);
 	}
 
 	public boolean matches(CraftingContainer craftingContainer, Level level) {

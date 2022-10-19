@@ -17,29 +17,40 @@ import net.minecraft.world.phys.Vec3;
 @Environment(EnvType.CLIENT)
 public class VibrationSignalParticle extends TextureSheetParticle {
 	private final PositionSource target;
-	private float yRot;
-	private float yRotO;
+	private float rot;
+	private float rotO;
+	private float pitch;
+	private float pitchO;
 
 	VibrationSignalParticle(ClientLevel clientLevel, double d, double e, double f, PositionSource positionSource, int i) {
 		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.quadSize = 0.3F;
 		this.target = positionSource;
 		this.lifetime = i;
+		Optional<Vec3> optional = positionSource.getPosition(clientLevel);
+		if (optional.isPresent()) {
+			Vec3 vec3 = (Vec3)optional.get();
+			double g = d - vec3.x();
+			double h = e - vec3.y();
+			double j = f - vec3.z();
+			this.rotO = this.rot = (float)Mth.atan2(g, j);
+			this.pitchO = this.pitch = (float)Mth.atan2(h, Math.sqrt(g * g + j * j));
+		}
 	}
 
 	@Override
 	public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
 		float g = Mth.sin(((float)this.age + f - (float) (Math.PI * 2)) * 0.05F) * 2.0F;
-		float h = Mth.lerp(f, this.yRotO, this.yRot);
-		float i = 1.0472F;
+		float h = Mth.lerp(f, this.rotO, this.rot);
+		float i = Mth.lerp(f, this.pitchO, this.pitch) + (float) (Math.PI / 2);
 		this.renderSignal(vertexConsumer, camera, f, quaternion -> {
 			quaternion.mul(Vector3f.YP.rotation(h));
-			quaternion.mul(Vector3f.XP.rotation(-1.0472F));
+			quaternion.mul(Vector3f.XP.rotation(-i));
 			quaternion.mul(Vector3f.YP.rotation(g));
 		});
 		this.renderSignal(vertexConsumer, camera, f, quaternion -> {
 			quaternion.mul(Vector3f.YP.rotation((float) -Math.PI + h));
-			quaternion.mul(Vector3f.XP.rotation(1.0472F));
+			quaternion.mul(Vector3f.XP.rotation(i));
 			quaternion.mul(Vector3f.YP.rotation(g));
 		});
 	}
@@ -122,8 +133,13 @@ public class VibrationSignalParticle extends TextureSheetParticle {
 				this.x = Mth.lerp(d, this.x, vec3.x());
 				this.y = Mth.lerp(d, this.y, vec3.y());
 				this.z = Mth.lerp(d, this.z, vec3.z());
-				this.yRotO = this.yRot;
-				this.yRot = (float)Mth.atan2(this.x - vec3.x(), this.z - vec3.z());
+				double e = this.x - vec3.x();
+				double f = this.y - vec3.y();
+				double g = this.z - vec3.z();
+				this.rotO = this.rot;
+				this.rot = (float)Mth.atan2(e, g);
+				this.pitchO = this.pitch;
+				this.pitch = (float)Mth.atan2(f, Math.sqrt(e * e + g * g));
 			}
 		}
 	}

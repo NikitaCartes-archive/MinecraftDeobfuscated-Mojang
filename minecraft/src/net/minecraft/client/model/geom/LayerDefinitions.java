@@ -16,6 +16,9 @@ import net.minecraft.client.model.BeeModel;
 import net.minecraft.client.model.BlazeModel;
 import net.minecraft.client.model.BoatModel;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.model.CamelModel;
+import net.minecraft.client.model.ChestBoatModel;
+import net.minecraft.client.model.ChestRaftModel;
 import net.minecraft.client.model.ChestedHorseModel;
 import net.minecraft.client.model.ChickenModel;
 import net.minecraft.client.model.CodModel;
@@ -54,6 +57,7 @@ import net.minecraft.client.model.PufferfishBigModel;
 import net.minecraft.client.model.PufferfishMidModel;
 import net.minecraft.client.model.PufferfishSmallModel;
 import net.minecraft.client.model.RabbitModel;
+import net.minecraft.client.model.RaftModel;
 import net.minecraft.client.model.RavagerModel;
 import net.minecraft.client.model.SalmonModel;
 import net.minecraft.client.model.SheepFurModel;
@@ -89,6 +93,7 @@ import net.minecraft.client.renderer.blockentity.BedRenderer;
 import net.minecraft.client.renderer.blockentity.BellRenderer;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.blockentity.ConduitRenderer;
+import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.entity.EndCrystalRenderer;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
@@ -138,6 +143,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.BOOK, BookModel.createBodyLayer());
 		builder.put(ModelLayers.CAT, layerDefinition10);
 		builder.put(ModelLayers.CAT_COLLAR, LayerDefinition.create(OcelotModel.createBodyMesh(new CubeDeformation(0.01F)), 64, 32));
+		builder.put(ModelLayers.CAMEL, CamelModel.createBodyLayer());
 		builder.put(ModelLayers.CAVE_SPIDER, layerDefinition18);
 		builder.put(ModelLayers.CHEST, ChestRenderer.createSingleBodyLayer());
 		builder.put(ModelLayers.DOUBLE_CHEST_LEFT, ChestRenderer.createDoubleBodyLeftLayer());
@@ -282,16 +288,25 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN, layerDefinition11);
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR, layerDefinition3);
-		LayerDefinition layerDefinition19 = BoatModel.createBodyModel(false);
-		LayerDefinition layerDefinition20 = BoatModel.createBodyModel(true);
+		LayerDefinition layerDefinition19 = BoatModel.createBodyModel();
+		LayerDefinition layerDefinition20 = ChestBoatModel.createBodyModel();
+		LayerDefinition layerDefinition21 = RaftModel.createBodyModel();
+		LayerDefinition layerDefinition22 = ChestRaftModel.createBodyModel();
 
 		for (Boat.Type type : Boat.Type.values()) {
-			builder.put(ModelLayers.createBoatModelName(type), layerDefinition19);
-			builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition20);
+			if (type == Boat.Type.BAMBOO) {
+				builder.put(ModelLayers.createBoatModelName(type), layerDefinition21);
+				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition22);
+			} else {
+				builder.put(ModelLayers.createBoatModelName(type), layerDefinition19);
+				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition20);
+			}
 		}
 
-		LayerDefinition layerDefinition21 = SignRenderer.createSignLayer();
-		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition21));
+		LayerDefinition layerDefinition23 = SignRenderer.createSignLayer();
+		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition23));
+		LayerDefinition layerDefinition24 = HangingSignRenderer.createHangingSignLayer();
+		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createHangingSignModelName(woodType), layerDefinition24));
 		ImmutableMap<ModelLayerLocation, LayerDefinition> immutableMap = builder.build();
 		List<ModelLayerLocation> list = (List<ModelLayerLocation>)ModelLayers.getKnownLocations()
 			.filter(modelLayerLocation -> !immutableMap.containsKey(modelLayerLocation))

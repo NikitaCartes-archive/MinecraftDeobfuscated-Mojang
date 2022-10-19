@@ -18,7 +18,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
@@ -30,8 +29,8 @@ public interface PresetEditor {
 	Map<Optional<ResourceKey<WorldPreset>>, PresetEditor> EDITORS = Map.of(
 		Optional.of(WorldPresets.FLAT),
 		(PresetEditor)(createWorldScreen, worldCreationContext) -> {
-			ChunkGenerator chunkGenerator = worldCreationContext.worldGenSettings().overworld();
-			RegistryAccess registryAccess = worldCreationContext.registryAccess();
+			ChunkGenerator chunkGenerator = worldCreationContext.selectedDimensions().overworld();
+			RegistryAccess registryAccess = worldCreationContext.worldgenLoadContext();
 			Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
 			Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
 			return new CreateFlatWorldScreen(
@@ -48,23 +47,23 @@ public interface PresetEditor {
 
 	Screen createEditScreen(CreateWorldScreen createWorldScreen, WorldCreationContext worldCreationContext);
 
-	private static WorldCreationContext.Updater flatWorldConfigurator(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
-		return (frozen, worldGenSettings) -> {
+	private static WorldCreationContext.DimensionsUpdater flatWorldConfigurator(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+		return (frozen, worldDimensions) -> {
 			Registry<StructureSet> registry = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
 			ChunkGenerator chunkGenerator = new FlatLevelSource(registry, flatLevelGeneratorSettings);
-			return WorldGenSettings.replaceOverworldGenerator(frozen, worldGenSettings, chunkGenerator);
+			return worldDimensions.replaceOverworldGenerator(frozen, chunkGenerator);
 		};
 	}
 
-	private static WorldCreationContext.Updater fixedBiomeConfigurator(Holder<Biome> holder) {
-		return (frozen, worldGenSettings) -> {
+	private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> holder) {
+		return (frozen, worldDimensions) -> {
 			Registry<StructureSet> registry = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
 			Registry<NoiseGeneratorSettings> registry2 = frozen.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
 			Registry<NormalNoise.NoiseParameters> registry3 = frozen.registryOrThrow(Registry.NOISE_REGISTRY);
 			Holder<NoiseGeneratorSettings> holder2 = registry2.getOrCreateHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
 			BiomeSource biomeSource = new FixedBiomeSource(holder);
 			ChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator(registry, registry3, biomeSource, holder2);
-			return WorldGenSettings.replaceOverworldGenerator(frozen, worldGenSettings, chunkGenerator);
+			return worldDimensions.replaceOverworldGenerator(frozen, chunkGenerator);
 		};
 	}
 }

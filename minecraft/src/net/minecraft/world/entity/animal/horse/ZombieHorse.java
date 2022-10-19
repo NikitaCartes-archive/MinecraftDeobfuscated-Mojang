@@ -14,8 +14,6 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class ZombieHorse extends AbstractHorse {
@@ -39,19 +37,16 @@ public class ZombieHorse extends AbstractHorse {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		super.getAmbientSound();
 		return SoundEvents.ZOMBIE_HORSE_AMBIENT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		super.getDeathSound();
 		return SoundEvents.ZOMBIE_HORSE_DEATH;
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		super.getHurtSound(damageSource);
 		return SoundEvents.ZOMBIE_HORSE_HURT;
 	}
 
@@ -63,32 +58,7 @@ public class ZombieHorse extends AbstractHorse {
 
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (!this.isTamed()) {
-			return InteractionResult.PASS;
-		} else if (this.isBaby()) {
-			return super.mobInteract(player, interactionHand);
-		} else if (player.isSecondaryUseActive()) {
-			this.openCustomInventoryScreen(player);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
-		} else if (this.isVehicle()) {
-			return super.mobInteract(player, interactionHand);
-		} else {
-			if (!itemStack.isEmpty()) {
-				if (itemStack.is(Items.SADDLE) && !this.isSaddled()) {
-					this.openCustomInventoryScreen(player);
-					return InteractionResult.sidedSuccess(this.level.isClientSide);
-				}
-
-				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
-				if (interactionResult.consumesAction()) {
-					return interactionResult;
-				}
-			}
-
-			this.doPlayerRide(player);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
-		}
+		return !this.isTamed() ? InteractionResult.PASS : super.mobInteract(player, interactionHand);
 	}
 
 	@Override

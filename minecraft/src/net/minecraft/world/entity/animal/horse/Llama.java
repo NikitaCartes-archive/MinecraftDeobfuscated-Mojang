@@ -242,7 +242,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	}
 
 	@Override
-	protected boolean isImmobile() {
+	public boolean isImmobile() {
 		return this.isDeadOrDying() || this.isEating();
 	}
 
@@ -267,6 +267,11 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 
 		this.setVariant(i);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+	}
+
+	@Override
+	protected boolean canPerformRearing() {
+		return false;
 	}
 
 	@Override
@@ -303,14 +308,6 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	@Override
 	protected void playChestEquipsSound() {
 		this.playSound(SoundEvents.LLAMA_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-	}
-
-	@Override
-	public void makeMad() {
-		SoundEvent soundEvent = this.getAngrySound();
-		if (soundEvent != null) {
-			this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-		}
 	}
 
 	@Override
@@ -382,21 +379,26 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		return animal != this && animal instanceof Llama && this.canParent() && ((Llama)animal).canParent();
 	}
 
+	@Nullable
 	public Llama getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Llama llama = this.makeBabyLlama();
-		this.setOffspringAttributes(ageableMob, llama);
-		Llama llama2 = (Llama)ageableMob;
-		int i = this.random.nextInt(Math.max(this.getStrength(), llama2.getStrength())) + 1;
-		if (this.random.nextFloat() < 0.03F) {
-			i++;
+		Llama llama = this.makeNewLlama();
+		if (llama != null) {
+			this.setOffspringAttributes(ageableMob, llama);
+			Llama llama2 = (Llama)ageableMob;
+			int i = this.random.nextInt(Math.max(this.getStrength(), llama2.getStrength())) + 1;
+			if (this.random.nextFloat() < 0.03F) {
+				i++;
+			}
+
+			llama.setStrength(i);
+			llama.setVariant(this.random.nextBoolean() ? this.getVariant() : llama2.getVariant());
 		}
 
-		llama.setStrength(i);
-		llama.setVariant(this.random.nextBoolean() ? this.getVariant() : llama2.getVariant());
 		return llama;
 	}
 
-	protected Llama makeBabyLlama() {
+	@Nullable
+	protected Llama makeNewLlama() {
 		return EntityType.LLAMA.create(this.level);
 	}
 

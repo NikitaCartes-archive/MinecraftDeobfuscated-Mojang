@@ -46,7 +46,7 @@ public class SetEntityLookTarget extends Behavior<LivingEntity> {
 			.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
 			.get();
 		this.nearestEntityMatchingTest = nearestVisibleLivingEntities.findClosest(
-			this.predicate.and(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr)
+			this.predicate.and(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr && !livingEntity.hasPassenger(livingEntity2))
 		);
 		return this.nearestEntityMatchingTest.isPresent();
 	}

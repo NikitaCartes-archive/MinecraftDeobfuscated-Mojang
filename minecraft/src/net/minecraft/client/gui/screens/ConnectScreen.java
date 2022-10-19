@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
@@ -23,9 +24,9 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -50,13 +51,13 @@ public class ConnectScreen extends Screen {
 		ConnectScreen connectScreen = new ConnectScreen(screen);
 		minecraft.clearLevel();
 		minecraft.prepareForMultiplayer();
-		minecraft.setCurrentServer(serverData);
+		minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData != null ? serverData.ip : serverAddress.getHost()));
 		minecraft.setScreen(connectScreen);
-		connectScreen.connect(minecraft, serverAddress);
+		connectScreen.connect(minecraft, serverAddress, serverData);
 	}
 
-	private void connect(Minecraft minecraft, ServerAddress serverAddress) {
-		final CompletableFuture<Optional<ProfilePublicKey.Data>> completableFuture = minecraft.getProfileKeyPairManager().preparePublicKey();
+	private void connect(Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
+		final CompletableFuture<LocalChatSession> completableFuture = minecraft.getProfileKeyPairManager().prepareChatSession();
 		LOGGER.info("Connecting to {}, {}", serverAddress.getHost(), serverAddress.getPort());
 		Thread thread = new Thread("Server Connector #" + UNIQUE_THREAD_ID.incrementAndGet()) {
 			public void run() {
@@ -81,14 +82,17 @@ public class ConnectScreen extends Screen {
 
 					inetSocketAddress = (InetSocketAddress)optional.get();
 					ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
+					LocalChatSession localChatSession = (LocalChatSession)completableFuture.join();
 					ConnectScreen.this.connection
-						.setListener(new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, ConnectScreen.this.parent, ConnectScreen.this::updateStatus));
+						.setListener(
+							new ClientHandshakePacketListenerImpl(
+								ConnectScreen.this.connection, minecraft, localChatSession, serverData, ConnectScreen.this.parent, ConnectScreen.this::updateStatus
+							)
+						);
 					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
 					ConnectScreen.this.connection
 						.send(
-							new ServerboundHelloPacket(
-								minecraft.getUser().getName(), (Optional<ProfilePublicKey.Data>)completableFuture.join(), Optional.ofNullable(minecraft.getUser().getProfileId())
-							)
+							new ServerboundHelloPacket(minecraft.getUser().getName(), localChatSession.asRemote().asData(), Optional.ofNullable(minecraft.getUser().getProfileId()))
 						);
 				} catch (Exception var6) {
 					if (ConnectScreen.this.aborted) {

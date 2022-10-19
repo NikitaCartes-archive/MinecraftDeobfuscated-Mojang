@@ -32,6 +32,7 @@ import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.entity.animal.goat.Goat;
@@ -86,6 +87,7 @@ public class DefaultAttributes {
 		.put(EntityType.BEE, Bee.createAttributes().build())
 		.put(EntityType.BLAZE, Blaze.createAttributes().build())
 		.put(EntityType.CAT, Cat.createAttributes().build())
+		.put(EntityType.CAMEL, Camel.createAttributes().build())
 		.put(EntityType.CAVE_SPIDER, CaveSpider.createCaveSpider().build())
 		.put(EntityType.CHICKEN, Chicken.createAttributes().build())
 		.put(EntityType.COD, AbstractFish.createAttributes().build())

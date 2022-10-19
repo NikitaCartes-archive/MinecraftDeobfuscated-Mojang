@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -248,9 +247,19 @@ public abstract class PathNavigation {
 				return true;
 			} else {
 				Vec3 vec33 = Vec3.atBottomCenterOf(this.path.getNodePos(this.path.getNextNodeIndex() + 1));
-				Vec3 vec34 = vec33.subtract(vec32);
-				Vec3 vec35 = vec3.subtract(vec32);
-				return vec34.dot(vec35) > 0.0;
+				Vec3 vec34 = vec32.subtract(vec3);
+				Vec3 vec35 = vec33.subtract(vec3);
+				double d = vec34.lengthSqr();
+				double e = vec35.lengthSqr();
+				boolean bl = e < d;
+				boolean bl2 = d < 0.5;
+				if (!bl && !bl2) {
+					return false;
+				} else {
+					Vec3 vec36 = vec34.normalize();
+					Vec3 vec37 = vec35.normalize();
+					return vec37.dot(vec36) < 0.0;
+				}
 			}
 		}
 	}
@@ -270,19 +279,20 @@ public abstract class PathNavigation {
 
 		if (this.path != null && !this.path.isDone()) {
 			Vec3i vec3i = this.path.getNextNodePos();
+			long l = this.level.getGameTime();
 			if (vec3i.equals(this.timeoutCachedNode)) {
-				this.timeoutTimer = this.timeoutTimer + (Util.getMillis() - this.lastTimeoutCheck);
+				this.timeoutTimer = this.timeoutTimer + (l - this.lastTimeoutCheck);
 			} else {
 				this.timeoutCachedNode = vec3i;
 				double d = vec3.distanceTo(Vec3.atBottomCenterOf(this.timeoutCachedNode));
-				this.timeoutLimit = this.mob.getSpeed() > 0.0F ? d / (double)this.mob.getSpeed() * 1000.0 : 0.0;
+				this.timeoutLimit = this.mob.getSpeed() > 0.0F ? d / (double)this.mob.getSpeed() * 20.0 : 0.0;
 			}
 
 			if (this.timeoutLimit > 0.0 && (double)this.timeoutTimer > this.timeoutLimit * 3.0) {
 				this.timeoutPath();
 			}
 
-			this.lastTimeoutCheck = Util.getMillis();
+			this.lastTimeoutCheck = l;
 		}
 	}
 

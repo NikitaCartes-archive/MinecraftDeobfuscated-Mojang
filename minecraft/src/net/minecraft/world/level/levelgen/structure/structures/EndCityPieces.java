@@ -375,8 +375,10 @@ public class EndCityPieces {
 			} else if (boundingBox.isInside(blockPos) && Level.isInSpawnableBounds(blockPos)) {
 				if (string.startsWith("Sentry")) {
 					Shulker shulker = EntityType.SHULKER.create(serverLevelAccessor.getLevel());
-					shulker.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
-					serverLevelAccessor.addFreshEntity(shulker);
+					if (shulker != null) {
+						shulker.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
+						serverLevelAccessor.addFreshEntity(shulker);
+					}
 				} else if (string.startsWith("Elytra")) {
 					ItemFrame itemFrame = new ItemFrame(serverLevelAccessor.getLevel(), blockPos, this.placeSettings.getRotation().rotate(Direction.SOUTH));
 					itemFrame.setItem(new ItemStack(Items.ELYTRA), false);

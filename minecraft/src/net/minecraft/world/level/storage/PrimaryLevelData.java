@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
@@ -27,14 +28,14 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
 import org.slf4j.Logger;
@@ -44,7 +45,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	protected static final String PLAYER = "Player";
 	protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
 	private LevelSettings settings;
-	private final WorldGenSettings worldGenSettings;
+	private final WorldOptions worldOptions;
+	private final PrimaryLevelData.SpecialWorldProperty specialWorldProperty;
 	private final Lifecycle worldGenSettingsLifecycle;
 	private int xSpawn;
 	private int ySpawn;
@@ -106,45 +108,45 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		@Nullable CompoundTag compoundTag2,
 		CompoundTag compoundTag3,
 		LevelSettings levelSettings,
-		WorldGenSettings worldGenSettings,
+		WorldOptions worldOptions,
+		PrimaryLevelData.SpecialWorldProperty specialWorldProperty,
 		Lifecycle lifecycle
 	) {
-		if (!worldGenSettings.dimensions().containsKey(LevelStem.OVERWORLD)) {
-			throw new IllegalStateException("Missing Overworld dimension data");
-		} else {
-			this.fixerUpper = dataFixer;
-			this.wasModded = bl;
-			this.xSpawn = j;
-			this.ySpawn = k;
-			this.zSpawn = l;
-			this.spawnAngle = f;
-			this.gameTime = m;
-			this.dayTime = n;
-			this.version = o;
-			this.clearWeatherTime = p;
-			this.rainTime = q;
-			this.raining = bl2;
-			this.thunderTime = r;
-			this.thundering = bl3;
-			this.initialized = bl4;
-			this.difficultyLocked = bl5;
-			this.worldBorder = settings;
-			this.wanderingTraderSpawnDelay = s;
-			this.wanderingTraderSpawnChance = t;
-			this.wanderingTraderId = uUID;
-			this.knownServerBrands = set;
-			this.loadedPlayerTag = compoundTag;
-			this.playerDataVersion = i;
-			this.scheduledEvents = timerQueue;
-			this.customBossEvents = compoundTag2;
-			this.endDragonFightData = compoundTag3;
-			this.settings = levelSettings;
-			this.worldGenSettings = worldGenSettings;
-			this.worldGenSettingsLifecycle = lifecycle;
-		}
+		this.fixerUpper = dataFixer;
+		this.wasModded = bl;
+		this.xSpawn = j;
+		this.ySpawn = k;
+		this.zSpawn = l;
+		this.spawnAngle = f;
+		this.gameTime = m;
+		this.dayTime = n;
+		this.version = o;
+		this.clearWeatherTime = p;
+		this.rainTime = q;
+		this.raining = bl2;
+		this.thunderTime = r;
+		this.thundering = bl3;
+		this.initialized = bl4;
+		this.difficultyLocked = bl5;
+		this.worldBorder = settings;
+		this.wanderingTraderSpawnDelay = s;
+		this.wanderingTraderSpawnChance = t;
+		this.wanderingTraderId = uUID;
+		this.knownServerBrands = set;
+		this.loadedPlayerTag = compoundTag;
+		this.playerDataVersion = i;
+		this.scheduledEvents = timerQueue;
+		this.customBossEvents = compoundTag2;
+		this.endDragonFightData = compoundTag3;
+		this.settings = levelSettings;
+		this.worldOptions = worldOptions;
+		this.specialWorldProperty = specialWorldProperty;
+		this.worldGenSettingsLifecycle = lifecycle;
 	}
 
-	public PrimaryLevelData(LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
+	public PrimaryLevelData(
+		LevelSettings levelSettings, WorldOptions worldOptions, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, Lifecycle lifecycle
+	) {
 		this(
 			null,
 			SharedConstants.getCurrentVersion().getWorldVersion(),
@@ -173,7 +175,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			null,
 			new CompoundTag(),
 			levelSettings.copy(),
-			worldGenSettings,
+			worldOptions,
+			specialWorldProperty,
 			lifecycle
 		);
 	}
@@ -185,7 +188,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		@Nullable CompoundTag compoundTag,
 		LevelSettings levelSettings,
 		LevelVersion levelVersion,
-		WorldGenSettings worldGenSettings,
+		PrimaryLevelData.SpecialWorldProperty specialWorldProperty,
+		WorldOptions worldOptions,
 		Lifecycle lifecycle
 	) {
 		long l = dynamic.get("Time").asLong(0L);
@@ -224,7 +228,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			(CompoundTag)dynamic.get("CustomBossEvents").orElseEmptyMap().getValue(),
 			compoundTag2,
 			levelSettings,
-			worldGenSettings,
+			worldOptions,
+			specialWorldProperty,
 			lifecycle
 		);
 	}
@@ -254,8 +259,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag.put("Version", compoundTag3);
 		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
 		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, registryAccess);
-		WorldGenSettings.CODEC
-			.encodeStart(dynamicOps, this.worldGenSettings)
+		WorldGenSettings.encode(dynamicOps, this.worldOptions, registryAccess)
 			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("WorldGenSettings", tag));
 		compoundTag.putInt("GameType", this.settings.gameType().getId());
@@ -285,7 +289,10 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			compoundTag.put("Player", compoundTag2);
 		}
 
-		DataPackConfig.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataPackConfig()).result().ifPresent(tag -> compoundTag.put("DataPacks", tag));
+		DataResult<Tag> dataResult = WorldDataConfiguration.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataConfiguration());
+		dataResult.get()
+			.ifLeft(tag -> compoundTag.merge((CompoundTag)tag))
+			.ifRight(partialResult -> LOGGER.warn("Failed to encode configuration {}", partialResult.message()));
 		if (this.customBossEvents != null) {
 			compoundTag.put("CustomBossEvents", this.customBossEvents);
 		}
@@ -523,8 +530,18 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public WorldGenSettings worldGenSettings() {
-		return this.worldGenSettings;
+	public WorldOptions worldGenOptions() {
+		return this.worldOptions;
+	}
+
+	@Override
+	public boolean isFlatWorld() {
+		return this.specialWorldProperty == PrimaryLevelData.SpecialWorldProperty.FLAT;
+	}
+
+	@Override
+	public boolean isDebugWorld() {
+		return this.specialWorldProperty == PrimaryLevelData.SpecialWorldProperty.DEBUG;
 	}
 
 	@Override
@@ -543,13 +560,13 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public DataPackConfig getDataPackConfig() {
-		return this.settings.getDataPackConfig();
+	public WorldDataConfiguration getDataConfiguration() {
+		return this.settings.getDataConfiguration();
 	}
 
 	@Override
-	public void setDataPackConfig(DataPackConfig dataPackConfig) {
-		this.settings = this.settings.withDataPackConfig(dataPackConfig);
+	public void setDataConfiguration(WorldDataConfiguration worldDataConfiguration) {
+		this.settings = this.settings.withDataConfiguration(worldDataConfiguration);
 	}
 
 	@Nullable
@@ -618,5 +635,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	@Override
 	public LevelSettings getLevelSettings() {
 		return this.settings.copy();
+	}
+
+	@Deprecated
+	public static enum SpecialWorldProperty {
+		NONE,
+		FLAT,
+		DEBUG;
 	}
 }

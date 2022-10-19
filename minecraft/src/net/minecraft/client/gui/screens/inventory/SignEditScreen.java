@@ -1,215 +1,62 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
-import java.util.stream.IntStream;
+import com.mojang.math.Vector3f;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.font.TextFieldHelper;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(EnvType.CLIENT)
-public class SignEditScreen extends Screen {
-	private final SignBlockEntity sign;
-	private int frame;
-	private int line;
-	private TextFieldHelper signField;
-	private WoodType woodType;
+public class SignEditScreen extends AbstractSignEditScreen {
+	public static final float MAGIC_SCALE_NUMBER = 62.500004F;
+	public static final float MAGIC_TEXT_SCALE = 0.9765628F;
+	private static final Vector3f TEXT_SCALE = new Vector3f(0.9765628F, 0.9765628F, 0.9765628F);
+	@Nullable
 	private SignRenderer.SignModel signModel;
-	private final String[] messages;
 
 	public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
-		super(Component.translatable("sign.edit"));
-		this.messages = (String[])IntStream.range(0, 4).mapToObj(i -> signBlockEntity.getMessage(i, bl)).map(Component::getString).toArray(String[]::new);
-		this.sign = signBlockEntity;
+		super(signBlockEntity, bl);
 	}
 
 	@Override
 	protected void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
-		this.sign.setEditable(false);
-		this.signField = new TextFieldHelper(
-			() -> this.messages[this.line],
-			string -> {
-				this.messages[this.line] = string;
-				this.sign.setMessage(this.line, Component.literal(string));
-			},
-			TextFieldHelper.createClipboardGetter(this.minecraft),
-			TextFieldHelper.createClipboardSetter(this.minecraft),
-			string -> this.minecraft.font.width(string) <= 90
-		);
-		BlockState blockState = this.sign.getBlockState();
-		this.woodType = SignRenderer.getWoodType(blockState.getBlock());
+		super.init();
 		this.signModel = SignRenderer.createSignModel(this.minecraft.getEntityModels(), this.woodType);
 	}
 
 	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
-		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
-		if (clientPacketListener != null) {
-			clientPacketListener.send(new ServerboundSignUpdatePacket(this.sign.getBlockPos(), this.messages[0], this.messages[1], this.messages[2], this.messages[3]));
-		}
-
-		this.sign.setEditable(true);
-	}
-
-	@Override
-	public void tick() {
-		this.frame++;
-		if (!this.sign.getType().isValid(this.sign.getBlockState())) {
-			this.onDone();
-		}
-	}
-
-	private void onDone() {
-		this.sign.setChanged();
-		this.minecraft.setScreen(null);
-	}
-
-	@Override
-	public boolean charTyped(char c, int i) {
-		this.signField.charTyped(c);
-		return true;
-	}
-
-	@Override
-	public void onClose() {
-		this.onDone();
-	}
-
-	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 265) {
-			this.line = this.line - 1 & 3;
-			this.signField.setCursorToEnd();
-			return true;
-		} else if (i == 264 || i == 257 || i == 335) {
-			this.line = this.line + 1 & 3;
-			this.signField.setCursorToEnd();
-			return true;
-		} else {
-			return this.signField.keyPressed(i) ? true : super.keyPressed(i, j, k);
-		}
-	}
-
-	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		Lighting.setupForFlatItems();
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 40, 16777215);
-		poseStack.pushPose();
-		poseStack.translate((double)(this.width / 2), 0.0, 50.0);
-		float g = 93.75F;
-		poseStack.scale(93.75F, -93.75F, 93.75F);
-		poseStack.translate(0.0, -1.3125, 0.0);
-		BlockState blockState = this.sign.getBlockState();
+	protected void offsetSign(PoseStack poseStack, BlockState blockState) {
+		super.offsetSign(poseStack, blockState);
 		boolean bl = blockState.getBlock() instanceof StandingSignBlock;
 		if (!bl) {
-			poseStack.translate(0.0, -0.3125, 0.0);
+			poseStack.translate(0.0, 35.0, 0.0);
 		}
+	}
 
-		boolean bl2 = this.frame / 6 % 2 == 0;
-		float h = 0.6666667F;
-		poseStack.pushPose();
-		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
-		Material material = Sheets.getSignMaterial(this.woodType);
-		VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);
-		this.signModel.stick.visible = bl;
-		this.signModel.root.render(poseStack, vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
-		poseStack.popPose();
-		float k = 0.010416667F;
-		poseStack.translate(0.0, 0.33333334F, 0.046666667F);
-		poseStack.scale(0.010416667F, -0.010416667F, 0.010416667F);
-		int l = this.sign.getColor().getTextColor();
-		int m = this.signField.getCursorPos();
-		int n = this.signField.getSelectionPos();
-		int o = this.line * 10 - this.messages.length * 5;
-		Matrix4f matrix4f = poseStack.last().pose();
-
-		for (int p = 0; p < this.messages.length; p++) {
-			String string = this.messages[p];
-			if (string != null) {
-				if (this.font.isBidirectional()) {
-					string = this.font.bidirectionalShaping(string);
-				}
-
-				float q = (float)(-this.minecraft.font.width(string) / 2);
-				this.minecraft.font.drawInBatch(string, q, (float)(p * 10 - this.messages.length * 5), l, false, matrix4f, bufferSource, false, 0, 15728880, false);
-				if (p == this.line && m >= 0 && bl2) {
-					int r = this.minecraft.font.width(string.substring(0, Math.max(Math.min(m, string.length()), 0)));
-					int s = r - this.minecraft.font.width(string) / 2;
-					if (m >= string.length()) {
-						this.minecraft.font.drawInBatch("_", (float)s, (float)o, l, false, matrix4f, bufferSource, false, 0, 15728880, false);
-					}
-				}
-			}
+	@Override
+	protected void renderSignBackground(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, BlockState blockState) {
+		if (this.signModel != null) {
+			boolean bl = blockState.getBlock() instanceof StandingSignBlock;
+			poseStack.translate(0.0, 31.0, 0.0);
+			poseStack.scale(62.500004F, 62.500004F, -62.500004F);
+			Material material = Sheets.getSignMaterial(this.woodType);
+			VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);
+			this.signModel.stick.visible = bl;
+			this.signModel.root.render(poseStack, vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
 		}
+	}
 
-		bufferSource.endBatch();
-
-		for (int px = 0; px < this.messages.length; px++) {
-			String string = this.messages[px];
-			if (string != null && px == this.line && m >= 0) {
-				int t = this.minecraft.font.width(string.substring(0, Math.max(Math.min(m, string.length()), 0)));
-				int r = t - this.minecraft.font.width(string) / 2;
-				if (bl2 && m < string.length()) {
-					fill(poseStack, r, o - 1, r + 1, o + 9, 0xFF000000 | l);
-				}
-
-				if (n != m) {
-					int s = Math.min(m, n);
-					int u = Math.max(m, n);
-					int v = this.minecraft.font.width(string.substring(0, s)) - this.minecraft.font.width(string) / 2;
-					int w = this.minecraft.font.width(string.substring(0, u)) - this.minecraft.font.width(string) / 2;
-					int x = Math.min(v, w);
-					int y = Math.max(v, w);
-					Tesselator tesselator = Tesselator.getInstance();
-					BufferBuilder bufferBuilder = tesselator.getBuilder();
-					RenderSystem.setShader(GameRenderer::getPositionColorShader);
-					RenderSystem.disableTexture();
-					RenderSystem.enableColorLogicOp();
-					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-					bufferBuilder.vertex(matrix4f, (float)x, (float)(o + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.vertex(matrix4f, (float)y, (float)(o + 9), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.vertex(matrix4f, (float)y, (float)o, 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.vertex(matrix4f, (float)x, (float)o, 0.0F).color(0, 0, 255, 255).endVertex();
-					BufferUploader.drawWithShader(bufferBuilder.end());
-					RenderSystem.disableColorLogicOp();
-					RenderSystem.enableTexture();
-				}
-			}
-		}
-
-		poseStack.popPose();
-		Lighting.setupFor3DItems();
-		super.render(poseStack, i, j, f);
+	@Override
+	protected Vector3f getSignTextScale() {
+		return TEXT_SCALE;
 	}
 }

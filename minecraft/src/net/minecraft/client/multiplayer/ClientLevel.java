@@ -53,6 +53,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -489,10 +490,6 @@ public class ClientLevel extends Level {
 		}
 	}
 
-	public void playLocalSound(BlockPos blockPos, SoundEvent soundEvent, SoundSource soundSource, float f, float g, boolean bl) {
-		this.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, soundEvent, soundSource, f, g, bl);
-	}
-
 	@Override
 	public void playLocalSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl) {
 		this.playSound(d, e, f, soundEvent, soundSource, g, h, bl, this.random.nextLong());
@@ -842,6 +839,11 @@ public class ClientLevel extends Level {
 
 	public int getServerSimulationDistance() {
 		return this.serverSimulationDistance;
+	}
+
+	@Override
+	public FeatureFlagSet enabledFeatures() {
+		return this.connection.enabledFeatures();
 	}
 
 	@Environment(EnvType.CLIENT)

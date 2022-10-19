@@ -655,7 +655,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	@Override
 	public boolean canBreed() {
-		return this.foodLevel + this.countFoodPointsInInventory() >= 12 && this.getAge() == 0;
+		return this.foodLevel + this.countFoodPointsInInventory() >= 12 && !this.isSleeping() && this.getAge() == 0;
 	}
 
 	private boolean hungry() {
@@ -758,6 +758,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
+	@Nullable
 	public Villager getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		double d = this.random.nextDouble();
 		VillagerType villagerType;
@@ -779,18 +780,22 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
 			LOGGER.info("Villager {} was struck by lightning {}.", this, lightningBolt);
 			Witch witch = EntityType.WITCH.create(serverLevel);
-			witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-			witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
-			witch.setNoAi(this.isNoAi());
-			if (this.hasCustomName()) {
-				witch.setCustomName(this.getCustomName());
-				witch.setCustomNameVisible(this.isCustomNameVisible());
-			}
+			if (witch != null) {
+				witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+				witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+				witch.setNoAi(this.isNoAi());
+				if (this.hasCustomName()) {
+					witch.setCustomName(this.getCustomName());
+					witch.setCustomNameVisible(this.isCustomNameVisible());
+				}
 
-			witch.setPersistenceRequired();
-			serverLevel.addFreshEntityWithPassengers(witch);
-			this.releaseAllPois();
-			this.discard();
+				witch.setPersistenceRequired();
+				serverLevel.addFreshEntityWithPassengers(witch);
+				this.releaseAllPois();
+				this.discard();
+			} else {
+				super.thunderHit(serverLevel, lightningBolt);
+			}
 		} else {
 			super.thunderHit(serverLevel, lightningBolt);
 		}

@@ -28,6 +28,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation BOOK = register("book");
 	public static final ModelLayerLocation CAT = register("cat");
 	public static final ModelLayerLocation CAT_COLLAR = register("cat", "collar");
+	public static final ModelLayerLocation CAMEL = register("camel");
 	public static final ModelLayerLocation CAVE_SPIDER = register("cave_spider");
 	public static final ModelLayerLocation CHEST = register("chest");
 	public static final ModelLayerLocation CHEST_MINECART = register("chest_minecart");
@@ -198,6 +199,14 @@ public class ModelLayers {
 		return register(string, "outer_armor");
 	}
 
+	public static ModelLayerLocation createRaftModelName(Boat.Type type) {
+		return createLocation("raft/" + type.getName(), "main");
+	}
+
+	public static ModelLayerLocation createChestRaftModelName(Boat.Type type) {
+		return createLocation("chest_raft/" + type.getName(), "main");
+	}
+
 	public static ModelLayerLocation createBoatModelName(Boat.Type type) {
 		return createLocation("boat/" + type.getName(), "main");
 	}
@@ -208,6 +217,10 @@ public class ModelLayers {
 
 	public static ModelLayerLocation createSignModelName(WoodType woodType) {
 		return createLocation("sign/" + woodType.name(), "main");
+	}
+
+	public static ModelLayerLocation createHangingSignModelName(WoodType woodType) {
+		return createLocation("hanging_sign/" + woodType.name(), "main");
 	}
 
 	public static Stream<ModelLayerLocation> getKnownLocations() {

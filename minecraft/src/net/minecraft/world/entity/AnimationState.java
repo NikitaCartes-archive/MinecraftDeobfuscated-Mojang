@@ -19,6 +19,14 @@ public class AnimationState {
 		}
 	}
 
+	public void animateWhen(boolean bl, int i) {
+		if (bl) {
+			this.startIfStopped(i);
+		} else {
+			this.stop();
+		}
+	}
+
 	public void stop() {
 		this.lastTime = Long.MAX_VALUE;
 	}

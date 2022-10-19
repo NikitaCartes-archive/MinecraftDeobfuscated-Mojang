@@ -26,7 +26,7 @@ public class ReloadCommand {
 	private static Collection<String> discoverNewPacks(PackRepository packRepository, WorldData worldData, Collection<String> collection) {
 		packRepository.reload();
 		Collection<String> collection2 = Lists.<String>newArrayList(collection);
-		Collection<String> collection3 = worldData.getDataPackConfig().getDisabled();
+		Collection<String> collection3 = worldData.getDataConfiguration().dataPacks().getDisabled();
 
 		for (String string : packRepository.getAvailableIds()) {
 			if (!collection3.contains(string) && !collection2.contains(string)) {

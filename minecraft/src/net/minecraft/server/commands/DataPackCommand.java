@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.Collection;
@@ -17,6 +18,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 
 public class DataPackCommand {
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_PACK = new DynamicCommandExceptionType(
@@ -28,14 +31,24 @@ public class DataPackCommand {
 	private static final DynamicCommandExceptionType ERROR_PACK_ALREADY_DISABLED = new DynamicCommandExceptionType(
 		object -> Component.translatable("commands.datapack.disable.failed", object)
 	);
+	private static final Dynamic2CommandExceptionType ERROR_PACK_FEATURES_NOT_ENABLED = new Dynamic2CommandExceptionType(
+		(object, object2) -> Component.translatable("commands.datapack.enable.failed.no_flags", object, object2)
+	);
 	private static final SuggestionProvider<CommandSourceStack> SELECTED_PACKS = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
 			commandContext.getSource().getServer().getPackRepository().getSelectedIds().stream().map(StringArgumentType::escapeIfRequired), suggestionsBuilder
 		);
 	private static final SuggestionProvider<CommandSourceStack> UNSELECTED_PACKS = (commandContext, suggestionsBuilder) -> {
 		PackRepository packRepository = commandContext.getSource().getServer().getPackRepository();
 		Collection<String> collection = packRepository.getSelectedIds();
+		FeatureFlagSet featureFlagSet = commandContext.getSource().enabledFeatures();
 		return SharedSuggestionProvider.suggest(
-			packRepository.getAvailableIds().stream().filter(string -> !collection.contains(string)).map(StringArgumentType::escapeIfRequired), suggestionsBuilder
+			packRepository.getAvailablePacks()
+				.stream()
+				.filter(pack -> pack.getRequestedFeatures().isSubsetOf(featureFlagSet))
+				.map(Pack::getId)
+				.filter(string -> !collection.contains(string))
+				.map(StringArgumentType::escapeIfRequired),
+			suggestionsBuilder
 		);
 	};
 
@@ -132,9 +145,10 @@ public class DataPackCommand {
 	private static int listAvailablePacks(CommandSourceStack commandSourceStack) {
 		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
 		packRepository.reload();
-		Collection<? extends Pack> collection = packRepository.getSelectedPacks();
-		Collection<? extends Pack> collection2 = packRepository.getAvailablePacks();
-		List<Pack> list = (List<Pack>)collection2.stream().filter(pack -> !collection.contains(pack)).collect(Collectors.toList());
+		Collection<Pack> collection = packRepository.getSelectedPacks();
+		Collection<Pack> collection2 = packRepository.getAvailablePacks();
+		FeatureFlagSet featureFlagSet = commandSourceStack.enabledFeatures();
+		List<Pack> list = collection2.stream().filter(pack -> !collection.contains(pack) && pack.getRequestedFeatures().isSubsetOf(featureFlagSet)).toList();
 		if (list.isEmpty()) {
 			commandSourceStack.sendSuccess(Component.translatable("commands.datapack.list.available.none"), false);
 		} else {
@@ -175,7 +189,13 @@ public class DataPackCommand {
 			} else if (!bl && !bl2) {
 				throw ERROR_PACK_ALREADY_DISABLED.create(string2);
 			} else {
-				return pack;
+				FeatureFlagSet featureFlagSet = commandContext.getSource().enabledFeatures();
+				FeatureFlagSet featureFlagSet2 = pack.getRequestedFeatures();
+				if (!featureFlagSet2.isSubsetOf(featureFlagSet)) {
+					throw ERROR_PACK_FEATURES_NOT_ENABLED.create(string2, FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2));
+				} else {
+					return pack;
+				}
 			}
 		}
 	}

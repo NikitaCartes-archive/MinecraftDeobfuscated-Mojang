@@ -22,16 +22,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
-	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType(
-		object -> Component.translatable("attribute.unknown", object)
-	);
 	private static final DynamicCommandExceptionType ERROR_INVALID_FEATURE = new DynamicCommandExceptionType(
 		object -> Component.translatable("commands.place.feature.invalid", object)
 	);
@@ -51,7 +47,7 @@ public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 		return new ResourceKeyArgument<>(resourceKey);
 	}
 
-	private static <T> ResourceKey<T> getRegistryType(
+	private static <T> ResourceKey<T> getRegistryKey(
 		CommandContext<CommandSourceStack> commandContext,
 		String string,
 		ResourceKey<Registry<T>> resourceKey,
@@ -66,35 +62,28 @@ public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 		return commandContext.getSource().getServer().registryAccess().registryOrThrow(resourceKey);
 	}
 
-	private static <T> Holder<T> getRegistryKeyType(
+	private static <T> Holder.Reference<T> resolveKey(
 		CommandContext<CommandSourceStack> commandContext,
 		String string,
 		ResourceKey<Registry<T>> resourceKey,
 		DynamicCommandExceptionType dynamicCommandExceptionType
 	) throws CommandSyntaxException {
-		ResourceKey<T> resourceKey2 = getRegistryType(commandContext, string, resourceKey, dynamicCommandExceptionType);
-		return (Holder<T>)getRegistry(commandContext, resourceKey)
+		ResourceKey<T> resourceKey2 = getRegistryKey(commandContext, string, resourceKey, dynamicCommandExceptionType);
+		return (Holder.Reference<T>)getRegistry(commandContext, resourceKey)
 			.getHolder(resourceKey2)
 			.orElseThrow(() -> dynamicCommandExceptionType.create(resourceKey2.location()));
 	}
 
-	public static Attribute getAttribute(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		ResourceKey<Attribute> resourceKey = getRegistryType(commandContext, string, Registry.ATTRIBUTE_REGISTRY, ERROR_UNKNOWN_ATTRIBUTE);
-		return (Attribute)getRegistry(commandContext, Registry.ATTRIBUTE_REGISTRY)
-			.getOptional(resourceKey)
-			.orElseThrow(() -> ERROR_UNKNOWN_ATTRIBUTE.create(resourceKey.location()));
+	public static Holder.Reference<ConfiguredFeature<?, ?>> getConfiguredFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+		return resolveKey(commandContext, string, Registry.CONFIGURED_FEATURE_REGISTRY, ERROR_INVALID_FEATURE);
 	}
 
-	public static Holder<ConfiguredFeature<?, ?>> getConfiguredFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getRegistryKeyType(commandContext, string, Registry.CONFIGURED_FEATURE_REGISTRY, ERROR_INVALID_FEATURE);
+	public static Holder.Reference<Structure> getStructure(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+		return resolveKey(commandContext, string, Registry.STRUCTURE_REGISTRY, ERROR_INVALID_STRUCTURE);
 	}
 
-	public static Holder<Structure> getStructure(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getRegistryKeyType(commandContext, string, Registry.STRUCTURE_REGISTRY, ERROR_INVALID_STRUCTURE);
-	}
-
-	public static Holder<StructureTemplatePool> getStructureTemplatePool(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getRegistryKeyType(commandContext, string, Registry.TEMPLATE_POOL_REGISTRY, ERROR_INVALID_TEMPLATE_POOL);
+	public static Holder.Reference<StructureTemplatePool> getStructureTemplatePool(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+		return resolveKey(commandContext, string, Registry.TEMPLATE_POOL_REGISTRY, ERROR_INVALID_TEMPLATE_POOL);
 	}
 
 	public ResourceKey<T> parse(StringReader stringReader) throws CommandSyntaxException {
@@ -117,7 +106,7 @@ public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 	}
 
 	public static class Info<T> implements ArgumentTypeInfo<ResourceKeyArgument<T>, ResourceKeyArgument.Info<T>.Template> {
-		public void serializeToNetwork(ResourceKeyArgument.Info.Template template, FriendlyByteBuf friendlyByteBuf) {
+		public void serializeToNetwork(ResourceKeyArgument.Info<T>.Template template, FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeResourceLocation(template.registryKey.location());
 		}
 
@@ -126,7 +115,7 @@ public class ResourceKeyArgument<T> implements ArgumentType<ResourceKey<T>> {
 			return new ResourceKeyArgument.Info.Template(ResourceKey.createRegistryKey(resourceLocation));
 		}
 
-		public void serializeToJson(ResourceKeyArgument.Info.Template template, JsonObject jsonObject) {
+		public void serializeToJson(ResourceKeyArgument.Info<T>.Template template, JsonObject jsonObject) {
 			jsonObject.addProperty("registry", template.registryKey.location().toString());
 		}
 

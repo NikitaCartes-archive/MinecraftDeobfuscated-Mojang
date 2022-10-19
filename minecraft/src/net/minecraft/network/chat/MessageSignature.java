@@ -1,44 +1,39 @@
 package net.minecraft.network.chat;
 
-import it.unimi.dsi.fastutil.bytes.ByteArrays;
+import com.google.common.base.Preconditions;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
 
 public record MessageSignature(byte[] bytes) {
-	public static final MessageSignature EMPTY = new MessageSignature(ByteArrays.EMPTY_ARRAY);
+	public static final int BYTES = 256;
 
-	public MessageSignature(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readByteArray());
+	public MessageSignature(byte[] bytes) {
+		Preconditions.checkState(bytes.length == 256, "Invalid message signature size");
+		this.bytes = bytes;
 	}
 
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeByteArray(this.bytes);
+	public static MessageSignature read(FriendlyByteBuf friendlyByteBuf) {
+		byte[] bs = new byte[256];
+		friendlyByteBuf.readBytes(bs);
+		return new MessageSignature(bs);
 	}
 
-	public boolean verify(SignatureValidator signatureValidator, SignedMessageHeader signedMessageHeader, SignedMessageBody signedMessageBody) {
-		if (!this.isEmpty()) {
-			byte[] bs = signedMessageBody.hash().asBytes();
-			return signatureValidator.validate(output -> signedMessageHeader.updateSignature(output, bs), this.bytes);
-		} else {
-			return false;
-		}
+	public static void write(FriendlyByteBuf friendlyByteBuf, MessageSignature messageSignature) {
+		friendlyByteBuf.writeBytes(messageSignature.bytes);
 	}
 
-	public boolean verify(SignatureValidator signatureValidator, SignedMessageHeader signedMessageHeader, byte[] bs) {
-		return !this.isEmpty() ? signatureValidator.validate(output -> signedMessageHeader.updateSignature(output, bs), this.bytes) : false;
+	public boolean verify(SignatureValidator signatureValidator, SignatureUpdater signatureUpdater) {
+		return signatureValidator.validate(signatureUpdater, this.bytes);
 	}
 
-	public boolean isEmpty() {
-		return this.bytes.length == 0;
-	}
-
-	@Nullable
 	public ByteBuffer asByteBuffer() {
-		return !this.isEmpty() ? ByteBuffer.wrap(this.bytes) : null;
+		return ByteBuffer.wrap(this.bytes);
 	}
 
 	public boolean equals(Object object) {
@@ -58,6 +53,50 @@ public record MessageSignature(byte[] bytes) {
 	}
 
 	public String toString() {
-		return !this.isEmpty() ? Base64.getEncoder().encodeToString(this.bytes) : "empty";
+		return Base64.getEncoder().encodeToString(this.bytes);
+	}
+
+	public MessageSignature.Packed pack(MessageSignature.Packer packer) {
+		int i = packer.pack(this);
+		return i != -1 ? new MessageSignature.Packed(i) : new MessageSignature.Packed(this);
+	}
+
+	public static record Packed(int id, @Nullable MessageSignature fullSignature) {
+		public static final int FULL_SIGNATURE = -1;
+
+		public Packed(MessageSignature messageSignature) {
+			this(-1, messageSignature);
+		}
+
+		public Packed(int i) {
+			this(i, null);
+		}
+
+		public static MessageSignature.Packed read(FriendlyByteBuf friendlyByteBuf) {
+			int i = friendlyByteBuf.readVarInt() - 1;
+			return i == -1 ? new MessageSignature.Packed(MessageSignature.read(friendlyByteBuf)) : new MessageSignature.Packed(i);
+		}
+
+		public static void write(FriendlyByteBuf friendlyByteBuf, MessageSignature.Packed packed) {
+			friendlyByteBuf.writeVarInt(packed.id() + 1);
+			if (packed.fullSignature() != null) {
+				MessageSignature.write(friendlyByteBuf, packed.fullSignature());
+			}
+		}
+
+		public Optional<MessageSignature> unpack(MessageSignature.Unpacker unpacker) {
+			return this.fullSignature != null ? Optional.of(this.fullSignature) : Optional.ofNullable(unpacker.unpack(this.id));
+		}
+	}
+
+	public interface Packer {
+		int NOT_FOUND = -1;
+
+		int pack(MessageSignature messageSignature);
+	}
+
+	public interface Unpacker {
+		@Nullable
+		MessageSignature unpack(int i);
 	}
 }

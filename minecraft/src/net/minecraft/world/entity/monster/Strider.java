@@ -384,6 +384,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		}
 	}
 
+	@Nullable
 	public Strider getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return EntityType.STRIDER.create(serverLevel);
 	}
@@ -453,21 +454,24 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		} else {
 			RandomSource randomSource = serverLevelAccessor.getRandom();
-			Object var8;
 			if (randomSource.nextInt(30) == 0) {
 				Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
-				var8 = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
-				mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
-				this.equipSaddle(null);
+				if (mob != null) {
+					spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
+					mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
+					this.equipSaddle(null);
+				}
 			} else if (randomSource.nextInt(10) == 0) {
 				AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
-				ageableMob.setAge(-24000);
-				var8 = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);
+				if (ageableMob != null) {
+					ageableMob.setAge(-24000);
+					spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);
+				}
 			} else {
-				var8 = new AgeableMob.AgeableMobGroupData(0.5F);
+				spawnGroupData = new AgeableMob.AgeableMobGroupData(0.5F);
 			}
 
-			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, (SpawnGroupData)var8, compoundTag);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		}
 	}
 

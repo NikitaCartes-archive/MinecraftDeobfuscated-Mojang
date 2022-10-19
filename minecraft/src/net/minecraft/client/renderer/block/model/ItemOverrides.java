@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,7 +13,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,7 +31,7 @@ public class ItemOverrides {
 		this.properties = new ResourceLocation[0];
 	}
 
-	public ItemOverrides(ModelBakery modelBakery, BlockModel blockModel, Function<ResourceLocation, UnbakedModel> function, List<ItemOverride> list) {
+	public ItemOverrides(ModelBaker modelBaker, BlockModel blockModel, List<ItemOverride> list) {
 		this.properties = (ResourceLocation[])list.stream()
 			.flatMap(ItemOverride::getPredicates)
 			.map(ItemOverride.Predicate::getProperty)
@@ -48,7 +47,7 @@ public class ItemOverrides {
 
 		for (int j = list.size() - 1; j >= 0; j--) {
 			ItemOverride itemOverride = (ItemOverride)list.get(j);
-			BakedModel bakedModel = this.bakeModel(modelBakery, blockModel, function, itemOverride);
+			BakedModel bakedModel = this.bakeModel(modelBaker, blockModel, itemOverride);
 			ItemOverrides.PropertyMatcher[] propertyMatchers = (ItemOverrides.PropertyMatcher[])itemOverride.getPredicates().map(predicate -> {
 				int i = object2IntMap.getInt(predicate.getProperty());
 				return new ItemOverrides.PropertyMatcher(i, predicate.getValue());
@@ -60,9 +59,9 @@ public class ItemOverrides {
 	}
 
 	@Nullable
-	private BakedModel bakeModel(ModelBakery modelBakery, BlockModel blockModel, Function<ResourceLocation, UnbakedModel> function, ItemOverride itemOverride) {
-		UnbakedModel unbakedModel = (UnbakedModel)function.apply(itemOverride.getModel());
-		return Objects.equals(unbakedModel, blockModel) ? null : modelBakery.bake(itemOverride.getModel(), BlockModelRotation.X0_Y0);
+	private BakedModel bakeModel(ModelBaker modelBaker, BlockModel blockModel, ItemOverride itemOverride) {
+		UnbakedModel unbakedModel = modelBaker.getModel(itemOverride.getModel());
+		return Objects.equals(unbakedModel, blockModel) ? null : modelBaker.bake(itemOverride.getModel(), BlockModelRotation.X0_Y0);
 	}
 
 	@Nullable

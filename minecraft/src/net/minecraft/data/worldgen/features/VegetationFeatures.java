@@ -116,7 +116,7 @@ public class VegetationFeatures {
 			PlacementUtils.filtered(
 				Feature.SIMPLE_BLOCK,
 				new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.MELON)),
-				BlockPredicate.allOf(BlockPredicate.replaceable(), BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.GRASS_BLOCK))
+				BlockPredicate.allOf(BlockPredicate.replaceable(), BlockPredicate.noFluid(), BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.GRASS_BLOCK))
 			)
 		)
 	);

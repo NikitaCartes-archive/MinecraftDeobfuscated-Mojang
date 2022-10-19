@@ -37,7 +37,7 @@ public class ReloadableResourceManager implements ResourceManager, AutoCloseable
 	}
 
 	public ReloadInstance createReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
-		LOGGER.info("Reloading ResourceManager: {}", LogUtils.defer(() -> list.stream().map(PackResources::getName).collect(Collectors.joining(", "))));
+		LOGGER.info("Reloading ResourceManager: {}", LogUtils.defer(() -> list.stream().map(PackResources::packId).collect(Collectors.joining(", "))));
 		this.resources.close();
 		this.resources = new MultiPackResourceManager(this.type, list);
 		return SimpleReloadInstance.create(this.resources, this.listeners, executor, executor2, completableFuture, LOGGER.isDebugEnabled());

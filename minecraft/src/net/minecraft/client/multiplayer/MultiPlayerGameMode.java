@@ -311,7 +311,12 @@ public class MultiPlayerGameMode {
 			boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
 			boolean bl2 = localPlayer.isSecondaryUseActive() && bl;
 			if (!bl2) {
-				InteractionResult interactionResult = this.minecraft.level.getBlockState(blockPos).use(this.minecraft.level, localPlayer, interactionHand, blockHitResult);
+				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
+				if (!this.connection.isFeatureEnabled(blockState.getBlock().requiredFeatures())) {
+					return InteractionResult.FAIL;
+				}
+
+				InteractionResult interactionResult = blockState.use(this.minecraft.level, localPlayer, interactionHand, blockHitResult);
 				if (interactionResult.consumesAction()) {
 					return interactionResult;
 				}
@@ -319,16 +324,16 @@ public class MultiPlayerGameMode {
 
 			if (!itemStack.isEmpty() && !localPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
 				UseOnContext useOnContext = new UseOnContext(localPlayer, interactionHand, blockHitResult);
-				InteractionResult interactionResult;
+				InteractionResult interactionResult2;
 				if (this.localPlayerMode.isCreative()) {
 					int i = itemStack.getCount();
-					interactionResult = itemStack.useOn(useOnContext);
+					interactionResult2 = itemStack.useOn(useOnContext);
 					itemStack.setCount(i);
 				} else {
-					interactionResult = itemStack.useOn(useOnContext);
+					interactionResult2 = itemStack.useOn(useOnContext);
 				}
 
-				return interactionResult;
+				return interactionResult2;
 			} else {
 				return InteractionResult.PASS;
 			}
@@ -432,13 +437,13 @@ public class MultiPlayerGameMode {
 	}
 
 	public void handleCreativeModeItemAdd(ItemStack itemStack, int i) {
-		if (this.localPlayerMode.isCreative()) {
+		if (this.localPlayerMode.isCreative() && this.connection.isFeatureEnabled(itemStack.getItem().requiredFeatures())) {
 			this.connection.send(new ServerboundSetCreativeModeSlotPacket(i, itemStack));
 		}
 	}
 
 	public void handleCreativeModeItemDrop(ItemStack itemStack) {
-		if (this.localPlayerMode.isCreative() && !itemStack.isEmpty()) {
+		if (this.localPlayerMode.isCreative() && !itemStack.isEmpty() && this.connection.isFeatureEnabled(itemStack.getItem().requiredFeatures())) {
 			this.connection.send(new ServerboundSetCreativeModeSlotPacket(-1, itemStack));
 		}
 	}

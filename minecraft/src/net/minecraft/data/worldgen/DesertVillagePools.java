@@ -207,6 +207,14 @@ public class DesertVillagePools {
 		);
 		Pools.register(
 			new StructureTemplatePool(
+				new ResourceLocation("village/desert/camel"),
+				new ResourceLocation("empty"),
+				ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/desert/camel_spawn"), 1)),
+				StructureTemplatePool.Projection.RIGID
+			)
+		);
+		Pools.register(
+			new StructureTemplatePool(
 				new ResourceLocation("village/desert/zombie/villagers"),
 				new ResourceLocation("empty"),
 				ImmutableList.of(

@@ -94,6 +94,8 @@ public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketL
 		Y_ROT(3),
 		X_ROT(4);
 
+		public static final Set<ClientboundPlayerPositionPacket.RelativeArgument> ALL = Set.of(values());
+		public static final Set<ClientboundPlayerPositionPacket.RelativeArgument> ROTATION = Set.of(X_ROT, Y_ROT);
 		private final int bit;
 
 		private RelativeArgument(int j) {

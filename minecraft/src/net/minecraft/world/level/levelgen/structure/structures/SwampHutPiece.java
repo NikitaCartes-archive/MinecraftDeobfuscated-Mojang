@@ -99,10 +99,12 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
 				if (boundingBox.isInside(blockPos2)) {
 					this.spawnedWitch = true;
 					Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel());
-					witch.setPersistenceRequired();
-					witch.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0F, 0.0F);
-					witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
-					worldGenLevel.addFreshEntityWithPassengers(witch);
+					if (witch != null) {
+						witch.setPersistenceRequired();
+						witch.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0F, 0.0F);
+						witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
+						worldGenLevel.addFreshEntityWithPassengers(witch);
+					}
 				}
 			}
 
@@ -116,10 +118,12 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
 			if (boundingBox.isInside(blockPos)) {
 				this.spawnedCat = true;
 				Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel());
-				cat.setPersistenceRequired();
-				cat.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
-				cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
-				serverLevelAccessor.addFreshEntityWithPassengers(cat);
+				if (cat != null) {
+					cat.setPersistenceRequired();
+					cat.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
+					cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
+					serverLevelAccessor.addFreshEntityWithPassengers(cat);
+				}
 			}
 		}
 	}

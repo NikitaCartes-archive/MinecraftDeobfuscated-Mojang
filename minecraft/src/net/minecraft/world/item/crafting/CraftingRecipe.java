@@ -7,4 +7,6 @@ public interface CraftingRecipe extends Recipe<CraftingContainer> {
 	default RecipeType<?> getType() {
 		return RecipeType.CRAFTING;
 	}
+
+	CraftingBookCategory category();
 }

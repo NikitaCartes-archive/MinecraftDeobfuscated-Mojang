@@ -24,6 +24,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerListener;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -50,6 +51,7 @@ import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.RandomStandGoal;
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
@@ -102,7 +104,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	protected SimpleContainer inventory;
 	protected int temper;
 	protected float playerJumpPendingScale;
-	private boolean allowStandSliding;
+	protected boolean allowStandSliding;
 	private float eatAnim;
 	private float eatAnimO;
 	private float standAnim;
@@ -127,6 +129,10 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.7));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+		if (this.canPerformRearing()) {
+			this.goalSelector.addGoal(9, new RandomStandGoal(this));
+		}
+
 		this.addBehaviourGoals();
 	}
 
@@ -212,7 +218,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	public void equipSaddle(@Nullable SoundSource soundSource) {
 		this.inventory.setItem(0, new ItemStack(Items.SADDLE));
 		if (soundSource != null) {
-			this.level.playSound(null, this, SoundEvents.HORSE_SADDLE, soundSource, 0.5F, 1.0F);
+			this.level.playSound(null, this, this.getSaddleSoundEvent(), soundSource, 0.5F, 1.0F);
+		}
+	}
+
+	public void equipArmor(Player player, ItemStack itemStack) {
+		if (this.isArmor(itemStack)) {
+			this.inventory.setItem(1, new ItemStack(itemStack.getItem()));
+			if (!player.getAbilities().instabuild) {
+				itemStack.shrink(1);
+			}
 		}
 	}
 
@@ -322,40 +337,27 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		return this.getAttributeValue(Attributes.JUMP_STRENGTH);
 	}
 
+	@Override
+	public boolean hurt(DamageSource damageSource, float f) {
+		boolean bl = super.hurt(damageSource, f);
+		if (bl && this.random.nextInt(3) == 0) {
+			this.standIfPossible();
+		}
+
+		return bl;
+	}
+
+	protected boolean canPerformRearing() {
+		return true;
+	}
+
 	@Nullable
 	protected SoundEvent getEatingSound() {
 		return null;
 	}
 
 	@Nullable
-	@Override
-	protected SoundEvent getDeathSound() {
-		return null;
-	}
-
-	@Nullable
-	@Override
-	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		if (this.random.nextInt(3) == 0) {
-			this.stand();
-		}
-
-		return null;
-	}
-
-	@Nullable
-	@Override
-	protected SoundEvent getAmbientSound() {
-		if (this.random.nextInt(10) == 0 && !this.isImmobile()) {
-			this.stand();
-		}
-
-		return null;
-	}
-
-	@Nullable
 	protected SoundEvent getAngrySound() {
-		this.stand();
 		return null;
 	}
 
@@ -508,7 +510,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected boolean isImmobile() {
+	public boolean isImmobile() {
 		return super.isImmobile() && this.isVehicle() && this.isSaddled() || this.isEating() || this.isStanding();
 	}
 
@@ -644,6 +646,32 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 	}
 
+	@Override
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+		if (this.isVehicle() || this.isBaby()) {
+			return super.mobInteract(player, interactionHand);
+		} else if (this.isTamed() && player.isSecondaryUseActive()) {
+			this.openCustomInventoryScreen(player);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
+		} else {
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			if (!itemStack.isEmpty()) {
+				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
+				if (interactionResult.consumesAction()) {
+					return interactionResult;
+				}
+
+				if (this.canWearArmor() && this.isArmor(itemStack) && !this.isWearingArmor()) {
+					this.equipArmor(player, itemStack);
+					return InteractionResult.sidedSuccess(this.level.isClientSide);
+				}
+			}
+
+			this.doPlayerRide(player);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
+		}
+	}
+
 	private void openMouth() {
 		if (!this.level.isClientSide) {
 			this.mouthCounter = 1;
@@ -663,8 +691,13 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		this.setFlag(32, bl);
 	}
 
-	private void stand() {
-		if (this.isControlledByLocalInstance() || this.isEffectiveAi()) {
+	@Nullable
+	public SoundEvent getAmbientStandSound() {
+		return this.getAmbientSound();
+	}
+
+	public void standIfPossible() {
+		if (this.canPerformRearing() && this.isControlledByLocalInstance() || this.isEffectiveAi()) {
 			this.standCounter = 1;
 			this.setStanding(true);
 		}
@@ -672,7 +705,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public void makeMad() {
 		if (!this.isStanding()) {
-			this.stand();
+			this.standIfPossible();
 			SoundEvent soundEvent = this.getAngrySound();
 			if (soundEvent != null) {
 				this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
@@ -695,13 +728,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	public void travel(Vec3 vec3) {
 		if (this.isAlive()) {
 			LivingEntity livingEntity = this.getControllingPassenger();
-			if (this.isVehicle() && livingEntity != null) {
-				this.setYRot(livingEntity.getYRot());
-				this.yRotO = this.getYRot();
-				this.setXRot(livingEntity.getXRot() * 0.5F);
-				this.setRot(this.getYRot(), this.getXRot());
-				this.yBodyRot = this.getYRot();
-				this.yHeadRot = this.yBodyRot;
+			if (this.isVehicle() && livingEntity != null && !this.mountIgnoresControllerInput(livingEntity)) {
+				this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5F);
+				this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
 				float f = livingEntity.xxa * 0.5F;
 				float g = livingEntity.zza;
 				if (g <= 0.0F) {
@@ -715,29 +744,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				}
 
 				if (this.playerJumpPendingScale > 0.0F && !this.isJumping() && this.onGround) {
-					double d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
-					double e = d + this.getJumpBoostPower();
-					Vec3 vec32 = this.getDeltaMovement();
-					this.setDeltaMovement(vec32.x, e, vec32.z);
-					this.setIsJumping(true);
-					this.hasImpulse = true;
-					if (g > 0.0F) {
-						float h = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
-						float i = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
-						this.setDeltaMovement(
-							this.getDeltaMovement().add((double)(-0.4F * h * this.playerJumpPendingScale), 0.0, (double)(0.4F * i * this.playerJumpPendingScale))
-						);
-					}
-
+					this.executeRidersJump(this.playerJumpPendingScale, f, g);
 					this.playerJumpPendingScale = 0.0F;
 				}
 
 				this.flyingSpeed = this.getSpeed() * 0.1F;
 				if (this.isControlledByLocalInstance()) {
-					this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+					this.setSpeed(this.getDrivenMovementSpeed(livingEntity));
 					super.travel(new Vec3((double)f, vec3.y, (double)g));
 				} else if (livingEntity instanceof Player) {
-					this.setDeltaMovement(Vec3.ZERO);
+					this.setDeltaMovement(this.getX() - this.xOld, this.getY() - this.yOld, this.getZ() - this.zOld);
 				}
 
 				if (this.onGround) {
@@ -751,6 +767,28 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				this.flyingSpeed = 0.02F;
 				super.travel(vec3);
 			}
+		}
+	}
+
+	protected float getDrivenMovementSpeed(LivingEntity livingEntity) {
+		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
+	}
+
+	protected boolean mountIgnoresControllerInput(LivingEntity livingEntity) {
+		return false;
+	}
+
+	protected void executeRidersJump(float f, float g, float h) {
+		double d = this.getCustomJump() * (double)f * (double)this.getBlockJumpFactor();
+		double e = d + this.getJumpBoostPower();
+		Vec3 vec3 = this.getDeltaMovement();
+		this.setDeltaMovement(vec3.x, e, vec3.z);
+		this.setIsJumping(true);
+		this.hasImpulse = true;
+		if (h > 0.0F) {
+			float i = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
+			float j = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
+			this.setDeltaMovement(this.getDeltaMovement().add((double)(-0.4F * i * f), 0.0, (double)(0.4F * j * f)));
 		}
 	}
 
@@ -852,7 +890,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				i = 0;
 			} else {
 				this.allowStandSliding = true;
-				this.stand();
+				this.standIfPossible();
 			}
 
 			if (i >= 90) {
@@ -871,7 +909,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public void handleStartJump(int i) {
 		this.allowStandSliding = true;
-		this.stand();
+		this.standIfPossible();
 		this.playJumpSound();
 	}
 
@@ -1081,5 +1119,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public boolean hasInventoryChanged(Container container) {
 		return this.inventory != container;
+	}
+
+	public int getAmbientStandInterval() {
+		return this.getAmbientSoundInterval();
 	}
 }

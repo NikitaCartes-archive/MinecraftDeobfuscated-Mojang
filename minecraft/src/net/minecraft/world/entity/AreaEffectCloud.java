@@ -10,13 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.ParticleArgument;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -347,7 +346,7 @@ public class AreaEffectCloud extends Entity {
 
 		if (compoundTag.contains("Particle", 8)) {
 			try {
-				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle"))));
+				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), HolderLookup.forRegistry(Registry.PARTICLE_TYPE)));
 			} catch (CommandSyntaxException var5) {
 				LOGGER.warn("Couldn't load custom particle {}", compoundTag.getString("Particle"), var5);
 			}
@@ -424,11 +423,6 @@ public class AreaEffectCloud extends Entity {
 	@Override
 	public PushReaction getPistonPushReaction() {
 		return PushReaction.IGNORE;
-	}
-
-	@Override
-	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
 	}
 
 	@Override

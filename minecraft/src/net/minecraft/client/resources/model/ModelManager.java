@@ -1,39 +1,102 @@
 package net.minecraft.client.resources.model;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.texture.AtlasSet;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.blockentity.BellRenderer;
+import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
+import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class ModelManager extends SimplePreparableReloadListener<ModelBakery> implements AutoCloseable {
+public class ModelManager implements PreparableReloadListener, AutoCloseable {
+	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Map<ResourceLocation, AtlasSet.ResourceLister> VANILLA_ATLASES = Map.of(
+		Sheets.BANNER_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> {
+			Map<ResourceLocation, Resource> map = new HashMap();
+			SpriteLoader.addSprite(resourceManager, ModelBakery.BANNER_BASE.texture(), map::put);
+			SpriteLoader.listSprites(resourceManager, "entity/banner", map::put);
+			return map;
+		},
+		Sheets.BED_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/bed"),
+		Sheets.CHEST_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/chest"),
+		Sheets.SHIELD_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> {
+			Map<ResourceLocation, Resource> map = new HashMap();
+			SpriteLoader.addSprite(resourceManager, ModelBakery.SHIELD_BASE.texture(), map::put);
+			SpriteLoader.addSprite(resourceManager, ModelBakery.NO_PATTERN_SHIELD.texture(), map::put);
+			SpriteLoader.listSprites(resourceManager, "entity/shield", map::put);
+			return map;
+		},
+		Sheets.SIGN_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/signs"),
+		Sheets.SHULKER_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/shulker"),
+		TextureAtlas.LOCATION_BLOCKS,
+		(AtlasSet.ResourceLister)resourceManager -> {
+			Map<ResourceLocation, Resource> map = new HashMap();
+			SpriteLoader.listSprites(resourceManager, "block", map::put);
+			SpriteLoader.listSprites(resourceManager, "item", map::put);
+			SpriteLoader.listSprites(resourceManager, "entity/conduit", map::put);
+			SpriteLoader.addSprite(resourceManager, BellRenderer.BELL_RESOURCE_LOCATION.texture(), map::put);
+			SpriteLoader.addSprite(resourceManager, EnchantTableRenderer.BOOK_LOCATION.texture(), map::put);
+			return map;
+		},
+		Sheets.HANGING_SIGN_SHEET,
+		(AtlasSet.ResourceLister)resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/signs/hanging")
+	);
 	private Map<ResourceLocation, BakedModel> bakedRegistry;
-	@Nullable
-	private AtlasSet atlases;
+	private final AtlasSet atlases;
 	private final BlockModelShaper blockModelShaper;
-	private final TextureManager textureManager;
 	private final BlockColors blockColors;
 	private int maxMipmapLevels;
 	private BakedModel missingModel;
 	private Object2IntMap<BlockState> modelGroups;
 
 	public ModelManager(TextureManager textureManager, BlockColors blockColors, int i) {
-		this.textureManager = textureManager;
 		this.blockColors = blockColors;
 		this.maxMipmapLevels = i;
 		this.blockModelShaper = new BlockModelShaper(this);
+		this.atlases = new AtlasSet(VANILLA_ATLASES, textureManager);
 	}
 
 	public BakedModel getModel(ModelResourceLocation modelResourceLocation) {
@@ -48,26 +111,186 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 		return this.blockModelShaper;
 	}
 
-	protected ModelBakery prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+	@Override
+	public final CompletableFuture<Void> reload(
+		PreparableReloadListener.PreparationBarrier preparationBarrier,
+		ResourceManager resourceManager,
+		ProfilerFiller profilerFiller,
+		ProfilerFiller profilerFiller2,
+		Executor executor,
+		Executor executor2
+	) {
 		profilerFiller.startTick();
-		ModelBakery modelBakery = new ModelBakery(resourceManager, this.blockColors, profilerFiller, this.maxMipmapLevels);
-		profilerFiller.endTick();
-		return modelBakery;
+		CompletableFuture<Map<ResourceLocation, BlockModel>> completableFuture = loadBlockModels(resourceManager, executor);
+		CompletableFuture<Map<ResourceLocation, List<ModelBakery.LoadedJson>>> completableFuture2 = loadBlockStates(resourceManager, executor);
+		CompletableFuture<ModelBakery> completableFuture3 = completableFuture.thenCombineAsync(
+			completableFuture2, (mapx, map2) -> new ModelBakery(this.blockColors, profilerFiller, mapx, map2), executor
+		);
+		Map<ResourceLocation, CompletableFuture<AtlasSet.StitchResult>> map = this.atlases.scheduleLoad(resourceManager, this.maxMipmapLevels, executor);
+		return CompletableFuture.allOf((CompletableFuture[])Stream.concat(map.values().stream(), Stream.of(completableFuture3)).toArray(CompletableFuture[]::new))
+			.thenApplyAsync(
+				void_ -> this.loadModels(
+						profilerFiller,
+						(Map<ResourceLocation, AtlasSet.StitchResult>)map.entrySet()
+							.stream()
+							.collect(Collectors.toMap(Entry::getKey, entry -> (AtlasSet.StitchResult)((CompletableFuture)entry.getValue()).join())),
+						(ModelBakery)completableFuture3.join()
+					),
+				executor
+			)
+			.thenCompose(reloadState -> reloadState.readyForUpload.thenApply(void_ -> reloadState))
+			.thenCompose(preparationBarrier::wait)
+			.thenAcceptAsync(reloadState -> this.apply(reloadState, profilerFiller2), executor2);
 	}
 
-	protected void apply(ModelBakery modelBakery, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		profilerFiller.startTick();
-		profilerFiller.push("upload");
-		if (this.atlases != null) {
-			this.atlases.close();
+	private static CompletableFuture<Map<ResourceLocation, BlockModel>> loadBlockModels(ResourceManager resourceManager, Executor executor) {
+		return CompletableFuture.supplyAsync(() -> ModelBakery.MODEL_LISTER.listMatchingResources(resourceManager), executor)
+			.thenCompose(
+				map -> {
+					List<CompletableFuture<Pair<ResourceLocation, BlockModel>>> list = new ArrayList(map.size());
+
+					for (Entry<ResourceLocation, Resource> entry : map.entrySet()) {
+						list.add(CompletableFuture.supplyAsync(() -> {
+							try {
+								Reader reader = ((Resource)entry.getValue()).openAsReader();
+
+								Pair var2x;
+								try {
+									var2x = Pair.of((ResourceLocation)entry.getKey(), BlockModel.fromStream(reader));
+								} catch (Throwable var5) {
+									if (reader != null) {
+										try {
+											reader.close();
+										} catch (Throwable var4x) {
+											var5.addSuppressed(var4x);
+										}
+									}
+
+									throw var5;
+								}
+
+								if (reader != null) {
+									reader.close();
+								}
+
+								return var2x;
+							} catch (IOException var6) {
+								LOGGER.error("Failed to load model {}", entry.getKey(), var6);
+								return null;
+							}
+						}, executor));
+					}
+
+					return Util.sequence(list)
+						.thenApply(listx -> (Map)listx.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond)));
+				}
+			);
+	}
+
+	private static CompletableFuture<Map<ResourceLocation, List<ModelBakery.LoadedJson>>> loadBlockStates(ResourceManager resourceManager, Executor executor) {
+		return CompletableFuture.supplyAsync(() -> ModelBakery.BLOCKSTATE_LISTER.listMatchingResourceStacks(resourceManager), executor)
+			.thenCompose(
+				map -> {
+					List<CompletableFuture<Pair<ResourceLocation, List<ModelBakery.LoadedJson>>>> list = new ArrayList(map.size());
+
+					for (Entry<ResourceLocation, List<Resource>> entry : map.entrySet()) {
+						list.add(CompletableFuture.supplyAsync(() -> {
+							List<Resource> listx = (List<Resource>)entry.getValue();
+							List<ModelBakery.LoadedJson> list2 = new ArrayList(listx.size());
+
+							for (Resource resource : listx) {
+								try {
+									Reader reader = resource.openAsReader();
+
+									try {
+										JsonObject jsonObject = GsonHelper.parse(reader);
+										list2.add(new ModelBakery.LoadedJson(resource.sourcePackId(), jsonObject));
+									} catch (Throwable var9) {
+										if (reader != null) {
+											try {
+												reader.close();
+											} catch (Throwable var8) {
+												var9.addSuppressed(var8);
+											}
+										}
+
+										throw var9;
+									}
+
+									if (reader != null) {
+										reader.close();
+									}
+								} catch (IOException var10) {
+									LOGGER.error("Failed to load blockstate {} from pack {}", entry.getKey(), resource.sourcePackId(), var10);
+								}
+							}
+
+							return Pair.of((ResourceLocation)entry.getKey(), list2);
+						}, executor));
+					}
+
+					return Util.sequence(list)
+						.thenApply(listx -> (Map)listx.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond)));
+				}
+			);
+	}
+
+	private ModelManager.ReloadState loadModels(ProfilerFiller profilerFiller, Map<ResourceLocation, AtlasSet.StitchResult> map, ModelBakery modelBakery) {
+		profilerFiller.push("load");
+		profilerFiller.popPush("baking");
+		Multimap<ResourceLocation, Material> multimap = HashMultimap.create();
+		modelBakery.bakeModels((resourceLocation, material) -> {
+			AtlasSet.StitchResult stitchResult = (AtlasSet.StitchResult)map.get(material.atlasLocation());
+			TextureAtlasSprite textureAtlasSprite = stitchResult.getSprite(material.texture());
+			if (textureAtlasSprite != null) {
+				return textureAtlasSprite;
+			} else {
+				multimap.put(resourceLocation, material);
+				return stitchResult.missing();
+			}
+		});
+		multimap.asMap()
+			.forEach(
+				(resourceLocation, collection) -> LOGGER.warn(
+						"Missing textures in model {}:\n{}",
+						resourceLocation,
+						collection.stream()
+							.sorted(Material.COMPARATOR)
+							.map(material -> "    " + material.atlasLocation() + ":" + material.texture())
+							.collect(Collectors.joining("\n"))
+					)
+			);
+		profilerFiller.popPush("dispatch");
+		Map<ResourceLocation, BakedModel> map2 = modelBakery.getBakedTopLevelModels();
+		BakedModel bakedModel = (BakedModel)map2.get(ModelBakery.MISSING_MODEL_LOCATION);
+		Map<BlockState, BakedModel> map3 = new IdentityHashMap();
+
+		for (Block block : Registry.BLOCK) {
+			block.getStateDefinition().getPossibleStates().forEach(blockState -> {
+				ResourceLocation resourceLocation = blockState.getBlock().builtInRegistryHolder().key().location();
+				BakedModel bakedModel2 = (BakedModel)map2.getOrDefault(BlockModelShaper.stateToModelLocation(resourceLocation, blockState), bakedModel);
+				map3.put(blockState, bakedModel2);
+			});
 		}
 
-		this.atlases = modelBakery.uploadTextures(this.textureManager, profilerFiller);
+		CompletableFuture<Void> completableFuture = CompletableFuture.allOf(
+			(CompletableFuture[])map.values().stream().map(AtlasSet.StitchResult::readyForUpload).toArray(CompletableFuture[]::new)
+		);
+		profilerFiller.pop();
+		profilerFiller.endTick();
+		return new ModelManager.ReloadState(modelBakery, bakedModel, map3, map, completableFuture);
+	}
+
+	private void apply(ModelManager.ReloadState reloadState, ProfilerFiller profilerFiller) {
+		profilerFiller.startTick();
+		profilerFiller.push("upload");
+		reloadState.atlasPreparations.values().forEach(AtlasSet.StitchResult::upload);
+		ModelBakery modelBakery = reloadState.modelBakery;
 		this.bakedRegistry = modelBakery.getBakedTopLevelModels();
 		this.modelGroups = modelBakery.getModelGroups();
-		this.missingModel = (BakedModel)this.bakedRegistry.get(ModelBakery.MISSING_MODEL_LOCATION);
+		this.missingModel = reloadState.missingModel;
 		profilerFiller.popPush("cache");
-		this.blockModelShaper.rebuildCache();
+		this.blockModelShaper.replaceCache(reloadState.modelCache);
 		profilerFiller.pop();
 		profilerFiller.endTick();
 	}
@@ -95,12 +318,20 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 	}
 
 	public void close() {
-		if (this.atlases != null) {
-			this.atlases.close();
-		}
+		this.atlases.close();
 	}
 
 	public void updateMaxMipLevel(int i) {
 		this.maxMipmapLevels = i;
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record ReloadState(
+		ModelBakery modelBakery,
+		BakedModel missingModel,
+		Map<BlockState, BakedModel> modelCache,
+		Map<ResourceLocation, AtlasSet.StitchResult> atlasPreparations,
+		CompletableFuture<Void> readyForUpload
+	) {
 	}
 }

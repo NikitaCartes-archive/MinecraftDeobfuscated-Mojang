@@ -1,12 +1,15 @@
 package net.minecraft.client.gui.components;
 
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,7 +35,10 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 @Environment(EnvType.CLIENT)
 public class PlayerTabOverlay extends GuiComponent {
-	private static final Ordering<PlayerInfo> PLAYER_ORDERING = Ordering.from(new PlayerTabOverlay.PlayerInfoComparator());
+	private static final Comparator<PlayerInfo> PLAYER_COMPARATOR = Comparator.comparing(
+			PlayerInfo::getGameMode, Comparator.comparing(gameType -> gameType != GameType.SPECTATOR)
+		)
+		.thenComparing(playerInfo -> Util.mapNullable(playerInfo.getTeam(), PlayerTeam::getName, ""));
 	public static final int MAX_ROWS_PER_COL = 20;
 	public static final int HEART_EMPTY_CONTAINER = 16;
 	public static final int HEART_EMPTY_CONTAINER_BLINKING = 25;
@@ -48,8 +54,8 @@ public class PlayerTabOverlay extends GuiComponent {
 	private Component footer;
 	@Nullable
 	private Component header;
-	private long visibilityId;
 	private boolean visible;
+	private final Map<UUID, PlayerTabOverlay.HealthState> healthStates = new Object2ObjectOpenHashMap<>();
 
 	public PlayerTabOverlay(Minecraft minecraft, Gui gui) {
 		this.minecraft = minecraft;
@@ -67,16 +73,15 @@ public class PlayerTabOverlay extends GuiComponent {
 	}
 
 	public void setVisible(boolean bl) {
-		if (bl && !this.visible) {
-			this.visibilityId = Util.getMillis();
+		if (this.visible != bl) {
+			this.healthStates.clear();
+			this.visible = bl;
 		}
-
-		this.visible = bl;
 	}
 
 	public void render(PoseStack poseStack, int i, Scoreboard scoreboard, @Nullable Objective objective) {
 		ClientPacketListener clientPacketListener = this.minecraft.player.connection;
-		List<PlayerInfo> list = PLAYER_ORDERING.sortedCopy(clientPacketListener.getOnlinePlayers());
+		List<PlayerInfo> list = clientPacketListener.getListedOnlinePlayers().stream().sorted(PLAYER_COMPARATOR).limit(80L).toList();
 		int j = 0;
 		int k = 0;
 
@@ -89,7 +94,11 @@ public class PlayerTabOverlay extends GuiComponent {
 			}
 		}
 
-		list = list.subList(0, Math.min(list.size(), 80));
+		if (!this.healthStates.isEmpty()) {
+			Set<UUID> set = (Set<UUID>)list.stream().map(playerInfox -> playerInfox.getProfile().getId()).collect(Collectors.toSet());
+			this.healthStates.keySet().removeIf(uUID -> !set.contains(uUID));
+		}
+
 		int m = list.size();
 		int n = m;
 
@@ -175,7 +184,7 @@ public class PlayerTabOverlay extends GuiComponent {
 					int z = x + j + 1;
 					int aa = z + o;
 					if (aa - z > 5) {
-						this.renderTablistScore(objective, y, gameProfile.getName(), z, aa, playerInfo2, poseStack);
+						this.renderTablistScore(objective, y, gameProfile.getName(), z, aa, gameProfile.getId(), poseStack);
 					}
 				}
 
@@ -219,74 +228,61 @@ public class PlayerTabOverlay extends GuiComponent {
 		this.setBlitOffset(this.getBlitOffset() - 100);
 	}
 
-	private void renderTablistScore(Objective objective, int i, String string, int j, int k, PlayerInfo playerInfo, PoseStack poseStack) {
+	private void renderTablistScore(Objective objective, int i, String string, int j, int k, UUID uUID, PoseStack poseStack) {
 		int l = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
 		if (objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) {
-			RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
-			long m = Util.getMillis();
-			if (this.visibilityId == playerInfo.getRenderVisibilityId()) {
-				if (l < playerInfo.getLastHealth()) {
-					playerInfo.setLastHealthTime(m);
-					playerInfo.setHealthBlinkTime((long)(this.gui.getGuiTicks() + 20));
-				} else if (l > playerInfo.getLastHealth()) {
-					playerInfo.setLastHealthTime(m);
-					playerInfo.setHealthBlinkTime((long)(this.gui.getGuiTicks() + 10));
-				}
-			}
-
-			if (m - playerInfo.getLastHealthTime() > 1000L || this.visibilityId != playerInfo.getRenderVisibilityId()) {
-				playerInfo.setLastHealth(l);
-				playerInfo.setDisplayHealth(l);
-				playerInfo.setLastHealthTime(m);
-			}
-
-			playerInfo.setRenderVisibilityId(this.visibilityId);
-			playerInfo.setLastHealth(l);
-			int n = Mth.ceil((float)Math.max(l, playerInfo.getDisplayHealth()) / 2.0F);
-			int o = Math.max(Mth.ceil((float)(l / 2)), Math.max(Mth.ceil((float)(playerInfo.getDisplayHealth() / 2)), 10));
-			boolean bl = playerInfo.getHealthBlinkTime() > (long)this.gui.getGuiTicks()
-				&& (playerInfo.getHealthBlinkTime() - (long)this.gui.getGuiTicks()) / 3L % 2L == 1L;
-			if (n > 0) {
-				int p = Mth.floor(Math.min((float)(k - j - 4) / (float)o, 9.0F));
-				if (p > 3) {
-					for (int q = n; q < o; q++) {
-						this.blit(poseStack, j + q * p, i, bl ? 25 : 16, 0, 9, 9);
-					}
-
-					for (int q = 0; q < n; q++) {
-						this.blit(poseStack, j + q * p, i, bl ? 25 : 16, 0, 9, 9);
-						if (bl) {
-							if (q * 2 + 1 < playerInfo.getDisplayHealth()) {
-								this.blit(poseStack, j + q * p, i, 70, 0, 9, 9);
-							}
-
-							if (q * 2 + 1 == playerInfo.getDisplayHealth()) {
-								this.blit(poseStack, j + q * p, i, 79, 0, 9, 9);
-							}
-						}
-
-						if (q * 2 + 1 < l) {
-							this.blit(poseStack, j + q * p, i, q >= 10 ? 160 : 52, 0, 9, 9);
-						}
-
-						if (q * 2 + 1 == l) {
-							this.blit(poseStack, j + q * p, i, q >= 10 ? 169 : 61, 0, 9, 9);
-						}
-					}
-				} else {
-					float f = Mth.clamp((float)l / 20.0F, 0.0F, 1.0F);
-					int r = (int)((1.0F - f) * 255.0F) << 16 | (int)(f * 255.0F) << 8;
-					String string2 = (float)l / 2.0F + "";
-					if (k - this.minecraft.font.width(string2 + "hp") >= j) {
-						string2 = string2 + "hp";
-					}
-
-					this.minecraft.font.drawShadow(poseStack, string2, (float)((k + j) / 2 - this.minecraft.font.width(string2) / 2), (float)i, r);
-				}
-			}
+			this.renderTablistHearts(i, j, k, uUID, poseStack, l);
 		} else {
-			String string3 = "" + ChatFormatting.YELLOW + l;
-			this.minecraft.font.drawShadow(poseStack, string3, (float)(k - this.minecraft.font.width(string3)), (float)i, 16777215);
+			String string2 = "" + ChatFormatting.YELLOW + l;
+			this.minecraft.font.drawShadow(poseStack, string2, (float)(k - this.minecraft.font.width(string2)), (float)i, 16777215);
+		}
+	}
+
+	private void renderTablistHearts(int i, int j, int k, UUID uUID, PoseStack poseStack, int l) {
+		PlayerTabOverlay.HealthState healthState = (PlayerTabOverlay.HealthState)this.healthStates
+			.computeIfAbsent(uUID, uUIDx -> new PlayerTabOverlay.HealthState(l));
+		healthState.update(l, (long)this.gui.getGuiTicks());
+		int m = Mth.positiveCeilDiv(Math.max(l, healthState.displayedValue()), 2);
+		int n = Math.max(l, Math.max(healthState.displayedValue(), 20)) / 2;
+		boolean bl = healthState.isBlinking((long)this.gui.getGuiTicks());
+		if (m > 0) {
+			RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
+			int o = Mth.floor(Math.min((float)(k - j - 4) / (float)n, 9.0F));
+			if (o <= 3) {
+				float f = Mth.clamp((float)l / 20.0F, 0.0F, 1.0F);
+				int p = (int)((1.0F - f) * 255.0F) << 16 | (int)(f * 255.0F) << 8;
+				String string = (float)l / 2.0F + "";
+				if (k - this.minecraft.font.width(string + "hp") >= j) {
+					string = string + "hp";
+				}
+
+				this.minecraft.font.drawShadow(poseStack, string, (float)((k + j - this.minecraft.font.width(string)) / 2), (float)i, p);
+			} else {
+				for (int q = m; q < n; q++) {
+					this.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+				}
+
+				for (int q = 0; q < m; q++) {
+					this.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+					if (bl) {
+						if (q * 2 + 1 < healthState.displayedValue()) {
+							this.blit(poseStack, j + q * o, i, 70, 0, 9, 9);
+						}
+
+						if (q * 2 + 1 == healthState.displayedValue()) {
+							this.blit(poseStack, j + q * o, i, 79, 0, 9, 9);
+						}
+					}
+
+					if (q * 2 + 1 < l) {
+						this.blit(poseStack, j + q * o, i, q >= 10 ? 160 : 52, 0, 9, 9);
+					}
+
+					if (q * 2 + 1 == l) {
+						this.blit(poseStack, j + q * o, i, q >= 10 ? 169 : 61, 0, 9, 9);
+					}
+				}
+			}
 		}
 	}
 
@@ -304,15 +300,39 @@ public class PlayerTabOverlay extends GuiComponent {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class PlayerInfoComparator implements Comparator<PlayerInfo> {
-		public int compare(PlayerInfo playerInfo, PlayerInfo playerInfo2) {
-			PlayerTeam playerTeam = playerInfo.getTeam();
-			PlayerTeam playerTeam2 = playerInfo2.getTeam();
-			return ComparisonChain.start()
-				.compareTrueFirst(playerInfo.getGameMode() != GameType.SPECTATOR, playerInfo2.getGameMode() != GameType.SPECTATOR)
-				.compare(playerTeam != null ? playerTeam.getName() : "", playerTeam2 != null ? playerTeam2.getName() : "")
-				.compare(playerInfo.getProfile().getName(), playerInfo2.getProfile().getName(), String::compareToIgnoreCase)
-				.result();
+	static class HealthState {
+		private static final long DISPLAY_UPDATE_DELAY = 20L;
+		private static final long DECREASE_BLINK_DURATION = 20L;
+		private static final long INCREASE_BLINK_DURATION = 10L;
+		private int lastValue;
+		private int displayedValue;
+		private long lastUpdateTick;
+		private long blinkUntilTick;
+
+		public HealthState(int i) {
+			this.displayedValue = i;
+			this.lastValue = i;
+		}
+
+		public void update(int i, long l) {
+			if (i != this.lastValue) {
+				long m = i < this.lastValue ? 20L : 10L;
+				this.blinkUntilTick = l + m;
+				this.lastValue = i;
+				this.lastUpdateTick = l;
+			}
+
+			if (l - this.lastUpdateTick > 20L) {
+				this.displayedValue = i;
+			}
+		}
+
+		public int displayedValue() {
+			return this.displayedValue;
+		}
+
+		public boolean isBlinking(long l) {
+			return this.blinkUntilTick > l && (this.blinkUntilTick - l) % 6L >= 3L;
 		}
 	}
 }

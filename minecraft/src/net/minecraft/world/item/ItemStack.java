@@ -25,6 +25,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -55,6 +56,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -95,6 +97,7 @@ public final class ItemStack {
 	private static final String TAG_CAN_DESTROY_BLOCK_LIST = "CanDestroy";
 	private static final String TAG_CAN_PLACE_ON_BLOCK_LIST = "CanPlaceOn";
 	private static final String TAG_HIDE_FLAGS = "HideFlags";
+	private static final Component DISABLED_ITEM_TOOLTIP = Component.translatable("item.disabled").withStyle(ChatFormatting.RED);
 	private static final int DONT_HIDE_TOOLTIP = 0;
 	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE).withItalic(true);
 	private int count;
@@ -177,6 +180,10 @@ public final class ItemStack {
 		} else {
 			return this.getItem() == null || this.is(Items.AIR) ? true : this.count <= 0;
 		}
+	}
+
+	public boolean isItemEnabled(FeatureFlagSet featureFlagSet) {
+		return this.isEmpty() || this.getItem().isEnabled(featureFlagSet);
 	}
 
 	public ItemStack split(int i) {
@@ -756,6 +763,10 @@ public final class ItemStack {
 			}
 		}
 
+		if (player != null && !this.getItem().isEnabled(player.getLevel().enabledFeatures())) {
+			list.add(DISABLED_ITEM_TOOLTIP);
+		}
+
 		return list;
 	}
 
@@ -783,7 +794,7 @@ public final class ItemStack {
 
 	private static Collection<Component> expandBlockState(String string) {
 		try {
-			return BlockStateParser.parseForTesting(Registry.BLOCK, string, true)
+			return BlockStateParser.parseForTesting(HolderLookup.forRegistry(Registry.BLOCK), string, true)
 				.map(
 					blockResult -> Lists.<Component>newArrayList(blockResult.blockState().getBlock().getName().withStyle(ChatFormatting.DARK_GRAY)),
 					tagResult -> (List)tagResult.tag()

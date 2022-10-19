@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
@@ -31,8 +32,8 @@ public class ItemModelGenerator {
 
 			Material material = blockModel.getMaterial(string);
 			map.put(string, Either.left(material));
-			TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)function.apply(material);
-			list.addAll(this.processFrames(i, string, textureAtlasSprite));
+			SpriteContents spriteContents = ((TextureAtlasSprite)function.apply(material)).contents();
+			list.addAll(this.processFrames(i, string, spriteContents));
 		}
 
 		map.put("particle", blockModel.hasTexture("particle") ? Either.left(blockModel.getMaterial("particle")) : (Either)map.get("layer0"));
@@ -41,22 +42,22 @@ public class ItemModelGenerator {
 		return blockModel2;
 	}
 
-	private List<BlockElement> processFrames(int i, String string, TextureAtlasSprite textureAtlasSprite) {
+	private List<BlockElement> processFrames(int i, String string, SpriteContents spriteContents) {
 		Map<Direction, BlockElementFace> map = Maps.<Direction, BlockElementFace>newHashMap();
 		map.put(Direction.SOUTH, new BlockElementFace(null, i, string, new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0)));
 		map.put(Direction.NORTH, new BlockElementFace(null, i, string, new BlockFaceUV(new float[]{16.0F, 0.0F, 0.0F, 16.0F}, 0)));
 		List<BlockElement> list = Lists.<BlockElement>newArrayList();
 		list.add(new BlockElement(new Vector3f(0.0F, 0.0F, 7.5F), new Vector3f(16.0F, 16.0F, 8.5F), map, null, true));
-		list.addAll(this.createSideElements(textureAtlasSprite, string, i));
+		list.addAll(this.createSideElements(spriteContents, string, i));
 		return list;
 	}
 
-	private List<BlockElement> createSideElements(TextureAtlasSprite textureAtlasSprite, String string, int i) {
-		float f = (float)textureAtlasSprite.getWidth();
-		float g = (float)textureAtlasSprite.getHeight();
+	private List<BlockElement> createSideElements(SpriteContents spriteContents, String string, int i) {
+		float f = (float)spriteContents.width();
+		float g = (float)spriteContents.height();
 		List<BlockElement> list = Lists.<BlockElement>newArrayList();
 
-		for (ItemModelGenerator.Span span : this.getSpans(textureAtlasSprite)) {
+		for (ItemModelGenerator.Span span : this.getSpans(spriteContents)) {
 			float h = 0.0F;
 			float j = 0.0F;
 			float k = 0.0F;
@@ -139,18 +140,18 @@ public class ItemModelGenerator {
 		return list;
 	}
 
-	private List<ItemModelGenerator.Span> getSpans(TextureAtlasSprite textureAtlasSprite) {
-		int i = textureAtlasSprite.getWidth();
-		int j = textureAtlasSprite.getHeight();
+	private List<ItemModelGenerator.Span> getSpans(SpriteContents spriteContents) {
+		int i = spriteContents.width();
+		int j = spriteContents.height();
 		List<ItemModelGenerator.Span> list = Lists.<ItemModelGenerator.Span>newArrayList();
-		textureAtlasSprite.getUniqueFrames().forEach(k -> {
+		spriteContents.getUniqueFrames().forEach(k -> {
 			for (int l = 0; l < j; l++) {
 				for (int m = 0; m < i; m++) {
-					boolean bl = !this.isTransparent(textureAtlasSprite, k, m, l, i, j);
-					this.checkTransition(ItemModelGenerator.SpanFacing.UP, list, textureAtlasSprite, k, m, l, i, j, bl);
-					this.checkTransition(ItemModelGenerator.SpanFacing.DOWN, list, textureAtlasSprite, k, m, l, i, j, bl);
-					this.checkTransition(ItemModelGenerator.SpanFacing.LEFT, list, textureAtlasSprite, k, m, l, i, j, bl);
-					this.checkTransition(ItemModelGenerator.SpanFacing.RIGHT, list, textureAtlasSprite, k, m, l, i, j, bl);
+					boolean bl = !this.isTransparent(spriteContents, k, m, l, i, j);
+					this.checkTransition(ItemModelGenerator.SpanFacing.UP, list, spriteContents, k, m, l, i, j, bl);
+					this.checkTransition(ItemModelGenerator.SpanFacing.DOWN, list, spriteContents, k, m, l, i, j, bl);
+					this.checkTransition(ItemModelGenerator.SpanFacing.LEFT, list, spriteContents, k, m, l, i, j, bl);
+					this.checkTransition(ItemModelGenerator.SpanFacing.RIGHT, list, spriteContents, k, m, l, i, j, bl);
 				}
 			}
 		});
@@ -158,17 +159,9 @@ public class ItemModelGenerator {
 	}
 
 	private void checkTransition(
-		ItemModelGenerator.SpanFacing spanFacing,
-		List<ItemModelGenerator.Span> list,
-		TextureAtlasSprite textureAtlasSprite,
-		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		boolean bl
+		ItemModelGenerator.SpanFacing spanFacing, List<ItemModelGenerator.Span> list, SpriteContents spriteContents, int i, int j, int k, int l, int m, boolean bl
 	) {
-		boolean bl2 = this.isTransparent(textureAtlasSprite, i, j + spanFacing.getXOffset(), k + spanFacing.getYOffset(), l, m) && bl;
+		boolean bl2 = this.isTransparent(spriteContents, i, j + spanFacing.getXOffset(), k + spanFacing.getYOffset(), l, m) && bl;
 		if (bl2) {
 			this.createOrExpandSpan(list, spanFacing, j, k);
 		}
@@ -196,8 +189,8 @@ public class ItemModelGenerator {
 		}
 	}
 
-	private boolean isTransparent(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m) {
-		return j >= 0 && k >= 0 && j < l && k < m ? textureAtlasSprite.isTransparent(i, j, k) : true;
+	private boolean isTransparent(SpriteContents spriteContents, int i, int j, int k, int l, int m) {
+		return j >= 0 && k >= 0 && j < l && k < m ? spriteContents.isTransparent(i, j, k) : true;
 	}
 
 	@Environment(EnvType.CLIENT)

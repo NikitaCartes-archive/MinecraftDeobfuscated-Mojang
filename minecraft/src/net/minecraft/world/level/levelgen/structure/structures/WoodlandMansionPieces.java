@@ -1285,11 +1285,13 @@ public class WoodlandMansionPieces {
 				}
 
 				for (Mob mob : list) {
-					mob.setPersistenceRequired();
-					mob.moveTo(blockPos, 0.0F, 0.0F);
-					mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.STRUCTURE, null, null);
-					serverLevelAccessor.addFreshEntityWithPassengers(mob);
-					serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+					if (mob != null) {
+						mob.setPersistenceRequired();
+						mob.moveTo(blockPos, 0.0F, 0.0F);
+						mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.STRUCTURE, null, null);
+						serverLevelAccessor.addFreshEntityWithPassengers(mob);
+						serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+					}
 				}
 			}
 		}

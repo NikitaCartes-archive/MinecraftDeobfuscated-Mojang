@@ -93,7 +93,7 @@ public class ItemParser {
 	private void readItem() throws CommandSyntaxException {
 		int i = this.reader.getCursor();
 		ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-		Optional<Holder<Item>> optional = this.items.get(ResourceKey.create(Registry.ITEM_REGISTRY, resourceLocation));
+		Optional<? extends Holder<Item>> optional = this.items.get(ResourceKey.create(Registry.ITEM_REGISTRY, resourceLocation));
 		this.result = Either.left((Holder<Item>)optional.orElseThrow(() -> {
 			this.reader.setCursor(i);
 			return ERROR_UNKNOWN_ITEM.createWithContext(this.reader, resourceLocation);

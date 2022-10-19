@@ -1,7 +1,6 @@
 package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,6 +11,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.animal.allay.Allay;
@@ -25,11 +25,12 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 	private final ModelPart left_arm;
 	private final ModelPart right_wing;
 	private final ModelPart left_wing;
-	private static final float FLYING_ANIMATION_X_ROT = (float) (Math.PI * 2.0 / 9.0);
-	private static final float MAX_HAND_HOLDING_ITEM_X_ROT_RAD = (float) (-Math.PI / 4);
+	private static final float FLYING_ANIMATION_X_ROT = (float) (Math.PI / 4);
+	private static final float MAX_HAND_HOLDING_ITEM_X_ROT_RAD = -1.134464F;
 	private static final float MIN_HAND_HOLDING_ITEM_X_ROT_RAD = (float) (-Math.PI / 3);
 
 	public AllayModel(ModelPart modelPart) {
+		super(RenderType::entityTranslucent);
 		this.root = modelPart.getChild("root");
 		this.head = this.root.getChild("head");
 		this.body = this.root.getChild("body");
@@ -73,20 +74,20 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		partDefinition3.addOrReplaceChild(
 			"right_wing",
 			CubeListBuilder.create().texOffs(16, 14).addBox(0.0F, 1.0F, 0.0F, 0.0F, 5.0F, 8.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(-0.5F, 0.0F, 0.65F)
+			PartPose.offset(-0.5F, 0.0F, 0.6F)
 		);
 		partDefinition3.addOrReplaceChild(
 			"left_wing",
 			CubeListBuilder.create().texOffs(16, 14).addBox(0.0F, 1.0F, 0.0F, 0.0F, 5.0F, 8.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(0.5F, 0.0F, 0.65F)
+			PartPose.offset(0.5F, 0.0F, 0.6F)
 		);
 		return LayerDefinition.create(meshDefinition, 32, 32);
 	}
 
 	public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		float k = h * 20.0F * (float) (Math.PI / 180.0) + g;
-		float l = Mth.cos(k) * (float) Math.PI * 0.15F;
+		float k = h * 20.0F * (float) (Math.PI / 180.0) + f;
+		float l = Mth.cos(k) * (float) Math.PI * 0.15F + g;
 		float m = h - (float)allay.tickCount;
 		float n = h * 9.0F * (float) (Math.PI / 180.0);
 		float o = Math.min(g / 0.3F, 1.0F);
@@ -107,37 +108,31 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 			this.head.yRot = i * (float) (Math.PI / 180.0);
 		}
 
-		this.right_wing.xRot = 0.43633232F;
-		this.right_wing.yRot = -0.61086524F + l;
-		this.left_wing.xRot = 0.43633232F;
-		this.left_wing.yRot = 0.61086524F - l;
-		float r = o * (float) (Math.PI * 2.0 / 9.0);
-		this.body.xRot = r;
-		float s = Mth.lerp(q, r, Mth.lerp(o, (float) (-Math.PI / 3), (float) (-Math.PI / 4)));
+		this.right_wing.xRot = 0.43633232F * (1.0F - o);
+		this.right_wing.yRot = (float) (-Math.PI / 4) + l;
+		this.left_wing.xRot = 0.43633232F * (1.0F - o);
+		this.left_wing.yRot = (float) (Math.PI / 4) - l;
+		this.body.xRot = o * (float) (Math.PI / 4);
+		float r = q * Mth.lerp(o, (float) (-Math.PI / 3), -1.134464F);
 		this.root.y = this.root.y + (float)Math.cos((double)n) * 0.25F * p;
-		this.right_arm.xRot = s;
-		this.left_arm.xRot = s;
-		float t = p * (1.0F - q);
-		float u = 0.43633232F - Mth.cos(n + (float) (Math.PI * 3.0 / 2.0)) * (float) Math.PI * 0.075F * t;
-		this.left_arm.zRot = -u;
-		this.right_arm.zRot = u;
+		this.right_arm.xRot = r;
+		this.left_arm.xRot = r;
+		float s = p * (1.0F - q);
+		float t = 0.43633232F - Mth.cos(n + (float) (Math.PI * 3.0 / 2.0)) * (float) Math.PI * 0.075F * s;
+		this.left_arm.zRot = -t;
+		this.right_arm.zRot = t;
 		this.right_arm.yRot = 0.27925268F * q;
 		this.left_arm.yRot = -0.27925268F * q;
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-		this.root.render(poseStack, vertexConsumer, i, j);
-	}
-
-	@Override
 	public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
-		float f = -1.5F;
-		float g = 1.5F;
+		float f = 1.0F;
+		float g = 3.0F;
 		this.root.translateAndRotate(poseStack);
 		this.body.translateAndRotate(poseStack);
-		poseStack.translate(0.0, -0.09375, 0.09375);
-		poseStack.mulPose(Vector3f.XP.rotation(this.right_arm.xRot + 0.43633232F));
+		poseStack.translate(0.0, 0.0625, 0.1875);
+		poseStack.mulPose(Vector3f.XP.rotation(this.right_arm.xRot));
 		poseStack.scale(0.7F, 0.7F, 0.7F);
 		poseStack.translate(0.0625, 0.0, 0.0);
 	}

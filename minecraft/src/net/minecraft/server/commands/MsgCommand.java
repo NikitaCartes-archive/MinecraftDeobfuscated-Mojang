@@ -8,52 +8,53 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
+import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.entity.Entity;
 
 public class MsgCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		LiteralCommandNode<CommandSourceStack> literalCommandNode = commandDispatcher.register(
 			Commands.literal("msg")
-				.then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
-					MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
+				.then(
+					Commands.argument("targets", EntityArgument.players())
+						.then(
+							Commands.argument("message", MessageArgument.message())
+								.executes(
+									commandContext -> {
+										Collection<ServerPlayer> collection = EntityArgument.getPlayers(commandContext, "targets");
+										if (!collection.isEmpty()) {
+											MessageArgument.resolveChatMessage(
+												commandContext, "message", playerChatMessage -> sendMessage(commandContext.getSource(), collection, playerChatMessage)
+											);
+										}
 
-					try {
-						return sendMessage(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), chatMessage);
-					} catch (Exception var3) {
-						chatMessage.consume(commandContext.getSource());
-						throw var3;
-					}
-				})))
+										return collection.size();
+									}
+								)
+						)
+				)
 		);
 		commandDispatcher.register(Commands.literal("tell").redirect(literalCommandNode));
 		commandDispatcher.register(Commands.literal("w").redirect(literalCommandNode));
 	}
 
-	private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, MessageArgument.ChatMessage chatMessage) {
+	private static void sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, PlayerChatMessage playerChatMessage) {
 		ChatType.Bound bound = ChatType.bind(ChatType.MSG_COMMAND_INCOMING, commandSourceStack);
-		chatMessage.resolve(commandSourceStack, playerChatMessage -> {
-			OutgoingPlayerChatMessage outgoingPlayerChatMessage = OutgoingPlayerChatMessage.create(playerChatMessage);
-			boolean bl = playerChatMessage.isFullyFiltered();
-			Entity entity = commandSourceStack.getEntity();
-			boolean bl2 = false;
+		OutgoingChatMessage outgoingChatMessage = OutgoingChatMessage.create(playerChatMessage);
+		boolean bl = false;
 
-			for (ServerPlayer serverPlayer : collection) {
-				ChatType.Bound bound2 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(serverPlayer.getDisplayName());
-				commandSourceStack.sendChatMessage(outgoingPlayerChatMessage, false, bound2);
-				boolean bl3 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
-				serverPlayer.sendChatMessage(outgoingPlayerChatMessage, bl3, bound);
-				bl2 |= bl && bl3 && serverPlayer != entity;
-			}
+		for (ServerPlayer serverPlayer : collection) {
+			ChatType.Bound bound2 = ChatType.bind(ChatType.MSG_COMMAND_OUTGOING, commandSourceStack).withTargetName(serverPlayer.getDisplayName());
+			commandSourceStack.sendChatMessage(outgoingChatMessage, false, bound2);
+			boolean bl2 = commandSourceStack.shouldFilterMessageTo(serverPlayer);
+			serverPlayer.sendChatMessage(outgoingChatMessage, bl2, bound);
+			bl |= bl2 && playerChatMessage.isFullyFiltered();
+		}
 
-			if (bl2) {
-				commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
-			}
-
-			outgoingPlayerChatMessage.sendHeadersToRemainingPlayers(commandSourceStack.getServer().getPlayerList());
-		});
-		return collection.size();
+		if (bl) {
+			commandSourceStack.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+		}
 	}
 }

@@ -6,29 +6,38 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
+import net.minecraft.server.packs.PackResources;
 
 public class Resource {
-	private final String packId;
-	private final Resource.IoSupplier<InputStream> streamSupplier;
-	private final Resource.IoSupplier<ResourceMetadata> metadataSupplier;
+	private final PackResources source;
+	private final IoSupplier<InputStream> streamSupplier;
+	private final IoSupplier<ResourceMetadata> metadataSupplier;
 	@Nullable
 	private ResourceMetadata cachedMetadata;
 
-	public Resource(String string, Resource.IoSupplier<InputStream> ioSupplier, Resource.IoSupplier<ResourceMetadata> ioSupplier2) {
-		this.packId = string;
+	public Resource(PackResources packResources, IoSupplier<InputStream> ioSupplier, IoSupplier<ResourceMetadata> ioSupplier2) {
+		this.source = packResources;
 		this.streamSupplier = ioSupplier;
 		this.metadataSupplier = ioSupplier2;
 	}
 
-	public Resource(String string, Resource.IoSupplier<InputStream> ioSupplier) {
-		this.packId = string;
+	public Resource(PackResources packResources, IoSupplier<InputStream> ioSupplier) {
+		this.source = packResources;
 		this.streamSupplier = ioSupplier;
-		this.metadataSupplier = () -> ResourceMetadata.EMPTY;
+		this.metadataSupplier = ResourceMetadata.EMPTY_SUPPLIER;
 		this.cachedMetadata = ResourceMetadata.EMPTY;
 	}
 
+	public PackResources source() {
+		return this.source;
+	}
+
 	public String sourcePackId() {
-		return this.packId;
+		return this.source.packId();
+	}
+
+	public boolean isBuiltin() {
+		return this.source.isBuiltin();
 	}
 
 	public InputStream open() throws IOException {
@@ -45,10 +54,5 @@ public class Resource {
 		}
 
 		return this.cachedMetadata;
-	}
-
-	@FunctionalInterface
-	public interface IoSupplier<T> {
-		T get() throws IOException;
 	}
 }

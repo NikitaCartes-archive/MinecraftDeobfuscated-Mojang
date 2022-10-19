@@ -36,6 +36,10 @@ public class BlockModelDefinition {
 		return GsonHelper.fromJson(context.gson, reader, BlockModelDefinition.class);
 	}
 
+	public static BlockModelDefinition fromJsonElement(BlockModelDefinition.Context context, JsonElement jsonElement) {
+		return context.gson.fromJson(jsonElement, BlockModelDefinition.class);
+	}
+
 	public BlockModelDefinition(Map<String, MultiVariant> map, MultiPart multiPart) {
 		this.multiPart = multiPart;
 		this.variants.putAll(map);

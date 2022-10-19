@@ -4,8 +4,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -148,10 +146,5 @@ public class EvokerFangs extends Entity {
 			int i = this.lifeTicks - 2;
 			return i <= 0 ? 1.0F : 1.0F - ((float)i - f) / 20.0F;
 		}
-	}
-
-	@Override
-	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
 	}
 }

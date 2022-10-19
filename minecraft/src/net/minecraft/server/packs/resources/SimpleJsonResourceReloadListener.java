@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -16,8 +17,6 @@ import org.slf4j.Logger;
 
 public abstract class SimpleJsonResourceReloadListener extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final String PATH_SUFFIX = ".json";
-	private static final int PATH_SUFFIX_LENGTH = ".json".length();
 	private final Gson gson;
 	private final String directory;
 
@@ -28,15 +27,11 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 
 	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		Map<ResourceLocation, JsonElement> map = Maps.<ResourceLocation, JsonElement>newHashMap();
-		int i = this.directory.length() + 1;
+		FileToIdConverter fileToIdConverter = FileToIdConverter.json(this.directory);
 
-		for (Entry<ResourceLocation, Resource> entry : resourceManager.listResources(
-				this.directory, resourceLocationx -> resourceLocationx.getPath().endsWith(".json")
-			)
-			.entrySet()) {
+		for (Entry<ResourceLocation, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
 			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-			String string = resourceLocation.getPath();
-			ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string.substring(i, string.length() - PATH_SUFFIX_LENGTH));
+			ResourceLocation resourceLocation2 = fileToIdConverter.fileToId(resourceLocation);
 
 			try {
 				Reader reader = ((Resource)entry.getValue()).openAsReader();
@@ -51,23 +46,23 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 					} else {
 						LOGGER.error("Couldn't load data file {} from {} as it's null or empty", resourceLocation2, resourceLocation);
 					}
-				} catch (Throwable var14) {
+				} catch (Throwable var13) {
 					if (reader != null) {
 						try {
 							reader.close();
-						} catch (Throwable var13) {
-							var14.addSuppressed(var13);
+						} catch (Throwable var12) {
+							var13.addSuppressed(var12);
 						}
 					}
 
-					throw var14;
+					throw var13;
 				}
 
 				if (reader != null) {
 					reader.close();
 				}
-			} catch (IllegalArgumentException | IOException | JsonParseException var15) {
-				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var15);
+			} catch (IllegalArgumentException | IOException | JsonParseException var14) {
+				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var14);
 			}
 		}
 

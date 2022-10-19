@@ -25,6 +25,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -353,6 +354,11 @@ public class WorldGenRegion implements WorldGenLevel {
 	@Override
 	public RegistryAccess registryAccess() {
 		return this.level.registryAccess();
+	}
+
+	@Override
+	public FeatureFlagSet enabledFeatures() {
+		return this.level.enabledFeatures();
 	}
 
 	@Override

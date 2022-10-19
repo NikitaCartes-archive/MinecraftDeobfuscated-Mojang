@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -49,19 +47,20 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	private volatile Map<TagKey<T>, HolderSet.Named<T>> tags = new IdentityHashMap();
 	private boolean frozen;
 	@Nullable
-	private final Function<T, Holder.Reference<T>> customHolderProvider;
-	@Nullable
-	private Map<T, Holder.Reference<T>> intrusiveHolderCache;
+	private Map<T, Holder.Reference<T>> unregisteredIntrusiveHolders;
 	@Nullable
 	private List<Holder.Reference<T>> holdersInOrder;
 	private int nextId;
 
-	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, @Nullable Function<T, Holder.Reference<T>> function) {
+	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
+		this(resourceKey, lifecycle, false);
+	}
+
+	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, boolean bl) {
 		super(resourceKey, lifecycle);
 		this.elementsLifecycle = lifecycle;
-		this.customHolderProvider = function;
-		if (function != null) {
-			this.intrusiveHolderCache = new IdentityHashMap();
+		if (bl) {
+			this.unregisteredIntrusiveHolders = new IdentityHashMap();
 		}
 	}
 
@@ -73,6 +72,12 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		return this.holdersInOrder;
 	}
 
+	private void validateWrite() {
+		if (this.frozen) {
+			throw new IllegalStateException("Registry is already frozen");
+		}
+	}
+
 	private void validateWrite(ResourceKey<T> resourceKey) {
 		if (this.frozen) {
 			throw new IllegalStateException("Registry is already frozen (trying to add key " + resourceKey + ")");
@@ -81,75 +86,48 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 	@Override
 	public Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
-		return this.registerMapping(i, resourceKey, object, lifecycle, true);
-	}
-
-	private Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle, boolean bl) {
 		this.validateWrite(resourceKey);
 		Validate.notNull(resourceKey);
 		Validate.notNull(object);
-		this.byId.size(Math.max(this.byId.size(), i + 1));
-		this.toId.put(object, i);
-		this.holdersInOrder = null;
-		if (bl && this.byKey.containsKey(resourceKey)) {
-			Util.logAndPauseIfInIde("Adding duplicate key '" + resourceKey + "' to registry");
+		if (this.byLocation.containsKey(resourceKey.location())) {
+			Util.pauseInIde((T)(new IllegalStateException("Adding duplicate key '" + resourceKey + "' to registry")));
 		}
 
 		if (this.byValue.containsKey(object)) {
-			Util.logAndPauseIfInIde("Adding duplicate value '" + object + "' to registry");
-		}
-
-		this.lifecycles.put(object, lifecycle);
-		this.elementsLifecycle = this.elementsLifecycle.add(lifecycle);
-		if (this.nextId <= i) {
-			this.nextId = i + 1;
+			Util.pauseInIde((T)(new IllegalStateException("Adding duplicate value '" + object + "' to registry")));
 		}
 
 		Holder.Reference<T> reference;
-		if (this.customHolderProvider != null) {
-			reference = (Holder.Reference<T>)this.customHolderProvider.apply(object);
-			Holder.Reference<T> reference2 = (Holder.Reference<T>)this.byKey.put(resourceKey, reference);
-			if (reference2 != null && reference2 != reference) {
-				throw new IllegalStateException("Invalid holder present for key " + resourceKey);
+		if (this.unregisteredIntrusiveHolders != null) {
+			reference = (Holder.Reference<T>)this.unregisteredIntrusiveHolders.remove(object);
+			if (reference == null) {
+				throw new AssertionError("Missing intrusive holder for " + resourceKey + ":" + object);
 			}
+
+			reference.bindKey(resourceKey);
 		} else {
 			reference = (Holder.Reference<T>)this.byKey.computeIfAbsent(resourceKey, resourceKeyx -> Holder.Reference.createStandAlone(this, resourceKeyx));
 		}
 
+		this.byKey.put(resourceKey, reference);
 		this.byLocation.put(resourceKey.location(), reference);
 		this.byValue.put(object, reference);
-		reference.bind(resourceKey, object);
+		this.byId.size(Math.max(this.byId.size(), i + 1));
 		this.byId.set(i, reference);
+		this.toId.put(object, i);
+		if (this.nextId <= i) {
+			this.nextId = i + 1;
+		}
+
+		this.lifecycles.put(object, lifecycle);
+		this.elementsLifecycle = this.elementsLifecycle.add(lifecycle);
+		this.holdersInOrder = null;
 		return reference;
 	}
 
 	@Override
 	public Holder<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
 		return this.registerMapping(this.nextId, resourceKey, object, lifecycle);
-	}
-
-	@Override
-	public Holder<T> registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
-		this.validateWrite(resourceKey);
-		Validate.notNull(resourceKey);
-		Validate.notNull(object);
-		Holder<T> holder = (Holder<T>)this.byKey.get(resourceKey);
-		T object2 = holder != null && holder.isBound() ? holder.value() : null;
-		int i;
-		if (object2 == null) {
-			i = optionalInt.orElse(this.nextId);
-		} else {
-			i = this.toId.getInt(object2);
-			if (optionalInt.isPresent() && optionalInt.getAsInt() != i) {
-				throw new IllegalStateException("ID mismatch");
-			}
-
-			this.lifecycles.remove(object2);
-			this.toId.removeInt(object2);
-			this.byValue.remove(object2);
-		}
-
-		return this.registerMapping(i, resourceKey, object, lifecycle, false);
 	}
 
 	@Nullable
@@ -182,19 +160,19 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public Optional<Holder<T>> getHolder(int i) {
-		return i >= 0 && i < this.byId.size() ? Optional.ofNullable((Holder)this.byId.get(i)) : Optional.empty();
+	public Optional<Holder.Reference<T>> getHolder(int i) {
+		return i >= 0 && i < this.byId.size() ? Optional.ofNullable((Holder.Reference)this.byId.get(i)) : Optional.empty();
 	}
 
 	@Override
-	public Optional<Holder<T>> getHolder(ResourceKey<T> resourceKey) {
-		return Optional.ofNullable((Holder)this.byKey.get(resourceKey));
+	public Optional<Holder.Reference<T>> getHolder(ResourceKey<T> resourceKey) {
+		return Optional.ofNullable((Holder.Reference)this.byKey.get(resourceKey));
 	}
 
 	@Override
-	public Holder<T> getOrCreateHolderOrThrow(ResourceKey<T> resourceKey) {
-		return (Holder<T>)this.byKey.computeIfAbsent(resourceKey, resourceKeyx -> {
-			if (this.customHolderProvider != null) {
+	public Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> resourceKey) {
+		return (Holder.Reference<T>)this.byKey.computeIfAbsent(resourceKey, resourceKeyx -> {
+			if (this.unregisteredIntrusiveHolders != null) {
 				throw new IllegalStateException("This registry can't create new holders without value");
 			} else {
 				this.validateWrite(resourceKeyx);
@@ -204,10 +182,10 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public DataResult<Holder<T>> getOrCreateHolder(ResourceKey<T> resourceKey) {
+	public DataResult<Holder.Reference<T>> getOrCreateHolder(ResourceKey<T> resourceKey) {
 		Holder.Reference<T> reference = (Holder.Reference<T>)this.byKey.get(resourceKey);
 		if (reference == null) {
-			if (this.customHolderProvider != null) {
+			if (this.unregisteredIntrusiveHolders != null) {
 				return DataResult.error("This registry can't create new holders without value (requested key: " + resourceKey + ")");
 			}
 
@@ -327,38 +305,41 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 	@Override
 	public Registry<T> freeze() {
-		this.frozen = true;
-		List<ResourceLocation> list = this.byKey
-			.entrySet()
-			.stream()
-			.filter(entry -> !((Holder.Reference)entry.getValue()).isBound())
-			.map(entry -> ((ResourceKey)entry.getKey()).location())
-			.sorted()
-			.toList();
-		if (!list.isEmpty()) {
-			throw new IllegalStateException("Unbound values in registry " + this.key() + ": " + list);
+		if (this.frozen) {
+			return this;
 		} else {
-			if (this.intrusiveHolderCache != null) {
-				List<Holder.Reference<T>> list2 = this.intrusiveHolderCache.values().stream().filter(reference -> !reference.isBound()).toList();
-				if (!list2.isEmpty()) {
-					throw new IllegalStateException("Some intrusive holders were not added to registry: " + list2);
+			this.frozen = true;
+			this.byValue.forEach((object, reference) -> reference.bindValue(object));
+			List<ResourceLocation> list = this.byKey
+				.entrySet()
+				.stream()
+				.filter(entry -> !((Holder.Reference)entry.getValue()).isBound())
+				.map(entry -> ((ResourceKey)entry.getKey()).location())
+				.sorted()
+				.toList();
+			if (!list.isEmpty()) {
+				throw new IllegalStateException("Unbound values in registry " + this.key() + ": " + list);
+			} else {
+				if (this.unregisteredIntrusiveHolders != null) {
+					if (!this.unregisteredIntrusiveHolders.isEmpty()) {
+						throw new IllegalStateException("Some intrusive holders were not registered: " + this.unregisteredIntrusiveHolders.values());
+					}
+
+					this.unregisteredIntrusiveHolders = null;
 				}
 
-				this.intrusiveHolderCache = null;
+				return this;
 			}
-
-			return this;
 		}
 	}
 
 	@Override
 	public Holder.Reference<T> createIntrusiveHolder(T object) {
-		if (this.customHolderProvider == null) {
+		if (this.unregisteredIntrusiveHolders == null) {
 			throw new IllegalStateException("This registry can't create intrusive holders");
-		} else if (!this.frozen && this.intrusiveHolderCache != null) {
-			return (Holder.Reference<T>)this.intrusiveHolderCache.computeIfAbsent(object, objectx -> Holder.Reference.createIntrusive(this, (T)objectx));
 		} else {
-			throw new IllegalStateException("Registry is already frozen");
+			this.validateWrite();
+			return (Holder.Reference<T>)this.unregisteredIntrusiveHolders.computeIfAbsent(object, objectx -> Holder.Reference.createIntrusive(this, (T)objectx));
 		}
 	}
 

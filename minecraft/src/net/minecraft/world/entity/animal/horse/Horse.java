@@ -27,7 +27,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
@@ -148,13 +147,11 @@ public class Horse extends AbstractHorse {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		super.getAmbientSound();
 		return SoundEvents.HORSE_AMBIENT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		super.getDeathSound();
 		return SoundEvents.HORSE_DEATH;
 	}
 
@@ -166,57 +163,33 @@ public class Horse extends AbstractHorse {
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		super.getHurtSound(damageSource);
 		return SoundEvents.HORSE_HURT;
 	}
 
 	@Override
 	protected SoundEvent getAngrySound() {
-		super.getAngrySound();
 		return SoundEvents.HORSE_ANGRY;
 	}
 
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (!this.isBaby()) {
-			if (this.isTamed() && player.isSecondaryUseActive()) {
-				this.openCustomInventoryScreen(player);
-				return InteractionResult.sidedSuccess(this.level.isClientSide);
+		boolean bl = !this.isBaby() && this.isTamed() && player.isSecondaryUseActive();
+		if (!this.isVehicle() && !bl) {
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			if (!itemStack.isEmpty()) {
+				if (this.isFood(itemStack)) {
+					return this.fedFood(player, itemStack);
+				}
+
+				if (!this.isTamed()) {
+					this.makeMad();
+					return InteractionResult.sidedSuccess(this.level.isClientSide);
+				}
 			}
 
-			if (this.isVehicle()) {
-				return super.mobInteract(player, interactionHand);
-			}
-		}
-
-		if (!itemStack.isEmpty()) {
-			if (this.isFood(itemStack)) {
-				return this.fedFood(player, itemStack);
-			}
-
-			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
-			if (interactionResult.consumesAction()) {
-				return interactionResult;
-			}
-
-			if (!this.isTamed()) {
-				this.makeMad();
-				return InteractionResult.sidedSuccess(this.level.isClientSide);
-			}
-
-			boolean bl = !this.isBaby() && !this.isSaddled() && itemStack.is(Items.SADDLE);
-			if (this.isArmor(itemStack) || bl) {
-				this.openCustomInventoryScreen(player);
-				return InteractionResult.sidedSuccess(this.level.isClientSide);
-			}
-		}
-
-		if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
-			this.doPlayerRide(player);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
+			return super.mobInteract(player, interactionHand);
 		}
 	}
 
@@ -229,39 +202,46 @@ public class Horse extends AbstractHorse {
 		}
 	}
 
+	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		AbstractHorse abstractHorse;
 		if (ageableMob instanceof Donkey) {
-			abstractHorse = EntityType.MULE.create(serverLevel);
+			Mule mule = EntityType.MULE.create(serverLevel);
+			if (mule != null) {
+				this.setOffspringAttributes(ageableMob, mule);
+			}
+
+			return mule;
 		} else {
 			Horse horse = (Horse)ageableMob;
-			abstractHorse = EntityType.HORSE.create(serverLevel);
-			int i = this.random.nextInt(9);
-			Variant variant;
-			if (i < 4) {
-				variant = this.getVariant();
-			} else if (i < 8) {
-				variant = horse.getVariant();
-			} else {
-				variant = Util.getRandom(Variant.values(), this.random);
+			Horse horse2 = EntityType.HORSE.create(serverLevel);
+			if (horse2 != null) {
+				int i = this.random.nextInt(9);
+				Variant variant;
+				if (i < 4) {
+					variant = this.getVariant();
+				} else if (i < 8) {
+					variant = horse.getVariant();
+				} else {
+					variant = Util.getRandom(Variant.values(), this.random);
+				}
+
+				int j = this.random.nextInt(5);
+				Markings markings;
+				if (j < 2) {
+					markings = this.getMarkings();
+				} else if (j < 4) {
+					markings = horse.getMarkings();
+				} else {
+					markings = Util.getRandom(Markings.values(), this.random);
+				}
+
+				horse2.setVariantAndMarkings(variant, markings);
+				this.setOffspringAttributes(ageableMob, horse2);
 			}
 
-			int j = this.random.nextInt(5);
-			Markings markings;
-			if (j < 2) {
-				markings = this.getMarkings();
-			} else if (j < 4) {
-				markings = horse.getMarkings();
-			} else {
-				markings = Util.getRandom(Markings.values(), this.random);
-			}
-
-			((Horse)abstractHorse).setVariantAndMarkings(variant, markings);
+			return horse2;
 		}
-
-		this.setOffspringAttributes(ageableMob, abstractHorse);
-		return abstractHorse;
 	}
 
 	@Override

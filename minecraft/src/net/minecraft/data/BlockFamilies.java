@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -127,6 +128,26 @@ public class BlockFamilies {
 		.trapdoor(Blocks.MANGROVE_TRAPDOOR)
 		.recipeGroupPrefix("wooden")
 		.recipeUnlockedBy("has_planks")
+		.getFamily();
+	public static final BlockFamily BAMBOO_PLANKS = familyBuilder(Blocks.BAMBOO_PLANKS)
+		.button(Blocks.BAMBOO_BUTTON)
+		.slab(Blocks.BAMBOO_SLAB)
+		.stairs(Blocks.BAMBOO_STAIRS)
+		.customFence(Blocks.BAMBOO_FENCE)
+		.customFenceGate(Blocks.BAMBOO_FENCE_GATE)
+		.pressurePlate(Blocks.BAMBOO_PRESSURE_PLATE)
+		.sign(Blocks.BAMBOO_SIGN, Blocks.BAMBOO_WALL_SIGN)
+		.door(Blocks.BAMBOO_DOOR)
+		.trapdoor(Blocks.BAMBOO_TRAPDOOR)
+		.mosaic(Blocks.BAMBOO_MOSAIC)
+		.recipeGroupPrefix("wooden")
+		.recipeUnlockedBy("has_planks")
+		.featureLockedBehind(FeatureFlags.UPDATE_1_20)
+		.getFamily();
+	public static final BlockFamily BAMBOO_MOSAIC = familyBuilder(Blocks.BAMBOO_MOSAIC)
+		.slab(Blocks.BAMBOO_MOSAIC_SLAB)
+		.stairs(Blocks.BAMBOO_MOSAIC_STAIRS)
+		.featureLockedBehind(FeatureFlags.UPDATE_1_20)
 		.getFamily();
 	public static final BlockFamily MUD_BRICKS = familyBuilder(Blocks.MUD_BRICKS)
 		.wall(Blocks.MUD_BRICK_WALL)

@@ -254,16 +254,17 @@ public final class NaturalSpawner {
 	@Nullable
 	private static Mob getMobForSpawn(ServerLevel serverLevel, EntityType<?> entityType) {
 		try {
-			Entity entity = entityType.create(serverLevel);
-			if (!(entity instanceof Mob)) {
-				throw new IllegalStateException("Trying to spawn a non-mob: " + Registry.ENTITY_TYPE.getKey(entityType));
-			} else {
-				return (Mob)entity;
+			Entity var3 = entityType.create(serverLevel);
+			if (var3 instanceof Mob) {
+				return (Mob)var3;
 			}
+
+			LOGGER.warn("Can't spawn entity of type: {}", Registry.ENTITY_TYPE.getKey(entityType));
 		} catch (Exception var4) {
 			LOGGER.warn("Failed to create mob", (Throwable)var4);
-			return null;
 		}
+
+		return null;
 	}
 
 	private static boolean isValidPositionForMob(ServerLevel serverLevel, Mob mob, double d) {
@@ -408,6 +409,10 @@ public final class NaturalSpawner {
 									entity = spawnerData.type.create(serverLevelAccessor.getLevel());
 								} catch (Exception var27) {
 									LOGGER.warn("Failed to create mob", (Throwable)var27);
+									continue;
+								}
+
+								if (entity == null) {
 									continue;
 								}
 

@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -36,7 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
-public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
+public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Nameable {
 	private static final int MAX_LEVELS = 4;
 	public static final MobEffect[][] BEACON_EFFECTS = new MobEffect[][]{
 		{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}
@@ -47,6 +48,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 	public static final int DATA_SECONDARY = 2;
 	public static final int NUM_DATA_VALUES = 3;
 	private static final int BLOCKS_CHECK_PER_TICK = 10;
+	private static final Component DEFAULT_NAME = Component.translatable("container.beacon");
 	List<BeaconBlockEntity.BeaconBeamSection> beamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	private List<BeaconBlockEntity.BeaconBeamSection> checkingBeamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	int levels;
@@ -292,6 +294,12 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 
 	@Nullable
 	@Override
+	public Component getCustomName() {
+		return this.name;
+	}
+
+	@Nullable
+	@Override
 	public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
 		return BaseContainerBlockEntity.canUnlock(player, this.lockKey, this.getDisplayName())
 			? new BeaconMenu(i, inventory, this.dataAccess, ContainerLevelAccess.create(this.level, this.getBlockPos()))
@@ -300,7 +308,12 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider {
 
 	@Override
 	public Component getDisplayName() {
-		return (Component)(this.name != null ? this.name : Component.translatable("container.beacon"));
+		return this.getName();
+	}
+
+	@Override
+	public Component getName() {
+		return this.name != null ? this.name : DEFAULT_NAME;
 	}
 
 	@Override

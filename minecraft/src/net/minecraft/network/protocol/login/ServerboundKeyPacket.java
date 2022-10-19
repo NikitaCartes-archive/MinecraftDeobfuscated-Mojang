@@ -10,7 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
-import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.util.SignatureValidator;
 
 public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 	private final byte[] keybytes;
@@ -45,8 +45,8 @@ public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 		return Crypt.decryptByteToSecretKey(privateKey, this.keybytes);
 	}
 
-	public boolean isChallengeSignatureValid(byte[] bs, ProfilePublicKey profilePublicKey) {
-		return this.nonceOrSaltSignature.<Boolean>map(bsx -> false, saltSignaturePair -> profilePublicKey.createSignatureValidator().validate(output -> {
+	public boolean isChallengeSignatureValid(byte[] bs, SignatureValidator signatureValidator) {
+		return this.nonceOrSaltSignature.<Boolean>map(bsx -> false, saltSignaturePair -> signatureValidator.validate(output -> {
 				output.update(bs);
 				output.update(saltSignaturePair.saltAsBytes());
 			}, saltSignaturePair.signature()));

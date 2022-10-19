@@ -491,6 +491,10 @@ public class Raid {
 
 			for (int l = 0; l < j; l++) {
 				Raider raider = raiderType.entityType.create(this.level);
+				if (raider == null) {
+					break;
+				}
+
 				if (!bl && raider.canBeLeader()) {
 					raider.setPatrolLeader(true);
 					this.setLeader(i, raider);

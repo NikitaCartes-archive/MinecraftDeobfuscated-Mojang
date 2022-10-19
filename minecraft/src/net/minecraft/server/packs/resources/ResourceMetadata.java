@@ -17,6 +17,7 @@ public interface ResourceMetadata {
 			return Optional.empty();
 		}
 	};
+	IoSupplier<ResourceMetadata> EMPTY_SUPPLIER = () -> EMPTY;
 
 	static ResourceMetadata fromJsonStream(InputStream inputStream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));

@@ -12,21 +12,14 @@ public class SayCommand {
 		commandDispatcher.register(
 			Commands.literal("say")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
-				.then(
-					Commands.argument("message", MessageArgument.message())
-						.executes(
-							commandContext -> {
-								MessageArgument.ChatMessage chatMessage = MessageArgument.getChatMessage(commandContext, "message");
-								CommandSourceStack commandSourceStack = commandContext.getSource();
-								PlayerList playerList = commandSourceStack.getServer().getPlayerList();
-								chatMessage.resolve(
-									commandSourceStack,
-									playerChatMessage -> playerList.broadcastChatMessage(playerChatMessage, commandSourceStack, ChatType.bind(ChatType.SAY_COMMAND, commandSourceStack))
-								);
-								return 1;
-							}
-						)
-				)
+				.then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
+					MessageArgument.resolveChatMessage(commandContext, "message", playerChatMessage -> {
+						CommandSourceStack commandSourceStack = commandContext.getSource();
+						PlayerList playerList = commandSourceStack.getServer().getPlayerList();
+						playerList.broadcastChatMessage(playerChatMessage, commandSourceStack, ChatType.bind(ChatType.SAY_COMMAND, commandSourceStack));
+					});
+					return 1;
+				}))
 		);
 	}
 }

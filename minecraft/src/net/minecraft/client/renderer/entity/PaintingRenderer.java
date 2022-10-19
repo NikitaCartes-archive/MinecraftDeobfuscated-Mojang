@@ -49,7 +49,7 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 	}
 
 	public ResourceLocation getTextureLocation(Painting painting) {
-		return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlas().location();
+		return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlasLocation();
 	}
 
 	private void renderPainting(

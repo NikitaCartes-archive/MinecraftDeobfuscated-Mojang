@@ -2,6 +2,8 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,12 +38,16 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	protected static final VoxelShape X_OCCLUSION_SHAPE = Shapes.or(Block.box(7.0, 5.0, 0.0, 9.0, 16.0, 2.0), Block.box(7.0, 5.0, 14.0, 9.0, 16.0, 16.0));
 	protected static final VoxelShape Z_OCCLUSION_SHAPE_LOW = Shapes.or(Block.box(0.0, 2.0, 7.0, 2.0, 13.0, 9.0), Block.box(14.0, 2.0, 7.0, 16.0, 13.0, 9.0));
 	protected static final VoxelShape X_OCCLUSION_SHAPE_LOW = Shapes.or(Block.box(7.0, 2.0, 0.0, 9.0, 13.0, 2.0), Block.box(7.0, 2.0, 14.0, 9.0, 13.0, 16.0));
+	private final SoundEvent closeSound;
+	private final SoundEvent openSound;
 
-	public FenceGateBlock(BlockBehaviour.Properties properties) {
+	public FenceGateBlock(BlockBehaviour.Properties properties, SoundEvent soundEvent, SoundEvent soundEvent2) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(OPEN, Boolean.valueOf(false)).setValue(POWERED, Boolean.valueOf(false)).setValue(IN_WALL, Boolean.valueOf(false))
 		);
+		this.closeSound = soundEvent;
+		this.openSound = soundEvent2;
 	}
 
 	@Override
@@ -136,7 +142,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 		}
 
 		boolean bl = (Boolean)blockState.getValue(OPEN);
-		level.levelEvent(player, bl ? 1008 : 1014, blockPos, 0);
+		level.playSound(player, blockPos, bl ? this.openSound : this.closeSound, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
 		level.gameEvent(player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
@@ -148,7 +154,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 			if ((Boolean)blockState.getValue(POWERED) != bl2) {
 				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)).setValue(OPEN, Boolean.valueOf(bl2)), 2);
 				if ((Boolean)blockState.getValue(OPEN) != bl2) {
-					level.levelEvent(null, bl2 ? 1008 : 1014, blockPos, 0);
+					level.playSound(null, blockPos, bl2 ? this.openSound : this.closeSound, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
 					level.gameEvent(null, bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 				}
 			}

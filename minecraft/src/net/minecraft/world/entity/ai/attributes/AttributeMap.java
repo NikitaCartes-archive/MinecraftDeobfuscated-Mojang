@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -50,13 +51,26 @@ public class AttributeMap {
 		return (AttributeInstance)this.attributes.computeIfAbsent(attribute, attributex -> this.supplier.createInstance(this::onAttributeModified, attributex));
 	}
 
+	@Nullable
+	public AttributeInstance getInstance(Holder<Attribute> holder) {
+		return this.getInstance(holder.value());
+	}
+
 	public boolean hasAttribute(Attribute attribute) {
 		return this.attributes.get(attribute) != null || this.supplier.hasAttribute(attribute);
+	}
+
+	public boolean hasAttribute(Holder<Attribute> holder) {
+		return this.hasAttribute(holder.value());
 	}
 
 	public boolean hasModifier(Attribute attribute, UUID uUID) {
 		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
 		return attributeInstance != null ? attributeInstance.getModifier(uUID) != null : this.supplier.hasModifier(attribute, uUID);
+	}
+
+	public boolean hasModifier(Holder<Attribute> holder, UUID uUID) {
+		return this.hasModifier(holder.value(), uUID);
 	}
 
 	public double getValue(Attribute attribute) {
@@ -72,6 +86,10 @@ public class AttributeMap {
 	public double getModifierValue(Attribute attribute, UUID uUID) {
 		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
 		return attributeInstance != null ? attributeInstance.getModifier(uUID).getAmount() : this.supplier.getModifierValue(attribute, uUID);
+	}
+
+	public double getModifierValue(Holder<Attribute> holder, UUID uUID) {
+		return this.getModifierValue(holder.value(), uUID);
 	}
 
 	public void removeAttributeModifiers(Multimap<Attribute, AttributeModifier> multimap) {

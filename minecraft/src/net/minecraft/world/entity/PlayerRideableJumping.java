@@ -8,4 +8,8 @@ public interface PlayerRideableJumping extends PlayerRideable {
 	void handleStartJump(int i);
 
 	void handleStopJump();
+
+	default int getJumpCooldown() {
+		return 0;
+	}
 }

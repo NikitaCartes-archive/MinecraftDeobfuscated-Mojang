@@ -3,6 +3,8 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -44,8 +46,10 @@ public class DoorBlock extends Block {
 	protected static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape WEST_AABB = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
+	private final SoundEvent closeSound;
+	private final SoundEvent openSound;
 
-	protected DoorBlock(BlockBehaviour.Properties properties) {
+	protected DoorBlock(BlockBehaviour.Properties properties, SoundEvent soundEvent, SoundEvent soundEvent2) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -56,6 +60,8 @@ public class DoorBlock extends Block {
 				.setValue(POWERED, Boolean.valueOf(false))
 				.setValue(HALF, DoubleBlockHalf.LOWER)
 		);
+		this.closeSound = soundEvent;
+		this.openSound = soundEvent2;
 	}
 
 	@Override
@@ -116,14 +122,6 @@ public class DoorBlock extends Block {
 			default:
 				return false;
 		}
-	}
-
-	private int getCloseSound() {
-		return this.material == Material.METAL ? 1011 : 1012;
-	}
-
-	private int getOpenSound() {
-		return this.material == Material.METAL ? 1005 : 1006;
 	}
 
 	@Nullable
@@ -195,7 +193,7 @@ public class DoorBlock extends Block {
 		} else {
 			blockState = blockState.cycle(OPEN);
 			level.setBlock(blockPos, blockState, 10);
-			level.levelEvent(player, blockState.getValue(OPEN) ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
+			this.playSound(player, level, blockPos, (Boolean)blockState.getValue(OPEN));
 			level.gameEvent(player, this.isOpen(blockState) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
@@ -208,7 +206,7 @@ public class DoorBlock extends Block {
 	public void setOpen(@Nullable Entity entity, Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
 		if (blockState.is(this) && (Boolean)blockState.getValue(OPEN) != bl) {
 			level.setBlock(blockPos, blockState.setValue(OPEN, Boolean.valueOf(bl)), 10);
-			this.playSound(level, blockPos, bl);
+			this.playSound(entity, level, blockPos, bl);
 			level.gameEvent(entity, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 		}
 	}
@@ -219,7 +217,7 @@ public class DoorBlock extends Block {
 			|| level.hasNeighborSignal(blockPos.relative(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
 		if (!this.defaultBlockState().is(block) && bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2 != (Boolean)blockState.getValue(OPEN)) {
-				this.playSound(level, blockPos, bl2);
+				this.playSound(null, level, blockPos, bl2);
 				level.gameEvent(null, bl2 ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
 			}
 
@@ -234,8 +232,8 @@ public class DoorBlock extends Block {
 		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) : blockState2.is(this);
 	}
 
-	private void playSound(Level level, BlockPos blockPos, boolean bl) {
-		level.levelEvent(null, bl ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
+	private void playSound(@Nullable Entity entity, Level level, BlockPos blockPos, boolean bl) {
+		level.playSound(entity, blockPos, bl ? this.openSound : this.closeSound, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
 	}
 
 	@Override

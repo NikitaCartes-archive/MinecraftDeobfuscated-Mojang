@@ -4,62 +4,37 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
-import com.mojang.logging.LogUtils;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.chat.SignedMessageValidator;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.SignatureValidator;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
-import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class PlayerInfo {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private final GameProfile profile;
 	private final Map<Type, ResourceLocation> textureLocations = Maps.newEnumMap(Type.class);
-	private GameType gameMode;
+	private GameType gameMode = GameType.DEFAULT_MODE;
 	private int latency;
 	private boolean pendingTextures;
 	@Nullable
 	private String skinModel;
 	@Nullable
 	private Component tabListDisplayName;
-	private int lastHealth;
-	private int displayHealth;
-	private long lastHealthTime;
-	private long healthBlinkTime;
-	private long renderVisibilityId;
 	@Nullable
-	private final ProfilePublicKey profilePublicKey;
-	private final SignedMessageValidator messageValidator;
+	private RemoteChatSession chatSession;
+	private SignedMessageValidator messageValidator = SignedMessageValidator.REJECT_ALL;
 
-	public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate, SignatureValidator signatureValidator, boolean bl) {
-		this.profile = playerUpdate.getProfile();
-		this.gameMode = playerUpdate.getGameMode();
-		this.latency = playerUpdate.getLatency();
-		this.tabListDisplayName = playerUpdate.getDisplayName();
-		ProfilePublicKey profilePublicKey = null;
-
-		try {
-			ProfilePublicKey.Data data = playerUpdate.getProfilePublicKey();
-			if (data != null) {
-				profilePublicKey = ProfilePublicKey.createValidated(signatureValidator, this.profile.getId(), data, ProfilePublicKey.EXPIRY_GRACE_PERIOD);
-			}
-		} catch (Exception var6) {
-			LOGGER.error("Failed to validate publicKey property for profile {}", this.profile.getId(), var6);
-		}
-
-		this.profilePublicKey = profilePublicKey;
-		this.messageValidator = SignedMessageValidator.create(profilePublicKey, bl);
+	public PlayerInfo(GameProfile gameProfile) {
+		this.profile = gameProfile;
 	}
 
 	public GameProfile getProfile() {
@@ -67,15 +42,23 @@ public class PlayerInfo {
 	}
 
 	@Nullable
-	public ProfilePublicKey getProfilePublicKey() {
-		return this.profilePublicKey;
+	public RemoteChatSession getChatSession() {
+		return this.chatSession;
 	}
 
 	public SignedMessageValidator getMessageValidator() {
 		return this.messageValidator;
 	}
 
-	@Nullable
+	public boolean hasVerifiableChat() {
+		return this.chatSession != null && this.chatSession.verifiable();
+	}
+
+	protected void setChatSession(@Nullable RemoteChatSession remoteChatSession) {
+		this.chatSession = remoteChatSession;
+		this.messageValidator = Util.mapNullable(remoteChatSession, RemoteChatSession::createMessageValidator, SignedMessageValidator.REJECT_ALL);
+	}
+
 	public GameType getGameMode() {
 		return this.gameMode;
 	}
@@ -150,45 +133,5 @@ public class PlayerInfo {
 	@Nullable
 	public Component getTabListDisplayName() {
 		return this.tabListDisplayName;
-	}
-
-	public int getLastHealth() {
-		return this.lastHealth;
-	}
-
-	public void setLastHealth(int i) {
-		this.lastHealth = i;
-	}
-
-	public int getDisplayHealth() {
-		return this.displayHealth;
-	}
-
-	public void setDisplayHealth(int i) {
-		this.displayHealth = i;
-	}
-
-	public long getLastHealthTime() {
-		return this.lastHealthTime;
-	}
-
-	public void setLastHealthTime(long l) {
-		this.lastHealthTime = l;
-	}
-
-	public long getHealthBlinkTime() {
-		return this.healthBlinkTime;
-	}
-
-	public void setHealthBlinkTime(long l) {
-		this.healthBlinkTime = l;
-	}
-
-	public long getRenderVisibilityId() {
-		return this.renderVisibilityId;
-	}
-
-	public void setRenderVisibilityId(long l) {
-		this.renderVisibilityId = l;
 	}
 }

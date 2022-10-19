@@ -30,6 +30,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -68,7 +72,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class BlockBehaviour {
+public abstract class BlockBehaviour implements FeatureElement {
 	protected static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{
 		Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP
 	};
@@ -81,6 +85,7 @@ public abstract class BlockBehaviour {
 	protected final float speedFactor;
 	protected final float jumpFactor;
 	protected final boolean dynamicShape;
+	protected final FeatureFlagSet requiredFeatures;
 	protected final BlockBehaviour.Properties properties;
 	@Nullable
 	protected ResourceLocation drops;
@@ -96,6 +101,7 @@ public abstract class BlockBehaviour {
 		this.speedFactor = properties.speedFactor;
 		this.jumpFactor = properties.jumpFactor;
 		this.dynamicShape = properties.dynamicShape;
+		this.requiredFeatures = properties.requiredFeatures;
 		this.properties = properties;
 	}
 
@@ -193,6 +199,11 @@ public abstract class BlockBehaviour {
 
 	public float getMaxVerticalOffset() {
 		return 0.2F;
+	}
+
+	@Override
+	public FeatureFlagSet requiredFeatures() {
+		return this.requiredFeatures;
 	}
 
 	@Deprecated
@@ -348,7 +359,7 @@ public abstract class BlockBehaviour {
 	public final ResourceLocation getLootTable() {
 		if (this.drops == null) {
 			ResourceLocation resourceLocation = Registry.BLOCK.getKey(this.asBlock());
-			this.drops = new ResourceLocation(resourceLocation.getNamespace(), "blocks/" + resourceLocation.getPath());
+			this.drops = resourceLocation.withPrefix("blocks/");
 		}
 
 		return this.drops;
@@ -385,8 +396,11 @@ public abstract class BlockBehaviour {
 		private final BlockBehaviour.StatePredicate hasPostProcess;
 		private final BlockBehaviour.StatePredicate emissiveRendering;
 		private final BlockBehaviour.OffsetType offsetType;
+		private final boolean spawnParticlesOnBreak;
 		@Nullable
 		protected BlockBehaviour.BlockStateBase.Cache cache;
+		private FluidState fluidState = Fluids.EMPTY.defaultFluidState();
+		private boolean isRandomlyTicking;
 
 		protected BlockStateBase(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<BlockState> mapCodec) {
 			super(block, immutableMap, mapCodec);
@@ -405,12 +419,16 @@ public abstract class BlockBehaviour {
 			this.hasPostProcess = properties.hasPostProcess;
 			this.emissiveRendering = properties.emissiveRendering;
 			this.offsetType = (BlockBehaviour.OffsetType)properties.offsetType.apply(this.asState());
+			this.spawnParticlesOnBreak = properties.spawnParticlesOnBreak;
 		}
 
 		public void initCache() {
 			if (!this.getBlock().hasDynamicShape()) {
 				this.cache = new BlockBehaviour.BlockStateBase.Cache(this.asState());
 			}
+
+			this.fluidState = this.owner.getFluidState(this.asState());
+			this.isRandomlyTicking = this.owner.isRandomlyTicking(this.asState());
 		}
 
 		public Block getBlock() {
@@ -681,6 +699,10 @@ public abstract class BlockBehaviour {
 			return this.getBlock().canBeReplaced(this.asState(), fluid);
 		}
 
+		public boolean canBeReplaced() {
+			return this.getMaterial().isReplaceable();
+		}
+
 		public boolean canSurvive(LevelReader levelReader, BlockPos blockPos) {
 			return this.getBlock().canSurvive(this.asState(), levelReader, blockPos);
 		}
@@ -724,11 +746,11 @@ public abstract class BlockBehaviour {
 		}
 
 		public FluidState getFluidState() {
-			return this.getBlock().getFluidState(this.asState());
+			return this.fluidState;
 		}
 
 		public boolean isRandomlyTicking() {
-			return this.getBlock().isRandomlyTicking(this.asState());
+			return this.isRandomlyTicking;
 		}
 
 		public long getSeed(BlockPos blockPos) {
@@ -763,6 +785,10 @@ public abstract class BlockBehaviour {
 
 		public BlockBehaviour.OffsetType getOffsetType() {
 			return this.offsetType;
+		}
+
+		public boolean shouldSpawnParticlesOnBreak() {
+			return this.spawnParticlesOnBreak;
 		}
 
 		static final class Cache {
@@ -850,6 +876,7 @@ public abstract class BlockBehaviour {
 		ResourceLocation drops;
 		boolean canOcclude = true;
 		boolean isAir;
+		boolean spawnParticlesOnBreak = true;
 		BlockBehaviour.StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(
 					blockGetter, blockPos, Direction.UP
 				)
@@ -862,6 +889,7 @@ public abstract class BlockBehaviour {
 		BlockBehaviour.StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
 		BlockBehaviour.StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
 		boolean dynamicShape;
+		FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 		Function<BlockState, BlockBehaviour.OffsetType> offsetType = blockState -> BlockBehaviour.OffsetType.NONE;
 
 		private Properties(Material material, MaterialColor materialColor) {
@@ -906,6 +934,8 @@ public abstract class BlockBehaviour {
 			properties.isAir = blockBehaviour.properties.isAir;
 			properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
 			properties.offsetType = blockBehaviour.properties.offsetType;
+			properties.spawnParticlesOnBreak = blockBehaviour.properties.spawnParticlesOnBreak;
+			properties.requiredFeatures = blockBehaviour.properties.requiredFeatures;
 			return properties;
 		}
 
@@ -1039,6 +1069,16 @@ public abstract class BlockBehaviour {
 
 		public BlockBehaviour.Properties offsetType(Function<BlockState, BlockBehaviour.OffsetType> function) {
 			this.offsetType = function;
+			return this;
+		}
+
+		public BlockBehaviour.Properties noParticlesOnBreak() {
+			this.spawnParticlesOnBreak = false;
+			return this;
+		}
+
+		public BlockBehaviour.Properties requiredFeatures(FeatureFlag... featureFlags) {
+			this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
 			return this;
 		}
 	}

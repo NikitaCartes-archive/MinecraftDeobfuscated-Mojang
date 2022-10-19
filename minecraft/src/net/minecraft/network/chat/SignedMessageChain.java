@@ -1,74 +1,92 @@
 package net.minecraft.network.chat;
 
-import java.util.Optional;
+import com.mojang.logging.LogUtils;
+import java.time.Instant;
+import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.Signer;
+import net.minecraft.world.entity.player.ProfilePublicKey;
+import org.slf4j.Logger;
 
 public class SignedMessageChain {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	@Nullable
-	private MessageSignature previousSignature;
+	private SignedMessageLink nextLink;
 
-	private SignedMessageChain.Link pack(Signer signer, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages) {
-		MessageSignature messageSignature = pack(signer, messageSigner, this.previousSignature, chatMessageContent, lastSeenMessages);
-		this.previousSignature = messageSignature;
-		return new SignedMessageChain.Link(messageSignature);
+	public SignedMessageChain(UUID uUID, UUID uUID2) {
+		this.nextLink = SignedMessageLink.root(uUID, uUID2);
 	}
 
-	private static MessageSignature pack(
-		Signer signer,
-		MessageSigner messageSigner,
-		@Nullable MessageSignature messageSignature,
-		ChatMessageContent chatMessageContent,
-		LastSeenMessages lastSeenMessages
-	) {
-		SignedMessageHeader signedMessageHeader = new SignedMessageHeader(messageSignature, messageSigner.profileId());
-		SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), lastSeenMessages);
-		byte[] bs = signedMessageBody.hash().asBytes();
-		return new MessageSignature(signer.sign(output -> signedMessageHeader.updateSignature(output, bs)));
+	public SignedMessageChain.Encoder encoder(Signer signer) {
+		return signedMessageBody -> {
+			SignedMessageLink signedMessageLink = this.advanceLink();
+			return signedMessageLink == null
+				? null
+				: new MessageSignature(signer.sign(output -> PlayerChatMessage.updateSignature(output, signedMessageLink, signedMessageBody)));
+		};
 	}
 
-	private PlayerChatMessage unpack(
-		SignedMessageChain.Link link, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages
-	) {
-		PlayerChatMessage playerChatMessage = unpack(link, this.previousSignature, messageSigner, chatMessageContent, lastSeenMessages);
-		this.previousSignature = link.signature;
-		return playerChatMessage;
+	public SignedMessageChain.Decoder decoder(ProfilePublicKey profilePublicKey) {
+		SignatureValidator signatureValidator = profilePublicKey.createSignatureValidator();
+		return (messageSignature, signedMessageBody) -> {
+			SignedMessageLink signedMessageLink = this.advanceLink();
+			if (signedMessageLink == null) {
+				throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.chain_broken"), false);
+			} else if (profilePublicKey.data().hasExpired()) {
+				throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.expiredProfileKey"), false);
+			} else {
+				PlayerChatMessage playerChatMessage = new PlayerChatMessage(signedMessageLink, messageSignature, signedMessageBody, null, FilterMask.PASS_THROUGH);
+				if (!playerChatMessage.verify(signatureValidator)) {
+					throw new SignedMessageChain.DecodeException(Component.translatable("multiplayer.disconnect.unsigned_chat"), true);
+				} else {
+					if (playerChatMessage.hasExpiredServer(Instant.now())) {
+						LOGGER.warn("Received expired chat: '{}'. Is the client/server system time unsynchronized?", signedMessageBody.content());
+					}
+
+					return playerChatMessage;
+				}
+			}
+		};
 	}
 
-	private static PlayerChatMessage unpack(
-		SignedMessageChain.Link link,
-		@Nullable MessageSignature messageSignature,
-		MessageSigner messageSigner,
-		ChatMessageContent chatMessageContent,
-		LastSeenMessages lastSeenMessages
-	) {
-		SignedMessageHeader signedMessageHeader = new SignedMessageHeader(messageSignature, messageSigner.profileId());
-		SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), lastSeenMessages);
-		return new PlayerChatMessage(signedMessageHeader, link.signature, signedMessageBody, Optional.empty(), FilterMask.PASS_THROUGH);
+	@Nullable
+	private SignedMessageLink advanceLink() {
+		SignedMessageLink signedMessageLink = this.nextLink;
+		if (signedMessageLink != null) {
+			this.nextLink = signedMessageLink.advance();
+		}
+
+		return signedMessageLink;
 	}
 
-	public SignedMessageChain.Decoder decoder() {
-		return this::unpack;
-	}
+	public static class DecodeException extends ThrowingComponent {
+		private final boolean shouldDisconnect;
 
-	public SignedMessageChain.Encoder encoder() {
-		return this::pack;
+		public DecodeException(Component component, boolean bl) {
+			super(component);
+			this.shouldDisconnect = bl;
+		}
+
+		public boolean shouldDisconnect() {
+			return this.shouldDisconnect;
+		}
 	}
 
 	@FunctionalInterface
 	public interface Decoder {
-		SignedMessageChain.Decoder UNSIGNED = (link, messageSigner, chatMessageContent, lastSeenMessages) -> PlayerChatMessage.unsigned(
-				messageSigner, chatMessageContent
-			);
+		static SignedMessageChain.Decoder unsigned(UUID uUID) {
+			return (messageSignature, signedMessageBody) -> PlayerChatMessage.unsigned(uUID, signedMessageBody.content());
+		}
 
-		PlayerChatMessage unpack(SignedMessageChain.Link link, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages);
+		PlayerChatMessage unpack(@Nullable MessageSignature messageSignature, SignedMessageBody signedMessageBody) throws SignedMessageChain.DecodeException;
 	}
 
 	@FunctionalInterface
 	public interface Encoder {
-		SignedMessageChain.Link pack(Signer signer, MessageSigner messageSigner, ChatMessageContent chatMessageContent, LastSeenMessages lastSeenMessages);
-	}
+		SignedMessageChain.Encoder UNSIGNED = signedMessageBody -> null;
 
-	public static record Link(MessageSignature signature) {
+		@Nullable
+		MessageSignature pack(SignedMessageBody signedMessageBody);
 	}
 }

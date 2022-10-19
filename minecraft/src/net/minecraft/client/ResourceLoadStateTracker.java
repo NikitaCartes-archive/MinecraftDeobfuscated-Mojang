@@ -28,7 +28,7 @@ public class ResourceLoadStateTracker {
 		}
 
 		this.reloadState = new ResourceLoadStateTracker.ReloadState(
-			reloadReason, (List<String>)list.stream().map(PackResources::getName).collect(ImmutableList.toImmutableList())
+			reloadReason, (List<String>)list.stream().map(PackResources::packId).collect(ImmutableList.toImmutableList())
 		);
 	}
 

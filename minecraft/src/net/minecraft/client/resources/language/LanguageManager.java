@@ -43,7 +43,7 @@ public class LanguageManager implements ResourceManagerReloadListener {
 					}
 				}
 			} catch (IOException | RuntimeException var5) {
-				LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", packResources.getName(), var5);
+				LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", packResources.packId(), var5);
 			}
 		});
 		return ImmutableMap.copyOf(map);

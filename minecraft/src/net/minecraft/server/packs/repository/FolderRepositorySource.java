@@ -1,46 +1,115 @@
 package net.minecraft.server.packs.repository;
 
+import com.mojang.logging.LogUtils;
 import java.io.File;
-import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.FilePackResources;
-import net.minecraft.server.packs.FolderPackResources;
-import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.linkfs.LinkFileSystem;
+import org.slf4j.Logger;
 
 public class FolderRepositorySource implements RepositorySource {
-	private static final FileFilter RESOURCEPACK_FILTER = file -> {
-		boolean bl = file.isFile() && file.getName().endsWith(".zip");
-		boolean bl2 = file.isDirectory() && new File(file, "pack.mcmeta").isFile();
-		return bl || bl2;
-	};
-	private final File folder;
+	private static final Logger LOGGER = LogUtils.getLogger();
+	private final Path folder;
+	private final PackType packType;
 	private final PackSource packSource;
 
-	public FolderRepositorySource(File file, PackSource packSource) {
-		this.folder = file;
+	public FolderRepositorySource(Path path, PackType packType, PackSource packSource) {
+		this.folder = path;
+		this.packType = packType;
 		this.packSource = packSource;
 	}
 
-	@Override
-	public void loadPacks(Consumer<Pack> consumer, Pack.PackConstructor packConstructor) {
-		if (!this.folder.isDirectory()) {
-			this.folder.mkdirs();
-		}
+	private static String nameFromPath(Path path) {
+		return path.getFileName().toString();
+	}
 
-		File[] files = this.folder.listFiles(RESOURCEPACK_FILTER);
-		if (files != null) {
-			for (File file : files) {
-				String string = "file/" + file.getName();
-				Pack pack = Pack.create(string, false, this.createSupplier(file), packConstructor, Pack.Position.TOP, this.packSource);
-				if (pack != null) {
-					consumer.accept(pack);
+	@Override
+	public void loadPacks(Consumer<Pack> consumer) {
+		try {
+			Files.createDirectories(this.folder);
+			discoverPacks(
+				this.folder,
+				(path, resourcesSupplier) -> {
+					String string = nameFromPath(path);
+					Pack pack = Pack.readMetaAndCreate(
+						"file/" + string, Component.literal(string), false, resourcesSupplier, this.packType, Pack.Position.TOP, this.packSource
+					);
+					if (pack != null) {
+						consumer.accept(pack);
+					}
 				}
-			}
+			);
+		} catch (IOException var3) {
+			LOGGER.warn("Failed to list packs in {}", this.folder, var3);
 		}
 	}
 
-	private Supplier<PackResources> createSupplier(File file) {
-		return file.isDirectory() ? () -> new FolderPackResources(file) : () -> new FilePackResources(file);
+	public static void discoverPacks(Path path, BiConsumer<Path, Pack.ResourcesSupplier> biConsumer) throws IOException {
+		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path);
+
+		try {
+			for (Path path2 : directoryStream) {
+				Pack.ResourcesSupplier resourcesSupplier = detectPackResources(path2);
+				if (resourcesSupplier != null) {
+					biConsumer.accept(path2, resourcesSupplier);
+				}
+			}
+		} catch (Throwable var7) {
+			if (directoryStream != null) {
+				try {
+					directoryStream.close();
+				} catch (Throwable var6) {
+					var7.addSuppressed(var6);
+				}
+			}
+
+			throw var7;
+		}
+
+		if (directoryStream != null) {
+			directoryStream.close();
+		}
+	}
+
+	@Nullable
+	public static Pack.ResourcesSupplier detectPackResources(Path path) {
+		BasicFileAttributes basicFileAttributes;
+		try {
+			basicFileAttributes = Files.readAttributes(path, BasicFileAttributes.class);
+		} catch (NoSuchFileException var4) {
+			return null;
+		} catch (IOException var5) {
+			LOGGER.warn("Failed to read properties of '{}', ignoring", path, var5);
+			return null;
+		}
+
+		if (basicFileAttributes.isDirectory() && Files.isRegularFile(path.resolve("pack.mcmeta"), new LinkOption[0])) {
+			return string -> new PathPackResources(string, path);
+		} else {
+			if (basicFileAttributes.isRegularFile() && path.getFileName().toString().endsWith(".zip")) {
+				FileSystem fileSystem = path.getFileSystem();
+				if (fileSystem == FileSystems.getDefault() || fileSystem instanceof LinkFileSystem) {
+					File file = path.toFile();
+					return string -> new FilePackResources(string, file);
+				}
+			}
+
+			LOGGER.info("Found non-pack entry '{}', ignoring", path);
+			return null;
+		}
 	}
 }

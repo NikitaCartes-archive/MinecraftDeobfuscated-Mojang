@@ -37,7 +37,6 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 
 	@Override
 	protected void subInit() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = (this.width - this.imageWidth) / 2;
 		int j = (this.height - this.imageHeight) / 2;
 		this.name = new EditBox(this.font, i + 62, j + 24, 103, 12, Component.translatable("container.repair"));
@@ -58,12 +57,6 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		String string = this.name.getValue();
 		this.init(minecraft, i, j);
 		this.name.setValue(string);
-	}
-
-	@Override
-	public void removed() {
-		super.removed();
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override

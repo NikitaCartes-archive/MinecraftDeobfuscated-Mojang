@@ -74,7 +74,7 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
 			"lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F), PartPose.offset(0.0F, 9.0F, 1.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"lock", CubeListBuilder.create().texOffs(0, 0).addBox(7.0F, -1.0F, 15.0F, 2.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 8.0F, 0.0F)
+			"lock", CubeListBuilder.create().texOffs(0, 0).addBox(7.0F, -2.0F, 14.0F, 2.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 9.0F, 1.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
@@ -87,7 +87,7 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
 			"lid", CubeListBuilder.create().texOffs(0, 0).addBox(1.0F, 0.0F, 0.0F, 15.0F, 5.0F, 14.0F), PartPose.offset(0.0F, 9.0F, 1.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"lock", CubeListBuilder.create().texOffs(0, 0).addBox(15.0F, -1.0F, 15.0F, 1.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 8.0F, 0.0F)
+			"lock", CubeListBuilder.create().texOffs(0, 0).addBox(15.0F, -2.0F, 14.0F, 1.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 9.0F, 1.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
@@ -100,7 +100,7 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
 			"lid", CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, 0.0F, 0.0F, 15.0F, 5.0F, 14.0F), PartPose.offset(0.0F, 9.0F, 1.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"lock", CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, -1.0F, 15.0F, 1.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 8.0F, 0.0F)
+			"lock", CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, -2.0F, 14.0F, 1.0F, 4.0F, 1.0F), PartPose.offset(0.0F, 9.0F, 1.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}

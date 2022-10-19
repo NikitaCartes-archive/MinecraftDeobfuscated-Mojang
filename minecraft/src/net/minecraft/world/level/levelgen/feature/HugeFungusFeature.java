@@ -60,7 +60,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	private static boolean isReplaceable(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
 		return levelAccessor.isStateAtPosition(blockPos, blockState -> {
 			Material material = blockState.getMaterial();
-			return blockState.getMaterial().isReplaceable() || bl && material == Material.PLANT;
+			return blockState.canBeReplaced() || bl && material == Material.PLANT;
 		});
 	}
 

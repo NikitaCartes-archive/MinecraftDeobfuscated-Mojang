@@ -35,7 +35,9 @@ public abstract class HierarchicalModel<E extends Entity> extends EntityModel<E>
 	public abstract ModelPart root();
 
 	public Optional<ModelPart> getAnyDescendantWithName(String string) {
-		return this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
+		return string.equals("root")
+			? Optional.of(this.root())
+			: this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
 	}
 
 	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f) {

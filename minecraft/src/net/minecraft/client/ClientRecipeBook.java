@@ -16,9 +16,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.core.Registry;
 import net.minecraft.stats.RecipeBook;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.slf4j.Logger;
@@ -78,36 +78,46 @@ public class ClientRecipeBook extends RecipeBook {
 	}
 
 	private static RecipeBookCategories getCategory(Recipe<?> recipe) {
-		RecipeType<?> recipeType = recipe.getType();
-		if (recipeType == RecipeType.CRAFTING) {
-			ItemStack itemStack = recipe.getResultItem();
-			CreativeModeTab creativeModeTab = itemStack.getItem().getItemCategory();
-			if (creativeModeTab == CreativeModeTab.TAB_BUILDING_BLOCKS) {
-				return RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
-			} else if (creativeModeTab == CreativeModeTab.TAB_TOOLS || creativeModeTab == CreativeModeTab.TAB_COMBAT) {
-				return RecipeBookCategories.CRAFTING_EQUIPMENT;
-			} else {
-				return creativeModeTab == CreativeModeTab.TAB_REDSTONE ? RecipeBookCategories.CRAFTING_REDSTONE : RecipeBookCategories.CRAFTING_MISC;
-			}
-		} else if (recipeType == RecipeType.SMELTING) {
-			if (recipe.getResultItem().getItem().isEdible()) {
-				return RecipeBookCategories.FURNACE_FOOD;
-			} else {
-				return recipe.getResultItem().getItem() instanceof BlockItem ? RecipeBookCategories.FURNACE_BLOCKS : RecipeBookCategories.FURNACE_MISC;
-			}
-		} else if (recipeType == RecipeType.BLASTING) {
-			return recipe.getResultItem().getItem() instanceof BlockItem ? RecipeBookCategories.BLAST_FURNACE_BLOCKS : RecipeBookCategories.BLAST_FURNACE_MISC;
-		} else if (recipeType == RecipeType.SMOKING) {
-			return RecipeBookCategories.SMOKER_FOOD;
-		} else if (recipeType == RecipeType.STONECUTTING) {
-			return RecipeBookCategories.STONECUTTER;
-		} else if (recipeType == RecipeType.CAMPFIRE_COOKING) {
-			return RecipeBookCategories.CAMPFIRE;
-		} else if (recipeType == RecipeType.SMITHING) {
-			return RecipeBookCategories.SMITHING;
+		if (recipe instanceof CraftingRecipe craftingRecipe) {
+			return switch (craftingRecipe.category()) {
+				case BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+				case EQUIPMENT -> RecipeBookCategories.CRAFTING_EQUIPMENT;
+				case REDSTONE -> RecipeBookCategories.CRAFTING_REDSTONE;
+				case MISC -> RecipeBookCategories.CRAFTING_MISC;
+			};
 		} else {
-			LOGGER.warn("Unknown recipe category: {}/{}", LogUtils.defer(() -> Registry.RECIPE_TYPE.getKey(recipe.getType())), LogUtils.defer(recipe::getId));
-			return RecipeBookCategories.UNKNOWN;
+			RecipeType<?> recipeType = recipe.getType();
+			if (recipe instanceof AbstractCookingRecipe abstractCookingRecipe) {
+				CookingBookCategory cookingBookCategory = abstractCookingRecipe.category();
+				if (recipeType == RecipeType.SMELTING) {
+					return switch (cookingBookCategory) {
+						case BLOCKS -> RecipeBookCategories.FURNACE_BLOCKS;
+						case FOOD -> RecipeBookCategories.FURNACE_FOOD;
+						case MISC -> RecipeBookCategories.FURNACE_MISC;
+					};
+				}
+
+				if (recipeType == RecipeType.BLASTING) {
+					return cookingBookCategory == CookingBookCategory.BLOCKS ? RecipeBookCategories.BLAST_FURNACE_BLOCKS : RecipeBookCategories.BLAST_FURNACE_MISC;
+				}
+
+				if (recipeType == RecipeType.SMOKING) {
+					return RecipeBookCategories.SMOKER_FOOD;
+				}
+
+				if (recipeType == RecipeType.CAMPFIRE_COOKING) {
+					return RecipeBookCategories.CAMPFIRE;
+				}
+			}
+
+			if (recipeType == RecipeType.STONECUTTING) {
+				return RecipeBookCategories.STONECUTTER;
+			} else if (recipeType == RecipeType.SMITHING) {
+				return RecipeBookCategories.SMITHING;
+			} else {
+				LOGGER.warn("Unknown recipe category: {}/{}", LogUtils.defer(() -> Registry.RECIPE_TYPE.getKey(recipe.getType())), LogUtils.defer(recipe::getId));
+				return RecipeBookCategories.UNKNOWN;
+			}
 		}
 	}
 

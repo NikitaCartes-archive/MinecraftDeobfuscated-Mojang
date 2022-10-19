@@ -29,7 +29,8 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 			options.fovEffectScale(),
 			options.darkMojangStudiosBackground(),
 			options.hideLightningFlash(),
-			options.darknessEffectScale()
+			options.darknessEffectScale(),
+			options.panoramaSpeed()
 		};
 	}
 

@@ -87,12 +87,8 @@ public class BlockStateParser {
 		this.allowNbt = bl2;
 	}
 
-	public static BlockStateParser.BlockResult parseForBlock(Registry<Block> registry, String string, boolean bl) throws CommandSyntaxException {
-		return parseForBlock(registry, new StringReader(string), bl);
-	}
-
-	public static BlockStateParser.BlockResult parseForBlock(Registry<Block> registry, StringReader stringReader, boolean bl) throws CommandSyntaxException {
-		return parseForBlock(HolderLookup.forRegistry(registry), stringReader, bl);
+	public static BlockStateParser.BlockResult parseForBlock(HolderLookup<Block> holderLookup, String string, boolean bl) throws CommandSyntaxException {
+		return parseForBlock(holderLookup, new StringReader(string), bl);
 	}
 
 	public static BlockStateParser.BlockResult parseForBlock(HolderLookup<Block> holderLookup, StringReader stringReader, boolean bl) throws CommandSyntaxException {
@@ -108,12 +104,8 @@ public class BlockStateParser {
 		}
 	}
 
-	public static Either<BlockStateParser.BlockResult, BlockStateParser.TagResult> parseForTesting(Registry<Block> registry, String string, boolean bl) throws CommandSyntaxException {
-		return parseForTesting(registry, new StringReader(string), bl);
-	}
-
-	public static Either<BlockStateParser.BlockResult, BlockStateParser.TagResult> parseForTesting(Registry<Block> registry, StringReader stringReader, boolean bl) throws CommandSyntaxException {
-		return parseForTesting(HolderLookup.forRegistry(registry), new StringReader(stringReader), bl);
+	public static Either<BlockStateParser.BlockResult, BlockStateParser.TagResult> parseForTesting(HolderLookup<Block> holderLookup, String string, boolean bl) throws CommandSyntaxException {
+		return parseForTesting(holderLookup, new StringReader(string), bl);
 	}
 
 	public static Either<BlockStateParser.BlockResult, BlockStateParser.TagResult> parseForTesting(
@@ -360,7 +352,7 @@ public class BlockStateParser {
 	private void readBlock() throws CommandSyntaxException {
 		int i = this.reader.getCursor();
 		this.id = ResourceLocation.read(this.reader);
-		Block block = (Block)((Holder)this.blocks.get(ResourceKey.create(Registry.BLOCK_REGISTRY, this.id)).orElseThrow(() -> {
+		Block block = (Block)((Holder.Reference)this.blocks.get(ResourceKey.create(Registry.BLOCK_REGISTRY, this.id)).orElseThrow(() -> {
 			this.reader.setCursor(i);
 			return ERROR_UNKNOWN_BLOCK.createWithContext(this.reader, this.id.toString());
 		})).value();

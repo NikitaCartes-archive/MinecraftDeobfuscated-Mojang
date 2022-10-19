@@ -499,6 +499,33 @@ public class SoundType {
 	public static final SoundType PACKED_MUD = new SoundType(
 		1.0F, 1.0F, SoundEvents.PACKED_MUD_BREAK, SoundEvents.PACKED_MUD_STEP, SoundEvents.PACKED_MUD_PLACE, SoundEvents.PACKED_MUD_HIT, SoundEvents.PACKED_MUD_FALL
 	);
+	public static final SoundType HANGING_SIGN = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.HANGING_SIGN_BREAK,
+		SoundEvents.HANGING_SIGN_STEP,
+		SoundEvents.HANGING_SIGN_PLACE,
+		SoundEvents.HANGING_SIGN_HIT,
+		SoundEvents.HANGING_SIGN_FALL
+	);
+	public static final SoundType BAMBOO_WOOD = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.BAMBOO_WOOD_BREAK,
+		SoundEvents.BAMBOO_WOOD_STEP,
+		SoundEvents.BAMBOO_WOOD_PLACE,
+		SoundEvents.BAMBOO_WOOD_HIT,
+		SoundEvents.BAMBOO_WOOD_FALL
+	);
+	public static final SoundType NETHER_WOOD = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.NETHER_WOOD_BREAK,
+		SoundEvents.NETHER_WOOD_STEP,
+		SoundEvents.NETHER_WOOD_PLACE,
+		SoundEvents.NETHER_WOOD_HIT,
+		SoundEvents.NETHER_WOOD_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

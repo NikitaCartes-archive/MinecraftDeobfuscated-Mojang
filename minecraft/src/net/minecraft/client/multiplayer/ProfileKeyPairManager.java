@@ -25,9 +25,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
-import net.minecraft.util.Signer;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class ProfileKeyPairManager {
 	private static final Path PROFILE_KEY_PAIR_DIR = Path.of("profilekeys");
 	private final UserApiService userApiService;
 	private final Path profileKeyPairPath;
-	private CompletableFuture<Optional<ProfileKeyPairManager.Result>> keyPair;
+	private CompletableFuture<Optional<ProfileKeyPair>> keyPair;
 
 	public ProfileKeyPairManager(UserApiService userApiService, UUID uUID, Path path) {
 		this.userApiService = userApiService;
@@ -49,15 +49,12 @@ public class ProfileKeyPairManager {
 			.thenCompose(this::readOrFetchProfileKeyPair);
 	}
 
-	public CompletableFuture<Optional<ProfilePublicKey.Data>> preparePublicKey() {
-		this.keyPair = this.keyPair.thenCompose(optional -> {
-			Optional<ProfileKeyPair> optional2 = optional.map(ProfileKeyPairManager.Result::keyPair);
-			return this.readOrFetchProfileKeyPair(optional2);
-		});
-		return this.keyPair.thenApply(optional -> optional.map(result -> result.keyPair().publicKey().data()));
+	public CompletableFuture<LocalChatSession> prepareChatSession() {
+		this.keyPair = this.keyPair.thenCompose(this::readOrFetchProfileKeyPair);
+		return this.keyPair.thenApply(optional -> LocalChatSession.create((ProfileKeyPair)optional.orElse(null)));
 	}
 
-	private CompletableFuture<Optional<ProfileKeyPairManager.Result>> readOrFetchProfileKeyPair(Optional<ProfileKeyPair> optional) {
+	private CompletableFuture<Optional<ProfileKeyPair>> readOrFetchProfileKeyPair(Optional<ProfileKeyPair> optional) {
 		return CompletableFuture.supplyAsync(() -> {
 			if (optional.isPresent() && !((ProfileKeyPair)optional.get()).dueRefresh()) {
 				if (SharedConstants.IS_RUNNING_IN_IDE) {
@@ -76,7 +73,7 @@ public class ProfileKeyPairManager {
 				this.writeProfileKeyPair(null);
 				return optional;
 			}
-		}, Util.backgroundExecutor()).thenApply(optionalx -> optionalx.map(ProfileKeyPairManager.Result::new));
+		}, Util.backgroundExecutor());
 	}
 
 	private Optional<ProfileKeyPair> readProfileKeyPair() {
@@ -160,22 +157,6 @@ public class ProfileKeyPairManager {
 			}
 		} else {
 			throw new CryptException(new MissingException());
-		}
-	}
-
-	@Nullable
-	public Signer signer() {
-		return (Signer)((Optional)this.keyPair.join()).map(ProfileKeyPairManager.Result::signer).orElse(null);
-	}
-
-	public Optional<ProfilePublicKey> profilePublicKey() {
-		return ((Optional)this.keyPair.join()).map(result -> result.keyPair().publicKey());
-	}
-
-	@Environment(EnvType.CLIENT)
-	static record Result(ProfileKeyPair keyPair, Signer signer) {
-		public Result(ProfileKeyPair profileKeyPair) {
-			this(profileKeyPair, Signer.from(profileKeyPair.privateKey(), "SHA256withRSA"));
 		}
 	}
 }

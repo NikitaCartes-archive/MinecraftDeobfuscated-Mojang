@@ -1,34 +1,34 @@
 package net.minecraft.data.advancements;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 public class AdvancementProvider implements DataProvider {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final DataGenerator.PathProvider pathProvider;
-	private final List<Consumer<Consumer<Advancement>>> tabs = ImmutableList.of(
-		new TheEndAdvancements(), new HusbandryAdvancements(), new AdventureAdvancements(), new NetherAdvancements(), new StoryAdvancements()
-	);
+	private final String name;
+	private final PackOutput.PathProvider pathProvider;
+	private final List<AdvancementSubProvider> subProviders;
 
-	public AdvancementProvider(DataGenerator dataGenerator) {
-		this.pathProvider = dataGenerator.createPathProvider(DataGenerator.Target.DATA_PACK, "advancements");
+	public AdvancementProvider(String string, PackOutput packOutput, List<AdvancementSubProvider> list) {
+		this.name = string;
+		this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "advancements");
+		this.subProviders = list;
 	}
 
 	@Override
 	public void run(CachedOutput cachedOutput) {
-		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
+		Set<ResourceLocation> set = new HashSet();
 		Consumer<Advancement> consumer = advancement -> {
 			if (!set.add(advancement.getId())) {
 				throw new IllegalStateException("Duplicate advancement " + advancement.getId());
@@ -43,13 +43,13 @@ public class AdvancementProvider implements DataProvider {
 			}
 		};
 
-		for (Consumer<Consumer<Advancement>> consumer2 : this.tabs) {
-			consumer2.accept(consumer);
+		for (AdvancementSubProvider advancementSubProvider : this.subProviders) {
+			advancementSubProvider.generate(consumer);
 		}
 	}
 
 	@Override
 	public String getName() {
-		return "Advancements";
+		return this.name;
 	}
 }

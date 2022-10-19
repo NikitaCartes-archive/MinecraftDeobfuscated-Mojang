@@ -35,6 +35,12 @@ public class ModelTemplates {
 	public static final ModelTemplate DOOR_TOP_LEFT_OPEN = create("door_top_left_open", "_top_left_open", TextureSlot.TOP, TextureSlot.BOTTOM);
 	public static final ModelTemplate DOOR_TOP_RIGHT = create("door_top_right", "_top_right", TextureSlot.TOP, TextureSlot.BOTTOM);
 	public static final ModelTemplate DOOR_TOP_RIGHT_OPEN = create("door_top_right_open", "_top_right_open", TextureSlot.TOP, TextureSlot.BOTTOM);
+	public static final ModelTemplate CUSTOM_FENCE_POST = create("custom_fence_post", "_post", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+	public static final ModelTemplate CUSTOM_FENCE_SIDE_NORTH = create("custom_fence_side_north", "_side_north", TextureSlot.TEXTURE);
+	public static final ModelTemplate CUSTOM_FENCE_SIDE_EAST = create("custom_fence_side_east", "_side_east", TextureSlot.TEXTURE);
+	public static final ModelTemplate CUSTOM_FENCE_SIDE_SOUTH = create("custom_fence_side_south", "_side_south", TextureSlot.TEXTURE);
+	public static final ModelTemplate CUSTOM_FENCE_SIDE_WEST = create("custom_fence_side_west", "_side_west", TextureSlot.TEXTURE);
+	public static final ModelTemplate CUSTOM_FENCE_INVENTORY = create("custom_fence_inventory", "_inventory", TextureSlot.TEXTURE);
 	public static final ModelTemplate FENCE_POST = create("fence_post", "_post", TextureSlot.TEXTURE);
 	public static final ModelTemplate FENCE_SIDE = create("fence_side", "_side", TextureSlot.TEXTURE);
 	public static final ModelTemplate FENCE_INVENTORY = create("fence_inventory", "_inventory", TextureSlot.TEXTURE);
@@ -42,6 +48,12 @@ public class ModelTemplates {
 	public static final ModelTemplate WALL_LOW_SIDE = create("template_wall_side", "_side", TextureSlot.WALL);
 	public static final ModelTemplate WALL_TALL_SIDE = create("template_wall_side_tall", "_side_tall", TextureSlot.WALL);
 	public static final ModelTemplate WALL_INVENTORY = create("wall_inventory", "_inventory", TextureSlot.WALL);
+	public static final ModelTemplate CUSTOM_FENCE_GATE_CLOSED = create("template_custom_fence_gate", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+	public static final ModelTemplate CUSTOM_FENCE_GATE_OPEN = create("template_custom_fence_gate_open", "_open", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+	public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_CLOSED = create("template_custom_fence_gate_wall", "_wall", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
+	public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_OPEN = create(
+		"template_custom_fence_gate_wall_open", "_wall_open", TextureSlot.TEXTURE, TextureSlot.PARTICLE
+	);
 	public static final ModelTemplate FENCE_GATE_CLOSED = create("template_fence_gate", TextureSlot.TEXTURE);
 	public static final ModelTemplate FENCE_GATE_OPEN = create("template_fence_gate_open", "_open", TextureSlot.TEXTURE);
 	public static final ModelTemplate FENCE_GATE_WALL_CLOSED = create("template_fence_gate_wall", "_wall", TextureSlot.TEXTURE);
@@ -82,6 +94,7 @@ public class ModelTemplates {
 	public static final ModelTemplate STAINED_GLASS_PANE_SIDE = create("template_glass_pane_side", "_side", TextureSlot.PANE, TextureSlot.EDGE);
 	public static final ModelTemplate STAINED_GLASS_PANE_SIDE_ALT = create("template_glass_pane_side_alt", "_side_alt", TextureSlot.PANE, TextureSlot.EDGE);
 	public static final ModelTemplate COMMAND_BLOCK = create("template_command_block", TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.SIDE);
+	public static final ModelTemplate CHISELED_BOOKSHELF_BLOCK = create("template_chiseled_bookshelf", TextureSlot.FRONT, TextureSlot.SIDE, TextureSlot.TOP);
 	public static final ModelTemplate ANVIL = create("template_anvil", TextureSlot.TOP);
 	public static final ModelTemplate[] STEMS = (ModelTemplate[])IntStream.range(0, 8)
 		.mapToObj(i -> create("stem_growth" + i, "_stage" + i, TextureSlot.STEM))

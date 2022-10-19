@@ -36,9 +36,9 @@ public class CreateBuffetWorldScreen extends Screen {
 		super(Component.translatable("createWorld.customize.buffet.title"));
 		this.parent = screen;
 		this.applySettings = consumer;
-		this.biomes = worldCreationContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+		this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registry.BIOME_REGISTRY);
 		Holder<Biome> holder = (Holder<Biome>)this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
-		this.biome = (Holder<Biome>)worldCreationContext.worldGenSettings().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
+		this.biome = (Holder<Biome>)worldCreationContext.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
 	}
 
 	@Override

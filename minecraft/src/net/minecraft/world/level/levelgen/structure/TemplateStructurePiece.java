@@ -106,7 +106,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 					BlockState blockState = Blocks.AIR.defaultBlockState();
 
 					try {
-						blockState = BlockStateParser.parseForBlock(Registry.BLOCK, string, true).blockState();
+						blockState = BlockStateParser.parseForBlock(worldGenLevel.holderLookup(Registry.BLOCK_REGISTRY), string, true).blockState();
 					} catch (CommandSyntaxException var15) {
 						LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos);
 					}

@@ -9,19 +9,20 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.levelgen.WorldOptions;
 
 public interface WorldData {
 	int ANVIL_VERSION_ID = 19133;
 	int MCREGION_VERSION_ID = 19132;
 
-	DataPackConfig getDataPackConfig();
+	WorldDataConfiguration getDataConfiguration();
 
-	void setDataPackConfig(DataPackConfig dataPackConfig);
+	void setDataConfiguration(WorldDataConfiguration worldDataConfiguration);
 
 	boolean wasModded();
 
@@ -89,7 +90,15 @@ public interface WorldData {
 
 	void setEndDragonFightData(CompoundTag compoundTag);
 
-	WorldGenSettings worldGenSettings();
+	WorldOptions worldGenOptions();
+
+	boolean isFlatWorld();
+
+	boolean isDebugWorld();
 
 	Lifecycle worldGenSettingsLifecycle();
+
+	default FeatureFlagSet enabledFeatures() {
+		return this.getDataConfiguration().enabledFeatures();
+	}
 }

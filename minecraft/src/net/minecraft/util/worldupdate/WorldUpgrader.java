@@ -2,7 +2,6 @@ package net.minecraft.util.worldupdate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -17,13 +16,16 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -33,7 +35,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.chunk.storage.RegionFile;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.slf4j.Logger;
@@ -41,7 +43,8 @@ import org.slf4j.Logger;
 public class WorldUpgrader {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).build();
-	private final WorldGenSettings worldGenSettings;
+	private final Registry<LevelStem> dimensions;
+	private final Set<ResourceKey<Level>> levels;
 	private final boolean eraseCache;
 	private final LevelStorageSource.LevelStorageAccess levelStorage;
 	private final Thread thread;
@@ -57,8 +60,9 @@ public class WorldUpgrader {
 	private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 	private final DimensionDataStorage overworldDataStorage;
 
-	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, WorldGenSettings worldGenSettings, boolean bl) {
-		this.worldGenSettings = worldGenSettings;
+	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, Registry<LevelStem> registry, boolean bl) {
+		this.dimensions = registry;
+		this.levels = (Set<ResourceKey<Level>>)registry.registryKeySet().stream().map(Registry::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
 		this.eraseCache = bl;
 		this.dataFixer = dataFixer;
 		this.levelStorage = levelStorageAccess;
@@ -84,9 +88,8 @@ public class WorldUpgrader {
 	private void work() {
 		this.totalChunks = 0;
 		Builder<ResourceKey<Level>, ListIterator<ChunkPos>> builder = ImmutableMap.builder();
-		ImmutableSet<ResourceKey<Level>> immutableSet = this.worldGenSettings.levels();
 
-		for (ResourceKey<Level> resourceKey : immutableSet) {
+		for (ResourceKey<Level> resourceKey : this.levels) {
 			List<ChunkPos> list = this.getAllChunkPos(resourceKey);
 			builder.put(resourceKey, list.listIterator());
 			this.totalChunks = this.totalChunks + list.size();
@@ -99,7 +102,7 @@ public class WorldUpgrader {
 			ImmutableMap<ResourceKey<Level>, ListIterator<ChunkPos>> immutableMap = builder.build();
 			Builder<ResourceKey<Level>, ChunkStorage> builder2 = ImmutableMap.builder();
 
-			for (ResourceKey<Level> resourceKey2 : immutableSet) {
+			for (ResourceKey<Level> resourceKey2 : this.levels) {
 				Path path = this.levelStorage.getDimensionPath(resourceKey2);
 				builder2.put(resourceKey2, new ChunkStorage(path.resolve("region"), this.dataFixer, true));
 			}
@@ -112,7 +115,7 @@ public class WorldUpgrader {
 				boolean bl = false;
 				float g = 0.0F;
 
-				for (ResourceKey<Level> resourceKey3 : immutableSet) {
+				for (ResourceKey<Level> resourceKey3 : this.levels) {
 					ListIterator<ChunkPos> listIterator = immutableMap.get(resourceKey3);
 					ChunkStorage chunkStorage = immutableMap2.get(resourceKey3);
 					if (listIterator.hasNext()) {
@@ -123,7 +126,7 @@ public class WorldUpgrader {
 							CompoundTag compoundTag = (CompoundTag)((Optional)chunkStorage.read(chunkPos).join()).orElse(null);
 							if (compoundTag != null) {
 								int i = ChunkStorage.getVersion(compoundTag);
-								ChunkGenerator chunkGenerator = this.worldGenSettings.dimensions().get(WorldGenSettings.levelToLevelStem(resourceKey3)).generator();
+								ChunkGenerator chunkGenerator = this.dimensions.getOrThrow(Registry.levelToLevelStem(resourceKey3)).generator();
 								CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(
 									resourceKey3, () -> this.overworldDataStorage, compoundTag, chunkGenerator.getTypeNameForDataFixer()
 								);
@@ -154,10 +157,10 @@ public class WorldUpgrader {
 									bl2 = true;
 								}
 							}
-						} catch (CompletionException | ReportedException var27) {
-							Throwable throwable = var27.getCause();
+						} catch (CompletionException | ReportedException var26) {
+							Throwable throwable = var26.getCause();
 							if (!(throwable instanceof IOException)) {
-								throw var27;
+								throw var26;
 							}
 
 							LOGGER.error("Error upgrading chunk {}", chunkPos, throwable);
@@ -188,8 +191,8 @@ public class WorldUpgrader {
 			for (ChunkStorage chunkStorage2 : immutableMap2.values()) {
 				try {
 					chunkStorage2.close();
-				} catch (IOException var26) {
-					LOGGER.error("Error upgrading chunk", (Throwable)var26);
+				} catch (IOException var25) {
+					LOGGER.error("Error upgrading chunk", (Throwable)var25);
 				}
 			}
 
@@ -237,8 +240,8 @@ public class WorldUpgrader {
 		return this.finished;
 	}
 
-	public ImmutableSet<ResourceKey<Level>> levels() {
-		return this.worldGenSettings.levels();
+	public Set<ResourceKey<Level>> levels() {
+		return this.levels;
 	}
 
 	public float dimensionProgress(ResourceKey<Level> resourceKey) {

@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.block;
 
-import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
@@ -11,13 +10,12 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
 @Environment(EnvType.CLIENT)
 public class BlockModelShaper {
-	private final Map<BlockState, BakedModel> modelByStateCache = Maps.<BlockState, BakedModel>newIdentityHashMap();
+	private Map<BlockState, BakedModel> modelByStateCache = Map.of();
 	private final ModelManager modelManager;
 
 	public BlockModelShaper(ModelManager modelManager) {
@@ -41,14 +39,8 @@ public class BlockModelShaper {
 		return this.modelManager;
 	}
 
-	public void rebuildCache() {
-		this.modelByStateCache.clear();
-
-		for (Block block : Registry.BLOCK) {
-			block.getStateDefinition()
-				.getPossibleStates()
-				.forEach(blockState -> this.modelByStateCache.put(blockState, this.modelManager.getModel(stateToModelLocation(blockState))));
-		}
+	public void replaceCache(Map<BlockState, BakedModel> map) {
+		this.modelByStateCache = map;
 	}
 
 	public static ModelResourceLocation stateToModelLocation(BlockState blockState) {

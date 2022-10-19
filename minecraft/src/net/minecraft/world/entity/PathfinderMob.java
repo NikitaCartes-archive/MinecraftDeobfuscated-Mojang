@@ -55,6 +55,7 @@ public abstract class PathfinderMob extends Mob {
 				double e = (entity.getY() - this.getY()) / (double)f;
 				double g = (entity.getZ() - this.getZ()) / (double)f;
 				this.setDeltaMovement(this.getDeltaMovement().add(Math.copySign(d * d * 0.4, d), Math.copySign(e * e * 0.4, e), Math.copySign(g * g * 0.4, g)));
+				this.checkSlowFallDistance();
 			} else if (this.shouldStayCloseToLeashHolder()) {
 				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
 				float h = 2.0F;

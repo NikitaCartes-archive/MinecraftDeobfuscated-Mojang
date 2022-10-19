@@ -1,89 +1,66 @@
 package net.minecraft.network.chat;
 
+import com.google.common.primitives.Ints;
+import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.Util;
+import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 
 public record PlayerChatMessage(
-	SignedMessageHeader signedHeader, MessageSignature headerSignature, SignedMessageBody signedBody, Optional<Component> unsignedContent, FilterMask filterMask
+	SignedMessageLink link, @Nullable MessageSignature signature, SignedMessageBody signedBody, @Nullable Component unsignedContent, FilterMask filterMask
 ) {
+	private static final UUID SYSTEM_SENDER = Util.NIL_UUID;
 	public static final Duration MESSAGE_EXPIRES_AFTER_SERVER = Duration.ofMinutes(5L);
 	public static final Duration MESSAGE_EXPIRES_AFTER_CLIENT = MESSAGE_EXPIRES_AFTER_SERVER.plus(Duration.ofMinutes(2L));
 
-	public PlayerChatMessage(FriendlyByteBuf friendlyByteBuf) {
-		this(
-			new SignedMessageHeader(friendlyByteBuf),
-			new MessageSignature(friendlyByteBuf),
-			new SignedMessageBody(friendlyByteBuf),
-			friendlyByteBuf.readOptional(FriendlyByteBuf::readComponent),
-			FilterMask.read(friendlyByteBuf)
-		);
+	public static PlayerChatMessage system(String string) {
+		return unsigned(SYSTEM_SENDER, string);
 	}
 
-	public static PlayerChatMessage system(ChatMessageContent chatMessageContent) {
-		return unsigned(MessageSigner.system(), chatMessageContent);
-	}
-
-	public static PlayerChatMessage unsigned(MessageSigner messageSigner, ChatMessageContent chatMessageContent) {
-		SignedMessageBody signedMessageBody = new SignedMessageBody(chatMessageContent, messageSigner.timeStamp(), messageSigner.salt(), LastSeenMessages.EMPTY);
-		SignedMessageHeader signedMessageHeader = new SignedMessageHeader(null, messageSigner.profileId());
-		return new PlayerChatMessage(signedMessageHeader, MessageSignature.EMPTY, signedMessageBody, Optional.empty(), FilterMask.PASS_THROUGH);
-	}
-
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		this.signedHeader.write(friendlyByteBuf);
-		this.headerSignature.write(friendlyByteBuf);
-		this.signedBody.write(friendlyByteBuf);
-		friendlyByteBuf.writeOptional(this.unsignedContent, FriendlyByteBuf::writeComponent);
-		FilterMask.write(friendlyByteBuf, this.filterMask);
+	public static PlayerChatMessage unsigned(UUID uUID, String string) {
+		SignedMessageBody signedMessageBody = SignedMessageBody.unsigned(string);
+		SignedMessageLink signedMessageLink = SignedMessageLink.unsigned(uUID);
+		return new PlayerChatMessage(signedMessageLink, null, signedMessageBody, null, FilterMask.PASS_THROUGH);
 	}
 
 	public PlayerChatMessage withUnsignedContent(Component component) {
-		Optional<Component> optional = !this.signedContent().decorated().equals(component) ? Optional.of(component) : Optional.empty();
-		return new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, optional, this.filterMask);
+		Component component2 = !component.equals(Component.literal(this.signedContent())) ? component : null;
+		return new PlayerChatMessage(this.link, this.signature, this.signedBody, component2, this.filterMask);
 	}
 
 	public PlayerChatMessage removeUnsignedContent() {
-		return this.unsignedContent.isPresent()
-			? new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, Optional.empty(), this.filterMask)
-			: this;
+		return this.unsignedContent != null ? new PlayerChatMessage(this.link, this.signature, this.signedBody, null, this.filterMask) : this;
 	}
 
 	public PlayerChatMessage filter(FilterMask filterMask) {
-		return this.filterMask.equals(filterMask)
-			? this
-			: new PlayerChatMessage(this.signedHeader, this.headerSignature, this.signedBody, this.unsignedContent, filterMask);
+		return this.filterMask.equals(filterMask) ? this : new PlayerChatMessage(this.link, this.signature, this.signedBody, this.unsignedContent, filterMask);
 	}
 
 	public PlayerChatMessage filter(boolean bl) {
 		return this.filter(bl ? this.filterMask : FilterMask.PASS_THROUGH);
 	}
 
+	public static void updateSignature(SignatureUpdater.Output output, SignedMessageLink signedMessageLink, SignedMessageBody signedMessageBody) throws SignatureException {
+		output.update(Ints.toByteArray(1));
+		signedMessageLink.updateSignature(output);
+		signedMessageBody.updateSignature(output);
+	}
+
 	public boolean verify(SignatureValidator signatureValidator) {
-		return this.headerSignature.verify(signatureValidator, this.signedHeader, this.signedBody);
+		return this.signature != null && this.signature.verify(signatureValidator, output -> updateSignature(output, this.link, this.signedBody));
 	}
 
-	public boolean verify(ProfilePublicKey profilePublicKey) {
-		SignatureValidator signatureValidator = profilePublicKey.createSignatureValidator();
-		return this.verify(signatureValidator);
-	}
-
-	public boolean verify(ChatSender chatSender) {
-		ProfilePublicKey profilePublicKey = chatSender.profilePublicKey();
-		return profilePublicKey != null && this.verify(profilePublicKey);
-	}
-
-	public ChatMessageContent signedContent() {
+	public String signedContent() {
 		return this.signedBody.content();
 	}
 
-	public Component serverContent() {
-		return (Component)this.unsignedContent().orElse(this.signedContent().decorated());
+	public Component decoratedContent() {
+		return (Component)Objects.requireNonNullElseGet(this.unsignedContent, () -> Component.literal(this.signedContent()));
 	}
 
 	public Instant timeStamp() {
@@ -102,18 +79,20 @@ public record PlayerChatMessage(
 		return instant.isAfter(this.timeStamp().plus(MESSAGE_EXPIRES_AFTER_CLIENT));
 	}
 
-	public MessageSigner signer() {
-		return new MessageSigner(this.signedHeader.sender(), this.timeStamp(), this.salt());
+	public UUID sender() {
+		return this.link.sender();
 	}
 
-	@Nullable
-	public LastSeenMessages.Entry toLastSeenEntry() {
-		MessageSigner messageSigner = this.signer();
-		return !this.headerSignature.isEmpty() && !messageSigner.isSystem() ? new LastSeenMessages.Entry(messageSigner.profileId(), this.headerSignature) : null;
+	public boolean isSystem() {
+		return this.sender().equals(SYSTEM_SENDER);
+	}
+
+	public boolean hasSignature() {
+		return this.signature != null;
 	}
 
 	public boolean hasSignatureFrom(UUID uUID) {
-		return !this.headerSignature.isEmpty() && this.signedHeader.sender().equals(uUID);
+		return this.hasSignature() && this.link.sender().equals(uUID);
 	}
 
 	public boolean isFullyFiltered() {

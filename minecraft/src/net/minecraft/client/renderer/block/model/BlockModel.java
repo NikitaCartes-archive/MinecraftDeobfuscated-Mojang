@@ -13,7 +13,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.Reader;
 import java.io.StringReader;
@@ -36,6 +35,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BuiltInModel;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.SimpleBakedModel;
@@ -125,8 +125,8 @@ public class BlockModel implements UnbakedModel {
 		return this.overrides;
 	}
 
-	private ItemOverrides getItemOverrides(ModelBakery modelBakery, BlockModel blockModel) {
-		return this.overrides.isEmpty() ? ItemOverrides.EMPTY : new ItemOverrides(modelBakery, blockModel, modelBakery::getModel, this.overrides);
+	private ItemOverrides getItemOverrides(ModelBaker modelBaker, BlockModel blockModel) {
+		return this.overrides.isEmpty() ? ItemOverrides.EMPTY : new ItemOverrides(modelBaker, blockModel, this.overrides);
 	}
 
 	@Override
@@ -145,21 +145,21 @@ public class BlockModel implements UnbakedModel {
 	}
 
 	@Override
-	public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> function, Set<Pair<String, String>> set) {
-		Set<UnbakedModel> set2 = Sets.<UnbakedModel>newLinkedHashSet();
+	public void resolveParents(Function<ResourceLocation, UnbakedModel> function) {
+		Set<UnbakedModel> set = Sets.<UnbakedModel>newLinkedHashSet();
 
 		for (BlockModel blockModel = this; blockModel.parentLocation != null && blockModel.parent == null; blockModel = blockModel.parent) {
-			set2.add(blockModel);
+			set.add(blockModel);
 			UnbakedModel unbakedModel = (UnbakedModel)function.apply(blockModel.parentLocation);
 			if (unbakedModel == null) {
 				LOGGER.warn("No parent '{}' while loading model '{}'", this.parentLocation, blockModel);
 			}
 
-			if (set2.contains(unbakedModel)) {
+			if (set.contains(unbakedModel)) {
 				LOGGER.warn(
 					"Found 'parent' loop while loading model '{}' in chain: {} -> {}",
 					blockModel,
-					set2.stream().map(Object::toString).collect(Collectors.joining(" -> ")),
+					set.stream().map(Object::toString).collect(Collectors.joining(" -> ")),
 					this.parentLocation
 				);
 				unbakedModel = null;
@@ -177,39 +177,21 @@ public class BlockModel implements UnbakedModel {
 			blockModel.parent = (BlockModel)unbakedModel;
 		}
 
-		Set<Material> set3 = Sets.<Material>newHashSet(this.getMaterial("particle"));
-
-		for (BlockElement blockElement : this.getElements()) {
-			for (BlockElementFace blockElementFace : blockElement.faces.values()) {
-				Material material = this.getMaterial(blockElementFace.texture);
-				if (Objects.equals(material.texture(), MissingTextureAtlasSprite.getLocation())) {
-					set.add(Pair.of(blockElementFace.texture, this.name));
-				}
-
-				set3.add(material);
-			}
-		}
-
 		this.overrides.forEach(itemOverride -> {
 			UnbakedModel unbakedModelx = (UnbakedModel)function.apply(itemOverride.getModel());
 			if (!Objects.equals(unbakedModelx, this)) {
-				set3.addAll(unbakedModelx.getMaterials(function, set));
+				unbakedModelx.resolveParents(function);
 			}
 		});
-		if (this.getRootModel() == ModelBakery.GENERATION_MARKER) {
-			ItemModelGenerator.LAYERS.forEach(string -> set3.add(this.getMaterial(string)));
-		}
-
-		return set3;
 	}
 
 	@Override
-	public BakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
-		return this.bake(modelBakery, this, function, modelState, resourceLocation, true);
+	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
+		return this.bake(modelBaker, this, function, modelState, resourceLocation, true);
 	}
 
 	public BakedModel bake(
-		ModelBakery modelBakery,
+		ModelBaker modelBaker,
 		BlockModel blockModel,
 		Function<Material, TextureAtlasSprite> function,
 		ModelState modelState,
@@ -218,9 +200,9 @@ public class BlockModel implements UnbakedModel {
 	) {
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)function.apply(this.getMaterial("particle"));
 		if (this.getRootModel() == ModelBakery.BLOCK_ENTITY_MARKER) {
-			return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBakery, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
+			return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBaker, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
 		} else {
-			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.getItemOverrides(modelBakery, blockModel), bl).particle(textureAtlasSprite);
+			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.getItemOverrides(modelBaker, blockModel), bl).particle(textureAtlasSprite);
 
 			for (BlockElement blockElement : this.getElements()) {
 				for (Direction direction : blockElement.faces.keySet()) {

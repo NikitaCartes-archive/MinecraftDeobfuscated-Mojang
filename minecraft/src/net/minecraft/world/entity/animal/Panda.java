@@ -239,11 +239,14 @@ public class Panda extends Animal {
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Panda panda = EntityType.PANDA.create(serverLevel);
-		if (ageableMob instanceof Panda) {
-			panda.setGeneFromParents(this, (Panda)ageableMob);
+		if (panda != null) {
+			if (ageableMob instanceof Panda panda2) {
+				panda.setGeneFromParents(this, panda2);
+			}
+
+			panda.setAttributes();
 		}
 
-		panda.setAttributes();
 		return panda;
 	}
 

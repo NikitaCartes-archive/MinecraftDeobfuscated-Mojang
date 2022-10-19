@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 	Codec<BlockPredicate> CODEC = Registry.BLOCK_PREDICATE_TYPES.byNameCodec().dispatch(BlockPredicate::type, BlockPredicateType::codec);
@@ -112,6 +113,14 @@ public interface BlockPredicate extends BiPredicate<WorldGenLevel, BlockPos> {
 
 	static BlockPredicate solid() {
 		return solid(Vec3i.ZERO);
+	}
+
+	static BlockPredicate noFluid() {
+		return noFluid(Vec3i.ZERO);
+	}
+
+	static BlockPredicate noFluid(Vec3i vec3i) {
+		return matchesFluids(vec3i, Fluids.EMPTY);
 	}
 
 	static BlockPredicate insideWorld(Vec3i vec3i) {

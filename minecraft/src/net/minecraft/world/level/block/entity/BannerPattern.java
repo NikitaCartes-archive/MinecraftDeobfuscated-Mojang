@@ -21,8 +21,7 @@ public class BannerPattern {
 
 	public static ResourceLocation location(ResourceKey<BannerPattern> resourceKey, boolean bl) {
 		String string = bl ? "banner" : "shield";
-		ResourceLocation resourceLocation = resourceKey.location();
-		return new ResourceLocation(resourceLocation.getNamespace(), "entity/" + string + "/" + resourceLocation.getPath());
+		return resourceKey.location().withPrefix("entity/" + string + "/");
 	}
 
 	public String getHashname() {

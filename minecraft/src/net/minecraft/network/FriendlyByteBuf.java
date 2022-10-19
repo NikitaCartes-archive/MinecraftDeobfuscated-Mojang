@@ -30,9 +30,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +60,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -214,6 +217,31 @@ public class FriendlyByteBuf extends ByteBuf {
 		for (int j = 0; j < i; j++) {
 			consumer.accept(this);
 		}
+	}
+
+	public <E extends Enum<E>> void writeEnumSet(EnumSet<E> enumSet, Class<E> class_) {
+		E[] enums = (E[])class_.getEnumConstants();
+		BitSet bitSet = new BitSet(enums.length);
+
+		for (int i = 0; i < enums.length; i++) {
+			bitSet.set(i, enumSet.contains(enums[i]));
+		}
+
+		this.writeFixedBitSet(bitSet, enums.length);
+	}
+
+	public <E extends Enum<E>> EnumSet<E> readEnumSet(Class<E> class_) {
+		E[] enums = (E[])class_.getEnumConstants();
+		BitSet bitSet = this.readFixedBitSet(enums.length);
+		EnumSet<E> enumSet = EnumSet.noneOf(class_);
+
+		for (int i = 0; i < enums.length; i++) {
+			if (bitSet.get(i)) {
+				enumSet.add(enums[i]);
+			}
+		}
+
+		return enumSet;
 	}
 
 	public <T> void writeOptional(Optional<T> optional, FriendlyByteBuf.Writer<T> writer) {
@@ -668,22 +696,46 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.writeLongArray(bitSet.toLongArray());
 	}
 
+	public BitSet readFixedBitSet(int i) {
+		byte[] bs = new byte[Mth.positiveCeilDiv(i, 8)];
+		this.readBytes(bs);
+		return BitSet.valueOf(bs);
+	}
+
+	public void writeFixedBitSet(BitSet bitSet, int i) {
+		if (bitSet.length() > i) {
+			throw new EncoderException("BitSet is larger than expected size (" + bitSet.length() + ">" + i + ")");
+		} else {
+			byte[] bs = bitSet.toByteArray();
+			this.writeBytes(Arrays.copyOf(bs, Mth.positiveCeilDiv(i, 8)));
+		}
+	}
+
 	public GameProfile readGameProfile() {
 		UUID uUID = this.readUUID();
 		String string = this.readUtf(16);
 		GameProfile gameProfile = new GameProfile(uUID, string);
-		PropertyMap propertyMap = gameProfile.getProperties();
-		this.readWithCount(friendlyByteBuf -> {
-			Property property = this.readProperty();
-			propertyMap.put(property.getName(), property);
-		});
+		gameProfile.getProperties().putAll(this.readGameProfileProperties());
 		return gameProfile;
 	}
 
 	public void writeGameProfile(GameProfile gameProfile) {
 		this.writeUUID(gameProfile.getId());
 		this.writeUtf(gameProfile.getName());
-		this.writeCollection(gameProfile.getProperties().values(), FriendlyByteBuf::writeProperty);
+		this.writeGameProfileProperties(gameProfile.getProperties());
+	}
+
+	public PropertyMap readGameProfileProperties() {
+		PropertyMap propertyMap = new PropertyMap();
+		this.readWithCount(friendlyByteBuf -> {
+			Property property = this.readProperty();
+			propertyMap.put(property.getName(), property);
+		});
+		return propertyMap;
+	}
+
+	public void writeGameProfileProperties(PropertyMap propertyMap) {
+		this.writeCollection(propertyMap.values(), FriendlyByteBuf::writeProperty);
 	}
 
 	public Property readProperty() {

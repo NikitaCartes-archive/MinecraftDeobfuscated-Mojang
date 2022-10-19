@@ -13,7 +13,7 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 
 public class WorldPreset {
 	public static final Codec<WorldPreset> DIRECT_CODEC = RecordCodecBuilder.create(
@@ -33,8 +33,8 @@ public class WorldPreset {
 	}
 
 	private Registry<LevelStem> createRegistry() {
-		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
-		LevelStem.keysInOrder(this.dimensions.keySet().stream()).forEach(resourceKey -> {
+		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+		WorldDimensions.keysInOrder(this.dimensions.keySet().stream()).forEach(resourceKey -> {
 			LevelStem levelStem = (LevelStem)this.dimensions.get(resourceKey);
 			if (levelStem != null) {
 				writableRegistry.register(resourceKey, levelStem, Lifecycle.stable());
@@ -43,20 +43,12 @@ public class WorldPreset {
 		return writableRegistry.freeze();
 	}
 
-	public WorldGenSettings createWorldGenSettings(long l, boolean bl, boolean bl2) {
-		return new WorldGenSettings(l, bl, bl2, this.createRegistry());
-	}
-
-	public WorldGenSettings recreateWorldGenSettings(WorldGenSettings worldGenSettings) {
-		return this.createWorldGenSettings(worldGenSettings.seed(), worldGenSettings.generateStructures(), worldGenSettings.generateBonusChest());
+	public WorldDimensions createWorldDimensions() {
+		return new WorldDimensions(this.createRegistry());
 	}
 
 	public Optional<LevelStem> overworld() {
 		return Optional.ofNullable((LevelStem)this.dimensions.get(LevelStem.OVERWORLD));
-	}
-
-	public LevelStem overworldOrThrow() {
-		return (LevelStem)this.overworld().orElseThrow(() -> new IllegalStateException("Can't find overworld in this preset"));
 	}
 
 	private static DataResult<WorldPreset> requireOverworld(WorldPreset worldPreset) {

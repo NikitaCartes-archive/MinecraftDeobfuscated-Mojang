@@ -5,8 +5,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 public class SmokingRecipe extends AbstractCookingRecipe {
-	public SmokingRecipe(ResourceLocation resourceLocation, String string, Ingredient ingredient, ItemStack itemStack, float f, int i) {
-		super(RecipeType.SMOKING, resourceLocation, string, ingredient, itemStack, f, i);
+	public SmokingRecipe(
+		ResourceLocation resourceLocation, String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i
+	) {
+		super(RecipeType.SMOKING, resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	@Override

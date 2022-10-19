@@ -95,8 +95,8 @@ public class RamTarget extends Behavior<Goat> {
 		} else {
 			Optional<WalkTarget> optional = brain.getMemory(MemoryModuleType.WALK_TARGET);
 			Optional<Vec3> optional2 = brain.getMemory(MemoryModuleType.RAM_TARGET);
-			boolean bl2 = !optional.isPresent()
-				|| !optional2.isPresent()
+			boolean bl2 = optional.isEmpty()
+				|| optional2.isEmpty()
 				|| ((WalkTarget)optional.get()).getTarget().currentPosition().closerThan((Position)optional2.get(), 0.25);
 			if (bl2) {
 				this.finishRam(serverLevel, goat);

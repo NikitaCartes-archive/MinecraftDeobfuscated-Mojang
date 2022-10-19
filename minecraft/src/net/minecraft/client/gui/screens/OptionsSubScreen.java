@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
@@ -38,5 +39,14 @@ public class OptionsSubScreen extends Screen {
 		return (List<FormattedCharSequence>)(optional.isPresent() && optional.get() instanceof TooltipAccessor
 			? ((TooltipAccessor)optional.get()).getTooltip()
 			: ImmutableList.of());
+	}
+
+	protected void basicListRender(PoseStack poseStack, OptionsList optionsList, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		optionsList.render(poseStack, i, j, f);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
+		super.render(poseStack, i, j, f);
+		List<FormattedCharSequence> list = tooltipAt(optionsList, i, j);
+		this.renderTooltip(poseStack, list, i, j);
 	}
 }
