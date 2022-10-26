@@ -73,25 +73,21 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			})
 			.start();
 		this.addWidget(this.pendingInvitationSelectionList);
-		this.acceptButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 174, this.height - 32, 100, 20, Component.translatable("mco.invites.button.accept"), button -> {
-				this.accept(this.selectedInvite);
-				this.selectedInvite = -1;
-				this.updateButtonStates();
-			})
-		);
+		this.acceptButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.invites.button.accept"), button -> {
+			this.accept(this.selectedInvite);
+			this.selectedInvite = -1;
+			this.updateButtonStates();
+		}).bounds(this.width / 2 - 174, this.height - 32, 100, 20).build());
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 - 50, this.height - 32, 100, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(new RealmsMainScreen(this.lastScreen))
-			)
+			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(new RealmsMainScreen(this.lastScreen)))
+				.bounds(this.width / 2 - 50, this.height - 32, 100, 20)
+				.build()
 		);
-		this.rejectButton = this.addRenderableWidget(
-			new Button(this.width / 2 + 74, this.height - 32, 100, 20, Component.translatable("mco.invites.button.reject"), button -> {
-				this.reject(this.selectedInvite);
-				this.selectedInvite = -1;
-				this.updateButtonStates();
-			})
-		);
+		this.rejectButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.invites.button.reject"), button -> {
+			this.reject(this.selectedInvite);
+			this.selectedInvite = -1;
+			this.updateButtonStates();
+		}).bounds(this.width / 2 + 74, this.height - 32, 100, 20).build());
 		this.updateButtonStates();
 	}
 

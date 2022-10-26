@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
@@ -34,13 +34,13 @@ public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
 		super.setupRotations(cat, poseStack, f, g, h);
 		float i = cat.getLieDownAmount(h);
 		if (i > 0.0F) {
-			poseStack.translate((double)(0.4F * i), (double)(0.15F * i), (double)(0.1F * i));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.rotLerp(i, 0.0F, 90.0F)));
+			poseStack.translate(0.4F * i, 0.15F * i, 0.1F * i);
+			poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp(i, 0.0F, 90.0F)));
 			BlockPos blockPos = cat.blockPosition();
 
 			for (Player player : cat.level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0))) {
 				if (player.isSleeping()) {
-					poseStack.translate((double)(0.15F * i), 0.0, 0.0);
+					poseStack.translate(0.15F * i, 0.0F, 0.0F);
 					break;
 				}
 			}

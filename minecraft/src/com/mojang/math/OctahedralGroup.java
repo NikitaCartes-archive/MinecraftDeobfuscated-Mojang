@@ -12,6 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.util.StringRepresentable;
+import org.joml.Matrix3f;
 
 public enum OctahedralGroup implements StringRepresentable {
 	IDENTITY("identity", SymmetricGroup3.P123, false, false, false),
@@ -110,10 +111,7 @@ public enum OctahedralGroup implements StringRepresentable {
 		this.invertY = bl2;
 		this.invertZ = bl3;
 		this.permutation = symmetricGroup3;
-		this.transformation = new Matrix3f();
-		this.transformation.m00 = bl ? -1.0F : 1.0F;
-		this.transformation.m11 = bl2 ? -1.0F : 1.0F;
-		this.transformation.m22 = bl3 ? -1.0F : 1.0F;
+		this.transformation = new Matrix3f().scaling(bl ? -1.0F : 1.0F, bl2 ? -1.0F : 1.0F, bl3 ? -1.0F : 1.0F);
 		this.transformation.mul(symmetricGroup3.transformation());
 	}
 
@@ -130,7 +128,7 @@ public enum OctahedralGroup implements StringRepresentable {
 	}
 
 	public Matrix3f transformation() {
-		return this.transformation.copy();
+		return new Matrix3f(this.transformation);
 	}
 
 	public String toString() {

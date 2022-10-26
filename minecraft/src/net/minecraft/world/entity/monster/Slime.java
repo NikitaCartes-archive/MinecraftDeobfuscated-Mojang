@@ -53,6 +53,7 @@ public class Slime extends Mob implements Enemy {
 
 	public Slime(EntityType<? extends Slime> entityType, Level level) {
 		super(entityType, level);
+		this.fixupDimensions();
 		this.moveControl = new Slime.SlimeMoveControl(this);
 	}
 

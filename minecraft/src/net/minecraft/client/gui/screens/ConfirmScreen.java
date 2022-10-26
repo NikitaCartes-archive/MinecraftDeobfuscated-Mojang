@@ -50,8 +50,8 @@ public class ConfirmScreen extends Screen {
 	}
 
 	protected void addButtons(int i) {
-		this.addExitButton(new Button(this.width / 2 - 155, i, 150, 20, this.yesButton, button -> this.callback.accept(true)));
-		this.addExitButton(new Button(this.width / 2 - 155 + 160, i, 150, 20, this.noButton, button -> this.callback.accept(false)));
+		this.addExitButton(Button.builder(this.yesButton, button -> this.callback.accept(true)).bounds(this.width / 2 - 155, i, 150, 20).build());
+		this.addExitButton(Button.builder(this.noButton, button -> this.callback.accept(false)).bounds(this.width / 2 - 155 + 160, i, 150, 20).build());
 	}
 
 	protected void addExitButton(Button button) {

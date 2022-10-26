@@ -8,11 +8,11 @@ import net.minecraft.world.item.ItemStack;
 
 public class IndirectEntityDamageSource extends EntityDamageSource {
 	@Nullable
-	private final Entity owner;
+	private final Entity cause;
 
 	public IndirectEntityDamageSource(String string, Entity entity, @Nullable Entity entity2) {
 		super(string, entity);
-		this.owner = entity2;
+		this.cause = entity2;
 	}
 
 	@Nullable
@@ -24,17 +24,19 @@ public class IndirectEntityDamageSource extends EntityDamageSource {
 	@Nullable
 	@Override
 	public Entity getEntity() {
-		return this.owner;
+		return this.cause;
 	}
 
 	@Override
 	public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-		Component component = this.owner == null ? this.entity.getDisplayName() : this.owner.getDisplayName();
-		ItemStack itemStack = this.owner instanceof LivingEntity ? ((LivingEntity)this.owner).getMainHandItem() : ItemStack.EMPTY;
+		Component component = this.cause == null ? this.entity.getDisplayName() : this.cause.getDisplayName();
+		ItemStack itemStack = this.cause instanceof LivingEntity livingEntity2 ? livingEntity2.getMainHandItem() : ItemStack.EMPTY;
 		String string = "death.attack." + this.msgId;
-		String string2 = string + ".item";
-		return !itemStack.isEmpty() && itemStack.hasCustomHoverName()
-			? Component.translatable(string2, livingEntity.getDisplayName(), component, itemStack.getDisplayName())
-			: Component.translatable(string, livingEntity.getDisplayName(), component);
+		if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {
+			String string2 = string + ".item";
+			return Component.translatable(string2, livingEntity.getDisplayName(), component, itemStack.getDisplayName());
+		} else {
+			return Component.translatable(string, livingEntity.getDisplayName(), component);
+		}
 	}
 }

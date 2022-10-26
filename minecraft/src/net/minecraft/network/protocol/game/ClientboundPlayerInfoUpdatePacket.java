@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
@@ -95,8 +96,8 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 			friendlyByteBuf.writeGameProfileProperties(entry.profile().getProperties());
 		}),
 		INITIALIZE_CHAT(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.chatSession = RemoteChatSession.Data.read(friendlyByteBuf),
-			(friendlyByteBuf, entry) -> RemoteChatSession.Data.write(friendlyByteBuf, entry.chatSession())
+			(entryBuilder, friendlyByteBuf) -> entryBuilder.chatSession = friendlyByteBuf.readNullable(RemoteChatSession.Data::read),
+			(friendlyByteBuf, entry) -> friendlyByteBuf.writeNullable(entry.chatSession, RemoteChatSession.Data::write)
 		),
 		UPDATE_GAME_MODE(
 			(entryBuilder, friendlyByteBuf) -> entryBuilder.gameMode = GameType.byId(friendlyByteBuf.readVarInt()),
@@ -133,8 +134,15 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 	}
 
 	public static record Entry(
-		UUID profileId, GameProfile profile, boolean listed, int latency, GameType gameMode, @Nullable Component displayName, RemoteChatSession.Data chatSession
+		UUID profileId,
+		GameProfile profile,
+		boolean listed,
+		int latency,
+		GameType gameMode,
+		@Nullable Component displayName,
+		@Nullable RemoteChatSession.Data chatSession
 	) {
+
 		Entry(ServerPlayer serverPlayer) {
 			this(
 				serverPlayer.getUUID(),
@@ -143,7 +151,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 				serverPlayer.latency,
 				serverPlayer.gameMode.getGameModeForPlayer(),
 				serverPlayer.getTabListDisplayName(),
-				serverPlayer.getChatSession().asData()
+				Util.mapNullable(serverPlayer.getChatSession(), RemoteChatSession::asData)
 			);
 		}
 	}
@@ -156,6 +164,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 		GameType gameMode = GameType.DEFAULT_MODE;
 		@Nullable
 		Component displayName;
+		@Nullable
 		RemoteChatSession.Data chatSession;
 
 		EntryBuilder(UUID uUID) {

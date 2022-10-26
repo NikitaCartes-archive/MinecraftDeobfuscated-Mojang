@@ -32,10 +32,10 @@ public class SoundOptionsScreen extends OptionsSubScreen {
 		this.list.addBig(this.options.soundDevice());
 		this.list.addSmall(buttonOptions(this.options));
 		this.addWidget(this.list);
-		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> {
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
 			this.minecraft.options.save();
 			this.minecraft.setScreen(this.lastScreen);
-		}));
+		}).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
 	}
 
 	private OptionInstance<?>[] getAllSoundOptionsExceptMaster() {

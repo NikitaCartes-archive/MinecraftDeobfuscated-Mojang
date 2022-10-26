@@ -50,13 +50,13 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 				poseStack.scale(l, l, l);
 			}
 
-			poseStack.translate(0.0, (double)(this.babyYHeadOffset / 16.0F), (double)(this.babyZHeadOffset / 16.0F));
+			poseStack.translate(0.0F, this.babyYHeadOffset / 16.0F, this.babyZHeadOffset / 16.0F);
 			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 			poseStack.popPose();
 			poseStack.pushPose();
 			float l = 1.0F / this.babyBodyScale;
 			poseStack.scale(l, l, l);
-			poseStack.translate(0.0, (double)(this.bodyYOffset / 16.0F), 0.0);
+			poseStack.translate(0.0F, this.bodyYOffset / 16.0F, 0.0F);
 			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 			poseStack.popPose();
 		} else {

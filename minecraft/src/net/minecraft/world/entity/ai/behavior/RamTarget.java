@@ -83,12 +83,12 @@ public class RamTarget extends Behavior<Goat> {
 			float h = livingEntity.isDamageSourceBlocked(DamageSource.mobAttack(goat)) ? 0.5F : 1.0F;
 			livingEntity.knockback((double)(h * g) * this.getKnockbackForce.applyAsDouble(goat), this.ramDirection.x(), this.ramDirection.z());
 			this.finishRam(serverLevel, goat);
-			serverLevel.playSound(null, goat, (SoundEvent)this.getImpactSound.apply(goat), SoundSource.HOSTILE, 1.0F, 1.0F);
+			serverLevel.playSound(null, goat, (SoundEvent)this.getImpactSound.apply(goat), SoundSource.NEUTRAL, 1.0F, 1.0F);
 		} else if (this.hasRammedHornBreakingBlock(serverLevel, goat)) {
-			serverLevel.playSound(null, goat, (SoundEvent)this.getImpactSound.apply(goat), SoundSource.HOSTILE, 1.0F, 1.0F);
+			serverLevel.playSound(null, goat, (SoundEvent)this.getImpactSound.apply(goat), SoundSource.NEUTRAL, 1.0F, 1.0F);
 			boolean bl = goat.dropHorn();
 			if (bl) {
-				serverLevel.playSound(null, goat, (SoundEvent)this.getHornBreakSound.apply(goat), SoundSource.HOSTILE, 1.0F, 1.0F);
+				serverLevel.playSound(null, goat, (SoundEvent)this.getHornBreakSound.apply(goat), SoundSource.NEUTRAL, 1.0F, 1.0F);
 			}
 
 			this.finishRam(serverLevel, goat);

@@ -1,9 +1,5 @@
 package com.mojang.blaze3d.vertex;
 
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import net.fabricmc.api.EnvType;
@@ -11,6 +7,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.FastColor;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 @Environment(EnvType.CLIENT)
@@ -68,9 +68,8 @@ public interface VertexConsumer {
 		int[] js = new int[]{is[0], is[1], is[2], is[3]};
 		int[] ks = bakedQuad.getVertices();
 		Vec3i vec3i = bakedQuad.getDirection().getNormal();
-		Vector3f vector3f = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 		Matrix4f matrix4f = pose.pose();
-		vector3f.transform(pose.normal());
+		Vector3f vector3f = pose.normal().transform(new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ()));
 		int j = 8;
 		int k = ks.length / 8;
 
@@ -103,22 +102,19 @@ public interface VertexConsumer {
 				int v = js[l];
 				float q = byteBuffer.getFloat(16);
 				float r = byteBuffer.getFloat(20);
-				Vector4f vector4f = new Vector4f(m, n, o, 1.0F);
-				vector4f.transform(matrix4f);
+				Vector4f vector4f = matrix4f.transform(new Vector4f(m, n, o, 1.0F));
 				this.vertex(vector4f.x(), vector4f.y(), vector4f.z(), s, t, u, 1.0F, q, r, i, v, vector3f.x(), vector3f.y(), vector3f.z());
 			}
 		}
 	}
 
 	default VertexConsumer vertex(Matrix4f matrix4f, float f, float g, float h) {
-		Vector4f vector4f = new Vector4f(f, g, h, 1.0F);
-		vector4f.transform(matrix4f);
+		Vector4f vector4f = matrix4f.transform(new Vector4f(f, g, h, 1.0F));
 		return this.vertex((double)vector4f.x(), (double)vector4f.y(), (double)vector4f.z());
 	}
 
 	default VertexConsumer normal(Matrix3f matrix3f, float f, float g, float h) {
-		Vector3f vector3f = new Vector3f(f, g, h);
-		vector3f.transform(matrix3f);
+		Vector3f vector3f = matrix3f.transform(new Vector3f(f, g, h));
 		return this.normal(vector3f.x(), vector3f.y(), vector3f.z());
 	}
 }

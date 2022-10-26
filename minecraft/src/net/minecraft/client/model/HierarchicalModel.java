@@ -2,7 +2,6 @@ package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
@@ -14,6 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public abstract class HierarchicalModel<E extends Entity> extends EntityModel<E> {

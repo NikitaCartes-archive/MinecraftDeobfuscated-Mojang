@@ -27,9 +27,9 @@ public class BatRenderer extends MobRenderer<Bat, BatModel> {
 
 	protected void setupRotations(Bat bat, PoseStack poseStack, float f, float g, float h) {
 		if (bat.isResting()) {
-			poseStack.translate(0.0, -0.1F, 0.0);
+			poseStack.translate(0.0F, -0.1F, 0.0F);
 		} else {
-			poseStack.translate(0.0, (double)(Mth.cos(f * 0.3F) * 0.1F), 0.0);
+			poseStack.translate(0.0F, Mth.cos(f * 0.3F) * 0.1F, 0.0F);
 		}
 
 		super.setupRotations(bat, poseStack, f, g, h);

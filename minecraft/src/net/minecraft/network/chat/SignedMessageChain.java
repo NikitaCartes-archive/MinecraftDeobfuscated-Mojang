@@ -75,6 +75,10 @@ public class SignedMessageChain {
 
 	@FunctionalInterface
 	public interface Decoder {
+		SignedMessageChain.Decoder REJECT_ALL = (messageSignature, signedMessageBody) -> {
+			throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.missingProfileKey"), false);
+		};
+
 		static SignedMessageChain.Decoder unsigned(UUID uUID) {
 			return (messageSignature, signedMessageBody) -> PlayerChatMessage.unsigned(uUID, signedMessageBody.content());
 		}

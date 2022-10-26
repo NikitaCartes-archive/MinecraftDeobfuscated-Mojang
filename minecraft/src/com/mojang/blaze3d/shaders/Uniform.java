@@ -3,14 +3,14 @@ package com.mojang.blaze3d.shaders;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 
@@ -148,9 +148,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	@Override
 	public final void set(Vector3f vector3f) {
 		this.floatValues.position(0);
-		this.floatValues.put(0, vector3f.x());
-		this.floatValues.put(1, vector3f.y());
-		this.floatValues.put(2, vector3f.z());
+		vector3f.get(this.floatValues);
 		this.markDirty();
 	}
 
@@ -168,10 +166,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	@Override
 	public final void set(Vector4f vector4f) {
 		this.floatValues.position(0);
-		this.floatValues.put(0, vector4f.x());
-		this.floatValues.put(1, vector4f.y());
-		this.floatValues.put(2, vector4f.z());
-		this.floatValues.put(3, vector4f.w());
+		vector4f.get(this.floatValues);
 		this.markDirty();
 	}
 
@@ -405,14 +400,14 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	@Override
 	public final void set(Matrix4f matrix4f) {
 		this.floatValues.position(0);
-		matrix4f.store(this.floatValues);
+		matrix4f.get(this.floatValues);
 		this.markDirty();
 	}
 
 	@Override
 	public final void set(Matrix3f matrix3f) {
 		this.floatValues.position(0);
-		matrix3f.store(this.floatValues);
+		matrix3f.get(this.floatValues);
 		this.markDirty();
 	}
 

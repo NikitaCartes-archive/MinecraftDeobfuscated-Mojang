@@ -1,8 +1,6 @@
 package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.Optional;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
@@ -13,6 +11,8 @@ import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class VibrationSignalParticle extends TextureSheetParticle {
@@ -43,39 +43,28 @@ public class VibrationSignalParticle extends TextureSheetParticle {
 		float g = Mth.sin(((float)this.age + f - (float) (Math.PI * 2)) * 0.05F) * 2.0F;
 		float h = Mth.lerp(f, this.rotO, this.rot);
 		float i = Mth.lerp(f, this.pitchO, this.pitch) + (float) (Math.PI / 2);
-		this.renderSignal(vertexConsumer, camera, f, quaternion -> {
-			quaternion.mul(Vector3f.YP.rotation(h));
-			quaternion.mul(Vector3f.XP.rotation(-i));
-			quaternion.mul(Vector3f.YP.rotation(g));
-		});
-		this.renderSignal(vertexConsumer, camera, f, quaternion -> {
-			quaternion.mul(Vector3f.YP.rotation((float) -Math.PI + h));
-			quaternion.mul(Vector3f.XP.rotation(i));
-			quaternion.mul(Vector3f.YP.rotation(g));
-		});
+		this.renderSignal(vertexConsumer, camera, f, quaternionf -> quaternionf.rotateY(h).rotateX(-i).rotateY(g));
+		this.renderSignal(vertexConsumer, camera, f, quaternionf -> quaternionf.rotateY((float) -Math.PI + h).rotateX(i).rotateY(g));
 	}
 
-	private void renderSignal(VertexConsumer vertexConsumer, Camera camera, float f, Consumer<Quaternion> consumer) {
+	private void renderSignal(VertexConsumer vertexConsumer, Camera camera, float f, Consumer<Quaternionf> consumer) {
 		Vec3 vec3 = camera.getPosition();
 		float g = (float)(Mth.lerp((double)f, this.xo, this.x) - vec3.x());
 		float h = (float)(Mth.lerp((double)f, this.yo, this.y) - vec3.y());
 		float i = (float)(Mth.lerp((double)f, this.zo, this.z) - vec3.z());
-		Vector3f vector3f = new Vector3f(0.5F, 0.5F, 0.5F);
-		vector3f.normalize();
-		Quaternion quaternion = new Quaternion(vector3f, 0.0F, true);
-		consumer.accept(quaternion);
-		Vector3f vector3f2 = new Vector3f(-1.0F, -1.0F, 0.0F);
-		vector3f2.transform(quaternion);
+		Vector3f vector3f = new Vector3f(0.5F, 0.5F, 0.5F).normalize();
+		Quaternionf quaternionf = new Quaternionf().setAngleAxis(0.0F, vector3f.x(), vector3f.y(), vector3f.z());
+		consumer.accept(quaternionf);
 		Vector3f[] vector3fs = new Vector3f[]{
 			new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)
 		};
 		float j = this.getQuadSize(f);
 
 		for (int k = 0; k < 4; k++) {
-			Vector3f vector3f3 = vector3fs[k];
-			vector3f3.transform(quaternion);
-			vector3f3.mul(j);
-			vector3f3.add(g, h, i);
+			Vector3f vector3f2 = vector3fs[k];
+			vector3f2.rotate(quaternionf);
+			vector3f2.mul(j);
+			vector3f2.add(g, h, i);
 		}
 
 		float l = this.getU0();

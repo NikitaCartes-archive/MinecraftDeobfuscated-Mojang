@@ -239,12 +239,13 @@ public class ServerPlayer extends Player {
 		public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
 		}
 	};
-	private final RemoteChatSession chatSession;
+	@Nullable
+	private RemoteChatSession chatSession;
 	private int containerCounter;
 	public int latency;
 	public boolean wonGame;
 
-	public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, RemoteChatSession remoteChatSession) {
+	public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
 		super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
 		this.textFilter = minecraftServer.createTextFilterForPlayer(this);
 		this.gameMode = minecraftServer.createGameModeForPlayer(this);
@@ -252,7 +253,6 @@ public class ServerPlayer extends Player {
 		this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
 		this.maxUpStep = 1.0F;
-		this.chatSession = remoteChatSession;
 		this.fudgeSpawnLocation(serverLevel);
 	}
 
@@ -1169,6 +1169,7 @@ public class ServerPlayer extends Player {
 	public void restoreFrom(ServerPlayer serverPlayer, boolean bl) {
 		this.wardenSpawnTracker = serverPlayer.wardenSpawnTracker;
 		this.textFilteringEnabled = serverPlayer.textFilteringEnabled;
+		this.chatSession = serverPlayer.chatSession;
 		this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
 		this.onUpdateAbilities();
 		if (bl) {
@@ -1651,6 +1652,11 @@ public class ServerPlayer extends Player {
 		}
 	}
 
+	public void setChatSession(RemoteChatSession remoteChatSession) {
+		this.chatSession = remoteChatSession;
+	}
+
+	@Nullable
 	public RemoteChatSession getChatSession() {
 		return this.chatSession;
 	}

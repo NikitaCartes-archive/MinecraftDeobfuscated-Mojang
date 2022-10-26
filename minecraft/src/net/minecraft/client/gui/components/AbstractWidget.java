@@ -21,12 +21,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractWidget extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
+public abstract class AbstractWidget extends GuiComponent implements Renderable, GuiEventListener, NarratableEntry {
 	public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
 	protected int width;
 	protected int height;
-	public int x;
-	public int y;
+	private int x;
+	private int y;
 	private Component message;
 	protected boolean isHovered;
 	public boolean active = true;
@@ -60,7 +60,7 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.visible) {
-			this.isHovered = i >= this.x && j >= this.y && i < this.x + this.width && j < this.y + this.height;
+			this.isHovered = i >= this.getX() && j >= this.getY() && i < this.getX() + this.width && j < this.getY() + this.height;
 			this.renderButton(poseStack, i, j, f);
 		}
 	}
@@ -83,11 +83,13 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableDepthTest();
-		this.blit(poseStack, this.x, this.y, 0, 46 + k * 20, this.width / 2, this.height);
-		this.blit(poseStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
+		this.blit(poseStack, this.getX(), this.getY(), 0, 46 + k * 20, this.width / 2, this.height);
+		this.blit(poseStack, this.getX() + this.width / 2, this.getY(), 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
 		this.renderBg(poseStack, minecraft, i, j);
 		int l = this.active ? 16777215 : 10526880;
-		drawCenteredString(poseStack, font, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0F) << 24);
+		drawCenteredString(
+			poseStack, font, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0F) << 24
+		);
 	}
 
 	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
@@ -145,7 +147,12 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 	}
 
 	protected boolean clicked(double d, double e) {
-		return this.active && this.visible && d >= (double)this.x && e >= (double)this.y && d < (double)(this.x + this.width) && e < (double)(this.y + this.height);
+		return this.active
+			&& this.visible
+			&& d >= (double)this.getX()
+			&& e >= (double)this.getY()
+			&& d < (double)(this.getX() + this.width)
+			&& e < (double)(this.getY() + this.height);
 	}
 
 	public boolean isHoveredOrFocused() {
@@ -168,7 +175,12 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 
 	@Override
 	public boolean isMouseOver(double d, double e) {
-		return this.active && this.visible && d >= (double)this.x && e >= (double)this.y && d < (double)(this.x + this.width) && e < (double)(this.y + this.height);
+		return this.active
+			&& this.visible
+			&& d >= (double)this.getX()
+			&& e >= (double)this.getY()
+			&& d < (double)(this.getX() + this.width)
+			&& e < (double)(this.getY() + this.height);
 	}
 
 	public void renderToolTip(PoseStack poseStack, int i, int j) {
@@ -229,5 +241,26 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 				narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.hovered"));
 			}
 		}
+	}
+
+	public int getX() {
+		return this.x;
+	}
+
+	public void setX(int i) {
+		this.x = i;
+	}
+
+	public void setPosition(int i, int j) {
+		this.setX(i);
+		this.setY(j);
+	}
+
+	public int getY() {
+		return this.y;
+	}
+
+	public void setY(int i) {
+		this.y = i;
 	}
 }

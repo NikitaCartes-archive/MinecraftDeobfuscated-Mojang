@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
@@ -72,6 +71,7 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class DebugScreenOverlay extends GuiComponent {

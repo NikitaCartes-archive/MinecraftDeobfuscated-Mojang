@@ -10,9 +10,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -34,6 +31,9 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeSource;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
 import org.slf4j.Logger;
@@ -70,10 +70,10 @@ public class RenderSystem {
 		intConsumer.accept(i + 2);
 		intConsumer.accept(i + 1);
 	});
-	private static Matrix3f inverseViewRotationMatrix = new Matrix3f();
+	private static Matrix3f inverseViewRotationMatrix = new Matrix3f().zero();
 	private static Matrix4f projectionMatrix = new Matrix4f();
 	private static Matrix4f savedProjectionMatrix = new Matrix4f();
-	private static PoseStack modelViewStack = new PoseStack();
+	private static final PoseStack modelViewStack = new PoseStack();
 	private static Matrix4f modelViewMatrix = new Matrix4f();
 	private static Matrix4f textureMatrix = new Matrix4f();
 	private static final int[] shaderTextures = new int[12];
@@ -561,10 +561,10 @@ public class RenderSystem {
 		GlStateManager._clearDepth(1.0);
 		GlStateManager._enableDepthTest();
 		GlStateManager._depthFunc(515);
-		projectionMatrix.setIdentity();
-		savedProjectionMatrix.setIdentity();
-		modelViewMatrix.setIdentity();
-		textureMatrix.setIdentity();
+		projectionMatrix.identity();
+		savedProjectionMatrix.identity();
+		modelViewMatrix.identity();
+		textureMatrix.identity();
 		GlStateManager._viewport(i, j, k, l);
 	}
 
@@ -808,7 +808,7 @@ public class RenderSystem {
 	}
 
 	public static void setProjectionMatrix(Matrix4f matrix4f) {
-		Matrix4f matrix4f2 = matrix4f.copy();
+		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (!isOnRenderThread()) {
 			recordRenderCall(() -> projectionMatrix = matrix4f2);
 		} else {
@@ -817,7 +817,7 @@ public class RenderSystem {
 	}
 
 	public static void setInverseViewRotationMatrix(Matrix3f matrix3f) {
-		Matrix3f matrix3f2 = matrix3f.copy();
+		Matrix3f matrix3f2 = new Matrix3f(matrix3f);
 		if (!isOnRenderThread()) {
 			recordRenderCall(() -> inverseViewRotationMatrix = matrix3f2);
 		} else {
@@ -826,7 +826,7 @@ public class RenderSystem {
 	}
 
 	public static void setTextureMatrix(Matrix4f matrix4f) {
-		Matrix4f matrix4f2 = matrix4f.copy();
+		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (!isOnRenderThread()) {
 			recordRenderCall(() -> textureMatrix = matrix4f2);
 		} else {
@@ -836,14 +836,14 @@ public class RenderSystem {
 
 	public static void resetTextureMatrix() {
 		if (!isOnRenderThread()) {
-			recordRenderCall(() -> textureMatrix.setIdentity());
+			recordRenderCall(() -> textureMatrix.identity());
 		} else {
-			textureMatrix.setIdentity();
+			textureMatrix.identity();
 		}
 	}
 
 	public static void applyModelViewMatrix() {
-		Matrix4f matrix4f = modelViewStack.last().pose().copy();
+		Matrix4f matrix4f = new Matrix4f(modelViewStack.last().pose());
 		if (!isOnRenderThread()) {
 			recordRenderCall(() -> modelViewMatrix = matrix4f);
 		} else {
@@ -921,13 +921,6 @@ public class RenderSystem {
 	public static float getShaderGameTime() {
 		assertOnRenderThread();
 		return shaderGameTime;
-	}
-
-	static {
-		projectionMatrix.setIdentity();
-		savedProjectionMatrix.setIdentity();
-		modelViewMatrix.setIdentity();
-		textureMatrix.setIdentity();
 	}
 
 	@Environment(EnvType.CLIENT)

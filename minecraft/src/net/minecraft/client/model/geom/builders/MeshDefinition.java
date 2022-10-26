@@ -7,7 +7,7 @@ import net.minecraft.client.model.geom.PartPose;
 
 @Environment(EnvType.CLIENT)
 public class MeshDefinition {
-	private PartDefinition root = new PartDefinition(ImmutableList.of(), PartPose.ZERO);
+	private final PartDefinition root = new PartDefinition(ImmutableList.of(), PartPose.ZERO);
 
 	public PartDefinition getRoot() {
 		return this.root;

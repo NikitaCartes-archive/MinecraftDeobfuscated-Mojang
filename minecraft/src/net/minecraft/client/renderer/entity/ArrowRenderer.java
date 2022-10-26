@@ -2,9 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -12,6 +10,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRenderer<T> {
@@ -21,8 +21,8 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 
 	public void render(T abstractArrow, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, abstractArrow.yRotO, abstractArrow.getYRot()) - 90.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, abstractArrow.xRotO, abstractArrow.getXRot())));
+		poseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(g, abstractArrow.yRotO, abstractArrow.getYRot()) - 90.0F));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(g, abstractArrow.xRotO, abstractArrow.getXRot())));
 		int j = 0;
 		float h = 0.0F;
 		float k = 0.5F;
@@ -36,12 +36,12 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 		float s = (float)abstractArrow.shakeTime - g;
 		if (s > 0.0F) {
 			float t = -Mth.sin(s * 3.0F) * s;
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(t));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(t));
 		}
 
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(45.0F));
+		poseStack.mulPose(Axis.XP.rotationDegrees(45.0F));
 		poseStack.scale(0.05625F, 0.05625F, 0.05625F);
-		poseStack.translate(-4.0, 0.0, 0.0);
+		poseStack.translate(-4.0F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(this.getTextureLocation(abstractArrow)));
 		PoseStack.Pose pose = poseStack.last();
 		Matrix4f matrix4f = pose.pose();
@@ -56,7 +56,7 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, -2, -2, 0.0F, 0.3125F, 1, 0, 0, i);
 
 		for (int u = 0; u < 4; u++) {
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 			this.vertex(matrix4f, matrix3f, vertexConsumer, -8, -2, 0, 0.0F, 0.0F, 0, 1, 0, i);
 			this.vertex(matrix4f, matrix3f, vertexConsumer, 8, -2, 0, 0.5F, 0.0F, 0, 1, 0, i);
 			this.vertex(matrix4f, matrix3f, vertexConsumer, 8, 2, 0, 0.5F, 0.15625F, 0, 1, 0, i);

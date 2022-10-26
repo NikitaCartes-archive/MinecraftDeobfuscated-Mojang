@@ -38,7 +38,9 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
+			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
+				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20)
+				.build()
 		);
 		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList(this.minecraft);
 		this.addWidget(this.backupInfoList);

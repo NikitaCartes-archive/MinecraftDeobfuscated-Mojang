@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 public class LongJumpMidJump extends Behavior<Mob> {
 	public static final int TIME_OUT_DURATION = 100;
 	private final UniformInt timeBetweenLongJumps;
-	private SoundEvent landingSound;
+	private final SoundEvent landingSound;
 
 	public LongJumpMidJump(UniformInt uniformInt, SoundEvent soundEvent) {
 		super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_PRESENT), 100);

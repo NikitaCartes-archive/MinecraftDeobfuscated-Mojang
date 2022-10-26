@@ -111,7 +111,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			this.tradeOffers = compoundTag.getCompound("Offers");
 		}
 
-		if (compoundTag.contains("Gossips", 10)) {
+		if (compoundTag.contains("Gossips", 9)) {
 			this.gossips = compoundTag.getList("Gossips", 10);
 		}
 

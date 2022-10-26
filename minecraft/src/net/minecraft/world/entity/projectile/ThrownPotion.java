@@ -33,7 +33,7 @@ import net.minecraft.world.phys.HitResult;
 public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplier {
 	public static final double SPLASH_RANGE = 4.0;
 	private static final double SPLASH_RANGE_SQ = 16.0;
-	public static final Predicate<LivingEntity> WATER_SENSITIVE = LivingEntity::isSensitiveToWater;
+	public static final Predicate<LivingEntity> WATER_SENSITIVE_OR_ON_FIRE = livingEntity -> livingEntity.isSensitiveToWater() || livingEntity.isOnFire();
 
 	public ThrownPotion(EntityType<? extends ThrownPotion> entityType, Level level) {
 		super(entityType, level);
@@ -105,12 +105,16 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 
 	private void applyWater() {
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
-		List<LivingEntity> list = this.level.getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE);
-		if (!list.isEmpty()) {
-			for (LivingEntity livingEntity : list) {
-				double d = this.distanceToSqr(livingEntity);
-				if (d < 16.0 && livingEntity.isSensitiveToWater()) {
+
+		for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE_OR_ON_FIRE)) {
+			double d = this.distanceToSqr(livingEntity);
+			if (d < 16.0) {
+				if (livingEntity.isSensitiveToWater()) {
 					livingEntity.hurt(DamageSource.indirectMagic(this, this.getOwner()), 1.0F);
+				}
+
+				if (livingEntity.isOnFire() && livingEntity.isAlive()) {
+					livingEntity.extinguishFire();
 				}
 			}
 		}

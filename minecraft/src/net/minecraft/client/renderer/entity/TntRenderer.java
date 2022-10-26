@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -24,7 +24,7 @@ public class TntRenderer extends EntityRenderer<PrimedTnt> {
 
 	public void render(PrimedTnt primedTnt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.translate(0.0, 0.5, 0.0);
+		poseStack.translate(0.0F, 0.5F, 0.0F);
 		int j = primedTnt.getFuse();
 		if ((float)j - g + 1.0F < 10.0F) {
 			float h = 1.0F - ((float)j - g + 1.0F) / 10.0F;
@@ -35,9 +35,9 @@ public class TntRenderer extends EntityRenderer<PrimedTnt> {
 			poseStack.scale(k, k, k);
 		}
 
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
-		poseStack.translate(-0.5, -0.5, 0.5);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+		poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+		poseStack.translate(-0.5F, -0.5F, 0.5F);
+		poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 		TntMinecartRenderer.renderWhiteSolidBlock(this.blockRenderer, Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, j / 5 % 2 == 0);
 		poseStack.popPose();
 		super.render(primedTnt, f, g, poseStack, multiBufferSource, i);

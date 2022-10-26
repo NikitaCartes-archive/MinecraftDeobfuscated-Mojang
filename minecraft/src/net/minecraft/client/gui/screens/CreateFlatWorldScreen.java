@@ -61,34 +61,32 @@ public class CreateFlatWorldScreen extends Screen {
 		this.columnHeight = Component.translatable("createWorld.customize.flat.height");
 		this.list = new CreateFlatWorldScreen.DetailsList();
 		this.addWidget(this.list);
-		this.deleteLayerButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 155, this.height - 52, 150, 20, Component.translatable("createWorld.customize.flat.removeLayer"), button -> {
-				if (this.hasValidSelection()) {
-					List<FlatLayerInfo> list = this.generator.getLayersInfo();
-					int i = this.list.children().indexOf(this.list.getSelected());
-					int j = list.size() - i - 1;
-					list.remove(j);
-					this.list.setSelected(list.isEmpty() ? null : (CreateFlatWorldScreen.DetailsList.Entry)this.list.children().get(Math.min(i, list.size() - 1)));
-					this.generator.updateLayers();
-					this.list.resetRows();
-					this.updateButtonValidity();
-				}
-			})
-		);
-		this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 52, 150, 20, Component.translatable("createWorld.customize.presets"), button -> {
+		this.deleteLayerButton = this.addRenderableWidget(Button.builder(Component.translatable("createWorld.customize.flat.removeLayer"), button -> {
+			if (this.hasValidSelection()) {
+				List<FlatLayerInfo> list = this.generator.getLayersInfo();
+				int i = this.list.children().indexOf(this.list.getSelected());
+				int j = list.size() - i - 1;
+				list.remove(j);
+				this.list.setSelected(list.isEmpty() ? null : (CreateFlatWorldScreen.DetailsList.Entry)this.list.children().get(Math.min(i, list.size() - 1)));
+				this.generator.updateLayers();
+				this.list.resetRows();
+				this.updateButtonValidity();
+			}
+		}).bounds(this.width / 2 - 155, this.height - 52, 150, 20).build());
+		this.addRenderableWidget(Button.builder(Component.translatable("createWorld.customize.presets"), button -> {
 			this.minecraft.setScreen(new PresetFlatWorldScreen(this));
 			this.generator.updateLayers();
 			this.updateButtonValidity();
-		}));
-		this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
+		}).bounds(this.width / 2 + 5, this.height - 52, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
 			this.applySettings.accept(this.generator);
 			this.minecraft.setScreen(this.parent);
 			this.generator.updateLayers();
-		}));
-		this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+		}).bounds(this.width / 2 - 155, this.height - 28, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			this.minecraft.setScreen(this.parent);
 			this.generator.updateLayers();
-		}));
+		}).bounds(this.width / 2 + 5, this.height - 28, 150, 20).build());
 		this.generator.updateLayers();
 		this.updateButtonValidity();
 	}

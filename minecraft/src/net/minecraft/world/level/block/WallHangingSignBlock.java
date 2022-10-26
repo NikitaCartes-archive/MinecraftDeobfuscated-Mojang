@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -69,6 +70,11 @@ public class WallHangingSignBlock extends SignBlock {
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return (VoxelShape)AABBS.get(blockState.getValue(FACING));
+	}
+
+	@Override
+	public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return this.getShape(blockState, blockGetter, blockPos, CollisionContext.empty());
 	}
 
 	@Override
@@ -144,5 +150,10 @@ public class WallHangingSignBlock extends SignBlock {
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
 		return new HangingSignBlockEntity(blockPos, blockState);
+	}
+
+	@Override
+	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+		return false;
 	}
 }

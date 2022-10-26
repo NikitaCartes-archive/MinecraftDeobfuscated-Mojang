@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity.player;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -163,7 +163,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 					multiBufferSource,
 					i
 				);
-				poseStack.translate(0.0, (double)(9.0F * 1.15F * 0.025F), 0.0);
+				poseStack.translate(0.0F, 9.0F * 1.15F * 0.025F, 0.0F);
 			}
 		}
 
@@ -203,7 +203,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			float j = (float)abstractClientPlayer.getFallFlyingTicks() + h;
 			float k = Mth.clamp(j * j / 100.0F, 0.0F, 1.0F);
 			if (!abstractClientPlayer.isAutoSpinAttack()) {
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(k * (-90.0F - abstractClientPlayer.getXRot())));
+				poseStack.mulPose(Axis.XP.rotationDegrees(k * (-90.0F - abstractClientPlayer.getXRot())));
 			}
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
@@ -213,15 +213,15 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			if (d > 0.0 && e > 0.0) {
 				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
 				double m = vec32.x * vec3.z - vec32.z * vec3.x;
-				poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
+				poseStack.mulPose(Axis.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
 			}
 		} else if (i > 0.0F) {
 			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
 			float jx = abstractClientPlayer.isInWater() ? -90.0F - abstractClientPlayer.getXRot() : -90.0F;
 			float kx = Mth.lerp(i, 0.0F, jx);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(kx));
+			poseStack.mulPose(Axis.XP.rotationDegrees(kx));
 			if (abstractClientPlayer.isVisuallySwimming()) {
-				poseStack.translate(0.0, -1.0, 0.3F);
+				poseStack.translate(0.0F, -1.0F, 0.3F);
 			}
 		} else {
 			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);

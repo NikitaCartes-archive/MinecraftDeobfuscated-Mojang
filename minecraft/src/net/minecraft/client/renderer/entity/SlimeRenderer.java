@@ -28,7 +28,7 @@ public class SlimeRenderer extends MobRenderer<Slime, SlimeModel<Slime>> {
 	protected void scale(Slime slime, PoseStack poseStack, float f) {
 		float g = 0.999F;
 		poseStack.scale(0.999F, 0.999F, 0.999F);
-		poseStack.translate(0.0, 0.001F, 0.0);
+		poseStack.translate(0.0F, 0.001F, 0.0F);
 		float h = (float)slime.getSize();
 		float i = Mth.lerp(f, slime.oSquish, slime.squish) / (h * 0.5F + 1.0F);
 		float j = 1.0F / (i + 1.0F);

@@ -84,7 +84,7 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 		if (spectatorMenuItem != SpectatorMenu.EMPTY_SLOT) {
 			int k = (int)(g * 255.0F);
 			poseStack.pushPose();
-			poseStack.translate((double)j, (double)f, 0.0);
+			poseStack.translate((float)j, f, 0.0F);
 			float h = spectatorMenuItem.isEnabled() ? 1.0F : 0.25F;
 			RenderSystem.setShaderColor(h, h, h, g);
 			spectatorMenuItem.renderIcon(poseStack, h, k);

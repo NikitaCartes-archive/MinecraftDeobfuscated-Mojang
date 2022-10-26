@@ -2,7 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -39,7 +39,7 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		float h = (((float)(l >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float j = (((float)(l >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float k = (((float)(l >> 24 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
-		poseStack.translate((double)h, (double)j, (double)k);
+		poseStack.translate(h, j, k);
 		double d = Mth.lerp((double)g, abstractMinecart.xOld, abstractMinecart.getX());
 		double e = Mth.lerp((double)g, abstractMinecart.yOld, abstractMinecart.getY());
 		double m = Mth.lerp((double)g, abstractMinecart.zOld, abstractMinecart.getZ());
@@ -66,9 +66,9 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 			}
 		}
 
-		poseStack.translate(0.0, 0.375, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - f));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(-o));
+		poseStack.translate(0.0F, 0.375F, 0.0F);
+		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - f));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(-o));
 		float p = (float)abstractMinecart.getHurtTime() - g;
 		float q = abstractMinecart.getDamage() - g;
 		if (q < 0.0F) {
@@ -76,7 +76,7 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		}
 
 		if (p > 0.0F) {
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(p) * p * q / 10.0F * (float)abstractMinecart.getHurtDir()));
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(p) * p * q / 10.0F * (float)abstractMinecart.getHurtDir()));
 		}
 
 		int r = abstractMinecart.getDisplayOffset();
@@ -85,8 +85,8 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 			poseStack.pushPose();
 			float s = 0.75F;
 			poseStack.scale(0.75F, 0.75F, 0.75F);
-			poseStack.translate(-0.5, (double)((float)(r - 8) / 16.0F), 0.5);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+			poseStack.translate(-0.5F, (float)(r - 8) / 16.0F, 0.5F);
+			poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 			this.renderMinecartContents(abstractMinecart, g, blockState, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}

@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -31,12 +31,12 @@ public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity
 			ItemStack itemStack = nonNullList.get(l);
 			if (itemStack != ItemStack.EMPTY) {
 				poseStack.pushPose();
-				poseStack.translate(0.5, 0.44921875, 0.5);
+				poseStack.translate(0.5F, 0.44921875F, 0.5F);
 				Direction direction2 = Direction.from2DDataValue((l + direction.get2DDataValue()) % 4);
 				float g = -direction2.toYRot();
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(g));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-				poseStack.translate(-0.3125, -0.3125, 0.0);
+				poseStack.mulPose(Axis.YP.rotationDegrees(g));
+				poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+				poseStack.translate(-0.3125F, -0.3125F, 0.0F);
 				poseStack.scale(0.375F, 0.375F, 0.375F);
 				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, j, poseStack, multiBufferSource, k + l);
 				poseStack.popPose();

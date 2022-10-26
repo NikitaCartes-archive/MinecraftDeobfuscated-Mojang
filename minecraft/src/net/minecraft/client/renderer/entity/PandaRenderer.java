@@ -2,7 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -46,42 +46,42 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 				float m = (float)(90 * i) / 7.0F;
 				float n = (float)(90 * j) / 7.0F;
 				float o = this.getAngle(m, n, j, h, 8.0F);
-				poseStack.translate(0.0, (double)((l + 0.2F) * (o / 90.0F)), 0.0);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-o));
+				poseStack.translate(0.0F, (l + 0.2F) * (o / 90.0F), 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
 			} else if (i < 16) {
 				float m = ((float)i - 8.0F) / 7.0F;
 				float n = 90.0F + 90.0F * m;
 				float p = 90.0F + 90.0F * ((float)j - 8.0F) / 7.0F;
 				float o = this.getAngle(n, p, j, h, 16.0F);
-				poseStack.translate(0.0, (double)(l + 0.2F + (l - 0.2F) * (o - 90.0F) / 90.0F), 0.0);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-o));
+				poseStack.translate(0.0F, l + 0.2F + (l - 0.2F) * (o - 90.0F) / 90.0F, 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
 			} else if ((float)i < 24.0F) {
 				float m = ((float)i - 16.0F) / 7.0F;
 				float n = 180.0F + 90.0F * m;
 				float p = 180.0F + 90.0F * ((float)j - 16.0F) / 7.0F;
 				float o = this.getAngle(n, p, j, h, 24.0F);
-				poseStack.translate(0.0, (double)(l + l * (270.0F - o) / 90.0F), 0.0);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-o));
+				poseStack.translate(0.0F, l + l * (270.0F - o) / 90.0F, 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
 			} else if (i < 32) {
 				float m = ((float)i - 24.0F) / 7.0F;
 				float n = 270.0F + 90.0F * m;
 				float p = 270.0F + 90.0F * ((float)j - 24.0F) / 7.0F;
 				float o = this.getAngle(n, p, j, h, 32.0F);
-				poseStack.translate(0.0, (double)(l * ((360.0F - o) / 90.0F)), 0.0);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-o));
+				poseStack.translate(0.0F, l * ((360.0F - o) / 90.0F), 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
 			}
 		}
 
 		float q = panda.getSitAmount(h);
 		if (q > 0.0F) {
-			poseStack.translate(0.0, (double)(0.8F * q), 0.0);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(q, panda.getXRot(), panda.getXRot() + 90.0F)));
-			poseStack.translate(0.0, (double)(-1.0F * q), 0.0);
+			poseStack.translate(0.0F, 0.8F * q, 0.0F);
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(q, panda.getXRot(), panda.getXRot() + 90.0F)));
+			poseStack.translate(0.0F, -1.0F * q, 0.0F);
 			if (panda.isScared()) {
 				float r = (float)(Math.cos((double)panda.tickCount * 1.25) * Math.PI * 0.05F);
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(r));
+				poseStack.mulPose(Axis.YP.rotationDegrees(r));
 				if (panda.isBaby()) {
-					poseStack.translate(0.0, 0.8F, 0.55F);
+					poseStack.translate(0.0F, 0.8F, 0.55F);
 				}
 			}
 		}
@@ -89,8 +89,8 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 		float r = panda.getLieOnBackAmount(h);
 		if (r > 0.0F) {
 			float k = panda.isBaby() ? 0.5F : 1.3F;
-			poseStack.translate(0.0, (double)(k * r), 0.0);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(r, panda.getXRot(), panda.getXRot() + 180.0F)));
+			poseStack.translate(0.0F, k * r, 0.0F);
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(r, panda.getXRot(), panda.getXRot() + 180.0F)));
 		}
 	}
 

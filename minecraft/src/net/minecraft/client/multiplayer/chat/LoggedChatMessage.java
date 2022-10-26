@@ -1,6 +1,8 @@
 package net.minecraft.client.multiplayer.chat;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -12,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.util.ExtraCodecs;
 
 @Environment(EnvType.CLIENT)
 public interface LoggedChatMessage extends LoggedChatEvent {
@@ -33,6 +36,15 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 
 	@Environment(EnvType.CLIENT)
 	public static record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChatMessage {
+		public static final Codec<LoggedChatMessage.Player> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.GAME_PROFILE.fieldOf("profile").forGetter(LoggedChatMessage.Player::profile),
+						ExtraCodecs.COMPONENT.fieldOf("display_name").forGetter(LoggedChatMessage.Player::displayName),
+						PlayerChatMessage.MAP_CODEC.forGetter(LoggedChatMessage.Player::message),
+						ChatTrustLevel.CODEC.optionalFieldOf("trust_level", ChatTrustLevel.SECURE).forGetter(LoggedChatMessage.Player::trustLevel)
+					)
+					.apply(instance, LoggedChatMessage.Player::new)
+		);
 		private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
 		@Override
@@ -70,10 +82,23 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 		public UUID profileId() {
 			return this.profile.getId();
 		}
+
+		@Override
+		public LoggedChatEvent.Type type() {
+			return LoggedChatEvent.Type.PLAYER;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static record System(Component message, Instant timeStamp) implements LoggedChatMessage {
+		public static final Codec<LoggedChatMessage.System> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.COMPONENT.fieldOf("message").forGetter(LoggedChatMessage.System::message),
+						ExtraCodecs.INSTANT_ISO8601.fieldOf("time_stamp").forGetter(LoggedChatMessage.System::timeStamp)
+					)
+					.apply(instance, LoggedChatMessage.System::new)
+		);
+
 		@Override
 		public Component toContentComponent() {
 			return this.message;
@@ -82,6 +107,11 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 		@Override
 		public boolean canReport(UUID uUID) {
 			return false;
+		}
+
+		@Override
+		public LoggedChatEvent.Type type() {
+			return LoggedChatEvent.Type.SYSTEM;
 		}
 	}
 }

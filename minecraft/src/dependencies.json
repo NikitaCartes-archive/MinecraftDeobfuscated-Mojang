@@ -53,19 +53,19 @@
 		"url": "https://libraries.minecraft.net/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar"
 	},
 	{
-		"sha1sum": "76f95700418a68fbc4ac050525261f05dc681ca1",
-		"name": "fastutil-8.5.6.jar",
-		"url": "https://libraries.minecraft.net/it/unimi/dsi/fastutil/8.5.6/fastutil-8.5.6.jar"
+		"sha1sum": "bb7ea75ecdb216654237830b3a96d87ad91f8cc5",
+		"name": "fastutil-8.5.9.jar",
+		"url": "https://libraries.minecraft.net/it/unimi/dsi/fastutil/8.5.9/fastutil-8.5.9.jar"
 	},
 	{
-		"sha1sum": "8a432c1d6825781e21a02db2e2c33c5fde2833b9",
-		"name": "gson-2.8.9.jar",
-		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.8.9/gson-2.8.9.jar"
+		"sha1sum": "02cc2131b98ebfb04e2b2c7dfb84431f4045096b",
+		"name": "gson-2.9.1.jar",
+		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar"
 	},
 	{
-		"sha1sum": "119ea2b2bc205b138974d351777b20f02b92704b",
-		"name": "guava-31.0.1-jre.jar",
-		"url": "https://libraries.minecraft.net/com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.jar"
+		"sha1sum": "60458f877d055d0c9114d9e1a2efb737b4bc282c",
+		"name": "guava-31.1-jre.jar",
+		"url": "https://libraries.minecraft.net/com/google/guava/guava/31.1-jre/guava-31.1-jre.jar"
 	},
 	{
 		"sha1sum": "e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada",
@@ -73,14 +73,14 @@
 		"url": "https://libraries.minecraft.net/org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar"
 	},
 	{
-		"sha1sum": "9dd1a631c082d92ecd4bd8fd4cf55026c720a8c1",
-		"name": "httpcore-4.4.14.jar",
-		"url": "https://libraries.minecraft.net/org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar"
+		"sha1sum": "7f2e0c573eaa7a74bac2e89b359e1f73d92a0a1d",
+		"name": "httpcore-4.4.15.jar",
+		"url": "https://libraries.minecraft.net/org/apache/httpcomponents/httpcore/4.4.15/httpcore-4.4.15.jar"
 	},
 	{
-		"sha1sum": "dfa3a1fbc55bf5db8c6e79fc0935ac7ab1202950",
-		"name": "icu4j-70.1.jar",
-		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/70.1/icu4j-70.1.jar"
+		"sha1sum": "9e7d3304c23f9ba5cb71915f7cce23231a57a445",
+		"name": "icu4j-71.1.jar",
+		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/71.1/icu4j-71.1.jar"
 	},
 	{
 		"sha1sum": "bfa589b0bd71588fa7e594640114b0cda0cff5f6",
@@ -93,14 +93,19 @@
 		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.1/java-objc-bridge-1.1.jar"
 	},
 	{
-		"sha1sum": "7cf4c87dd802db50721db66947aa237d7ad09418",
-		"name": "jna-5.10.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.10.0/jna-5.10.0.jar"
+		"sha1sum": "b1e93a735caea94f503e95e6fe79bf9cdc1e985d",
+		"name": "jna-5.12.1.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna/5.12.1/jna-5.12.1.jar"
 	},
 	{
-		"sha1sum": "fbed7d9669dba47714ad0d4f4454290a997aee69",
-		"name": "jna-platform-5.10.0.jar",
-		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.10.0/jna-platform-5.10.0.jar"
+		"sha1sum": "097406a297c852f4a41e688a176ec675f72e8329",
+		"name": "jna-platform-5.12.1.jar",
+		"url": "https://libraries.minecraft.net/net/java/dev/jna/jna-platform/5.12.1/jna-platform-5.12.1.jar"
+	},
+	{
+		"sha1sum": "22566d58af70ad3d72308bab63b8339906deb649",
+		"name": "joml-1.10.5.jar",
+		"url": "https://libraries.minecraft.net/org/joml/joml/1.10.5/joml-1.10.5.jar"
 	},
 	{
 		"sha1sum": "4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c",
@@ -108,24 +113,24 @@
 		"url": "https://libraries.minecraft.net/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar"
 	},
 	{
-		"sha1sum": "bbd791e9c8c9421e45337c4fe0a10851c086e36c",
-		"name": "log4j-api-2.17.0.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.17.0/log4j-api-2.17.0.jar"
+		"sha1sum": "ea1b37f38c327596b216542bc636cfdc0b8036fa",
+		"name": "log4j-api-2.19.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-api/2.19.0/log4j-api-2.19.0.jar"
 	},
 	{
-		"sha1sum": "fe6e7a32c1228884b9691a744f953a55d0dd8ead",
-		"name": "log4j-core-2.17.0.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.17.0/log4j-core-2.17.0.jar"
+		"sha1sum": "3b6eeb4de4c49c0fe38a4ee27188ff5fee44d0bb",
+		"name": "log4j-core-2.19.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-core/2.19.0/log4j-core-2.19.0.jar"
 	},
 	{
-		"sha1sum": "bd7f6c0b9224dd214afb4e684957e2349b529a8d",
-		"name": "log4j-slf4j18-impl-2.17.0.jar",
-		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-slf4j18-impl/2.17.0/log4j-slf4j18-impl-2.17.0.jar"
+		"sha1sum": "5c04bfdd63ce9dceb2e284b81e96b6a70010ee10",
+		"name": "log4j-slf4j2-impl-2.19.0.jar",
+		"url": "https://libraries.minecraft.net/org/apache/logging/log4j/log4j-slf4j2-impl/2.19.0/log4j-slf4j2-impl-2.19.0.jar"
 	},
 	{
-		"sha1sum": "f6ca3b2eee0b80b384e8ed93d368faecb82dfb9b",
-		"name": "logging-1.0.0.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/logging/1.0.0/logging-1.0.0.jar"
+		"sha1sum": "832b8e6674a9b325a5175a3a6267dfaf34c85139",
+		"name": "logging-1.1.1.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/logging/1.1.1/logging-1.1.1.jar"
 	},
 	{
 		"sha1sum": "ae58664f88e18a9bb2c77b063833ca7aaec484cb",
@@ -373,59 +378,59 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.3.1/lwjgl-tinyfd-3.3.1-natives-windows-x86.jar"
 	},
 	{
-		"sha1sum": "d97571f99e5e739d86824d0df99f35d295276b5f",
-		"name": "netty-buffer-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-buffer/4.1.77.Final/netty-buffer-4.1.77.Final.jar"
+		"sha1sum": "a544270cf1ae8b8077082f5036436a9a9971ea71",
+		"name": "netty-buffer-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-buffer/4.1.82.Final/netty-buffer-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "4efc5f59335301d6ba0d7cd31dd10651119b03c8",
-		"name": "netty-codec-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-codec/4.1.77.Final/netty-codec-4.1.77.Final.jar"
+		"sha1sum": "b77200379acb345a9ffdece1c605e591ac3e4e0a",
+		"name": "netty-codec-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-codec/4.1.82.Final/netty-codec-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "ea0fc20f4e6178966b9d62017b7fcb83dfe0e713",
-		"name": "netty-common-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-common/4.1.77.Final/netty-common-4.1.77.Final.jar"
+		"sha1sum": "022d148e85c3f5ebdacc0ce1f5aabb1d420f73f3",
+		"name": "netty-common-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-common/4.1.82.Final/netty-common-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "47a81089de03635a27f509f3e4e13386ae1db275",
-		"name": "netty-handler-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-handler/4.1.77.Final/netty-handler-4.1.77.Final.jar"
+		"sha1sum": "644041d1fa96a5d3130a29e8978630d716d76e38",
+		"name": "netty-handler-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-handler/4.1.82.Final/netty-handler-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "4a239dbf8d8bb5f98aa51462c35011c0516395fd",
-		"name": "netty-resolver-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-resolver/4.1.77.Final/netty-resolver-4.1.77.Final.jar"
+		"sha1sum": "38f665ae8dcd29032eea31245ba7806bed2e0fa8",
+		"name": "netty-resolver-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-resolver/4.1.82.Final/netty-resolver-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "2a3373bbd20d520c821f210bd5ee886788512043",
-		"name": "netty-transport-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-transport/4.1.77.Final/netty-transport-4.1.77.Final.jar"
+		"sha1sum": "e431a218d91acb6476ccad5f5aafde50aa3945ca",
+		"name": "netty-transport-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport/4.1.82.Final/netty-transport-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "dd70dbccbcf98382223a59044f3c08d8e9920cad",
-		"name": "netty-transport-classes-epoll-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-transport-classes-epoll/4.1.77.Final/netty-transport-classes-epoll-4.1.77.Final.jar"
+		"sha1sum": "e7c7dd18deac93105797f30057c912651ea76521",
+		"name": "netty-transport-classes-epoll-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport-classes-epoll/4.1.82.Final/netty-transport-classes-epoll-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "5f051599ced83e119ddeda891f471c0613721e5c",
-		"name": "netty-transport-native-epoll-4.1.77.Final-linux-aarch_64.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-epoll/4.1.77.Final/netty-transport-native-epoll-4.1.77.Final-linux-aarch_64.jar"
+		"sha1sum": "476409d6255001ca53a55f65b01c13822f8dc93a",
+		"name": "netty-transport-native-epoll-4.1.82.Final-linux-aarch_64.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-epoll/4.1.82.Final/netty-transport-native-epoll-4.1.82.Final-linux-aarch_64.jar"
 	},
 	{
-		"sha1sum": "8d10e9e138dac52172dd83229bdc89197100c723",
-		"name": "netty-transport-native-epoll-4.1.77.Final-linux-x86_64.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-epoll/4.1.77.Final/netty-transport-native-epoll-4.1.77.Final-linux-x86_64.jar"
+		"sha1sum": "c7350a71920f3ae9142945e25fed4846cce53374",
+		"name": "netty-transport-native-epoll-4.1.82.Final-linux-x86_64.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-epoll/4.1.82.Final/netty-transport-native-epoll-4.1.82.Final-linux-x86_64.jar"
 	},
 	{
-		"sha1sum": "c95d53486414b3270d08057957c5da8e0c37e4eb",
-		"name": "netty-transport-native-unix-common-4.1.77.Final.jar",
-		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-unix-common/4.1.77.Final/netty-transport-native-unix-common-4.1.77.Final.jar"
+		"sha1sum": "3e895b35ca1b8a0eca56cacff4c2dde5d2c6abce",
+		"name": "netty-transport-native-unix-common-4.1.82.Final.jar",
+		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-unix-common/4.1.82.Final/netty-transport-native-unix-common-4.1.82.Final.jar"
 	},
 	{
-		"sha1sum": "1d0ec654d820741327f5a9229d513732a4b7ce50",
-		"name": "oshi-core-5.8.5.jar",
-		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/5.8.5/oshi-core-5.8.5.jar"
+		"sha1sum": "54f5efc19bca95d709d9a37d19ffcbba3d21c1a6",
+		"name": "oshi-core-6.2.2.jar",
+		"url": "https://libraries.minecraft.net/com/github/oshi/oshi-core/6.2.2/oshi-core-6.2.2.jar"
 	},
 	{
 		"sha1sum": "da05971b07cbb379d002cf7eaec6a2048211fefc",
@@ -433,9 +438,9 @@
 		"url": "https://libraries.minecraft.net/com/mojang/patchy/2.2.10/patchy-2.2.10.jar"
 	},
 	{
-		"sha1sum": "83b0359d847ee053d745be7ec0d8e9e8a44304b4",
-		"name": "slf4j-api-1.8.0-beta4.jar",
-		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar"
+		"sha1sum": "f48d81adce2abf5ad3cfe463df517952749e03bc",
+		"name": "slf4j-api-2.0.1.jar",
+		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/2.0.1/slf4j-api-2.0.1.jar"
 	},
 	{
 		"sha1sum": "ee4095669061d1fe4bce5fea23d69d1520bc2d58",

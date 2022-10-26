@@ -11,7 +11,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -116,9 +115,8 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 			}
 
 			this.safeSetBlock(worldGenLevel, blockPos, Blocks.SPAWNER.defaultBlockState(), predicate);
-			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
-			if (blockEntity instanceof SpawnerBlockEntity) {
-				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(randomSource));
+			if (worldGenLevel.getBlockEntity(blockPos) instanceof SpawnerBlockEntity spawnerBlockEntity) {
+				spawnerBlockEntity.setEntityId(this.randomEntityId(randomSource), randomSource);
 			} else {
 				LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
 			}

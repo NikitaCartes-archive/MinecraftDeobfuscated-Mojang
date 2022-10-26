@@ -1,8 +1,6 @@
 package net.minecraft.world.item;
 
 import com.google.common.collect.Lists;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -29,6 +27,8 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 	private static final String TAG_CHARGED = "Charged";
@@ -227,10 +227,9 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 				crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
 			} else {
 				Vec3 vec3 = livingEntity.getUpVector(1.0F);
-				Quaternion quaternion = new Quaternion(new Vector3f(vec3), i, true);
+				Quaternionf quaternionf = new Quaternionf().setAngleAxis((double)i, vec3.x, vec3.y, vec3.z);
 				Vec3 vec32 = livingEntity.getViewVector(1.0F);
-				Vector3f vector3f = new Vector3f(vec32);
-				vector3f.transform(quaternion);
+				Vector3f vector3f = vec32.toVector3f().rotate(quaternionf);
 				projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), g, h);
 			}
 

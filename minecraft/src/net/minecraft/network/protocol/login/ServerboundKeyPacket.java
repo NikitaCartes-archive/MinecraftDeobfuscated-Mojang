@@ -1,40 +1,32 @@
 package net.minecraft.network.protocol.login;
 
-import com.mojang.datafixers.util.Either;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
-import java.util.Optional;
 import javax.crypto.SecretKey;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
-import net.minecraft.util.SignatureValidator;
 
 public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 	private final byte[] keybytes;
-	private final Either<byte[], Crypt.SaltSignaturePair> nonceOrSaltSignature;
+	private final byte[] encryptedChallenge;
 
 	public ServerboundKeyPacket(SecretKey secretKey, PublicKey publicKey, byte[] bs) throws CryptException {
 		this.keybytes = Crypt.encryptUsingKey(publicKey, secretKey.getEncoded());
-		this.nonceOrSaltSignature = Either.left(Crypt.encryptUsingKey(publicKey, bs));
-	}
-
-	public ServerboundKeyPacket(SecretKey secretKey, PublicKey publicKey, long l, byte[] bs) throws CryptException {
-		this.keybytes = Crypt.encryptUsingKey(publicKey, secretKey.getEncoded());
-		this.nonceOrSaltSignature = Either.right(new Crypt.SaltSignaturePair(l, bs));
+		this.encryptedChallenge = Crypt.encryptUsingKey(publicKey, bs);
 	}
 
 	public ServerboundKeyPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.keybytes = friendlyByteBuf.readByteArray();
-		this.nonceOrSaltSignature = friendlyByteBuf.readEither(FriendlyByteBuf::readByteArray, Crypt.SaltSignaturePair::new);
+		this.encryptedChallenge = friendlyByteBuf.readByteArray();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByteArray(this.keybytes);
-		friendlyByteBuf.writeEither(this.nonceOrSaltSignature, FriendlyByteBuf::writeByteArray, Crypt.SaltSignaturePair::write);
+		friendlyByteBuf.writeByteArray(this.encryptedChallenge);
 	}
 
 	public void handle(ServerLoginPacketListener serverLoginPacketListener) {
@@ -45,19 +37,10 @@ public class ServerboundKeyPacket implements Packet<ServerLoginPacketListener> {
 		return Crypt.decryptByteToSecretKey(privateKey, this.keybytes);
 	}
 
-	public boolean isChallengeSignatureValid(byte[] bs, SignatureValidator signatureValidator) {
-		return this.nonceOrSaltSignature.<Boolean>map(bsx -> false, saltSignaturePair -> signatureValidator.validate(output -> {
-				output.update(bs);
-				output.update(saltSignaturePair.saltAsBytes());
-			}, saltSignaturePair.signature()));
-	}
-
-	public boolean isNonceValid(byte[] bs, PrivateKey privateKey) {
-		Optional<byte[]> optional = this.nonceOrSaltSignature.left();
-
+	public boolean isChallengeValid(byte[] bs, PrivateKey privateKey) {
 		try {
-			return optional.isPresent() && Arrays.equals(bs, Crypt.decryptUsingKey(privateKey, (byte[])optional.get()));
-		} catch (CryptException var5) {
+			return Arrays.equals(bs, Crypt.decryptUsingKey(privateKey, this.encryptedChallenge));
+		} catch (CryptException var4) {
 			return false;
 		}
 	}

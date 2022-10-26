@@ -62,6 +62,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	public static final EntityDataAccessor<Long> LAST_POSE_CHANGE_TICK = SynchedEntityData.defineId(Camel.class, EntityDataSerializers.LONG);
 	public final AnimationState walkAnimationState = new AnimationState();
 	public final AnimationState sitAnimationState = new AnimationState();
+	public final AnimationState sitPoseAnimationState = new AnimationState();
 	public final AnimationState sitUpAnimationState = new AnimationState();
 	public final AnimationState idleAnimationState = new AnimationState();
 	public final AnimationState dashAnimationState = new AnimationState();
@@ -182,6 +183,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 		switch (this.getPose()) {
 			case STANDING:
 				this.sitAnimationState.stop();
+				this.sitPoseAnimationState.stop();
 				this.dashAnimationState.animateWhen(this.isDashing(), this.tickCount);
 				this.sitUpAnimationState.animateWhen(this.isInPoseTransition(), this.tickCount);
 				this.walkAnimationState
@@ -191,11 +193,18 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 				this.walkAnimationState.stop();
 				this.sitUpAnimationState.stop();
 				this.dashAnimationState.stop();
-				this.sitAnimationState.startIfStopped(this.tickCount);
+				if (this.isSittingDown()) {
+					this.sitAnimationState.startIfStopped(this.tickCount);
+					this.sitPoseAnimationState.stop();
+				} else {
+					this.sitAnimationState.stop();
+					this.sitPoseAnimationState.startIfStopped(this.tickCount);
+				}
 				break;
 			default:
 				this.walkAnimationState.stop();
 				this.sitAnimationState.stop();
+				this.sitPoseAnimationState.stop();
 				this.sitUpAnimationState.stop();
 				this.dashAnimationState.stop();
 		}
@@ -213,7 +222,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 		}
 	}
 
-	boolean refuseToMove() {
+	public boolean refuseToMove() {
 		return this.isPoseSitting() || this.isInPoseTransition();
 	}
 
@@ -537,6 +546,10 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 			case SITTING -> l < 40L;
 			default -> false;
 		};
+	}
+
+	private boolean isSittingDown() {
+		return this.getPose() == Pose.SITTING && this.getPoseTime() < 40L;
 	}
 
 	public void sitDown() {

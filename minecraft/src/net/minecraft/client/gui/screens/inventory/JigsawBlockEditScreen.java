@@ -138,12 +138,14 @@ public class JigsawBlockEditScreen extends Screen {
 			CycleButton.onOffBuilder(this.keepJigsaws)
 				.create(this.width / 2 - 50, 180, 100, 20, Component.translatable("jigsaw_block.keep_jigsaws"), (cycleButton, boolean_) -> this.keepJigsaws = boolean_)
 		);
-		this.generateButton = this.addRenderableWidget(new Button(this.width / 2 + 54, 180, 100, 20, Component.translatable("jigsaw_block.generate"), button -> {
+		this.generateButton = this.addRenderableWidget(Button.builder(Component.translatable("jigsaw_block.generate"), button -> {
 			this.onDone();
 			this.sendGenerate();
-		}));
-		this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
-		this.addRenderableWidget(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
+		}).bounds(this.width / 2 + 54, 180, 100, 20).build());
+		this.doneButton = this.addRenderableWidget(
+			Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build()
+		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onCancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 		this.setInitialFocus(this.poolEdit);
 		this.updateValidity();
 	}

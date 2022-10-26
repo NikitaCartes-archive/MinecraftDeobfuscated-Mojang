@@ -3,9 +3,9 @@ package net.minecraft.data.metadata;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.bridge.game.PackType;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import net.minecraft.DetectedVersion;
 import net.minecraft.data.CachedOutput;
@@ -18,13 +18,11 @@ import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.world.flag.FeatureFlagSet;
 
 public class PackMetadataGenerator implements DataProvider {
-	private final String name;
 	private final PackOutput output;
 	private final Map<String, Supplier<JsonElement>> elements = new HashMap();
 
-	public PackMetadataGenerator(PackOutput packOutput, String string) {
+	public PackMetadataGenerator(PackOutput packOutput) {
 		this.output = packOutput;
-		this.name = string;
 	}
 
 	public <T> PackMetadataGenerator add(MetadataSectionType<T> metadataSectionType, T object) {
@@ -33,19 +31,19 @@ public class PackMetadataGenerator implements DataProvider {
 	}
 
 	@Override
-	public void run(CachedOutput cachedOutput) throws IOException {
+	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		JsonObject jsonObject = new JsonObject();
 		this.elements.forEach((string, supplier) -> jsonObject.add(string, (JsonElement)supplier.get()));
-		DataProvider.saveStable(cachedOutput, jsonObject, this.output.getOutputFolder().resolve("pack.mcmeta"));
+		return DataProvider.saveStable(cachedOutput, jsonObject, this.output.getOutputFolder().resolve("pack.mcmeta"));
 	}
 
 	@Override
-	public String getName() {
-		return this.name;
+	public final String getName() {
+		return "Pack Metadata";
 	}
 
-	public static PackMetadataGenerator forFeaturePack(PackOutput packOutput, String string, Component component, FeatureFlagSet featureFlagSet) {
-		return new PackMetadataGenerator(packOutput, "Pack metadata for " + string)
+	public static PackMetadataGenerator forFeaturePack(PackOutput packOutput, Component component, FeatureFlagSet featureFlagSet) {
+		return new PackMetadataGenerator(packOutput)
 			.add(PackMetadataSection.TYPE, new PackMetadataSection(component, DetectedVersion.BUILT_IN.getPackVersion(PackType.DATA)))
 			.add(FeatureFlagsMetadataSection.TYPE, new FeatureFlagsMetadataSection(featureFlagSet));
 	}

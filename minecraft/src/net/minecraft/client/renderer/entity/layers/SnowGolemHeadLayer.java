@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -40,15 +40,15 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 				poseStack.pushPose();
 				this.getParentModel().getHead().translateAndRotate(poseStack);
 				float m = 0.625F;
-				poseStack.translate(0.0, -0.34375, 0.0);
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+				poseStack.translate(0.0F, -0.34375F, 0.0F);
+				poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				poseStack.scale(0.625F, -0.625F, -0.625F);
 				ItemStack itemStack = new ItemStack(Blocks.CARVED_PUMPKIN);
 				if (bl) {
 					BlockState blockState = Blocks.CARVED_PUMPKIN.defaultBlockState();
 					BakedModel bakedModel = this.blockRenderer.getBlockModel(blockState);
 					int n = LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0F);
-					poseStack.translate(-0.5, -0.5, -0.5);
+					poseStack.translate(-0.5F, -0.5F, -0.5F);
 					this.blockRenderer
 						.getModelRenderer()
 						.renderModel(

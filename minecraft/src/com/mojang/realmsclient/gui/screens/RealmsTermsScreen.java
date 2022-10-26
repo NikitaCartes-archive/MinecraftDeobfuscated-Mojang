@@ -43,9 +43,13 @@ public class RealmsTermsScreen extends RealmsScreen {
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = this.width / 4 - 2;
-		this.addRenderableWidget(new Button(this.width / 4, row(12), i, 20, Component.translatable("mco.terms.buttons.agree"), button -> this.agreedToTos()));
 		this.addRenderableWidget(
-			new Button(this.width / 2 + 4, row(12), i, 20, Component.translatable("mco.terms.buttons.disagree"), button -> this.minecraft.setScreen(this.lastScreen))
+			Button.builder(Component.translatable("mco.terms.buttons.agree"), button -> this.agreedToTos()).bounds(this.width / 4, row(12), i, 20).build()
+		);
+		this.addRenderableWidget(
+			Button.builder(Component.translatable("mco.terms.buttons.disagree"), button -> this.minecraft.setScreen(this.lastScreen))
+				.bounds(this.width / 2 + 4, row(12), i, 20)
+				.build()
 		);
 	}
 

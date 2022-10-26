@@ -47,9 +47,9 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		if (this.animationTime > 0.0F) {
 			float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
 			poseStack.pushPose();
-			poseStack.translate((double)(this.x + 8), (double)(this.y + 12), 0.0);
+			poseStack.translate((float)(this.getX() + 8), (float)(this.getY() + 12), 0.0F);
 			poseStack.scale(1.0F, g, 1.0F);
-			poseStack.translate((double)(-(this.x + 8)), (double)(-(this.y + 12)), 0.0);
+			poseStack.translate((float)(-(this.getX() + 8)), (float)(-(this.getY() + 12)), 0.0F);
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
@@ -66,13 +66,13 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 			l += this.yDiffTex;
 		}
 
-		int m = this.x;
+		int m = this.getX();
 		if (this.isStateTriggered) {
 			m -= 2;
 		}
 
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		this.blit(poseStack, m, this.y, k, l, this.width, this.height);
+		this.blit(poseStack, m, this.getY(), k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
 		this.renderIcon(minecraft.getItemRenderer());
 		if (this.animationTime > 0.0F) {
@@ -85,10 +85,10 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		List<ItemStack> list = this.category.getIconItems();
 		int i = this.isStateTriggered ? -2 : 0;
 		if (list.size() == 1) {
-			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.x + 9 + i, this.y + 5);
+			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.getX() + 9 + i, this.getY() + 5);
 		} else if (list.size() == 2) {
-			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.x + 3 + i, this.y + 5);
-			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(1), this.x + 14 + i, this.y + 5);
+			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.getX() + 3 + i, this.getY() + 5);
+			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(1), this.getX() + 14 + i, this.getY() + 5);
 		}
 	}
 

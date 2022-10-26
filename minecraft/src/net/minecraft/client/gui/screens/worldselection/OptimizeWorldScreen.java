@@ -80,10 +80,10 @@ public class OptimizeWorldScreen extends Screen {
 	@Override
 	protected void init() {
 		super.init();
-		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 150, 200, 20, CommonComponents.GUI_CANCEL, button -> {
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			this.upgrader.cancel();
 			this.callback.accept(false);
-		}));
+		}).bounds(this.width / 2 - 100, this.height / 4 + 150, 200, 20).build());
 	}
 
 	@Override

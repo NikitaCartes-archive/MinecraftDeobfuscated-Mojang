@@ -16,7 +16,7 @@ public class PlainTextButton extends Button {
 	private final Component underlinedMessage;
 
 	public PlainTextButton(int i, int j, int k, int l, Component component, Button.OnPress onPress, Font font) {
-		super(i, j, k, l, component, onPress);
+		super(i, j, k, l, component, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
 		this.font = font;
 		this.message = component;
 		this.underlinedMessage = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withUnderlined(true));
@@ -25,6 +25,6 @@ public class PlainTextButton extends Button {
 	@Override
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		Component component = this.isHoveredOrFocused() ? this.underlinedMessage : this.message;
-		drawString(poseStack, this.font, component, this.x, this.y, 16777215 | Mth.ceil(this.alpha * 255.0F) << 24);
+		drawString(poseStack, this.font, component, this.getX(), this.getY(), 16777215 | Mth.ceil(this.alpha * 255.0F) << 24);
 	}
 }

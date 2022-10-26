@@ -4,9 +4,11 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 public class MessageSignatureCache {
+	public static final int NOT_FOUND = -1;
 	private static final int DEFAULT_CAPACITY = 128;
 	private final MessageSignature[] entries;
 
@@ -18,20 +20,19 @@ public class MessageSignatureCache {
 		return new MessageSignatureCache(128);
 	}
 
-	public MessageSignature.Packer packer() {
-		return messageSignature -> {
-			for (int i = 0; i < this.entries.length; i++) {
-				if (messageSignature.equals(this.entries[i])) {
-					return i;
-				}
+	public int pack(MessageSignature messageSignature) {
+		for (int i = 0; i < this.entries.length; i++) {
+			if (messageSignature.equals(this.entries[i])) {
+				return i;
 			}
+		}
 
-			return -1;
-		};
+		return -1;
 	}
 
-	public MessageSignature.Unpacker unpacker() {
-		return i -> this.entries[i];
+	@Nullable
+	public MessageSignature unpack(int i) {
+		return this.entries[i];
 	}
 
 	public void push(PlayerChatMessage playerChatMessage) {

@@ -201,8 +201,13 @@ public class ServerEntity {
 		Packet<ClientGamePacketListener> packet = this.entity.getAddEntityPacket();
 		this.yHeadRotp = Mth.floor(this.entity.getYHeadRot() * 256.0F / 360.0F);
 		consumer.accept(packet);
-		if (!this.entity.getEntityData().isEmpty()) {
-			consumer.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), this.entity.getEntityData(), true));
+		SynchedEntityData synchedEntityData = this.entity.getEntityData();
+		if (!synchedEntityData.isEmpty()) {
+			List<SynchedEntityData.DataValue<?>> list = synchedEntityData.getNonDefaultValues();
+			synchedEntityData.clearDirty();
+			if (list != null) {
+				consumer.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
+			}
 		}
 
 		boolean bl = this.trackDelta;
@@ -223,17 +228,17 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
-			List<Pair<EquipmentSlot, ItemStack>> list = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
+			List<Pair<EquipmentSlot, ItemStack>> list2 = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
 
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 				ItemStack itemStack = ((LivingEntity)this.entity).getItemBySlot(equipmentSlot);
 				if (!itemStack.isEmpty()) {
-					list.add(Pair.of(equipmentSlot, itemStack.copy()));
+					list2.add(Pair.of(equipmentSlot, itemStack.copy()));
 				}
 			}
 
-			if (!list.isEmpty()) {
-				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list));
+			if (!list2.isEmpty()) {
+				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list2));
 			}
 		}
 
@@ -258,8 +263,9 @@ public class ServerEntity {
 
 	private void sendDirtyEntityData() {
 		SynchedEntityData synchedEntityData = this.entity.getEntityData();
-		if (synchedEntityData.isDirty()) {
-			this.broadcastAndSend(new ClientboundSetEntityDataPacket(this.entity.getId(), synchedEntityData, false));
+		List<SynchedEntityData.DataValue<?>> list = synchedEntityData.packDirty();
+		if (list != null) {
+			this.broadcastAndSend(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
 		}
 
 		if (this.entity instanceof LivingEntity) {

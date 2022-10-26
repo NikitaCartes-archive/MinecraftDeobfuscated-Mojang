@@ -1,47 +1,44 @@
 package net.minecraft.network.protocol.game;
 
+import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.SynchedEntityData;
 
-public class ClientboundSetEntityDataPacket implements Packet<ClientGamePacketListener> {
-	private final int id;
-	@Nullable
-	private final List<SynchedEntityData.DataItem<?>> packedItems;
-
-	public ClientboundSetEntityDataPacket(int i, SynchedEntityData synchedEntityData, boolean bl) {
-		this.id = i;
-		if (bl) {
-			this.packedItems = synchedEntityData.getAll();
-			synchedEntityData.clearDirty();
-		} else {
-			this.packedItems = synchedEntityData.packDirty();
-		}
-	}
+public record ClientboundSetEntityDataPacket(int id, List<SynchedEntityData.DataValue<?>> packedItems) implements Packet<ClientGamePacketListener> {
+	public static final int EOF_MARKER = 255;
 
 	public ClientboundSetEntityDataPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.id = friendlyByteBuf.readVarInt();
-		this.packedItems = SynchedEntityData.unpack(friendlyByteBuf);
+		this(friendlyByteBuf.readVarInt(), unpack(friendlyByteBuf));
+	}
+
+	private static void pack(List<SynchedEntityData.DataValue<?>> list, FriendlyByteBuf friendlyByteBuf) {
+		for (SynchedEntityData.DataValue<?> dataValue : list) {
+			dataValue.write(friendlyByteBuf);
+		}
+
+		friendlyByteBuf.writeByte(255);
+	}
+
+	private static List<SynchedEntityData.DataValue<?>> unpack(FriendlyByteBuf friendlyByteBuf) {
+		List<SynchedEntityData.DataValue<?>> list = new ArrayList();
+
+		int i;
+		while ((i = friendlyByteBuf.readUnsignedByte()) != 255) {
+			list.add(SynchedEntityData.DataValue.read(friendlyByteBuf, i));
+		}
+
+		return list;
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
-		SynchedEntityData.pack(this.packedItems, friendlyByteBuf);
+		pack(this.packedItems, friendlyByteBuf);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
 		clientGamePacketListener.handleSetEntityData(this);
-	}
-
-	@Nullable
-	public List<SynchedEntityData.DataItem<?>> getUnpackedData() {
-		return this.packedItems;
-	}
-
-	public int getId() {
-		return this.id;
 	}
 }

@@ -30,11 +30,15 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 		int i = Math.max(this.font.width(component), this.font.width(component2)) + 30;
 		Component component3 = Component.translatable("mco.account.privacy.info");
 		int j = (int)((double)this.font.width(component3) * 1.2);
-		this.addRenderableWidget(new Button(this.width / 2 - j / 2, row(11), j, 20, component3, button -> Util.getPlatform().openUri("https://aka.ms/MinecraftGDPR")));
 		this.addRenderableWidget(
-			new Button(this.width / 2 - (i + 5), row(13), i, 20, component, button -> Util.getPlatform().openUri("https://aka.ms/UpdateMojangAccount"))
+			Button.builder(component3, button -> Util.getPlatform().openUri("https://aka.ms/MinecraftGDPR")).bounds(this.width / 2 - j / 2, row(11), j, 20).build()
 		);
-		this.addRenderableWidget(new Button(this.width / 2 + 5, row(13), i, 20, component2, button -> this.minecraft.setScreen(this.nextScreen)));
+		this.addRenderableWidget(
+			Button.builder(component, button -> Util.getPlatform().openUri("https://aka.ms/UpdateMojangAccount"))
+				.bounds(this.width / 2 - (i + 5), row(13), i, 20)
+				.build()
+		);
+		this.addRenderableWidget(Button.builder(component2, button -> this.minecraft.setScreen(this.nextScreen)).bounds(this.width / 2 + 5, row(13), i, 20).build());
 		this.messageLines = MultiLineLabel.create(this.font, MESSAGE, (int)Math.round((double)this.width * 0.9));
 	}
 

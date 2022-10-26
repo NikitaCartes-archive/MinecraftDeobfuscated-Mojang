@@ -5,11 +5,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
-public class RealmsLabel implements Widget {
+public class RealmsLabel implements Renderable {
 	private final Component text;
 	private final int x;
 	private final int y;

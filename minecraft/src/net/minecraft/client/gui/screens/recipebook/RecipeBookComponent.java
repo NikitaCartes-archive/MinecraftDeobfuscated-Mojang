@@ -17,8 +17,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.StateSwitchingButton;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -40,7 +40,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
-public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ingredient>, Widget, GuiEventListener, NarratableEntry, RecipeShownListener {
+public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ingredient>, Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
 	protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final Component SEARCH_HINT = Component.translatable("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
@@ -248,7 +248,7 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.isVisible()) {
 			poseStack.pushPose();
-			poseStack.translate(0.0, 0.0, 100.0);
+			poseStack.translate(0.0F, 0.0F, 100.0F);
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

@@ -2,7 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerBulletModel;
@@ -35,10 +35,10 @@ public class ShulkerBulletRenderer extends EntityRenderer<ShulkerBullet> {
 		float h = Mth.rotlerp(shulkerBullet.yRotO, shulkerBullet.getYRot(), g);
 		float j = Mth.lerp(g, shulkerBullet.xRotO, shulkerBullet.getXRot());
 		float k = (float)shulkerBullet.tickCount + g;
-		poseStack.translate(0.0, 0.15F, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.sin(k * 0.1F) * 180.0F));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.cos(k * 0.1F) * 180.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.sin(k * 0.15F) * 360.0F));
+		poseStack.translate(0.0F, 0.15F, 0.0F);
+		poseStack.mulPose(Axis.YP.rotationDegrees(Mth.sin(k * 0.1F) * 180.0F));
+		poseStack.mulPose(Axis.XP.rotationDegrees(Mth.cos(k * 0.1F) * 180.0F));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(k * 0.15F) * 360.0F));
 		poseStack.scale(-0.5F, -0.5F, 0.5F);
 		this.model.setupAnim(shulkerBullet, 0.0F, 0.0F, 0.0F, h, j);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));

@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,10 +40,10 @@ public class ArmorStandRenderer extends LivingEntityRenderer<ArmorStand, ArmorSt
 	}
 
 	protected void setupRotations(ArmorStand armorStand, PoseStack poseStack, float f, float g, float h) {
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
+		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - g));
 		float i = (float)(armorStand.level.getGameTime() - armorStand.lastHit) + h;
 		if (i < 5.0F) {
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.sin(i / 1.5F * (float) Math.PI) * 3.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(Mth.sin(i / 1.5F * (float) Math.PI) * 3.0F));
 		}
 	}
 

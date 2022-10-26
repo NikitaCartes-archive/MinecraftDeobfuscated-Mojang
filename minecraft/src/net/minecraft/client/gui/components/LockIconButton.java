@@ -14,7 +14,7 @@ public class LockIconButton extends Button {
 	private boolean locked;
 
 	public LockIconButton(int i, int j, Button.OnPress onPress) {
-		super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress);
+		super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress, NO_TOOLTIP, DEFAULT_NARRATION);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class LockIconButton extends Button {
 			icon = this.locked ? LockIconButton.Icon.LOCKED : LockIconButton.Icon.UNLOCKED;
 		}
 
-		this.blit(poseStack, this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
+		this.blit(poseStack, this.getX(), this.getY(), icon.getX(), icon.getY(), this.width, this.height);
 	}
 
 	@Environment(EnvType.CLIENT)

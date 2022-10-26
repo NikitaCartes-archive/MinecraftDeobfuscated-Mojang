@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.net.InetSocketAddress;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -24,7 +23,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.slf4j.Logger;
@@ -57,7 +55,6 @@ public class ConnectScreen extends Screen {
 	}
 
 	private void connect(Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
-		final CompletableFuture<LocalChatSession> completableFuture = minecraft.getProfileKeyPairManager().prepareChatSession();
 		LOGGER.info("Connecting to {}, {}", serverAddress.getHost(), serverAddress.getPort());
 		Thread thread = new Thread("Server Connector #" + UNIQUE_THREAD_ID.incrementAndGet()) {
 			public void run() {
@@ -82,18 +79,12 @@ public class ConnectScreen extends Screen {
 
 					inetSocketAddress = (InetSocketAddress)optional.get();
 					ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
-					LocalChatSession localChatSession = (LocalChatSession)completableFuture.join();
 					ConnectScreen.this.connection
 						.setListener(
-							new ClientHandshakePacketListenerImpl(
-								ConnectScreen.this.connection, minecraft, localChatSession, serverData, ConnectScreen.this.parent, ConnectScreen.this::updateStatus
-							)
+							new ClientHandshakePacketListenerImpl(ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, ConnectScreen.this::updateStatus)
 						);
 					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-					ConnectScreen.this.connection
-						.send(
-							new ServerboundHelloPacket(minecraft.getUser().getName(), localChatSession.asRemote().asData(), Optional.ofNullable(minecraft.getUser().getProfileId()))
-						);
+					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
 				} catch (Exception var6) {
 					if (ConnectScreen.this.aborted) {
 						return;
@@ -146,14 +137,14 @@ public class ConnectScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> {
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			this.aborted = true;
 			if (this.connection != null) {
 				this.connection.disconnect(Component.translatable("connect.aborted"));
 			}
 
 			this.minecraft.setScreen(this.parent);
-		}));
+		}).bounds(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20).build());
 	}
 
 	@Override

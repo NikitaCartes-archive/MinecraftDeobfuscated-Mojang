@@ -37,6 +37,10 @@ public class AreaEffectCloud extends Entity {
 	private static final EntityDataAccessor<Boolean> DATA_WAITING = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<ParticleOptions> DATA_PARTICLE = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.PARTICLE);
 	private static final float MAX_RADIUS = 32.0F;
+	private static final float MINIMAL_RADIUS = 0.5F;
+	private static final float DEFAULT_RADIUS = 3.0F;
+	public static final float DEFAULT_WIDTH = 6.0F;
+	public static final float HEIGHT = 0.5F;
 	private Potion potion = Potions.EMPTY;
 	private final List<MobEffectInstance> effects = Lists.<MobEffectInstance>newArrayList();
 	private final Map<Entity, Integer> victims = Maps.<Entity, Integer>newHashMap();
@@ -55,7 +59,6 @@ public class AreaEffectCloud extends Entity {
 	public AreaEffectCloud(EntityType<? extends AreaEffectCloud> entityType, Level level) {
 		super(entityType, level);
 		this.noPhysics = true;
-		this.setRadius(3.0F);
 	}
 
 	public AreaEffectCloud(Level level, double d, double e, double f) {
@@ -66,7 +69,7 @@ public class AreaEffectCloud extends Entity {
 	@Override
 	protected void defineSynchedData() {
 		this.getEntityData().define(DATA_COLOR, 0);
-		this.getEntityData().define(DATA_RADIUS, 0.5F);
+		this.getEntityData().define(DATA_RADIUS, 3.0F);
 		this.getEntityData().define(DATA_WAITING, false);
 		this.getEntityData().define(DATA_PARTICLE, ParticleTypes.ENTITY_EFFECT);
 	}

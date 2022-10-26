@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractScrollWidget extends AbstractWidget implements Widget, GuiEventListener {
+public abstract class AbstractScrollWidget extends AbstractWidget implements Renderable, GuiEventListener {
 	private static final int BORDER_COLOR_FOCUSED = -1;
 	private static final int BORDER_COLOR = -6250336;
 	private static final int BACKGROUND_COLOR = -16777216;
@@ -33,10 +33,10 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Wid
 		} else {
 			boolean bl = this.withinContentAreaPoint(d, e);
 			boolean bl2 = this.scrollbarVisible()
-				&& d >= (double)(this.x + this.width)
-				&& d <= (double)(this.x + this.width + 8)
-				&& e >= (double)this.y
-				&& e < (double)(this.y + this.height);
+				&& d >= (double)(this.getX() + this.width)
+				&& d <= (double)(this.getX() + this.width + 8)
+				&& e >= (double)this.getY()
+				&& e < (double)(this.getY() + this.height);
 			this.setFocused(bl || bl2);
 			if (bl2 && i == 0) {
 				this.scrolling = true;
@@ -59,9 +59,9 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Wid
 	@Override
 	public boolean mouseDragged(double d, double e, int i, double f, double g) {
 		if (this.visible && this.isFocused() && this.scrolling) {
-			if (e < (double)this.y) {
+			if (e < (double)this.getY()) {
 				this.setScrollAmount(0.0);
-			} else if (e > (double)(this.y + this.height)) {
+			} else if (e > (double)(this.getY() + this.height)) {
 				this.setScrollAmount((double)this.getMaxScrollAmount());
 			} else {
 				int j = this.getScrollBarHeight();
@@ -89,7 +89,7 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Wid
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		if (this.visible) {
 			this.renderBackground(poseStack);
-			enableScissor(this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1);
+			enableScissor(this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1);
 			poseStack.pushPose();
 			poseStack.translate(0.0, -this.scrollAmount, 0.0);
 			this.renderContents(poseStack, i, j, f);
@@ -135,15 +135,15 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Wid
 
 	private void renderBackground(PoseStack poseStack) {
 		int i = this.isFocused() ? -1 : -6250336;
-		fill(poseStack, this.x, this.y, this.x + this.width, this.y + this.height, i);
-		fill(poseStack, this.x + 1, this.y + 1, this.x + this.width - 1, this.y + this.height - 1, -16777216);
+		fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, i);
+		fill(poseStack, this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1, -16777216);
 	}
 
 	private void renderScrollBar() {
 		int i = this.getScrollBarHeight();
-		int j = this.x + this.width;
-		int k = this.x + this.width + 8;
-		int l = Math.max(this.y, (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.y);
+		int j = this.getX() + this.width;
+		int k = this.getX() + this.width + 8;
+		int l = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
 		int m = l + i;
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Tesselator tesselator = Tesselator.getInstance();
@@ -161,11 +161,11 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Wid
 	}
 
 	protected boolean withinContentAreaTopBottom(int i, int j) {
-		return (double)j - this.scrollAmount >= (double)this.y && (double)i - this.scrollAmount <= (double)(this.y + this.height);
+		return (double)j - this.scrollAmount >= (double)this.getY() && (double)i - this.scrollAmount <= (double)(this.getY() + this.height);
 	}
 
 	protected boolean withinContentAreaPoint(double d, double e) {
-		return d >= (double)this.x && d < (double)(this.x + this.width) && e >= (double)this.y && e < (double)(this.y + this.height);
+		return d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
 	}
 
 	protected abstract int getInnerHeight();

@@ -35,7 +35,7 @@ public class ShareToLanScreen extends Screen {
 		this.addRenderableWidget(
 			CycleButton.onOffBuilder(this.commands).create(this.width / 2 + 5, 100, 150, 20, ALLOW_COMMANDS_LABEL, (cycleButton, boolean_) -> this.commands = boolean_)
 		);
-		this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, Component.translatable("lanServer.start"), button -> {
+		this.addRenderableWidget(Button.builder(Component.translatable("lanServer.start"), button -> {
 			this.minecraft.setScreen(null);
 			int i = HttpUtil.getAvailablePort();
 			Component component;
@@ -47,9 +47,11 @@ public class ShareToLanScreen extends Screen {
 
 			this.minecraft.gui.getChat().addMessage(component);
 			this.minecraft.updateTitle();
-		}));
+		}).bounds(this.width / 2 - 155, this.height - 28, 150, 20).build());
 		this.addRenderableWidget(
-			new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
+			Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
+				.bounds(this.width / 2 + 5, this.height - 28, 150, 20)
+				.build()
 		);
 	}
 

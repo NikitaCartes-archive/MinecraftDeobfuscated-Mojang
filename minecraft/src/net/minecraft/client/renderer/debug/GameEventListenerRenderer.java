@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
@@ -29,6 +28,7 @@ import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRenderer {

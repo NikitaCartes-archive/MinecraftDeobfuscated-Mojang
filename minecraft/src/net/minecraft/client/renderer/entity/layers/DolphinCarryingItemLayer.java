@@ -29,9 +29,9 @@ public class DolphinCarryingItemLayer extends RenderLayer<Dolphin, DolphinModel<
 		float n = -1.0F;
 		float o = Mth.abs(dolphin.getXRot()) / 60.0F;
 		if (dolphin.getXRot() < 0.0F) {
-			poseStack.translate(0.0, (double)(1.0F - o * 0.5F), (double)(-1.0F + o * 0.5F));
+			poseStack.translate(0.0F, 1.0F - o * 0.5F, -1.0F + o * 0.5F);
 		} else {
-			poseStack.translate(0.0, (double)(1.0F + o * 0.8F), (double)(-1.0F + o * 0.2F));
+			poseStack.translate(0.0F, 1.0F + o * 0.8F, -1.0F + o * 0.2F);
 		}
 
 		ItemStack itemStack = bl ? dolphin.getMainHandItem() : dolphin.getOffhandItem();

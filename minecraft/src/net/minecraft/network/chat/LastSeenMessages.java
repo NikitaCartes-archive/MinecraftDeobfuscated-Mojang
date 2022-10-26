@@ -1,6 +1,7 @@
 package net.minecraft.network.chat;
 
 import com.google.common.primitives.Ints;
+import com.mojang.serialization.Codec;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -10,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.SignatureUpdater;
 
 public record LastSeenMessages(List<MessageSignature> entries) {
+	public static final Codec<LastSeenMessages> CODEC = MessageSignature.CODEC.listOf().xmap(LastSeenMessages::new, LastSeenMessages::entries);
 	public static LastSeenMessages EMPTY = new LastSeenMessages(List.of());
 	public static final int LAST_SEEN_MESSAGES_MAX_LENGTH = 20;
 
@@ -21,8 +23,8 @@ public record LastSeenMessages(List<MessageSignature> entries) {
 		}
 	}
 
-	public LastSeenMessages.Packed pack(MessageSignature.Packer packer) {
-		return new LastSeenMessages.Packed(this.entries.stream().map(messageSignature -> messageSignature.pack(packer)).toList());
+	public LastSeenMessages.Packed pack(MessageSignatureCache messageSignatureCache) {
+		return new LastSeenMessages.Packed(this.entries.stream().map(messageSignature -> messageSignature.pack(messageSignatureCache)).toList());
 	}
 
 	public static record Packed(List<MessageSignature.Packed> entries) {
@@ -36,11 +38,11 @@ public record LastSeenMessages(List<MessageSignature> entries) {
 			friendlyByteBuf.writeCollection(this.entries, MessageSignature.Packed::write);
 		}
 
-		public Optional<LastSeenMessages> unpack(MessageSignature.Unpacker unpacker) {
+		public Optional<LastSeenMessages> unpack(MessageSignatureCache messageSignatureCache) {
 			List<MessageSignature> list = new ArrayList(this.entries.size());
 
 			for (MessageSignature.Packed packed : this.entries) {
-				Optional<MessageSignature> optional = packed.unpack(unpacker);
+				Optional<MessageSignature> optional = packed.unpack(messageSignatureCache);
 				if (optional.isEmpty()) {
 					return Optional.empty();
 				}

@@ -56,10 +56,14 @@ public class EditGameRulesScreen extends Screen {
 		this.rules = new EditGameRulesScreen.RuleList(this.gameRules);
 		this.addWidget(this.rules);
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20, CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty()))
+			Button.builder(CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty()))
+				.bounds(this.width / 2 - 155 + 160, this.height - 29, 150, 20)
+				.build()
 		);
 		this.doneButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 155, this.height - 29, 150, 20, CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules)))
+			Button.builder(CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules)))
+				.bounds(this.width / 2 - 155, this.height - 29, 150, 20)
+				.build()
 		);
 	}
 
@@ -118,8 +122,8 @@ public class EditGameRulesScreen extends Screen {
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			this.renderLabel(poseStack, j, k);
-			this.checkbox.x = k + l - 45;
-			this.checkbox.y = j;
+			this.checkbox.setX(k + l - 45);
+			this.checkbox.setY(j);
 			this.checkbox.render(poseStack, n, o, f);
 		}
 	}
@@ -218,8 +222,8 @@ public class EditGameRulesScreen extends Screen {
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			this.renderLabel(poseStack, j, k);
-			this.input.x = k + l - 44;
-			this.input.y = j;
+			this.input.setX(k + l - 44);
+			this.input.setY(j);
 			this.input.render(poseStack, n, o, f);
 		}
 	}

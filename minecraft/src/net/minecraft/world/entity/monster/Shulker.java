@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.monster;
 
-import com.mojang.math.Vector3f;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +53,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Shulker extends AbstractGolem implements Enemy {
 	private static final UUID COVERED_ARMOR_MODIFIER_UUID = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF27F");
@@ -666,8 +666,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 		@Override
 		protected Optional<Float> getYRotD() {
 			Direction direction = Shulker.this.getAttachFace().getOpposite();
-			Vector3f vector3f = Shulker.FORWARD.copy();
-			vector3f.transform(direction.getRotation());
+			Vector3f vector3f = direction.getRotation().transform(new Vector3f(Shulker.FORWARD));
 			Vec3i vec3i = direction.getNormal();
 			Vector3f vector3f2 = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 			vector3f2.cross(vector3f);

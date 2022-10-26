@@ -33,7 +33,7 @@ public class EntityDamageSource extends DamageSource {
 
 	@Override
 	public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-		ItemStack itemStack = this.entity instanceof LivingEntity ? ((LivingEntity)this.entity).getMainHandItem() : ItemStack.EMPTY;
+		ItemStack itemStack = this.entity instanceof LivingEntity livingEntity2 ? livingEntity2.getMainHandItem() : ItemStack.EMPTY;
 		String string = "death.attack." + this.msgId;
 		return !itemStack.isEmpty() && itemStack.hasCustomHoverName()
 			? Component.translatable(string + ".item", livingEntity.getDisplayName(), this.entity.getDisplayName(), itemStack.getDisplayName())

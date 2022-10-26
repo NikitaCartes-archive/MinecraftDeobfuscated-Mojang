@@ -5,10 +5,9 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.JsonOps;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
@@ -29,38 +28,41 @@ public class BuiltinRegistriesDatapackGenerator implements DataProvider {
 	}
 
 	@Override
-	public void run(CachedOutput cachedOutput) {
+	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		RegistryAccess registryAccess = BuiltinRegistries.createAccess();
 		DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-		RegistryDataLoader.WORLDGEN_REGISTRIES.forEach(registryData -> this.dumpRegistryCap(cachedOutput, registryAccess, dynamicOps, registryData));
+		return CompletableFuture.allOf(
+			(CompletableFuture[])RegistryDataLoader.WORLDGEN_REGISTRIES
+				.stream()
+				.map(registryData -> this.dumpRegistryCap(cachedOutput, registryAccess, dynamicOps, registryData))
+				.toArray(CompletableFuture[]::new)
+		);
 	}
 
-	private <T> void dumpRegistryCap(
+	private <T> CompletableFuture<?> dumpRegistryCap(
 		CachedOutput cachedOutput, RegistryAccess registryAccess, DynamicOps<JsonElement> dynamicOps, RegistryDataLoader.RegistryData<T> registryData
 	) {
 		ResourceKey<? extends Registry<T>> resourceKey = registryData.key();
 		Registry<T> registry = registryAccess.registryOrThrow(resourceKey);
 		PackOutput.PathProvider pathProvider = this.output.createPathProvider(PackOutput.Target.DATA_PACK, resourceKey.location().getPath());
-
-		for (Entry<ResourceKey<T>, T> entry : registry.entrySet()) {
-			dumpValue(pathProvider.json(((ResourceKey)entry.getKey()).location()), cachedOutput, dynamicOps, registryData.elementCodec(), (T)entry.getValue());
-		}
+		return CompletableFuture.allOf(
+			(CompletableFuture[])registry.entrySet()
+				.stream()
+				.map(
+					entry -> dumpValue(pathProvider.json(((ResourceKey)entry.getKey()).location()), cachedOutput, dynamicOps, registryData.elementCodec(), (T)entry.getValue())
+				)
+				.toArray(CompletableFuture[]::new)
+		);
 	}
 
-	private static <E> void dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
-		try {
-			Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object)
-				.resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", path, string));
-			if (optional.isPresent()) {
-				DataProvider.saveStable(cachedOutput, (JsonElement)optional.get(), path);
-			}
-		} catch (IOException var6) {
-			LOGGER.error("Couldn't save element {}", path, var6);
-		}
+	private static <E> CompletableFuture<?> dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
+		Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object)
+			.resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", path, string));
+		return optional.isPresent() ? DataProvider.saveStable(cachedOutput, (JsonElement)optional.get(), path) : CompletableFuture.completedFuture(null);
 	}
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return "Worldgen";
 	}
 }

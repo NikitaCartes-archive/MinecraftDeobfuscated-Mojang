@@ -3,7 +3,6 @@ package net.minecraft.client.renderer;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class FogRenderer {

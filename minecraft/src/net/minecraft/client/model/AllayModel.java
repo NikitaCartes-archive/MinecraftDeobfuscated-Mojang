@@ -1,7 +1,7 @@
 package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -131,9 +131,9 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		float g = 3.0F;
 		this.root.translateAndRotate(poseStack);
 		this.body.translateAndRotate(poseStack);
-		poseStack.translate(0.0, 0.0625, 0.1875);
-		poseStack.mulPose(Vector3f.XP.rotation(this.right_arm.xRot));
+		poseStack.translate(0.0F, 0.0625F, 0.1875F);
+		poseStack.mulPose(Axis.XP.rotation(this.right_arm.xRot));
 		poseStack.scale(0.7F, 0.7F, 0.7F);
-		poseStack.translate(0.0625, 0.0, 0.0);
+		poseStack.translate(0.0625F, 0.0F, 0.0F);
 	}
 }

@@ -8,8 +8,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 public class UpdateOneTwentyLootTableProvider {
 	public static LootTableProvider create(PackOutput packOutput) {
-		return new LootTableProvider(
-			"1.20 Loot Tables", packOutput, Set.of(), List.of(new LootTableProvider.SubProviderEntry(UpdateOneTwentyBlockLoot::new, LootContextParamSets.BLOCK))
-		);
+		return new LootTableProvider(packOutput, Set.of(), List.of(new LootTableProvider.SubProviderEntry(UpdateOneTwentyBlockLoot::new, LootContextParamSets.BLOCK)));
 	}
 }

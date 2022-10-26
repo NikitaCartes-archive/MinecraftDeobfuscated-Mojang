@@ -104,16 +104,22 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			this.worldTemplateObjectSelectionList.getTemplates()
 		);
 		this.trailerButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 206, this.height - 32, 100, 20, Component.translatable("mco.template.button.trailer"), buttonx -> this.onTrailer())
+			Button.builder(Component.translatable("mco.template.button.trailer"), buttonx -> this.onTrailer())
+				.bounds(this.width / 2 - 206, this.height - 32, 100, 20)
+				.build()
 		);
 		this.selectButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 100, this.height - 32, 100, 20, Component.translatable("mco.template.button.select"), buttonx -> this.selectTemplate())
+			Button.builder(Component.translatable("mco.template.button.select"), buttonx -> this.selectTemplate())
+				.bounds(this.width / 2 - 100, this.height - 32, 100, 20)
+				.build()
 		);
 		Component component = this.worldType == RealmsServer.WorldType.MINIGAME ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_BACK;
-		Button button = new Button(this.width / 2 + 6, this.height - 32, 100, 20, component, buttonx -> this.onClose());
+		Button button = Button.builder(component, buttonx -> this.onClose()).bounds(this.width / 2 + 6, this.height - 32, 100, 20).build();
 		this.addRenderableWidget(button);
 		this.publisherButton = this.addRenderableWidget(
-			new Button(this.width / 2 + 112, this.height - 32, 100, 20, Component.translatable("mco.template.button.publisher"), buttonx -> this.onPublish())
+			Button.builder(Component.translatable("mco.template.button.publisher"), buttonx -> this.onPublish())
+				.bounds(this.width / 2 + 112, this.height - 32, 100, 20)
+				.build()
 		);
 		this.selectButton.active = false;
 		this.trailerButton.visible = false;

@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -114,16 +113,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		ListTag listTag = new ListTag();
-
-		for (int i = 0; i < this.inventory.getContainerSize(); i++) {
-			ItemStack itemStack = this.inventory.getItem(i);
-			if (!itemStack.isEmpty()) {
-				listTag.add(itemStack.save(new CompoundTag()));
-			}
-		}
-
-		compoundTag.put("Inventory", listTag);
+		this.writeInventoryToTag(compoundTag);
 	}
 
 	@Override
@@ -140,15 +130,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		ListTag listTag = compoundTag.getList("Inventory", 10);
-
-		for (int i = 0; i < listTag.size(); i++) {
-			ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
-			if (!itemStack.isEmpty()) {
-				this.inventory.addItem(itemStack);
-			}
-		}
-
+		this.readInventoryFromTag(compoundTag);
 		this.setCanPickUpLoot(true);
 	}
 

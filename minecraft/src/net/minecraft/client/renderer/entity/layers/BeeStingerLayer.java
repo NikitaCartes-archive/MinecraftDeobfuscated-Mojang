@@ -2,9 +2,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -16,6 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>> extends StuckInBodyLayer<T, M> {
@@ -35,21 +35,21 @@ public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>> e
 		float k = Mth.sqrt(f * f + h * h);
 		float l = (float)(Math.atan2((double)f, (double)h) * 180.0F / (float)Math.PI);
 		float m = (float)(Math.atan2((double)g, (double)k) * 180.0F / (float)Math.PI);
-		poseStack.translate(0.0, 0.0, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(l - 90.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(m));
+		poseStack.translate(0.0F, 0.0F, 0.0F);
+		poseStack.mulPose(Axis.YP.rotationDegrees(l - 90.0F));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(m));
 		float n = 0.0F;
 		float o = 0.125F;
 		float p = 0.0F;
 		float q = 0.0625F;
 		float r = 0.03125F;
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(45.0F));
+		poseStack.mulPose(Axis.XP.rotationDegrees(45.0F));
 		poseStack.scale(0.03125F, 0.03125F, 0.03125F);
-		poseStack.translate(2.5, 0.0, 0.0);
+		poseStack.translate(2.5F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(BEE_STINGER_LOCATION));
 
 		for (int s = 0; s < 4; s++) {
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 			PoseStack.Pose pose = poseStack.last();
 			Matrix4f matrix4f = pose.pose();
 			Matrix3f matrix3f = pose.normal();

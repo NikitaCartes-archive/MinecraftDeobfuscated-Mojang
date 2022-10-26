@@ -621,7 +621,7 @@ public class ChunkRenderDispatcher {
 							}
 
 							poseStack.pushPose();
-							poseStack.translate((double)(blockPos3.getX() & 15), (double)(blockPos3.getY() & 15), (double)(blockPos3.getZ() & 15));
+							poseStack.translate((float)(blockPos3.getX() & 15), (float)(blockPos3.getY() & 15), (float)(blockPos3.getZ() & 15));
 							blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, randomSource);
 							poseStack.popPose();
 						}

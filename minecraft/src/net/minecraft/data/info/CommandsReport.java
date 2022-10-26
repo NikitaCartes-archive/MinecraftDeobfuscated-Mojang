@@ -1,8 +1,8 @@
 package net.minecraft.data.info;
 
 import com.mojang.brigadier.CommandDispatcher;
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -21,17 +21,17 @@ public class CommandsReport implements DataProvider {
 	}
 
 	@Override
-	public void run(CachedOutput cachedOutput) throws IOException {
+	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		Path path = this.output.getOutputFolder(PackOutput.Target.REPORTS).resolve("commands.json");
 		CommandDispatcher<CommandSourceStack> commandDispatcher = new Commands(
 				Commands.CommandSelection.ALL, new CommandBuildContext(BuiltinRegistries.createAccess(), FeatureFlags.REGISTRY.allFlags())
 			)
 			.getDispatcher();
-		DataProvider.saveStable(cachedOutput, ArgumentUtils.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
+		return DataProvider.saveStable(cachedOutput, ArgumentUtils.serializeNodeToJson(commandDispatcher, commandDispatcher.getRoot()), path);
 	}
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return "Command Syntax";
 	}
 }

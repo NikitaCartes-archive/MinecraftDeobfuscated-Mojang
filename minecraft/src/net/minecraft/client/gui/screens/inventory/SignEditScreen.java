@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +13,7 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class SignEditScreen extends AbstractSignEditScreen {
@@ -38,7 +38,7 @@ public class SignEditScreen extends AbstractSignEditScreen {
 		super.offsetSign(poseStack, blockState);
 		boolean bl = blockState.getBlock() instanceof StandingSignBlock;
 		if (!bl) {
-			poseStack.translate(0.0, 35.0, 0.0);
+			poseStack.translate(0.0F, 35.0F, 0.0F);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class SignEditScreen extends AbstractSignEditScreen {
 	protected void renderSignBackground(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, BlockState blockState) {
 		if (this.signModel != null) {
 			boolean bl = blockState.getBlock() instanceof StandingSignBlock;
-			poseStack.translate(0.0, 31.0, 0.0);
+			poseStack.translate(0.0F, 31.0F, 0.0F);
 			poseStack.scale(62.500004F, 62.500004F, -62.500004F);
 			Material material = Sheets.getSignMaterial(this.woodType);
 			VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);

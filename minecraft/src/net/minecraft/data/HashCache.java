@@ -1,5 +1,7 @@
 package net.minecraft.data;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.mojang.logging.LogUtils;
@@ -13,13 +15,17 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.WorldVersion;
@@ -32,32 +38,33 @@ public class HashCache {
 	private final Path rootDir;
 	private final Path cacheDir;
 	private final String versionId;
-	private final Map<DataProvider, HashCache.ProviderCache> existingCaches;
-	private final Map<DataProvider, HashCache.CacheUpdater> cachesToWrite = new HashMap();
+	private final Map<String, HashCache.ProviderCache> caches;
+	private final Set<String> cachesToWrite = new HashSet();
 	private final Set<Path> cachePaths = new HashSet();
 	private final int initialCount;
+	private int writes;
 
-	private Path getProviderCachePath(DataProvider dataProvider) {
-		return this.cacheDir.resolve(Hashing.sha1().hashString(dataProvider.getName(), StandardCharsets.UTF_8).toString());
+	private Path getProviderCachePath(String string) {
+		return this.cacheDir.resolve(Hashing.sha1().hashString(string, StandardCharsets.UTF_8).toString());
 	}
 
-	public HashCache(Path path, List<DataProvider> list, WorldVersion worldVersion) throws IOException {
+	public HashCache(Path path, Collection<String> collection, WorldVersion worldVersion) throws IOException {
 		this.versionId = worldVersion.getName();
 		this.rootDir = path;
 		this.cacheDir = path.resolve(".cache");
 		Files.createDirectories(this.cacheDir);
-		Map<DataProvider, HashCache.ProviderCache> map = new HashMap();
+		Map<String, HashCache.ProviderCache> map = new HashMap();
 		int i = 0;
 
-		for (DataProvider dataProvider : list) {
-			Path path2 = this.getProviderCachePath(dataProvider);
+		for (String string : collection) {
+			Path path2 = this.getProviderCachePath(string);
 			this.cachePaths.add(path2);
 			HashCache.ProviderCache providerCache = readCache(path, path2);
-			map.put(dataProvider, providerCache);
+			map.put(string, providerCache);
 			i += providerCache.count();
 		}
 
-		this.existingCaches = map;
+		this.caches = map;
 		this.initialCount = i;
 	}
 
@@ -70,46 +77,50 @@ public class HashCache {
 			}
 		}
 
-		return new HashCache.ProviderCache("unknown");
+		return new HashCache.ProviderCache("unknown", ImmutableMap.of());
 	}
 
-	public boolean shouldRunInThisVersion(DataProvider dataProvider) {
-		HashCache.ProviderCache providerCache = (HashCache.ProviderCache)this.existingCaches.get(dataProvider);
+	public boolean shouldRunInThisVersion(String string) {
+		HashCache.ProviderCache providerCache = (HashCache.ProviderCache)this.caches.get(string);
 		return providerCache == null || !providerCache.version.equals(this.versionId);
 	}
 
-	public CachedOutput getUpdater(DataProvider dataProvider) {
-		return (CachedOutput)this.cachesToWrite.computeIfAbsent(dataProvider, dataProviderx -> {
-			HashCache.ProviderCache providerCache = (HashCache.ProviderCache)this.existingCaches.get(dataProviderx);
-			if (providerCache == null) {
-				throw new IllegalStateException("Provider not registered: " + dataProviderx.getName());
-			} else {
-				HashCache.CacheUpdater cacheUpdater = new HashCache.CacheUpdater(this.versionId, providerCache);
-				this.existingCaches.put(dataProviderx, cacheUpdater.newCache);
-				return cacheUpdater;
-			}
-		});
+	public CompletableFuture<HashCache.UpdateResult> generateUpdate(String string, HashCache.UpdateFunction updateFunction) {
+		HashCache.ProviderCache providerCache = (HashCache.ProviderCache)this.caches.get(string);
+		if (providerCache == null) {
+			throw new IllegalStateException("Provider not registered: " + string);
+		} else {
+			HashCache.CacheUpdater cacheUpdater = new HashCache.CacheUpdater(string, this.versionId, providerCache);
+			return updateFunction.update(cacheUpdater).thenApply(object -> cacheUpdater.close());
+		}
+	}
+
+	public void applyUpdate(HashCache.UpdateResult updateResult) {
+		this.caches.put(updateResult.providerId(), updateResult.cache());
+		this.cachesToWrite.add(updateResult.providerId());
+		this.writes = this.writes + updateResult.writes();
 	}
 
 	public void purgeStaleAndWrite() throws IOException {
-		MutableInt mutableInt = new MutableInt();
-		this.cachesToWrite.forEach((dataProvider, cacheUpdater) -> {
-			Path path = this.getProviderCachePath(dataProvider);
-			cacheUpdater.newCache.save(this.rootDir, path, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) + "\t" + dataProvider.getName());
-			mutableInt.add(cacheUpdater.writes);
-		});
 		Set<Path> set = new HashSet();
-		this.existingCaches.values().forEach(providerCache -> set.addAll(providerCache.data().keySet()));
+		this.caches.forEach((string, providerCache) -> {
+			if (this.cachesToWrite.contains(string)) {
+				Path path = this.getProviderCachePath(string);
+				providerCache.save(this.rootDir, path, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()) + "\t" + string);
+			}
+
+			set.addAll(providerCache.data().keySet());
+		});
 		set.add(this.rootDir.resolve("version.json"));
+		MutableInt mutableInt = new MutableInt();
 		MutableInt mutableInt2 = new MutableInt();
-		MutableInt mutableInt3 = new MutableInt();
 		Stream<Path> stream = Files.walk(this.rootDir);
 
 		try {
 			stream.forEach(path -> {
 				if (!Files.isDirectory(path, new LinkOption[0])) {
 					if (!this.cachePaths.contains(path)) {
-						mutableInt2.increment();
+						mutableInt.increment();
 						if (!set.contains(path)) {
 							try {
 								Files.delete(path);
@@ -117,21 +128,21 @@ public class HashCache {
 								LOGGER.warn("Failed to delete file {}", path, var6);
 							}
 
-							mutableInt3.increment();
+							mutableInt2.increment();
 						}
 					}
 				}
 			});
-		} catch (Throwable var9) {
+		} catch (Throwable var8) {
 			if (stream != null) {
 				try {
 					stream.close();
-				} catch (Throwable var8) {
-					var9.addSuppressed(var8);
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
 				}
 			}
 
-			throw var9;
+			throw var8;
 		}
 
 		if (stream != null) {
@@ -140,22 +151,25 @@ public class HashCache {
 
 		LOGGER.info(
 			"Caching: total files: {}, old count: {}, new count: {}, removed stale: {}, written: {}",
-			mutableInt2,
+			mutableInt,
 			this.initialCount,
 			set.size(),
-			mutableInt3,
-			mutableInt
+			mutableInt2,
+			this.writes
 		);
 	}
 
-	static class CacheUpdater implements CachedOutput {
+	class CacheUpdater implements CachedOutput {
+		private final String provider;
 		private final HashCache.ProviderCache oldCache;
-		final HashCache.ProviderCache newCache;
-		int writes;
+		private final HashCache.ProviderCacheBuilder newCache;
+		private final AtomicInteger writes = new AtomicInteger();
+		private volatile boolean closed;
 
-		CacheUpdater(String string, HashCache.ProviderCache providerCache) {
+		CacheUpdater(String string, String string2, HashCache.ProviderCache providerCache) {
+			this.provider = string;
 			this.oldCache = providerCache;
-			this.newCache = new HashCache.ProviderCache(string);
+			this.newCache = new HashCache.ProviderCacheBuilder(string2);
 		}
 
 		private boolean shouldWrite(Path path, HashCode hashCode) {
@@ -164,29 +178,30 @@ public class HashCache {
 
 		@Override
 		public void writeIfNeeded(Path path, byte[] bs, HashCode hashCode) throws IOException {
-			if (this.shouldWrite(path, hashCode)) {
-				this.writes++;
-				Files.createDirectories(path.getParent());
-				Files.write(path, bs, new OpenOption[0]);
-			}
+			if (this.closed) {
+				throw new IllegalStateException("Cannot write to cache as it has already been closed");
+			} else {
+				if (this.shouldWrite(path, hashCode)) {
+					this.writes.incrementAndGet();
+					Files.createDirectories(path.getParent());
+					Files.write(path, bs, new OpenOption[0]);
+				}
 
-			this.newCache.put(path, hashCode);
+				this.newCache.put(path, hashCode);
+			}
+		}
+
+		public HashCache.UpdateResult close() {
+			this.closed = true;
+			return new HashCache.UpdateResult(this.provider, this.newCache.build(), this.writes.get());
 		}
 	}
 
-	static record ProviderCache(String version, Map<Path, HashCode> data) {
-
-		ProviderCache(String string) {
-			this(string, new HashMap());
-		}
+	static record ProviderCache(String version, ImmutableMap<Path, HashCode> data) {
 
 		@Nullable
 		public HashCode get(Path path) {
-			return (HashCode)this.data.get(path);
-		}
-
-		public void put(Path path, HashCode hashCode) {
-			this.data.put(path, hashCode);
+			return this.data.get(path);
 		}
 
 		public int count() {
@@ -205,12 +220,12 @@ public class HashCache {
 
 				String[] strings = string.substring("// ".length()).split("\t", 2);
 				String string2 = strings[0];
-				Map<Path, HashCode> map = new HashMap();
+				Builder<Path, HashCode> builder = ImmutableMap.builder();
 				bufferedReader.lines().forEach(stringx -> {
 					int i = stringx.indexOf(32);
-					map.put(path.resolve(stringx.substring(i + 1)), HashCode.fromString(stringx.substring(0, i)));
+					builder.put(path.resolve(stringx.substring(i + 1)), HashCode.fromString(stringx.substring(0, i)));
 				});
-				var7 = new HashCache.ProviderCache(string2, Map.copyOf(map));
+				var7 = new HashCache.ProviderCache(string2, builder.build());
 			} catch (Throwable var9) {
 				if (bufferedReader != null) {
 					try {
@@ -266,5 +281,27 @@ public class HashCache {
 				HashCache.LOGGER.warn("Unable write cachefile {}: {}", path2, var9);
 			}
 		}
+	}
+
+	static record ProviderCacheBuilder(String version, ConcurrentMap<Path, HashCode> data) {
+		ProviderCacheBuilder(String string) {
+			this(string, new ConcurrentHashMap());
+		}
+
+		public void put(Path path, HashCode hashCode) {
+			this.data.put(path, hashCode);
+		}
+
+		public HashCache.ProviderCache build() {
+			return new HashCache.ProviderCache(this.version, ImmutableMap.copyOf(this.data));
+		}
+	}
+
+	@FunctionalInterface
+	public interface UpdateFunction {
+		CompletableFuture<?> update(CachedOutput cachedOutput);
+	}
+
+	public static record UpdateResult(String providerId, HashCache.ProviderCache cache, int writes) {
 	}
 }

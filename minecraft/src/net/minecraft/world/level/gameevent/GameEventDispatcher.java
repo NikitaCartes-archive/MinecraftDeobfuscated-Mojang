@@ -11,7 +11,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
 
 public class GameEventDispatcher {
-	private ServerLevel level;
+	private final ServerLevel level;
 
 	public GameEventDispatcher(ServerLevel serverLevel) {
 		this.level = serverLevel;

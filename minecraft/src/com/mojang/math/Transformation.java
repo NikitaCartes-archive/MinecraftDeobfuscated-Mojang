@@ -1,10 +1,14 @@
 package com.mojang.math;
 
-import com.mojang.datafixers.util.Pair;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import org.apache.commons.lang3.tuple.Triple;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Matrix4x3f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public final class Transformation {
 	private final Matrix4f matrix;
@@ -12,15 +16,13 @@ public final class Transformation {
 	@Nullable
 	private Vector3f translation;
 	@Nullable
-	private Quaternion leftRotation;
+	private Quaternionf leftRotation;
 	@Nullable
 	private Vector3f scale;
 	@Nullable
-	private Quaternion rightRotation;
+	private Quaternionf rightRotation;
 	private static final Transformation IDENTITY = Util.make(() -> {
-		Matrix4f matrix4f = new Matrix4f();
-		matrix4f.setIdentity();
-		Transformation transformation = new Transformation(matrix4f);
+		Transformation transformation = new Transformation(new Matrix4f());
 		transformation.getLeftRotation();
 		return transformation;
 	});
@@ -33,12 +35,12 @@ public final class Transformation {
 		}
 	}
 
-	public Transformation(@Nullable Vector3f vector3f, @Nullable Quaternion quaternion, @Nullable Vector3f vector3f2, @Nullable Quaternion quaternion2) {
-		this.matrix = compose(vector3f, quaternion, vector3f2, quaternion2);
+	public Transformation(@Nullable Vector3f vector3f, @Nullable Quaternionf quaternionf, @Nullable Vector3f vector3f2, @Nullable Quaternionf quaternionf2) {
+		this.matrix = compose(vector3f, quaternionf, vector3f2, quaternionf2);
 		this.translation = vector3f != null ? vector3f : new Vector3f();
-		this.leftRotation = quaternion != null ? quaternion : Quaternion.ONE.copy();
+		this.leftRotation = quaternionf != null ? quaternionf : new Quaternionf();
 		this.scale = vector3f2 != null ? vector3f2 : new Vector3f(1.0F, 1.0F, 1.0F);
-		this.rightRotation = quaternion2 != null ? quaternion2 : Quaternion.ONE.copy();
+		this.rightRotation = quaternionf2 != null ? quaternionf2 : new Quaternionf();
 		this.decomposed = true;
 	}
 
@@ -48,7 +50,7 @@ public final class Transformation {
 
 	public Transformation compose(Transformation transformation) {
 		Matrix4f matrix4f = this.getMatrix();
-		matrix4f.multiply(transformation.getMatrix());
+		matrix4f.mul(transformation.getMatrix());
 		return new Transformation(matrix4f);
 	}
 
@@ -57,76 +59,68 @@ public final class Transformation {
 		if (this == IDENTITY) {
 			return this;
 		} else {
-			Matrix4f matrix4f = this.getMatrix();
-			return matrix4f.invert() ? new Transformation(matrix4f) : null;
+			Matrix4f matrix4f = this.getMatrix().invert();
+			return matrix4f.isFinite() ? new Transformation(matrix4f) : null;
 		}
 	}
 
 	private void ensureDecomposed() {
 		if (!this.decomposed) {
-			Pair<Matrix3f, Vector3f> pair = toAffine(this.matrix);
-			Triple<Quaternion, Vector3f, Quaternion> triple = pair.getFirst().svdDecompose();
-			this.translation = pair.getSecond();
-			this.leftRotation = triple.getLeft();
-			this.scale = triple.getMiddle();
-			this.rightRotation = triple.getRight();
+			Matrix4x3f matrix4x3f = MatrixUtil.toAffine(this.matrix);
+			Triple<Quaternionf, Vector3f, Quaternionf> triple = MatrixUtil.svdDecompose(new Matrix3f().set(matrix4x3f));
+			this.translation = matrix4x3f.getTranslation(new Vector3f());
+			this.leftRotation = new Quaternionf(triple.getLeft());
+			this.scale = new Vector3f(triple.getMiddle());
+			this.rightRotation = new Quaternionf(triple.getRight());
 			this.decomposed = true;
 		}
 	}
 
-	private static Matrix4f compose(@Nullable Vector3f vector3f, @Nullable Quaternion quaternion, @Nullable Vector3f vector3f2, @Nullable Quaternion quaternion2) {
+	private static Matrix4f compose(
+		@Nullable Vector3f vector3f, @Nullable Quaternionf quaternionf, @Nullable Vector3f vector3f2, @Nullable Quaternionf quaternionf2
+	) {
 		Matrix4f matrix4f = new Matrix4f();
-		matrix4f.setIdentity();
-		if (quaternion != null) {
-			matrix4f.multiply(new Matrix4f(quaternion));
+		if (vector3f != null) {
+			matrix4f.translation(vector3f);
+		}
+
+		if (quaternionf != null) {
+			matrix4f.rotate(quaternionf);
 		}
 
 		if (vector3f2 != null) {
-			matrix4f.multiply(Matrix4f.createScaleMatrix(vector3f2.x(), vector3f2.y(), vector3f2.z()));
+			matrix4f.scale(vector3f2);
 		}
 
-		if (quaternion2 != null) {
-			matrix4f.multiply(new Matrix4f(quaternion2));
-		}
-
-		if (vector3f != null) {
-			matrix4f.m03 = vector3f.x();
-			matrix4f.m13 = vector3f.y();
-			matrix4f.m23 = vector3f.z();
+		if (quaternionf2 != null) {
+			matrix4f.rotate(quaternionf2);
 		}
 
 		return matrix4f;
 	}
 
-	public static Pair<Matrix3f, Vector3f> toAffine(Matrix4f matrix4f) {
-		matrix4f.multiply(1.0F / matrix4f.m33);
-		Vector3f vector3f = new Vector3f(matrix4f.m03, matrix4f.m13, matrix4f.m23);
-		Matrix3f matrix3f = new Matrix3f(matrix4f);
-		return Pair.of(matrix3f, vector3f);
-	}
-
 	public Matrix4f getMatrix() {
-		return this.matrix.copy();
+		return new Matrix4f(this.matrix);
 	}
 
 	public Vector3f getTranslation() {
 		this.ensureDecomposed();
-		return this.translation.copy();
+		return new Vector3f(this.translation);
 	}
 
-	public Quaternion getLeftRotation() {
+	public Quaternionf getLeftRotation() {
 		this.ensureDecomposed();
-		return this.leftRotation.copy();
+		return new Quaternionf(this.leftRotation);
 	}
 
 	public Vector3f getScale() {
 		this.ensureDecomposed();
-		return this.scale.copy();
+		return new Vector3f(this.scale);
 	}
 
-	public Quaternion getRightRotation() {
+	public Quaternionf getRightRotation() {
 		this.ensureDecomposed();
-		return this.rightRotation.copy();
+		return new Quaternionf(this.rightRotation);
 	}
 
 	public boolean equals(Object object) {
@@ -146,13 +140,13 @@ public final class Transformation {
 
 	public Transformation slerp(Transformation transformation, float f) {
 		Vector3f vector3f = this.getTranslation();
-		Quaternion quaternion = this.getLeftRotation();
+		Quaternionf quaternionf = this.getLeftRotation();
 		Vector3f vector3f2 = this.getScale();
-		Quaternion quaternion2 = this.getRightRotation();
+		Quaternionf quaternionf2 = this.getRightRotation();
 		vector3f.lerp(transformation.getTranslation(), f);
-		quaternion.slerp(transformation.getLeftRotation(), f);
+		quaternionf.slerp(transformation.getLeftRotation(), f);
 		vector3f2.lerp(transformation.getScale(), f);
-		quaternion2.slerp(transformation.getRightRotation(), f);
-		return new Transformation(vector3f, quaternion, vector3f2, quaternion2);
+		quaternionf2.slerp(transformation.getRightRotation(), f);
+		return new Transformation(vector3f, quaternionf, vector3f2, quaternionf2);
 	}
 }

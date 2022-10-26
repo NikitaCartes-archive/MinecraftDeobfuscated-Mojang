@@ -93,50 +93,50 @@ public class Main {
 		Path path, Collection<Path> collection, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, WorldVersion worldVersion, boolean bl6
 	) {
 		DataGenerator dataGenerator = new DataGenerator(path, worldVersion, bl6);
-		PackOutput packOutput = dataGenerator.getVanillaPackOutput();
-		dataGenerator.addProvider(bl || bl2, new SnbtToNbt(packOutput, collection).addFilter(new StructureUpdater()));
-		dataGenerator.addProvider(bl, new ModelProvider(packOutput));
-		dataGenerator.addProvider(bl2, new BuiltinRegistriesDatapackGenerator(packOutput));
-		dataGenerator.addProvider(bl2, VanillaAdvancementProvider.create(packOutput));
-		dataGenerator.addProvider(bl2, VanillaLootTableProvider.create(packOutput));
-		dataGenerator.addProvider(bl2, new VanillaRecipeProvider(packOutput));
-		TagsProvider<Block> tagsProvider = new VanillaBlockTagsProvider(packOutput);
-		dataGenerator.addProvider(bl2, tagsProvider);
-		dataGenerator.addProvider(bl2, new VanillaItemTagsProvider(packOutput, tagsProvider));
-		dataGenerator.addProvider(bl2, new BannerPatternTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new BiomeTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new CatVariantTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new EntityTypeTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new FlatLevelGeneratorPresetTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new FluidTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new GameEventTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new InstrumentTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new PaintingVariantTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new PoiTypeTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new StructureTagsProvider(packOutput));
-		dataGenerator.addProvider(bl2, new WorldPresetTagsProvider(packOutput));
-		dataGenerator.addProvider(bl3, new NbtToSnbt(packOutput, collection));
-		dataGenerator.addProvider(bl4, new BiomeParametersDumpReport(packOutput));
-		dataGenerator.addProvider(bl4, new BlockListReport(packOutput));
-		dataGenerator.addProvider(bl4, new CommandsReport(packOutput));
-		dataGenerator.addProvider(bl4, new RegistryDumpReport(packOutput));
-		PackOutput packOutput2 = dataGenerator.createBuiltinDatapackOutput("bundle");
-		dataGenerator.addProvider(bl2, new BundleRecipeProvider(packOutput2));
-		dataGenerator.addProvider(
-			bl2,
-			PackMetadataGenerator.forFeaturePack(packOutput2, "bundle", Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
+		DataGenerator.PackGenerator packGenerator = dataGenerator.getVanillaPack(bl || bl2);
+		packGenerator.addProvider(packOutput -> new SnbtToNbt(packOutput, collection).addFilter(new StructureUpdater()));
+		packGenerator = dataGenerator.getVanillaPack(bl);
+		packGenerator.addProvider(ModelProvider::new);
+		packGenerator = dataGenerator.getVanillaPack(bl2);
+		packGenerator.addProvider(BuiltinRegistriesDatapackGenerator::new);
+		packGenerator.addProvider(VanillaAdvancementProvider::create);
+		packGenerator.addProvider(VanillaLootTableProvider::create);
+		packGenerator.addProvider(VanillaRecipeProvider::new);
+		TagsProvider<Block> tagsProvider = packGenerator.addProvider(VanillaBlockTagsProvider::new);
+		packGenerator.addProvider(packOutput -> new VanillaItemTagsProvider(packOutput, tagsProvider));
+		packGenerator.addProvider(BannerPatternTagsProvider::new);
+		packGenerator.addProvider(BiomeTagsProvider::new);
+		packGenerator.addProvider(CatVariantTagsProvider::new);
+		packGenerator.addProvider(EntityTypeTagsProvider::new);
+		packGenerator.addProvider(FlatLevelGeneratorPresetTagsProvider::new);
+		packGenerator.addProvider(FluidTagsProvider::new);
+		packGenerator.addProvider(GameEventTagsProvider::new);
+		packGenerator.addProvider(InstrumentTagsProvider::new);
+		packGenerator.addProvider(PaintingVariantTagsProvider::new);
+		packGenerator.addProvider(PoiTypeTagsProvider::new);
+		packGenerator.addProvider(StructureTagsProvider::new);
+		packGenerator.addProvider(WorldPresetTagsProvider::new);
+		packGenerator = dataGenerator.getVanillaPack(bl3);
+		packGenerator.addProvider(packOutput -> new NbtToSnbt(packOutput, collection));
+		packGenerator = dataGenerator.getVanillaPack(bl4);
+		packGenerator.addProvider(BiomeParametersDumpReport::new);
+		packGenerator.addProvider(BlockListReport::new);
+		packGenerator.addProvider(CommandsReport::new);
+		packGenerator.addProvider(RegistryDumpReport::new);
+		packGenerator = dataGenerator.getBuiltinDatapack(bl2, "bundle");
+		packGenerator.addProvider(BundleRecipeProvider::new);
+		packGenerator.addProvider(
+			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
 		);
-		PackOutput packOutput3 = dataGenerator.createBuiltinDatapackOutput("update_1_20");
-		dataGenerator.addProvider(bl2, new UpdateOneTwentyRecipeProvider(packOutput3));
-		UpdateOneTwentyBlockTagsProvider updateOneTwentyBlockTagsProvider = new UpdateOneTwentyBlockTagsProvider(packOutput3);
-		dataGenerator.addProvider(bl2, updateOneTwentyBlockTagsProvider);
-		dataGenerator.addProvider(bl2, new UpdateOneTwentyItemTagsProvider(packOutput3, updateOneTwentyBlockTagsProvider));
-		dataGenerator.addProvider(bl2, UpdateOneTwentyLootTableProvider.create(packOutput3));
-		dataGenerator.addProvider(
-			bl2,
-			PackMetadataGenerator.forFeaturePack(
-				packOutput3, "update_1_20", Component.translatable("dataPack.update_1_20.description"), FeatureFlagSet.of(FeatureFlags.UPDATE_1_20)
-			)
+		packGenerator = dataGenerator.getBuiltinDatapack(bl2, "update_1_20");
+		packGenerator.addProvider(UpdateOneTwentyRecipeProvider::new);
+		tagsProvider = packGenerator.addProvider(UpdateOneTwentyBlockTagsProvider::new);
+		packGenerator.addProvider(packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, tagsProvider));
+		packGenerator.addProvider(UpdateOneTwentyLootTableProvider::create);
+		packGenerator.addProvider(
+			packOutput -> PackMetadataGenerator.forFeaturePack(
+					packOutput, Component.translatable("dataPack.update_1_20.description"), FeatureFlagSet.of(FeatureFlags.UPDATE_1_20)
+				)
 		);
 		return dataGenerator;
 	}

@@ -2,7 +2,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Calendar;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -115,9 +115,9 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
 			boolean bl2 = chestType != ChestType.SINGLE;
 			poseStack.pushPose();
 			float g = ((Direction)blockState.getValue(ChestBlock.FACING)).toYRot();
-			poseStack.translate(0.5, 0.5, 0.5);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
-			poseStack.translate(-0.5, -0.5, -0.5);
+			poseStack.translate(0.5F, 0.5F, 0.5F);
+			poseStack.mulPose(Axis.YP.rotationDegrees(-g));
+			poseStack.translate(-0.5F, -0.5F, -0.5F);
 			DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> neighborCombineResult;
 			if (bl) {
 				neighborCombineResult = abstractChestBlock.combine(blockState, level, blockEntity.getBlockPos(), true);

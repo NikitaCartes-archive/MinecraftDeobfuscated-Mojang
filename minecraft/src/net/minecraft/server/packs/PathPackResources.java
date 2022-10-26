@@ -143,8 +143,9 @@ public class PathPackResources extends AbstractPackResources {
 			if (directoryStream != null) {
 				directoryStream.close();
 			}
-		} catch (IOException var10) {
-			LOGGER.error("Failed to list path {}", path, var10);
+		} catch (NoSuchFileException var10) {
+		} catch (IOException var11) {
+			LOGGER.error("Failed to list path {}", path, var11);
 		}
 
 		return set;

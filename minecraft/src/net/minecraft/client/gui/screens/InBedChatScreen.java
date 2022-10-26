@@ -17,7 +17,9 @@ public class InBedChatScreen extends ChatScreen {
 	protected void init() {
 		super.init();
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 100, this.height - 40, 200, 20, Component.translatable("multiplayer.stopSleeping"), button -> this.sendWakeUp())
+			Button.builder(Component.translatable("multiplayer.stopSleeping"), button -> this.sendWakeUp())
+				.bounds(this.width / 2 - 100, this.height - 40, 200, 20)
+				.build()
 		);
 	}
 

@@ -221,7 +221,7 @@ public class GameModeSwitcherScreen extends Screen {
 		public void renderButton(PoseStack poseStack, int i, int j, float f) {
 			Minecraft minecraft = Minecraft.getInstance();
 			this.drawSlot(poseStack, minecraft.getTextureManager());
-			this.icon.drawIcon(GameModeSwitcherScreen.this.itemRenderer, this.x + 5, this.y + 5);
+			this.icon.drawIcon(GameModeSwitcherScreen.this.itemRenderer, this.getX() + 5, this.getY() + 5);
 			if (this.isSelected) {
 				this.drawSelection(poseStack, minecraft.getTextureManager());
 			}
@@ -245,7 +245,7 @@ public class GameModeSwitcherScreen extends Screen {
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
 			poseStack.pushPose();
-			poseStack.translate((double)this.x, (double)this.y, 0.0);
+			poseStack.translate((float)this.getX(), (float)this.getY(), 0.0F);
 			blit(poseStack, 0, 0, 0.0F, 75.0F, 26, 26, 128, 128);
 			poseStack.popPose();
 		}
@@ -254,7 +254,7 @@ public class GameModeSwitcherScreen extends Screen {
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, GameModeSwitcherScreen.GAMEMODE_SWITCHER_LOCATION);
 			poseStack.pushPose();
-			poseStack.translate((double)this.x, (double)this.y, 0.0);
+			poseStack.translate((float)this.getX(), (float)this.getY(), 0.0F);
 			blit(poseStack, 0, 0, 26.0F, 75.0F, 26, 26, 128, 128);
 			poseStack.popPose();
 		}

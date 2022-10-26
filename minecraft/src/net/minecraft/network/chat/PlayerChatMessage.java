@@ -1,19 +1,38 @@
 package net.minecraft.network.chat;
 
 import com.google.common.primitives.Ints;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
 
 public record PlayerChatMessage(
 	SignedMessageLink link, @Nullable MessageSignature signature, SignedMessageBody signedBody, @Nullable Component unsignedContent, FilterMask filterMask
 ) {
+	public static final MapCodec<PlayerChatMessage> MAP_CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					SignedMessageLink.CODEC.fieldOf("link").forGetter(PlayerChatMessage::link),
+					MessageSignature.CODEC.optionalFieldOf("signature").forGetter(playerChatMessage -> Optional.ofNullable(playerChatMessage.signature)),
+					SignedMessageBody.MAP_CODEC.forGetter(PlayerChatMessage::signedBody),
+					ExtraCodecs.COMPONENT.optionalFieldOf("unsigned_content").forGetter(playerChatMessage -> Optional.ofNullable(playerChatMessage.unsignedContent)),
+					FilterMask.CODEC.optionalFieldOf("filter_mask", FilterMask.PASS_THROUGH).forGetter(PlayerChatMessage::filterMask)
+				)
+				.apply(
+					instance,
+					(signedMessageLink, optional, signedMessageBody, optional2, filterMask) -> new PlayerChatMessage(
+							signedMessageLink, (MessageSignature)optional.orElse(null), signedMessageBody, (Component)optional2.orElse(null), filterMask
+						)
+				)
+	);
 	private static final UUID SYSTEM_SENDER = Util.NIL_UUID;
 	public static final Duration MESSAGE_EXPIRES_AFTER_SERVER = Duration.ofMinutes(5L);
 	public static final Duration MESSAGE_EXPIRES_AFTER_CLIENT = MESSAGE_EXPIRES_AFTER_SERVER.plus(Duration.ofMinutes(2L));

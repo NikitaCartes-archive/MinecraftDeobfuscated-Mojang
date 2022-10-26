@@ -64,7 +64,7 @@ public class ChatComponent extends GuiComponent {
 				int n = Mth.ceil((float)this.getWidth() / f);
 				int o = this.minecraft.getWindow().getGuiScaledHeight();
 				poseStack.pushPose();
-				poseStack.translate(4.0, 0.0, 0.0);
+				poseStack.translate(4.0F, 0.0F, 0.0F);
 				poseStack.scale(f, f, 1.0F);
 				int p = Mth.floor((float)(o - 40) / f);
 				int q = this.getMessageEndIndexAt(this.screenToChatX((double)j), this.screenToChatY((double)k));
@@ -90,7 +90,7 @@ public class ChatComponent extends GuiComponent {
 								int aa = p - t * r;
 								int ab = (int)((double)aa + h);
 								poseStack.pushPose();
-								poseStack.translate(0.0, 0.0, 50.0);
+								poseStack.translate(0.0F, 0.0F, 50.0F);
 								fill(poseStack, -4, aa - r, 0 + n + 4 + 4, aa, y << 24);
 								GuiMessageTag guiMessageTag = line.tag();
 								if (guiMessageTag != null) {
@@ -104,7 +104,7 @@ public class ChatComponent extends GuiComponent {
 								}
 
 								RenderSystem.enableBlend();
-								poseStack.translate(0.0, 0.0, 50.0);
+								poseStack.translate(0.0F, 0.0F, 50.0F);
 								this.minecraft.font.drawShadow(poseStack, line.content(), 0.0F, (float)ab, 16777215 + (x << 24));
 								RenderSystem.disableBlend();
 								poseStack.popPose();
@@ -118,10 +118,10 @@ public class ChatComponent extends GuiComponent {
 					int ag = (int)(128.0 * d);
 					int v = (int)(255.0 * e);
 					poseStack.pushPose();
-					poseStack.translate(0.0, (double)p, 50.0);
+					poseStack.translate(0.0F, (float)p, 50.0F);
 					fill(poseStack, -2, 0, n + 4, 9, v << 24);
 					RenderSystem.enableBlend();
-					poseStack.translate(0.0, 0.0, 50.0);
+					poseStack.translate(0.0F, 0.0F, 50.0F);
 					this.minecraft.font.drawShadow(poseStack, Component.translatable("chat.queue", af), 0.0F, 1.0F, 16777215 + (ag << 24));
 					poseStack.popPose();
 					RenderSystem.disableBlend();

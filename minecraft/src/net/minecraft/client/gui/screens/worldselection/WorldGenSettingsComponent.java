@@ -24,7 +24,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -44,7 +44,7 @@ import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class WorldGenSettingsComponent implements Widget {
+public class WorldGenSettingsComponent implements Renderable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component CUSTOM_WORLD_DESCRIPTION = Component.translatable("generator.custom");
 	private static final Component AMPLIFIED_HELP_TEXT = Component.translatable("generator.minecraft.amplified.info");
@@ -119,17 +119,17 @@ public class WorldGenSettingsComponent implements Widget {
 		this.preset.ifPresent(this.typeButton::setValue);
 		this.typeButton.visible = false;
 		this.customWorldDummyButton = createWorldScreen.addRenderableWidget(
-			new Button(j, 100, 150, 20, CommonComponents.optionNameValue(Component.translatable("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {
-			})
+			Button.builder(CommonComponents.optionNameValue(Component.translatable("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {
+			}).bounds(j, 100, 150, 20).build()
 		);
 		this.customWorldDummyButton.active = false;
 		this.customWorldDummyButton.visible = false;
-		this.customizeTypeButton = createWorldScreen.addRenderableWidget(new Button(j, 120, 150, 20, Component.translatable("selectWorld.customizeType"), button -> {
+		this.customizeTypeButton = createWorldScreen.addRenderableWidget(Button.builder(Component.translatable("selectWorld.customizeType"), button -> {
 			PresetEditor presetEditor = (PresetEditor)PresetEditor.EDITORS.get(this.preset.flatMap(Holder::unwrapKey));
 			if (presetEditor != null) {
 				minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
 			}
-		}));
+		}).bounds(j, 120, 150, 20).build());
 		this.customizeTypeButton.visible = false;
 		this.bonusItemsButton = createWorldScreen.addRenderableWidget(
 			CycleButton.onOffBuilder(this.settings.options().generateBonusChest() && !createWorldScreen.hardCore)
@@ -144,61 +144,59 @@ public class WorldGenSettingsComponent implements Widget {
 		);
 		this.bonusItemsButton.visible = false;
 		this.importSettingsButton = createWorldScreen.addRenderableWidget(
-			new Button(
-				i,
-				185,
-				150,
-				20,
-				Component.translatable("selectWorld.import_worldgen_settings"),
-				button -> {
-					String string = TinyFileDialogs.tinyfd_openFileDialog(SELECT_FILE_PROMPT.getString(), null, null, null, false);
-					if (string != null) {
-						DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, this.settings.worldgenLoadContext());
+			Button.builder(
+					Component.translatable("selectWorld.import_worldgen_settings"),
+					button -> {
+						String string = TinyFileDialogs.tinyfd_openFileDialog(SELECT_FILE_PROMPT.getString(), null, null, null, false);
+						if (string != null) {
+							DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, this.settings.worldgenLoadContext());
 
-						DataResult<WorldGenSettings> dataResult;
-						try {
-							BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string));
-
+							DataResult<WorldGenSettings> dataResult;
 							try {
-								JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
-								dataResult = WorldGenSettings.CODEC.parse(dynamicOps, jsonElement);
-							} catch (Throwable var11) {
-								if (bufferedReader != null) {
-									try {
-										bufferedReader.close();
-									} catch (Throwable var10) {
-										var11.addSuppressed(var10);
+								BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string));
+
+								try {
+									JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
+									dataResult = WorldGenSettings.CODEC.parse(dynamicOps, jsonElement);
+								} catch (Throwable var11) {
+									if (bufferedReader != null) {
+										try {
+											bufferedReader.close();
+										} catch (Throwable var10) {
+											var11.addSuppressed(var10);
+										}
 									}
+
+									throw var11;
 								}
 
-								throw var11;
+								if (bufferedReader != null) {
+									bufferedReader.close();
+								}
+							} catch (Exception var12) {
+								dataResult = DataResult.error("Failed to parse file: " + var12.getMessage());
 							}
 
-							if (bufferedReader != null) {
-								bufferedReader.close();
+							if (dataResult.error().isPresent()) {
+								Component component = Component.translatable("selectWorld.import_worldgen_settings.failure");
+								String string2 = ((PartialResult)dataResult.error().get()).message();
+								LOGGER.error("Error parsing world settings: {}", string2);
+								Component component2 = Component.literal(string2);
+								minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
+							} else {
+								Lifecycle lifecycle = dataResult.lifecycle();
+								dataResult.resultOrPartial(LOGGER::error)
+									.ifPresent(
+										worldGenSettings -> WorldOpenFlows.confirmWorldCreation(
+												minecraft, createWorldScreen, lifecycle, () -> this.importSettings(worldGenSettings.options(), worldGenSettings.dimensions())
+											)
+									);
 							}
-						} catch (Exception var12) {
-							dataResult = DataResult.error("Failed to parse file: " + var12.getMessage());
-						}
-
-						if (dataResult.error().isPresent()) {
-							Component component = Component.translatable("selectWorld.import_worldgen_settings.failure");
-							String string2 = ((PartialResult)dataResult.error().get()).message();
-							LOGGER.error("Error parsing world settings: {}", string2);
-							Component component2 = Component.literal(string2);
-							minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
-						} else {
-							Lifecycle lifecycle = dataResult.lifecycle();
-							dataResult.resultOrPartial(LOGGER::error)
-								.ifPresent(
-									worldGenSettings -> WorldOpenFlows.confirmWorldCreation(
-											minecraft, createWorldScreen, lifecycle, () -> this.importSettings(worldGenSettings.options(), worldGenSettings.dimensions())
-										)
-								);
 						}
 					}
-				}
-			)
+				)
+				.bounds(i, 185, 150, 20)
+				.build()
 		);
 		this.importSettingsButton.visible = false;
 		this.amplifiedWorldInfo = MultiLineLabel.create(font, AMPLIFIED_HELP_TEXT, this.typeButton.getWidth());
@@ -238,7 +236,7 @@ public class WorldGenSettingsComponent implements Widget {
 
 		this.seedEdit.render(poseStack, i, j, f);
 		if (this.preset.filter(WorldGenSettingsComponent::isAmplified).isPresent()) {
-			this.amplifiedWorldInfo.renderLeftAligned(poseStack, this.typeButton.x + 2, this.typeButton.y + 22, 9, 10526880);
+			this.amplifiedWorldInfo.renderLeftAligned(poseStack, this.typeButton.getX() + 2, this.typeButton.getY() + 22, 9, 10526880);
 		}
 	}
 

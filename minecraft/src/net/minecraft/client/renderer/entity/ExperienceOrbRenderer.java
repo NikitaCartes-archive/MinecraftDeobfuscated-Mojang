@@ -2,9 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,6 +12,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
@@ -45,9 +45,9 @@ public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
 		int s = (int)((Mth.sin(r + 0.0F) + 1.0F) * 0.5F * 255.0F);
 		int t = 255;
 		int u = (int)((Mth.sin(r + (float) (Math.PI * 4.0 / 3.0)) + 1.0F) * 0.1F * 255.0F);
-		poseStack.translate(0.0, 0.1F, 0.0);
+		poseStack.translate(0.0F, 0.1F, 0.0F);
 		poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 		float v = 0.3F;
 		poseStack.scale(0.3F, 0.3F, 0.3F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);

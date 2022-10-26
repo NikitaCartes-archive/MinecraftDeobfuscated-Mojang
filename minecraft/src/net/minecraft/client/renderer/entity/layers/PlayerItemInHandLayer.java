@@ -57,7 +57,7 @@ public class PlayerItemInHandLayer<T extends Player, M extends EntityModel<T> & 
 		modelPart.xRot = f;
 		CustomHeadLayer.translateToHead(poseStack, false);
 		boolean bl = humanoidArm == HumanoidArm.LEFT;
-		poseStack.translate((double)((bl ? -2.5F : 2.5F) / 16.0F), -0.0625, 0.0);
+		poseStack.translate((bl ? -2.5F : 2.5F) / 16.0F, -0.0625F, 0.0F);
 		this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}

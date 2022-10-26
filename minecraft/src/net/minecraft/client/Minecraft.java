@@ -30,7 +30,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix4f;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import java.io.File;
@@ -165,7 +164,6 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.KeybindResolver;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -239,6 +237,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.apache.commons.io.FileUtils;
+import org.joml.Matrix4f;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.slf4j.Logger;
 
@@ -556,7 +555,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.window.setDefaultErrorCallback();
 		this.resizeDisplay();
 		this.gameRenderer.preloadUiShader(this.vanillaPackResources.asProvider());
-		this.profileKeyPairManager = new ProfileKeyPairManager(this.userApiService, this.user.getGameProfile().getId(), this.gameDirectory.toPath());
+		this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, this.gameDirectory.toPath());
 		this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
 		this.narrator = new GameNarrator(this);
 		this.chatListener = new ChatListener(this);
@@ -1398,11 +1397,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		ResultField resultField = (ResultField)list.remove(0);
 		RenderSystem.clear(256, ON_OSX);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float)this.window.getWidth(), 0.0F, (float)this.window.getHeight(), 1000.0F, 3000.0F);
+		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)this.window.getWidth(), (float)this.window.getHeight(), 0.0F, 1000.0F, 3000.0F);
 		RenderSystem.setProjectionMatrix(matrix4f);
 		PoseStack poseStack2 = RenderSystem.getModelViewStack();
 		poseStack2.setIdentity();
-		poseStack2.translate(0.0, 0.0, -2000.0);
+		poseStack2.translate(0.0F, 0.0F, -2000.0F);
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.lineWidth(1.0F);
 		RenderSystem.disableTexture();
@@ -1915,7 +1914,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void doWorldLoad(String string, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem) {
-		CompletableFuture<LocalChatSession> completableFuture = this.profileKeyPairManager.prepareChatSession();
 		this.clearLevel();
 		this.progressListener.set(null);
 
@@ -1932,8 +1930,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				}));
 			this.isLocalServer = true;
 			this.updateReportEnvironment(ReportEnvironment.local());
-		} catch (Throwable var11) {
-			CrashReport crashReport = CrashReport.forThrowable(var11, "Starting integrated server");
+		} catch (Throwable var9) {
+			CrashReport crashReport = CrashReport.forThrowable(var9, "Starting integrated server");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
 			crashReportCategory.setDetail("Level ID", string);
 			crashReportCategory.setDetail("Level Name", (CrashReportDetail<String>)(() -> worldStem.worldData().getLevelName()));
@@ -1954,7 +1952,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			try {
 				Thread.sleep(16L);
-			} catch (InterruptedException var10) {
+			} catch (InterruptedException var8) {
 			}
 
 			if (this.delayedCrash != null) {
@@ -1966,13 +1964,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.profiler.pop();
 		SocketAddress socketAddress = this.singleplayerServer.getConnection().startMemoryChannel();
 		Connection connection = Connection.connectToLocalServer(socketAddress);
-		LocalChatSession localChatSession = (LocalChatSession)completableFuture.join();
-		connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, localChatSession, null, null, component -> {
+		connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, null, component -> {
 		}));
 		connection.send(new ClientIntentionPacket(socketAddress.toString(), 0, ConnectionProtocol.LOGIN));
-		connection.send(
-			new ServerboundHelloPacket(this.getUser().getName(), localChatSession.asRemote().asData(), Optional.ofNullable(this.getUser().getProfileId()))
-		);
+		connection.send(new ServerboundHelloPacket(this.getUser().getName(), Optional.ofNullable(this.getUser().getProfileId())));
 		this.pendingConnection = connection;
 	}
 
@@ -2689,6 +2684,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void prepareForMultiplayer() {
 		this.playerSocialManager.startOnlineMode();
+		this.getProfileKeyPairManager().prepareKeyPair();
 	}
 
 	public Realms32BitWarningStatus getRealms32BitWarningStatus() {

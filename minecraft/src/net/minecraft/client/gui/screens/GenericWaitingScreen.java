@@ -52,7 +52,7 @@ public class GenericWaitingScreen extends Screen {
 		int k = this.message != null ? this.message.getLineCount() : 1;
 		int l = Math.max(k, 5) * 9;
 		int m = Math.min(120 + l, this.height - 40);
-		this.button = this.addRenderableWidget(new Button((this.width - 150) / 2, m, 150, 20, this.buttonLabel, button -> this.onClose()));
+		this.button = this.addRenderableWidget(Button.builder(this.buttonLabel, button -> this.onClose()).bounds((this.width - 150) / 2, m, 150, 20).build());
 	}
 
 	@Override

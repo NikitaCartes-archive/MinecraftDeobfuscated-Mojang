@@ -3,10 +3,7 @@ package net.minecraft.client.renderer.entity;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -51,6 +48,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
 public class EntityRenderDispatcher implements ResourceManagerReloadListener {
@@ -60,7 +60,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	public final TextureManager textureManager;
 	private Level level;
 	public Camera camera;
-	private Quaternion cameraOrientation;
+	private Quaternionf cameraOrientation;
 	public Entity crosshairPickEntity;
 	private final ItemRenderer itemRenderer;
 	private final BlockRenderDispatcher blockRenderDispatcher;
@@ -110,8 +110,8 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		this.crosshairPickEntity = entity;
 	}
 
-	public void overrideCameraOrientation(Quaternion quaternion) {
-		this.cameraOrientation = quaternion;
+	public void overrideCameraOrientation(Quaternionf quaternionf) {
+		this.cameraOrientation = quaternionf;
 	}
 
 	public void setRenderShadow(boolean bl) {
@@ -243,8 +243,8 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		float h = 0.0F;
 		float i = entity.getBbHeight() / f;
 		float j = 0.0F;
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.camera.getYRot()));
-		poseStack.translate(0.0, 0.0, (double)(-0.3F + (float)((int)i) * 0.02F));
+		poseStack.mulPose(Axis.YP.rotationDegrees(-this.camera.getYRot()));
+		poseStack.translate(0.0F, 0.0F, -0.3F + (float)((int)i) * 0.02F);
 		float k = 0.0F;
 		int l = 0;
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(Sheets.cutoutBlockSheet());
@@ -373,7 +373,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		return this.camera.getPosition().distanceToSqr(d, e, f);
 	}
 
-	public Quaternion cameraOrientation() {
+	public Quaternionf cameraOrientation() {
 		return this.cameraOrientation;
 	}
 

@@ -494,13 +494,13 @@ public class EnderMan extends Monster implements NeutralMob {
 		private int teleportTime;
 		private final TargetingConditions startAggroTargetConditions;
 		private final TargetingConditions continueAggroTargetConditions = TargetingConditions.forCombat().ignoreLineOfSight();
+		private final Predicate<LivingEntity> isAngerInducing;
 
 		public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
 			super(enderMan, Player.class, 10, false, false, predicate);
 			this.enderman = enderMan;
-			this.startAggroTargetConditions = TargetingConditions.forCombat()
-				.range(this.getFollowDistance())
-				.selector(livingEntity -> enderMan.isLookingAtMe((Player)livingEntity));
+			this.isAngerInducing = livingEntity -> enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt(livingEntity);
+			this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
 		}
 
 		@Override
@@ -525,7 +525,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		@Override
 		public boolean canContinueToUse() {
 			if (this.pendingTarget != null) {
-				if (!this.enderman.isLookingAtMe(this.pendingTarget)) {
+				if (!this.isAngerInducing.test(this.pendingTarget)) {
 					return false;
 				} else {
 					this.enderman.lookAt(this.pendingTarget, 10.0F, 10.0F);

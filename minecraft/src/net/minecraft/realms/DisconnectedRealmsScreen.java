@@ -31,7 +31,9 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
 		this.message = MultiLineLabel.create(this.font, this.reason, this.width - 50);
 		this.textHeight = this.message.getLineCount() * 9;
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 100, this.height / 2 + this.textHeight / 2 + 9, 200, 20, CommonComponents.GUI_BACK, button -> minecraft.setScreen(this.parent))
+			Button.builder(CommonComponents.GUI_BACK, button -> minecraft.setScreen(this.parent))
+				.bounds(this.width / 2 - 100, this.height / 2 + this.textHeight / 2 + 9, 200, 20)
+				.build()
 		);
 	}
 

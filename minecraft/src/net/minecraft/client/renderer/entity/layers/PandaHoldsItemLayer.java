@@ -33,7 +33,7 @@ public class PandaHoldsItemLayer extends RenderLayer<Panda, PandaModel<Panda>> {
 			}
 
 			poseStack.pushPose();
-			poseStack.translate(0.1F, (double)n, (double)m);
+			poseStack.translate(0.1F, n, m);
 			this.itemInHandRenderer.renderItem(panda, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}

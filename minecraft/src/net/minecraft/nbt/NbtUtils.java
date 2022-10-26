@@ -544,7 +544,7 @@ public final class NbtUtils {
 			compoundTag.put("palettes", listTag3);
 		}
 
-		if (compoundTag.contains("entities", 10)) {
+		if (compoundTag.contains("entities", 9)) {
 			ListTag listTag3 = compoundTag.getList("entities", 10);
 			ListTag listTag4 = (ListTag)listTag3.stream()
 				.map(CompoundTag.class::cast)

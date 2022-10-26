@@ -111,7 +111,7 @@ public class PrepareRamNearestTarget<E extends PathfinderMob> extends Behavior<E
 								MemoryModuleType.RAM_TARGET, this.getEdgeOfBlock(blockPos, ((PrepareRamNearestTarget.RamCandidate)this.ramCandidate.get()).getTargetPosition())
 							);
 						serverLevel.playSound(
-							null, pathfinderMob, (SoundEvent)this.getPrepareRamSound.apply(pathfinderMob), SoundSource.HOSTILE, 1.0F, pathfinderMob.getVoicePitch()
+							null, pathfinderMob, (SoundEvent)this.getPrepareRamSound.apply(pathfinderMob), SoundSource.NEUTRAL, 1.0F, pathfinderMob.getVoicePitch()
 						);
 						this.ramCandidate = Optional.empty();
 					}

@@ -107,30 +107,26 @@ public class StructureBlockEditScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.addRenderableWidget(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
-		this.addRenderableWidget(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onCancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 		this.initialMirror = this.structure.getMirror();
 		this.initialRotation = this.structure.getRotation();
 		this.initialMode = this.structure.getMode();
 		this.initialEntityIgnoring = this.structure.isIgnoreEntities();
 		this.initialShowAir = this.structure.getShowAir();
 		this.initialShowBoundingBox = this.structure.getShowBoundingBox();
-		this.saveButton = this.addRenderableWidget(
-			new Button(this.width / 2 + 4 + 100, 185, 50, 20, Component.translatable("structure_block.button.save"), button -> {
-				if (this.structure.getMode() == StructureMode.SAVE) {
-					this.sendToServer(StructureBlockEntity.UpdateType.SAVE_AREA);
-					this.minecraft.setScreen(null);
-				}
-			})
-		);
-		this.loadButton = this.addRenderableWidget(
-			new Button(this.width / 2 + 4 + 100, 185, 50, 20, Component.translatable("structure_block.button.load"), button -> {
-				if (this.structure.getMode() == StructureMode.LOAD) {
-					this.sendToServer(StructureBlockEntity.UpdateType.LOAD_AREA);
-					this.minecraft.setScreen(null);
-				}
-			})
-		);
+		this.saveButton = this.addRenderableWidget(Button.builder(Component.translatable("structure_block.button.save"), button -> {
+			if (this.structure.getMode() == StructureMode.SAVE) {
+				this.sendToServer(StructureBlockEntity.UpdateType.SAVE_AREA);
+				this.minecraft.setScreen(null);
+			}
+		}).bounds(this.width / 2 + 4 + 100, 185, 50, 20).build());
+		this.loadButton = this.addRenderableWidget(Button.builder(Component.translatable("structure_block.button.load"), button -> {
+			if (this.structure.getMode() == StructureMode.LOAD) {
+				this.sendToServer(StructureBlockEntity.UpdateType.LOAD_AREA);
+				this.minecraft.setScreen(null);
+			}
+		}).bounds(this.width / 2 + 4 + 100, 185, 50, 20).build());
 		this.addRenderableWidget(
 			CycleButton.<StructureMode>builder(structureMode -> Component.translatable("structure_block.mode." + structureMode.getSerializedName()))
 				.withValues(DEFAULT_MODES, ALL_MODES)
@@ -141,14 +137,12 @@ public class StructureBlockEditScreen extends Screen {
 					this.updateMode(structureMode);
 				})
 		);
-		this.detectButton = this.addRenderableWidget(
-			new Button(this.width / 2 + 4 + 100, 120, 50, 20, Component.translatable("structure_block.button.detect_size"), button -> {
-				if (this.structure.getMode() == StructureMode.SAVE) {
-					this.sendToServer(StructureBlockEntity.UpdateType.SCAN_AREA);
-					this.minecraft.setScreen(null);
-				}
-			})
-		);
+		this.detectButton = this.addRenderableWidget(Button.builder(Component.translatable("structure_block.button.detect_size"), button -> {
+			if (this.structure.getMode() == StructureMode.SAVE) {
+				this.sendToServer(StructureBlockEntity.UpdateType.SCAN_AREA);
+				this.minecraft.setScreen(null);
+			}
+		}).bounds(this.width / 2 + 4 + 100, 120, 50, 20).build());
 		this.includeEntitiesButton = this.addRenderableWidget(
 			CycleButton.onOffBuilder(!this.structure.isIgnoreEntities())
 				.displayOnlyValue()
@@ -171,22 +165,22 @@ public class StructureBlockEditScreen extends Screen {
 				.displayOnlyValue()
 				.create(this.width / 2 + 4 + 100, 80, 50, 20, SHOW_BOUNDING_BOX_LABEL, (cycleButton, boolean_) -> this.structure.setShowBoundingBox(boolean_))
 		);
-		this.rot0Button = this.addRenderableWidget(new Button(this.width / 2 - 1 - 40 - 1 - 40 - 20, 185, 40, 20, Component.literal("0"), button -> {
+		this.rot0Button = this.addRenderableWidget(Button.builder(Component.literal("0"), button -> {
 			this.structure.setRotation(Rotation.NONE);
 			this.updateDirectionButtons();
-		}));
-		this.rot90Button = this.addRenderableWidget(new Button(this.width / 2 - 1 - 40 - 20, 185, 40, 20, Component.literal("90"), button -> {
+		}).bounds(this.width / 2 - 1 - 40 - 1 - 40 - 20, 185, 40, 20).build());
+		this.rot90Button = this.addRenderableWidget(Button.builder(Component.literal("90"), button -> {
 			this.structure.setRotation(Rotation.CLOCKWISE_90);
 			this.updateDirectionButtons();
-		}));
-		this.rot180Button = this.addRenderableWidget(new Button(this.width / 2 + 1 + 20, 185, 40, 20, Component.literal("180"), button -> {
+		}).bounds(this.width / 2 - 1 - 40 - 20, 185, 40, 20).build());
+		this.rot180Button = this.addRenderableWidget(Button.builder(Component.literal("180"), button -> {
 			this.structure.setRotation(Rotation.CLOCKWISE_180);
 			this.updateDirectionButtons();
-		}));
-		this.rot270Button = this.addRenderableWidget(new Button(this.width / 2 + 1 + 40 + 1 + 20, 185, 40, 20, Component.literal("270"), button -> {
+		}).bounds(this.width / 2 + 1 + 20, 185, 40, 20).build());
+		this.rot270Button = this.addRenderableWidget(Button.builder(Component.literal("270"), button -> {
 			this.structure.setRotation(Rotation.COUNTERCLOCKWISE_90);
 			this.updateDirectionButtons();
-		}));
+		}).bounds(this.width / 2 + 1 + 40 + 1 + 20, 185, 40, 20).build());
 		this.nameEdit = new EditBox(this.font, this.width / 2 - 152, 40, 300, 20, Component.translatable("structure_block.structure_name")) {
 			@Override
 			public boolean charTyped(char c, int i) {

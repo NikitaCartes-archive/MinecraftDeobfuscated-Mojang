@@ -8,8 +8,8 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilde
 
 public abstract class SinglePieceStructure extends Structure {
 	private final SinglePieceStructure.PieceConstructor constructor;
-	private int width;
-	private int depth;
+	private final int width;
+	private final int depth;
 
 	protected SinglePieceStructure(SinglePieceStructure.PieceConstructor pieceConstructor, int i, int j, Structure.StructureSettings structureSettings) {
 		super(structureSettings);

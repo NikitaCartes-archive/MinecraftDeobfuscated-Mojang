@@ -1,10 +1,10 @@
 package net.minecraft.client.model.geom.builders;
 
-import com.mojang.math.Vector3f;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public final class CubeDefinition {

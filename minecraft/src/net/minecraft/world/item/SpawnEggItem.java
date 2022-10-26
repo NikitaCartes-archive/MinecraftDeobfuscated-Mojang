@@ -22,7 +22,6 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -61,10 +60,9 @@ public class SpawnEggItem extends Item {
 			BlockState blockState = level.getBlockState(blockPos);
 			if (blockState.is(Blocks.SPAWNER)) {
 				BlockEntity blockEntity = level.getBlockEntity(blockPos);
-				if (blockEntity instanceof SpawnerBlockEntity) {
-					BaseSpawner baseSpawner = ((SpawnerBlockEntity)blockEntity).getSpawner();
+				if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity) {
 					EntityType<?> entityType = this.getType(itemStack.getTag());
-					baseSpawner.setEntityId(entityType);
+					spawnerBlockEntity.setEntityId(entityType, level.getRandom());
 					blockEntity.setChanged();
 					level.sendBlockUpdated(blockPos, blockState, blockState, 3);
 					level.gameEvent(useOnContext.getPlayer(), GameEvent.BLOCK_CHANGE, blockPos);

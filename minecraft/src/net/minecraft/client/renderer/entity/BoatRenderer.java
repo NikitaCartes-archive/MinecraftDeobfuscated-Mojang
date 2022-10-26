@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -25,6 +24,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.Boat;
+import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
 public class BoatRenderer extends EntityRenderer<Boat> {
@@ -55,8 +55,8 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 
 	public void render(Boat boat, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.translate(0.0, 0.375, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - f));
+		poseStack.translate(0.0F, 0.375F, 0.0F);
+		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - f));
 		float h = (float)boat.getHurtTime() - g;
 		float j = boat.getDamage() - g;
 		if (j < 0.0F) {
@@ -64,19 +64,19 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		}
 
 		if (h > 0.0F) {
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(h) * h * j / 10.0F * (float)boat.getHurtDir()));
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(h) * h * j / 10.0F * (float)boat.getHurtDir()));
 		}
 
 		float k = boat.getBubbleAngle(g);
 		if (!Mth.equal(k, 0.0F)) {
-			poseStack.mulPose(new Quaternion(new Vector3f(1.0F, 0.0F, 1.0F), boat.getBubbleAngle(g), true));
+			poseStack.mulPose(new Quaternionf().setAngleAxis(boat.getBubbleAngle(g) * (float) (Math.PI / 180.0), 1.0F, 0.0F, 1.0F));
 		}
 
 		Pair<ResourceLocation, ListModel<Boat>> pair = (Pair<ResourceLocation, ListModel<Boat>>)this.boatResources.get(boat.getBoatType());
 		ResourceLocation resourceLocation = pair.getFirst();
 		ListModel<Boat> listModel = pair.getSecond();
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+		poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 		listModel.setupAnim(boat, g, 0.0F, -0.1F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(listModel.renderType(resourceLocation));
 		listModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);

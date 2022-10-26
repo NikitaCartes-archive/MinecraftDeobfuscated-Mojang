@@ -1,7 +1,5 @@
 package net.minecraft.client;
 
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +17,8 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class Camera {
@@ -32,7 +32,7 @@ public class Camera {
 	private final Vector3f left = new Vector3f(1.0F, 0.0F, 0.0F);
 	private float xRot;
 	private float yRot;
-	private final Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+	private final Quaternionf rotation = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
 	private boolean detached;
 	private float eyeHeight;
 	private float eyeHeightOld;
@@ -105,15 +105,10 @@ public class Camera {
 	protected void setRotation(float f, float g) {
 		this.xRot = g;
 		this.yRot = f;
-		this.rotation.set(0.0F, 0.0F, 0.0F, 1.0F);
-		this.rotation.mul(Vector3f.YP.rotationDegrees(-f));
-		this.rotation.mul(Vector3f.XP.rotationDegrees(g));
-		this.forwards.set(0.0F, 0.0F, 1.0F);
-		this.forwards.transform(this.rotation);
-		this.up.set(0.0F, 1.0F, 0.0F);
-		this.up.transform(this.rotation);
-		this.left.set(1.0F, 0.0F, 0.0F);
-		this.left.transform(this.rotation);
+		this.rotation.rotationYXZ(-f * (float) (Math.PI / 180.0), g * (float) (Math.PI / 180.0), 0.0F);
+		this.forwards.set(0.0F, 0.0F, 1.0F).rotate(this.rotation);
+		this.up.set(0.0F, 1.0F, 0.0F).rotate(this.rotation);
+		this.left.set(1.0F, 0.0F, 0.0F).rotate(this.rotation);
 	}
 
 	protected void setPosition(double d, double e, double f) {
@@ -141,7 +136,7 @@ public class Camera {
 		return this.yRot;
 	}
 
-	public Quaternion rotation() {
+	public Quaternionf rotation() {
 		return this.rotation;
 	}
 

@@ -31,7 +31,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class EditBox extends AbstractWidget implements Widget, GuiEventListener {
+public class EditBox extends AbstractWidget implements Renderable, GuiEventListener {
 	public static final int BACKWARDS = -1;
 	public static final int FORWARDS = 1;
 	private static final int CURSOR_INSERT_WIDTH = 1;
@@ -351,13 +351,13 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 		if (!this.isVisible()) {
 			return false;
 		} else {
-			boolean bl = d >= (double)this.x && d < (double)(this.x + this.width) && e >= (double)this.y && e < (double)(this.y + this.height);
+			boolean bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
 			if (this.canLoseFocus) {
 				this.setFocus(bl);
 			}
 
 			if (this.isFocused() && bl && i == 0) {
-				int j = Mth.floor(d) - this.x;
+				int j = Mth.floor(d) - this.getX();
 				if (this.bordered) {
 					j -= 4;
 				}
@@ -380,8 +380,8 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 		if (this.isVisible()) {
 			if (this.isBordered()) {
 				int k = this.isFocused() ? -1 : -6250336;
-				fill(poseStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, k);
-				fill(poseStack, this.x, this.y, this.x + this.width, this.y + this.height, -16777216);
+				fill(poseStack, this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, k);
+				fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
 			}
 
 			int k = this.isEditable ? this.textColor : this.textColorUneditable;
@@ -390,8 +390,8 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 			String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
 			boolean bl = l >= 0 && l <= string.length();
 			boolean bl2 = this.isFocused() && this.frame / 6 % 2 == 0 && bl;
-			int n = this.bordered ? this.x + 4 : this.x;
-			int o = this.bordered ? this.y + (this.height - 8) / 2 : this.y;
+			int n = this.bordered ? this.getX() + 4 : this.getX();
+			int o = this.bordered ? this.getY() + (this.height - 8) / 2 : this.getY();
 			int p = n;
 			if (m > string.length()) {
 				m = string.length();
@@ -447,12 +447,12 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 			l = m;
 		}
 
-		if (k > this.x + this.width) {
-			k = this.x + this.width;
+		if (k > this.getX() + this.width) {
+			k = this.getX() + this.width;
 		}
 
-		if (i > this.x + this.width) {
-			i = this.x + this.width;
+		if (i > this.getX() + this.width) {
+			i = this.getX() + this.width;
 		}
 
 		Tesselator tesselator = Tesselator.getInstance();
@@ -512,7 +512,11 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 
 	@Override
 	public boolean isMouseOver(double d, double e) {
-		return this.visible && d >= (double)this.x && d < (double)(this.x + this.width) && e >= (double)this.y && e < (double)(this.y + this.height);
+		return this.visible
+			&& d >= (double)this.getX()
+			&& d < (double)(this.getX() + this.width)
+			&& e >= (double)this.getY()
+			&& e < (double)(this.getY() + this.height);
 	}
 
 	@Override
@@ -576,11 +580,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	}
 
 	public int getScreenX(int i) {
-		return i > this.value.length() ? this.x : this.x + this.font.width(this.value.substring(0, i));
-	}
-
-	public void setX(int i) {
-		this.x = i;
+		return i > this.value.length() ? this.getX() : this.getX() + this.font.width(this.value.substring(0, i));
 	}
 
 	@Override

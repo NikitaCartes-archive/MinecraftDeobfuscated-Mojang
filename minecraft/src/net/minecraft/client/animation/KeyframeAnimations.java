@@ -1,6 +1,5 @@
 package net.minecraft.client.animation;
 
-import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map.Entry;
@@ -9,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class KeyframeAnimations {

@@ -265,7 +265,7 @@ public class WinScreen extends Screen {
 		int l = this.height + 50;
 		float g = -this.scroll;
 		poseStack.pushPose();
-		poseStack.translate(0.0, (double)g, 0.0);
+		poseStack.translate(0.0F, g, 0.0F);
 		RenderSystem.setShaderTexture(0, LOGO_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
@@ -282,7 +282,7 @@ public class WinScreen extends Screen {
 			if (n == this.lines.size() - 1) {
 				float h = (float)m + g - (float)(this.height / 2 - 6);
 				if (h < 0.0F) {
-					poseStack.translate(0.0, (double)(-h), 0.0);
+					poseStack.translate(0.0F, -h, 0.0F);
 				}
 			}
 

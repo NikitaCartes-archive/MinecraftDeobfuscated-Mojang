@@ -67,13 +67,11 @@ public class ChatSelectionScreen extends Screen {
 		this.chatSelectionList = new ChatSelectionScreen.ChatSelectionList(this.minecraft, (this.contextInfoLabel.getLineCount() + 1) * 9);
 		this.chatSelectionList.setRenderBackground(false);
 		this.addWidget(this.chatSelectionList);
-		this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 32, 150, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
-		this.confirmSelectedButton = this.addRenderableWidget(
-			new Button(this.width / 2 - 155 + 160, this.height - 32, 150, 20, CommonComponents.GUI_DONE, button -> {
-				this.onSelected.accept(this.report);
-				this.onClose();
-			})
-		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(this.width / 2 - 155, this.height - 32, 150, 20).build());
+		this.confirmSelectedButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
+			this.onSelected.accept(this.report);
+			this.onClose();
+		}).bounds(this.width / 2 - 155 + 160, this.height - 32, 150, 20).build());
 		this.updateConfirmSelectedButton();
 		this.extendLog();
 		this.chatSelectionList.setScrollAmount((double)this.chatSelectionList.getMaxScroll());

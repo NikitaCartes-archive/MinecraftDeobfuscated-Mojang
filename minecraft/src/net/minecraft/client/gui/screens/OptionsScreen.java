@@ -51,8 +51,8 @@ public class OptionsScreen extends Screen {
 				this.difficultyButton.setWidth(this.difficultyButton.getWidth() - 20);
 				this.lockButton = this.addRenderableWidget(
 					new LockIconButton(
-						this.difficultyButton.x + this.difficultyButton.getWidth(),
-						this.difficultyButton.y,
+						this.difficultyButton.getX() + this.difficultyButton.getWidth(),
+						this.difficultyButton.getY(),
 						button -> this.minecraft
 								.setScreen(
 									new ConfirmScreen(
@@ -71,108 +71,71 @@ public class OptionsScreen extends Screen {
 			}
 		} else {
 			this.addRenderableWidget(
-				new Button(
-					this.width / 2 + 5,
-					this.height / 6 - 12 + 24 * (i >> 1),
-					150,
-					20,
-					Component.translatable("options.online"),
-					button -> this.minecraft.setScreen(new OnlineOptionsScreen(this, this.options))
-				)
+				Button.builder(Component.translatable("options.online"), button -> this.minecraft.setScreen(new OnlineOptionsScreen(this, this.options)))
+					.bounds(this.width / 2 + 5, this.height / 6 - 12 + 24 * (i >> 1), 150, 20)
+					.build()
 			);
 		}
 
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 - 155,
-				this.height / 6 + 48 - 6,
-				150,
-				20,
-				Component.translatable("options.skinCustomisation"),
-				button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))
-			)
+			Button.builder(Component.translatable("options.skinCustomisation"), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options)))
+				.bounds(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 + 5,
-				this.height / 6 + 48 - 6,
-				150,
-				20,
-				Component.translatable("options.sounds"),
-				button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))
-			)
+			Button.builder(Component.translatable("options.sounds"), button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options)))
+				.bounds(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 - 155,
-				this.height / 6 + 72 - 6,
-				150,
-				20,
-				Component.translatable("options.video"),
-				button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))
-			)
+			Button.builder(Component.translatable("options.video"), button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options)))
+				.bounds(this.width / 2 - 155, this.height / 6 + 72 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 + 5,
-				this.height / 6 + 72 - 6,
-				150,
-				20,
-				Component.translatable("options.controls"),
-				button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))
-			)
+			Button.builder(Component.translatable("options.controls"), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options)))
+				.bounds(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 - 155,
-				this.height / 6 + 96 - 6,
-				150,
-				20,
-				Component.translatable("options.language"),
-				button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.options, this.minecraft.getLanguageManager()))
-			)
+			Button.builder(
+					Component.translatable("options.language"),
+					button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.options, this.minecraft.getLanguageManager()))
+				)
+				.bounds(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 + 5,
-				this.height / 6 + 96 - 6,
-				150,
-				20,
-				Component.translatable("options.chat.title"),
-				button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))
-			)
+			Button.builder(Component.translatable("options.chat.title"), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options)))
+				.bounds(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 - 155,
-				this.height / 6 + 120 - 6,
-				150,
-				20,
-				Component.translatable("options.resourcepack"),
-				button -> this.minecraft
-						.setScreen(
-							new PackSelectionScreen(
-								this,
-								this.minecraft.getResourcePackRepository(),
-								this::updatePackList,
-								this.minecraft.getResourcePackDirectory(),
-								Component.translatable("resourcePack.title")
+			Button.builder(
+					Component.translatable("options.resourcepack"),
+					button -> this.minecraft
+							.setScreen(
+								new PackSelectionScreen(
+									this,
+									this.minecraft.getResourcePackRepository(),
+									this::updatePackList,
+									this.minecraft.getResourcePackDirectory(),
+									Component.translatable("resourcePack.title")
+								)
 							)
-						)
-			)
+				)
+				.bounds(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 + 5,
-				this.height / 6 + 120 - 6,
-				150,
-				20,
-				Component.translatable("options.accessibility.title"),
-				button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))
-			)
+			Button.builder(Component.translatable("options.accessibility.title"), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options)))
+				.bounds(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
+			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
+				.bounds(this.width / 2 - 100, this.height / 6 + 168, 200, 20)
+				.build()
 		);
 	}
 

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
 import java.nio.ByteBuffer;
@@ -14,6 +13,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 

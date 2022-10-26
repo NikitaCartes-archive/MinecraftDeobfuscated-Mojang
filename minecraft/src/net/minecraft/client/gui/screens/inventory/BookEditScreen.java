@@ -127,27 +127,27 @@ public class BookEditScreen extends Screen {
 	protected void init() {
 		this.clearDisplayCache();
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.signButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, Component.translatable("book.signButton"), button -> {
+		this.signButton = this.addRenderableWidget(Button.builder(Component.translatable("book.signButton"), button -> {
 			this.isSigning = true;
 			this.updateButtonVisibility();
-		}));
-		this.doneButton = this.addRenderableWidget(new Button(this.width / 2 + 2, 196, 98, 20, CommonComponents.GUI_DONE, button -> {
+		}).bounds(this.width / 2 - 100, 196, 98, 20).build());
+		this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
 			this.minecraft.setScreen(null);
 			this.saveChanges(false);
-		}));
-		this.finalizeButton = this.addRenderableWidget(new Button(this.width / 2 - 100, 196, 98, 20, Component.translatable("book.finalizeButton"), button -> {
+		}).bounds(this.width / 2 + 2, 196, 98, 20).build());
+		this.finalizeButton = this.addRenderableWidget(Button.builder(Component.translatable("book.finalizeButton"), button -> {
 			if (this.isSigning) {
 				this.saveChanges(true);
 				this.minecraft.setScreen(null);
 			}
-		}));
-		this.cancelButton = this.addRenderableWidget(new Button(this.width / 2 + 2, 196, 98, 20, CommonComponents.GUI_CANCEL, button -> {
+		}).bounds(this.width / 2 - 100, 196, 98, 20).build());
+		this.cancelButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			if (this.isSigning) {
 				this.isSigning = false;
 			}
 
 			this.updateButtonVisibility();
-		}));
+		}).bounds(this.width / 2 + 2, 196, 98, 20).build());
 		int i = (this.width - 192) / 2;
 		int j = 2;
 		this.forwardButton = this.addRenderableWidget(new PageButton(i + 116, 159, true, button -> this.pageForward(), true));

@@ -94,7 +94,7 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			this.children.forEach(abstractWidget -> {
-				abstractWidget.y = j;
+				abstractWidget.setY(j);
 				abstractWidget.render(poseStack, n, o, f);
 			});
 		}

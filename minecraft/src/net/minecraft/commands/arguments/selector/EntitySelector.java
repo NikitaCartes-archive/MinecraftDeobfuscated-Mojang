@@ -48,7 +48,7 @@ public class EntitySelector {
 	private final String playerName;
 	@Nullable
 	private final UUID entityUUID;
-	private EntityTypeTest<Entity, ?> type;
+	private final EntityTypeTest<Entity, ?> type;
 	private final boolean usesSelector;
 
 	public EntitySelector(

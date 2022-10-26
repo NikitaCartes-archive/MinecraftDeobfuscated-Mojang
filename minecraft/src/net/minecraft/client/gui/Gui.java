@@ -12,7 +12,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -258,7 +258,7 @@ public class Gui extends GuiComponent {
 
 				if (m > 8) {
 					poseStack.pushPose();
-					poseStack.translate((double)(this.screenWidth / 2), (double)(this.screenHeight - 68), 0.0);
+					poseStack.translate((float)(this.screenWidth / 2), (float)(this.screenHeight - 68), 0.0F);
 					RenderSystem.enableBlend();
 					RenderSystem.defaultBlendFunc();
 					int l = 16777215;
@@ -293,7 +293,7 @@ public class Gui extends GuiComponent {
 				mx = Mth.clamp(mx, 0, 255);
 				if (mx > 8) {
 					poseStack.pushPose();
-					poseStack.translate((double)(this.screenWidth / 2), (double)(this.screenHeight / 2), 0.0);
+					poseStack.translate((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), 0.0F);
 					RenderSystem.enableBlend();
 					RenderSystem.defaultBlendFunc();
 					poseStack.pushPose();
@@ -373,9 +373,9 @@ public class Gui extends GuiComponent {
 					Camera camera = this.minecraft.gameRenderer.getMainCamera();
 					PoseStack poseStack2 = RenderSystem.getModelViewStack();
 					poseStack2.pushPose();
-					poseStack2.translate((double)(this.screenWidth / 2), (double)(this.screenHeight / 2), (double)this.getBlitOffset());
-					poseStack2.mulPose(Vector3f.XN.rotationDegrees(camera.getXRot()));
-					poseStack2.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot()));
+					poseStack2.translate((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), (float)this.getBlitOffset());
+					poseStack2.mulPose(Axis.XN.rotationDegrees(camera.getXRot()));
+					poseStack2.mulPose(Axis.YP.rotationDegrees(camera.getYRot()));
 					poseStack2.scale(-1.0F, -1.0F, -1.0F);
 					RenderSystem.applyModelViewMatrix();
 					RenderSystem.renderCrosshair(10);
@@ -1088,9 +1088,9 @@ public class Gui extends GuiComponent {
 			if (g > 0.0F) {
 				float h = 1.0F + g / 5.0F;
 				poseStack.pushPose();
-				poseStack.translate((double)(i + 8), (double)(j + 12), 0.0);
+				poseStack.translate((float)(i + 8), (float)(j + 12), 0.0F);
 				poseStack.scale(1.0F / h, (h + 1.0F) / 2.0F, 1.0F);
-				poseStack.translate((double)(-(i + 8)), (double)(-(j + 12)), 0.0);
+				poseStack.translate((float)(-(i + 8)), (float)(-(j + 12)), 0.0F);
 				RenderSystem.applyModelViewMatrix();
 			}
 

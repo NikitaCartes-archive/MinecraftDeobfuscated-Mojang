@@ -2,9 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -19,6 +17,8 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class FishingHookRenderer extends EntityRenderer<FishingHook> {
@@ -37,7 +37,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			poseStack.pushPose();
 			poseStack.scale(0.5F, 0.5F, 0.5F);
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			PoseStack.Pose pose = poseStack.last();
 			Matrix4f matrix4f = pose.pose();
 			Matrix3f matrix3f = pose.normal();

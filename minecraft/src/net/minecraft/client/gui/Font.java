@@ -8,9 +8,7 @@ import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -32,6 +30,8 @@ import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringDecomposer;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class Font {
@@ -185,7 +185,7 @@ public class Font {
 		}
 
 		i = adjustColor(i);
-		Matrix4f matrix4f2 = matrix4f.copy();
+		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (bl) {
 			this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
 			matrix4f2.translate(SHADOW_OFFSET);
@@ -208,7 +208,7 @@ public class Font {
 		int k
 	) {
 		i = adjustColor(i);
-		Matrix4f matrix4f2 = matrix4f.copy();
+		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (bl) {
 			this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
 			matrix4f2.translate(SHADOW_OFFSET);

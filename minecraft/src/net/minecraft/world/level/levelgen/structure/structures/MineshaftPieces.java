@@ -25,7 +25,6 @@ import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.WallTorchBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -406,9 +405,8 @@ public class MineshaftPieces {
 						if (boundingBox.isInside(blockPos2) && this.isInterior(worldGenLevel, 1, 0, q, boundingBox)) {
 							this.hasPlacedSpider = true;
 							worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
-							BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos2);
-							if (blockEntity instanceof SpawnerBlockEntity) {
-								((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.CAVE_SPIDER);
+							if (worldGenLevel.getBlockEntity(blockPos2) instanceof SpawnerBlockEntity spawnerBlockEntity) {
+								spawnerBlockEntity.setEntityId(EntityType.CAVE_SPIDER, randomSource);
 							}
 						}
 					}

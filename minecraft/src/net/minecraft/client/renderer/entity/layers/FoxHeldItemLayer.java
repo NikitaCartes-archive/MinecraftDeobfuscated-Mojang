@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.FoxModel;
@@ -29,31 +29,29 @@ public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
 		if (bl2) {
 			float m = 0.75F;
 			poseStack.scale(0.75F, 0.75F, 0.75F);
-			poseStack.translate(0.0, 0.5, 0.209375F);
+			poseStack.translate(0.0F, 0.5F, 0.209375F);
 		}
 
-		poseStack.translate(
-			(double)(this.getParentModel().head.x / 16.0F), (double)(this.getParentModel().head.y / 16.0F), (double)(this.getParentModel().head.z / 16.0F)
-		);
+		poseStack.translate(this.getParentModel().head.x / 16.0F, this.getParentModel().head.y / 16.0F, this.getParentModel().head.z / 16.0F);
 		float m = fox.getHeadRollAngle(h);
-		poseStack.mulPose(Vector3f.ZP.rotation(m));
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
+		poseStack.mulPose(Axis.ZP.rotation(m));
+		poseStack.mulPose(Axis.YP.rotationDegrees(k));
+		poseStack.mulPose(Axis.XP.rotationDegrees(l));
 		if (fox.isBaby()) {
 			if (bl) {
 				poseStack.translate(0.4F, 0.26F, 0.15F);
 			} else {
-				poseStack.translate(0.06F, 0.26F, -0.5);
+				poseStack.translate(0.06F, 0.26F, -0.5F);
 			}
 		} else if (bl) {
 			poseStack.translate(0.46F, 0.26F, 0.22F);
 		} else {
-			poseStack.translate(0.06F, 0.27F, -0.5);
+			poseStack.translate(0.06F, 0.27F, -0.5F);
 		}
 
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+		poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 		if (bl) {
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
 		}
 
 		ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);

@@ -1,6 +1,5 @@
 package net.minecraft.world.phys;
 
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import java.util.EnumSet;
 import java.util.List;
@@ -9,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 public class Vec3 implements Position {
 	public static final Codec<Vec3> CODEC = Codec.DOUBLE
@@ -249,5 +249,9 @@ public class Vec3 implements Position {
 	@Override
 	public final double z() {
 		return this.z;
+	}
+
+	public Vector3f toVector3f() {
+		return new Vector3f((float)this.x, (float)this.y, (float)this.z);
 	}
 }

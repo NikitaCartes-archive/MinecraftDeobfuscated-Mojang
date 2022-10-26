@@ -2,9 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,6 +21,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
@@ -47,11 +47,11 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 		poseStack.pushPose();
 		float h = (float)enderDragon.getLatencyPos(7, g)[0];
 		float j = (float)(enderDragon.getLatencyPos(5, g)[1] - enderDragon.getLatencyPos(10, g)[1]);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(j * 10.0F));
-		poseStack.translate(0.0, 0.0, 1.0);
+		poseStack.mulPose(Axis.YP.rotationDegrees(-h));
+		poseStack.mulPose(Axis.XP.rotationDegrees(j * 10.0F));
+		poseStack.translate(0.0F, 0.0F, 1.0F);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		poseStack.translate(0.0, -1.501F, 0.0);
+		poseStack.translate(0.0F, -1.501F, 0.0F);
 		boolean bl = enderDragon.hurtTime > 0;
 		this.model.prepareMobModel(enderDragon, 0.0F, 0.0F, g);
 		if (enderDragon.dragonDeathTime > 0) {
@@ -73,15 +73,15 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 			RandomSource randomSource = RandomSource.create(432L);
 			VertexConsumer vertexConsumer4 = multiBufferSource.getBuffer(RenderType.lightning());
 			poseStack.pushPose();
-			poseStack.translate(0.0, -1.0, -2.0);
+			poseStack.translate(0.0F, -1.0F, -2.0F);
 
 			for (int n = 0; (float)n < (l + l * l) / 2.0F * 60.0F; n++) {
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(randomSource.nextFloat() * 360.0F));
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(randomSource.nextFloat() * 360.0F));
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(randomSource.nextFloat() * 360.0F));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(randomSource.nextFloat() * 360.0F));
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(randomSource.nextFloat() * 360.0F));
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(randomSource.nextFloat() * 360.0F + l * 90.0F));
+				poseStack.mulPose(Axis.XP.rotationDegrees(randomSource.nextFloat() * 360.0F));
+				poseStack.mulPose(Axis.YP.rotationDegrees(randomSource.nextFloat() * 360.0F));
+				poseStack.mulPose(Axis.ZP.rotationDegrees(randomSource.nextFloat() * 360.0F));
+				poseStack.mulPose(Axis.XP.rotationDegrees(randomSource.nextFloat() * 360.0F));
+				poseStack.mulPose(Axis.YP.rotationDegrees(randomSource.nextFloat() * 360.0F));
+				poseStack.mulPose(Axis.ZP.rotationDegrees(randomSource.nextFloat() * 360.0F + l * 90.0F));
 				float o = randomSource.nextFloat() * 20.0F + 5.0F + m * 10.0F;
 				float p = randomSource.nextFloat() * 2.0F + 1.0F + m * 2.0F;
 				Matrix4f matrix4f = poseStack.last().pose();
@@ -133,9 +133,9 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 		float l = Mth.sqrt(f * f + h * h);
 		float m = Mth.sqrt(f * f + g * g + h * h);
 		poseStack.pushPose();
-		poseStack.translate(0.0, 2.0, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotation((float)(-Math.atan2((double)h, (double)f)) - (float) (Math.PI / 2)));
-		poseStack.mulPose(Vector3f.XP.rotation((float)(-Math.atan2((double)l, (double)g)) - (float) (Math.PI / 2)));
+		poseStack.translate(0.0F, 2.0F, 0.0F);
+		poseStack.mulPose(Axis.YP.rotation((float)(-Math.atan2((double)h, (double)f)) - (float) (Math.PI / 2)));
+		poseStack.mulPose(Axis.XP.rotation((float)(-Math.atan2((double)l, (double)g)) - (float) (Math.PI / 2)));
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(BEAM);
 		float n = 0.0F - ((float)j + i) * 0.01F;
 		float o = Mth.sqrt(f * f + g * g + h * h) / 32.0F - ((float)j + i) * 0.01F;
@@ -346,8 +346,8 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 			this.jaw.xRot = (float)(Math.sin((double)(l * (float) (Math.PI * 2))) + 1.0) * 0.2F;
 			float m = (float)(Math.sin((double)(l * (float) (Math.PI * 2) - 1.0F)) + 1.0);
 			m = (m * m + m * 2.0F) * 0.05F;
-			poseStack.translate(0.0, (double)(m - 2.0F), -3.0);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(m * 2.0F));
+			poseStack.translate(0.0F, m - 2.0F, -3.0F);
+			poseStack.mulPose(Axis.XP.rotationDegrees(m * 2.0F));
 			float n = 0.0F;
 			float o = 20.0F;
 			float p = -12.0F;
@@ -381,9 +381,9 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 			this.head.zRot = -Mth.rotWrap(fs[0] - (double)s) * (float) (Math.PI / 180.0);
 			this.head.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, k);
 			poseStack.pushPose();
-			poseStack.translate(0.0, 1.0, 0.0);
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(-r * 1.5F));
-			poseStack.translate(0.0, -1.0, 0.0);
+			poseStack.translate(0.0F, 1.0F, 0.0F);
+			poseStack.mulPose(Axis.ZP.rotationDegrees(-r * 1.5F));
+			poseStack.translate(0.0F, -1.0F, 0.0F);
 			this.body.zRot = 0.0F;
 			this.body.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, k);
 			float w = l * (float) (Math.PI * 2);

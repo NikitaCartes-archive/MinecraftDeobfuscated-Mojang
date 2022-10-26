@@ -7,7 +7,6 @@ import net.minecraft.data.advancements.AdvancementProvider;
 public class VanillaAdvancementProvider {
 	public static AdvancementProvider create(PackOutput packOutput) {
 		return new AdvancementProvider(
-			"Vanilla Advancements",
 			packOutput,
 			List.of(
 				new VanillaTheEndAdvancements(),

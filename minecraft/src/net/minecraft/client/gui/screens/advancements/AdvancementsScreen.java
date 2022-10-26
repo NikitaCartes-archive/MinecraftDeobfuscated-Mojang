@@ -133,7 +133,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 		} else {
 			PoseStack poseStack2 = RenderSystem.getModelViewStack();
 			poseStack2.pushPose();
-			poseStack2.translate((double)(k + 9), (double)(l + 18), 0.0);
+			poseStack2.translate((float)(k + 9), (float)(l + 18), 0.0F);
 			RenderSystem.applyModelViewMatrix();
 			advancementTab.drawContents(poseStack);
 			poseStack2.popPose();
@@ -173,7 +173,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 		if (this.selectedTab != null) {
 			PoseStack poseStack2 = RenderSystem.getModelViewStack();
 			poseStack2.pushPose();
-			poseStack2.translate((double)(k + 9), (double)(l + 18), 400.0);
+			poseStack2.translate((float)(k + 9), (float)(l + 18), 400.0F);
 			RenderSystem.applyModelViewMatrix();
 			RenderSystem.enableDepthTest();
 			this.selectedTab.drawTooltips(poseStack, i - k - 9, j - l - 18, k, l);

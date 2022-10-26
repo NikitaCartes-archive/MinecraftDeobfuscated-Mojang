@@ -7,7 +7,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.math.Vector3f;
 import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.Map;
@@ -18,6 +17,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class BlockElement {

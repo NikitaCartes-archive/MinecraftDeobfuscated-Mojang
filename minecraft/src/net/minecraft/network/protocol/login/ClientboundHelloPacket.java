@@ -9,25 +9,25 @@ import net.minecraft.util.CryptException;
 public class ClientboundHelloPacket implements Packet<ClientLoginPacketListener> {
 	private final String serverId;
 	private final byte[] publicKey;
-	private final byte[] nonce;
+	private final byte[] challenge;
 
 	public ClientboundHelloPacket(String string, byte[] bs, byte[] cs) {
 		this.serverId = string;
 		this.publicKey = bs;
-		this.nonce = cs;
+		this.challenge = cs;
 	}
 
 	public ClientboundHelloPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.serverId = friendlyByteBuf.readUtf(20);
 		this.publicKey = friendlyByteBuf.readByteArray();
-		this.nonce = friendlyByteBuf.readByteArray();
+		this.challenge = friendlyByteBuf.readByteArray();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.serverId);
 		friendlyByteBuf.writeByteArray(this.publicKey);
-		friendlyByteBuf.writeByteArray(this.nonce);
+		friendlyByteBuf.writeByteArray(this.challenge);
 	}
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {
@@ -42,7 +42,7 @@ public class ClientboundHelloPacket implements Packet<ClientLoginPacketListener>
 		return Crypt.byteToPublicKey(this.publicKey);
 	}
 
-	public byte[] getNonce() {
-		return this.nonce;
+	public byte[] getChallenge() {
+		return this.challenge;
 	}
 }

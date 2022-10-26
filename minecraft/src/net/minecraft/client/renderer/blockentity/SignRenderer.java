@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -62,15 +62,15 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		WoodType woodType = SignBlock.getWoodType(blockState.getBlock());
 		SignRenderer.SignModel signModel = (SignRenderer.SignModel)this.signModels.get(woodType);
 		if (blockState.getBlock() instanceof StandingSignBlock) {
-			poseStack.translate(0.5, 0.5, 0.5);
+			poseStack.translate(0.5F, 0.5F, 0.5F);
 			float h = -RotationSegment.convertToDegrees((Integer)blockState.getValue(StandingSignBlock.ROTATION));
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+			poseStack.mulPose(Axis.YP.rotationDegrees(h));
 			signModel.stick.visible = true;
 		} else {
-			poseStack.translate(0.5, 0.5, 0.5);
+			poseStack.translate(0.5F, 0.5F, 0.5F);
 			float h = -((Direction)blockState.getValue(WallSignBlock.FACING)).toYRot();
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
-			poseStack.translate(0.0, -0.3125, -0.4375);
+			poseStack.mulPose(Axis.YP.rotationDegrees(h));
+			poseStack.translate(0.0F, -0.3125F, -0.4375F);
 			signModel.stick.visible = false;
 		}
 

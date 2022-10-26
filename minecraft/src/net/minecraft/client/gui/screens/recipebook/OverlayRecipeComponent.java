@@ -12,7 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
@@ -26,7 +26,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
-public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiEventListener {
+public class OverlayRecipeComponent extends GuiComponent implements Renderable, GuiEventListener {
 	static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final int MAX_ROW = 4;
 	private static final int MAX_ROW_LARGE = 5;
@@ -138,7 +138,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
 			poseStack.pushPose();
-			poseStack.translate(0.0, 0.0, 170.0);
+			poseStack.translate(0.0F, 0.0F, 170.0F);
 			int k = this.recipeButtons.size() <= 16 ? 4 : 5;
 			int l = Math.min(this.recipeButtons.size(), k);
 			int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
@@ -241,10 +241,10 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 				l += 26;
 			}
 
-			this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
+			this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
 			PoseStack poseStack2 = RenderSystem.getModelViewStack();
 			poseStack2.pushPose();
-			poseStack2.translate((double)(this.x + 2), (double)(this.y + 2), 125.0);
+			poseStack2.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 125.0);
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
 				poseStack2.pushPose();

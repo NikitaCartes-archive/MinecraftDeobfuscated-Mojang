@@ -14,7 +14,6 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -1230,9 +1229,8 @@ public class NetherFortressPieces {
 				if (boundingBox.isInside(blockPos2)) {
 					this.hasPlacedSpawner = true;
 					worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
-					BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos2);
-					if (blockEntity instanceof SpawnerBlockEntity) {
-						((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.BLAZE);
+					if (worldGenLevel.getBlockEntity(blockPos2) instanceof SpawnerBlockEntity spawnerBlockEntity) {
+						spawnerBlockEntity.setEntityId(EntityType.BLAZE, randomSource);
 					}
 				}
 			}

@@ -146,17 +146,8 @@ public class RespawnAnchorBlock extends Block {
 					: super.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
 			}
 		};
-		level.explode(
-			null,
-			DamageSource.badRespawnPointExplosion(),
-			explosionDamageCalculator,
-			(double)blockPos.getX() + 0.5,
-			(double)blockPos.getY() + 0.5,
-			(double)blockPos.getZ() + 0.5,
-			5.0F,
-			true,
-			Explosion.BlockInteraction.DESTROY
-		);
+		Vec3 vec3 = blockPos.getCenter();
+		level.explode(null, DamageSource.badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0F, true, Explosion.BlockInteraction.DESTROY);
 	}
 
 	public static boolean canSetSpawn(Level level) {

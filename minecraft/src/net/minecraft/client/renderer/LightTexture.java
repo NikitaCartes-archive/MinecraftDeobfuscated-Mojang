@@ -2,7 +2,6 @@ package net.minecraft.client.renderer;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -14,6 +13,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class LightTexture implements AutoCloseable {
@@ -109,8 +109,7 @@ public class LightTexture implements AutoCloseable {
 					m = 0.0F;
 				}
 
-				Vector3f vector3f = new Vector3f(g, g, 1.0F);
-				vector3f.lerp(new Vector3f(1.0F, 1.0F, 1.0F), 0.35F);
+				Vector3f vector3f = new Vector3f(g, g, 1.0F).lerp(new Vector3f(1.0F, 1.0F, 1.0F), 0.35F);
 				float n = this.blockLightRedFlicker + 1.5F;
 				Vector3f vector3f2 = new Vector3f();
 
@@ -124,16 +123,14 @@ public class LightTexture implements AutoCloseable {
 						boolean bl = clientLevel.effects().forceBrightLightmap();
 						if (bl) {
 							vector3f2.lerp(new Vector3f(0.99F, 1.12F, 1.0F), 0.25F);
-							vector3f2.clamp(0.0F, 1.0F);
+							clampColor(vector3f2);
 						} else {
-							Vector3f vector3f3 = vector3f.copy();
-							vector3f3.mul(q);
+							Vector3f vector3f3 = new Vector3f(vector3f).mul(q);
 							vector3f2.add(vector3f3);
 							vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
 							if (this.renderer.getDarkenWorldAmount(f) > 0.0F) {
 								float v = this.renderer.getDarkenWorldAmount(f);
-								Vector3f vector3f4 = vector3f2.copy();
-								vector3f4.mul(0.7F, 0.6F, 0.6F);
+								Vector3f vector3f4 = new Vector3f(vector3f2).mul(0.7F, 0.6F, 0.6F);
 								vector3f2.lerp(vector3f4, v);
 							}
 						}
@@ -142,8 +139,7 @@ public class LightTexture implements AutoCloseable {
 							float w = Math.max(vector3f2.x(), Math.max(vector3f2.y(), vector3f2.z()));
 							if (w < 1.0F) {
 								float v = 1.0F / w;
-								Vector3f vector3f4 = vector3f2.copy();
-								vector3f4.mul(v);
+								Vector3f vector3f4 = new Vector3f(vector3f2).mul(v);
 								vector3f2.lerp(vector3f4, m);
 							}
 						}
@@ -153,15 +149,14 @@ public class LightTexture implements AutoCloseable {
 								vector3f2.add(-k, -k, -k);
 							}
 
-							vector3f2.clamp(0.0F, 1.0F);
+							clampColor(vector3f2);
 						}
 
 						float w = this.minecraft.options.gamma().get().floatValue();
-						Vector3f vector3f5 = vector3f2.copy();
-						vector3f5.map(this::notGamma);
+						Vector3f vector3f5 = new Vector3f(this.notGamma(vector3f2.x), this.notGamma(vector3f2.y), this.notGamma(vector3f2.z));
 						vector3f2.lerp(vector3f5, Math.max(0.0F, w - j));
 						vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
-						vector3f2.clamp(0.0F, 1.0F);
+						clampColor(vector3f2);
 						vector3f2.mul(255.0F);
 						int x = 255;
 						int y = (int)vector3f2.x();
@@ -175,6 +170,10 @@ public class LightTexture implements AutoCloseable {
 				this.minecraft.getProfiler().pop();
 			}
 		}
+	}
+
+	private static void clampColor(Vector3f vector3f) {
+		vector3f.set(Mth.clamp(vector3f.x, 0.0F, 1.0F), Mth.clamp(vector3f.y, 0.0F, 1.0F), Mth.clamp(vector3f.z, 0.0F, 1.0F));
 	}
 
 	private float notGamma(float f) {

@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -62,9 +62,9 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 		float h = 0.25F;
 		float l = Mth.sin(((float)itemEntity.getAge() + g) / 10.0F + itemEntity.bobOffs) * 0.1F + 0.1F;
 		float m = bakedModel.getTransforms().getTransform(ItemTransforms.TransformType.GROUND).scale.y();
-		poseStack.translate(0.0, (double)(l + 0.25F * m), 0.0);
+		poseStack.translate(0.0F, l + 0.25F * m, 0.0F);
 		float n = itemEntity.getSpin(g);
-		poseStack.mulPose(Vector3f.YP.rotation(n));
+		poseStack.mulPose(Axis.YP.rotation(n));
 		float o = bakedModel.getTransforms().ground.scale.x();
 		float p = bakedModel.getTransforms().ground.scale.y();
 		float q = bakedModel.getTransforms().ground.scale.z();
@@ -72,7 +72,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 			float r = -0.0F * (float)(k - 1) * 0.5F * o;
 			float s = -0.0F * (float)(k - 1) * 0.5F * p;
 			float t = -0.09375F * (float)(k - 1) * 0.5F * q;
-			poseStack.translate((double)r, (double)s, (double)t);
+			poseStack.translate(r, s, t);
 		}
 
 		for (int u = 0; u < k; u++) {
@@ -82,18 +82,18 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 					float s = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F;
 					float t = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F;
 					float v = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F;
-					poseStack.translate((double)s, (double)t, (double)v);
+					poseStack.translate(s, t, v);
 				} else {
 					float s = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
 					float t = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-					poseStack.translate((double)s, (double)t, 0.0);
+					poseStack.translate(s, t, 0.0F);
 				}
 			}
 
 			this.itemRenderer.render(itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, bakedModel);
 			poseStack.popPose();
 			if (!bl) {
-				poseStack.translate((double)(0.0F * o), (double)(0.0F * p), (double)(0.09375F * q));
+				poseStack.translate(0.0F * o, 0.0F * p, 0.09375F * q);
 			}
 		}
 

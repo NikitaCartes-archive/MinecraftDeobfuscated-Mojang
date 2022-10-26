@@ -2,8 +2,7 @@ package net.minecraft.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
@@ -19,6 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class MapRenderer implements AutoCloseable {
@@ -119,10 +119,10 @@ public class MapRenderer implements AutoCloseable {
 			for (MapDecoration mapDecoration : this.data.getDecorations()) {
 				if (!bl || mapDecoration.renderOnFrame()) {
 					poseStack.pushPose();
-					poseStack.translate((double)(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F), (double)(0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F), -0.02F);
-					poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)(mapDecoration.getRot() * 360) / 16.0F));
+					poseStack.translate(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F, -0.02F);
+					poseStack.mulPose(Axis.ZP.rotationDegrees((float)(mapDecoration.getRot() * 360) / 16.0F));
 					poseStack.scale(4.0F, 4.0F, 3.0F);
-					poseStack.translate(-0.125, 0.125, 0.0);
+					poseStack.translate(-0.125F, 0.125F, 0.0F);
 					byte b = mapDecoration.getImage();
 					float g = (float)(b % 16 + 0) / 16.0F;
 					float h = (float)(b / 16 + 0) / 16.0F;
@@ -142,11 +142,9 @@ public class MapRenderer implements AutoCloseable {
 						float p = (float)font.width(component);
 						float q = Mth.clamp(25.0F / p, 0.0F, 6.0F / 9.0F);
 						poseStack.pushPose();
-						poseStack.translate(
-							(double)(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - p * q / 2.0F), (double)(0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F), -0.025F
-						);
+						poseStack.translate(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - p * q / 2.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F, -0.025F);
 						poseStack.scale(q, q, 1.0F);
-						poseStack.translate(0.0, 0.0, -0.1F);
+						poseStack.translate(0.0F, 0.0F, -0.1F);
 						font.drawInBatch(component, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
 						poseStack.popPose();
 					}

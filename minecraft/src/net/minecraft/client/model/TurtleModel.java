@@ -100,7 +100,7 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		boolean bl = this.eggBelly.visible;
 		if (bl) {
 			poseStack.pushPose();
-			poseStack.translate(0.0, -0.08F, 0.0);
+			poseStack.translate(0.0F, -0.08F, 0.0F);
 		}
 
 		super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h, k);

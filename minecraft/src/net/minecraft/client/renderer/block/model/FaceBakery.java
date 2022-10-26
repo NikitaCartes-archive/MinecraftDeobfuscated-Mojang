@@ -1,11 +1,6 @@
 package net.minecraft.client.renderer.block.model;
 
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +12,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 @Environment(EnvType.CLIENT)
 public class FaceBakery {
@@ -68,14 +68,12 @@ public class FaceBakery {
 		Matrix4f matrix4f = BlockMath.getUVLockTransform(transformation, direction, () -> "Unable to resolve UVLock for model: " + resourceLocation).getMatrix();
 		float f = blockFaceUV.getU(blockFaceUV.getReverseIndex(0));
 		float g = blockFaceUV.getV(blockFaceUV.getReverseIndex(0));
-		Vector4f vector4f = new Vector4f(f / 16.0F, g / 16.0F, 0.0F, 1.0F);
-		vector4f.transform(matrix4f);
+		Vector4f vector4f = matrix4f.transform(new Vector4f(f / 16.0F, g / 16.0F, 0.0F, 1.0F));
 		float h = 16.0F * vector4f.x();
 		float i = 16.0F * vector4f.y();
 		float j = blockFaceUV.getU(blockFaceUV.getReverseIndex(2));
 		float k = blockFaceUV.getV(blockFaceUV.getReverseIndex(2));
-		Vector4f vector4f2 = new Vector4f(j / 16.0F, k / 16.0F, 0.0F, 1.0F);
-		vector4f2.transform(matrix4f);
+		Vector4f vector4f2 = matrix4f.transform(new Vector4f(j / 16.0F, k / 16.0F, 0.0F, 1.0F));
 		float l = 16.0F * vector4f2.x();
 		float m = 16.0F * vector4f2.y();
 		float n;
@@ -99,9 +97,8 @@ public class FaceBakery {
 		}
 
 		float r = (float)Math.toRadians((double)blockFaceUV.rotation);
-		Vector3f vector3f = new Vector3f(Mth.cos(r), Mth.sin(r), 0.0F);
 		Matrix3f matrix3f = new Matrix3f(matrix4f);
-		vector3f.transform(matrix3f);
+		Vector3f vector3f = matrix3f.transform(new Vector3f(Mth.cos(r), Mth.sin(r), 0.0F));
 		int s = Math.floorMod(-((int)Math.round(Math.toDegrees(Math.atan2((double)vector3f.y(), (double)vector3f.x())) / 90.0)) * 90, 360);
 		return new BlockFaceUV(new float[]{n, p, o, q}, s);
 	}
@@ -167,26 +164,26 @@ public class FaceBakery {
 		if (blockElementRotation != null) {
 			Vector3f vector3f2;
 			Vector3f vector3f3;
-			switch (blockElementRotation.axis) {
+			switch (blockElementRotation.axis()) {
 				case X:
-					vector3f2 = Vector3f.XP;
+					vector3f2 = new Vector3f(1.0F, 0.0F, 0.0F);
 					vector3f3 = new Vector3f(0.0F, 1.0F, 1.0F);
 					break;
 				case Y:
-					vector3f2 = Vector3f.YP;
+					vector3f2 = new Vector3f(0.0F, 1.0F, 0.0F);
 					vector3f3 = new Vector3f(1.0F, 0.0F, 1.0F);
 					break;
 				case Z:
-					vector3f2 = Vector3f.ZP;
+					vector3f2 = new Vector3f(0.0F, 0.0F, 1.0F);
 					vector3f3 = new Vector3f(1.0F, 1.0F, 0.0F);
 					break;
 				default:
 					throw new IllegalArgumentException("There are only 3 axes");
 			}
 
-			Quaternion quaternion = vector3f2.rotationDegrees(blockElementRotation.angle);
-			if (blockElementRotation.rescale) {
-				if (Math.abs(blockElementRotation.angle) == 22.5F) {
+			Quaternionf quaternionf = new Quaternionf().rotationAxis(blockElementRotation.angle() * (float) (Math.PI / 180.0), vector3f2);
+			if (blockElementRotation.rescale()) {
+				if (Math.abs(blockElementRotation.angle()) == 22.5F) {
 					vector3f3.mul(RESCALE_22_5);
 				} else {
 					vector3f3.mul(RESCALE_45);
@@ -197,7 +194,7 @@ public class FaceBakery {
 				vector3f3.set(1.0F, 1.0F, 1.0F);
 			}
 
-			this.rotateVertexBy(vector3f, blockElementRotation.origin.copy(), new Matrix4f(quaternion), vector3f3);
+			this.rotateVertexBy(vector3f, new Vector3f(blockElementRotation.origin()), new Matrix4f().rotation(quaternionf), vector3f3);
 		}
 	}
 
@@ -208,9 +205,8 @@ public class FaceBakery {
 	}
 
 	private void rotateVertexBy(Vector3f vector3f, Vector3f vector3f2, Matrix4f matrix4f, Vector3f vector3f3) {
-		Vector4f vector4f = new Vector4f(vector3f.x() - vector3f2.x(), vector3f.y() - vector3f2.y(), vector3f.z() - vector3f2.z(), 1.0F);
-		vector4f.transform(matrix4f);
-		vector4f.mul(vector3f3);
+		Vector4f vector4f = matrix4f.transform(new Vector4f(vector3f.x() - vector3f2.x(), vector3f.y() - vector3f2.y(), vector3f.z() - vector3f2.z(), 1.0F));
+		vector4f.mul(new Vector4f(vector3f3, 1.0F));
 		vector3f.set(vector4f.x() + vector3f2.x(), vector4f.y() + vector3f2.y(), vector4f.z() + vector3f2.z());
 	}
 
@@ -218,27 +214,27 @@ public class FaceBakery {
 		Vector3f vector3f = new Vector3f(Float.intBitsToFloat(is[0]), Float.intBitsToFloat(is[1]), Float.intBitsToFloat(is[2]));
 		Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(is[8]), Float.intBitsToFloat(is[9]), Float.intBitsToFloat(is[10]));
 		Vector3f vector3f3 = new Vector3f(Float.intBitsToFloat(is[16]), Float.intBitsToFloat(is[17]), Float.intBitsToFloat(is[18]));
-		Vector3f vector3f4 = vector3f.copy();
-		vector3f4.sub(vector3f2);
-		Vector3f vector3f5 = vector3f3.copy();
-		vector3f5.sub(vector3f2);
-		Vector3f vector3f6 = vector3f5.copy();
-		vector3f6.cross(vector3f4);
-		vector3f6.normalize();
-		Direction direction = null;
-		float f = 0.0F;
+		Vector3f vector3f4 = new Vector3f(vector3f).sub(vector3f2);
+		Vector3f vector3f5 = new Vector3f(vector3f3).sub(vector3f2);
+		Vector3f vector3f6 = new Vector3f(vector3f5).cross(vector3f4).normalize();
+		if (!vector3f6.isFinite()) {
+			return Direction.UP;
+		} else {
+			Direction direction = null;
+			float f = 0.0F;
 
-		for (Direction direction2 : Direction.values()) {
-			Vec3i vec3i = direction2.getNormal();
-			Vector3f vector3f7 = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
-			float g = vector3f6.dot(vector3f7);
-			if (g >= 0.0F && g > f) {
-				f = g;
-				direction = direction2;
+			for (Direction direction2 : Direction.values()) {
+				Vec3i vec3i = direction2.getNormal();
+				Vector3f vector3f7 = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
+				float g = vector3f6.dot(vector3f7);
+				if (g >= 0.0F && g > f) {
+					f = g;
+					direction = direction2;
+				}
 			}
-		}
 
-		return direction == null ? Direction.UP : direction;
+			return direction == null ? Direction.UP : direction;
+		}
 	}
 
 	private void recalculateWinding(int[] is, Direction direction) {

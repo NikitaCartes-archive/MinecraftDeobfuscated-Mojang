@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -18,6 +16,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderStateShard {
@@ -354,9 +353,8 @@ public abstract class RenderStateShard {
 		long l = Util.getMillis() * 8L;
 		float g = (float)(l % 110000L) / 110000.0F;
 		float h = (float)(l % 30000L) / 30000.0F;
-		Matrix4f matrix4f = Matrix4f.createTranslateMatrix(-g, h, 0.0F);
-		matrix4f.multiply(Vector3f.ZP.rotationDegrees(10.0F));
-		matrix4f.multiply(Matrix4f.createScaleMatrix(f, f, f));
+		Matrix4f matrix4f = new Matrix4f().translation(-g, h, 0.0F);
+		matrix4f.rotateZ((float) (Math.PI / 18)).scale(f);
 		RenderSystem.setTextureMatrix(matrix4f);
 	}
 
@@ -526,7 +524,7 @@ public abstract class RenderStateShard {
 	@Environment(EnvType.CLIENT)
 	protected static final class OffsetTexturingStateShard extends RenderStateShard.TexturingStateShard {
 		public OffsetTexturingStateShard(float f, float g) {
-			super("offset_texturing", () -> RenderSystem.setTextureMatrix(Matrix4f.createTranslateMatrix(f, g, 0.0F)), () -> RenderSystem.resetTextureMatrix());
+			super("offset_texturing", () -> RenderSystem.setTextureMatrix(new Matrix4f().translation(f, g, 0.0F)), () -> RenderSystem.resetTextureMatrix());
 		}
 	}
 

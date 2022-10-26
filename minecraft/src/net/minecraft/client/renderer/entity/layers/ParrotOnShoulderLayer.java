@@ -34,7 +34,7 @@ public class ParrotOnShoulderLayer<T extends Player> extends RenderLayer<T, Play
 		CompoundTag compoundTag = bl ? player.getShoulderEntityLeft() : player.getShoulderEntityRight();
 		EntityType.byString(compoundTag.getString("id")).filter(entityType -> entityType == EntityType.PARROT).ifPresent(entityType -> {
 			poseStack.pushPose();
-			poseStack.translate(bl ? 0.4F : -0.4F, player.isCrouching() ? -1.3F : -1.5, 0.0);
+			poseStack.translate(bl ? 0.4F : -0.4F, player.isCrouching() ? -1.3F : -1.5F, 0.0F);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(ParrotRenderer.PARROT_LOCATIONS[compoundTag.getInt("Variant")]));
 			this.model.renderOnShoulder(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, j, player.tickCount);
 			poseStack.popPose();

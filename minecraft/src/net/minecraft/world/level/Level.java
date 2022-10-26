@@ -64,6 +64,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 
 public abstract class Level implements LevelAccessor, AutoCloseable {
@@ -473,6 +474,18 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
 		return this.explode(entity, null, null, d, e, f, g, bl, blockInteraction);
+	}
+
+	public Explosion explode(
+		@Nullable Entity entity,
+		@Nullable DamageSource damageSource,
+		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
+		Vec3 vec3,
+		float f,
+		boolean bl,
+		Explosion.BlockInteraction blockInteraction
+	) {
+		return this.explode(entity, damageSource, explosionDamageCalculator, vec3.x(), vec3.y(), vec3.z(), f, bl, blockInteraction);
 	}
 
 	public Explosion explode(

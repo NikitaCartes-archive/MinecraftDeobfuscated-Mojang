@@ -19,7 +19,7 @@ public class FileUtil {
 	private static final Pattern COPY_COUNTER_PATTERN = Pattern.compile("(<name>.*) \\((<count>\\d*)\\)", 66);
 	private static final int MAX_FILE_NAME = 255;
 	private static final Pattern RESERVED_WINDOWS_FILENAMES = Pattern.compile(".*\\.|(?:COM|CLOCK\\$|CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\\..*)?", 2);
-	private static final Pattern STRICT_PATH_SEGMENT_CHECK = Pattern.compile("[._a-z0-9]+");
+	private static final Pattern STRICT_PATH_SEGMENT_CHECK = Pattern.compile("[-._a-z0-9]+");
 
 	public static String findAvailableName(Path path, String string, String string2) throws IOException {
 		for (char c : SharedConstants.ILLEGAL_FILE_CHARACTERS) {
@@ -105,7 +105,7 @@ public class FileUtil {
 		if (i == -1) {
 			return switch (string) {
 				case "", ".", ".." -> DataResult.error("Invalid path '" + string + "'");
-				default -> DataResult.success(List.of(string));
+				default -> !isValidStrictPathSegment(string) ? DataResult.error("Invalid path '" + string + "'") : DataResult.success(List.of(string));
 			};
 		} else {
 			List<String> list = new ArrayList();

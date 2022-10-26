@@ -2,7 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.TridentModel;
@@ -25,8 +25,8 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 
 	public void render(ThrownTrident thrownTrident, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, thrownTrident.yRotO, thrownTrident.getYRot()) - 90.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, thrownTrident.xRotO, thrownTrident.getXRot()) + 90.0F));
+		poseStack.mulPose(Axis.YP.rotationDegrees(Mth.lerp(g, thrownTrident.yRotO, thrownTrident.getYRot()) - 90.0F));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(g, thrownTrident.xRotO, thrownTrident.getXRot()) + 90.0F));
 		VertexConsumer vertexConsumer = ItemRenderer.getFoilBufferDirect(
 			multiBufferSource, this.model.renderType(this.getTextureLocation(thrownTrident)), false, thrownTrident.isFoil()
 		);

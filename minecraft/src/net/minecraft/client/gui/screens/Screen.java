@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix4f;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +35,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -55,10 +54,11 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public abstract class Screen extends AbstractContainerEventHandler implements Widget {
+public abstract class Screen extends AbstractContainerEventHandler implements Renderable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<String> ALLOWED_PROTOCOLS = Sets.<String>newHashSet("http", "https");
 	private static final int EXTRA_SPACE_AFTER_FIRST_TOOLTIP_LINE = 2;
@@ -71,7 +71,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	protected ItemRenderer itemRenderer;
 	public int width;
 	public int height;
-	private final List<Widget> renderables = Lists.<Widget>newArrayList();
+	private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
 	public boolean passEvents;
 	protected Font font;
 	@Nullable
@@ -101,8 +101,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		for (Widget widget : this.renderables) {
-			widget.render(poseStack, i, j, f);
+		for (Renderable renderable : this.renderables) {
+			renderable.render(poseStack, i, j, f);
 		}
 	}
 
@@ -131,14 +131,14 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 		this.minecraft.setScreen(null);
 	}
 
-	protected <T extends GuiEventListener & Widget & NarratableEntry> T addRenderableWidget(T guiEventListener) {
+	protected <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T guiEventListener) {
 		this.renderables.add(guiEventListener);
 		return this.addWidget(guiEventListener);
 	}
 
-	protected <T extends Widget> T addRenderableOnly(T widget) {
-		this.renderables.add(widget);
-		return widget;
+	protected <T extends Renderable> T addRenderableOnly(T renderable) {
+		this.renderables.add(renderable);
+		return renderable;
 	}
 
 	protected <T extends GuiEventListener & NarratableEntry> T addWidget(T guiEventListener) {
@@ -148,8 +148,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	}
 
 	protected void removeWidget(GuiEventListener guiEventListener) {
-		if (guiEventListener instanceof Widget) {
-			this.renderables.remove((Widget)guiEventListener);
+		if (guiEventListener instanceof Renderable) {
+			this.renderables.remove((Renderable)guiEventListener);
 		}
 
 		if (guiEventListener instanceof NarratableEntry) {
@@ -249,7 +249,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 			RenderSystem.disableBlend();
 			RenderSystem.enableTexture();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			poseStack.translate(0.0, 0.0, 400.0);
+			poseStack.translate(0.0F, 0.0F, 400.0F);
 			int u = o;
 
 			for (int v = 0; v < list.size(); v++) {

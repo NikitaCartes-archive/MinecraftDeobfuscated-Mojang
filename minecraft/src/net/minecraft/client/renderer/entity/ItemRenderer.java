@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
+import com.mojang.math.MatrixUtil;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -136,7 +137,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			}
 
 			bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
-			poseStack.translate(-0.5, -0.5, -0.5);
+			poseStack.translate(-0.5F, -0.5F, -0.5F);
 			if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl2)) {
 				boolean bl3;
 				if (transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem) {
@@ -152,9 +153,9 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 					poseStack.pushPose();
 					PoseStack.Pose pose = poseStack.last();
 					if (transformType == ItemTransforms.TransformType.GUI) {
-						pose.pose().multiply(0.5F);
+						MatrixUtil.mulComponentWise(pose.pose(), 0.5F);
 					} else if (transformType.firstPerson()) {
-						pose.pose().multiply(0.75F);
+						MatrixUtil.mulComponentWise(pose.pose(), 0.75F);
 					}
 
 					if (bl3) {
@@ -285,8 +286,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		PoseStack poseStack = RenderSystem.getModelViewStack();
 		poseStack.pushPose();
-		poseStack.translate((double)i, (double)j, (double)(100.0F + this.blitOffset));
-		poseStack.translate(8.0, 8.0, 0.0);
+		poseStack.translate((float)i, (float)j, 100.0F + this.blitOffset);
+		poseStack.translate(8.0F, 8.0F, 0.0F);
 		poseStack.scale(1.0F, -1.0F, 1.0F);
 		poseStack.scale(16.0F, 16.0F, 16.0F);
 		RenderSystem.applyModelViewMatrix();
@@ -362,7 +363,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			PoseStack poseStack = new PoseStack();
 			if (itemStack.getCount() != 1 || string != null) {
 				String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
-				poseStack.translate(0.0, 0.0, (double)(this.blitOffset + 200.0F));
+				poseStack.translate(0.0F, 0.0F, this.blitOffset + 200.0F);
 				MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 				font.drawInBatch(
 					string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 16777215, true, poseStack.last().pose(), bufferSource, false, 0, 15728880

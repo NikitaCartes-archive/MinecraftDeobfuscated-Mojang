@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmedModel;
@@ -31,7 +31,7 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 			poseStack.pushPose();
 			if (this.getParentModel().young) {
 				float m = 0.5F;
-				poseStack.translate(0.0, 0.75, 0.0);
+				poseStack.translate(0.0F, 0.75F, 0.0F);
 				poseStack.scale(0.5F, 0.5F, 0.5F);
 			}
 
@@ -53,10 +53,10 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		if (!itemStack.isEmpty()) {
 			poseStack.pushPose();
 			this.getParentModel().translateToHand(humanoidArm, poseStack);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			boolean bl = humanoidArm == HumanoidArm.LEFT;
-			poseStack.translate((double)((float)(bl ? -1 : 1) / 16.0F), 0.125, -0.625);
+			poseStack.translate((float)(bl ? -1 : 1) / 16.0F, 0.125F, -0.625F);
 			this.itemInHandRenderer.renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}

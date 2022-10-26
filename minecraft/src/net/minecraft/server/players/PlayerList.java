@@ -36,7 +36,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -423,7 +422,7 @@ public abstract class PlayerList {
 		}
 	}
 
-	public ServerPlayer getPlayerForLogin(GameProfile gameProfile, RemoteChatSession remoteChatSession) {
+	public ServerPlayer getPlayerForLogin(GameProfile gameProfile) {
 		UUID uUID = UUIDUtil.getOrCreatePlayerUUID(gameProfile);
 		List<ServerPlayer> list = Lists.<ServerPlayer>newArrayList();
 
@@ -443,7 +442,7 @@ public abstract class PlayerList {
 			serverPlayer3.connection.disconnect(Component.translatable("multiplayer.disconnect.duplicate_login"));
 		}
 
-		return new ServerPlayer(this.server, this.server.overworld(), gameProfile, remoteChatSession);
+		return new ServerPlayer(this.server, this.server.overworld(), gameProfile);
 	}
 
 	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {
@@ -461,7 +460,7 @@ public abstract class PlayerList {
 		}
 
 		ServerLevel serverLevel2 = serverLevel != null && optional.isPresent() ? serverLevel : this.server.overworld();
-		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile(), serverPlayer.getChatSession());
+		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile());
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);
 		serverPlayer2.setId(serverPlayer.getId());

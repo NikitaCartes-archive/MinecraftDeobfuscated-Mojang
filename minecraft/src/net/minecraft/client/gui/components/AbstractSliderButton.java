@@ -48,8 +48,8 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = (this.isHoveredOrFocused() ? 2 : 1) * 20;
-		this.blit(poseStack, this.x + (int)(this.value * (double)(this.width - 8)), this.y, 0, 46 + k, 4, 20);
-		this.blit(poseStack, this.x + (int)(this.value * (double)(this.width - 8)) + 4, this.y, 196, 46 + k, 4, 20);
+		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 0, 46 + k, 4, 20);
+		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)) + 4, this.getY(), 196, 46 + k, 4, 20);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	}
 
 	private void setValueFromMouse(double d) {
-		this.setValue((d - (double)(this.x + 4)) / (double)(this.width - 8));
+		this.setValue((d - (double)(this.getX() + 4)) / (double)(this.width - 8));
 	}
 
 	private void setValue(double d) {

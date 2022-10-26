@@ -37,7 +37,7 @@ public abstract class StuckInBodyLayer<T extends LivingEntity, M extends PlayerM
 				float r = Mth.lerp(o, cube.minX, cube.maxX) / 16.0F;
 				float s = Mth.lerp(p, cube.minY, cube.maxY) / 16.0F;
 				float t = Mth.lerp(q, cube.minZ, cube.maxZ) / 16.0F;
-				poseStack.translate((double)r, (double)s, (double)t);
+				poseStack.translate(r, s, t);
 				o = -1.0F * (o * 2.0F - 1.0F);
 				p = -1.0F * (p * 2.0F - 1.0F);
 				q = -1.0F * (q * 2.0F - 1.0F);

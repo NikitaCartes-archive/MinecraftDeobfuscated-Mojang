@@ -123,9 +123,11 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 			if (playerEntry.getPlayerId().equals(this.minecraft.getUser().getProfileId())) {
 				return 0;
 			} else if (playerEntry.getPlayerId().version() == 2) {
-				return 3;
+				return 4;
+			} else if (this.minecraft.getReportingContext().hasDraftReportFor(playerEntry.getPlayerId())) {
+				return 1;
 			} else {
-				return playerEntry.hasRecentMessages() ? 1 : 2;
+				return playerEntry.hasRecentMessages() ? 2 : 3;
 			}
 		}).thenComparing(playerEntry -> {
 			if (!playerEntry.getPlayerName().isBlank()) {

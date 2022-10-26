@@ -128,6 +128,7 @@ import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -339,6 +340,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundPlayerCommandPacket.class, ServerboundPlayerCommandPacket::new)
 					.addPacket(ServerboundPlayerInputPacket.class, ServerboundPlayerInputPacket::new)
 					.addPacket(ServerboundPongPacket.class, ServerboundPongPacket::new)
+					.addPacket(ServerboundChatSessionUpdatePacket.class, ServerboundChatSessionUpdatePacket::new)
 					.addPacket(ServerboundRecipeBookChangeSettingsPacket.class, ServerboundRecipeBookChangeSettingsPacket::new)
 					.addPacket(ServerboundRecipeBookSeenRecipePacket.class, ServerboundRecipeBookSeenRecipePacket::new)
 					.addPacket(ServerboundRenameItemPacket.class, ServerboundRenameItemPacket::new)

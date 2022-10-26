@@ -2,11 +2,11 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.math.Vector3f;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 public abstract class DustParticleOptionsBase implements ParticleOptions {
 	public static final float MIN_SCALE = 0.01F;

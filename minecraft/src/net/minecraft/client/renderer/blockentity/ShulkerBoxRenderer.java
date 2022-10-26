@@ -43,12 +43,12 @@ public class ShulkerBoxRenderer implements BlockEntityRenderer<ShulkerBoxBlockEn
 		}
 
 		poseStack.pushPose();
-		poseStack.translate(0.5, 0.5, 0.5);
+		poseStack.translate(0.5F, 0.5F, 0.5F);
 		float g = 0.9995F;
 		poseStack.scale(0.9995F, 0.9995F, 0.9995F);
 		poseStack.mulPose(direction.getRotation());
 		poseStack.scale(1.0F, -1.0F, -1.0F);
-		poseStack.translate(0.0, -1.0, 0.0);
+		poseStack.translate(0.0F, -1.0F, 0.0F);
 		ModelPart modelPart = this.model.getLid();
 		modelPart.setPos(0.0F, 24.0F - shulkerBoxBlockEntity.getProgress(f) * 0.5F * 16.0F, 0.0F);
 		modelPart.yRot = 270.0F * shulkerBoxBlockEntity.getProgress(f) * (float) (Math.PI / 180.0);

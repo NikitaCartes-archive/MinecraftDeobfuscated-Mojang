@@ -54,11 +54,17 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 		super.init();
 		this.multilineMessage = MultiLineLabel.create(this.font, MESSAGE, this.width - 50);
 		int i = Mth.clamp(this.titleTop() + 20 + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24);
-		this.addRenderableWidget(new Button(this.width / 2 - 50 - 105, i, 100, 20, CommonComponents.GUI_PROCEED, button -> this.callback.accept(true)));
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 50, i, 100, 20, DETAILS_BUTTON, button -> this.minecraft.setScreen(new ConfirmExperimentalFeaturesScreen.DetailsScreen()))
+			Button.builder(CommonComponents.GUI_PROCEED, button -> this.callback.accept(true)).bounds(this.width / 2 - 50 - 105, i, 100, 20).build()
 		);
-		this.addRenderableWidget(new Button(this.width / 2 - 50 + 105, i, 100, 20, CommonComponents.GUI_BACK, button -> this.callback.accept(false)));
+		this.addRenderableWidget(
+			Button.builder(DETAILS_BUTTON, button -> this.minecraft.setScreen(new ConfirmExperimentalFeaturesScreen.DetailsScreen()))
+				.bounds(this.width / 2 - 50, i, 100, 20)
+				.build()
+		);
+		this.addRenderableWidget(
+			Button.builder(CommonComponents.GUI_BACK, button -> this.callback.accept(false)).bounds(this.width / 2 - 50 + 105, i, 100, 20).build()
+		);
 	}
 
 	@Override
@@ -90,7 +96,9 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 		@Override
 		protected void init() {
 			super.init();
-			this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
+			this.addRenderableWidget(
+				Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20).build()
+			);
 			this.packList = new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks);
 			this.addWidget(this.packList);
 		}

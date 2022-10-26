@@ -16,9 +16,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +77,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -917,7 +918,7 @@ public class GameRenderer implements AutoCloseable {
 			float g = (float)livingEntity.hurtTime - f;
 			if (livingEntity.isDeadOrDying()) {
 				float h = Math.min((float)livingEntity.deathTime + f, 20.0F);
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0F - 8000.0F / (h + 200.0F)));
+				poseStack.mulPose(Axis.ZP.rotationDegrees(40.0F - 8000.0F / (h + 200.0F)));
 			}
 
 			if (g < 0.0F) {
@@ -927,9 +928,9 @@ public class GameRenderer implements AutoCloseable {
 			g /= (float)livingEntity.hurtDuration;
 			g = Mth.sin(g * g * g * g * (float) Math.PI);
 			float h = livingEntity.hurtDir;
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(-g * 14.0F));
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+			poseStack.mulPose(Axis.YP.rotationDegrees(-h));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(-g * 14.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(h));
 		}
 	}
 
@@ -939,9 +940,9 @@ public class GameRenderer implements AutoCloseable {
 			float g = player.walkDist - player.walkDistO;
 			float h = -(player.walkDist + g * f);
 			float i = Mth.lerp(f, player.oBob, player.bob);
-			poseStack.translate((double)(Mth.sin(h * (float) Math.PI) * i * 0.5F), (double)(-Math.abs(Mth.cos(h * (float) Math.PI) * i)), 0.0);
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.sin(h * (float) Math.PI) * i * 3.0F));
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(Math.abs(Mth.cos(h * (float) Math.PI - 0.2F) * i) * 5.0F));
+			poseStack.translate(Mth.sin(h * (float) Math.PI) * i * 0.5F, -Math.abs(Mth.cos(h * (float) Math.PI) * i), 0.0F);
+			poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(h * (float) Math.PI) * i * 3.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(Math.abs(Mth.cos(h * (float) Math.PI - 0.2F) * i) * 5.0F));
 		}
 	}
 
@@ -958,9 +959,7 @@ public class GameRenderer implements AutoCloseable {
 	private void renderItemInHand(PoseStack poseStack, Camera camera, float f) {
 		if (!this.panoramicMode) {
 			this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(camera, f, false)));
-			PoseStack.Pose pose = poseStack.last();
-			pose.pose().setIdentity();
-			pose.normal().setIdentity();
+			poseStack.setIdentity();
 			poseStack.pushPose();
 			this.bobHurt(poseStack, f);
 			if (this.minecraft.options.bobView().get()) {
@@ -1002,15 +1001,23 @@ public class GameRenderer implements AutoCloseable {
 
 	public Matrix4f getProjectionMatrix(double d) {
 		PoseStack poseStack = new PoseStack();
-		poseStack.last().pose().setIdentity();
+		poseStack.last().pose().identity();
 		if (this.zoom != 1.0F) {
-			poseStack.translate((double)this.zoomX, (double)(-this.zoomY), 0.0);
+			poseStack.translate(this.zoomX, -this.zoomY, 0.0F);
 			poseStack.scale(this.zoom, this.zoom, 1.0F);
 		}
 
 		poseStack.last()
 			.pose()
-			.multiply(Matrix4f.perspective(d, (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05F, this.getDepthFar()));
+			.mul(
+				new Matrix4f()
+					.setPerspective(
+						(float)(d * (float) (Math.PI / 180.0)),
+						(float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(),
+						0.05F,
+						this.getDepthFar()
+					)
+			);
 		return poseStack.last().pose();
 	}
 
@@ -1060,13 +1067,14 @@ public class GameRenderer implements AutoCloseable {
 
 			Window window = this.minecraft.getWindow();
 			RenderSystem.clear(256, Minecraft.ON_OSX);
-			Matrix4f matrix4f = Matrix4f.orthographic(
-				0.0F, (float)((double)window.getWidth() / window.getGuiScale()), 0.0F, (float)((double)window.getHeight() / window.getGuiScale()), 1000.0F, 3000.0F
-			);
+			Matrix4f matrix4f = new Matrix4f()
+				.setOrtho(
+					0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 3000.0F
+				);
 			RenderSystem.setProjectionMatrix(matrix4f);
 			PoseStack poseStack = RenderSystem.getModelViewStack();
 			poseStack.setIdentity();
-			poseStack.translate(0.0, 0.0, -2000.0);
+			poseStack.translate(0.0F, 0.0F, -2000.0F);
 			RenderSystem.applyModelViewMatrix();
 			Lighting.setupFor3DItems();
 			PoseStack poseStack2 = new PoseStack();
@@ -1228,7 +1236,7 @@ public class GameRenderer implements AutoCloseable {
 		this.renderDistance = (float)(this.minecraft.options.getEffectiveRenderDistance() * 16);
 		PoseStack poseStack2 = new PoseStack();
 		double d = this.getFov(camera, f, true);
-		poseStack2.last().pose().multiply(this.getProjectionMatrix(d));
+		poseStack2.mulPoseMatrix(this.getProjectionMatrix(d));
 		this.bobHurt(poseStack2, f);
 		if (this.minecraft.options.bobView().get()) {
 			this.bobView(poseStack2, f);
@@ -1240,11 +1248,11 @@ public class GameRenderer implements AutoCloseable {
 			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
 			float j = 5.0F / (h * h + 5.0F) - h * 0.04F;
 			j *= j;
-			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
-			poseStack2.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
+			Axis axis = Axis.of(new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F));
+			poseStack2.mulPose(axis.rotationDegrees(((float)this.tick + f) * (float)i));
 			poseStack2.scale(1.0F / j, 1.0F, 1.0F);
 			float k = -((float)this.tick + f) * (float)i;
-			poseStack2.mulPose(vector3f.rotationDegrees(k));
+			poseStack2.mulPose(axis.rotationDegrees(k));
 		}
 
 		Matrix4f matrix4f = poseStack2.last().pose();
@@ -1256,13 +1264,10 @@ public class GameRenderer implements AutoCloseable {
 			this.minecraft.options.getCameraType().isMirrored(),
 			f
 		);
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0F));
-		Matrix3f matrix3f = poseStack.last().normal().copy();
-		if (matrix3f.invert()) {
-			RenderSystem.setInverseViewRotationMatrix(matrix3f);
-		}
-
+		poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+		poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+		Matrix3f matrix3f = new Matrix3f(poseStack.last().normal()).invert();
+		RenderSystem.setInverseViewRotationMatrix(matrix3f);
 		this.minecraft
 			.levelRenderer
 			.prepareCullFrustum(poseStack, camera.getPosition(), this.getProjectionMatrix(Math.max(d, (double)this.minecraft.options.fov().get().intValue())));
@@ -1308,12 +1313,12 @@ public class GameRenderer implements AutoCloseable {
 			RenderSystem.disableCull();
 			PoseStack poseStack = new PoseStack();
 			poseStack.pushPose();
-			poseStack.translate((double)((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0F))), (double)((float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0F))), -50.0);
+			poseStack.translate((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0F)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0F)), -50.0F);
 			float q = 50.0F + 175.0F * Mth.sin(n);
 			poseStack.scale(q, -q, q);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(900.0F * Mth.abs(Mth.sin(n))));
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
+			poseStack.mulPose(Axis.YP.rotationDegrees(900.0F * Mth.abs(Mth.sin(n))));
+			poseStack.mulPose(Axis.XP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
 			MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 			this.minecraft
 				.getItemRenderer()

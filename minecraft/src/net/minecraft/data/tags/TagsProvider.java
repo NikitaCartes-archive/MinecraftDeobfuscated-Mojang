@@ -4,12 +4,12 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
@@ -37,42 +37,44 @@ public abstract class TagsProvider<T> implements DataProvider {
 	}
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return "Tags for " + this.registry.key().location();
 	}
 
 	protected abstract void addTags();
 
 	@Override
-	public void run(CachedOutput cachedOutput) {
+	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		this.builders.clear();
 		this.addTags();
-		this.builders
-			.forEach(
-				(resourceLocation, tagBuilder) -> {
-					List<TagEntry> list = tagBuilder.build();
-					List<TagEntry> list2 = list.stream().filter(tagEntry -> !tagEntry.verifyIfPresent(this.registry::containsKey, this.builders::containsKey)).toList();
-					if (!list2.isEmpty()) {
-						throw new IllegalArgumentException(
-							String.format(
-								Locale.ROOT,
-								"Couldn't define tag %s as it is missing following references: %s",
-								resourceLocation,
-								list2.stream().map(Objects::toString).collect(Collectors.joining(","))
-							)
-						);
-					} else {
-						JsonElement jsonElement = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(list, false)).getOrThrow(false, LOGGER::error);
-						Path path = this.pathProvider.json(resourceLocation);
-
-						try {
-							DataProvider.saveStable(cachedOutput, jsonElement, path);
-						} catch (IOException var9) {
-							LOGGER.error("Couldn't save tags to {}", path, var9);
+		return CompletableFuture.allOf(
+			(CompletableFuture[])this.builders
+				.entrySet()
+				.stream()
+				.map(
+					entry -> {
+						ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
+						TagBuilder tagBuilder = (TagBuilder)entry.getValue();
+						List<TagEntry> list = tagBuilder.build();
+						List<TagEntry> list2 = list.stream().filter(tagEntry -> !tagEntry.verifyIfPresent(this.registry::containsKey, this.builders::containsKey)).toList();
+						if (!list2.isEmpty()) {
+							throw new IllegalArgumentException(
+								String.format(
+									Locale.ROOT,
+									"Couldn't define tag %s as it is missing following references: %s",
+									resourceLocation,
+									list2.stream().map(Objects::toString).collect(Collectors.joining(","))
+								)
+							);
+						} else {
+							JsonElement jsonElement = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(list, false)).getOrThrow(false, LOGGER::error);
+							Path path = this.pathProvider.json(resourceLocation);
+							return DataProvider.saveStable(cachedOutput, jsonElement, path);
 						}
 					}
-				}
-			);
+				)
+				.toArray(CompletableFuture[]::new)
+		);
 	}
 
 	protected TagsProvider.TagAppender<T> tag(TagKey<T> tagKey) {

@@ -81,34 +81,27 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 		this.rightX = this.width / 2 + 190;
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.playersButton = this.addRenderableWidget(
-			new Button(
-				this.centerButton(0, 3),
-				row(0),
-				100,
-				20,
-				Component.translatable("mco.configure.world.buttons.players"),
-				button -> this.minecraft.setScreen(new RealmsPlayerScreen(this, this.serverData))
-			)
+			Button.builder(
+					Component.translatable("mco.configure.world.buttons.players"), button -> this.minecraft.setScreen(new RealmsPlayerScreen(this, this.serverData))
+				)
+				.bounds(this.centerButton(0, 3), row(0), 100, 20)
+				.build()
 		);
 		this.settingsButton = this.addRenderableWidget(
-			new Button(
-				this.centerButton(1, 3),
-				row(0),
-				100,
-				20,
-				Component.translatable("mco.configure.world.buttons.settings"),
-				button -> this.minecraft.setScreen(new RealmsSettingsScreen(this, this.serverData.clone()))
-			)
+			Button.builder(
+					Component.translatable("mco.configure.world.buttons.settings"),
+					button -> this.minecraft.setScreen(new RealmsSettingsScreen(this, this.serverData.clone()))
+				)
+				.bounds(this.centerButton(1, 3), row(0), 100, 20)
+				.build()
 		);
 		this.subscriptionButton = this.addRenderableWidget(
-			new Button(
-				this.centerButton(2, 3),
-				row(0),
-				100,
-				20,
-				Component.translatable("mco.configure.world.buttons.subscription"),
-				button -> this.minecraft.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone(), this.lastScreen))
-			)
+			Button.builder(
+					Component.translatable("mco.configure.world.buttons.subscription"),
+					button -> this.minecraft.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone(), this.lastScreen))
+				)
+				.bounds(this.centerButton(2, 3), row(0), 100, 20)
+				.build()
 		);
 		this.slotButtonList.clear();
 
@@ -117,64 +110,58 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 		}
 
 		this.switchMinigameButton = this.addRenderableWidget(
-			new Button(
-				this.leftButton(0),
-				row(13) - 5,
-				100,
-				20,
-				Component.translatable("mco.configure.world.buttons.switchminigame"),
-				button -> this.minecraft
-						.setScreen(
-							new RealmsSelectWorldTemplateScreen(
-								Component.translatable("mco.template.title.minigame"), this::templateSelectionCallback, RealmsServer.WorldType.MINIGAME
+			Button.builder(
+					Component.translatable("mco.configure.world.buttons.switchminigame"),
+					button -> this.minecraft
+							.setScreen(
+								new RealmsSelectWorldTemplateScreen(
+									Component.translatable("mco.template.title.minigame"), this::templateSelectionCallback, RealmsServer.WorldType.MINIGAME
+								)
 							)
-						)
-			)
+				)
+				.bounds(this.leftButton(0), row(13) - 5, 100, 20)
+				.build()
 		);
 		this.optionsButton = this.addRenderableWidget(
-			new Button(
-				this.leftButton(0),
-				row(13) - 5,
-				90,
-				20,
-				Component.translatable("mco.configure.world.buttons.options"),
-				button -> this.minecraft
-						.setScreen(
-							new RealmsSlotOptionsScreen(
-								this, ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).clone(), this.serverData.worldType, this.serverData.activeSlot
+			Button.builder(
+					Component.translatable("mco.configure.world.buttons.options"),
+					button -> this.minecraft
+							.setScreen(
+								new RealmsSlotOptionsScreen(
+									this, ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).clone(), this.serverData.worldType, this.serverData.activeSlot
+								)
 							)
-						)
-			)
+				)
+				.bounds(this.leftButton(0), row(13) - 5, 90, 20)
+				.build()
 		);
 		this.backupButton = this.addRenderableWidget(
-			new Button(
-				this.leftButton(1),
-				row(13) - 5,
-				90,
-				20,
-				Component.translatable("mco.configure.world.backup"),
-				button -> this.minecraft.setScreen(new RealmsBackupScreen(this, this.serverData.clone(), this.serverData.activeSlot))
-			)
+			Button.builder(
+					Component.translatable("mco.configure.world.backup"),
+					button -> this.minecraft.setScreen(new RealmsBackupScreen(this, this.serverData.clone(), this.serverData.activeSlot))
+				)
+				.bounds(this.leftButton(1), row(13) - 5, 90, 20)
+				.build()
 		);
 		this.resetWorldButton = this.addRenderableWidget(
-			new Button(
-				this.leftButton(2),
-				row(13) - 5,
-				90,
-				20,
-				Component.translatable("mco.configure.world.buttons.resetworld"),
-				button -> this.minecraft
-						.setScreen(
-							new RealmsResetWorldScreen(
-								this,
-								this.serverData.clone(),
-								() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())),
-								() -> this.minecraft.setScreen(this.getNewScreen())
+			Button.builder(
+					Component.translatable("mco.configure.world.buttons.resetworld"),
+					button -> this.minecraft
+							.setScreen(
+								new RealmsResetWorldScreen(
+									this,
+									this.serverData.clone(),
+									() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())),
+									() -> this.minecraft.setScreen(this.getNewScreen())
+								)
 							)
-						)
-			)
+				)
+				.bounds(this.leftButton(2), row(13) - 5, 90, 20)
+				.build()
 		);
-		this.addRenderableWidget(new Button(this.rightX - 80 + 8, row(13) - 5, 70, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()));
+		this.addRenderableWidget(
+			Button.builder(CommonComponents.GUI_BACK, button -> this.backButtonClicked()).bounds(this.rightX - 80 + 8, row(13) - 5, 70, 20).build()
+		);
 		this.backupButton.active = true;
 		if (this.serverData == null) {
 			this.hideMinigameButtons();

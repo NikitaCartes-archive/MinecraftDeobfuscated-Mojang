@@ -18,12 +18,14 @@ public class OutOfMemoryScreen extends Screen {
 	@Override
 	protected void init() {
 		this.addRenderableWidget(
-			new Button(
-				this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20, Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(new TitleScreen())
-			)
+			Button.builder(Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(new TitleScreen()))
+				.bounds(this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20)
+				.build()
 		);
 		this.addRenderableWidget(
-			new Button(this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, 150, 20, Component.translatable("menu.quit"), button -> this.minecraft.stop())
+			Button.builder(Component.translatable("menu.quit"), button -> this.minecraft.stop())
+				.bounds(this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, 150, 20)
+				.build()
 		);
 		this.message = MultiLineLabel.create(this.font, Component.translatable("outOfMemory.message"), 295);
 	}

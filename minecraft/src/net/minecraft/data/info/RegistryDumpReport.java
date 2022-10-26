@@ -2,8 +2,8 @@ package net.minecraft.data.info;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
@@ -19,11 +19,11 @@ public class RegistryDumpReport implements DataProvider {
 	}
 
 	@Override
-	public void run(CachedOutput cachedOutput) throws IOException {
+	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		JsonObject jsonObject = new JsonObject();
 		Registry.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), dumpRegistry((Registry)reference.value())));
 		Path path = this.output.getOutputFolder(PackOutput.Target.REPORTS).resolve("registries.json");
-		DataProvider.saveStable(cachedOutput, jsonObject, path);
+		return DataProvider.saveStable(cachedOutput, jsonObject, path);
 	}
 
 	private static <T> JsonElement dumpRegistry(Registry<T> registry) {
@@ -48,7 +48,7 @@ public class RegistryDumpReport implements DataProvider {
 	}
 
 	@Override
-	public String getName() {
+	public final String getName() {
 		return "Registry Dump";
 	}
 }

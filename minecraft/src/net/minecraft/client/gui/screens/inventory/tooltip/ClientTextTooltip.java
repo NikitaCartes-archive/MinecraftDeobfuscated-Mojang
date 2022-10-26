@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.screens.inventory.tooltip;
 
-import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.FormattedCharSequence;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class ClientTextTooltip implements ClientTooltipComponent {

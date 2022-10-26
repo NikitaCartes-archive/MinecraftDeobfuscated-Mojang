@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.OptionalInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -57,15 +57,15 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
 		double d = 0.46875;
 		poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.getXRot()));
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - itemFrame.getYRot()));
+		poseStack.mulPose(Axis.XP.rotationDegrees(itemFrame.getXRot()));
+		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - itemFrame.getYRot()));
 		boolean bl = itemFrame.isInvisible();
 		ItemStack itemStack = itemFrame.getItem();
 		if (!bl) {
 			ModelManager modelManager = this.blockRenderer.getBlockModelShaper().getModelManager();
 			ModelResourceLocation modelResourceLocation = this.getFrameModelResourceLoc(itemFrame, itemStack);
 			poseStack.pushPose();
-			poseStack.translate(-0.5, -0.5, -0.5);
+			poseStack.translate(-0.5F, -0.5F, -0.5F);
 			this.blockRenderer
 				.getModelRenderer()
 				.renderModel(
@@ -85,20 +85,20 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		if (!itemStack.isEmpty()) {
 			OptionalInt optionalInt = itemFrame.getFramedMapId();
 			if (bl) {
-				poseStack.translate(0.0, 0.0, 0.5);
+				poseStack.translate(0.0F, 0.0F, 0.5F);
 			} else {
-				poseStack.translate(0.0, 0.0, 0.4375);
+				poseStack.translate(0.0F, 0.0F, 0.4375F);
 			}
 
 			int j = optionalInt.isPresent() ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
+			poseStack.mulPose(Axis.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
 			if (optionalInt.isPresent()) {
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+				poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 				float h = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
-				poseStack.translate(-64.0, -64.0, 0.0);
+				poseStack.translate(-64.0F, -64.0F, 0.0F);
 				MapItemSavedData mapItemSavedData = MapItem.getSavedData(optionalInt.getAsInt(), itemFrame.level);
-				poseStack.translate(0.0, 0.0, -1.0);
+				poseStack.translate(0.0F, 0.0F, -1.0F);
 				if (mapItemSavedData != null) {
 					int k = this.getLightVal(itemFrame, 15728850, i);
 					Minecraft.getInstance().gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, optionalInt.getAsInt(), mapItemSavedData, true, k);

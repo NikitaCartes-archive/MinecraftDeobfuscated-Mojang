@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -16,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public abstract class EntityRenderer<T extends Entity> {
@@ -85,7 +85,7 @@ public abstract class EntityRenderer<T extends Entity> {
 			float f = entity.getBbHeight() + 0.5F;
 			int j = "deadmau5".equals(component.getString()) ? -10 : 0;
 			poseStack.pushPose();
-			poseStack.translate(0.0, (double)f, 0.0);
+			poseStack.translate(0.0F, f, 0.0F);
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
 			poseStack.scale(-0.025F, -0.025F, 0.025F);
 			Matrix4f matrix4f = poseStack.last().pose();

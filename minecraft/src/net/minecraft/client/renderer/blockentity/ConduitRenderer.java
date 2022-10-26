@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -21,6 +20,8 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.ConduitBlockEntity;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> {
@@ -80,8 +81,8 @@ public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> 
 			float h = conduitBlockEntity.getActiveRotation(0.0F);
 			VertexConsumer vertexConsumer = SHELL_TEXTURE.buffer(multiBufferSource, RenderType::entitySolid);
 			poseStack.pushPose();
-			poseStack.translate(0.5, 0.5, 0.5);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+			poseStack.translate(0.5F, 0.5F, 0.5F);
+			poseStack.mulPose(new Quaternionf().rotationY(h * (float) (Math.PI / 180.0)));
 			this.shell.render(poseStack, vertexConsumer, i, j);
 			poseStack.popPose();
 		} else {
@@ -89,39 +90,35 @@ public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> 
 			float k = Mth.sin(g * 0.1F) / 2.0F + 0.5F;
 			k = k * k + k;
 			poseStack.pushPose();
-			poseStack.translate(0.5, (double)(0.3F + k * 0.2F), 0.5);
-			Vector3f vector3f = new Vector3f(0.5F, 1.0F, 0.5F);
-			vector3f.normalize();
-			poseStack.mulPose(vector3f.rotationDegrees(h));
+			poseStack.translate(0.5F, 0.3F + k * 0.2F, 0.5F);
+			Vector3f vector3f = new Vector3f(0.5F, 1.0F, 0.5F).normalize();
+			poseStack.mulPose(new Quaternionf().rotationAxis(h * (float) (Math.PI / 180.0), vector3f));
 			this.cage.render(poseStack, ACTIVE_SHELL_TEXTURE.buffer(multiBufferSource, RenderType::entityCutoutNoCull), i, j);
 			poseStack.popPose();
 			int l = conduitBlockEntity.tickCount / 66 % 3;
 			poseStack.pushPose();
-			poseStack.translate(0.5, 0.5, 0.5);
+			poseStack.translate(0.5F, 0.5F, 0.5F);
 			if (l == 1) {
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+				poseStack.mulPose(new Quaternionf().rotationX((float) (Math.PI / 2)));
 			} else if (l == 2) {
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
+				poseStack.mulPose(new Quaternionf().rotationZ((float) (Math.PI / 2)));
 			}
 
 			VertexConsumer vertexConsumer2 = (l == 1 ? VERTICAL_WIND_TEXTURE : WIND_TEXTURE).buffer(multiBufferSource, RenderType::entityCutoutNoCull);
 			this.wind.render(poseStack, vertexConsumer2, i, j);
 			poseStack.popPose();
 			poseStack.pushPose();
-			poseStack.translate(0.5, 0.5, 0.5);
+			poseStack.translate(0.5F, 0.5F, 0.5F);
 			poseStack.scale(0.875F, 0.875F, 0.875F);
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+			poseStack.mulPose(new Quaternionf().rotationXYZ((float) Math.PI, 0.0F, (float) Math.PI));
 			this.wind.render(poseStack, vertexConsumer2, i, j);
 			poseStack.popPose();
 			Camera camera = this.renderer.camera;
 			poseStack.pushPose();
-			poseStack.translate(0.5, (double)(0.3F + k * 0.2F), 0.5);
+			poseStack.translate(0.5F, 0.3F + k * 0.2F, 0.5F);
 			poseStack.scale(0.5F, 0.5F, 0.5F);
 			float m = -camera.getYRot();
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(m));
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+			poseStack.mulPose(new Quaternionf().rotationYXZ(m * (float) (Math.PI / 180.0), camera.getXRot() * (float) (Math.PI / 180.0), (float) Math.PI));
 			float n = 1.3333334F;
 			poseStack.scale(1.3333334F, 1.3333334F, 1.3333334F);
 			this.eye
