@@ -6,7 +6,6 @@ package net.minecraft.world.entity.animal.axolotl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Dynamic;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -66,6 +65,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 public class Axolotl

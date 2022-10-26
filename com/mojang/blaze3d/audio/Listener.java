@@ -3,10 +3,10 @@
  */
 package com.mojang.blaze3d.audio;
 
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.lwjgl.openal.AL10;
 
 @Environment(value=EnvType.CLIENT)
@@ -38,7 +38,7 @@ public class Listener {
 
     public void reset() {
         this.setListenerPosition(Vec3.ZERO);
-        this.setListenerOrientation(Vector3f.ZN, Vector3f.YP);
+        this.setListenerOrientation(new Vector3f(0.0f, 0.0f, -1.0f), new Vector3f(0.0f, 1.0f, 0.0f));
     }
 }
 

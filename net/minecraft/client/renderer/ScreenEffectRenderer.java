@@ -10,8 +10,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -28,6 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class ScreenEffectRenderer {
@@ -144,8 +144,8 @@ public class ScreenEffectRenderer {
             float u = -0.5f;
             float v = 0.5f;
             float w = -0.5f;
-            poseStack.translate((float)(-(r * 2 - 1)) * 0.24f, -0.3f, 0.0);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees((float)(r * 2 - 1) * 10.0f));
+            poseStack.translate((float)(-(r * 2 - 1)) * 0.24f, -0.3f, 0.0f);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float)(r * 2 - 1) * 10.0f));
             Matrix4f matrix4f = poseStack.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
             bufferBuilder.vertex(matrix4f, -0.5f, -0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(n, p).endVertex();

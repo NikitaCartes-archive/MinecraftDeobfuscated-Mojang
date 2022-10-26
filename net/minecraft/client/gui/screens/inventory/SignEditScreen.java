@@ -5,7 +5,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
@@ -18,6 +17,7 @@ import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public class SignEditScreen
@@ -43,7 +43,7 @@ extends AbstractSignEditScreen {
         super.offsetSign(poseStack, blockState);
         boolean bl = blockState.getBlock() instanceof StandingSignBlock;
         if (!bl) {
-            poseStack.translate(0.0, 35.0, 0.0);
+            poseStack.translate(0.0f, 35.0f, 0.0f);
         }
     }
 
@@ -53,7 +53,7 @@ extends AbstractSignEditScreen {
             return;
         }
         boolean bl = blockState.getBlock() instanceof StandingSignBlock;
-        poseStack.translate(0.0, 31.0, 0.0);
+        poseStack.translate(0.0f, 31.0f, 0.0f);
         poseStack.scale(62.500004f, 62.500004f, -62.500004f);
         Material material = Sheets.getSignMaterial(this.woodType);
         VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);

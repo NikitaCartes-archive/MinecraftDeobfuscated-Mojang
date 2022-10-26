@@ -33,7 +33,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -182,26 +182,26 @@ extends Screen {
         this.addWidget(this.nameEdit);
         int i = this.width / 2 - 155;
         int j = this.width / 2 + 5;
-        this.modeButton = this.addRenderableWidget((GuiEventListener & Widget)CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])new SelectedGameMode[]{SelectedGameMode.SURVIVAL, SelectedGameMode.HARDCORE, SelectedGameMode.CREATIVE}).withInitialValue(this.gameMode).withCustomNarration(cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage()).append(CommonComponents.NARRATION_SEPARATOR).append(this.gameModeHelp1).append(" ").append(this.gameModeHelp2)).create(i, 100, 150, 20, GAME_MODEL_LABEL, (cycleButton, selectedGameMode) -> this.setGameMode((SelectedGameMode)((Object)selectedGameMode))));
-        this.difficultyButton = this.addRenderableWidget((GuiEventListener & Widget)CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.getEffectiveDifficulty()).create(j, 100, 150, 20, Component.translatable("options.difficulty"), (cycleButton, difficulty) -> {
+        this.modeButton = this.addRenderableWidget((GuiEventListener & Renderable)CycleButton.builder(SelectedGameMode::getDisplayName).withValues((SelectedGameMode[])new SelectedGameMode[]{SelectedGameMode.SURVIVAL, SelectedGameMode.HARDCORE, SelectedGameMode.CREATIVE}).withInitialValue(this.gameMode).withCustomNarration(cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage()).append(CommonComponents.NARRATION_SEPARATOR).append(this.gameModeHelp1).append(" ").append(this.gameModeHelp2)).create(i, 100, 150, 20, GAME_MODEL_LABEL, (cycleButton, selectedGameMode) -> this.setGameMode((SelectedGameMode)((Object)selectedGameMode))));
+        this.difficultyButton = this.addRenderableWidget((GuiEventListener & Renderable)CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(this.getEffectiveDifficulty()).create(j, 100, 150, 20, Component.translatable("options.difficulty"), (cycleButton, difficulty) -> {
             this.difficulty = difficulty;
         }));
-        this.commandsButton = this.addRenderableWidget((GuiEventListener & Widget)CycleButton.onOffBuilder(this.commands && !this.hardCore).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.allowCommands.info"))).create(i, 151, 150, 20, Component.translatable("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
+        this.commandsButton = this.addRenderableWidget((GuiEventListener & Renderable)CycleButton.onOffBuilder(this.commands && !this.hardCore).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.allowCommands.info"))).create(i, 151, 150, 20, Component.translatable("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
             this.commandsChanged = true;
             this.commands = boolean_;
         }));
-        this.dataPacksButton = this.addRenderableWidget(new Button(j, 151, 150, 20, Component.translatable("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen()));
-        this.gameRulesButton = this.addRenderableWidget(new Button(i, 185, 150, 20, Component.translatable("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
+        this.dataPacksButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen()).bounds(j, 151, 150, 20).build());
+        this.gameRulesButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
             this.minecraft.setScreen(this);
             optional.ifPresent(gameRules -> {
                 this.gameRules = gameRules;
             });
-        }))));
+        }))).bounds(i, 185, 150, 20).build());
         this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
-        this.moreOptionsButton = this.addRenderableWidget(new Button(j, 185, 150, 20, Component.translatable("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility()));
-        this.createButton = this.addRenderableWidget(new Button(i, this.height - 28, 150, 20, Component.translatable("selectWorld.create"), button -> this.onCreate()));
+        this.moreOptionsButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility()).bounds(j, 185, 150, 20).build());
+        this.createButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.create"), button -> this.onCreate()).bounds(i, this.height - 28, 150, 20).build());
         this.createButton.active = !this.initName.isEmpty();
-        this.addRenderableWidget(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.popScreen()));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.popScreen()).bounds(j, this.height - 28, 150, 20).build());
         this.refreshWorldGenSettingsVisibility();
         this.setInitialFocus(this.nameEdit);
         this.setGameMode(this.gameMode);
@@ -393,7 +393,7 @@ extends Screen {
     }
 
     @Override
-    protected <T extends GuiEventListener & Widget> T addRenderableWidget(T guiEventListener) {
+    protected <T extends GuiEventListener & Renderable> T addRenderableWidget(T guiEventListener) {
         return super.addRenderableWidget(guiEventListener);
     }
 

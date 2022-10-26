@@ -3,7 +3,6 @@
  */
 package net.minecraft.network.syncher;
 
-import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
@@ -32,12 +31,10 @@ import org.slf4j.Logger;
 public class SynchedEntityData {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Object2IntMap<Class<? extends Entity>> ENTITY_ID_POOL = new Object2IntOpenHashMap<Class<? extends Entity>>();
-    private static final int EOF_MARKER = 255;
     private static final int MAX_ID_VALUE = 254;
     private final Entity entity;
     private final Int2ObjectMap<DataItem<?>> itemsById = new Int2ObjectOpenHashMap();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private boolean isEmpty = true;
     private boolean isDirty;
 
     public SynchedEntityData(Entity entity) {
@@ -93,7 +90,6 @@ public class SynchedEntityData {
         DataItem<T> dataItem = new DataItem<T>(entityDataAccessor, object);
         this.lock.writeLock().lock();
         this.itemsById.put(entityDataAccessor.getId(), (DataItem<?>)dataItem);
-        this.isEmpty = false;
         this.lock.writeLock().unlock();
     }
 
@@ -131,17 +127,8 @@ public class SynchedEntityData {
         return this.isDirty;
     }
 
-    public static void pack(@Nullable List<DataItem<?>> list, FriendlyByteBuf friendlyByteBuf) {
-        if (list != null) {
-            for (DataItem<?> dataItem : list) {
-                SynchedEntityData.writeDataItem(friendlyByteBuf, dataItem);
-            }
-        }
-        friendlyByteBuf.writeByte(255);
-    }
-
     @Nullable
-    public List<DataItem<?>> packDirty() {
+    public List<DataValue<?>> packDirty() {
         ArrayList list = null;
         if (this.isDirty) {
             this.lock.readLock().lock();
@@ -149,9 +136,9 @@ public class SynchedEntityData {
                 if (!dataItem.isDirty()) continue;
                 dataItem.setDirty(false);
                 if (list == null) {
-                    list = Lists.newArrayList();
+                    list = new ArrayList();
                 }
-                list.add(dataItem.copy());
+                list.add(dataItem.value());
             }
             this.lock.readLock().unlock();
         }
@@ -160,62 +147,30 @@ public class SynchedEntityData {
     }
 
     @Nullable
-    public List<DataItem<?>> getAll() {
+    public List<DataValue<?>> getNonDefaultValues() {
         ArrayList list = null;
         this.lock.readLock().lock();
         for (DataItem dataItem : this.itemsById.values()) {
+            if (dataItem.isSetToDefault()) continue;
             if (list == null) {
-                list = Lists.newArrayList();
+                list = new ArrayList();
             }
-            list.add(dataItem.copy());
+            list.add(dataItem.value());
         }
         this.lock.readLock().unlock();
         return list;
     }
 
-    private static <T> void writeDataItem(FriendlyByteBuf friendlyByteBuf, DataItem<T> dataItem) {
-        EntityDataAccessor<T> entityDataAccessor = dataItem.getAccessor();
-        int i = EntityDataSerializers.getSerializedId(entityDataAccessor.getSerializer());
-        if (i < 0) {
-            throw new EncoderException("Unknown serializer type " + entityDataAccessor.getSerializer());
-        }
-        friendlyByteBuf.writeByte(entityDataAccessor.getId());
-        friendlyByteBuf.writeVarInt(i);
-        entityDataAccessor.getSerializer().write(friendlyByteBuf, dataItem.getValue());
-    }
-
-    @Nullable
-    public static List<DataItem<?>> unpack(FriendlyByteBuf friendlyByteBuf) {
-        short i;
-        ArrayList<DataItem<?>> list = null;
-        while ((i = friendlyByteBuf.readUnsignedByte()) != 255) {
-            int j;
-            EntityDataSerializer<?> entityDataSerializer;
-            if (list == null) {
-                list = Lists.newArrayList();
-            }
-            if ((entityDataSerializer = EntityDataSerializers.getSerializer(j = friendlyByteBuf.readVarInt())) == null) {
-                throw new DecoderException("Unknown serializer type " + j);
-            }
-            list.add(SynchedEntityData.genericHelper(friendlyByteBuf, i, entityDataSerializer));
-        }
-        return list;
-    }
-
-    private static <T> DataItem<T> genericHelper(FriendlyByteBuf friendlyByteBuf, int i, EntityDataSerializer<T> entityDataSerializer) {
-        return new DataItem<T>(entityDataSerializer.createAccessor(i), entityDataSerializer.read(friendlyByteBuf));
-    }
-
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public void assignValues(List<DataItem<?>> list) {
+    public void assignValues(List<DataValue<?>> list) {
         this.lock.writeLock().lock();
         try {
-            for (DataItem<?> dataItem : list) {
-                DataItem dataItem2 = (DataItem)this.itemsById.get(dataItem.getAccessor().getId());
-                if (dataItem2 == null) continue;
-                this.assignValue(dataItem2, dataItem);
+            for (DataValue<?> dataValue : list) {
+                DataItem dataItem = (DataItem)this.itemsById.get(dataValue.id);
+                if (dataItem == null) continue;
+                this.assignValue(dataItem, dataValue);
                 this.entity.onSyncedDataUpdated(dataItem.getAccessor());
             }
         } finally {
@@ -224,15 +179,15 @@ public class SynchedEntityData {
         this.isDirty = true;
     }
 
-    private <T> void assignValue(DataItem<T> dataItem, DataItem<?> dataItem2) {
-        if (!Objects.equals(dataItem2.accessor.getSerializer(), dataItem.accessor.getSerializer())) {
-            throw new IllegalStateException(String.format(Locale.ROOT, "Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", dataItem.accessor.getId(), this.entity, dataItem.value, dataItem.value.getClass(), dataItem2.value, dataItem2.value.getClass()));
+    private <T> void assignValue(DataItem<T> dataItem, DataValue<?> dataValue) {
+        if (!Objects.equals(dataValue.serializer(), dataItem.accessor.getSerializer())) {
+            throw new IllegalStateException(String.format(Locale.ROOT, "Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", dataItem.accessor.getId(), this.entity, dataItem.value, dataItem.value.getClass(), dataValue.value, dataValue.value.getClass()));
         }
-        dataItem.setValue(dataItem2.getValue());
+        dataItem.setValue(dataValue.value);
     }
 
     public boolean isEmpty() {
-        return this.isEmpty;
+        return this.itemsById.isEmpty();
     }
 
     public void clearDirty() {
@@ -247,10 +202,12 @@ public class SynchedEntityData {
     public static class DataItem<T> {
         final EntityDataAccessor<T> accessor;
         T value;
+        private final T initialValue;
         private boolean dirty;
 
         public DataItem(EntityDataAccessor<T> entityDataAccessor, T object) {
             this.accessor = entityDataAccessor;
+            this.initialValue = object;
             this.value = object;
             this.dirty = true;
         }
@@ -275,8 +232,42 @@ public class SynchedEntityData {
             this.dirty = bl;
         }
 
-        public DataItem<T> copy() {
-            return new DataItem<T>(this.accessor, this.accessor.getSerializer().copy(this.value));
+        public boolean isSetToDefault() {
+            return this.initialValue.equals(this.value);
+        }
+
+        public DataValue<T> value() {
+            return DataValue.create(this.accessor, this.value);
+        }
+    }
+
+    public record DataValue<T>(int id, EntityDataSerializer<T> serializer, T value) {
+        public static <T> DataValue<T> create(EntityDataAccessor<T> entityDataAccessor, T object) {
+            EntityDataSerializer<T> entityDataSerializer = entityDataAccessor.getSerializer();
+            return new DataValue<T>(entityDataAccessor.getId(), entityDataSerializer, entityDataSerializer.copy(object));
+        }
+
+        public void write(FriendlyByteBuf friendlyByteBuf) {
+            int i = EntityDataSerializers.getSerializedId(this.serializer);
+            if (i < 0) {
+                throw new EncoderException("Unknown serializer type " + this.serializer);
+            }
+            friendlyByteBuf.writeByte(this.id);
+            friendlyByteBuf.writeVarInt(i);
+            this.serializer.write(friendlyByteBuf, this.value);
+        }
+
+        public static DataValue<?> read(FriendlyByteBuf friendlyByteBuf, int i) {
+            int j = friendlyByteBuf.readVarInt();
+            EntityDataSerializer<?> entityDataSerializer = EntityDataSerializers.getSerializer(j);
+            if (entityDataSerializer == null) {
+                throw new DecoderException("Unknown serializer type " + j);
+            }
+            return DataValue.read(friendlyByteBuf, i, entityDataSerializer);
+        }
+
+        private static <T> DataValue<T> read(FriendlyByteBuf friendlyByteBuf, int i, EntityDataSerializer<T> entityDataSerializer) {
+            return new DataValue<T>(i, entityDataSerializer, entityDataSerializer.read(friendlyByteBuf));
         }
     }
 }

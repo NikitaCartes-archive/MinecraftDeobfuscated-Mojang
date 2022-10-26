@@ -20,8 +20,8 @@ import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.StateSwitchingButton;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -52,7 +52,7 @@ import org.jetbrains.annotations.Nullable;
 public class RecipeBookComponent
 extends GuiComponent
 implements PlaceRecipe<Ingredient>,
-Widget,
+Renderable,
 GuiEventListener,
 NarratableEntry,
 RecipeShownListener {
@@ -242,7 +242,7 @@ RecipeShownListener {
             return;
         }
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, 100.0);
+        poseStack.translate(0.0f, 0.0f, 100.0f);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);

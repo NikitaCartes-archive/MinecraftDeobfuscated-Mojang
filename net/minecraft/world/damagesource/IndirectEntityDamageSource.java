@@ -13,11 +13,11 @@ import org.jetbrains.annotations.Nullable;
 public class IndirectEntityDamageSource
 extends EntityDamageSource {
     @Nullable
-    private final Entity owner;
+    private final Entity cause;
 
     public IndirectEntityDamageSource(String string, Entity entity, @Nullable Entity entity2) {
         super(string, entity);
-        this.owner = entity2;
+        this.cause = entity2;
     }
 
     @Override
@@ -29,17 +29,25 @@ extends EntityDamageSource {
     @Override
     @Nullable
     public Entity getEntity() {
-        return this.owner;
+        return this.cause;
     }
 
     @Override
     public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-        Component component = this.owner == null ? this.entity.getDisplayName() : this.owner.getDisplayName();
-        ItemStack itemStack = this.owner instanceof LivingEntity ? ((LivingEntity)this.owner).getMainHandItem() : ItemStack.EMPTY;
+        ItemStack itemStack;
+        Component component = this.cause == null ? this.entity.getDisplayName() : this.cause.getDisplayName();
+        Entity entity = this.cause;
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity2 = (LivingEntity)entity;
+            itemStack = livingEntity2.getMainHandItem();
+        } else {
+            itemStack = ItemStack.EMPTY;
+        }
+        ItemStack itemStack2 = itemStack;
         String string = "death.attack." + this.msgId;
-        String string2 = string + ".item";
-        if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {
-            return Component.translatable(string2, livingEntity.getDisplayName(), component, itemStack.getDisplayName());
+        if (!itemStack2.isEmpty() && itemStack2.hasCustomHoverName()) {
+            String string2 = string + ".item";
+            return Component.translatable(string2, livingEntity.getDisplayName(), component, itemStack2.getDisplayName());
         }
         return Component.translatable(string, livingEntity.getDisplayName(), component);
     }

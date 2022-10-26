@@ -40,7 +40,7 @@ extends ThrowableItemProjectile
 implements ItemSupplier {
     public static final double SPLASH_RANGE = 4.0;
     private static final double SPLASH_RANGE_SQ = 16.0;
-    public static final Predicate<LivingEntity> WATER_SENSITIVE = LivingEntity::isSensitiveToWater;
+    public static final Predicate<LivingEntity> WATER_SENSITIVE_OR_ON_FIRE = livingEntity -> livingEntity.isSensitiveToWater() || livingEntity.isOnFire();
 
     public ThrownPotion(EntityType<? extends ThrownPotion> entityType, Level level) {
         super((EntityType<? extends ThrowableItemProjectile>)entityType, level);
@@ -113,13 +113,15 @@ implements ItemSupplier {
 
     private void applyWater() {
         AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
-        List<LivingEntity> list = this.level.getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE);
-        if (!list.isEmpty()) {
-            for (LivingEntity livingEntity : list) {
-                double d = this.distanceToSqr(livingEntity);
-                if (!(d < 16.0) || !livingEntity.isSensitiveToWater()) continue;
+        List<LivingEntity> list = this.level.getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE_OR_ON_FIRE);
+        for (LivingEntity livingEntity : list) {
+            double d = this.distanceToSqr(livingEntity);
+            if (!(d < 16.0)) continue;
+            if (livingEntity.isSensitiveToWater()) {
                 livingEntity.hurt(DamageSource.indirectMagic(this, this.getOwner()), 1.0f);
             }
+            if (!livingEntity.isOnFire() || !livingEntity.isAlive()) continue;
+            livingEntity.extinguishFire();
         }
         List<Axolotl> list2 = this.level.getEntitiesOfClass(Axolotl.class, aABB);
         for (Axolotl axolotl : list2) {

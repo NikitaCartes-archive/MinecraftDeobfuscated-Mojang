@@ -56,11 +56,11 @@ extends Screen {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.list = new BiomeList();
         this.addWidget(this.list);
-        this.doneButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
+        this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             this.applySettings.accept(this.biome);
             this.minecraft.setScreen(this.parent);
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
+        }).bounds(this.width / 2 - 155, this.height - 28, 150, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)).bounds(this.width / 2 + 5, this.height - 28, 150, 20).build());
         this.list.setSelected((BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(entry.biome, this.biome)).findFirst().orElse(null));
     }
 

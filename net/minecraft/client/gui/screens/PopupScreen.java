@@ -54,7 +54,7 @@ extends Screen {
         int l = this.contentTop + k + this.font.lineHeight * 2;
         int m = (int)((double)this.width / 2.0 - (double)j / 2.0);
         for (ButtonOption buttonOption2 : this.buttonOptions) {
-            this.addRenderableWidget(new Button(m, l, this.buttonWidth, 20, buttonOption2.message, buttonOption2.onPress));
+            this.addRenderableWidget(Button.builder(buttonOption2.message, buttonOption2.onPress).bounds(m, l, this.buttonWidth, 20).build());
             m += i;
         }
     }

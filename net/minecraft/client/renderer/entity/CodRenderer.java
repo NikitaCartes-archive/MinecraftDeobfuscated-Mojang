@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CodModel;
@@ -33,10 +33,10 @@ extends MobRenderer<Cod, CodModel<Cod>> {
     protected void setupRotations(Cod cod, PoseStack poseStack, float f, float g, float h) {
         super.setupRotations(cod, poseStack, f, g, h);
         float i = 4.3f * Mth.sin(0.6f * f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(i));
+        poseStack.mulPose(Axis.YP.rotationDegrees(i));
         if (!cod.isInWater()) {
             poseStack.translate(0.1f, 0.1f, -0.1f);
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
         }
     }
 }

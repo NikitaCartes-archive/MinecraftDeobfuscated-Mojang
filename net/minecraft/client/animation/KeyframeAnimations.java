@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.animation;
 
-import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +14,7 @@ import net.minecraft.client.animation.Keyframe;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public class KeyframeAnimations {

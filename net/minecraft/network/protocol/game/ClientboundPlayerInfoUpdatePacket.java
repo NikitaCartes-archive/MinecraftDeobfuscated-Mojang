@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
@@ -81,14 +82,19 @@ implements Packet<ClientGamePacketListener> {
         return MoreObjects.toStringHelper(this).add("actions", this.actions).add("entries", this.entries).toString();
     }
 
-    public record Entry(UUID profileId, GameProfile profile, boolean listed, int latency, GameType gameMode, @Nullable Component displayName, RemoteChatSession.Data chatSession) {
+    public record Entry(UUID profileId, GameProfile profile, boolean listed, int latency, GameType gameMode, @Nullable Component displayName, @Nullable RemoteChatSession.Data chatSession) {
         Entry(ServerPlayer serverPlayer) {
-            this(serverPlayer.getUUID(), serverPlayer.getGameProfile(), true, serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName(), serverPlayer.getChatSession().asData());
+            this(serverPlayer.getUUID(), serverPlayer.getGameProfile(), true, serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName(), Util.mapNullable(serverPlayer.getChatSession(), RemoteChatSession::asData));
         }
 
         @Nullable
         public Component displayName() {
             return this.displayName;
+        }
+
+        @Nullable
+        public RemoteChatSession.Data chatSession() {
+            return this.chatSession;
         }
     }
 
@@ -102,8 +108,8 @@ implements Packet<ClientGamePacketListener> {
             friendlyByteBuf.writeGameProfileProperties(entry.profile().getProperties());
         }),
         INITIALIZE_CHAT((entryBuilder, friendlyByteBuf) -> {
-            entryBuilder.chatSession = RemoteChatSession.Data.read(friendlyByteBuf);
-        }, (friendlyByteBuf, entry) -> RemoteChatSession.Data.write(friendlyByteBuf, entry.chatSession())),
+            entryBuilder.chatSession = (RemoteChatSession.Data)friendlyByteBuf.readNullable(RemoteChatSession.Data::read);
+        }, (friendlyByteBuf, entry) -> friendlyByteBuf.writeNullable(entry.chatSession, RemoteChatSession.Data::write)),
         UPDATE_GAME_MODE((entryBuilder, friendlyByteBuf) -> {
             entryBuilder.gameMode = GameType.byId(friendlyByteBuf.readVarInt());
         }, (friendlyByteBuf, entry) -> friendlyByteBuf.writeVarInt(entry.gameMode().getId())),
@@ -142,6 +148,7 @@ implements Packet<ClientGamePacketListener> {
         GameType gameMode = GameType.DEFAULT_MODE;
         @Nullable
         Component displayName;
+        @Nullable
         RemoteChatSession.Data chatSession;
 
         EntryBuilder(UUID uUID) {

@@ -3,18 +3,20 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public class VecDeltaCodec {
     private static final double TRUNCATION_STEPS = 4096.0;
     private Vec3 base = Vec3.ZERO;
 
-    private static long encode(double d) {
-        return Mth.lfloor(d * 4096.0);
+    @VisibleForTesting
+    static long encode(double d) {
+        return Math.round(d * 4096.0);
     }
 
-    private static double decode(long l) {
+    @VisibleForTesting
+    static double decode(long l) {
         return (double)l / 4096.0;
     }
 
@@ -29,15 +31,15 @@ public class VecDeltaCodec {
     }
 
     public long encodeX(Vec3 vec3) {
-        return VecDeltaCodec.encode(vec3.x - this.base.x);
+        return VecDeltaCodec.encode(vec3.x) - VecDeltaCodec.encode(this.base.x);
     }
 
     public long encodeY(Vec3 vec3) {
-        return VecDeltaCodec.encode(vec3.y - this.base.y);
+        return VecDeltaCodec.encode(vec3.y) - VecDeltaCodec.encode(this.base.y);
     }
 
     public long encodeZ(Vec3 vec3) {
-        return VecDeltaCodec.encode(vec3.z - this.base.z);
+        return VecDeltaCodec.encode(vec3.z) - VecDeltaCodec.encode(this.base.z);
     }
 
     public Vec3 delta(Vec3 vec3) {

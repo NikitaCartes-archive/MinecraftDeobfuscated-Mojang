@@ -79,18 +79,18 @@ extends EntityModel<T> {
             float l = 1.5f;
             poseStack.pushPose();
             poseStack.scale(0.56666666f, 0.56666666f, 0.56666666f);
-            poseStack.translate(0.0, 1.375, 0.125);
+            poseStack.translate(0.0f, 1.375f, 0.125f);
             ImmutableList.of(this.head, this.leftEar, this.rightEar, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
             poseStack.pushPose();
             poseStack.scale(0.4f, 0.4f, 0.4f);
-            poseStack.translate(0.0, 2.25, 0.0);
+            poseStack.translate(0.0f, 2.25f, 0.0f);
             ImmutableList.of(this.leftRearFoot, this.rightRearFoot, this.leftHaunch, this.rightHaunch, this.body, this.leftFrontLeg, this.rightFrontLeg, this.tail).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         } else {
             poseStack.pushPose();
             poseStack.scale(0.6f, 0.6f, 0.6f);
-            poseStack.translate(0.0, 1.0, 0.0);
+            poseStack.translate(0.0f, 1.0f, 0.0f);
             ImmutableList.of(this.leftRearFoot, this.rightRearFoot, this.leftHaunch, this.rightHaunch, this.body, this.leftFrontLeg, this.rightFrontLeg, this.head, this.rightEar, this.leftEar, this.tail, this.nose, new ModelPart[0]).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         }

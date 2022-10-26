@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomLookAround;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
+import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.ai.behavior.RunSometimes;
 import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
@@ -69,7 +71,7 @@ public class CamelAi {
     }
 
     private static void initIdleActivity(Brain<Camel> brain) {
-        brain.addActivity(Activity.IDLE, ImmutableList.of(Pair.of(0, new RunSometimes<LivingEntity>(new SetEntityLookTarget(EntityType.PLAYER, 6.0f), UniformInt.of(30, 60))), Pair.of(1, new AnimalMakeLove(EntityType.CAMEL, 1.0f)), Pair.of(2, new FollowTemptation(livingEntity -> Float.valueOf(2.5f))), Pair.of(3, new BabyFollowAdult(ADULT_FOLLOW_RANGE, 2.5f)), Pair.of(4, new RandomLookAround(UniformInt.of(150, 250), 30.0f, 0.0f, 0.0f)), Pair.of(5, new RunOne(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT), ImmutableList.of(Pair.of(new RandomStroll(2.0f), 1), Pair.of(new SetWalkTargetFromLookTarget(2.0f, 3), 1), Pair.of(new RandomSitting(20), 1), Pair.of(new DoNothing(30, 60), 1))))));
+        brain.addActivity(Activity.IDLE, ImmutableList.of(Pair.of(0, new RunSometimes<LivingEntity>(new SetEntityLookTarget(EntityType.PLAYER, 6.0f), UniformInt.of(30, 60))), Pair.of(1, new AnimalMakeLove(EntityType.CAMEL, 1.0f)), Pair.of(2, new FollowTemptation(livingEntity -> Float.valueOf(2.5f))), Pair.of(3, new RunIf<Camel>(Predicate.not(Camel::refuseToMove), new BabyFollowAdult(ADULT_FOLLOW_RANGE, 2.5f))), Pair.of(4, new RandomLookAround(UniformInt.of(150, 250), 30.0f, 0.0f, 0.0f)), Pair.of(5, new RunOne(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT), ImmutableList.of(Pair.of(new RunIf<PathfinderMob>(Predicate.not(Camel::refuseToMove), new RandomStroll(2.0f)), 1), Pair.of(new RunIf<LivingEntity>(Predicate.not(Camel::refuseToMove), new SetWalkTargetFromLookTarget(2.0f, 3)), 1), Pair.of(new RandomSitting(20), 1), Pair.of(new DoNothing(30, 60), 1))))));
     }
 
     public static void updateActivity(Camel camel) {

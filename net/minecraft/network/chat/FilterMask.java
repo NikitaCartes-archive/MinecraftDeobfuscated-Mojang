@@ -3,20 +3,28 @@
  */
 package net.minecraft.network.chat;
 
+import com.mojang.serialization.Codec;
 import java.util.BitSet;
+import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.StringRepresentable;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class FilterMask {
+    public static final Codec<FilterMask> CODEC = StringRepresentable.fromEnum(Type::values).dispatch(FilterMask::type, Type::codec);
     public static final FilterMask FULLY_FILTERED = new FilterMask(new BitSet(0), Type.FULLY_FILTERED);
     public static final FilterMask PASS_THROUGH = new FilterMask(new BitSet(0), Type.PASS_THROUGH);
     public static final Style FILTERED_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_GRAY).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.filtered")));
+    static final Codec<FilterMask> PASS_THROUGH_CODEC = Codec.unit(PASS_THROUGH);
+    static final Codec<FilterMask> FULLY_FILTERED_CODEC = Codec.unit(FULLY_FILTERED);
+    static final Codec<FilterMask> PARTIALLY_FILTERED_CODEC = ExtraCodecs.BIT_SET.xmap(FilterMask::new, FilterMask::mask);
     private static final char HASH = '#';
     private final BitSet mask;
     private final Type type;
@@ -26,8 +34,21 @@ public class FilterMask {
         this.type = type;
     }
 
+    private FilterMask(BitSet bitSet) {
+        this.mask = bitSet;
+        this.type = Type.PARTIALLY_FILTERED;
+    }
+
     public FilterMask(int i) {
         this(new BitSet(i), Type.PARTIALLY_FILTERED);
+    }
+
+    private Type type() {
+        return this.type;
+    }
+
+    private BitSet mask() {
+        return this.mask;
     }
 
     public static FilterMask read(FriendlyByteBuf friendlyByteBuf) {
@@ -103,11 +124,45 @@ public class FilterMask {
         return this.type == Type.FULLY_FILTERED;
     }
 
-    static enum Type {
-        PASS_THROUGH,
-        FULLY_FILTERED,
-        PARTIALLY_FILTERED;
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        FilterMask filterMask = (FilterMask)object;
+        return this.mask.equals(filterMask.mask) && this.type == filterMask.type;
+    }
 
+    public int hashCode() {
+        int i = this.mask.hashCode();
+        i = 31 * i + this.type.hashCode();
+        return i;
+    }
+
+    static enum Type implements StringRepresentable
+    {
+        PASS_THROUGH("pass_through", () -> PASS_THROUGH_CODEC),
+        FULLY_FILTERED("fully_filtered", () -> FULLY_FILTERED_CODEC),
+        PARTIALLY_FILTERED("partially_filtered", () -> PARTIALLY_FILTERED_CODEC);
+
+        private final String serializedName;
+        private final Supplier<Codec<FilterMask>> codec;
+
+        private Type(String string2, Supplier<Codec<FilterMask>> supplier) {
+            this.serializedName = string2;
+            this.codec = supplier;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.serializedName;
+        }
+
+        private Codec<FilterMask> codec() {
+            return this.codec.get();
+        }
     }
 }
 

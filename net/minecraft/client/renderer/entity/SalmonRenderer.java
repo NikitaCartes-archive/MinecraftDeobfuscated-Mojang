@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SalmonModel;
@@ -39,11 +39,11 @@ extends MobRenderer<Salmon, SalmonModel<Salmon>> {
             j = 1.7f;
         }
         float k = i * 4.3f * Mth.sin(j * 0.6f * f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-        poseStack.translate(0.0, 0.0, -0.4f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(k));
+        poseStack.translate(0.0f, 0.0f, -0.4f);
         if (!salmon.isInWater()) {
-            poseStack.translate(0.2f, 0.1f, 0.0);
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
+            poseStack.translate(0.2f, 0.1f, 0.0f);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
         }
     }
 }

@@ -419,7 +419,8 @@ public class NetherFortressPieces {
                 worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
                 BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos2);
                 if (blockEntity instanceof SpawnerBlockEntity) {
-                    ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.BLAZE);
+                    SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity)blockEntity;
+                    spawnerBlockEntity.setEntityId(EntityType.BLAZE, randomSource);
                 }
             }
             for (int i = 0; i <= 6; ++i) {

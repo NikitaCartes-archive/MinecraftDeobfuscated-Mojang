@@ -62,18 +62,18 @@ extends RealmsScreen {
     public void init() {
         this.getSubscription(this.serverData.id);
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20, Component.translatable("mco.configure.world.subscription.extend"), button -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.subscription.extend"), button -> {
             String string = "https://aka.ms/ExtendJavaRealms?subscriptionId=" + this.serverData.remoteSubscriptionId + "&profileId=" + this.minecraft.getUser().getUuid();
             this.minecraft.keyboardHandler.setClipboard(string);
             Util.getPlatform().openUri(string);
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+        }).bounds(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(12), 200, 20).build());
         if (this.serverData.expired) {
-            this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20, Component.translatable("mco.configure.world.delete.button"), button -> {
+            this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.delete.button"), button -> {
                 MutableComponent component = Component.translatable("mco.configure.world.delete.question.line1");
                 MutableComponent component2 = Component.translatable("mco.configure.world.delete.question.line2");
                 this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
-            }));
+            }).bounds(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20).build());
         }
     }
 

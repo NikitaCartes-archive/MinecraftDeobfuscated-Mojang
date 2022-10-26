@@ -985,10 +985,10 @@ public class StrongholdPieces {
             this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 10, 7, 15, false, randomSource, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, randomSource, boundingBox, StrongholdPiece.SmallDoorType.GRATES, 4, 1, 0);
             int i = 6;
-            this.generateBox(worldGenLevel, boundingBox, 1, i, 1, 1, i, 14, false, randomSource, SMOOTH_STONE_SELECTOR);
-            this.generateBox(worldGenLevel, boundingBox, 9, i, 1, 9, i, 14, false, randomSource, SMOOTH_STONE_SELECTOR);
-            this.generateBox(worldGenLevel, boundingBox, 2, i, 1, 8, i, 2, false, randomSource, SMOOTH_STONE_SELECTOR);
-            this.generateBox(worldGenLevel, boundingBox, 2, i, 14, 8, i, 14, false, randomSource, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 6, 1, 1, 6, 14, false, randomSource, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 9, 6, 1, 9, 6, 14, false, randomSource, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 2, 6, 1, 8, 6, 2, false, randomSource, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 2, 6, 14, 8, 6, 14, false, randomSource, SMOOTH_STONE_SELECTOR);
             this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 2, 1, 4, false, randomSource, SMOOTH_STONE_SELECTOR);
             this.generateBox(worldGenLevel, boundingBox, 8, 1, 1, 9, 1, 4, false, randomSource, SMOOTH_STONE_SELECTOR);
             this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 1, 1, 3, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
@@ -1052,7 +1052,8 @@ public class StrongholdPieces {
                 worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
                 BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos2);
                 if (blockEntity instanceof SpawnerBlockEntity) {
-                    ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.SILVERFISH);
+                    SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity)blockEntity;
+                    spawnerBlockEntity.setEntityId(EntityType.SILVERFISH, randomSource);
                 }
             }
         }

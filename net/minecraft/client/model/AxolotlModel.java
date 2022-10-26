@@ -4,7 +4,6 @@
 package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.math.Vector3f;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +18,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public class AxolotlModel<T extends Axolotl>

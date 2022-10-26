@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.FoxModel;
@@ -36,27 +36,27 @@ extends RenderLayer<Fox, FoxModel<Fox>> {
         if (bl2) {
             m = 0.75f;
             poseStack.scale(0.75f, 0.75f, 0.75f);
-            poseStack.translate(0.0, 0.5, 0.209375f);
+            poseStack.translate(0.0f, 0.5f, 0.209375f);
         }
         poseStack.translate(((FoxModel)this.getParentModel()).head.x / 16.0f, ((FoxModel)this.getParentModel()).head.y / 16.0f, ((FoxModel)this.getParentModel()).head.z / 16.0f);
         m = fox.getHeadRollAngle(h);
-        poseStack.mulPose(Vector3f.ZP.rotation(m));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
+        poseStack.mulPose(Axis.ZP.rotation(m));
+        poseStack.mulPose(Axis.YP.rotationDegrees(k));
+        poseStack.mulPose(Axis.XP.rotationDegrees(l));
         if (fox.isBaby()) {
             if (bl) {
                 poseStack.translate(0.4f, 0.26f, 0.15f);
             } else {
-                poseStack.translate(0.06f, 0.26f, -0.5);
+                poseStack.translate(0.06f, 0.26f, -0.5f);
             }
         } else if (bl) {
             poseStack.translate(0.46f, 0.26f, 0.22f);
         } else {
-            poseStack.translate(0.06f, 0.27f, -0.5);
+            poseStack.translate(0.06f, 0.27f, -0.5f);
         }
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
         if (bl) {
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
         }
         ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
         this.itemInHandRenderer.renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);

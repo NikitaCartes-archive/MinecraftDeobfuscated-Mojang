@@ -33,7 +33,7 @@ implements Comparable<MobEffectInstance> {
     private boolean showIcon;
     @Nullable
     private MobEffectInstance hiddenEffect;
-    private Optional<FactorData> factorData;
+    private final Optional<FactorData> factorData;
 
     public MobEffectInstance(MobEffect mobEffect) {
         this(mobEffect, 0, 0);

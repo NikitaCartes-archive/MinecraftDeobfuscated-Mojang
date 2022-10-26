@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -20,6 +19,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class PostPass

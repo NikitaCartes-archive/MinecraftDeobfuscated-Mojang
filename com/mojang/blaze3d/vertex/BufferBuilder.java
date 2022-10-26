@@ -13,7 +13,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
 import java.nio.ByteBuffer;
@@ -23,6 +22,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 

@@ -4,10 +4,6 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Iterators;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -28,6 +24,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public enum Direction implements StringRepresentable
 {
@@ -105,8 +105,7 @@ public enum Direction implements StringRepresentable
 
     public static Direction rotate(Matrix4f matrix4f, Direction direction) {
         Vec3i vec3i = direction.getNormal();
-        Vector4f vector4f = new Vector4f(vec3i.getX(), vec3i.getY(), vec3i.getZ(), 0.0f);
-        vector4f.transform(matrix4f);
+        Vector4f vector4f = matrix4f.transform(new Vector4f(vec3i.getX(), vec3i.getY(), vec3i.getZ(), 0.0f));
         return Direction.getNearest(vector4f.x(), vector4f.y(), vector4f.z());
     }
 
@@ -118,25 +117,15 @@ public enum Direction implements StringRepresentable
         return Stream.of(VALUES);
     }
 
-    public Quaternion getRotation() {
-        Quaternion quaternion = Vector3f.XP.rotationDegrees(90.0f);
+    public Quaternionf getRotation() {
         return switch (this) {
             default -> throw new IncompatibleClassChangeError();
-            case DOWN -> Vector3f.XP.rotationDegrees(180.0f);
-            case UP -> Quaternion.ONE.copy();
-            case NORTH -> {
-                quaternion.mul(Vector3f.ZP.rotationDegrees(180.0f));
-                yield quaternion;
-            }
-            case SOUTH -> quaternion;
-            case WEST -> {
-                quaternion.mul(Vector3f.ZP.rotationDegrees(90.0f));
-                yield quaternion;
-            }
-            case EAST -> {
-                quaternion.mul(Vector3f.ZP.rotationDegrees(-90.0f));
-                yield quaternion;
-            }
+            case DOWN -> new Quaternionf().rotationX((float)Math.PI);
+            case UP -> new Quaternionf();
+            case NORTH -> new Quaternionf().rotationXYZ(1.5707964f, 0.0f, (float)Math.PI);
+            case SOUTH -> new Quaternionf().rotationX(1.5707964f);
+            case WEST -> new Quaternionf().rotationXYZ(1.5707964f, 0.0f, 1.5707964f);
+            case EAST -> new Quaternionf().rotationXYZ(1.5707964f, 0.0f, -1.5707964f);
         };
     }
 

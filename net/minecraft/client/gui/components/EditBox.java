@@ -22,7 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -38,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class EditBox
 extends AbstractWidget
-implements Widget,
+implements Renderable,
 GuiEventListener {
     public static final int BACKWARDS = -1;
     public static final int FORWARDS = 1;
@@ -349,12 +349,12 @@ GuiEventListener {
         if (!this.isVisible()) {
             return false;
         }
-        boolean bl2 = bl = d >= (double)this.x && d < (double)(this.x + this.width) && e >= (double)this.y && e < (double)(this.y + this.height);
+        boolean bl2 = bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
         if (this.canLoseFocus) {
             this.setFocus(bl);
         }
         if (this.isFocused() && bl && i == 0) {
-            int j = Mth.floor(d) - this.x;
+            int j = Mth.floor(d) - this.getX();
             if (this.bordered) {
                 j -= 4;
             }
@@ -377,8 +377,8 @@ GuiEventListener {
         }
         if (this.isBordered()) {
             k = this.isFocused() ? -1 : -6250336;
-            EditBox.fill(poseStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, k);
-            EditBox.fill(poseStack, this.x, this.y, this.x + this.width, this.y + this.height, -16777216);
+            EditBox.fill(poseStack, this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, k);
+            EditBox.fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
         }
         k = this.isEditable ? this.textColor : this.textColorUneditable;
         int l = this.cursorPos - this.displayPos;
@@ -386,8 +386,8 @@ GuiEventListener {
         String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
         boolean bl = l >= 0 && l <= string.length();
         boolean bl2 = this.isFocused() && this.frame / 6 % 2 == 0 && bl;
-        int n = this.bordered ? this.x + 4 : this.x;
-        int o = this.bordered ? this.y + (this.height - 8) / 2 : this.y;
+        int n = this.bordered ? this.getX() + 4 : this.getX();
+        int o = this.bordered ? this.getY() + (this.height - 8) / 2 : this.getY();
         int p = n;
         if (m > string.length()) {
             m = string.length();
@@ -435,11 +435,11 @@ GuiEventListener {
             j = l;
             l = m;
         }
-        if (k > this.x + this.width) {
-            k = this.x + this.width;
+        if (k > this.getX() + this.width) {
+            k = this.getX() + this.width;
         }
-        if (i > this.x + this.width) {
-            i = this.x + this.width;
+        if (i > this.getX() + this.width) {
+            i = this.getX() + this.width;
         }
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -501,7 +501,7 @@ GuiEventListener {
 
     @Override
     public boolean isMouseOver(double d, double e) {
-        return this.visible && d >= (double)this.x && d < (double)(this.x + this.width) && e >= (double)this.y && e < (double)(this.y + this.height);
+        return this.visible && d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
     }
 
     @Override
@@ -563,13 +563,9 @@ GuiEventListener {
 
     public int getScreenX(int i) {
         if (i > this.value.length()) {
-            return this.x;
+            return this.getX();
         }
-        return this.x + this.font.width(this.value.substring(0, i));
-    }
-
-    public void setX(int i) {
-        this.x = i;
+        return this.getX() + this.font.width(this.value.substring(0, i));
     }
 
     @Override

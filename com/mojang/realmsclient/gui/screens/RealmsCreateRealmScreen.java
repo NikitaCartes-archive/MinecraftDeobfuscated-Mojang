@@ -47,8 +47,8 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.createButton = this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, Component.translatable("mco.create.world"), button -> this.createWorld()));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.createButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.create.world"), button -> this.createWorld()).bounds(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20).build());
         this.createButton.active = false;
         this.nameBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 65, 200, 20, null, Component.translatable("mco.configure.world.name"));
         this.addWidget(this.nameBox);

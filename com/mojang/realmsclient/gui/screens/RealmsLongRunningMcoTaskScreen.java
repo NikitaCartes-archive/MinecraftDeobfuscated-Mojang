@@ -68,7 +68,7 @@ implements ErrorCallback {
     @Override
     public void init() {
         this.task.init();
-        this.cancelOrBackButton = this.addRenderableWidget(new Button(this.width / 2 - 106, RealmsLongRunningMcoTaskScreen.row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()));
+        this.cancelOrBackButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()).bounds(this.width / 2 - 106, RealmsLongRunningMcoTaskScreen.row(12), 212, 20).build());
     }
 
     private void cancelOrBackButtonClicked() {
@@ -96,7 +96,7 @@ implements ErrorCallback {
         this.minecraft.getNarrator().sayNow(component);
         this.minecraft.execute(() -> {
             this.removeWidget(this.cancelOrBackButton);
-            this.cancelOrBackButton = this.addRenderableWidget(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
+            this.cancelOrBackButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()).bounds(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20).build());
         });
     }
 

@@ -25,7 +25,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.PresetEditor;
@@ -52,7 +52,7 @@ import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldGenSettingsComponent
-implements Widget {
+implements Renderable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Component CUSTOM_WORLD_DESCRIPTION = Component.translatable("generator.custom");
     private static final Component AMPLIFIED_HELP_TEXT = Component.translatable("generator.minecraft.amplified.info");
@@ -110,19 +110,19 @@ implements Widget {
         }));
         this.preset.ifPresent(this.typeButton::setValue);
         this.typeButton.visible = false;
-        this.customWorldDummyButton = createWorldScreen.addRenderableWidget(new Button(j, 100, 150, 20, CommonComponents.optionNameValue(Component.translatable("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {}));
+        this.customWorldDummyButton = createWorldScreen.addRenderableWidget(Button.builder(CommonComponents.optionNameValue(Component.translatable("selectWorld.mapType"), CUSTOM_WORLD_DESCRIPTION), button -> {}).bounds(j, 100, 150, 20).build());
         this.customWorldDummyButton.active = false;
         this.customWorldDummyButton.visible = false;
-        this.customizeTypeButton = createWorldScreen.addRenderableWidget(new Button(j, 120, 150, 20, Component.translatable("selectWorld.customizeType"), button -> {
+        this.customizeTypeButton = createWorldScreen.addRenderableWidget(Button.builder(Component.translatable("selectWorld.customizeType"), button -> {
             PresetEditor presetEditor = PresetEditor.EDITORS.get(this.preset.flatMap(Holder::unwrapKey));
             if (presetEditor != null) {
                 minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
             }
-        }));
+        }).bounds(j, 120, 150, 20).build());
         this.customizeTypeButton.visible = false;
         this.bonusItemsButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.options().generateBonusChest() && !createWorldScreen.hardCore).create(i, 151, 150, 20, Component.translatable("selectWorld.bonusItems"), (cycleButton, boolean_) -> this.updateSettings(worldOptions -> worldOptions.withBonusChest((boolean)boolean_))));
         this.bonusItemsButton.visible = false;
-        this.importSettingsButton = createWorldScreen.addRenderableWidget(new Button(i, 185, 150, 20, Component.translatable("selectWorld.import_worldgen_settings"), button -> {
+        this.importSettingsButton = createWorldScreen.addRenderableWidget(Button.builder(Component.translatable("selectWorld.import_worldgen_settings"), button -> {
             DataResult<Object> dataResult;
             String string = TinyFileDialogs.tinyfd_openFileDialog(SELECT_FILE_PROMPT.getString(), null, null, null, false);
             if (string == null) {
@@ -145,7 +145,7 @@ implements Widget {
             }
             Lifecycle lifecycle = dataResult.lifecycle();
             dataResult.resultOrPartial(LOGGER::error).ifPresent(worldGenSettings -> WorldOpenFlows.confirmWorldCreation(minecraft, createWorldScreen, lifecycle, () -> this.importSettings(worldGenSettings.options(), worldGenSettings.dimensions())));
-        }));
+        }).bounds(i, 185, 150, 20).build());
         this.importSettingsButton.visible = false;
         this.amplifiedWorldInfo = MultiLineLabel.create(font, (FormattedText)AMPLIFIED_HELP_TEXT, this.typeButton.getWidth());
     }
@@ -181,7 +181,7 @@ implements Widget {
         }
         this.seedEdit.render(poseStack, i, j, f);
         if (this.preset.filter(WorldGenSettingsComponent::isAmplified).isPresent()) {
-            this.amplifiedWorldInfo.renderLeftAligned(poseStack, this.typeButton.x + 2, this.typeButton.y + 22, this.font.lineHeight, 0xA0A0A0);
+            this.amplifiedWorldInfo.renderLeftAligned(poseStack, this.typeButton.getX() + 2, this.typeButton.getY() + 22, this.font.lineHeight, 0xA0A0A0);
         }
     }
 

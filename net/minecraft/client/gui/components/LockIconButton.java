@@ -19,7 +19,7 @@ extends Button {
     private boolean locked;
 
     public LockIconButton(int i, int j, Button.OnPress onPress) {
-        super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress);
+        super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress, NO_TOOLTIP, DEFAULT_NARRATION);
     }
 
     @Override
@@ -41,7 +41,7 @@ extends Button {
         RenderSystem.setShaderTexture(0, Button.WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         Icon icon = !this.active ? (this.locked ? Icon.LOCKED_DISABLED : Icon.UNLOCKED_DISABLED) : (this.isHoveredOrFocused() ? (this.locked ? Icon.LOCKED_HOVER : Icon.UNLOCKED_HOVER) : (this.locked ? Icon.LOCKED : Icon.UNLOCKED));
-        this.blit(poseStack, this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
+        this.blit(poseStack, this.getX(), this.getY(), icon.getX(), icon.getY(), this.width, this.height);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -71,16 +71,16 @@ extends EntityRenderer<T> {
                 o = (float)(Math.atan(vec34.y) * 73.0);
             }
         }
-        poseStack.translate(0.0, 0.375, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - f));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-o));
+        poseStack.translate(0.0f, 0.375f, 0.0f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - f));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(-o));
         float p = (float)((AbstractMinecart)abstractMinecart).getHurtTime() - g;
         float q = ((AbstractMinecart)abstractMinecart).getDamage() - g;
         if (q < 0.0f) {
             q = 0.0f;
         }
         if (p > 0.0f) {
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(p) * p * q / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(p) * p * q / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir()));
         }
         int r = ((AbstractMinecart)abstractMinecart).getDisplayOffset();
         BlockState blockState = ((AbstractMinecart)abstractMinecart).getDisplayBlockState();
@@ -88,8 +88,8 @@ extends EntityRenderer<T> {
             poseStack.pushPose();
             float s = 0.75f;
             poseStack.scale(0.75f, 0.75f, 0.75f);
-            poseStack.translate(-0.5, (float)(r - 8) / 16.0f, 0.5);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
+            poseStack.translate(-0.5f, (float)(r - 8) / 16.0f, 0.5f);
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0f));
             this.renderMinecartContents(abstractMinecart, g, blockState, poseStack, multiBufferSource, i);
             poseStack.popPose();
         }

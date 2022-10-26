@@ -122,7 +122,8 @@ extends Block {
                 return super.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
             }
         };
-        level.explode(null, DamageSource.badRespawnPointExplosion(), explosionDamageCalculator, (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.5, (double)blockPos2.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+        Vec3 vec3 = blockPos2.getCenter();
+        level.explode(null, DamageSource.badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0f, true, Explosion.BlockInteraction.DESTROY);
     }
 
     public static boolean canSetSpawn(Level level) {

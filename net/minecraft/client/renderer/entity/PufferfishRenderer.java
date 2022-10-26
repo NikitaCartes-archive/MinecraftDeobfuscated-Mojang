@@ -51,7 +51,7 @@ extends MobRenderer<Pufferfish, EntityModel<Pufferfish>> {
 
     @Override
     protected void setupRotations(Pufferfish pufferfish, PoseStack poseStack, float f, float g, float h) {
-        poseStack.translate(0.0, Mth.cos(f * 0.05f) * 0.08f, 0.0);
+        poseStack.translate(0.0f, Mth.cos(f * 0.05f) * 0.08f, 0.0f);
         super.setupRotations(pufferfish, poseStack, f, g, h);
     }
 }

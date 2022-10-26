@@ -167,12 +167,12 @@ extends Screen {
         this.addWidget(this.export);
         this.list = new PresetsList(this.parent.parent.worldGenSettingsComponent.registryHolder());
         this.addWidget(this.list);
-        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 155, this.height - 28, 150, 20, Component.translatable("createWorld.customize.presets.select"), button -> {
+        this.selectButton = this.addRenderableWidget(Button.builder(Component.translatable("createWorld.customize.presets.select"), button -> {
             FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(registry, registry2, this.export.getValue(), this.settings);
             this.parent.setConfig(flatLevelGeneratorSettings);
             this.minecraft.setScreen(this.parent);
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
+        }).bounds(this.width / 2 - 155, this.height - 28, 150, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)).bounds(this.width / 2 + 5, this.height - 28, 150, 20).build());
         this.updateButtonValidity(this.list.getSelected() != null);
     }
 
@@ -203,7 +203,7 @@ extends Screen {
         this.renderBackground(poseStack);
         this.list.render(poseStack, i, j, f);
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, 400.0);
+        poseStack.translate(0.0f, 0.0f, 400.0f);
         PresetFlatWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         PresetFlatWorldScreen.drawString(poseStack, this.font, this.shareText, 50, 30, 0xA0A0A0);
         PresetFlatWorldScreen.drawString(poseStack, this.font, this.listText, 50, 70, 0xA0A0A0);

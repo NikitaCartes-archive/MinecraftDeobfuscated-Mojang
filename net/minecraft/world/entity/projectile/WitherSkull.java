@@ -95,7 +95,7 @@ extends AbstractHurtingProjectile {
         super.onHit(hitResult);
         if (!this.level.isClientSide) {
             Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
-            this.level.explode(this, this.getX(), this.getY(), this.getZ(), 1.0f, false, blockInteraction);
+            this.level.explode((Entity)this, this.getX(), this.getY(), this.getZ(), 1.0f, false, blockInteraction);
             this.discard();
         }
     }

@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.reporting;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.chat.ChatLog;
 import net.minecraft.client.multiplayer.chat.LoggedChatEvent;
 import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
@@ -13,6 +14,7 @@ import net.minecraft.client.multiplayer.chat.report.ChatReportContextBuilder;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.SignedMessageLink;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -20,6 +22,8 @@ public class ChatSelectionLogFiller {
     private final ChatLog log;
     private final ChatReportContextBuilder contextBuilder;
     private final Predicate<LoggedChatMessage.Player> canReport;
+    @Nullable
+    private SignedMessageLink previousLink = null;
     private int eventId;
     private int missedCount;
     @Nullable
@@ -39,7 +43,7 @@ public class ChatSelectionLogFiller {
             LoggedChatMessage.Player player;
             int k = this.eventId--;
             if (!(loggedChatEvent instanceof LoggedChatMessage.Player) || (player = (LoggedChatMessage.Player)loggedChatEvent).message().equals(this.lastMessage)) continue;
-            if (this.acceptMessage(player)) {
+            if (this.acceptMessage(output, player)) {
                 if (this.missedCount > 0) {
                     output.acceptDivider(Component.translatable("gui.chatSelection.fold", this.missedCount));
                     this.missedCount = 0;
@@ -53,11 +57,15 @@ public class ChatSelectionLogFiller {
         }
     }
 
-    private boolean acceptMessage(LoggedChatMessage.Player player) {
+    private boolean acceptMessage(Output output, LoggedChatMessage.Player player) {
         PlayerChatMessage playerChatMessage = player.message();
         boolean bl = this.contextBuilder.acceptContext(playerChatMessage);
         if (this.canReport.test(player)) {
             this.contextBuilder.trackContext(playerChatMessage);
+            if (this.previousLink != null && !this.previousLink.isDescendantOf(playerChatMessage.link())) {
+                output.acceptDivider(Component.translatable("gui.chatSelection.join", player.profile().getName()).withStyle(ChatFormatting.YELLOW));
+            }
+            this.previousLink = playerChatMessage.link();
             return true;
         }
         return bl;

@@ -112,43 +112,33 @@ extends ContainerObjectSelectionList<Entry> {
         private final Button changeButton;
         private final Button resetButton;
 
-        KeyEntry(final KeyMapping keyMapping, final Component component) {
+        KeyEntry(KeyMapping keyMapping, Component component) {
             this.key = keyMapping;
             this.name = component;
-            this.changeButton = new Button(0, 0, 75, 20, component, button -> {
+            this.changeButton = Button.builder(component, button -> {
                 KeyBindsList.this.keyBindsScreen.selectedKey = keyMapping;
-            }){
-
-                @Override
-                protected MutableComponent createNarrationMessage() {
-                    if (keyMapping.isUnbound()) {
-                        return Component.translatable("narrator.controls.unbound", component);
-                    }
-                    return Component.translatable("narrator.controls.bound", component, super.createNarrationMessage());
+            }).bounds(0, 0, 75, 20).tooltip(Button.NO_TOOLTIP).createNarration(supplier -> {
+                if (keyMapping.isUnbound()) {
+                    return Component.translatable("narrator.controls.unbound", component);
                 }
-            };
-            this.resetButton = new Button(0, 0, 50, 20, Component.translatable("controls.reset"), button -> {
+                return Component.translatable("narrator.controls.bound", component, supplier.get());
+            }).build();
+            this.resetButton = Button.builder(Component.translatable("controls.reset"), button -> {
                 ((KeyBindsList)KeyBindsList.this).minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
                 KeyMapping.resetMapping();
-            }){
-
-                @Override
-                protected MutableComponent createNarrationMessage() {
-                    return Component.translatable("narrator.controls.reset", component);
-                }
-            };
+            }).bounds(0, 0, 50, 20).tooltip(Button.NO_TOOLTIP).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             boolean bl2 = KeyBindsList.this.keyBindsScreen.selectedKey == this.key;
             ((KeyBindsList)KeyBindsList.this).minecraft.font.draw(poseStack, this.name, (float)(k + 90 - KeyBindsList.this.maxNameWidth), (float)(j + m / 2 - ((KeyBindsList)KeyBindsList.this).minecraft.font.lineHeight / 2), 0xFFFFFF);
-            this.resetButton.x = k + 190;
-            this.resetButton.y = j;
+            this.resetButton.setX(k + 190);
+            this.resetButton.setY(j);
             this.resetButton.active = !this.key.isDefault();
             this.resetButton.render(poseStack, n, o, f);
-            this.changeButton.x = k + 105;
-            this.changeButton.y = j;
+            this.changeButton.setX(k + 105);
+            this.changeButton.setY(j);
             this.changeButton.setMessage(this.key.getTranslatedKeyMessage());
             boolean bl3 = false;
             if (!this.key.isUnbound()) {

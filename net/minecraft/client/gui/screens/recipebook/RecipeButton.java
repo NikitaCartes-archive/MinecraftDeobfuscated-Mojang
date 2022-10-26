@@ -63,11 +63,6 @@ extends AbstractWidget {
         return this.collection;
     }
 
-    public void setPosition(int i, int j) {
-        this.x = i;
-        this.y = j;
-    }
-
     @Override
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
         if (!Screen.hasControlDown()) {
@@ -89,22 +84,22 @@ extends AbstractWidget {
         if (bl) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
             poseStack2.pushPose();
-            poseStack2.translate(this.x + 8, this.y + 12, 0.0);
+            poseStack2.translate(this.getX() + 8, this.getY() + 12, 0.0f);
             poseStack2.scale(g, g, 1.0f);
-            poseStack2.translate(-(this.x + 8), -(this.y + 12), 0.0);
+            poseStack2.translate(-(this.getX() + 8), -(this.getY() + 12), 0.0f);
             RenderSystem.applyModelViewMatrix();
             this.animationTime -= f;
         }
-        this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
+        this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
         List<Recipe<?>> list = this.getOrderedRecipes();
         this.currentIndex = Mth.floor(this.time / 30.0f) % list.size();
         ItemStack itemStack = list.get(this.currentIndex).getResultItem();
         int m = 4;
         if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
-            minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m + 1, this.y + m + 1, 0, 10);
+            minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.getX() + m + 1, this.getY() + m + 1, 0, 10);
             --m;
         }
-        minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);
+        minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.getX() + m, this.getY() + m);
         if (bl) {
             poseStack2.popPose();
             RenderSystem.applyModelViewMatrix();

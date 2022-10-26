@@ -51,8 +51,8 @@ extends RealmsScreen {
         this.addRenderableWidget(CycleButton.onOffBuilder(this.generateStructures).create(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(6) - 2, 205, 20, Component.translatable("selectWorld.mapFeatures"), (cycleButton, boolean_) -> {
             this.generateStructures = boolean_;
         }));
-        this.addRenderableWidget(new Button(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(12), 97, 20, this.buttonTitle, button -> this.callback.accept(new WorldGenerationInfo(this.seedEdit.getValue(), this.levelType, this.generateStructures))));
-        this.addRenderableWidget(new Button(this.width / 2 + 8, RealmsResetNormalWorldScreen.row(12), 97, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
+        this.addRenderableWidget(Button.builder(this.buttonTitle, button -> this.callback.accept(new WorldGenerationInfo(this.seedEdit.getValue(), this.levelType, this.generateStructures))).bounds(this.width / 2 - 102, RealmsResetNormalWorldScreen.row(12), 97, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(this.width / 2 + 8, RealmsResetNormalWorldScreen.row(12), 97, 20).build());
     }
 
     @Override

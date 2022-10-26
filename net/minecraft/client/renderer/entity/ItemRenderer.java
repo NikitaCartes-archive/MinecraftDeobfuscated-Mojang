@@ -16,6 +16,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
+import com.mojang.math.MatrixUtil;
 import java.util.List;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -123,7 +124,7 @@ implements ResourceManagerReloadListener {
             }
         }
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
-        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(-0.5f, -0.5f, -0.5f);
         if (bakedModel.isCustomRenderer() || itemStack.is(Items.TRIDENT) && !bl2) {
             this.blockEntityRenderer.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
         } else {
@@ -135,9 +136,9 @@ implements ResourceManagerReloadListener {
                 poseStack.pushPose();
                 PoseStack.Pose pose = poseStack.last();
                 if (transformType == ItemTransforms.TransformType.GUI) {
-                    pose.pose().multiply(0.5f);
+                    MatrixUtil.mulComponentWise(pose.pose(), 0.5f);
                 } else if (transformType.firstPerson()) {
-                    pose.pose().multiply(0.75f);
+                    MatrixUtil.mulComponentWise(pose.pose(), 0.75f);
                 }
                 vertexConsumer = bl32 ? ItemRenderer.getCompassFoilBufferDirect(multiBufferSource, renderType, pose) : ItemRenderer.getCompassFoilBuffer(multiBufferSource, renderType, pose);
                 poseStack.popPose();
@@ -229,7 +230,7 @@ implements ResourceManagerReloadListener {
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.translate(i, j, 100.0f + this.blitOffset);
-        poseStack.translate(8.0, 8.0, 0.0);
+        poseStack.translate(8.0f, 8.0f, 0.0f);
         poseStack.scale(1.0f, -1.0f, 1.0f);
         poseStack.scale(16.0f, 16.0f, 16.0f);
         RenderSystem.applyModelViewMatrix();
@@ -306,7 +307,7 @@ implements ResourceManagerReloadListener {
         PoseStack poseStack = new PoseStack();
         if (itemStack.getCount() != 1 || string != null) {
             String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
-            poseStack.translate(0.0, 0.0, this.blitOffset + 200.0f);
+            poseStack.translate(0.0f, 0.0f, this.blitOffset + 200.0f);
             MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             font.drawInBatch(string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 0xFFFFFF, true, poseStack.last().pose(), (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
             bufferSource.endBatch();

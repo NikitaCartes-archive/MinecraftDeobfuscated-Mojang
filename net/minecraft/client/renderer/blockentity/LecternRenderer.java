@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
@@ -35,11 +35,11 @@ implements BlockEntityRenderer<LecternBlockEntity> {
             return;
         }
         poseStack.pushPose();
-        poseStack.translate(0.5, 1.0625, 0.5);
+        poseStack.translate(0.5f, 1.0625f, 0.5f);
         float g = blockState.getValue(LecternBlock.FACING).getClockWise().toYRot();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(67.5f));
-        poseStack.translate(0.0, -0.125, 0.0);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-g));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(67.5f));
+        poseStack.translate(0.0f, -0.125f, 0.0f);
         this.bookModel.setupAnim(0.0f, 0.1f, 0.9f, 1.2f);
         VertexConsumer vertexConsumer = EnchantTableRenderer.BOOK_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
         this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);

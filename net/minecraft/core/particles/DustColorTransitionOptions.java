@@ -6,7 +6,6 @@ package net.minecraft.core.particles;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.kinds.Applicative;
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -18,13 +17,15 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class DustColorTransitionOptions
 extends DustParticleOptionsBase {
-    public static final Vector3f SCULK_PARTICLE_COLOR = new Vector3f(Vec3.fromRGB24(3790560));
+    public static final Vector3f SCULK_PARTICLE_COLOR = Vec3.fromRGB24(3790560).toVector3f();
     public static final DustColorTransitionOptions SCULK_TO_REDSTONE = new DustColorTransitionOptions(SCULK_PARTICLE_COLOR, DustParticleOptions.REDSTONE_PARTICLE_COLOR, 1.0f);
-    public static final Codec<DustColorTransitionOptions> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Vector3f.CODEC.fieldOf("fromColor")).forGetter(dustColorTransitionOptions -> dustColorTransitionOptions.color), ((MapCodec)Vector3f.CODEC.fieldOf("toColor")).forGetter(dustColorTransitionOptions -> dustColorTransitionOptions.toColor), ((MapCodec)Codec.FLOAT.fieldOf("scale")).forGetter(dustColorTransitionOptions -> Float.valueOf(dustColorTransitionOptions.scale))).apply((Applicative<DustColorTransitionOptions, ?>)instance, DustColorTransitionOptions::new));
+    public static final Codec<DustColorTransitionOptions> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.VECTOR3F.fieldOf("fromColor")).forGetter(dustColorTransitionOptions -> dustColorTransitionOptions.color), ((MapCodec)ExtraCodecs.VECTOR3F.fieldOf("toColor")).forGetter(dustColorTransitionOptions -> dustColorTransitionOptions.toColor), ((MapCodec)Codec.FLOAT.fieldOf("scale")).forGetter(dustColorTransitionOptions -> Float.valueOf(dustColorTransitionOptions.scale))).apply((Applicative<DustColorTransitionOptions, ?>)instance, DustColorTransitionOptions::new));
     public static final ParticleOptions.Deserializer<DustColorTransitionOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustColorTransitionOptions>(){
 
         @Override

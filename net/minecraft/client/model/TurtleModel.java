@@ -84,7 +84,7 @@ extends QuadrupedModel<T> {
         boolean bl = this.eggBelly.visible;
         if (bl) {
             poseStack.pushPose();
-            poseStack.translate(0.0, -0.08f, 0.0);
+            poseStack.translate(0.0f, -0.08f, 0.0f);
         }
         super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h, k);
         if (bl) {

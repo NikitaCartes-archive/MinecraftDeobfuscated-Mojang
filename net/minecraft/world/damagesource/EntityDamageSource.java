@@ -38,10 +38,18 @@ extends DamageSource {
 
     @Override
     public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-        ItemStack itemStack = this.entity instanceof LivingEntity ? ((LivingEntity)this.entity).getMainHandItem() : ItemStack.EMPTY;
+        ItemStack itemStack;
+        Entity entity = this.entity;
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity2 = (LivingEntity)entity;
+            itemStack = livingEntity2.getMainHandItem();
+        } else {
+            itemStack = ItemStack.EMPTY;
+        }
+        ItemStack itemStack2 = itemStack;
         String string = "death.attack." + this.msgId;
-        if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {
-            return Component.translatable(string + ".item", livingEntity.getDisplayName(), this.entity.getDisplayName(), itemStack.getDisplayName());
+        if (!itemStack2.isEmpty() && itemStack2.hasCustomHoverName()) {
+            return Component.translatable(string + ".item", livingEntity.getDisplayName(), this.entity.getDisplayName(), itemStack2.getDisplayName());
         }
         return Component.translatable(string, livingEntity.getDisplayName(), this.entity.getDisplayName());
     }

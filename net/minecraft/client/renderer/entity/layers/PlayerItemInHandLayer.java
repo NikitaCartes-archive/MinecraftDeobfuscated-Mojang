@@ -52,7 +52,7 @@ extends ItemInHandLayer<T, M> {
         modelPart.xRot = f;
         CustomHeadLayer.translateToHead(poseStack, false);
         boolean bl = humanoidArm == HumanoidArm.LEFT;
-        poseStack.translate((bl ? -2.5f : 2.5f) / 16.0f, -0.0625, 0.0);
+        poseStack.translate((bl ? -2.5f : 2.5f) / 16.0f, -0.0625f, 0.0f);
         this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }

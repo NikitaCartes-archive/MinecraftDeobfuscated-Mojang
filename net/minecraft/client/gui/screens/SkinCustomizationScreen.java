@@ -33,7 +33,7 @@ extends OptionsSubScreen {
         if (++i % 2 == 1) {
             ++i;
         }
-        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, this.height / 6 + 24 * (i >> 1), 200, 20).build());
     }
 
     @Override

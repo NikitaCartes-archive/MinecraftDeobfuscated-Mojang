@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.player;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -156,7 +156,7 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
             super.renderNameTag(abstractClientPlayer, Component.literal(Integer.toString(score.getScore())).append(" ").append(objective.getDisplayName()), poseStack, multiBufferSource, i);
             Objects.requireNonNull(this.getFont());
-            poseStack.translate(0.0, 9.0f * 1.15f * 0.025f, 0.0);
+            poseStack.translate(0.0f, 9.0f * 1.15f * 0.025f, 0.0f);
         }
         super.renderNameTag(abstractClientPlayer, component, poseStack, multiBufferSource, i);
         poseStack.popPose();
@@ -191,7 +191,7 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             float j = (float)abstractClientPlayer.getFallFlyingTicks() + h;
             float k = Mth.clamp(j * j / 100.0f, 0.0f, 1.0f);
             if (!abstractClientPlayer.isAutoSpinAttack()) {
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(k * (-90.0f - abstractClientPlayer.getXRot())));
+                poseStack.mulPose(Axis.XP.rotationDegrees(k * (-90.0f - abstractClientPlayer.getXRot())));
             }
             Vec3 vec3 = abstractClientPlayer.getViewVector(h);
             Vec3 vec32 = abstractClientPlayer.getDeltaMovement();
@@ -200,15 +200,15 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             if (d > 0.0 && e > 0.0) {
                 double l = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
                 double m = vec32.x * vec3.z - vec32.z * vec3.x;
-                poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
+                poseStack.mulPose(Axis.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
             }
         } else if (i > 0.0f) {
             super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
             float j = abstractClientPlayer.isInWater() ? -90.0f - abstractClientPlayer.getXRot() : -90.0f;
             float k = Mth.lerp(i, 0.0f, j);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(k));
+            poseStack.mulPose(Axis.XP.rotationDegrees(k));
             if (abstractClientPlayer.isVisuallySwimming()) {
-                poseStack.translate(0.0, -1.0, 0.3f);
+                poseStack.translate(0.0f, -1.0f, 0.3f);
             }
         } else {
             super.setupRotations(abstractClientPlayer, poseStack, f, g, h);

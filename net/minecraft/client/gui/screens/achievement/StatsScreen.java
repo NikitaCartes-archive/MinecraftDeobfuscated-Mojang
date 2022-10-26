@@ -87,10 +87,10 @@ implements StatsUpdateListener {
     }
 
     public void initButtons() {
-        this.addRenderableWidget(new Button(this.width / 2 - 120, this.height - 52, 80, 20, Component.translatable("stat.generalButton"), button -> this.setActiveList(this.statsList)));
-        Button button2 = this.addRenderableWidget(new Button(this.width / 2 - 40, this.height - 52, 80, 20, Component.translatable("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)));
-        Button button22 = this.addRenderableWidget(new Button(this.width / 2 + 40, this.height - 52, 80, 20, Component.translatable("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)));
-        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(Button.builder(Component.translatable("stat.generalButton"), button -> this.setActiveList(this.statsList)).bounds(this.width / 2 - 120, this.height - 52, 80, 20).build());
+        Button button2 = this.addRenderableWidget(Button.builder(Component.translatable("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)).bounds(this.width / 2 - 40, this.height - 52, 80, 20).build());
+        Button button22 = this.addRenderableWidget(Button.builder(Component.translatable("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)).bounds(this.width / 2 + 40, this.height - 52, 80, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
         if (this.itemStatsList.children().isEmpty()) {
             button2.active = false;
         }
@@ -357,7 +357,7 @@ implements StatsUpdateListener {
             int m = StatsScreen.this.font.width(component);
             this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
             poseStack.pushPose();
-            poseStack.translate(0.0, 0.0, 400.0);
+            poseStack.translate(0.0f, 0.0f, 400.0f);
             StatsScreen.this.font.drawShadow(poseStack, component, (float)k, (float)l, -1);
             poseStack.popPose();
         }

@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PhantomModel;
@@ -35,13 +35,13 @@ extends MobRenderer<Phantom, PhantomModel<Phantom>> {
         int i = phantom.getPhantomSize();
         float g = 1.0f + 0.15f * (float)i;
         poseStack.scale(g, g, g);
-        poseStack.translate(0.0, 1.3125, 0.1875);
+        poseStack.translate(0.0f, 1.3125f, 0.1875f);
     }
 
     @Override
     protected void setupRotations(Phantom phantom, PoseStack poseStack, float f, float g, float h) {
         super.setupRotations(phantom, poseStack, f, g, h);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(phantom.getXRot()));
+        poseStack.mulPose(Axis.XP.rotationDegrees(phantom.getXRot()));
     }
 }
 

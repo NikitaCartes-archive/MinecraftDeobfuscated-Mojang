@@ -9,8 +9,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
@@ -19,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class CubeMap {
@@ -34,13 +34,13 @@ public class CubeMap {
     public void render(Minecraft minecraft, float f, float g, float h) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        Matrix4f matrix4f = Matrix4f.perspective(85.0, (float)minecraft.getWindow().getWidth() / (float)minecraft.getWindow().getHeight(), 0.05f, 10.0f);
+        Matrix4f matrix4f = new Matrix4f().setPerspective(1.4835298f, (float)minecraft.getWindow().getWidth() / (float)minecraft.getWindow().getHeight(), 0.05f, 10.0f);
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(matrix4f);
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
         poseStack.setIdentity();
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
         RenderSystem.applyModelViewMatrix();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -54,9 +54,9 @@ public class CubeMap {
             float k = ((float)(j % 2) / 2.0f - 0.5f) / 256.0f;
             float l = ((float)(j / 2) / 2.0f - 0.5f) / 256.0f;
             float m = 0.0f;
-            poseStack.translate(k, l, 0.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(f));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(g));
+            poseStack.translate(k, l, 0.0f);
+            poseStack.mulPose(Axis.XP.rotationDegrees(f));
+            poseStack.mulPose(Axis.YP.rotationDegrees(g));
             RenderSystem.applyModelViewMatrix();
             for (int n = 0; n < 6; ++n) {
                 RenderSystem.setShaderTexture(0, this.images[n]);

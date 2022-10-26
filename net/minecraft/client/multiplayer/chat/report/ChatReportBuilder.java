@@ -30,79 +30,77 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.SignedMessageLink;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ChatReportBuilder {
-    private final UUID reportId;
-    private final Instant createdAt;
-    private final UUID reportedProfileId;
+    private final ChatReport report;
     private final AbuseReportLimits limits;
-    private final IntSet reportedMessages = new IntOpenHashSet();
-    private String comments = "";
-    @Nullable
-    private ReportReason reason;
 
-    private ChatReportBuilder(UUID uUID, Instant instant, UUID uUID2, AbuseReportLimits abuseReportLimits) {
-        this.reportId = uUID;
-        this.createdAt = instant;
-        this.reportedProfileId = uUID2;
+    public ChatReportBuilder(ChatReport chatReport, AbuseReportLimits abuseReportLimits) {
+        this.report = chatReport;
         this.limits = abuseReportLimits;
     }
 
     public ChatReportBuilder(UUID uUID, AbuseReportLimits abuseReportLimits) {
-        this(UUID.randomUUID(), Instant.now(), uUID, abuseReportLimits);
+        this.report = new ChatReport(UUID.randomUUID(), Instant.now(), uUID);
+        this.limits = abuseReportLimits;
     }
 
-    public void setComments(String string) {
-        this.comments = string;
-    }
-
-    public void setReason(ReportReason reportReason) {
-        this.reason = reportReason;
-    }
-
-    public void toggleReported(int i) {
-        if (this.reportedMessages.contains(i)) {
-            this.reportedMessages.remove(i);
-        } else if (this.reportedMessages.size() < this.limits.maxReportedMessageCount()) {
-            this.reportedMessages.add(i);
-        }
+    public ChatReport report() {
+        return this.report;
     }
 
     public UUID reportedProfileId() {
-        return this.reportedProfileId;
+        return this.report.reportedProfileId;
     }
 
     public IntSet reportedMessages() {
-        return this.reportedMessages;
+        return this.report.reportedMessages;
     }
 
     public String comments() {
-        return this.comments;
+        return this.report.comments;
+    }
+
+    public void setComments(String string) {
+        this.report.comments = string;
     }
 
     @Nullable
     public ReportReason reason() {
-        return this.reason;
+        return this.report.reason;
+    }
+
+    public void setReason(ReportReason reportReason) {
+        this.report.reason = reportReason;
+    }
+
+    public void toggleReported(int i) {
+        this.report.toggleReported(i, this.limits);
     }
 
     public boolean isReported(int i) {
-        return this.reportedMessages.contains(i);
+        return this.report.reportedMessages.contains(i);
+    }
+
+    public boolean hasContent() {
+        return StringUtils.isNotEmpty(this.comments()) || !this.reportedMessages().isEmpty();
     }
 
     @Nullable
     public CannotBuildReason checkBuildable() {
-        if (this.reportedMessages.isEmpty()) {
+        if (this.report.reportedMessages.isEmpty()) {
             return CannotBuildReason.NO_REPORTED_MESSAGES;
         }
-        if (this.reportedMessages.size() > this.limits.maxReportedMessageCount()) {
+        if (this.report.reportedMessages.size() > this.limits.maxReportedMessageCount()) {
             return CannotBuildReason.TOO_MANY_MESSAGES;
         }
-        if (this.reason == null) {
+        if (this.report.reason == null) {
             return CannotBuildReason.NO_REASON;
         }
-        if (this.comments.length() > this.limits.maxOpinionCommentsLength()) {
+        if (this.report.comments.length() > this.limits.maxOpinionCommentsLength()) {
             return CannotBuildReason.COMMENTS_TOO_LONG;
         }
         return null;
@@ -113,17 +111,17 @@ public class ChatReportBuilder {
         if (cannotBuildReason != null) {
             return Either.right(cannotBuildReason);
         }
-        String string = Objects.requireNonNull(this.reason).backendName();
+        String string = Objects.requireNonNull(this.report.reason).backendName();
         ReportEvidence reportEvidence = this.buildEvidence(reportingContext.chatLog());
-        ReportedEntity reportedEntity = new ReportedEntity(this.reportedProfileId);
-        AbuseReport abuseReport = new AbuseReport(this.comments, string, reportEvidence, reportedEntity, this.createdAt);
-        return Either.left(new Result(this.reportId, abuseReport));
+        ReportedEntity reportedEntity = new ReportedEntity(this.report.reportedProfileId);
+        AbuseReport abuseReport = new AbuseReport(this.report.comments, string, reportEvidence, reportedEntity, this.report.createdAt);
+        return Either.left(new Result(this.report.reportId, abuseReport));
     }
 
     private ReportEvidence buildEvidence(ChatLog chatLog) {
         ArrayList list = new ArrayList();
         ChatReportContextBuilder chatReportContextBuilder = new ChatReportContextBuilder(this.limits.leadingContextMessageCount());
-        chatReportContextBuilder.collectAllContext(chatLog, this.reportedMessages, (i, player) -> list.add(this.buildReportedChatMessage(player, this.isReported(i))));
+        chatReportContextBuilder.collectAllContext(chatLog, this.report.reportedMessages, (i, player) -> list.add(this.buildReportedChatMessage(player, this.isReported(i))));
         return new ReportEvidence(Lists.reverse(list));
     }
 
@@ -136,11 +134,44 @@ public class ChatReportBuilder {
     }
 
     public ChatReportBuilder copy() {
-        ChatReportBuilder chatReportBuilder = new ChatReportBuilder(this.reportId, this.createdAt, this.reportedProfileId, this.limits);
-        chatReportBuilder.reportedMessages.addAll(this.reportedMessages);
-        chatReportBuilder.comments = this.comments;
-        chatReportBuilder.reason = this.reason;
-        return chatReportBuilder;
+        return new ChatReportBuilder(this.report.copy(), this.limits);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public class ChatReport {
+        final UUID reportId;
+        final Instant createdAt;
+        final UUID reportedProfileId;
+        final IntSet reportedMessages = new IntOpenHashSet();
+        String comments = "";
+        @Nullable
+        ReportReason reason;
+
+        ChatReport(UUID uUID, Instant instant, UUID uUID2) {
+            this.reportId = uUID;
+            this.createdAt = instant;
+            this.reportedProfileId = uUID2;
+        }
+
+        public void toggleReported(int i, AbuseReportLimits abuseReportLimits) {
+            if (this.reportedMessages.contains(i)) {
+                this.reportedMessages.remove(i);
+            } else if (this.reportedMessages.size() < abuseReportLimits.maxReportedMessageCount()) {
+                this.reportedMessages.add(i);
+            }
+        }
+
+        public ChatReport copy() {
+            ChatReport chatReport = new ChatReport(this.reportId, this.createdAt, this.reportedProfileId);
+            chatReport.reportedMessages.addAll(this.reportedMessages);
+            chatReport.comments = this.comments;
+            chatReport.reason = this.reason;
+            return chatReport;
+        }
+
+        public boolean isReportedPlayer(UUID uUID) {
+            return uUID.equals(this.reportedProfileId);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)

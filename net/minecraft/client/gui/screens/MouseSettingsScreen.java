@@ -40,10 +40,10 @@ extends OptionsSubScreen {
             this.list.addSmall(MouseSettingsScreen.options(this.options));
         }
         this.addWidget(this.list);
-        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> {
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             this.options.save();
             this.minecraft.setScreen(this.lastScreen);
-        }));
+        }).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
     }
 
     @Override

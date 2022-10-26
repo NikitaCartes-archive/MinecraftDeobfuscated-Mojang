@@ -6,12 +6,11 @@ package net.minecraft.data.recipes;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
-import com.mojang.logging.LogUtils;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
@@ -49,11 +48,9 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 public abstract class RecipeProvider
 implements DataProvider {
-    private static final Logger LOGGER = LogUtils.getLogger();
     private final PackOutput.PathProvider recipePathProvider;
     private final PackOutput.PathProvider advancementPathProvider;
     private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> SHAPE_BUILDERS = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, (itemLike, itemLike2) -> RecipeProvider.buttonBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.CHISELED, (itemLike, itemLike2) -> RecipeProvider.chiseledBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.CUT, (itemLike, itemLike2) -> RecipeProvider.cutBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.DOOR, (itemLike, itemLike2) -> RecipeProvider.doorBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.CUSTOM_FENCE, (itemLike, itemLike2) -> RecipeProvider.fenceBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.FENCE, (itemLike, itemLike2) -> RecipeProvider.fenceBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.CUSTOM_FENCE_GATE, (itemLike, itemLike2) -> RecipeProvider.fenceGateBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.FENCE_GATE, (itemLike, itemLike2) -> RecipeProvider.fenceGateBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.SIGN, (itemLike, itemLike2) -> RecipeProvider.signBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.SLAB, (itemLike, itemLike2) -> RecipeProvider.slabBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.STAIRS, (itemLike, itemLike2) -> RecipeProvider.stairBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.PRESSURE_PLATE, (itemLike, itemLike2) -> RecipeProvider.pressurePlateBuilder(RecipeCategory.REDSTONE, itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.POLISHED, (itemLike, itemLike2) -> RecipeProvider.polishedBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.TRAPDOOR, (itemLike, itemLike2) -> RecipeProvider.trapdoorBuilder(itemLike, Ingredient.of(itemLike2))).put(BlockFamily.Variant.WALL, (itemLike, itemLike2) -> RecipeProvider.wallBuilder(RecipeCategory.DECORATIONS, itemLike, Ingredient.of(itemLike2))).build();
@@ -64,38 +61,24 @@ implements DataProvider {
     }
 
     @Override
-    public void run(CachedOutput cachedOutput) {
+    public CompletableFuture<?> run(CachedOutput cachedOutput) {
         HashSet set = Sets.newHashSet();
+        ArrayList list = new ArrayList();
         this.buildRecipes(finishedRecipe -> {
             if (!set.add(finishedRecipe.getId())) {
                 throw new IllegalStateException("Duplicate recipe " + finishedRecipe.getId());
             }
-            RecipeProvider.saveRecipe(cachedOutput, finishedRecipe.serializeRecipe(), this.recipePathProvider.json(finishedRecipe.getId()));
+            list.add(DataProvider.saveStable(cachedOutput, finishedRecipe.serializeRecipe(), this.recipePathProvider.json(finishedRecipe.getId())));
             JsonObject jsonObject = finishedRecipe.serializeAdvancement();
             if (jsonObject != null) {
-                RecipeProvider.saveAdvancement(cachedOutput, jsonObject, this.advancementPathProvider.json(finishedRecipe.getAdvancementId()));
+                list.add(DataProvider.saveStable(cachedOutput, jsonObject, this.advancementPathProvider.json(finishedRecipe.getAdvancementId())));
             }
         });
+        return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
     }
 
-    protected void buildAdvancement(CachedOutput cachedOutput, ResourceLocation resourceLocation, Advancement.Builder builder) {
-        RecipeProvider.saveAdvancement(cachedOutput, builder.serializeToJson(), this.advancementPathProvider.json(resourceLocation));
-    }
-
-    private static void saveRecipe(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {
-        try {
-            DataProvider.saveStable(cachedOutput, jsonObject, path);
-        } catch (IOException iOException) {
-            LOGGER.error("Couldn't save recipe {}", (Object)path, (Object)iOException);
-        }
-    }
-
-    private static void saveAdvancement(CachedOutput cachedOutput, JsonObject jsonObject, Path path) {
-        try {
-            DataProvider.saveStable(cachedOutput, jsonObject, path);
-        } catch (IOException iOException) {
-            LOGGER.error("Couldn't save recipe advancement {}", (Object)path, (Object)iOException);
-        }
+    protected CompletableFuture<?> buildAdvancement(CachedOutput cachedOutput, ResourceLocation resourceLocation, Advancement.Builder builder) {
+        return DataProvider.saveStable(cachedOutput, builder.serializeToJson(), this.advancementPathProvider.json(resourceLocation));
     }
 
     protected abstract void buildRecipes(Consumer<FinishedRecipe> var1);
@@ -409,6 +392,11 @@ implements DataProvider {
 
     protected static String getBlastingRecipeName(ItemLike itemLike) {
         return RecipeProvider.getItemName(itemLike) + "_from_blasting";
+    }
+
+    @Override
+    public final String getName() {
+        return "Recipes";
     }
 }
 

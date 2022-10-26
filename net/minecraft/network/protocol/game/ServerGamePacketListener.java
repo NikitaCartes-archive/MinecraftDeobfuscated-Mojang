@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -147,5 +148,7 @@ extends ServerPacketListener {
     public void handleChangeDifficulty(ServerboundChangeDifficultyPacket var1);
 
     public void handleLockDifficulty(ServerboundLockDifficultyPacket var1);
+
+    public void handleChatSessionUpdate(ServerboundChatSessionUpdatePacket var1);
 }
 

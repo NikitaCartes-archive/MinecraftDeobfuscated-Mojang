@@ -41,12 +41,12 @@ implements BlockEntityRenderer<ShulkerBoxBlockEntity> {
         }
         Material material = (dyeColor = shulkerBoxBlockEntity.getColor()) == null ? Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION : Sheets.SHULKER_TEXTURE_LOCATION.get(dyeColor.getId());
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.translate(0.5f, 0.5f, 0.5f);
         float g = 0.9995f;
         poseStack.scale(0.9995f, 0.9995f, 0.9995f);
         poseStack.mulPose(direction.getRotation());
         poseStack.scale(1.0f, -1.0f, -1.0f);
-        poseStack.translate(0.0, -1.0, 0.0);
+        poseStack.translate(0.0f, -1.0f, 0.0f);
         ModelPart modelPart = this.model.getLid();
         modelPart.setPos(0.0f, 24.0f - shulkerBoxBlockEntity.getProgress(f) * 0.5f * 16.0f, 0.0f);
         modelPart.yRot = 270.0f * shulkerBoxBlockEntity.getProgress(f) * ((float)Math.PI / 180);

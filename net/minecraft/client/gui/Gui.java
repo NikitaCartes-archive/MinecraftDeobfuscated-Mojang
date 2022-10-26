@@ -15,7 +15,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -257,7 +257,7 @@ extends GuiComponent {
                 }
                 if (m > 8) {
                     poseStack.pushPose();
-                    poseStack.translate(this.screenWidth / 2, this.screenHeight - 68, 0.0);
+                    poseStack.translate(this.screenWidth / 2, this.screenHeight - 68, 0.0f);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     l = 0xFFFFFF;
@@ -286,7 +286,7 @@ extends GuiComponent {
                 }
                 if ((m = Mth.clamp(m, 0, 255)) > 8) {
                     poseStack.pushPose();
-                    poseStack.translate(this.screenWidth / 2, this.screenHeight / 2, 0.0);
+                    poseStack.translate(this.screenWidth / 2, this.screenHeight / 2, 0.0f);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     poseStack.pushPose();
@@ -360,8 +360,8 @@ extends GuiComponent {
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
             poseStack2.translate(this.screenWidth / 2, this.screenHeight / 2, this.getBlitOffset());
-            poseStack2.mulPose(Vector3f.XN.rotationDegrees(camera.getXRot()));
-            poseStack2.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot()));
+            poseStack2.mulPose(Axis.XN.rotationDegrees(camera.getXRot()));
+            poseStack2.mulPose(Axis.YP.rotationDegrees(camera.getYRot()));
             poseStack2.scale(-1.0f, -1.0f, -1.0f);
             RenderSystem.applyModelViewMatrix();
             RenderSystem.renderCrosshair(10);
@@ -1008,9 +1008,9 @@ extends GuiComponent {
         if (g > 0.0f) {
             float h = 1.0f + g / 5.0f;
             poseStack.pushPose();
-            poseStack.translate(i + 8, j + 12, 0.0);
+            poseStack.translate(i + 8, j + 12, 0.0f);
             poseStack.scale(1.0f / h, (h + 1.0f) / 2.0f, 1.0f);
-            poseStack.translate(-(i + 8), -(j + 12), 0.0);
+            poseStack.translate(-(i + 8), -(j + 12), 0.0f);
             RenderSystem.applyModelViewMatrix();
         }
         this.itemRenderer.renderAndDecorateItem(player, itemStack, i, j, k);

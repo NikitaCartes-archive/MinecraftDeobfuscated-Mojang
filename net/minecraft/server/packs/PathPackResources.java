@@ -110,8 +110,8 @@ extends AbstractPackResources {
     public Set<String> getNamespaces(PackType packType) {
         HashSet<String> set = Sets.newHashSet();
         Path path = this.root.resolve(packType.getDirectory());
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path);){
-            for (Path path2 : directoryStream) {
+        try (DirectoryStream<Path> directoryStream2 = Files.newDirectoryStream(path);){
+            for (Path path2 : directoryStream2) {
                 String string = path2.getFileName().toString();
                 if (string.equals(string.toLowerCase(Locale.ROOT))) {
                     set.add(string);
@@ -119,6 +119,7 @@ extends AbstractPackResources {
                 }
                 LOGGER.warn("Ignored non-lowercase namespace: {} in {}", (Object)string, (Object)this.root);
             }
+        } catch (NoSuchFileException directoryStream2) {
         } catch (IOException iOException) {
             LOGGER.error("Failed to list path {}", (Object)path, (Object)iOException);
         }

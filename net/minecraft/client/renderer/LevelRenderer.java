@@ -24,11 +24,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3d;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
+import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -157,6 +153,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3d;
+import org.joml.Vector4f;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -957,8 +957,8 @@ AutoCloseable {
 
     private void captureFrustum(Matrix4f matrix4f, Matrix4f matrix4f2, double d, double e, double f, Frustum frustum) {
         this.capturedFrustum = frustum;
-        Matrix4f matrix4f3 = matrix4f2.copy();
-        matrix4f3.multiply(matrix4f);
+        Matrix4f matrix4f3 = new Matrix4f(matrix4f2);
+        matrix4f3.mul(matrix4f);
         matrix4f3.invert();
         this.frustumPos.x = d;
         this.frustumPos.y = e;
@@ -972,8 +972,8 @@ AutoCloseable {
         this.frustumPoints[6] = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.frustumPoints[7] = new Vector4f(-1.0f, 1.0f, 1.0f, 1.0f);
         for (int i = 0; i < 8; ++i) {
-            this.frustumPoints[i].transform(matrix4f3);
-            this.frustumPoints[i].perspectiveDivide();
+            matrix4f3.transform(this.frustumPoints[i]);
+            this.frustumPoints[i].div(this.frustumPoints[i].w());
         }
     }
 
@@ -1343,7 +1343,7 @@ AutoCloseable {
             vertexBuffer.draw();
         }
         if (uniform != null) {
-            uniform.set(Vector3f.ZERO);
+            uniform.set(0.0f, 0.0f, 0.0f);
         }
         shaderInstance.clear();
         VertexBuffer.unbind();
@@ -1559,19 +1559,19 @@ AutoCloseable {
         for (int i = 0; i < 6; ++i) {
             poseStack.pushPose();
             if (i == 1) {
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
+                poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
             }
             if (i == 2) {
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
+                poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
             }
             if (i == 3) {
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
+                poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
             }
             if (i == 4) {
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
             }
             if (i == 5) {
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0f));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0f));
             }
             Matrix4f matrix4f = poseStack.last().pose();
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -1630,10 +1630,10 @@ AutoCloseable {
             RenderSystem.disableTexture();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             poseStack.pushPose();
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
             j = Mth.sin(this.level.getSunAngle(f)) < 0.0f ? 180.0f : 0.0f;
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(j));
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(j));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
             float k = fs[0];
             l = fs[1];
             float m = fs[2];
@@ -1655,8 +1655,8 @@ AutoCloseable {
         poseStack.pushPose();
         j = 1.0f - this.level.getRainLevel(f);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, j);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0f));
         Matrix4f matrix4f3 = poseStack.last().pose();
         l = 30.0f;
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -1700,7 +1700,7 @@ AutoCloseable {
         double d = this.minecraft.player.getEyePosition((float)f).y - this.level.getLevelData().getHorizonHeight(this.level);
         if (d < 0.0) {
             poseStack.pushPose();
-            poseStack.translate(0.0, 12.0, 0.0);
+            poseStack.translate(0.0f, 12.0f, 0.0f);
             this.darkBuffer.bind();
             this.darkBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
             VertexBuffer.unbind();

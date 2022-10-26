@@ -105,7 +105,7 @@ implements MenuAccess<T> {
         super.render(poseStack, i, j, f);
         PoseStack poseStack2 = RenderSystem.getModelViewStack();
         poseStack2.pushPose();
-        poseStack2.translate(k, l, 0.0);
+        poseStack2.translate(k, l, 0.0f);
         RenderSystem.applyModelViewMatrix();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.hoveredSlot = null;
@@ -173,7 +173,7 @@ implements MenuAccess<T> {
 
     private void renderFloatingItem(ItemStack itemStack, int i, int j, String string) {
         PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.translate(0.0, 0.0, 32.0);
+        poseStack.translate(0.0f, 0.0f, 32.0f);
         RenderSystem.applyModelViewMatrix();
         this.setBlitOffset(200);
         this.itemRenderer.blitOffset = 200.0f;

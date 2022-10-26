@@ -45,10 +45,10 @@ extends RealmsScreen {
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         int i = this.width / 2 - 106;
-        this.doneButton = this.addRenderableWidget(new Button(i - 2, RealmsSettingsScreen.row(12), 106, 20, Component.translatable("mco.configure.world.buttons.done"), button -> this.save()));
-        this.addRenderableWidget(new Button(this.width / 2 + 2, RealmsSettingsScreen.row(12), 106, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.configureWorldScreen)));
+        this.doneButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.buttons.done"), button -> this.save()).bounds(i - 2, RealmsSettingsScreen.row(12), 106, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.configureWorldScreen)).bounds(this.width / 2 + 2, RealmsSettingsScreen.row(12), 106, 20).build());
         String string = this.serverData.state == RealmsServer.State.OPEN ? "mco.configure.world.buttons.close" : "mco.configure.world.buttons.open";
-        Button button2 = new Button(this.width / 2 - 53, RealmsSettingsScreen.row(0), 106, 20, Component.translatable(string), button -> {
+        Button button2 = Button.builder(Component.translatable(string), button -> {
             if (this.serverData.state == RealmsServer.State.OPEN) {
                 MutableComponent component = Component.translatable("mco.configure.world.close.question.line1");
                 MutableComponent component2 = Component.translatable("mco.configure.world.close.question.line2");
@@ -62,7 +62,7 @@ extends RealmsScreen {
             } else {
                 this.configureWorldScreen.openTheWorld(false, this);
             }
-        });
+        }).bounds(this.width / 2 - 53, RealmsSettingsScreen.row(0), 106, 20).build();
         this.addRenderableWidget(button2);
         this.nameEdit = new EditBox(this.minecraft.font, i, RealmsSettingsScreen.row(4), 212, 20, null, Component.translatable("mco.configure.world.name"));
         this.nameEdit.setMaxLength(32);

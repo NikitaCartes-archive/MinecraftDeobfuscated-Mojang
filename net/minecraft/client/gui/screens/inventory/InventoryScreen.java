@@ -6,8 +6,6 @@ package net.minecraft.client.gui.screens.inventory;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -27,6 +25,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
+import org.joml.Quaternionf;
 
 @Environment(value=EnvType.CLIENT)
 public class InventoryScreen
@@ -114,16 +113,16 @@ implements RecipeUpdateListener {
         float l = (float)Math.atan(g / 40.0f);
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
-        poseStack.translate(i, j, 1050.0);
+        poseStack.translate(i, j, 1050.0f);
         poseStack.scale(1.0f, 1.0f, -1.0f);
         RenderSystem.applyModelViewMatrix();
         PoseStack poseStack2 = new PoseStack();
-        poseStack2.translate(0.0, 0.0, 1000.0);
+        poseStack2.translate(0.0f, 0.0f, 1000.0f);
         poseStack2.scale(k, k, k);
-        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0f);
-        Quaternion quaternion2 = Vector3f.XP.rotationDegrees(l * 20.0f);
-        quaternion.mul(quaternion2);
-        poseStack2.mulPose(quaternion);
+        Quaternionf quaternionf = new Quaternionf().rotateZ((float)Math.PI);
+        Quaternionf quaternionf2 = new Quaternionf().rotateX(l * 20.0f * ((float)Math.PI / 180));
+        quaternionf.mul(quaternionf2);
+        poseStack2.mulPose(quaternionf);
         float m = livingEntity.yBodyRot;
         float n = livingEntity.getYRot();
         float o = livingEntity.getXRot();
@@ -136,8 +135,8 @@ implements RecipeUpdateListener {
         livingEntity.yHeadRotO = livingEntity.getYRot();
         Lighting.setupForEntityInInventory();
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternion2.conj();
-        entityRenderDispatcher.overrideCameraOrientation(quaternion2);
+        quaternionf2.conjugate();
+        entityRenderDispatcher.overrideCameraOrientation(quaternionf2);
         entityRenderDispatcher.setRenderShadow(false);
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack2, bufferSource, 0xF000F0));

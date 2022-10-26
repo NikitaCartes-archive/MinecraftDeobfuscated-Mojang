@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DrownedModel;
@@ -37,7 +37,7 @@ extends AbstractZombieRenderer<Drowned, DrownedModel<Drowned>> {
         super.setupRotations(drowned, poseStack, f, g, h);
         float i = drowned.getSwimAmount(h);
         if (i > 0.0f) {
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(i, drowned.getXRot(), -10.0f - drowned.getXRot())));
+            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(i, drowned.getXRot(), -10.0f - drowned.getXRot())));
         }
     }
 }

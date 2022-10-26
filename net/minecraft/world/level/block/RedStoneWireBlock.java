@@ -6,7 +6,6 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.math.Vector3f;
 import java.util.HashSet;
 import java.util.Map;
 import net.minecraft.Util;
@@ -389,7 +388,7 @@ extends Block {
         double d = 0.5 + (double)(0.4375f * (float)direction.getStepX()) + (double)(j * (float)direction2.getStepX());
         double e = 0.5 + (double)(0.4375f * (float)direction.getStepY()) + (double)(j * (float)direction2.getStepY());
         double k = 0.5 + (double)(0.4375f * (float)direction.getStepZ()) + (double)(j * (float)direction2.getStepZ());
-        level.addParticle(new DustParticleOptions(new Vector3f(vec3), 1.0f), (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + k, 0.0, 0.0, 0.0);
+        level.addParticle(new DustParticleOptions(vec3.toVector3f(), 1.0f), (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + k, 0.0, 0.0, 0.0);
     }
 
     @Override

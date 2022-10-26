@@ -52,8 +52,8 @@ extends RealmsScreen {
         this.profileName = new EditBox(this.minecraft.font, this.width / 2 - 100, RealmsInviteScreen.row(2), 200, 20, null, Component.translatable("mco.configure.world.invite.profile.name"));
         this.addWidget(this.profileName);
         this.setInitialFocus(this.profileName);
-        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(10), 200, 20, Component.translatable("mco.configure.world.buttons.invite"), button -> this.onInvite()));
-        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsInviteScreen.row(12), 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.buttons.invite"), button -> this.onInvite()).bounds(this.width / 2 - 100, RealmsInviteScreen.row(10), 200, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, RealmsInviteScreen.row(12), 200, 20).build());
     }
 
     @Override

@@ -5,12 +5,12 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.math.Vector3f;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 public abstract class DustParticleOptionsBase
 implements ParticleOptions {

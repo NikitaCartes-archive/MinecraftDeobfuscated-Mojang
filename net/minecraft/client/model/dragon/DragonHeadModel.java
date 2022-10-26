@@ -45,7 +45,7 @@ extends SkullModelBase {
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
         poseStack.pushPose();
-        poseStack.translate(0.0, -0.374375f, 0.0);
+        poseStack.translate(0.0f, -0.374375f, 0.0f);
         poseStack.scale(0.75f, 0.75f, 0.75f);
         this.head.render(poseStack, vertexConsumer, i, j, f, g, h, k);
         poseStack.popPose();

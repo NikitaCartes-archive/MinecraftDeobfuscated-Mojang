@@ -27,7 +27,7 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.addRenderableWidget(new Button(this.width / 2 - 100, RealmsClientOutdatedScreen.row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, RealmsClientOutdatedScreen.row(12), 200, 20).build());
     }
 
     @Override

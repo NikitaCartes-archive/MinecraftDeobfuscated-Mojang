@@ -4,6 +4,7 @@
 package net.minecraft.network.chat;
 
 import com.google.common.primitives.Ints;
+import com.mojang.serialization.Codec;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -11,9 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.MessageSignatureCache;
 import net.minecraft.util.SignatureUpdater;
 
 public record LastSeenMessages(List<MessageSignature> entries) {
+    public static final Codec<LastSeenMessages> CODEC = MessageSignature.CODEC.listOf().xmap(LastSeenMessages::new, LastSeenMessages::entries);
     public static LastSeenMessages EMPTY = new LastSeenMessages(List.of());
     public static final int LAST_SEEN_MESSAGES_MAX_LENGTH = 20;
 
@@ -24,8 +27,8 @@ public record LastSeenMessages(List<MessageSignature> entries) {
         }
     }
 
-    public Packed pack(MessageSignature.Packer packer) {
-        return new Packed(this.entries.stream().map(messageSignature -> messageSignature.pack(packer)).toList());
+    public Packed pack(MessageSignatureCache messageSignatureCache) {
+        return new Packed(this.entries.stream().map(messageSignature -> messageSignature.pack(messageSignatureCache)).toList());
     }
 
     public record Packed(List<MessageSignature.Packed> entries) {
@@ -39,10 +42,10 @@ public record LastSeenMessages(List<MessageSignature> entries) {
             friendlyByteBuf.writeCollection(this.entries, MessageSignature.Packed::write);
         }
 
-        public Optional<LastSeenMessages> unpack(MessageSignature.Unpacker unpacker) {
+        public Optional<LastSeenMessages> unpack(MessageSignatureCache messageSignatureCache) {
             ArrayList<MessageSignature> list = new ArrayList<MessageSignature>(this.entries.size());
             for (MessageSignature.Packed packed : this.entries) {
-                Optional<MessageSignature> optional = packed.unpack(unpacker);
+                Optional<MessageSignature> optional = packed.unpack(messageSignatureCache);
                 if (optional.isEmpty()) {
                     return Optional.empty();
                 }

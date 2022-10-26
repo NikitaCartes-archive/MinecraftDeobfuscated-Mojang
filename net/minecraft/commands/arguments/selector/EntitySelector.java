@@ -54,7 +54,7 @@ public class EntitySelector {
     private final String playerName;
     @Nullable
     private final UUID entityUUID;
-    private EntityTypeTest<Entity, ?> type;
+    private final EntityTypeTest<Entity, ?> type;
     private final boolean usesSelector;
 
     public EntitySelector(int i, boolean bl, boolean bl2, Predicate<Entity> predicate, MinMaxBounds.Doubles doubles, Function<Vec3, Vec3> function, @Nullable AABB aABB, BiConsumer<Vec3, List<? extends Entity>> biConsumer, boolean bl3, @Nullable String string, @Nullable UUID uUID, @Nullable EntityType<?> entityType, boolean bl4) {

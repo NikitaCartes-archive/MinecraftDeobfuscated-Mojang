@@ -53,9 +53,9 @@ extends StateSwitchingButton {
         if (this.animationTime > 0.0f) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
             poseStack.pushPose();
-            poseStack.translate(this.x + 8, this.y + 12, 0.0);
+            poseStack.translate(this.getX() + 8, this.getY() + 12, 0.0f);
             poseStack.scale(1.0f, g, 1.0f);
-            poseStack.translate(-(this.x + 8), -(this.y + 12), 0.0);
+            poseStack.translate(-(this.getX() + 8), -(this.getY() + 12), 0.0f);
         }
         Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -69,12 +69,12 @@ extends StateSwitchingButton {
         if (this.isHoveredOrFocused()) {
             l += this.yDiffTex;
         }
-        int m = this.x;
+        int m = this.getX();
         if (this.isStateTriggered) {
             m -= 2;
         }
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        this.blit(poseStack, m, this.y, k, l, this.width, this.height);
+        this.blit(poseStack, m, this.getY(), k, l, this.width, this.height);
         RenderSystem.enableDepthTest();
         this.renderIcon(minecraft.getItemRenderer());
         if (this.animationTime > 0.0f) {
@@ -88,10 +88,10 @@ extends StateSwitchingButton {
         List<ItemStack> list = this.category.getIconItems();
         int n = i = this.isStateTriggered ? -2 : 0;
         if (list.size() == 1) {
-            itemRenderer.renderAndDecorateFakeItem(list.get(0), this.x + 9 + i, this.y + 5);
+            itemRenderer.renderAndDecorateFakeItem(list.get(0), this.getX() + 9 + i, this.getY() + 5);
         } else if (list.size() == 2) {
-            itemRenderer.renderAndDecorateFakeItem(list.get(0), this.x + 3 + i, this.y + 5);
-            itemRenderer.renderAndDecorateFakeItem(list.get(1), this.x + 14 + i, this.y + 5);
+            itemRenderer.renderAndDecorateFakeItem(list.get(0), this.getX() + 3 + i, this.getY() + 5);
+            itemRenderer.renderAndDecorateFakeItem(list.get(1), this.getX() + 14 + i, this.getY() + 5);
         }
     }
 

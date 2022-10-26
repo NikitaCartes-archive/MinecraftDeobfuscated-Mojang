@@ -65,15 +65,23 @@ extends Screen {
     @Nullable
     private MultiLineEditBox commentBox;
     private Button sendButton;
-    private ChatReportBuilder report;
+    private ChatReportBuilder reportBuilder;
     @Nullable
     ChatReportBuilder.CannotBuildReason cannotBuildReason;
 
-    public ChatReportScreen(Screen screen, ReportingContext reportingContext, UUID uUID) {
+    private ChatReportScreen(@Nullable Screen screen, ReportingContext reportingContext, ChatReportBuilder chatReportBuilder) {
         super(Component.translatable("gui.chatReport.title"));
         this.lastScreen = screen;
         this.reportingContext = reportingContext;
-        this.report = new ChatReportBuilder(uUID, reportingContext.sender().reportLimits());
+        this.reportBuilder = chatReportBuilder;
+    }
+
+    public ChatReportScreen(@Nullable Screen screen, ReportingContext reportingContext, UUID uUID) {
+        this(screen, reportingContext, new ChatReportBuilder(uUID, reportingContext.sender().reportLimits()));
+    }
+
+    public ChatReportScreen(@Nullable Screen screen, ReportingContext reportingContext, ChatReportBuilder.ChatReport chatReport) {
+        this(screen, reportingContext, new ChatReportBuilder(chatReport, reportingContext.sender().reportLimits()));
     }
 
     @Override
@@ -81,38 +89,38 @@ extends Screen {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         AbuseReportLimits abuseReportLimits = this.reportingContext.sender().reportLimits();
         int i = this.width / 2;
-        ReportReason reportReason = this.report.reason();
+        ReportReason reportReason = this.reportBuilder.reason();
         this.reasonDescriptionLabel = reportReason != null ? MultiLineLabel.create(this.font, (FormattedText)reportReason.description(), 280) : null;
-        IntSet intSet = this.report.reportedMessages();
+        IntSet intSet = this.reportBuilder.reportedMessages();
         Component component = intSet.isEmpty() ? SELECT_CHAT_MESSAGE : Component.translatable("gui.chatReport.selected_chat", intSet.size());
-        this.addRenderableWidget(new Button(this.contentLeft(), this.selectChatTop(), 280, 20, component, button -> this.minecraft.setScreen(new ChatSelectionScreen(this, this.reportingContext, this.report, chatReportBuilder -> {
-            this.report = chatReportBuilder;
+        this.addRenderableWidget(Button.builder(component, button -> this.minecraft.setScreen(new ChatSelectionScreen(this, this.reportingContext, this.reportBuilder, chatReportBuilder -> {
+            this.reportBuilder = chatReportBuilder;
             this.onReportChanged();
-        }))));
+        }))).bounds(this.contentLeft(), this.selectChatTop(), 280, 20).build());
         Component component2 = Util.mapNullable(reportReason, ReportReason::title, SELECT_REASON);
-        this.addRenderableWidget(new Button(this.contentLeft(), this.selectInfoTop(), 280, 20, component2, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.report.reason(), reportReason -> {
-            this.report.setReason((ReportReason)((Object)((Object)reportReason)));
+        this.addRenderableWidget(Button.builder(component2, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), reportReason -> {
+            this.reportBuilder.setReason((ReportReason)((Object)((Object)reportReason)));
             this.onReportChanged();
-        }))));
+        }))).bounds(this.contentLeft(), this.selectInfoTop(), 280, 20).build());
         this.commentBox = this.addRenderableWidget(new MultiLineEditBox(this.minecraft.font, this.contentLeft(), this.commentBoxTop(), 280, this.commentBoxBottom() - this.commentBoxTop(), DESCRIBE_PLACEHOLDER, Component.translatable("gui.chatReport.comments")));
-        this.commentBox.setValue(this.report.comments());
+        this.commentBox.setValue(this.reportBuilder.comments());
         this.commentBox.setCharacterLimit(abuseReportLimits.maxOpinionCommentsLength());
         this.commentBox.setValueListener(string -> {
-            this.report.setComments((String)string);
+            this.reportBuilder.setComments((String)string);
             this.onReportChanged();
         });
-        this.addRenderableWidget(new Button(i - 120, this.completeButtonTop(), 120, 20, CommonComponents.GUI_BACK, button -> this.onClose()));
-        this.sendButton = this.addRenderableWidget(new Button(i + 10, this.completeButtonTop(), 120, 20, Component.translatable("gui.chatReport.send"), button -> this.sendReport(), new SubmitButtonTooltip()));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(i - 120, this.completeButtonTop(), 120, 20).build());
+        this.sendButton = this.addRenderableWidget(Button.builder(Component.translatable("gui.chatReport.send"), button -> this.sendReport()).bounds(i + 10, this.completeButtonTop(), 120, 20).tooltip(new SubmitButtonTooltip()).build());
         this.onReportChanged();
     }
 
     private void onReportChanged() {
-        this.cannotBuildReason = this.report.checkBuildable();
+        this.cannotBuildReason = this.reportBuilder.checkBuildable();
         this.sendButton.active = this.cannotBuildReason == null;
     }
 
     private void sendReport() {
-        this.report.build(this.reportingContext).ifLeft(result -> {
+        this.reportBuilder.build(this.reportingContext).ifLeft(result -> {
             CompletableFuture<Unit> completableFuture = this.reportingContext.sender().send(result.id(), result.report());
             this.minecraft.setScreen(GenericWaitingScreen.createWaiting(REPORT_SENDING_TITLE, CommonComponents.GUI_CANCEL, () -> {
                 this.minecraft.setScreen(this);
@@ -133,6 +141,7 @@ extends Screen {
     }
 
     private void onReportSendSuccess() {
+        this.clearDraft();
         this.minecraft.setScreen(GenericWaitingScreen.createCompleted(REPORT_SENT_TITLE, REPORT_SENT_MESSAGE, CommonComponents.GUI_DONE, () -> this.minecraft.setScreen(null)));
     }
 
@@ -152,6 +161,16 @@ extends Screen {
     private void displayReportSendError(Component component) {
         MutableComponent component2 = component.copy().withStyle(ChatFormatting.RED);
         this.minecraft.setScreen(GenericWaitingScreen.createCompleted(REPORT_ERROR_TITLE, component2, CommonComponents.GUI_BACK, () -> this.minecraft.setScreen(this)));
+    }
+
+    void saveDraft() {
+        if (this.reportBuilder.hasContent()) {
+            this.reportingContext.setChatReportDraft(this.reportBuilder.report().copy());
+        }
+    }
+
+    void clearDraft() {
+        this.reportingContext.setChatReportDraft(null);
     }
 
     @Override
@@ -177,11 +196,17 @@ extends Screen {
 
     @Override
     public void onClose() {
-        if (!this.commentBox.getValue().isEmpty()) {
+        if (this.reportBuilder.hasContent()) {
             this.minecraft.setScreen(new DiscardReportWarningScreen());
         } else {
             this.minecraft.setScreen(this.lastScreen);
         }
+    }
+
+    @Override
+    public void removed() {
+        this.saveDraft();
+        super.removed();
     }
 
     @Override
@@ -253,6 +278,7 @@ extends Screen {
         private static final Component TITLE = Component.translatable("gui.chatReport.discard.title").withStyle(ChatFormatting.BOLD);
         private static final Component MESSAGE = Component.translatable("gui.chatReport.discard.content");
         private static final Component RETURN = Component.translatable("gui.chatReport.discard.return");
+        private static final Component DRAFT = Component.translatable("gui.chatReport.discard.draft");
         private static final Component DISCARD = Component.translatable("gui.chatReport.discard.discard");
 
         protected DiscardReportWarningScreen() {
@@ -261,8 +287,16 @@ extends Screen {
 
         @Override
         protected void initButtons(int i) {
-            this.addRenderableWidget(new Button(this.width / 2 - 155, 100 + i, 150, 20, RETURN, button -> this.onClose()));
-            this.addRenderableWidget(new Button(this.width / 2 + 5, 100 + i, 150, 20, DISCARD, button -> this.minecraft.setScreen(ChatReportScreen.this.lastScreen)));
+            int j = 150;
+            this.addRenderableWidget(Button.builder(RETURN, button -> this.onClose()).bounds(this.width / 2 - 245, 100 + i, 150, 20).build());
+            this.addRenderableWidget(Button.builder(DRAFT, button -> {
+                ChatReportScreen.this.saveDraft();
+                this.minecraft.setScreen(ChatReportScreen.this.lastScreen);
+            }).bounds(this.width / 2 - 75, 100 + i, 150, 20).build());
+            this.addRenderableWidget(Button.builder(DISCARD, button -> {
+                ChatReportScreen.this.clearDraft();
+                this.minecraft.setScreen(ChatReportScreen.this.lastScreen);
+            }).bounds(this.width / 2 + 95, 100 + i, 150, 20).build());
         }
 
         @Override

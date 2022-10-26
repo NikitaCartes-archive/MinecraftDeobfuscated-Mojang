@@ -70,6 +70,7 @@ extends HierarchicalModel<T> {
         float k = Math.min((float)((Entity)camel).getDeltaMovement().lengthSqr() * 75.0f, 2.0f);
         this.animate(((Camel)camel).walkAnimationState, CamelAnimation.CAMEL_WALK, h, k);
         this.animate(((Camel)camel).sitAnimationState, CamelAnimation.CAMEL_SIT, h, 1.0f);
+        this.animate(((Camel)camel).sitPoseAnimationState, CamelAnimation.CAMEL_SIT_POSE, h, 1.0f);
         this.animate(((Camel)camel).sitUpAnimationState, CamelAnimation.CAMEL_STANDUP, h, 1.0f);
         this.animate(((Camel)camel).idleAnimationState, CamelAnimation.CAMEL_IDLE, h, 1.0f);
         this.animate(((Camel)camel).dashAnimationState, CamelAnimation.CAMEL_DASH, h, 1.0f);
@@ -105,7 +106,7 @@ extends HierarchicalModel<T> {
             float m = 1.1f;
             poseStack.pushPose();
             poseStack.scale(0.45454544f, 0.41322312f, 0.45454544f);
-            poseStack.translate(0.0, 2.0625, 0.0);
+            poseStack.translate(0.0f, 2.0625f, 0.0f);
             this.root().render(poseStack, vertexConsumer, i, j, f, g, h, k);
             poseStack.popPose();
         } else {

@@ -451,7 +451,7 @@ implements InventoryCarrier {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("Inventory", this.inventory.createTag());
+        this.writeInventoryToTag(compoundTag);
         VibrationListener.codec(this.vibrationListenerConfig).encodeStart(NbtOps.INSTANCE, this.dynamicVibrationListener.getListener()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", (Tag)tag));
         compoundTag.putLong("DuplicationCooldown", this.duplicationCooldown);
         compoundTag.putBoolean("CanDuplicate", this.canDuplicate());
@@ -460,9 +460,7 @@ implements InventoryCarrier {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("Inventory", 10)) {
-            this.inventory.fromTag(compoundTag.getList("Inventory", 10));
-        }
+        this.readInventoryFromTag(compoundTag);
         if (compoundTag.contains("listener", 10)) {
             VibrationListener.codec(this.vibrationListenerConfig).parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("listener"))).resultOrPartial(LOGGER::error).ifPresent(vibrationListener -> this.dynamicVibrationListener.updateListener((VibrationListener)vibrationListener, this.level));
         }

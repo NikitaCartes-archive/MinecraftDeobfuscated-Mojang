@@ -5,7 +5,7 @@ package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -48,9 +48,9 @@ extends Particle {
         float h = 0.05f + 0.5f * Mth.sin(g * (float)Math.PI);
         PoseStack poseStack = new PoseStack();
         poseStack.mulPose(camera.rotation());
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(150.0f * g - 60.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(150.0f * g - 60.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.translate(0.0, -1.101f, 1.5);
+        poseStack.translate(0.0f, -1.101f, 1.5f);
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(this.renderType);
         this.model.renderToBuffer(poseStack, vertexConsumer2, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, h);

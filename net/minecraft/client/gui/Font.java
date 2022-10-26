@@ -11,9 +11,7 @@ import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
@@ -35,6 +33,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringDecomposer;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public class Font {
@@ -165,7 +165,7 @@ public class Font {
             string = this.bidirectionalShaping(string);
         }
         i = Font.adjustColor(i);
-        Matrix4f matrix4f2 = matrix4f.copy();
+        Matrix4f matrix4f2 = new Matrix4f(matrix4f);
         if (bl) {
             this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
             matrix4f2.translate(SHADOW_OFFSET);
@@ -176,7 +176,7 @@ public class Font {
 
     private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
         i = Font.adjustColor(i);
-        Matrix4f matrix4f2 = matrix4f.copy();
+        Matrix4f matrix4f2 = new Matrix4f(matrix4f);
         if (bl) {
             this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
             matrix4f2.translate(SHADOW_OFFSET);

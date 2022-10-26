@@ -9,7 +9,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
 import java.io.IOException;
@@ -132,8 +132,8 @@ extends Screen {
             this.createNormalMenuOptions(l, 24);
         }
         this.addRenderableWidget(new ImageButton(this.width / 2 - 124, l + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager())), Component.translatable("narrator.button.language")));
-        this.addRenderableWidget(new Button(this.width / 2 - 100, l + 72 + 12, 98, 20, Component.translatable("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
-        this.addRenderableWidget(new Button(this.width / 2 + 2, l + 72 + 12, 98, 20, Component.translatable("menu.quit"), button -> this.minecraft.stop()));
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))).bounds(this.width / 2 - 100, l + 72 + 12, 98, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.quit"), button -> this.minecraft.stop()).bounds(this.width / 2 + 2, l + 72 + 12, 98, 20).build());
         this.addRenderableWidget(new ImageButton(this.width / 2 + 104, l + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), Component.translatable("narrator.button.accessibility")));
         this.addRenderableWidget(new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, Runnables.doNothing())), this.font));
         this.minecraft.setConnectedToRealms(false);
@@ -149,7 +149,7 @@ extends Screen {
     }
 
     private void createNormalMenuOptions(int i, int j) {
-        this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, Component.translatable("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))).bounds(this.width / 2 - 100, i, 200, 20).build());
         final Component component = this.getMultiplayerDisabledReason();
         boolean bl = component == null;
         Button.OnTooltip onTooltip = component == null ? Button.NO_TOOLTIP : new Button.OnTooltip(){
@@ -164,8 +164,8 @@ extends Screen {
                 consumer.accept(component);
             }
         };
-        this.addRenderableWidget(new Button((int)(this.width / 2 - 100), (int)(i + j * 1), (int)200, (int)20, (Component)Component.translatable((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
-        this.addRenderableWidget(new Button((int)(this.width / 2 - 100), (int)(i + j * 2), (int)200, (int)20, (Component)Component.translatable((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
+        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)(i + j * 1), (int)200, (int)20).tooltip((Button.OnTooltip)onTooltip).build()).active = bl;
+        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)(i + j * 2), (int)200, (int)20).tooltip((Button.OnTooltip)onTooltip).build()).active = bl;
     }
 
     @Nullable
@@ -185,14 +185,14 @@ extends Screen {
 
     private void createDemoMenuOptions(int i, int j) {
         boolean bl = this.checkDemoWorldPresence();
-        this.addRenderableWidget(new Button(this.width / 2 - 100, i, 200, 20, Component.translatable("menu.playdemo"), button -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.playdemo"), button -> {
             if (bl) {
                 this.minecraft.createWorldOpenFlows().loadLevel(this, DEMO_LEVEL_ID);
             } else {
                 this.minecraft.createWorldOpenFlows().createFreshLevel(DEMO_LEVEL_ID, MinecraftServer.DEMO_SETTINGS, WorldOptions.DEMO_OPTIONS, WorldPresets::createNormalWorldDimensions);
             }
-        }));
-        this.resetDemoButton = this.addRenderableWidget(new Button(this.width / 2 - 100, i + j * 1, 200, 20, Component.translatable("menu.resetdemo"), button -> {
+        }).bounds(this.width / 2 - 100, i, 200, 20).build());
+        this.resetDemoButton = this.addRenderableWidget(Button.builder(Component.translatable("menu.resetdemo"), button -> {
             LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
             try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(DEMO_LEVEL_ID);){
                 LevelSummary levelSummary = levelStorageAccess.getSummary();
@@ -203,7 +203,7 @@ extends Screen {
                 SystemToast.onWorldAccessFailure(this.minecraft, DEMO_LEVEL_ID);
                 LOGGER.warn("Failed to access demo world", iOException);
             }
-        }));
+        }).bounds(this.width / 2 - 100, i + j * 1, 200, 20).build());
         this.resetDemoButton.active = bl;
     }
 
@@ -284,8 +284,8 @@ extends Screen {
         }
         if (this.splash != null) {
             poseStack.pushPose();
-            poseStack.translate(this.width / 2 + 90, 70.0, 0.0);
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0f));
+            poseStack.translate(this.width / 2 + 90, 70.0f, 0.0f);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(-20.0f));
             float o = 1.8f - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0f * ((float)Math.PI * 2)) * 0.1f);
             o = o * 100.0f / (float)(this.font.width(this.splash) + 32);
             poseStack.scale(o, o, o);

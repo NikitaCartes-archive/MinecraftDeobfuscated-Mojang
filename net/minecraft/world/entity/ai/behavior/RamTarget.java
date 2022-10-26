@@ -84,12 +84,12 @@ extends Behavior<Goat> {
             float h = livingEntity.isDamageSourceBlocked(DamageSource.mobAttack(goat)) ? 0.5f : 1.0f;
             livingEntity.knockback((double)(h * g) * this.getKnockbackForce.applyAsDouble(goat), this.ramDirection.x(), this.ramDirection.z());
             this.finishRam(serverLevel, goat);
-            serverLevel.playSound(null, goat, this.getImpactSound.apply(goat), SoundSource.HOSTILE, 1.0f, 1.0f);
+            serverLevel.playSound(null, goat, this.getImpactSound.apply(goat), SoundSource.NEUTRAL, 1.0f, 1.0f);
         } else if (this.hasRammedHornBreakingBlock(serverLevel, goat)) {
-            serverLevel.playSound(null, goat, this.getImpactSound.apply(goat), SoundSource.HOSTILE, 1.0f, 1.0f);
+            serverLevel.playSound(null, goat, this.getImpactSound.apply(goat), SoundSource.NEUTRAL, 1.0f, 1.0f);
             boolean bl = goat.dropHorn();
             if (bl) {
-                serverLevel.playSound(null, goat, this.getHornBreakSound.apply(goat), SoundSource.HOSTILE, 1.0f, 1.0f);
+                serverLevel.playSound(null, goat, this.getHornBreakSound.apply(goat), SoundSource.NEUTRAL, 1.0f, 1.0f);
             }
             this.finishRam(serverLevel, goat);
         } else {

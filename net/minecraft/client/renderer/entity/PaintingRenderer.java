@@ -5,9 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -25,6 +23,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class PaintingRenderer
@@ -36,7 +36,7 @@ extends EntityRenderer<Painting> {
     @Override
     public void render(Painting painting, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - f));
         PaintingVariant paintingVariant = painting.getVariant().value();
         float h = 0.0625f;
         poseStack.scale(0.0625f, 0.0625f, 0.0625f);

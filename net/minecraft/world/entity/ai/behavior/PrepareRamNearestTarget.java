@@ -98,7 +98,7 @@ extends Behavior<E> {
                 }
                 if (l - this.reachedRamPositionTimestamp.get() >= (long)this.ramPrepareTime) {
                     ((LivingEntity)pathfinderMob).getBrain().setMemory(MemoryModuleType.RAM_TARGET, this.getEdgeOfBlock(blockPos, this.ramCandidate.get().getTargetPosition()));
-                    serverLevel.playSound(null, (Entity)pathfinderMob, this.getPrepareRamSound.apply(pathfinderMob), SoundSource.HOSTILE, 1.0f, ((LivingEntity)pathfinderMob).getVoicePitch());
+                    serverLevel.playSound(null, (Entity)pathfinderMob, this.getPrepareRamSound.apply(pathfinderMob), SoundSource.NEUTRAL, 1.0f, ((LivingEntity)pathfinderMob).getVoicePitch());
                     this.ramCandidate = Optional.empty();
                 }
             }

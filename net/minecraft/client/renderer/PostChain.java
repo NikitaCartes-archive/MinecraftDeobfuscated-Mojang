@@ -13,7 +13,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Matrix4f;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
@@ -30,6 +29,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class PostChain
@@ -270,7 +270,7 @@ implements AutoCloseable {
     }
 
     private void updateOrthoMatrix() {
-        this.shaderOrthoMatrix = Matrix4f.orthographic(0.0f, this.screenTarget.width, this.screenTarget.height, 0.0f, 0.1f, 1000.0f);
+        this.shaderOrthoMatrix = new Matrix4f().setOrtho(0.0f, this.screenTarget.width, 0.0f, this.screenTarget.height, 0.1f, 1000.0f);
     }
 
     public void resize(int i, int j) {

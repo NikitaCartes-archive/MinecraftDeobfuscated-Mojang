@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -49,15 +49,15 @@ extends RenderLayer<SnowGolem, SnowGolemModel<SnowGolem>> {
         poseStack.pushPose();
         ((SnowGolemModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
         float m = 0.625f;
-        poseStack.translate(0.0, -0.34375, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        poseStack.translate(0.0f, -0.34375f, 0.0f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
         poseStack.scale(0.625f, -0.625f, -0.625f);
         ItemStack itemStack = new ItemStack(Blocks.CARVED_PUMPKIN);
         if (bl) {
             BlockState blockState = Blocks.CARVED_PUMPKIN.defaultBlockState();
             BakedModel bakedModel = this.blockRenderer.getBlockModel(blockState);
             int n = LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0f);
-            poseStack.translate(-0.5, -0.5, -0.5);
+            poseStack.translate(-0.5f, -0.5f, -0.5f);
             this.blockRenderer.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(RenderType.outline(TextureAtlas.LOCATION_BLOCKS)), blockState, bakedModel, 0.0f, 0.0f, 0.0f, i, n);
         } else {
             this.itemRenderer.renderStatic(snowGolem, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, snowGolem.level, i, LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0f), snowGolem.getId());

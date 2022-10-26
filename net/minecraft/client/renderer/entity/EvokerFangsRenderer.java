@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EvokerFangsModel;
@@ -39,7 +39,7 @@ extends EntityRenderer<EvokerFangs> {
             j *= (1.0f - h) / 0.1f;
         }
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f - evokerFangs.getYRot()));
+        poseStack.mulPose(Axis.YP.rotationDegrees(90.0f - evokerFangs.getYRot()));
         poseStack.scale(-j, -j, j);
         float k = 0.03125f;
         poseStack.translate(0.0, -0.626, 0.0);

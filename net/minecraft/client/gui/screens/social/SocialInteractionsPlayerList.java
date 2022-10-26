@@ -105,12 +105,15 @@ extends ContainerObjectSelectionList<PlayerEntry> {
                 return 0;
             }
             if (playerEntry.getPlayerId().version() == 2) {
-                return 3;
+                return 4;
             }
-            if (playerEntry.hasRecentMessages()) {
+            if (this.minecraft.getReportingContext().hasDraftReportFor(playerEntry.getPlayerId())) {
                 return 1;
             }
-            return 2;
+            if (playerEntry.hasRecentMessages()) {
+                return 2;
+            }
+            return 3;
         }).thenComparing(playerEntry -> {
             int i;
             if (!playerEntry.getPlayerName().isBlank() && ((i = playerEntry.getPlayerName().codePointAt(0)) == 95 || i >= 97 && i <= 122 || i >= 65 && i <= 90 || i >= 48 && i <= 57)) {

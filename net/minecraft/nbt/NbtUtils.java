@@ -497,7 +497,7 @@ public final class NbtUtils {
             });
             compoundTag2.put("palettes", listTag32);
         }
-        if (compoundTag2.contains("entities", 10)) {
+        if (compoundTag2.contains("entities", 9)) {
             listTag32 = compoundTag2.getList("entities", 10);
             listTag4 = listTag32.stream().map(CompoundTag.class::cast).sorted(Comparator.comparing(compoundTag -> compoundTag.getList("pos", 6), YXZ_LISTTAG_DOUBLE_COMPARATOR)).collect(Collectors.toCollection(ListTag::new));
             compoundTag2.put("entities", listTag4);

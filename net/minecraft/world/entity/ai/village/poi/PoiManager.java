@@ -191,7 +191,7 @@ extends SectionStorage<PoiSection> {
     }
 
     private static boolean mayHavePoi(LevelChunkSection levelChunkSection) {
-        return levelChunkSection.maybeHas(PoiTypes.ALL_STATES::contains);
+        return levelChunkSection.maybeHas(PoiTypes::hasPoi);
     }
 
     private void updateFromSection(LevelChunkSection levelChunkSection, SectionPos sectionPos, BiConsumer<BlockPos, Holder<PoiType>> biConsumer) {

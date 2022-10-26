@@ -77,7 +77,7 @@ implements SoundEventListener {
             int p = Mth.floor(Mth.clampedLerp(255.0f, 75.0f, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0f));
             int q = p << 16 | p << 8 | p;
             poseStack.pushPose();
-            poseStack.translate((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 35) - (float)(i * (m + 1)) * 1.0f, 0.0);
+            poseStack.translate((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 35) - (float)(i * (m + 1)) * 1.0f, 0.0f);
             poseStack.scale(1.0f, 1.0f, 1.0f);
             SubtitleOverlay.fill(poseStack, -l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8f));
             RenderSystem.enableBlend();

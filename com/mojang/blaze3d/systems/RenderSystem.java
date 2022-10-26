@@ -13,9 +13,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -37,6 +34,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TimeSource;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ public class RenderSystem {
     private static Matrix3f inverseViewRotationMatrix;
     private static Matrix4f projectionMatrix;
     private static Matrix4f savedProjectionMatrix;
-    private static PoseStack modelViewStack;
+    private static final PoseStack modelViewStack;
     private static Matrix4f modelViewMatrix;
     private static Matrix4f textureMatrix;
     private static final int[] shaderTextures;
@@ -544,10 +544,10 @@ public class RenderSystem {
         GlStateManager._clearDepth(1.0);
         GlStateManager._enableDepthTest();
         GlStateManager._depthFunc(515);
-        projectionMatrix.setIdentity();
-        savedProjectionMatrix.setIdentity();
-        modelViewMatrix.setIdentity();
-        textureMatrix.setIdentity();
+        projectionMatrix.identity();
+        savedProjectionMatrix.identity();
+        modelViewMatrix.identity();
+        textureMatrix.identity();
         GlStateManager._viewport(i, j, k, l);
     }
 
@@ -789,7 +789,7 @@ public class RenderSystem {
     }
 
     public static void setProjectionMatrix(Matrix4f matrix4f) {
-        Matrix4f matrix4f2 = matrix4f.copy();
+        Matrix4f matrix4f2 = new Matrix4f(matrix4f);
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> {
                 projectionMatrix = matrix4f2;
@@ -800,7 +800,7 @@ public class RenderSystem {
     }
 
     public static void setInverseViewRotationMatrix(Matrix3f matrix3f) {
-        Matrix3f matrix3f2 = matrix3f.copy();
+        Matrix3f matrix3f2 = new Matrix3f(matrix3f);
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> {
                 inverseViewRotationMatrix = matrix3f2;
@@ -811,7 +811,7 @@ public class RenderSystem {
     }
 
     public static void setTextureMatrix(Matrix4f matrix4f) {
-        Matrix4f matrix4f2 = matrix4f.copy();
+        Matrix4f matrix4f2 = new Matrix4f(matrix4f);
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> {
                 textureMatrix = matrix4f2;
@@ -823,14 +823,14 @@ public class RenderSystem {
 
     public static void resetTextureMatrix() {
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> textureMatrix.setIdentity());
+            RenderSystem.recordRenderCall(() -> textureMatrix.identity());
         } else {
-            textureMatrix.setIdentity();
+            textureMatrix.identity();
         }
     }
 
     public static void applyModelViewMatrix() {
-        Matrix4f matrix4f = modelViewStack.last().pose().copy();
+        Matrix4f matrix4f = new Matrix4f(modelViewStack.last().pose());
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> {
                 modelViewMatrix = matrix4f;
@@ -1156,7 +1156,7 @@ public class RenderSystem {
             intConsumer.accept(i + 2);
             intConsumer.accept(i + 1);
         });
-        inverseViewRotationMatrix = new Matrix3f();
+        inverseViewRotationMatrix = new Matrix3f().zero();
         projectionMatrix = new Matrix4f();
         savedProjectionMatrix = new Matrix4f();
         modelViewStack = new PoseStack();
@@ -1170,10 +1170,6 @@ public class RenderSystem {
         shaderLightDirections = new Vector3f[2];
         shaderLineWidth = 1.0f;
         apiDescription = "Unknown";
-        projectionMatrix.setIdentity();
-        savedProjectionMatrix.setIdentity();
-        modelViewMatrix.setIdentity();
-        textureMatrix.setIdentity();
     }
 
     @Environment(value=EnvType.CLIENT)

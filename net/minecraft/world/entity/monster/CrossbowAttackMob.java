@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.entity.monster;
 
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public interface CrossbowAttackMob
 extends RangedAttackMob {
@@ -49,18 +48,14 @@ extends RangedAttackMob {
     }
 
     default public Vector3f getProjectileShotVector(LivingEntity livingEntity, Vec3 vec3, float f) {
-        Vec3 vec32 = vec3.normalize();
-        Vec3 vec33 = vec32.cross(new Vec3(0.0, 1.0, 0.0));
-        if (vec33.lengthSqr() <= 1.0E-7) {
-            vec33 = vec32.cross(livingEntity.getUpVector(1.0f));
+        Vector3f vector3f = vec3.toVector3f().normalize();
+        Vector3f vector3f2 = vector3f.cross(new Vector3f(0.0f, 1.0f, 0.0f));
+        if ((double)vector3f2.lengthSquared() <= 1.0E-7) {
+            Vec3 vec32 = livingEntity.getUpVector(1.0f);
+            vector3f2 = vector3f.cross(vec32.toVector3f());
         }
-        Quaternion quaternion = new Quaternion(new Vector3f(vec33), 90.0f, true);
-        Vector3f vector3f = new Vector3f(vec32);
-        vector3f.transform(quaternion);
-        Quaternion quaternion2 = new Quaternion(vector3f, f, true);
-        Vector3f vector3f2 = new Vector3f(vec32);
-        vector3f2.transform(quaternion2);
-        return vector3f2;
+        Vector3f vector3f3 = new Vector3f(vector3f).rotateAxis(1.5707964f, vector3f2.x, vector3f2.y, vector3f2.z);
+        return new Vector3f(vector3f).rotateAxis(f * ((float)Math.PI / 180), vector3f3.x, vector3f3.y, vector3f3.z);
     }
 }
 

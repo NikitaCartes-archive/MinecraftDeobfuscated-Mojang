@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmedModel;
@@ -40,7 +40,7 @@ extends RenderLayer<T, M> {
         poseStack.pushPose();
         if (((EntityModel)this.getParentModel()).young) {
             float m = 0.5f;
-            poseStack.translate(0.0, 0.75, 0.0);
+            poseStack.translate(0.0f, 0.75f, 0.0f);
             poseStack.scale(0.5f, 0.5f, 0.5f);
         }
         this.renderArmWithItem((LivingEntity)livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, poseStack, multiBufferSource, i);
@@ -54,10 +54,10 @@ extends RenderLayer<T, M> {
         }
         poseStack.pushPose();
         ((ArmedModel)this.getParentModel()).translateToHand(humanoidArm, poseStack);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
         boolean bl = humanoidArm == HumanoidArm.LEFT;
-        poseStack.translate((float)(bl ? -1 : 1) / 16.0f, 0.125, -0.625);
+        poseStack.translate((float)(bl ? -1 : 1) / 16.0f, 0.125f, -0.625f);
         this.itemInHandRenderer.renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }

@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IronGolemModel;
@@ -41,7 +41,7 @@ extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
         float i = 13.0f;
         float j = ironGolem.animationPosition - ironGolem.animationSpeed * (1.0f - h) + 6.0f;
         float k = (Math.abs(j % 13.0f - 6.5f) - 3.25f) / 3.25f;
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(6.5f * k));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(6.5f * k));
     }
 }
 

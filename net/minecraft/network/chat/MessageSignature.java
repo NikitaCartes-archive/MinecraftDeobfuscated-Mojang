@@ -4,16 +4,20 @@
 package net.minecraft.network.chat;
 
 import com.google.common.base.Preconditions;
+import com.mojang.serialization.Codec;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MessageSignatureCache;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
 import org.jetbrains.annotations.Nullable;
 
 public record MessageSignature(byte[] bytes) {
+    public static final Codec<MessageSignature> CODEC = ExtraCodecs.BASE64_STRING.xmap(MessageSignature::new, MessageSignature::bytes);
     public static final int BYTES = 256;
 
     public MessageSignature {
@@ -61,15 +65,9 @@ public record MessageSignature(byte[] bytes) {
         return Base64.getEncoder().encodeToString(this.bytes);
     }
 
-    public Packed pack(Packer packer) {
-        int i = packer.pack(this);
+    public Packed pack(MessageSignatureCache messageSignatureCache) {
+        int i = messageSignatureCache.pack(this);
         return i != -1 ? new Packed(i) : new Packed(this);
-    }
-
-    public static interface Packer {
-        public static final int NOT_FOUND = -1;
-
-        public int pack(MessageSignature var1);
     }
 
     public record Packed(int id, @Nullable MessageSignature fullSignature) {
@@ -98,22 +96,17 @@ public record MessageSignature(byte[] bytes) {
             }
         }
 
-        public Optional<MessageSignature> unpack(Unpacker unpacker) {
+        public Optional<MessageSignature> unpack(MessageSignatureCache messageSignatureCache) {
             if (this.fullSignature != null) {
                 return Optional.of(this.fullSignature);
             }
-            return Optional.ofNullable(unpacker.unpack(this.id));
+            return Optional.ofNullable(messageSignatureCache.unpack(this.id));
         }
 
         @Nullable
         public MessageSignature fullSignature() {
             return this.fullSignature;
         }
-    }
-
-    public static interface Unpacker {
-        @Nullable
-        public MessageSignature unpack(int var1);
     }
 }
 

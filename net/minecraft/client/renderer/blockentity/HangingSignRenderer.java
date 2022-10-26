@@ -6,7 +6,7 @@ package net.minecraft.client.renderer.blockentity;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -63,11 +63,11 @@ extends SignRenderer {
         poseStack.translate(0.5, 0.9375, 0.5);
         if (bl2) {
             g = -RotationSegment.convertToDegrees(blockState.getValue(CeilingHangingSignBlock.ROTATION));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(g));
+            poseStack.mulPose(Axis.YP.rotationDegrees(g));
         } else {
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(this.getSignAngle(blockState, bl)));
+            poseStack.mulPose(Axis.YP.rotationDegrees(this.getSignAngle(blockState, bl)));
         }
-        poseStack.translate(0.0, -0.3125, 0.0);
+        poseStack.translate(0.0f, -0.3125f, 0.0f);
         hangingSignModel.evaluateVisibleParts(blockState);
         g = 1.0f;
         this.renderSign(poseStack, multiBufferSource, i, j, 1.0f, woodType, hangingSignModel);

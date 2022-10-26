@@ -685,6 +685,13 @@ CommandSource {
         this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
     }
 
+    public void extinguishFire() {
+        if (!this.level.isClientSide && this.wasOnFire) {
+            this.playEntityOnFireExtinguishedSound();
+        }
+        this.clearFire();
+    }
+
     protected void processFlappingMovement() {
         if (this.isFlapping()) {
             this.onFlap();
@@ -1028,7 +1035,9 @@ CommandSource {
     }
 
     void updateInWaterStateAndDoWaterCurrentPushing() {
-        if (this.getVehicle() instanceof Boat) {
+        Boat boat;
+        Entity entity = this.getVehicle();
+        if (entity instanceof Boat && !(boat = (Boat)entity).isUnderWater()) {
             this.wasTouchingWater = false;
         } else if (this.updateFluidHeightAndDoFluidPushing(FluidTags.WATER, 0.014)) {
             if (!this.wasTouchingWater && !this.firstTick) {
@@ -2369,6 +2378,14 @@ CommandSource {
         if (DATA_POSE.equals(entityDataAccessor)) {
             this.refreshDimensions();
         }
+    }
+
+    @Deprecated
+    protected void fixupDimensions() {
+        EntityDimensions entityDimensions;
+        Pose pose = this.getPose();
+        this.dimensions = entityDimensions = this.getDimensions(pose);
+        this.eyeHeight = this.getEyeHeight(pose, entityDimensions);
     }
 
     public void refreshDimensions() {

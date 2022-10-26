@@ -114,9 +114,9 @@ extends AbstractContainerScreen<LoomMenu> {
         if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
             MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
             poseStack.pushPose();
-            poseStack.translate(k + 139, l + 52, 0.0);
+            poseStack.translate(k + 139, l + 52, 0.0f);
             poseStack.scale(24.0f, -24.0f, 1.0f);
-            poseStack.translate(0.5, 0.5, 0.5);
+            poseStack.translate(0.5f, 0.5f, 0.5f);
             float g = 0.6666667f;
             poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
             this.flag.xRot = 0.0f;
@@ -158,10 +158,10 @@ extends AbstractContainerScreen<LoomMenu> {
         BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
         PoseStack poseStack = new PoseStack();
         poseStack.pushPose();
-        poseStack.translate((float)i + 0.5f, j + 16, 0.0);
+        poseStack.translate((float)i + 0.5f, j + 16, 0.0f);
         poseStack.scale(6.0f, -6.0f, 1.0f);
-        poseStack.translate(0.5, 0.5, 0.0);
-        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.translate(0.5f, 0.5f, 0.0f);
+        poseStack.translate(0.5f, 0.5f, 0.5f);
         float f = 0.6666667f;
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
         MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();

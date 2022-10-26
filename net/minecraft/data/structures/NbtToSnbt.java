@@ -14,7 +14,12 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -35,19 +40,46 @@ implements DataProvider {
     }
 
     @Override
-    public void run(CachedOutput cachedOutput) throws IOException {
-        Path path2 = this.output.getOutputFolder();
-        for (Path path22 : this.inputFolders) {
-            Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".nbt")).forEach(path3 -> NbtToSnbt.convertStructure(cachedOutput, path3, this.getName(path22, (Path)path3), path2));
+    public CompletableFuture<?> run(CachedOutput cachedOutput) {
+        Path path = this.output.getOutputFolder();
+        ArrayList<CompletionStage> list = new ArrayList<CompletionStage>();
+        for (Path path2 : this.inputFolders) {
+            list.add(CompletableFuture.supplyAsync(() -> {
+                CompletableFuture<Void> completableFuture;
+                block8: {
+                    Stream<Path> stream = Files.walk(path2, new FileVisitOption[0]);
+                    try {
+                        completableFuture = CompletableFuture.allOf((CompletableFuture[])stream.filter(path -> path.toString().endsWith(".nbt")).map(path3 -> CompletableFuture.runAsync(() -> NbtToSnbt.convertStructure(cachedOutput, path3, NbtToSnbt.getName(path2, path3), path), Util.ioPool())).toArray(CompletableFuture[]::new));
+                        if (stream == null) break block8;
+                    } catch (Throwable throwable) {
+                        try {
+                            if (stream != null) {
+                                try {
+                                    stream.close();
+                                } catch (Throwable throwable2) {
+                                    throwable.addSuppressed(throwable2);
+                                }
+                            }
+                            throw throwable;
+                        } catch (IOException iOException) {
+                            LOGGER.error("Failed to read structure input directory", iOException);
+                            return CompletableFuture.completedFuture(null);
+                        }
+                    }
+                    stream.close();
+                }
+                return completableFuture;
+            }, Util.backgroundExecutor()).thenCompose(completableFuture -> completableFuture));
         }
+        return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
     }
 
     @Override
-    public String getName() {
-        return "NBT to SNBT";
+    public final String getName() {
+        return "NBT -> SNBT";
     }
 
-    private String getName(Path path, Path path2) {
+    private static String getName(Path path, Path path2) {
         String string = path.relativize(path2).toString().replaceAll("\\\\", "/");
         return string.substring(0, string.length() - ".nbt".length());
     }

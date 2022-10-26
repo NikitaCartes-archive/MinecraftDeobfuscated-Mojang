@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -51,7 +51,7 @@ extends EntityRenderer<T> {
         poseStack.pushPose();
         poseStack.scale(this.scale, this.scale, this.scale);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
         this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, ((Entity)entity).getId());
         poseStack.popPose();
         super.render(entity, f, g, poseStack, multiBufferSource, i);

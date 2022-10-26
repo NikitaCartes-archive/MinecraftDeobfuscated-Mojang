@@ -22,7 +22,7 @@ extends Button {
     private final boolean playTurnSound;
 
     public PageButton(int i, int j, boolean bl, Button.OnPress onPress, boolean bl2) {
-        super(i, j, 23, 13, CommonComponents.EMPTY, onPress);
+        super(i, j, 23, 13, CommonComponents.EMPTY, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
         this.isForward = bl;
         this.playTurnSound = bl2;
     }
@@ -40,7 +40,7 @@ extends Button {
         if (!this.isForward) {
             l += 13;
         }
-        this.blit(poseStack, this.x, this.y, k, l, 23, 13);
+        this.blit(poseStack, this.getX(), this.getY(), k, l, 23, 13);
     }
 
     @Override

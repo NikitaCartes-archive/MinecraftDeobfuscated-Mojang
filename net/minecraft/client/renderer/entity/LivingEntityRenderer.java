@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -94,13 +94,13 @@ implements RenderLayerParent<T, M> {
         }
         if (((Entity)livingEntity).hasPose(Pose.SLEEPING) && (direction = ((LivingEntity)livingEntity).getBedOrientation()) != null) {
             n = ((Entity)livingEntity).getEyeHeight(Pose.STANDING) - 0.1f;
-            poseStack.translate((float)(-direction.getStepX()) * n, 0.0, (float)(-direction.getStepZ()) * n);
+            poseStack.translate((float)(-direction.getStepX()) * n, 0.0f, (float)(-direction.getStepZ()) * n);
         }
         float l = this.getBob(livingEntity, g);
         this.setupRotations(livingEntity, poseStack, l, h, g);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         this.scale(livingEntity, poseStack, g);
-        poseStack.translate(0.0, -1.501f, 0.0);
+        poseStack.translate(0.0f, -1.501f, 0.0f);
         n = 0.0f;
         float o = 0.0f;
         if (!((Entity)livingEntity).isPassenger() && ((LivingEntity)livingEntity).isAlive()) {
@@ -184,26 +184,26 @@ implements RenderLayerParent<T, M> {
             g += (float)(Math.cos((double)((LivingEntity)livingEntity).tickCount * 3.25) * Math.PI * (double)0.4f);
         }
         if (!((Entity)livingEntity).hasPose(Pose.SLEEPING)) {
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
+            poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - g));
         }
         if (((LivingEntity)livingEntity).deathTime > 0) {
             float i = ((float)((LivingEntity)livingEntity).deathTime + h - 1.0f) / 20.0f * 1.6f;
             if ((i = Mth.sqrt(i)) > 1.0f) {
                 i = 1.0f;
             }
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(i * this.getFlipDegrees(livingEntity)));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(i * this.getFlipDegrees(livingEntity)));
         } else if (((LivingEntity)livingEntity).isAutoSpinAttack()) {
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f - ((Entity)livingEntity).getXRot()));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)((LivingEntity)livingEntity).tickCount + h) * -75.0f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f - ((Entity)livingEntity).getXRot()));
+            poseStack.mulPose(Axis.YP.rotationDegrees(((float)((LivingEntity)livingEntity).tickCount + h) * -75.0f));
         } else if (((Entity)livingEntity).hasPose(Pose.SLEEPING)) {
             Direction direction = ((LivingEntity)livingEntity).getBedOrientation();
             float j = direction != null ? LivingEntityRenderer.sleepDirectionToRotation(direction) : g;
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0f));
+            poseStack.mulPose(Axis.YP.rotationDegrees(j));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
+            poseStack.mulPose(Axis.YP.rotationDegrees(270.0f));
         } else if (LivingEntityRenderer.isEntityUpsideDown(livingEntity)) {
-            poseStack.translate(0.0, ((Entity)livingEntity).getBbHeight() + 0.1f, 0.0);
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
+            poseStack.translate(0.0f, ((Entity)livingEntity).getBbHeight() + 0.1f, 0.0f);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
         }
     }
 

@@ -471,7 +471,8 @@ public class MineshaftPieces {
                 worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
                 BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos2);
                 if (!(blockEntity instanceof SpawnerBlockEntity)) continue;
-                ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.CAVE_SPIDER);
+                SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity)blockEntity;
+                spawnerBlockEntity.setEntityId(EntityType.CAVE_SPIDER, randomSource);
             }
             for (n = 0; n <= 2; ++n) {
                 for (o = 0; o <= m; ++o) {

@@ -734,7 +734,7 @@ implements Enemy {
     public void onCrystalDestroyed(EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource) {
         Player player = damageSource.getEntity() instanceof Player ? (Player)damageSource.getEntity() : this.level.getNearestPlayer(CRYSTAL_DESTROY_TARGETING, blockPos.getX(), blockPos.getY(), blockPos.getZ());
         if (endCrystal == this.nearestCrystal) {
-            this.hurt(this.head, DamageSource.explosion(player), 10.0f);
+            this.hurt(this.head, DamageSource.explosion(endCrystal, player), 10.0f);
         }
         this.phaseManager.getCurrentPhase().onCrystalDestroyed(endCrystal, blockPos, damageSource, player);
     }

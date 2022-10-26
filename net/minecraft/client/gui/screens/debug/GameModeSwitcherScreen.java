@@ -225,7 +225,7 @@ extends Screen {
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
             Minecraft minecraft = Minecraft.getInstance();
             this.drawSlot(poseStack, minecraft.getTextureManager());
-            this.icon.drawIcon(GameModeSwitcherScreen.this.itemRenderer, this.x + 5, this.y + 5);
+            this.icon.drawIcon(GameModeSwitcherScreen.this.itemRenderer, this.getX() + 5, this.getY() + 5);
             if (this.isSelected) {
                 this.drawSelection(poseStack, minecraft.getTextureManager());
             }
@@ -249,7 +249,7 @@ extends Screen {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, GAMEMODE_SWITCHER_LOCATION);
             poseStack.pushPose();
-            poseStack.translate(this.x, this.y, 0.0);
+            poseStack.translate(this.getX(), this.getY(), 0.0f);
             GameModeSlot.blit(poseStack, 0, 0, 0.0f, 75.0f, 26, 26, 128, 128);
             poseStack.popPose();
         }
@@ -258,7 +258,7 @@ extends Screen {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, GAMEMODE_SWITCHER_LOCATION);
             poseStack.pushPose();
-            poseStack.translate(this.x, this.y, 0.0);
+            poseStack.translate(this.getX(), this.getY(), 0.0f);
             GameModeSlot.blit(poseStack, 0, 0, 26.0f, 75.0f, 26, 26, 128, 128);
             poseStack.popPose();
         }

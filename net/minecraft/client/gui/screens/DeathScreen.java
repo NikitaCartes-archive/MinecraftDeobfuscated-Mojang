@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,11 +40,12 @@ extends Screen {
     protected void init() {
         this.delayTicker = 0;
         this.exitButtons.clear();
-        this.exitButtons.add(this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, this.hardcore ? Component.translatable("deathScreen.spectate") : Component.translatable("deathScreen.respawn"), button -> {
+        MutableComponent component = this.hardcore ? Component.translatable("deathScreen.spectate") : Component.translatable("deathScreen.respawn");
+        this.exitButtons.add(this.addRenderableWidget(Button.builder(component, button -> {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);
-        })));
-        this.exitButtons.add(this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, Component.translatable("deathScreen.titleScreen"), button -> {
+        }).bounds(this.width / 2 - 100, this.height / 4 + 72, 200, 20).build()));
+        this.exitButtons.add(this.addRenderableWidget(Button.builder(Component.translatable("deathScreen.titleScreen"), button -> {
             if (this.hardcore) {
                 this.exitToTitleScreen();
                 return;
@@ -51,7 +53,7 @@ extends Screen {
             ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, Component.translatable("deathScreen.quit.confirm"), CommonComponents.EMPTY, Component.translatable("deathScreen.titleScreen"), Component.translatable("deathScreen.respawn"));
             this.minecraft.setScreen(confirmScreen);
             confirmScreen.setDelay(20);
-        })));
+        }).bounds(this.width / 2 - 100, this.height / 4 + 96, 200, 20).build()));
         for (Button button2 : this.exitButtons) {
             button2.active = false;
         }

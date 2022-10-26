@@ -55,13 +55,13 @@ extends EntityModel<E> {
                 l = 1.5f / this.babyHeadScale;
                 poseStack.scale(l, l, l);
             }
-            poseStack.translate(0.0, this.babyYHeadOffset / 16.0f, this.babyZHeadOffset / 16.0f);
+            poseStack.translate(0.0f, this.babyYHeadOffset / 16.0f, this.babyZHeadOffset / 16.0f);
             this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
             poseStack.pushPose();
             l = 1.0f / this.babyBodyScale;
             poseStack.scale(l, l, l);
-            poseStack.translate(0.0, this.bodyYOffset / 16.0f, 0.0);
+            poseStack.translate(0.0f, this.bodyYOffset / 16.0f, 0.0f);
             this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         } else {

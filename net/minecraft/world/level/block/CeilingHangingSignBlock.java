@@ -107,6 +107,11 @@ extends SignBlock {
     }
 
     @Override
+    public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return this.getShape(blockState, blockGetter, blockPos, CollisionContext.empty());
+    }
+
+    @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == Direction.UP && !this.canSurvive(blockState, levelAccessor, blockPos)) {
             return Blocks.AIR.defaultBlockState();

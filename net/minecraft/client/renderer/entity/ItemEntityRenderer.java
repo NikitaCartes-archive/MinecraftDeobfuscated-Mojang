@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -71,9 +71,9 @@ extends EntityRenderer<ItemEntity> {
         float h = 0.25f;
         float l = Mth.sin(((float)itemEntity.getAge() + g) / 10.0f + itemEntity.bobOffs) * 0.1f + 0.1f;
         float m = bakedModel.getTransforms().getTransform((ItemTransforms.TransformType)ItemTransforms.TransformType.GROUND).scale.y();
-        poseStack.translate(0.0, l + 0.25f * m, 0.0);
+        poseStack.translate(0.0f, l + 0.25f * m, 0.0f);
         float n = itemEntity.getSpin(g);
-        poseStack.mulPose(Vector3f.YP.rotation(n));
+        poseStack.mulPose(Axis.YP.rotation(n));
         float o = bakedModel.getTransforms().ground.scale.x();
         float p = bakedModel.getTransforms().ground.scale.y();
         float q = bakedModel.getTransforms().ground.scale.z();
@@ -94,7 +94,7 @@ extends EntityRenderer<ItemEntity> {
                 } else {
                     s = (this.random.nextFloat() * 2.0f - 1.0f) * 0.15f * 0.5f;
                     t = (this.random.nextFloat() * 2.0f - 1.0f) * 0.15f * 0.5f;
-                    poseStack.translate(s, t, 0.0);
+                    poseStack.translate(s, t, 0.0f);
                 }
             }
             this.itemRenderer.render(itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, bakedModel);

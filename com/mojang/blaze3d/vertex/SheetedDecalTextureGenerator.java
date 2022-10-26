@@ -5,13 +5,13 @@ package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 @Environment(value=EnvType.CLIENT)
 public class SheetedDecalTextureGenerator
@@ -31,10 +31,8 @@ extends DefaultedVertexConsumer {
 
     public SheetedDecalTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f) {
         this.delegate = vertexConsumer;
-        this.cameraInversePose = matrix4f.copy();
-        this.cameraInversePose.invert();
-        this.normalInversePose = matrix3f.copy();
-        this.normalInversePose.invert();
+        this.cameraInversePose = new Matrix4f(matrix4f).invert();
+        this.normalInversePose = new Matrix3f(matrix3f).invert();
         this.resetState();
     }
 
@@ -52,14 +50,12 @@ extends DefaultedVertexConsumer {
 
     @Override
     public void endVertex() {
-        Vector3f vector3f = new Vector3f(this.nx, this.ny, this.nz);
-        vector3f.transform(this.normalInversePose);
+        Vector3f vector3f = this.normalInversePose.transform(new Vector3f(this.nx, this.ny, this.nz));
         Direction direction = Direction.getNearest(vector3f.x(), vector3f.y(), vector3f.z());
-        Vector4f vector4f = new Vector4f(this.x, this.y, this.z, 1.0f);
-        vector4f.transform(this.cameraInversePose);
-        vector4f.transform(Vector3f.YP.rotationDegrees(180.0f));
-        vector4f.transform(Vector3f.XP.rotationDegrees(-90.0f));
-        vector4f.transform(direction.getRotation());
+        Vector4f vector4f = this.cameraInversePose.transform(new Vector4f(this.x, this.y, this.z, 1.0f));
+        vector4f.rotateY((float)Math.PI);
+        vector4f.rotateX(-1.5707964f);
+        vector4f.rotate(direction.getRotation());
         float f = -vector4f.x();
         float g = -vector4f.y();
         this.delegate.vertex(this.x, this.y, this.z).color(1.0f, 1.0f, 1.0f, 1.0f).uv(f, g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();

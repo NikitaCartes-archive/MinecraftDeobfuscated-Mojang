@@ -73,16 +73,16 @@ extends Screen {
             this.serverSelectionList.updateOnlineServers(this.servers);
         }
         this.addWidget(this.serverSelectionList);
-        this.selectButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 52, 100, 20, Component.translatable("selectServer.select"), button -> this.joinSelectedServer()));
-        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 52, 100, 20, Component.translatable("selectServer.direct"), button -> {
+        this.selectButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.select"), button -> this.joinSelectedServer()).bounds(this.width / 2 - 154, this.height - 52, 100, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("selectServer.direct"), button -> {
             this.editingServer = new ServerData(I18n.get("selectServer.defaultName", new Object[0]), "", false);
             this.minecraft.setScreen(new DirectJoinServerScreen(this, this::directJoinCallback, this.editingServer));
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 + 4 + 50, this.height - 52, 100, 20, Component.translatable("selectServer.add"), button -> {
+        }).bounds(this.width / 2 - 50, this.height - 52, 100, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("selectServer.add"), button -> {
             this.editingServer = new ServerData(I18n.get("selectServer.defaultName", new Object[0]), "", false);
             this.minecraft.setScreen(new EditServerScreen(this, this::addServerCallback, this.editingServer));
-        }));
-        this.editButton = this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 70, 20, Component.translatable("selectServer.edit"), button -> {
+        }).bounds(this.width / 2 + 4 + 50, this.height - 52, 100, 20).build());
+        this.editButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.edit"), button -> {
             ServerSelectionList.Entry entry = (ServerSelectionList.Entry)this.serverSelectionList.getSelected();
             if (entry instanceof ServerSelectionList.OnlineServerEntry) {
                 ServerData serverData = ((ServerSelectionList.OnlineServerEntry)entry).getServerData();
@@ -90,8 +90,8 @@ extends Screen {
                 this.editingServer.copyFrom(serverData);
                 this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
             }
-        }));
-        this.deleteButton = this.addRenderableWidget(new Button(this.width / 2 - 74, this.height - 28, 70, 20, Component.translatable("selectServer.delete"), button -> {
+        }).bounds(this.width / 2 - 154, this.height - 28, 70, 20).build());
+        this.deleteButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.delete"), button -> {
             String string;
             ServerSelectionList.Entry entry = (ServerSelectionList.Entry)this.serverSelectionList.getSelected();
             if (entry instanceof ServerSelectionList.OnlineServerEntry && (string = ((ServerSelectionList.OnlineServerEntry)entry).getServerData().name) != null) {
@@ -101,9 +101,9 @@ extends Screen {
                 Component component4 = CommonComponents.GUI_CANCEL;
                 this.minecraft.setScreen(new ConfirmScreen(this::deleteCallback, component, component2, component3, component4));
             }
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 70, 20, Component.translatable("selectServer.refresh"), button -> this.refreshServerList()));
-        this.addRenderableWidget(new Button(this.width / 2 + 4 + 76, this.height - 28, 75, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
+        }).bounds(this.width / 2 - 74, this.height - 28, 70, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("selectServer.refresh"), button -> this.refreshServerList()).bounds(this.width / 2 + 4, this.height - 28, 70, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 4 + 76, this.height - 28, 75, 20).build());
         this.onSelectedChange();
     }
 

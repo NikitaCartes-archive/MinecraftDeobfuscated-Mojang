@@ -4,12 +4,9 @@
 package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -20,11 +17,13 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public class ShriekParticle
 extends TextureSheetParticle {
-    private static final Vector3f ROTATION_VECTOR = Util.make(new Vector3f(0.5f, 0.5f, 0.5f), Vector3f::normalize);
+    private static final Vector3f ROTATION_VECTOR = new Vector3f(0.5f, 0.5f, 0.5f).normalize();
     private static final Vector3f TRANSFORM_VECTOR = new Vector3f(-1.0f, -1.0f, 0.0f);
     private static final float MAGICAL_X_ROT = 1.0472f;
     private int delay;
@@ -51,30 +50,24 @@ extends TextureSheetParticle {
             return;
         }
         this.alpha = 1.0f - Mth.clamp(((float)this.age + f) / (float)this.lifetime, 0.0f, 1.0f);
-        this.renderRotatedParticle(vertexConsumer, camera, f, quaternion -> {
-            quaternion.mul(Vector3f.YP.rotation(0.0f));
-            quaternion.mul(Vector3f.XP.rotation(-1.0472f));
-        });
-        this.renderRotatedParticle(vertexConsumer, camera, f, quaternion -> {
-            quaternion.mul(Vector3f.YP.rotation((float)(-Math.PI)));
-            quaternion.mul(Vector3f.XP.rotation(1.0472f));
-        });
+        this.renderRotatedParticle(vertexConsumer, camera, f, quaternionf -> quaternionf.mul(new Quaternionf().rotationX(-1.0472f)));
+        this.renderRotatedParticle(vertexConsumer, camera, f, quaternionf -> quaternionf.mul(new Quaternionf().rotationYXZ((float)(-Math.PI), 1.0472f, 0.0f)));
     }
 
-    private void renderRotatedParticle(VertexConsumer vertexConsumer, Camera camera, float f, Consumer<Quaternion> consumer) {
+    private void renderRotatedParticle(VertexConsumer vertexConsumer, Camera camera, float f, Consumer<Quaternionf> consumer) {
         int k;
         Vec3 vec3 = camera.getPosition();
         float g = (float)(Mth.lerp((double)f, this.xo, this.x) - vec3.x());
         float h = (float)(Mth.lerp((double)f, this.yo, this.y) - vec3.y());
         float i = (float)(Mth.lerp((double)f, this.zo, this.z) - vec3.z());
-        Quaternion quaternion = new Quaternion(ROTATION_VECTOR, 0.0f, true);
-        consumer.accept(quaternion);
-        TRANSFORM_VECTOR.transform(quaternion);
+        Quaternionf quaternionf = new Quaternionf().setAngleAxis(0.0f, ROTATION_VECTOR.x(), ROTATION_VECTOR.y(), ROTATION_VECTOR.z());
+        consumer.accept(quaternionf);
+        quaternionf.transform(TRANSFORM_VECTOR);
         Vector3f[] vector3fs = new Vector3f[]{new Vector3f(-1.0f, -1.0f, 0.0f), new Vector3f(-1.0f, 1.0f, 0.0f), new Vector3f(1.0f, 1.0f, 0.0f), new Vector3f(1.0f, -1.0f, 0.0f)};
         float j = this.getQuadSize(f);
         for (k = 0; k < 4; ++k) {
             Vector3f vector3f = vector3fs[k];
-            vector3f.transform(quaternion);
+            vector3f.rotate(quaternionf);
             vector3f.mul(j);
             vector3f.add(g, h, i);
         }

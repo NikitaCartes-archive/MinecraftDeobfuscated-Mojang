@@ -36,7 +36,7 @@ extends MobRenderer<Slime, SlimeModel<Slime>> {
     protected void scale(Slime slime, PoseStack poseStack, float f) {
         float g = 0.999f;
         poseStack.scale(0.999f, 0.999f, 0.999f);
-        poseStack.translate(0.0, 0.001f, 0.0);
+        poseStack.translate(0.0f, 0.001f, 0.0f);
         float h = slime.getSize();
         float i = Mth.lerp(f, slime.oSquish, slime.squish) / (h * 0.5f + 1.0f);
         float j = 1.0f / (i + 1.0f);

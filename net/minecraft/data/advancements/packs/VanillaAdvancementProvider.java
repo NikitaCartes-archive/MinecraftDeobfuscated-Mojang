@@ -14,7 +14,7 @@ import net.minecraft.data.advancements.packs.VanillaTheEndAdvancements;
 
 public class VanillaAdvancementProvider {
     public static AdvancementProvider create(PackOutput packOutput) {
-        return new AdvancementProvider("Vanilla Advancements", packOutput, List.of(new VanillaTheEndAdvancements(), new VanillaHusbandryAdvancements(), new VanillaAdventureAdvancements(), new VanillaNetherAdvancements(), new VanillaStoryAdvancements()));
+        return new AdvancementProvider(packOutput, List.of(new VanillaTheEndAdvancements(), new VanillaHusbandryAdvancements(), new VanillaAdventureAdvancements(), new VanillaNetherAdvancements(), new VanillaStoryAdvancements()));
     }
 }
 

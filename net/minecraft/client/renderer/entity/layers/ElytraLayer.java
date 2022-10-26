@@ -45,7 +45,7 @@ extends RenderLayer<T, M> {
         }
         ResourceLocation resourceLocation = livingEntity instanceof AbstractClientPlayer ? ((abstractClientPlayer = (AbstractClientPlayer)livingEntity).isElytraLoaded() && abstractClientPlayer.getElytraTextureLocation() != null ? abstractClientPlayer.getElytraTextureLocation() : (abstractClientPlayer.isCapeLoaded() && abstractClientPlayer.getCloakTextureLocation() != null && abstractClientPlayer.isModelPartShown(PlayerModelPart.CAPE) ? abstractClientPlayer.getCloakTextureLocation() : WINGS_LOCATION)) : WINGS_LOCATION;
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, 0.125);
+        poseStack.translate(0.0f, 0.0f, 0.125f);
         ((EntityModel)this.getParentModel()).copyPropertiesTo(this.elytraModel);
         this.elytraModel.setupAnim(livingEntity, f, g, j, k, l);
         VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(resourceLocation), false, itemStack.hasFoil());

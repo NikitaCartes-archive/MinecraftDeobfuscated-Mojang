@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.entity;
 
-import com.mojang.math.Vector3f;
 import java.util.Map;
+import org.joml.Vector3f;
 
 public interface LerpingModel {
     public Map<String, Vector3f> getModelRotationValues();

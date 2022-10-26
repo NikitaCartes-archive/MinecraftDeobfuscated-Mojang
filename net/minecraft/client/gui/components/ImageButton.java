@@ -40,7 +40,7 @@ extends Button {
     }
 
     public ImageButton(int i, int j, int k, int l, int m, int n, int o, ResourceLocation resourceLocation, int p, int q, Button.OnPress onPress, Button.OnTooltip onTooltip, Component component) {
-        super(i, j, k, l, component, onPress, onTooltip);
+        super(i, j, k, l, component, onPress, onTooltip, DEFAULT_NARRATION);
         this.textureWidth = p;
         this.textureHeight = q;
         this.xTexStart = m;
@@ -49,9 +49,10 @@ extends Button {
         this.resourceLocation = resourceLocation;
     }
 
+    @Override
     public void setPosition(int i, int j) {
-        this.x = i;
-        this.y = j;
+        this.setX(i);
+        this.setY(j);
     }
 
     @Override
@@ -65,7 +66,7 @@ extends Button {
             k += this.yDiffTex;
         }
         RenderSystem.enableDepthTest();
-        ImageButton.blit(poseStack, this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
+        ImageButton.blit(poseStack, this.getX(), this.getY(), this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
         if (this.isHovered) {
             this.renderToolTip(poseStack, i, j);
         }

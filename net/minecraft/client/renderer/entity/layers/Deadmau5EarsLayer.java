@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -35,12 +35,12 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
             float o = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.getYRot()) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
             float p = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.getXRot());
             poseStack.pushPose();
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(p));
-            poseStack.translate(0.375f * (float)(n * 2 - 1), 0.0, 0.0);
-            poseStack.translate(0.0, -0.375, 0.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-p));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(-o));
+            poseStack.mulPose(Axis.YP.rotationDegrees(o));
+            poseStack.mulPose(Axis.XP.rotationDegrees(p));
+            poseStack.translate(0.375f * (float)(n * 2 - 1), 0.0f, 0.0f);
+            poseStack.translate(0.0f, -0.375f, 0.0f);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-p));
+            poseStack.mulPose(Axis.YP.rotationDegrees(-o));
             float q = 1.3333334f;
             poseStack.scale(1.3333334f, 1.3333334f, 1.3333334f);
             ((PlayerModel)this.getParentModel()).renderEars(poseStack, vertexConsumer, i, m);

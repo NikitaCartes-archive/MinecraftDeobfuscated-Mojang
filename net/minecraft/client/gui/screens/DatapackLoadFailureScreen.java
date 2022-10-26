@@ -27,8 +27,8 @@ extends Screen {
     protected void init() {
         super.init();
         this.message = MultiLineLabel.create(this.font, (FormattedText)this.getTitle(), this.width - 50);
-        this.addRenderableWidget(new Button(this.width / 2 - 155, this.height / 6 + 96, 150, 20, Component.translatable("datapackFailure.safeMode"), button -> this.callback.run()));
-        this.addRenderableWidget(new Button(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20, Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(null)));
+        this.addRenderableWidget(Button.builder(Component.translatable("datapackFailure.safeMode"), button -> this.callback.run()).bounds(this.width / 2 - 155, this.height / 6 + 96, 150, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(null)).bounds(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20).build());
     }
 
     @Override

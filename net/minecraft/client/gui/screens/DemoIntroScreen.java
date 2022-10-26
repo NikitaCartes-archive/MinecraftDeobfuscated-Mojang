@@ -30,14 +30,14 @@ extends Screen {
     @Override
     protected void init() {
         int i = -16;
-        this.addRenderableWidget(new Button(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20, Component.translatable("demo.help.buy"), button -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("demo.help.buy"), button -> {
             button.active = false;
             Util.getPlatform().openUri("https://aka.ms/BuyMinecraftJava");
-        }));
-        this.addRenderableWidget(new Button(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20, Component.translatable("demo.help.later"), button -> {
+        }).bounds(this.width / 2 - 116, this.height / 2 + 62 + -16, 114, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("demo.help.later"), button -> {
             this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
-        }));
+        }).bounds(this.width / 2 + 2, this.height / 2 + 62 + -16, 114, 20).build());
         Options options = this.minecraft.options;
         this.movementMessage = MultiLineLabel.create(this.font, Component.translatable("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), Component.translatable("demo.help.movementMouse"), Component.translatable("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), Component.translatable("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()));
         this.durationMessage = MultiLineLabel.create(this.font, (FormattedText)Component.translatable("demo.help.fullWrapped"), 218);

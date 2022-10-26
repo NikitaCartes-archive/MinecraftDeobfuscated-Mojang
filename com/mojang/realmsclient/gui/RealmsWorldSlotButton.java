@@ -40,7 +40,7 @@ extends Button {
     private State state;
 
     public RealmsWorldSlotButton(int i, int j, int k, int l, Supplier<RealmsServer> supplier, Consumer<Component> consumer, int m, Button.OnPress onPress) {
-        super(i, j, k, l, CommonComponents.EMPTY, onPress);
+        super(i, j, k, l, CommonComponents.EMPTY, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
         this.serverDataProvider = supplier;
         this.slotIndex = m;
         this.toolTipSetter = consumer;
@@ -113,7 +113,7 @@ extends Button {
         if (this.state == null) {
             return;
         }
-        this.drawSlotFrame(poseStack, this.x, this.y, i, j, this.state.isCurrentlyActiveSlot, this.state.slotName, this.slotIndex, this.state.imageId, this.state.image, this.state.empty, this.state.minigame, this.state.action, this.state.actionPrompt);
+        this.drawSlotFrame(poseStack, this.getX(), this.getY(), i, j, this.state.isCurrentlyActiveSlot, this.state.slotName, this.slotIndex, this.state.imageId, this.state.image, this.state.empty, this.state.minigame, this.state.action, this.state.actionPrompt);
     }
 
     private void drawSlotFrame(PoseStack poseStack, int i, int j, int k, int l, boolean bl, String string, int m, long n, @Nullable String string2, boolean bl2, boolean bl3, Action action, @Nullable Component component) {

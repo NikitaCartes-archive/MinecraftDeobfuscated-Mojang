@@ -3,12 +3,10 @@
  */
 package net.minecraft.client.gui.spectator.categories;
 
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,20 +25,17 @@ import net.minecraft.world.level.GameType;
 public class TeleportToPlayerMenuCategory
 implements SpectatorMenuCategory,
 SpectatorMenuItem {
-    private static final Ordering<PlayerInfo> PROFILE_ORDER = Ordering.from((playerInfo, playerInfo2) -> ComparisonChain.start().compare(playerInfo.getProfile().getId(), playerInfo2.getProfile().getId()).result());
+    private static final Comparator<PlayerInfo> PROFILE_ORDER = Comparator.comparing(playerInfo -> playerInfo.getProfile().getId());
     private static final Component TELEPORT_TEXT = Component.translatable("spectatorMenu.teleport");
     private static final Component TELEPORT_PROMPT = Component.translatable("spectatorMenu.teleport.prompt");
-    private final List<SpectatorMenuItem> items = Lists.newArrayList();
+    private final List<SpectatorMenuItem> items;
 
     public TeleportToPlayerMenuCategory() {
-        this(PROFILE_ORDER.sortedCopy(Minecraft.getInstance().getConnection().getListedOnlinePlayers()));
+        this(Minecraft.getInstance().getConnection().getListedOnlinePlayers());
     }
 
     public TeleportToPlayerMenuCategory(Collection<PlayerInfo> collection) {
-        for (PlayerInfo playerInfo : PROFILE_ORDER.sortedCopy(collection)) {
-            if (playerInfo.getGameMode() == GameType.SPECTATOR) continue;
-            this.items.add(new PlayerMenuItem(playerInfo.getProfile()));
-        }
+        this.items = collection.stream().filter(playerInfo -> playerInfo.getGameMode() != GameType.SPECTATOR).sorted(PROFILE_ORDER).map(playerInfo -> new PlayerMenuItem(playerInfo.getProfile())).toList();
     }
 
     @Override

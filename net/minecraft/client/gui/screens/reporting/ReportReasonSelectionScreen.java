@@ -54,20 +54,20 @@ extends Screen {
         ReasonSelectionList.Entry entry = Util.mapNullable(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
         this.reasonSelectionList.setSelected(entry);
         int i = this.width / 2 - 150 - 5;
-        this.addRenderableWidget(new Button(i, this.buttonTop(), 150, 20, READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+        this.addRenderableWidget(Button.builder(READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
                 Util.getPlatform().openUri(ADDITIONAL_INFO_LINK);
             }
             this.minecraft.setScreen(this);
-        }, ADDITIONAL_INFO_LINK, true))));
+        }, ADDITIONAL_INFO_LINK, true))).bounds(i, this.buttonTop(), 150, 20).build());
         int j = this.width / 2 + 5;
-        this.addRenderableWidget(new Button(j, this.buttonTop(), 150, 20, CommonComponents.GUI_DONE, button -> {
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             ReasonSelectionList.Entry entry = (ReasonSelectionList.Entry)this.reasonSelectionList.getSelected();
             if (entry != null) {
                 this.onSelectedReason.accept(entry.getReason());
             }
             this.minecraft.setScreen(this.lastScreen);
-        }));
+        }).bounds(j, this.buttonTop(), 150, 20).build());
         super.init();
     }
 

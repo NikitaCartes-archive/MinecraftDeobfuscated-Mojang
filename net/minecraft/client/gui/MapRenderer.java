@@ -5,8 +5,7 @@ package net.minecraft.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Objects;
@@ -24,6 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class MapRenderer
@@ -123,9 +123,9 @@ implements AutoCloseable {
                 if (bl && !mapDecoration.renderOnFrame()) continue;
                 poseStack.pushPose();
                 poseStack.translate(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f, -0.02f);
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)(mapDecoration.getRot() * 360) / 16.0f));
+                poseStack.mulPose(Axis.ZP.rotationDegrees((float)(mapDecoration.getRot() * 360) / 16.0f));
                 poseStack.scale(4.0f, 4.0f, 3.0f);
-                poseStack.translate(-0.125, 0.125, 0.0);
+                poseStack.translate(-0.125f, 0.125f, 0.0f);
                 byte b = mapDecoration.getImage();
                 float g = (float)(b % 16 + 0) / 16.0f;
                 float h = (float)(b / 16 + 0) / 16.0f;
@@ -149,7 +149,7 @@ implements AutoCloseable {
                     poseStack.pushPose();
                     poseStack.translate(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f - p * q / 2.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f + 4.0f, -0.025f);
                     poseStack.scale(q, q, 1.0f);
-                    poseStack.translate(0.0, 0.0, -0.1f);
+                    poseStack.translate(0.0f, 0.0f, -0.1f);
                     font.drawInBatch(component, 0.0f, 0.0f, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
                     poseStack.popPose();
                 }

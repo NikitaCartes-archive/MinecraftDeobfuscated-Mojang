@@ -4,8 +4,6 @@
 package net.minecraft.world.item;
 
 import com.google.common.collect.Lists;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -41,6 +39,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class CrossbowItem
 extends ProjectileWeaponItem
@@ -210,10 +210,9 @@ implements Vanishable {
             crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
         } else {
             Vec3 vec3 = livingEntity2.getUpVector(1.0f);
-            Quaternion quaternion = new Quaternion(new Vector3f(vec3), i, true);
+            Quaternionf quaternionf = new Quaternionf().setAngleAxis((double)i, vec3.x, vec3.y, vec3.z);
             Vec3 vec32 = livingEntity2.getViewVector(1.0f);
-            Vector3f vector3f = new Vector3f(vec32);
-            vector3f.transform(quaternion);
+            Vector3f vector3f = vec32.toVector3f().rotate(quaternionf);
             projectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), g, h);
         }
         itemStack.hurtAndBreak(bl2 ? 3 : 1, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent(interactionHand));

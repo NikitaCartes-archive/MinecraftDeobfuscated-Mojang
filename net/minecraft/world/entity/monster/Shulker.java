@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.monster;
 
-import com.mojang.math.Vector3f;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +58,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public class Shulker
 extends AbstractGolem
@@ -544,8 +544,7 @@ implements Enemy {
         @Override
         protected Optional<Float> getYRotD() {
             Direction direction = Shulker.this.getAttachFace().getOpposite();
-            Vector3f vector3f = FORWARD.copy();
-            vector3f.transform(direction.getRotation());
+            Vector3f vector3f = direction.getRotation().transform(new Vector3f(FORWARD));
             Vec3i vec3i = direction.getNormal();
             Vector3f vector3f2 = new Vector3f(vec3i.getX(), vec3i.getY(), vec3i.getZ());
             vector3f2.cross(vector3f);

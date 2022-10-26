@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class HangingSignBlockEntity
 extends SignBlockEntity {
     private static final int MAX_TEXT_LINE_WIDTH = 50;
-    private static final int TEXT_LINE_HEIGHT = 8;
+    private static final int TEXT_LINE_HEIGHT = 9;
 
     public HangingSignBlockEntity(BlockPos blockPos, BlockState blockState) {
         super((BlockEntityType)BlockEntityType.HANGING_SIGN, blockPos, blockState);
@@ -19,7 +19,7 @@ extends SignBlockEntity {
 
     @Override
     public int getTextLineHeight() {
-        return 8;
+        return 9;
     }
 
     @Override

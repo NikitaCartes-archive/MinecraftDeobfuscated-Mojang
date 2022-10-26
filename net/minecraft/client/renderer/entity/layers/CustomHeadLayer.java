@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,9 +70,9 @@ extends RenderLayer<T, M> {
         if (((LivingEntity)livingEntity).isBaby() && !(livingEntity instanceof Villager)) {
             m = 2.0f;
             float n = 1.4f;
-            poseStack.translate(0.0, 0.03125, 0.0);
+            poseStack.translate(0.0f, 0.03125f, 0.0f);
             poseStack.scale(0.7f, 0.7f, 0.7f);
-            poseStack.translate(0.0, 1.0, 0.0);
+            poseStack.translate(0.0f, 1.0f, 0.0f);
         }
         ((HeadedModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
         if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
@@ -80,7 +80,7 @@ extends RenderLayer<T, M> {
             m = 1.1875f;
             poseStack.scale(1.1875f, -1.1875f, -1.1875f);
             if (bl) {
-                poseStack.translate(0.0, 0.0625, 0.0);
+                poseStack.translate(0.0f, 0.0625f, 0.0f);
             }
             GameProfile gameProfile = null;
             if (itemStack.hasTag() && (compoundTag = itemStack.getTag()).contains("SkullOwner", 10)) {
@@ -100,11 +100,11 @@ extends RenderLayer<T, M> {
 
     public static void translateToHead(PoseStack poseStack, boolean bl) {
         float f = 0.625f;
-        poseStack.translate(0.0, -0.25, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        poseStack.translate(0.0f, -0.25f, 0.0f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
         poseStack.scale(0.625f, -0.625f, -0.625f);
         if (bl) {
-            poseStack.translate(0.0, 0.1875, 0.0);
+            poseStack.translate(0.0f, 0.1875f, 0.0f);
         }
     }
 }

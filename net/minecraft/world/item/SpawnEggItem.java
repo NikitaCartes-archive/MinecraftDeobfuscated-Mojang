@@ -26,7 +26,6 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -67,9 +66,9 @@ extends Item {
         Direction direction = useOnContext.getClickedFace();
         BlockState blockState = level.getBlockState(blockPos);
         if (blockState.is(Blocks.SPAWNER) && (blockEntity = level.getBlockEntity(blockPos)) instanceof SpawnerBlockEntity) {
-            BaseSpawner baseSpawner = ((SpawnerBlockEntity)blockEntity).getSpawner();
+            SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity)blockEntity;
             EntityType<?> entityType = this.getType(itemStack.getTag());
-            baseSpawner.setEntityId(entityType);
+            spawnerBlockEntity.setEntityId(entityType, level.getRandom());
             blockEntity.setChanged();
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);
             level.gameEvent((Entity)useOnContext.getPlayer(), GameEvent.BLOCK_CHANGE, blockPos);

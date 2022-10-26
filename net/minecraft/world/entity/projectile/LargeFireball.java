@@ -33,7 +33,7 @@ extends Fireball {
         super.onHit(hitResult);
         if (!this.level.isClientSide) {
             boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-            this.level.explode(null, this.getX(), this.getY(), this.getZ(), this.explosionPower, bl, bl ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE);
+            this.level.explode((Entity)this, this.getX(), this.getY(), this.getZ(), (float)this.explosionPower, bl, bl ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE);
             this.discard();
         }
     }

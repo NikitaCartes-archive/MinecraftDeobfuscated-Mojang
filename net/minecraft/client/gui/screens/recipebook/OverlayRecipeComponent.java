@@ -14,7 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class OverlayRecipeComponent
 extends GuiComponent
-implements Widget,
+implements Renderable,
 GuiEventListener {
     static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
     private static final int MAX_ROW = 4;
@@ -138,7 +138,7 @@ GuiEventListener {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, 170.0);
+        poseStack.translate(0.0f, 0.0f, 170.0f);
         int k = this.recipeButtons.size() <= 16 ? 4 : 5;
         int l = Math.min(this.recipeButtons.size(), k);
         int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
@@ -249,13 +249,13 @@ GuiEventListener {
             if (this.isHoveredOrFocused()) {
                 l += 26;
             }
-            this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
+            this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
-            poseStack2.translate(this.x + 2, this.y + 2, 125.0);
+            poseStack2.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 125.0);
             for (Pos pos : this.ingredientPos) {
                 poseStack2.pushPose();
-                poseStack2.translate(pos.x, pos.y, 0.0);
+                poseStack2.translate((double)pos.x, (double)pos.y, 0.0);
                 poseStack2.scale(0.375f, 0.375f, 1.0f);
                 poseStack2.translate(-8.0, -8.0, 0.0);
                 RenderSystem.applyModelViewMatrix();

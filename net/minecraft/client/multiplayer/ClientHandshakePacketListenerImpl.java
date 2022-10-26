@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.multiplayer;
 
-import com.google.common.primitives.Longs;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
@@ -29,7 +28,6 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.LocalChatSession;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
@@ -42,7 +40,6 @@ import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.HttpUtil;
-import net.minecraft.util.Signer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -51,7 +48,6 @@ public class ClientHandshakePacketListenerImpl
 implements ClientLoginPacketListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Minecraft minecraft;
-    private final LocalChatSession chatSession;
     @Nullable
     private final ServerData serverData;
     @Nullable
@@ -60,10 +56,9 @@ implements ClientLoginPacketListener {
     private final Connection connection;
     private GameProfile localGameProfile;
 
-    public ClientHandshakePacketListenerImpl(Connection connection, Minecraft minecraft, LocalChatSession localChatSession, @Nullable ServerData serverData, @Nullable Screen screen, Consumer<Component> consumer) {
+    public ClientHandshakePacketListenerImpl(Connection connection, Minecraft minecraft, @Nullable ServerData serverData, @Nullable Screen screen, Consumer<Component> consumer) {
         this.connection = connection;
         this.minecraft = minecraft;
-        this.chatSession = localChatSession;
         this.serverData = serverData;
         this.parent = screen;
         this.updateStatus = consumer;
@@ -81,18 +76,8 @@ implements ClientLoginPacketListener {
             string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
             cipher = Crypt.getCipher(2, secretKey);
             cipher2 = Crypt.getCipher(1, secretKey);
-            byte[] bs = clientboundHelloPacket.getNonce();
-            Signer signer = this.chatSession.createSigner();
-            if (signer == null) {
-                serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, bs);
-            } else {
-                long l = Crypt.SaltSupplier.getLong();
-                byte[] cs = signer.sign(output -> {
-                    output.update(bs);
-                    output.update(Longs.toByteArray(l));
-                });
-                serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, l, cs);
-            }
+            byte[] bs = clientboundHelloPacket.getChallenge();
+            serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, bs);
         } catch (Exception exception) {
             throw new IllegalStateException("Protocol error", exception);
         }
@@ -139,7 +124,7 @@ implements ClientLoginPacketListener {
         this.updateStatus.accept(Component.translatable("connect.joining"));
         this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
         this.connection.setProtocol(ConnectionProtocol.PLAY);
-        this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.chatSession, this.serverData, this.localGameProfile, this.minecraft.createTelemetryManager()));
+        this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.serverData, this.localGameProfile, this.minecraft.createTelemetryManager()));
     }
 
     @Override

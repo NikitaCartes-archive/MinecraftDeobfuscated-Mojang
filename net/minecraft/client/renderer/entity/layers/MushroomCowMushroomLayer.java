@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -47,27 +47,27 @@ extends RenderLayer<T, CowModel<T>> {
         int m = LivingEntityRenderer.getOverlayCoords(mushroomCow, 0.0f);
         BakedModel bakedModel = this.blockRenderer.getBlockModel(blockState);
         poseStack.pushPose();
-        poseStack.translate(0.2f, -0.35f, 0.5);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-48.0f));
+        poseStack.translate(0.2f, -0.35f, 0.5f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-48.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(-0.5f, -0.5f, -0.5f);
         this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockState, m, bakedModel);
         poseStack.popPose();
         poseStack.pushPose();
-        poseStack.translate(0.2f, -0.35f, 0.5);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(42.0f));
-        poseStack.translate(0.1f, 0.0, -0.6f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-48.0f));
+        poseStack.translate(0.2f, -0.35f, 0.5f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(42.0f));
+        poseStack.translate(0.1f, 0.0f, -0.6f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-48.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(-0.5f, -0.5f, -0.5f);
         this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockState, m, bakedModel);
         poseStack.popPose();
         poseStack.pushPose();
         ((CowModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
-        poseStack.translate(0.0, -0.7f, -0.2f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-78.0f));
+        poseStack.translate(0.0f, -0.7f, -0.2f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-78.0f));
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(-0.5f, -0.5f, -0.5f);
         this.renderMushroomBlock(poseStack, multiBufferSource, i, bl, blockState, m, bakedModel);
         poseStack.popPose();
     }

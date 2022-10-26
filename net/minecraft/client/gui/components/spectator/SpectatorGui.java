@@ -88,7 +88,7 @@ implements SpectatorMenuListener {
         if (spectatorMenuItem != SpectatorMenu.EMPTY_SLOT) {
             int k = (int)(g * 255.0f);
             poseStack.pushPose();
-            poseStack.translate(j, f, 0.0);
+            poseStack.translate(j, f, 0.0f);
             float h = spectatorMenuItem.isEnabled() ? 1.0f : 0.25f;
             RenderSystem.setShaderColor(h, h, h, g);
             spectatorMenuItem.renderIcon(poseStack, h, k);

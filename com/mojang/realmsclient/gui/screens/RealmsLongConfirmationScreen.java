@@ -34,10 +34,10 @@ extends RealmsScreen {
     @Override
     public void init() {
         if (this.yesNoQuestion) {
-            this.addRenderableWidget(new Button(this.width / 2 - 105, RealmsLongConfirmationScreen.row(8), 100, 20, CommonComponents.GUI_YES, button -> this.callback.accept(true)));
-            this.addRenderableWidget(new Button(this.width / 2 + 5, RealmsLongConfirmationScreen.row(8), 100, 20, CommonComponents.GUI_NO, button -> this.callback.accept(false)));
+            this.addRenderableWidget(Button.builder(CommonComponents.GUI_YES, button -> this.callback.accept(true)).bounds(this.width / 2 - 105, RealmsLongConfirmationScreen.row(8), 100, 20).build());
+            this.addRenderableWidget(Button.builder(CommonComponents.GUI_NO, button -> this.callback.accept(false)).bounds(this.width / 2 + 5, RealmsLongConfirmationScreen.row(8), 100, 20).build());
         } else {
-            this.addRenderableWidget(new Button(this.width / 2 - 50, RealmsLongConfirmationScreen.row(8), 100, 20, Component.translatable("mco.gui.ok"), button -> this.callback.accept(true)));
+            this.addRenderableWidget(Button.builder(Component.translatable("mco.gui.ok"), button -> this.callback.accept(true)).bounds(this.width / 2 - 50, RealmsLongConfirmationScreen.row(8), 100, 20).build());
         }
     }
 

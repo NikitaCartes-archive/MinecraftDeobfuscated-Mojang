@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -54,10 +54,10 @@ extends RenderLayer<T, PlayerModel<T>> {
         for (int m = 0; m < 3; ++m) {
             poseStack.pushPose();
             float n = j * (float)(-(45 + m * 5));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(n));
+            poseStack.mulPose(Axis.YP.rotationDegrees(n));
             float o = 0.75f * (float)m;
             poseStack.scale(o, o, o);
-            poseStack.translate(0.0, -0.2f + 0.6f * (float)m, 0.0);
+            poseStack.translate(0.0f, -0.2f + 0.6f * (float)m, 0.0f);
             this.box.render(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }

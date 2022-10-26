@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -28,19 +28,19 @@ implements BlockEntityRenderer<SpawnerBlockEntity> {
     @Override
     public void render(SpawnerBlockEntity spawnerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.0, 0.5);
+        poseStack.translate(0.5f, 0.0f, 0.5f);
         BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
-        Entity entity = baseSpawner.getOrCreateDisplayEntity(spawnerBlockEntity.getLevel());
+        Entity entity = baseSpawner.getOrCreateDisplayEntity(spawnerBlockEntity.getLevel(), spawnerBlockEntity.getLevel().getRandom(), spawnerBlockEntity.getBlockPos());
         if (entity != null) {
             float g = 0.53125f;
             float h = Math.max(entity.getBbWidth(), entity.getBbHeight());
             if ((double)h > 1.0) {
                 g /= h;
             }
-            poseStack.translate(0.0, 0.4f, 0.0);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees((float)Mth.lerp((double)f, baseSpawner.getoSpin(), baseSpawner.getSpin()) * 10.0f));
-            poseStack.translate(0.0, -0.2f, 0.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-30.0f));
+            poseStack.translate(0.0f, 0.4f, 0.0f);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float)Mth.lerp((double)f, baseSpawner.getoSpin(), baseSpawner.getSpin()) * 10.0f));
+            poseStack.translate(0.0f, -0.2f, 0.0f);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-30.0f));
             poseStack.scale(g, g, g);
             this.entityRenderer.render(entity, 0.0, 0.0, 0.0, 0.0f, f, poseStack, multiBufferSource, i);
         }

@@ -5,9 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GuardianModel;
@@ -25,6 +23,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class GuardianRenderer
@@ -72,7 +72,7 @@ extends MobRenderer<Guardian, GuardianModel> {
             float k = j * 0.5f % 1.0f;
             float l = guardian.getEyeHeight();
             poseStack.pushPose();
-            poseStack.translate(0.0, l, 0.0);
+            poseStack.translate(0.0f, l, 0.0f);
             Vec3 vec3 = this.getPosition(livingEntity, (double)livingEntity.getBbHeight() * 0.5, g);
             Vec3 vec32 = this.getPosition(guardian, l, g);
             Vec3 vec33 = vec3.subtract(vec32);
@@ -80,8 +80,8 @@ extends MobRenderer<Guardian, GuardianModel> {
             vec33 = vec33.normalize();
             float n = (float)Math.acos(vec33.y);
             float o = (float)Math.atan2(vec33.z, vec33.x);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees((1.5707964f - o) * 57.295776f));
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(n * 57.295776f));
+            poseStack.mulPose(Axis.YP.rotationDegrees((1.5707964f - o) * 57.295776f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(n * 57.295776f));
             boolean p = true;
             float q = j * 0.05f * -1.5f;
             float r = h * h;

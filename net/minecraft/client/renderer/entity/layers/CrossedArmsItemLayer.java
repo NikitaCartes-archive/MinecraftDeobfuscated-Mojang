@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -30,8 +30,8 @@ extends RenderLayer<T, M> {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.4f, -0.4f);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
+        poseStack.translate(0.0f, 0.4f, -0.4f);
+        poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.MAINHAND);
         this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();

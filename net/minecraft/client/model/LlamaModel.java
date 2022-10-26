@@ -80,18 +80,18 @@ extends EntityModel<T> {
             poseStack.pushPose();
             float m = 0.7f;
             poseStack.scale(0.71428573f, 0.64935064f, 0.7936508f);
-            poseStack.translate(0.0, 1.3125, 0.22f);
+            poseStack.translate(0.0f, 1.3125f, 0.22f);
             this.head.render(poseStack, vertexConsumer, i, j, f, g, h, k);
             poseStack.popPose();
             poseStack.pushPose();
             float n = 1.1f;
             poseStack.scale(0.625f, 0.45454544f, 0.45454544f);
-            poseStack.translate(0.0, 2.0625, 0.0);
+            poseStack.translate(0.0f, 2.0625f, 0.0f);
             this.body.render(poseStack, vertexConsumer, i, j, f, g, h, k);
             poseStack.popPose();
             poseStack.pushPose();
             poseStack.scale(0.45454544f, 0.41322312f, 0.45454544f);
-            poseStack.translate(0.0, 2.0625, 0.0);
+            poseStack.translate(0.0f, 2.0625f, 0.0f);
             ImmutableList.of(this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.rightChest, this.leftChest).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         } else {

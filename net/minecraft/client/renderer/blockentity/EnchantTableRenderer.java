@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
@@ -34,17 +34,17 @@ implements BlockEntityRenderer<EnchantmentTableBlockEntity> {
     public void render(EnchantmentTableBlockEntity enchantmentTableBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         float h;
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.75, 0.5);
+        poseStack.translate(0.5f, 0.75f, 0.5f);
         float g = (float)enchantmentTableBlockEntity.time + f;
-        poseStack.translate(0.0, 0.1f + Mth.sin(g * 0.1f) * 0.01f, 0.0);
+        poseStack.translate(0.0f, 0.1f + Mth.sin(g * 0.1f) * 0.01f, 0.0f);
         for (h = enchantmentTableBlockEntity.rot - enchantmentTableBlockEntity.oRot; h >= (float)Math.PI; h -= (float)Math.PI * 2) {
         }
         while (h < (float)(-Math.PI)) {
             h += (float)Math.PI * 2;
         }
         float k = enchantmentTableBlockEntity.oRot + h * f;
-        poseStack.mulPose(Vector3f.YP.rotation(-k));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(80.0f));
+        poseStack.mulPose(Axis.YP.rotation(-k));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(80.0f));
         float l = Mth.lerp(f, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip);
         float m = Mth.frac(l + 0.25f) * 1.6f - 0.3f;
         float n = Mth.frac(l + 0.75f) * 1.6f - 0.3f;

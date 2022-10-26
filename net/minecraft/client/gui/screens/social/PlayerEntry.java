@@ -22,6 +22,7 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.reporting.ChatReportScreen;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
@@ -49,6 +50,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
     private boolean hasRecentMessages;
     private final boolean reportingEnabled;
     private final boolean playerReportable;
+    private final boolean hasDraftReport;
     @Nullable
     private Button hideButton;
     @Nullable
@@ -89,6 +91,7 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         ReportingContext reportingContext = minecraft.getReportingContext();
         this.reportingEnabled = reportingContext.sender().isEnabled();
         this.playerReportable = bl;
+        this.hasDraftReport = reportingContext.hasDraftReportFor(uUID);
         final MutableComponent component = Component.translatable("gui.socialInteractions.narration.hide", string);
         final MutableComponent component2 = Component.translatable("gui.socialInteractions.narration.show", string);
         this.hideTooltip = minecraft.font.split(HIDE_TEXT_TOOLTIP, 150);
@@ -98,7 +101,11 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         boolean bl2 = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
         boolean bl4 = bl3 = !minecraft.player.getUUID().equals(uUID);
         if (bl3 && bl2 && !playerSocialManager.isBlocked(uUID)) {
-            this.reportButton = new ImageButton(0, 0, 20, 20, 0, 0, 20, REPORT_BUTTON_LOCATION, 64, 64, button -> minecraft.setScreen(new ChatReportScreen(minecraft.screen, reportingContext, uUID)), new Button.OnTooltip(){
+            this.reportButton = new ImageButton(0, 0, 20, 20, 0, 0, 20, REPORT_BUTTON_LOCATION, 64, 64, button -> {
+                if (reportingContext.draftReportHandled(minecraft, socialInteractionsScreen, false)) {
+                    minecraft.setScreen(new ChatReportScreen((Screen)socialInteractionsScreen, reportingContext, uUID));
+                }
+            }, new Button.OnTooltip(){
 
                 @Override
                 public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
@@ -212,18 +219,23 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         }
         if (this.hideButton != null && this.showButton != null && this.reportButton != null) {
             float g = this.tooltipHoverTime;
-            this.hideButton.x = k + (l - this.hideButton.getWidth() - 4) - 20 - 4;
-            this.hideButton.y = j + (m - this.hideButton.getHeight()) / 2;
+            this.hideButton.setX(k + (l - this.hideButton.getWidth() - 4) - 20 - 4);
+            this.hideButton.setY(j + (m - this.hideButton.getHeight()) / 2);
             this.hideButton.render(poseStack, n, o, f);
-            this.showButton.x = k + (l - this.showButton.getWidth() - 4) - 20 - 4;
-            this.showButton.y = j + (m - this.showButton.getHeight()) / 2;
+            this.showButton.setX(k + (l - this.showButton.getWidth() - 4) - 20 - 4);
+            this.showButton.setY(j + (m - this.showButton.getHeight()) / 2);
             this.showButton.render(poseStack, n, o, f);
-            this.reportButton.x = k + (l - this.showButton.getWidth() - 4);
-            this.reportButton.y = j + (m - this.showButton.getHeight()) / 2;
+            this.reportButton.setX(k + (l - this.showButton.getWidth() - 4));
+            this.reportButton.setY(j + (m - this.showButton.getHeight()) / 2);
             this.reportButton.render(poseStack, n, o, f);
             if (g == this.tooltipHoverTime) {
                 this.tooltipHoverTime = 0.0f;
             }
+        }
+        if (this.hasDraftReport && this.reportButton != null) {
+            RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            GuiComponent.blit(poseStack, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 182.0f, 24.0f, 15, 15, 256, 256);
         }
     }
 

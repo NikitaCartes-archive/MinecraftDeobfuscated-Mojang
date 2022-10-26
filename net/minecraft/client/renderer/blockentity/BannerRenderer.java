@@ -6,7 +6,7 @@ package net.minecraft.client.renderer.blockentity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -73,21 +73,21 @@ implements BlockEntityRenderer<BannerBlockEntity> {
         poseStack.pushPose();
         if (bl) {
             l = 0L;
-            poseStack.translate(0.5, 0.5, 0.5);
+            poseStack.translate(0.5f, 0.5f, 0.5f);
             this.pole.visible = true;
         } else {
             l = bannerBlockEntity.getLevel().getGameTime();
             BlockState blockState = bannerBlockEntity.getBlockState();
             if (blockState.getBlock() instanceof BannerBlock) {
-                poseStack.translate(0.5, 0.5, 0.5);
+                poseStack.translate(0.5f, 0.5f, 0.5f);
                 h = -RotationSegment.convertToDegrees(blockState.getValue(BannerBlock.ROTATION));
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+                poseStack.mulPose(Axis.YP.rotationDegrees(h));
                 this.pole.visible = true;
             } else {
-                poseStack.translate(0.5, -0.1666666716337204, 0.5);
+                poseStack.translate(0.5f, -0.16666667f, 0.5f);
                 h = -blockState.getValue(WallBannerBlock.FACING).toYRot();
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
-                poseStack.translate(0.0, -0.3125, -0.4375);
+                poseStack.mulPose(Axis.YP.rotationDegrees(h));
+                poseStack.translate(0.0f, -0.3125f, -0.4375f);
                 this.pole.visible = false;
             }
         }

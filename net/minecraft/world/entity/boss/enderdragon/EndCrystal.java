@@ -96,7 +96,8 @@ extends Entity {
         if (!this.isRemoved() && !this.level.isClientSide) {
             this.remove(Entity.RemovalReason.KILLED);
             if (!damageSource.isExplosion()) {
-                this.level.explode(null, this.getX(), this.getY(), this.getZ(), 6.0f, Explosion.BlockInteraction.DESTROY);
+                DamageSource damageSource2 = damageSource.getEntity() != null ? DamageSource.explosion(this, damageSource.getEntity()) : null;
+                this.level.explode(this, damageSource2, null, this.getX(), this.getY(), this.getZ(), 6.0f, false, Explosion.BlockInteraction.DESTROY);
             }
             this.onDestroyedBy(damageSource);
         }

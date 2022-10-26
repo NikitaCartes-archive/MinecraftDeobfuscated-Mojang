@@ -5,7 +5,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -38,7 +38,7 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
             return;
         }
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, 0.125);
+        poseStack.translate(0.0f, 0.0f, 0.125f);
         double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak) - Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.getX());
         double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak) - Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.getY());
         double m = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak) - Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.getZ());
@@ -59,9 +59,9 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         if (abstractClientPlayer.isCrouching()) {
             q += 25.0f;
         }
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0f + r / 2.0f + q));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(s / 2.0f));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - s / 2.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(6.0f + r / 2.0f + q));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(s / 2.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - s / 2.0f));
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getCloakTextureLocation()));
         ((PlayerModel)this.getParentModel()).renderCloak(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();

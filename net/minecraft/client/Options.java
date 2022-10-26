@@ -784,6 +784,7 @@ public class Options {
         fieldAccess.process("showAutosaveIndicator", this.showAutosaveIndicator);
         fieldAccess.process("allowServerListing", this.allowServerListing);
         fieldAccess.process("onlyShowSecureChat", this.onlyShowSecureChat);
+        fieldAccess.process("panoramaScrollSpeed", this.panoramaSpeed);
         for (KeyMapping keyMapping : this.keyMappings) {
             String string2;
             String string = keyMapping.saveString();

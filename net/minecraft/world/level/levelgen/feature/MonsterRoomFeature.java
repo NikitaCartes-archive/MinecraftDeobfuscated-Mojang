@@ -120,7 +120,8 @@ extends Feature<NoneFeatureConfiguration> {
         this.safeSetBlock(worldGenLevel, blockPos, Blocks.SPAWNER.defaultBlockState(), predicate);
         BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
         if (blockEntity instanceof SpawnerBlockEntity) {
-            ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(randomSource));
+            SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity)blockEntity;
+            spawnerBlockEntity.setEntityId(this.randomEntityId(randomSource), randomSource);
         } else {
             LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
         }

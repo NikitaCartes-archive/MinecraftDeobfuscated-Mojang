@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EndermanModel;
@@ -33,13 +33,13 @@ extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
             return;
         }
         poseStack.pushPose();
-        poseStack.translate(0.0, 0.6875, -0.75);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0f));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(45.0f));
-        poseStack.translate(0.25, 0.1875, 0.25);
+        poseStack.translate(0.0f, 0.6875f, -0.75f);
+        poseStack.mulPose(Axis.XP.rotationDegrees(20.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(45.0f));
+        poseStack.translate(0.25f, 0.1875f, 0.25f);
         float m = 0.5f;
         poseStack.scale(-0.5f, -0.5f, 0.5f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(90.0f));
         this.blockRenderer.renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

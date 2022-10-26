@@ -240,7 +240,7 @@ extends Screen {
         int l = this.height + 50;
         float g = -this.scroll;
         poseStack.pushPose();
-        poseStack.translate(0.0, g, 0.0);
+        poseStack.translate(0.0f, g, 0.0f);
         RenderSystem.setShaderTexture(0, LOGO_LOCATION);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
@@ -255,7 +255,7 @@ extends Screen {
         for (n = 0; n < this.lines.size(); ++n) {
             float h;
             if (n == this.lines.size() - 1 && (h = (float)m + g - (float)(this.height / 2 - 6)) < 0.0f) {
-                poseStack.translate(0.0, -h, 0.0);
+                poseStack.translate(0.0f, -h, 0.0f);
             }
             if ((float)m + g + 12.0f + 8.0f > 0.0f && (float)m + g < (float)this.height) {
                 FormattedCharSequence formattedCharSequence = this.lines.get(n);

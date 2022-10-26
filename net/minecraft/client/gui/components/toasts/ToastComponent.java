@@ -150,7 +150,7 @@ extends GuiComponent {
             }
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
-            poseStack2.translate((float)i - (float)this.toast.width() * this.getVisibility(l), this.index * 32, 800.0);
+            poseStack2.translate((float)i - (float)this.toast.width() * this.getVisibility(l), this.index * 32, 800.0f);
             RenderSystem.applyModelViewMatrix();
             Toast.Visibility visibility = this.toast.render(poseStack, this.field_2245, l - this.visibleTime);
             poseStack2.popPose();

@@ -48,7 +48,7 @@ extends Screen {
         int i = this.message.getLineCount() * this.font.lineHeight;
         int j = Mth.clamp(90 + i + 12, this.height / 6 + 96, this.height - 24);
         int k = 150;
-        this.addRenderableWidget(new Button((this.width - 150) / 2, j, 150, 20, this.okButton, button -> this.callback.run()));
+        this.addRenderableWidget(Button.builder(this.okButton, button -> this.callback.run()).bounds((this.width - 150) / 2, j, 150, 20).build());
     }
 
     @Override

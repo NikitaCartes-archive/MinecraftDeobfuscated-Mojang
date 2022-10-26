@@ -97,7 +97,7 @@ InventoryCarrier {
         if (this.cannotHunt) {
             compoundTag.putBoolean("CannotHunt", true);
         }
-        compoundTag.put("Inventory", this.inventory.createTag());
+        this.writeInventoryToTag(compoundTag);
     }
 
     @Override
@@ -105,9 +105,7 @@ InventoryCarrier {
         super.readAdditionalSaveData(compoundTag);
         this.setBaby(compoundTag.getBoolean("IsBaby"));
         this.setCannotHunt(compoundTag.getBoolean("CannotHunt"));
-        if (compoundTag.contains("Inventory", 10)) {
-            this.inventory.fromTag(compoundTag.getList("Inventory", 10));
-        }
+        this.readInventoryFromTag(compoundTag);
     }
 
     @Override

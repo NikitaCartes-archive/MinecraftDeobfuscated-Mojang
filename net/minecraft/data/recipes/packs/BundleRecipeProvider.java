@@ -21,10 +21,5 @@ extends RecipeProvider {
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.BUNDLE).define(Character.valueOf('#'), Items.RABBIT_HIDE).define(Character.valueOf('-'), Items.STRING).pattern("-#-").pattern("# #").pattern("###").unlockedBy("has_string", BundleRecipeProvider.has(Items.STRING)).save(consumer);
     }
-
-    @Override
-    public String getName() {
-        return "Bundle Recipes";
-    }
 }
 

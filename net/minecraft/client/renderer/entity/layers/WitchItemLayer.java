@@ -4,7 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
@@ -30,11 +30,11 @@ extends CrossedArmsItemLayer<T, WitchModel<T>> {
         if (itemStack.is(Items.POTION)) {
             ((WitchModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
             ((WitchModel)this.getParentModel()).getNose().translateAndRotate(poseStack);
-            poseStack.translate(0.0625, 0.25, 0.0);
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(140.0f));
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(10.0f));
-            poseStack.translate(0.0, -0.4f, 0.4f);
+            poseStack.translate(0.0625f, 0.25f, 0.0f);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(140.0f));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(10.0f));
+            poseStack.translate(0.0f, -0.4f, 0.4f);
         }
         super.render(poseStack, multiBufferSource, i, livingEntity, f, g, h, j, k, l);
         poseStack.popPose();

@@ -3,13 +3,13 @@
  */
 package net.minecraft.client.model.geom.builders;
 
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.UVPair;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public final class CubeDefinition {

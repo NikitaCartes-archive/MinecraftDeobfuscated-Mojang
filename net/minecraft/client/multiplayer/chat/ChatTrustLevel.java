@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.multiplayer.chat;
 
+import com.mojang.serialization.Codec;
 import java.time.Instant;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
@@ -11,14 +12,22 @@ import net.minecraft.client.GuiMessageTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public enum ChatTrustLevel {
-    SECURE,
-    MODIFIED,
-    NOT_SECURE;
+public enum ChatTrustLevel implements StringRepresentable
+{
+    SECURE("secure"),
+    MODIFIED("modified"),
+    NOT_SECURE("not_secure");
 
+    public static final Codec<ChatTrustLevel> CODEC;
+    private final String serializedName;
+
+    private ChatTrustLevel(String string2) {
+        this.serializedName = string2;
+    }
 
     public static ChatTrustLevel evaluate(PlayerChatMessage playerChatMessage, Component component, Instant instant) {
         if (!playerChatMessage.hasSignature() || playerChatMessage.hasExpiredClient(instant)) {
@@ -65,6 +74,15 @@ public enum ChatTrustLevel {
             case NOT_SECURE -> GuiMessageTag.chatNotSecure();
             default -> null;
         };
+    }
+
+    @Override
+    public String getSerializedName() {
+        return this.serializedName;
+    }
+
+    static {
+        CODEC = StringRepresentable.fromEnum(ChatTrustLevel::values);
     }
 }
 

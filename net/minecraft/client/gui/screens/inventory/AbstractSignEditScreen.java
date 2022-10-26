@@ -12,8 +12,6 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,6 +28,8 @@ import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractSignEditScreen
@@ -55,7 +55,7 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 100, this.height / 4 + 120, 200, 20).build());
         this.sign.setEditable(false);
         this.signField = new TextFieldHelper(() -> this.messages[this.line], string -> {
             this.messages[this.line] = string;
@@ -130,7 +130,7 @@ extends Screen {
     protected abstract Vector3f getSignTextScale();
 
     protected void offsetSign(PoseStack poseStack, BlockState blockState) {
-        poseStack.translate((float)this.width / 2.0f, 90.0, 50.0);
+        poseStack.translate((float)this.width / 2.0f, 90.0f, 50.0f);
     }
 
     private void renderSign(PoseStack poseStack) {
@@ -150,7 +150,7 @@ extends Screen {
         int o;
         String string;
         int n;
-        poseStack.translate(0.0, 0.0, 4.0);
+        poseStack.translate(0.0f, 0.0f, 4.0f);
         Vector3f vector3f = this.getSignTextScale();
         poseStack.scale(vector3f.x(), vector3f.y(), vector3f.z());
         int i = this.sign.getColor().getTextColor();

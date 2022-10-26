@@ -34,9 +34,9 @@ implements WorldVersion {
 
     private DetectedVersion() {
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
-        this.name = "22w42a";
+        this.name = "22w43a";
         this.stable = false;
-        this.worldVersion = new DataVersion(3205, "main");
+        this.worldVersion = new DataVersion(3206, "main");
         this.protocolVersion = SharedConstants.getProtocolVersion();
         this.resourcePackVersion = 11;
         this.dataPackVersion = 10;

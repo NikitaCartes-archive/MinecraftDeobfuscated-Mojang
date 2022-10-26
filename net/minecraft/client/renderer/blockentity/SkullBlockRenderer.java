@@ -81,10 +81,10 @@ implements BlockEntityRenderer<SkullBlockEntity> {
     public static void renderSkull(@Nullable Direction direction, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, SkullModelBase skullModelBase, RenderType renderType) {
         poseStack.pushPose();
         if (direction == null) {
-            poseStack.translate(0.5, 0.0, 0.5);
+            poseStack.translate(0.5f, 0.0f, 0.5f);
         } else {
             float h = 0.25f;
-            poseStack.translate(0.5f - (float)direction.getStepX() * 0.25f, 0.25, 0.5f - (float)direction.getStepZ() * 0.25f);
+            poseStack.translate(0.5f - (float)direction.getStepX() * 0.25f, 0.25f, 0.5f - (float)direction.getStepZ() * 0.25f);
         }
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);

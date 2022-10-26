@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -57,28 +59,44 @@ implements DataProvider {
     }
 
     @Override
-    public void run(CachedOutput cachedOutput) throws IOException {
-        Path path3 = this.output.getOutputFolder();
-        ArrayList<CompletableFuture> list = Lists.newArrayList();
-        for (Path path22 : this.inputFolders) {
-            Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".snbt")).forEach(path2 -> list.add(CompletableFuture.supplyAsync(() -> this.readStructure((Path)path2, this.getName(path22, (Path)path2)), Util.backgroundExecutor())));
+    public CompletableFuture<?> run(CachedOutput cachedOutput) {
+        Path path = this.output.getOutputFolder();
+        ArrayList<CompletionStage> list = Lists.newArrayList();
+        for (Path path2 : this.inputFolders) {
+            list.add(CompletableFuture.supplyAsync(() -> {
+                CompletableFuture<Void> completableFuture;
+                block8: {
+                    Stream<Path> stream = Files.walk(path2, new FileVisitOption[0]);
+                    try {
+                        completableFuture = CompletableFuture.allOf((CompletableFuture[])stream.filter(path -> path.toString().endsWith(".snbt")).map(path3 -> CompletableFuture.runAsync(() -> {
+                            TaskResult taskResult = this.readStructure((Path)path3, this.getName(path2, (Path)path3));
+                            this.storeStructureIfChanged(cachedOutput, taskResult, path);
+                        }, Util.backgroundExecutor())).toArray(CompletableFuture[]::new));
+                        if (stream == null) break block8;
+                    } catch (Throwable throwable) {
+                        try {
+                            if (stream != null) {
+                                try {
+                                    stream.close();
+                                } catch (Throwable throwable2) {
+                                    throwable.addSuppressed(throwable2);
+                                }
+                            }
+                            throw throwable;
+                        } catch (Exception exception) {
+                            throw new RuntimeException("Failed to read structure input directory, aborting", exception);
+                        }
+                    }
+                    stream.close();
+                }
+                return completableFuture;
+            }, Util.backgroundExecutor()).thenCompose(completableFuture -> completableFuture));
         }
-        boolean bl = false;
-        for (CompletableFuture completableFuture : list) {
-            try {
-                this.storeStructureIfChanged(cachedOutput, (TaskResult)completableFuture.get(), path3);
-            } catch (Exception exception) {
-                LOGGER.error("Failed to process structure", exception);
-                bl = true;
-            }
-        }
-        if (bl) {
-            throw new IllegalStateException("Failed to convert all structures, aborting");
-        }
+        return Util.sequenceFailFast(list);
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return "SNBT -> NBT";
     }
 

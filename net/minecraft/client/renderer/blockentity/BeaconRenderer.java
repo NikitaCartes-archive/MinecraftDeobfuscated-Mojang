@@ -5,9 +5,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(value=EnvType.CLIENT)
 public class BeaconRenderer
@@ -57,7 +57,7 @@ implements BlockEntityRenderer<BeaconBlockEntity> {
         float r = fs[1];
         float s = fs[2];
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(n * 2.25f - 45.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(n * 2.25f - 45.0f));
         float t = 0.0f;
         float u = h;
         float v = h;

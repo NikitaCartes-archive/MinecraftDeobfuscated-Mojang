@@ -135,7 +135,7 @@ implements ClientAdvancements.Listener {
         }
         PoseStack poseStack2 = RenderSystem.getModelViewStack();
         poseStack2.pushPose();
-        poseStack2.translate(k + 9, l + 18, 0.0);
+        poseStack2.translate(k + 9, l + 18, 0.0f);
         RenderSystem.applyModelViewMatrix();
         advancementTab.drawContents(poseStack);
         poseStack2.popPose();
@@ -169,7 +169,7 @@ implements ClientAdvancements.Listener {
         if (this.selectedTab != null) {
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();
-            poseStack2.translate(k + 9, l + 18, 400.0);
+            poseStack2.translate(k + 9, l + 18, 400.0f);
             RenderSystem.applyModelViewMatrix();
             RenderSystem.enableDepthTest();
             this.selectedTab.drawTooltips(poseStack, i - k - 9, j - l - 18, k, l);

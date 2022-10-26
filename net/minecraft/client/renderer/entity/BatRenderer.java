@@ -36,9 +36,9 @@ extends MobRenderer<Bat, BatModel> {
     @Override
     protected void setupRotations(Bat bat, PoseStack poseStack, float f, float g, float h) {
         if (bat.isResting()) {
-            poseStack.translate(0.0, -0.1f, 0.0);
+            poseStack.translate(0.0f, -0.1f, 0.0f);
         } else {
-            poseStack.translate(0.0, Mth.cos(f * 0.3f) * 0.1f, 0.0);
+            poseStack.translate(0.0f, Mth.cos(f * 0.3f) * 0.1f, 0.0f);
         }
         super.setupRotations(bat, poseStack, f, g, h);
     }

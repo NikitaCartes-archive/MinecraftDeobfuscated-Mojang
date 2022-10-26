@@ -40,10 +40,5 @@ extends ItemTagsProvider {
         this.tag(ItemTags.BOATS).add(Items.BAMBOO_RAFT);
         this.tag(ItemTags.BOOKSHELF_BOOKS).add((Item[])new Item[]{Items.BOOK, Items.WRITTEN_BOOK, Items.ENCHANTED_BOOK, Items.WRITABLE_BOOK});
     }
-
-    @Override
-    public String getName() {
-        return super.getName() + "@1.20";
-    }
 }
 

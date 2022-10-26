@@ -5,7 +5,6 @@ package com.mojang.math;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix3f;
 import com.mojang.math.SymmetricGroup3;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
@@ -17,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3f;
 
 public enum OctahedralGroup implements StringRepresentable
 {
@@ -86,10 +86,7 @@ public enum OctahedralGroup implements StringRepresentable
         this.invertY = bl2;
         this.invertZ = bl3;
         this.permutation = symmetricGroup3;
-        this.transformation = new Matrix3f();
-        this.transformation.m00 = bl ? -1.0f : 1.0f;
-        this.transformation.m11 = bl2 ? -1.0f : 1.0f;
-        this.transformation.m22 = bl3 ? -1.0f : 1.0f;
+        this.transformation = new Matrix3f().scaling(bl ? -1.0f : 1.0f, bl2 ? -1.0f : 1.0f, bl3 ? -1.0f : 1.0f);
         this.transformation.mul(symmetricGroup3.transformation());
     }
 
@@ -106,7 +103,7 @@ public enum OctahedralGroup implements StringRepresentable
     }
 
     public Matrix3f transformation() {
-        return this.transformation.copy();
+        return new Matrix3f(this.transformation);
     }
 
     public String toString() {
