@@ -76,6 +76,13 @@ public class GameRules {
     public static final Key<BooleanValue> RULE_FORGIVE_DEAD_PLAYERS = GameRules.register("forgiveDeadPlayers", Category.MOBS, BooleanValue.create(true));
     public static final Key<BooleanValue> RULE_UNIVERSAL_ANGER = GameRules.register("universalAnger", Category.MOBS, BooleanValue.create(false));
     public static final Key<IntegerValue> RULE_PLAYERS_SLEEPING_PERCENTAGE = GameRules.register("playersSleepingPercentage", Category.PLAYER, IntegerValue.create(100));
+    public static final Key<BooleanValue> RULE_BLOCK_EXPLOSION_DROP_DECAY = GameRules.register("blockExplosionDropDecay", Category.DROPS, BooleanValue.create(true));
+    public static final Key<BooleanValue> RULE_MOB_EXPLOSION_DROP_DECAY = GameRules.register("mobExplosionDropDecay", Category.DROPS, BooleanValue.create(true));
+    public static final Key<BooleanValue> RULE_TNT_EXPLOSION_DROP_DECAY = GameRules.register("tntExplosionDropDecay", Category.DROPS, BooleanValue.create(false));
+    public static final Key<IntegerValue> RULE_SNOW_ACCUMULATION_HEIGHT = GameRules.register("snowAccumulationHeight", Category.UPDATES, IntegerValue.create(1));
+    public static final Key<BooleanValue> RULE_WATER_SOURCE_CONVERSION = GameRules.register("waterSourceConversion", Category.UPDATES, BooleanValue.create(true));
+    public static final Key<BooleanValue> RULE_LAVA_SOURCE_CONVERSION = GameRules.register("lavaSourceConversion", Category.UPDATES, BooleanValue.create(false));
+    public static final Key<BooleanValue> RULE_GLOBAL_SOUND_EVENTS = GameRules.register("globalSoundEvents", Category.MISC, BooleanValue.create(true));
     private final Map<Key<?>, Value<?>> rules;
 
     private static <T extends Value<T>> Key<T> register(String string, Category category, Type<T> type) {

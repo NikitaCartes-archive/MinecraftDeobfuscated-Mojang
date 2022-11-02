@@ -11,15 +11,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import org.slf4j.Logger;
 
-public interface RegistryAccess {
+public interface RegistryAccess
+extends HolderLookup.Provider {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final Frozen EMPTY = new ImmutableRegistryAccess(Map.of()).freeze();
 
     public <E> Optional<Registry<E>> registry(ResourceKey<? extends Registry<? extends E>> var1);
+
+    @Override
+    default public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+        return this.registry(resourceKey).map(Registry::asLookup);
+    }
 
     default public <E> Registry<E> registryOrThrow(ResourceKey<? extends Registry<? extends E>> resourceKey) {
         return this.registry(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));

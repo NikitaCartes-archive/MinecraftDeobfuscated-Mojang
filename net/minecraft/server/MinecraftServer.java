@@ -158,7 +158,6 @@ import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.storage.CommandStorage;
 import net.minecraft.world.level.storage.DerivedLevelData;
@@ -295,8 +294,8 @@ AutoCloseable {
         this.playerDataStorage = levelStorageAccess.createPlayerStorage();
         this.fixerUpper = dataFixer;
         this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-        HolderLookup<Block> holderLookup = HolderLookup.forRegistry(this.registries.compositeAccess().registryOrThrow(Registry.BLOCK_REGISTRY)).filterFeatures(this.worldData.enabledFeatures());
-        this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderLookup);
+        HolderLookup<Block> holderGetter = this.registries.compositeAccess().registryOrThrow(Registry.BLOCK_REGISTRY).asLookup().filterFeatures(this.worldData.enabledFeatures());
+        this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderGetter);
         this.serverThread = thread;
         this.executor = Util.backgroundExecutor();
     }
@@ -415,8 +414,7 @@ AutoCloseable {
             k += m;
         }
         if (bl) {
-            ConfiguredFeature<NoneFeatureConfiguration, ?> configuredFeature = MiscOverworldFeatures.BONUS_CHEST.value();
-            configuredFeature.place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn()));
+            serverLevel.registryAccess().registry(Registry.CONFIGURED_FEATURE_REGISTRY).flatMap(registry -> registry.getHolder(MiscOverworldFeatures.BONUS_CHEST)).ifPresent(reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())));
         }
     }
 

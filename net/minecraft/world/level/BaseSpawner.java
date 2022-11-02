@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public abstract class BaseSpawner {
+    public static final String SPAWN_DATA_TAG = "SpawnData";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int EVENT_SPAWN = 1;
     private int spawnDelay = 20;
@@ -59,7 +60,7 @@ public abstract class BaseSpawner {
     public void clientTick(Level level, BlockPos blockPos) {
         if (!this.isNearPlayer(level, blockPos)) {
             this.oSpin = this.spin;
-        } else {
+        } else if (this.displayEntity != null) {
             RandomSource randomSource = level.getRandom();
             double d = (double)blockPos.getX() + randomSource.nextDouble();
             double e = (double)blockPos.getY() + randomSource.nextDouble();
@@ -152,9 +153,9 @@ public abstract class BaseSpawner {
     public void load(@Nullable Level level, BlockPos blockPos, CompoundTag compoundTag) {
         boolean bl2;
         this.spawnDelay = compoundTag.getShort("Delay");
-        boolean bl = compoundTag.contains("SpawnData", 10);
+        boolean bl = compoundTag.contains(SPAWN_DATA_TAG, 10);
         if (bl) {
-            SpawnData spawnData = SpawnData.CODEC.parse(NbtOps.INSTANCE, compoundTag.getCompound("SpawnData")).resultOrPartial(string -> LOGGER.warn("Invalid SpawnData: {}", string)).orElseGet(SpawnData::new);
+            SpawnData spawnData = SpawnData.CODEC.parse(NbtOps.INSTANCE, compoundTag.getCompound(SPAWN_DATA_TAG)).resultOrPartial(string -> LOGGER.warn("Invalid SpawnData: {}", string)).orElseGet(SpawnData::new);
             this.setNextSpawnData(level, blockPos, spawnData);
         }
         if (bl2 = compoundTag.contains("SpawnPotentials", 9)) {
@@ -187,7 +188,7 @@ public abstract class BaseSpawner {
         compoundTag.putShort("RequiredPlayerRange", (short)this.requiredPlayerRange);
         compoundTag.putShort("SpawnRange", (short)this.spawnRange);
         if (this.nextSpawnData != null) {
-            compoundTag.put("SpawnData", SpawnData.CODEC.encodeStart(NbtOps.INSTANCE, this.nextSpawnData).result().orElseThrow(() -> new IllegalStateException("Invalid SpawnData")));
+            compoundTag.put(SPAWN_DATA_TAG, SpawnData.CODEC.encodeStart(NbtOps.INSTANCE, this.nextSpawnData).result().orElseThrow(() -> new IllegalStateException("Invalid SpawnData")));
         }
         compoundTag.put("SpawnPotentials", SpawnData.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.spawnPotentials).result().orElseThrow());
         return compoundTag;
@@ -197,8 +198,11 @@ public abstract class BaseSpawner {
     public Entity getOrCreateDisplayEntity(Level level, RandomSource randomSource, BlockPos blockPos) {
         if (this.displayEntity == null) {
             CompoundTag compoundTag = this.getOrCreateNextSpawnData(level, randomSource, blockPos).getEntityToSpawn();
+            if (!compoundTag.contains("id", 8)) {
+                return null;
+            }
             this.displayEntity = EntityType.loadEntityRecursive(compoundTag, level, Function.identity());
-            if (compoundTag.size() != 1 || !compoundTag.contains("id", 8) || this.displayEntity instanceof Mob) {
+            if (compoundTag.size() != 1 || this.displayEntity instanceof Mob) {
                 // empty if block
             }
         }

@@ -5,6 +5,8 @@ package net.minecraft.world.level.block.grower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
@@ -30,14 +32,18 @@ extends AbstractTreeGrower {
     }
 
     @Nullable
-    protected abstract Holder<? extends ConfiguredFeature<?, ?>> getConfiguredMegaFeature(RandomSource var1);
+    protected abstract ResourceKey<ConfiguredFeature<?, ?>> getConfiguredMegaFeature(RandomSource var1);
 
     public boolean placeMega(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, RandomSource randomSource, int i, int j) {
-        Holder<ConfiguredFeature<?, ?>> holder = this.getConfiguredMegaFeature(randomSource);
+        ResourceKey<ConfiguredFeature<?, ?>> resourceKey = this.getConfiguredMegaFeature(randomSource);
+        if (resourceKey == null) {
+            return false;
+        }
+        Holder holder = serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).getHolder(resourceKey).orElse(null);
         if (holder == null) {
             return false;
         }
-        ConfiguredFeature<?, ?> configuredFeature = holder.value();
+        ConfiguredFeature configuredFeature = (ConfiguredFeature)holder.value();
         BlockState blockState2 = Blocks.AIR.defaultBlockState();
         serverLevel.setBlock(blockPos.offset(i, 0, j), blockState2, 4);
         serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);

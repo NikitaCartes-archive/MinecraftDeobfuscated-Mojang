@@ -17,7 +17,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
@@ -97,7 +96,7 @@ extends Entity {
             this.remove(Entity.RemovalReason.KILLED);
             if (!damageSource.isExplosion()) {
                 DamageSource damageSource2 = damageSource.getEntity() != null ? DamageSource.explosion(this, damageSource.getEntity()) : null;
-                this.level.explode(this, damageSource2, null, this.getX(), this.getY(), this.getZ(), 6.0f, false, Explosion.BlockInteraction.DESTROY);
+                this.level.explode(this, damageSource2, null, this.getX(), this.getY(), this.getZ(), 6.0f, false, Level.ExplosionInteraction.BLOCK);
             }
             this.onDestroyedBy(damageSource);
         }

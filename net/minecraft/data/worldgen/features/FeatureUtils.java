@@ -4,11 +4,10 @@
 package net.minecraft.data.worldgen.features;
 
 import java.util.List;
-import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.AquaticFeatures;
 import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.EndFeatures;
@@ -19,21 +18,28 @@ import net.minecraft.data.worldgen.features.PileFeatures;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.data.worldgen.features.VegetationFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
-import net.minecraft.util.RandomSource;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class FeatureUtils {
-    public static Holder<? extends ConfiguredFeature<?, ?>> bootstrap(Registry<ConfiguredFeature<?, ?>> registry) {
-        List<Holder<ConfiguredFeature<RandomFeatureConfiguration, ?>>> list = List.of(AquaticFeatures.KELP, CaveFeatures.MOSS_PATCH_BONEMEAL, EndFeatures.CHORUS_PLANT, MiscOverworldFeatures.SPRING_LAVA_OVERWORLD, NetherFeatures.BASALT_BLOBS, OreFeatures.ORE_ANCIENT_DEBRIS_LARGE, PileFeatures.PILE_HAY, TreeFeatures.AZALEA_TREE, VegetationFeatures.TREES_OLD_GROWTH_PINE_TAIGA);
-        return Util.getRandom(list, RandomSource.create());
+    public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
+        AquaticFeatures.bootstrap(bootstapContext);
+        CaveFeatures.bootstrap(bootstapContext);
+        EndFeatures.bootstrap(bootstapContext);
+        MiscOverworldFeatures.bootstrap(bootstapContext);
+        NetherFeatures.bootstrap(bootstapContext);
+        OreFeatures.bootstrap(bootstapContext);
+        PileFeatures.bootstrap(bootstapContext);
+        TreeFeatures.bootstrap(bootstapContext);
+        VegetationFeatures.bootstrap(bootstapContext);
     }
 
     private static BlockPredicate simplePatchPredicate(List<Block> list) {
@@ -57,12 +63,16 @@ public class FeatureUtils {
         return FeatureUtils.simplePatchConfiguration(feature, featureConfiguration, List.of(), 96);
     }
 
-    public static Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> register(String string, Feature<NoneFeatureConfiguration> feature) {
-        return FeatureUtils.register(string, feature, FeatureConfiguration.NONE);
+    public static ResourceKey<ConfiguredFeature<?, ?>> createKey(String string) {
+        return ResourceKey.create(Registry.CONFIGURED_FEATURE_REGISTRY, new ResourceLocation(string));
     }
 
-    public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<ConfiguredFeature<FC, ?>> register(String string, F feature, FC featureConfiguration) {
-        return BuiltinRegistries.registerExact(BuiltinRegistries.CONFIGURED_FEATURE, string, new ConfiguredFeature<FC, F>(feature, featureConfiguration));
+    public static void register(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, Feature<NoneFeatureConfiguration> feature) {
+        FeatureUtils.register(bootstapContext, resourceKey, feature, FeatureConfiguration.NONE);
+    }
+
+    public static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, F feature, FC featureConfiguration) {
+        bootstapContext.register(resourceKey, new ConfiguredFeature<FC, F>(feature, featureConfiguration));
     }
 }
 

@@ -38,6 +38,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.camel.CamelAi;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -80,7 +81,9 @@ Saddleable {
     public Camel(EntityType<? extends Camel> entityType, Level level) {
         super((EntityType<? extends AbstractHorse>)entityType, level);
         this.maxUpStep = 1.5f;
-        this.getNavigation().setCanFloat(true);
+        GroundPathNavigation groundPathNavigation = (GroundPathNavigation)this.getNavigation();
+        groundPathNavigation.setCanFloat(true);
+        groundPathNavigation.setCanWalkOverFences(true);
     }
 
     @Override

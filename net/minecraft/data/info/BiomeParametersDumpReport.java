@@ -11,9 +11,8 @@ import com.mojang.serialization.JsonOps;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -27,20 +26,23 @@ public class BiomeParametersDumpReport
 implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final Path topPath;
+    private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public BiomeParametersDumpReport(PackOutput packOutput) {
+    public BiomeParametersDumpReport(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
         this.topPath = packOutput.getOutputFolder(PackOutput.Target.REPORTS).resolve("biome_parameters");
+        this.registries = completableFuture;
     }
 
     @Override
     public CompletableFuture<?> run(CachedOutput cachedOutput) {
-        RegistryAccess.Frozen registryAccess = BuiltinRegistries.createAccess();
-        RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-        return CompletableFuture.allOf((CompletableFuture[])MultiNoiseBiomeSource.Preset.getPresets().map(pair -> {
-            MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(registry, false);
-            return BiomeParametersDumpReport.dumpValue(this.createPath((ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
-        }).toArray(CompletableFuture[]::new));
+        return this.registries.thenCompose(provider -> {
+            RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, provider);
+            HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registry.BIOME_REGISTRY);
+            return CompletableFuture.allOf((CompletableFuture[])MultiNoiseBiomeSource.Preset.getPresets().map(pair -> {
+                MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(holderGetter, false);
+                return BiomeParametersDumpReport.dumpValue(this.createPath((ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);
+            }).toArray(CompletableFuture[]::new));
+        });
     }
 
     private static <E> CompletableFuture<?> dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {

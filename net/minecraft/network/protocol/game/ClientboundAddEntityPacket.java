@@ -12,7 +12,6 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundAddEntityPacket
@@ -33,24 +32,16 @@ implements Packet<ClientGamePacketListener> {
     private final byte yHeadRot;
     private final int data;
 
-    public ClientboundAddEntityPacket(LivingEntity livingEntity) {
-        this(livingEntity, 0);
-    }
-
-    public ClientboundAddEntityPacket(LivingEntity livingEntity, int i) {
-        this(livingEntity.getId(), livingEntity.getUUID(), livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.getXRot(), livingEntity.getYRot(), livingEntity.getType(), i, livingEntity.getDeltaMovement(), livingEntity.yHeadRot);
-    }
-
     public ClientboundAddEntityPacket(Entity entity) {
         this(entity, 0);
     }
 
     public ClientboundAddEntityPacket(Entity entity, int i) {
-        this(entity.getId(), entity.getUUID(), entity.getX(), entity.getY(), entity.getZ(), entity.getXRot(), entity.getYRot(), entity.getType(), i, entity.getDeltaMovement(), 0.0);
+        this(entity.getId(), entity.getUUID(), entity.getX(), entity.getY(), entity.getZ(), entity.getXRot(), entity.getYRot(), entity.getType(), i, entity.getDeltaMovement(), entity.getYHeadRot());
     }
 
     public ClientboundAddEntityPacket(Entity entity, int i, BlockPos blockPos) {
-        this(entity.getId(), entity.getUUID(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), entity.getXRot(), entity.getYRot(), entity.getType(), i, entity.getDeltaMovement(), 0.0);
+        this(entity.getId(), entity.getUUID(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), entity.getXRot(), entity.getYRot(), entity.getType(), i, entity.getDeltaMovement(), entity.getYHeadRot());
     }
 
     public ClientboundAddEntityPacket(int i, UUID uUID, double d, double e, double f, float g, float h, EntityType<?> entityType, int j, Vec3 vec3, double k) {

@@ -188,7 +188,7 @@ implements RepositorySource {
     }
 
     public CompletableFuture<Void> setServerPack(File file, PackSource packSource) {
-        Pack.ResourcesSupplier resourcesSupplier = string -> new FilePackResources(string, file);
+        Pack.ResourcesSupplier resourcesSupplier = string -> new FilePackResources(string, file, false);
         Pack.Info info = Pack.readPackInfo(SERVER_ID, resourcesSupplier);
         if (info == null) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid pack metadata at " + file));

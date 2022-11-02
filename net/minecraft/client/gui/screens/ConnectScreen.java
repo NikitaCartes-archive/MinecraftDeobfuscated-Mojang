@@ -51,7 +51,7 @@ extends Screen {
         this.parent = screen;
     }
 
-    public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
+    public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, ServerData serverData) {
         ConnectScreen connectScreen = new ConnectScreen(screen);
         minecraft.clearLevel();
         minecraft.prepareForMultiplayer();

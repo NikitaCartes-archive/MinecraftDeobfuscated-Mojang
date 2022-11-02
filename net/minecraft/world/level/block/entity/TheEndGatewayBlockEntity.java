@@ -8,6 +8,7 @@ import java.util.List;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.phys.AABB;
@@ -199,14 +201,14 @@ extends TheEndPortalBlockEntity {
         LevelChunk levelChunk = TheEndGatewayBlockEntity.getChunk(serverLevel, vec3);
         BlockPos blockPos2 = TheEndGatewayBlockEntity.findValidSpawnInChunk(levelChunk);
         if (blockPos2 == null) {
-            blockPos2 = new BlockPos(vec3.x + 0.5, 75.0, vec3.z + 0.5);
-            LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", (Object)blockPos2);
-            EndFeatures.END_ISLAND.value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), RandomSource.create(blockPos2.asLong()), blockPos2);
+            BlockPos blockPos3 = new BlockPos(vec3.x + 0.5, 75.0, vec3.z + 0.5);
+            LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", (Object)blockPos3);
+            serverLevel.registryAccess().registry(Registry.CONFIGURED_FEATURE_REGISTRY).flatMap(registry -> registry.getHolder(EndFeatures.END_ISLAND)).ifPresent(reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, serverLevel.getChunkSource().getGenerator(), RandomSource.create(blockPos3.asLong()), blockPos3));
+            blockPos2 = blockPos3;
         } else {
             LOGGER.debug("Found suitable block to teleport to: {}", (Object)blockPos2);
         }
-        blockPos2 = TheEndGatewayBlockEntity.findTallestBlock(serverLevel, blockPos2, 16, true);
-        return blockPos2;
+        return TheEndGatewayBlockEntity.findTallestBlock(serverLevel, blockPos2, 16, true);
     }
 
     private static Vec3 findExitPortalXZPosTentative(ServerLevel serverLevel, BlockPos blockPos) {

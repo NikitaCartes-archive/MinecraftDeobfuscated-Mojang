@@ -4,28 +4,31 @@
 package net.minecraft.data.tags;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.tags.GameEventTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class GameEventTagsProvider
-extends TagsProvider<GameEvent> {
+extends IntrinsicHolderTagsProvider<GameEvent> {
     @VisibleForTesting
     static final GameEvent[] VIBRATIONS_EXCEPT_FLAP = new GameEvent[]{GameEvent.BLOCK_ATTACH, GameEvent.BLOCK_CHANGE, GameEvent.BLOCK_CLOSE, GameEvent.BLOCK_DESTROY, GameEvent.BLOCK_DETACH, GameEvent.BLOCK_OPEN, GameEvent.BLOCK_PLACE, GameEvent.BLOCK_ACTIVATE, GameEvent.BLOCK_DEACTIVATE, GameEvent.CONTAINER_CLOSE, GameEvent.CONTAINER_OPEN, GameEvent.DISPENSE_FAIL, GameEvent.DRINK, GameEvent.EAT, GameEvent.ELYTRA_GLIDE, GameEvent.ENTITY_DAMAGE, GameEvent.ENTITY_DIE, GameEvent.ENTITY_INTERACT, GameEvent.ENTITY_PLACE, GameEvent.ENTITY_ROAR, GameEvent.ENTITY_SHAKE, GameEvent.EQUIP, GameEvent.EXPLODE, GameEvent.FLUID_PICKUP, GameEvent.FLUID_PLACE, GameEvent.HIT_GROUND, GameEvent.INSTRUMENT_PLAY, GameEvent.ITEM_INTERACT_FINISH, GameEvent.LIGHTNING_STRIKE, GameEvent.NOTE_BLOCK_PLAY, GameEvent.PISTON_CONTRACT, GameEvent.PISTON_EXTEND, GameEvent.PRIME_FUSE, GameEvent.PROJECTILE_LAND, GameEvent.PROJECTILE_SHOOT, GameEvent.SHEAR, GameEvent.SPLASH, GameEvent.STEP, GameEvent.SWIM, GameEvent.TELEPORT};
 
-    public GameEventTagsProvider(PackOutput packOutput) {
-        super(packOutput, Registry.GAME_EVENT);
+    public GameEventTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+        super(packOutput, Registry.GAME_EVENT_REGISTRY, completableFuture, gameEvent -> gameEvent.builtInRegistryHolder().key());
     }
 
     @Override
-    protected void addTags() {
-        this.tag(GameEventTags.VIBRATIONS).add((GameEvent[])VIBRATIONS_EXCEPT_FLAP).add(GameEvent.FLAP);
-        this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
-        this.tag(GameEventTags.WARDEN_CAN_LISTEN).add((GameEvent[])VIBRATIONS_EXCEPT_FLAP).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
-        this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING).add((GameEvent[])new GameEvent[]{GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM, GameEvent.ITEM_INTERACT_START, GameEvent.ITEM_INTERACT_FINISH});
-        this.tag(GameEventTags.ALLAY_CAN_LISTEN).add(GameEvent.NOTE_BLOCK_PLAY);
+    protected void addTags(HolderLookup.Provider provider) {
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)GameEventTags.VIBRATIONS)).add((T[])VIBRATIONS_EXCEPT_FLAP).add(GameEvent.FLAP);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)GameEventTags.SHRIEKER_CAN_LISTEN)).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)GameEventTags.WARDEN_CAN_LISTEN)).add((T[])VIBRATIONS_EXCEPT_FLAP).add(GameEvent.SHRIEK).addTag((TagKey)GameEventTags.SHRIEKER_CAN_LISTEN);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)GameEventTags.IGNORE_VIBRATIONS_SNEAKING)).add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM, GameEvent.ITEM_INTERACT_START, GameEvent.ITEM_INTERACT_FINISH);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)GameEventTags.ALLAY_CAN_LISTEN)).add(GameEvent.NOTE_BLOCK_PLAY);
     }
 }
 

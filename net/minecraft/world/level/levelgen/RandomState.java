@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -26,8 +26,7 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public final class RandomState {
     final PositionalRandomFactory random;
-    private final long legacyLevelSeed;
-    private final Registry<NormalNoise.NoiseParameters> noises;
+    private final HolderGetter<NormalNoise.NoiseParameters> noises;
     private final NoiseRouter router;
     private final Climate.Sampler sampler;
     private final SurfaceSystem surfaceSystem;
@@ -36,18 +35,17 @@ public final class RandomState {
     private final Map<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise> noiseIntances;
     private final Map<ResourceLocation, PositionalRandomFactory> positionalRandoms;
 
-    public static RandomState create(RegistryAccess registryAccess, ResourceKey<NoiseGeneratorSettings> resourceKey, long l) {
-        return RandomState.create(registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(resourceKey), registryAccess.registryOrThrow(Registry.NOISE_REGISTRY), l);
+    public static RandomState create(HolderGetter.Provider provider, ResourceKey<NoiseGeneratorSettings> resourceKey, long l) {
+        return RandomState.create(provider.lookupOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(resourceKey).value(), provider.lookupOrThrow(Registry.NOISE_REGISTRY), l);
     }
 
-    public static RandomState create(NoiseGeneratorSettings noiseGeneratorSettings, Registry<NormalNoise.NoiseParameters> registry, long l) {
-        return new RandomState(noiseGeneratorSettings, registry, l);
+    public static RandomState create(NoiseGeneratorSettings noiseGeneratorSettings, HolderGetter<NormalNoise.NoiseParameters> holderGetter, long l) {
+        return new RandomState(noiseGeneratorSettings, holderGetter, l);
     }
 
-    private RandomState(NoiseGeneratorSettings noiseGeneratorSettings, Registry<NormalNoise.NoiseParameters> registry, final long l) {
+    private RandomState(NoiseGeneratorSettings noiseGeneratorSettings, HolderGetter<NormalNoise.NoiseParameters> holderGetter, final long l) {
         this.random = noiseGeneratorSettings.getRandomSource().newInstance(l).forkPositional();
-        this.legacyLevelSeed = l;
-        this.noises = registry;
+        this.noises = holderGetter;
         this.aquiferRandom = this.random.fromHashOf(new ResourceLocation("aquifer")).forkPositional();
         this.oreRandom = this.random.fromHashOf(new ResourceLocation("ore")).forkPositional();
         this.noiseIntances = new ConcurrentHashMap<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise>();
@@ -133,10 +131,6 @@ public final class RandomState {
 
     public PositionalRandomFactory getOrCreateRandomFactory(ResourceLocation resourceLocation) {
         return this.positionalRandoms.computeIfAbsent(resourceLocation, resourceLocation2 -> this.random.fromHashOf(resourceLocation).forkPositional());
-    }
-
-    public long legacyLevelSeed() {
-        return this.legacyLevelSeed;
     }
 
     public NoiseRouter router() {

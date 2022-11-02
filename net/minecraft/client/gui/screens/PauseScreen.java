@@ -91,7 +91,7 @@ extends Screen {
             gridWidget.addChild(Button.builder(Component.translatable("menu.playerReporting"), button -> this.minecraft.setScreen(new SocialInteractionsScreen())).width(98).build(), k, 1, layoutSettings2);
         }
         MutableComponent component = this.minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
-        gridWidget.addChild(Button.builder(component, button -> {
+        this.disconnectButton = gridWidget.addChild(Button.builder(component, button -> {
             if (this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, true)) {
                 boolean bl = this.minecraft.isLocalServer();
                 boolean bl2 = this.minecraft.isConnectedToRealms();

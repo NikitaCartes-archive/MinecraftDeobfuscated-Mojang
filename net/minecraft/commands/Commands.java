@@ -18,6 +18,7 @@ import com.mojang.brigadier.tree.RootCommandNode;
 import com.mojang.logging.LogUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -32,7 +33,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.ArgumentUtils;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.gametest.framework.TestCommand;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -41,6 +45,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.commands.AttributeCommand;
 import net.minecraft.server.commands.BanIpCommands;
@@ -113,8 +118,8 @@ import net.minecraft.server.commands.WhitelistCommand;
 import net.minecraft.server.commands.WorldBorderCommand;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
-import net.minecraft.world.flag.FeatureFlags;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -343,9 +348,31 @@ public class Commands {
         return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
     }
 
+    public static CommandBuildContext createValidationContext(final HolderLookup.Provider provider) {
+        return new CommandBuildContext(){
+
+            @Override
+            public <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<T>> resourceKey) {
+                final HolderLookup.RegistryLookup registryLookup = provider.lookupOrThrow(resourceKey);
+                return new HolderLookup.Delegate<T>(registryLookup){
+
+                    @Override
+                    public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+                        return Optional.of(this.getOrThrow(tagKey));
+                    }
+
+                    @Override
+                    public HolderSet.Named<T> getOrThrow(TagKey<T> tagKey) {
+                        Optional<HolderSet.Named<HolderSet.Named>> optional = registryLookup.get(tagKey);
+                        return optional.orElseGet(() -> HolderSet.emptyNamed(registryLookup, tagKey));
+                    }
+                };
+            }
+        };
+    }
+
     public static void validate() {
-        CommandBuildContext commandBuildContext = new CommandBuildContext(BuiltinRegistries.createAccess(), FeatureFlags.REGISTRY.allFlags());
-        commandBuildContext.missingTagAccessPolicy(CommandBuildContext.MissingTagAccessPolicy.RETURN_EMPTY);
+        CommandBuildContext commandBuildContext = Commands.createValidationContext(VanillaRegistries.createLookup());
         CommandDispatcher<CommandSourceStack> commandDispatcher = new Commands(CommandSelection.ALL, commandBuildContext).getDispatcher();
         RootCommandNode<CommandSourceStack> rootCommandNode = commandDispatcher.getRoot();
         commandDispatcher.findAmbiguities((commandNode, commandNode2, commandNode3, collection) -> LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {}", commandDispatcher.getPath(commandNode2), commandDispatcher.getPath(commandNode3), collection));

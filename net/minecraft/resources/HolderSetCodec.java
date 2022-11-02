@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryOps;
@@ -51,9 +52,9 @@ implements Codec<HolderSet<E>> {
     public <T> DataResult<Pair<HolderSet<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
         RegistryOps registryOps;
         Optional optional;
-        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
-            Registry registry = optional.get();
-            return this.registryAwareCodec.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(either -> either.map(registry::getOrCreateTag, HolderSet::direct)));
+        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).getter(this.registryKey)).isPresent()) {
+            HolderGetter holderGetter = optional.get();
+            return this.registryAwareCodec.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(either -> either.map(holderGetter::getOrThrow, HolderSet::direct)));
         }
         return this.decodeWithoutRegistry(dynamicOps, object);
     }
@@ -62,8 +63,8 @@ implements Codec<HolderSet<E>> {
     public <T> DataResult<T> encode(HolderSet<E> holderSet, DynamicOps<T> dynamicOps, T object) {
         RegistryOps registryOps;
         Optional optional;
-        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
-            if (!holderSet.isValidInRegistry(optional.get())) {
+        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).owner(this.registryKey)).isPresent()) {
+            if (!holderSet.canSerializeIn(optional.get())) {
                 return DataResult.error("HolderSet " + holderSet + " is not valid in current registry set");
             }
             return this.registryAwareCodec.encode(holderSet.unwrap().mapRight(List::copyOf), dynamicOps, object);

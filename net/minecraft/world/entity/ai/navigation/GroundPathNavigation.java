@@ -134,5 +134,9 @@ extends PathNavigation {
     public void setAvoidSun(boolean bl) {
         this.avoidSun = bl;
     }
+
+    public void setCanWalkOverFences(boolean bl) {
+        this.nodeEvaluator.setCanWalkOverFences(bl);
+    }
 }
 

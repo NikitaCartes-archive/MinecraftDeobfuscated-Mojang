@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -22,7 +21,7 @@ implements ParticleOptions {
         @Override
         public ItemParticleOption fromCommand(ParticleType<ItemParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
             stringReader.expect(' ');
-            ItemParser.ItemResult itemResult = ItemParser.parseForItem(HolderLookup.forRegistry(Registry.ITEM), stringReader);
+            ItemParser.ItemResult itemResult = ItemParser.parseForItem(Registry.ITEM.asLookup(), stringReader);
             ItemStack itemStack = new ItemInput(itemResult.item(), itemResult.nbt()).createItemStack(1, false);
             return new ItemParticleOption(particleType, itemStack);
         }

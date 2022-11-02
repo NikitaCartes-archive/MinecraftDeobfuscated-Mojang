@@ -49,7 +49,7 @@ implements RepositorySource {
     public void loadPacks(Consumer<Pack> consumer) {
         try {
             Files.createDirectories(this.folder, new FileAttribute[0]);
-            FolderRepositorySource.discoverPacks(this.folder, (path, resourcesSupplier) -> {
+            FolderRepositorySource.discoverPacks(this.folder, false, (path, resourcesSupplier) -> {
                 String string = FolderRepositorySource.nameFromPath(path);
                 Pack pack = Pack.readMetaAndCreate("file/" + string, Component.literal(string), false, resourcesSupplier, this.packType, Pack.Position.TOP, this.packSource);
                 if (pack != null) {
@@ -61,10 +61,10 @@ implements RepositorySource {
         }
     }
 
-    public static void discoverPacks(Path path, BiConsumer<Path, Pack.ResourcesSupplier> biConsumer) throws IOException {
+    public static void discoverPacks(Path path, boolean bl, BiConsumer<Path, Pack.ResourcesSupplier> biConsumer) throws IOException {
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path);){
             for (Path path2 : directoryStream) {
-                Pack.ResourcesSupplier resourcesSupplier = FolderRepositorySource.detectPackResources(path2);
+                Pack.ResourcesSupplier resourcesSupplier = FolderRepositorySource.detectPackResources(path2, bl);
                 if (resourcesSupplier == null) continue;
                 biConsumer.accept(path2, resourcesSupplier);
             }
@@ -72,7 +72,7 @@ implements RepositorySource {
     }
 
     @Nullable
-    public static Pack.ResourcesSupplier detectPackResources(Path path) {
+    public static Pack.ResourcesSupplier detectPackResources(Path path, boolean bl) {
         FileSystem fileSystem;
         BasicFileAttributes basicFileAttributes;
         try {
@@ -84,11 +84,11 @@ implements RepositorySource {
             return null;
         }
         if (basicFileAttributes.isDirectory() && Files.isRegularFile(path.resolve("pack.mcmeta"), new LinkOption[0])) {
-            return string -> new PathPackResources(string, path);
+            return string -> new PathPackResources(string, path, bl);
         }
         if (basicFileAttributes.isRegularFile() && path.getFileName().toString().endsWith(".zip") && ((fileSystem = path.getFileSystem()) == FileSystems.getDefault() || fileSystem instanceof LinkFileSystem)) {
             File file = path.toFile();
-            return string -> new FilePackResources(string, file);
+            return string -> new FilePackResources(string, file, bl);
         }
         LOGGER.info("Found non-pack entry '{}', ignoring", (Object)path);
         return null;

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.commands.arguments.ParticleArgument;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -332,7 +331,7 @@ extends Entity {
         }
         if (compoundTag.contains("Particle", 8)) {
             try {
-                this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), HolderLookup.forRegistry(Registry.PARTICLE_TYPE)));
+                this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), Registry.PARTICLE_TYPE.asLookup()));
             } catch (CommandSyntaxException commandSyntaxException) {
                 LOGGER.warn("Couldn't load custom particle {}", (Object)compoundTag.getString("Particle"), (Object)commandSyntaxException);
             }

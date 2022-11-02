@@ -5,6 +5,8 @@ package net.minecraft.world.level.block.grower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -16,14 +18,18 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractTreeGrower {
     @Nullable
-    protected abstract Holder<? extends ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource var1, boolean var2);
+    protected abstract ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource var1, boolean var2);
 
     public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
-        Holder<ConfiguredFeature<?, ?>> holder = this.getConfiguredFeature(randomSource, this.hasFlowers(serverLevel, blockPos));
+        ResourceKey<ConfiguredFeature<?, ?>> resourceKey = this.getConfiguredFeature(randomSource, this.hasFlowers(serverLevel, blockPos));
+        if (resourceKey == null) {
+            return false;
+        }
+        Holder holder = serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).getHolder(resourceKey).orElse(null);
         if (holder == null) {
             return false;
         }
-        ConfiguredFeature<?, ?> configuredFeature = holder.value();
+        ConfiguredFeature configuredFeature = (ConfiguredFeature)holder.value();
         BlockState blockState2 = serverLevel.getFluidState(blockPos).createLegacyBlock();
         serverLevel.setBlock(blockPos, blockState2, 4);
         if (configuredFeature.place(serverLevel, chunkGenerator, randomSource, blockPos)) {

@@ -3,14 +3,17 @@
  */
 package net.minecraft.world.level.block;
 
-import java.util.function.Supplier;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -27,11 +30,11 @@ extends BushBlock
 implements BonemealableBlock {
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
     private static final double BONEMEAL_SUCCESS_PROBABILITY = 0.4;
-    private final Supplier<Holder<ConfiguredFeature<HugeFungusConfiguration, ?>>> feature;
+    private final ResourceKey<ConfiguredFeature<?, ?>> feature;
 
-    protected FungusBlock(BlockBehaviour.Properties properties, Supplier<Holder<ConfiguredFeature<HugeFungusConfiguration, ?>>> supplier) {
+    protected FungusBlock(BlockBehaviour.Properties properties, ResourceKey<ConfiguredFeature<?, ?>> resourceKey) {
         super(properties);
-        this.feature = supplier;
+        this.feature = resourceKey;
     }
 
     @Override
@@ -44,11 +47,21 @@ implements BonemealableBlock {
         return blockState.is(BlockTags.NYLIUM) || blockState.is(Blocks.MYCELIUM) || blockState.is(Blocks.SOUL_SOIL) || super.mayPlaceOn(blockState, blockGetter, blockPos);
     }
 
+    private Optional<? extends Holder<ConfiguredFeature<?, ?>>> getFeature(LevelReader levelReader) {
+        return levelReader.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).getHolder(this.feature);
+    }
+
     @Override
-    public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-        Block block = this.feature.get().value().config().validBaseState.getBlock();
-        BlockState blockState2 = blockGetter.getBlockState(blockPos.below());
-        return blockState2.is(block);
+    public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+        Object obj;
+        Optional<Holder<ConfiguredFeature<?, ?>>> optional = this.getFeature(levelReader);
+        if (optional.isPresent() && (obj = optional.get().value().config()) instanceof HugeFungusConfiguration) {
+            HugeFungusConfiguration hugeFungusConfiguration = (HugeFungusConfiguration)obj;
+            Block block = hugeFungusConfiguration.validBaseState.getBlock();
+            BlockState blockState2 = levelReader.getBlockState(blockPos.below());
+            return blockState2.is(block);
+        }
+        return false;
     }
 
     @Override
@@ -58,7 +71,7 @@ implements BonemealableBlock {
 
     @Override
     public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
-        this.feature.get().value().place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos);
+        this.getFeature(serverLevel).ifPresent(holder -> ((ConfiguredFeature)holder.value()).place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos));
     }
 }
 

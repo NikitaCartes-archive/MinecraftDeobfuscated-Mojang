@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -19,7 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Rotation;
@@ -29,21 +28,19 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.GravityProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
-import org.slf4j.Logger;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 public class StructureTemplatePool {
-    private static final Logger LOGGER = LogUtils.getLogger();
     private static final int SIZE_UNSET = Integer.MIN_VALUE;
-    public static final Codec<StructureTemplatePool> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.fieldOf("name")).forGetter(StructureTemplatePool::getName), ((MapCodec)ResourceLocation.CODEC.fieldOf("fallback")).forGetter(StructureTemplatePool::getFallback), ((MapCodec)Codec.mapPair(StructurePoolElement.CODEC.fieldOf("element"), Codec.intRange(1, 150).fieldOf("weight")).codec().listOf().fieldOf("elements")).forGetter(structureTemplatePool -> structureTemplatePool.rawTemplates)).apply((Applicative<StructureTemplatePool, ?>)instance, StructureTemplatePool::new));
-    public static final Codec<Holder<StructureTemplatePool>> CODEC = RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC);
-    private final ResourceLocation name;
+    private static final MutableObject<Codec<Holder<StructureTemplatePool>>> CODEC_REFERENCE = new MutableObject();
+    public static final Codec<StructureTemplatePool> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.lazyInitializedCodec(CODEC_REFERENCE::getValue).fieldOf("fallback")).forGetter(StructureTemplatePool::getFallback), ((MapCodec)Codec.mapPair(StructurePoolElement.CODEC.fieldOf("element"), Codec.intRange(1, 150).fieldOf("weight")).codec().listOf().fieldOf("elements")).forGetter(structureTemplatePool -> structureTemplatePool.rawTemplates)).apply((Applicative<StructureTemplatePool, ?>)instance, StructureTemplatePool::new));
+    public static final Codec<Holder<StructureTemplatePool>> CODEC = Util.make(RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC), CODEC_REFERENCE::setValue);
     private final List<Pair<StructurePoolElement, Integer>> rawTemplates;
     private final ObjectArrayList<StructurePoolElement> templates;
-    private final ResourceLocation fallback;
+    private final Holder<StructureTemplatePool> fallback;
     private int maxSize = Integer.MIN_VALUE;
 
-    public StructureTemplatePool(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, List<Pair<StructurePoolElement, Integer>> list) {
-        this.name = resourceLocation;
+    public StructureTemplatePool(Holder<StructureTemplatePool> holder, List<Pair<StructurePoolElement, Integer>> list) {
         this.rawTemplates = list;
         this.templates = new ObjectArrayList();
         for (Pair<StructurePoolElement, Integer> pair : list) {
@@ -52,11 +49,10 @@ public class StructureTemplatePool {
                 this.templates.add(structurePoolElement);
             }
         }
-        this.fallback = resourceLocation2;
+        this.fallback = holder;
     }
 
-    public StructureTemplatePool(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, List<Pair<Function<Projection, ? extends StructurePoolElement>, Integer>> list, Projection projection) {
-        this.name = resourceLocation;
+    public StructureTemplatePool(Holder<StructureTemplatePool> holder, List<Pair<Function<Projection, ? extends StructurePoolElement>, Integer>> list, Projection projection) {
         this.rawTemplates = Lists.newArrayList();
         this.templates = new ObjectArrayList();
         for (Pair<Function<Projection, ? extends StructurePoolElement>, Integer> pair : list) {
@@ -66,7 +62,7 @@ public class StructureTemplatePool {
                 this.templates.add(structurePoolElement);
             }
         }
-        this.fallback = resourceLocation2;
+        this.fallback = holder;
     }
 
     public int getMaxSize(StructureTemplateManager structureTemplateManager) {
@@ -76,7 +72,7 @@ public class StructureTemplatePool {
         return this.maxSize;
     }
 
-    public ResourceLocation getFallback() {
+    public Holder<StructureTemplatePool> getFallback() {
         return this.fallback;
     }
 
@@ -86,10 +82,6 @@ public class StructureTemplatePool {
 
     public List<StructurePoolElement> getShuffledTemplates(RandomSource randomSource) {
         return Util.shuffledCopy(this.templates, randomSource);
-    }
-
-    public ResourceLocation getName() {
-        return this.name;
     }
 
     public int size() {

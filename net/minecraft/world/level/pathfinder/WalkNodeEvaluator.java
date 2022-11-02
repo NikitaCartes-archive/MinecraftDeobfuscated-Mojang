@@ -40,6 +40,7 @@ import org.jetbrains.annotations.Nullable;
 public class WalkNodeEvaluator
 extends NodeEvaluator {
     public static final double SPACE_BETWEEN_WALL_POSTS = 0.5;
+    private static final double DEFAULT_MOB_JUMP_HEIGHT = 1.125;
     protected float oldWaterCost;
     private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<BlockPathTypes>();
     private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<AABB>();
@@ -220,7 +221,7 @@ extends NodeEvaluator {
         Node node = null;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         double e = this.getFloorLevel(mutableBlockPos.set(i, j, k));
-        if (e - d > 1.125) {
+        if (e - d > this.getMobJumpHeight()) {
             return null;
         }
         BlockPathTypes blockPathTypes2 = this.getCachedBlockType(this.mob, i, j, k);
@@ -235,7 +236,7 @@ extends NodeEvaluator {
         if (blockPathTypes2 == BlockPathTypes.WALKABLE || this.isAmphibious() && blockPathTypes2 == BlockPathTypes.WATER) {
             return node;
         }
-        if ((node == null || node.costMalus < 0.0f) && l > 0 && blockPathTypes2 != BlockPathTypes.FENCE && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.findAcceptedNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
+        if ((node == null || node.costMalus < 0.0f) && l > 0 && (blockPathTypes2 != BlockPathTypes.FENCE || this.canWalkOverFences()) && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.findAcceptedNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
             node = null;
         }
         if (!this.isAmphibious() && blockPathTypes2 == BlockPathTypes.WATER && !this.canFloat()) {
@@ -270,12 +271,16 @@ extends NodeEvaluator {
                 return this.getBlockedNode(i, j, k);
             }
         }
-        if (WalkNodeEvaluator.doesBlockHavePartialCollision(blockPathTypes2) && (node = this.getNode(i, j, k)) != null) {
+        if (WalkNodeEvaluator.doesBlockHavePartialCollision(blockPathTypes2) && node == null && (node = this.getNode(i, j, k)) != null) {
             node.closed = true;
             node.type = blockPathTypes2;
             node.costMalus = blockPathTypes2.getMalus();
         }
         return node;
+    }
+
+    private double getMobJumpHeight() {
+        return Math.max(1.125, (double)this.mob.maxUpStep);
     }
 
     @Nullable

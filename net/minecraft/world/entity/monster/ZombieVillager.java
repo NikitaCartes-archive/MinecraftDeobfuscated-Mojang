@@ -71,7 +71,7 @@ implements VillagerDataHolder {
 
     public ZombieVillager(EntityType<? extends ZombieVillager> entityType, Level level) {
         super((EntityType<? extends Zombie>)entityType, level);
-        Registry.VILLAGER_PROFESSION.getRandom(this.random).ifPresent(holder -> this.setVillagerData(this.getVillagerData().setProfession((VillagerProfession)holder.value())));
+        Registry.VILLAGER_PROFESSION.getRandom(this.random).ifPresent(reference -> this.setVillagerData(this.getVillagerData().setProfession((VillagerProfession)reference.value())));
     }
 
     @Override

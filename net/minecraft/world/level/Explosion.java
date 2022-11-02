@@ -65,12 +65,8 @@ public class Explosion {
     private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList();
     private final Map<Player, Vec3> hitPlayers = Maps.newHashMap();
 
-    public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g) {
-        this(level, entity, d, e, f, g, false, BlockInteraction.DESTROY);
-    }
-
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, List<BlockPos> list) {
-        this(level, entity, d, e, f, g, false, BlockInteraction.DESTROY, list);
+        this(level, entity, d, e, f, g, false, BlockInteraction.DESTROY_WITH_DECAY, list);
     }
 
     public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, boolean bl, BlockInteraction blockInteraction, List<BlockPos> list) {
@@ -204,11 +200,10 @@ public class Explosion {
     }
 
     public void finalizeExplosion(boolean bl) {
-        boolean bl2;
         if (this.level.isClientSide) {
             this.level.playLocalSound(this.x, this.y, this.z, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 4.0f, (1.0f + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2f) * 0.7f, false);
         }
-        boolean bl3 = bl2 = this.blockInteraction != BlockInteraction.NONE;
+        boolean bl2 = this.interactsWithBlocks();
         if (bl) {
             if (this.radius < 2.0f || !bl2) {
                 this.level.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0, 0.0, 0.0);
@@ -218,7 +213,7 @@ public class Explosion {
         }
         if (bl2) {
             ObjectArrayList objectArrayList = new ObjectArrayList();
-            boolean bl32 = this.getIndirectSourceEntity() instanceof Player;
+            boolean bl3 = this.getIndirectSourceEntity() instanceof Player;
             Util.shuffle(this.toBlow, this.level.random);
             for (BlockPos blockPos : this.toBlow) {
                 Level level;
@@ -231,10 +226,10 @@ public class Explosion {
                     ServerLevel serverLevel = (ServerLevel)level;
                     BlockEntity blockEntity = blockState.hasBlockEntity() ? this.level.getBlockEntity(blockPos) : null;
                     LootContext.Builder builder = new LootContext.Builder(serverLevel).withRandom(this.level.random).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos)).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity).withOptionalParameter(LootContextParams.THIS_ENTITY, this.source);
-                    if (this.blockInteraction == BlockInteraction.DESTROY) {
+                    if (this.blockInteraction == BlockInteraction.DESTROY_WITH_DECAY) {
                         builder.withParameter(LootContextParams.EXPLOSION_RADIUS, Float.valueOf(this.radius));
                     }
-                    blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, bl32);
+                    blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, bl3);
                     blockState.getDrops(builder).forEach(itemStack -> Explosion.addBlockDrops(objectArrayList, itemStack, blockPos2));
                 }
                 this.level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
@@ -251,6 +246,10 @@ public class Explosion {
                 this.level.setBlockAndUpdate(blockPos3, BaseFireBlock.getState(this.level, blockPos3));
             }
         }
+    }
+
+    public boolean interactsWithBlocks() {
+        return this.blockInteraction != BlockInteraction.KEEP;
     }
 
     private static void addBlockDrops(ObjectArrayList<Pair<ItemStack, BlockPos>> objectArrayList, ItemStack itemStack, BlockPos blockPos) {
@@ -314,9 +313,9 @@ public class Explosion {
     }
 
     public static enum BlockInteraction {
-        NONE,
-        BREAK,
-        DESTROY;
+        KEEP,
+        DESTROY,
+        DESTROY_WITH_DECAY;
 
     }
 }

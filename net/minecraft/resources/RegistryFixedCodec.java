@@ -10,6 +10,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -31,8 +32,8 @@ implements Codec<Holder<E>> {
     public <T> DataResult<T> encode(Holder<E> holder, DynamicOps<T> dynamicOps, T object2) {
         RegistryOps registryOps;
         Optional optional;
-        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
-            if (!holder.isValidInRegistry(optional.get())) {
+        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).owner(this.registryKey)).isPresent()) {
+            if (!holder.canSerializeIn(optional.get())) {
                 return DataResult.error("Element " + holder + " is not valid in current registry set");
             }
             return holder.unwrap().map(resourceKey -> ResourceLocation.CODEC.encode(resourceKey.location(), dynamicOps, object2), object -> DataResult.error("Elements from registry " + this.registryKey + " can't be serialized to a value"));
@@ -44,11 +45,10 @@ implements Codec<Holder<E>> {
     public <T> DataResult<Pair<Holder<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
         RegistryOps registryOps;
         Optional optional;
-        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
+        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).getter(this.registryKey)).isPresent()) {
             return ResourceLocation.CODEC.decode(dynamicOps, object).flatMap((? super R pair) -> {
                 ResourceLocation resourceLocation = (ResourceLocation)pair.getFirst();
-                DataResult<Holder.Reference<Pair>> dataResult = ((Registry)optional.get()).getOrCreateHolder(ResourceKey.create(this.registryKey, resourceLocation));
-                return dataResult.map((? super R holder) -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
+                return ((HolderGetter)optional.get()).get(ResourceKey.create(this.registryKey, resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Failed to get element " + resourceLocation)).map((? super R reference) -> Pair.of(reference, pair.getSecond())).setLifecycle(Lifecycle.stable());
             });
         }
         return DataResult.error("Can't access registry " + this.registryKey);

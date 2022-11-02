@@ -62,7 +62,6 @@ public final class BlockTags {
     public static final TagKey<Block> COAL_ORES = BlockTags.create("coal_ores");
     public static final TagKey<Block> EMERALD_ORES = BlockTags.create("emerald_ores");
     public static final TagKey<Block> COPPER_ORES = BlockTags.create("copper_ores");
-    public static final TagKey<Block> NON_FLAMMABLE_WOOD = BlockTags.create("non_flammable_wood");
     public static final TagKey<Block> CANDLES = BlockTags.create("candles");
     public static final TagKey<Block> DIRT = BlockTags.create("dirt");
     public static final TagKey<Block> TERRACOTTA = BlockTags.create("terracotta");

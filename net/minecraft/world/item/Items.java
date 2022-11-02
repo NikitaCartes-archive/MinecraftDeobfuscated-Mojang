@@ -371,7 +371,7 @@ public class Items {
     public static final Item PURPUR_BLOCK = Items.registerBlock(Blocks.PURPUR_BLOCK);
     public static final Item PURPUR_PILLAR = Items.registerBlock(Blocks.PURPUR_PILLAR);
     public static final Item PURPUR_STAIRS = Items.registerBlock(Blocks.PURPUR_STAIRS);
-    public static final Item SPAWNER = Items.registerBlock(new BlockItem(Blocks.SPAWNER, new Item.Properties().rarity(Rarity.EPIC)));
+    public static final Item SPAWNER = Items.registerBlock(Blocks.SPAWNER);
     public static final Item CHEST = Items.registerBlock(Blocks.CHEST);
     public static final Item CRAFTING_TABLE = Items.registerBlock(Blocks.CRAFTING_TABLE);
     public static final Item FARMLAND = Items.registerBlock(Blocks.FARMLAND);
@@ -1065,6 +1065,7 @@ public class Items {
     public static final Item DONKEY_SPAWN_EGG = Items.registerItem("donkey_spawn_egg", (Item)new SpawnEggItem(EntityType.DONKEY, 5457209, 8811878, new Item.Properties()));
     public static final Item DROWNED_SPAWN_EGG = Items.registerItem("drowned_spawn_egg", (Item)new SpawnEggItem(EntityType.DROWNED, 9433559, 7969893, new Item.Properties()));
     public static final Item ELDER_GUARDIAN_SPAWN_EGG = Items.registerItem("elder_guardian_spawn_egg", (Item)new SpawnEggItem(EntityType.ELDER_GUARDIAN, 13552826, 7632531, new Item.Properties()));
+    public static final Item ENDER_DRAGON_SPAWN_EGG = Items.registerItem("ender_dragon_spawn_egg", (Item)new SpawnEggItem(EntityType.ENDER_DRAGON, 0x1C1C1C, 14711290, new Item.Properties()));
     public static final Item ENDERMAN_SPAWN_EGG = Items.registerItem("enderman_spawn_egg", (Item)new SpawnEggItem(EntityType.ENDERMAN, 0x161616, 0, new Item.Properties()));
     public static final Item ENDERMITE_SPAWN_EGG = Items.registerItem("endermite_spawn_egg", (Item)new SpawnEggItem(EntityType.ENDERMITE, 0x161616, 0x6E6E6E, new Item.Properties()));
     public static final Item EVOKER_SPAWN_EGG = Items.registerItem("evoker_spawn_egg", (Item)new SpawnEggItem(EntityType.EVOKER, 0x959B9B, 1973274, new Item.Properties()));
@@ -1077,6 +1078,7 @@ public class Items {
     public static final Item HOGLIN_SPAWN_EGG = Items.registerItem("hoglin_spawn_egg", (Item)new SpawnEggItem(EntityType.HOGLIN, 13004373, 6251620, new Item.Properties()));
     public static final Item HORSE_SPAWN_EGG = Items.registerItem("horse_spawn_egg", (Item)new SpawnEggItem(EntityType.HORSE, 12623485, 0xEEE500, new Item.Properties()));
     public static final Item HUSK_SPAWN_EGG = Items.registerItem("husk_spawn_egg", (Item)new SpawnEggItem(EntityType.HUSK, 7958625, 15125652, new Item.Properties()));
+    public static final Item IRON_GOLEM_SPAWN_EGG = Items.registerItem("iron_golem_spawn_egg", (Item)new SpawnEggItem(EntityType.IRON_GOLEM, 14405058, 7643954, new Item.Properties()));
     public static final Item LLAMA_SPAWN_EGG = Items.registerItem("llama_spawn_egg", (Item)new SpawnEggItem(EntityType.LLAMA, 12623485, 10051392, new Item.Properties()));
     public static final Item MAGMA_CUBE_SPAWN_EGG = Items.registerItem("magma_cube_spawn_egg", (Item)new SpawnEggItem(EntityType.MAGMA_CUBE, 0x340000, 0xFCFC00, new Item.Properties()));
     public static final Item MOOSHROOM_SPAWN_EGG = Items.registerItem("mooshroom_spawn_egg", (Item)new SpawnEggItem(EntityType.MOOSHROOM, 10489616, 0xB7B7B7, new Item.Properties()));
@@ -1089,7 +1091,7 @@ public class Items {
     public static final Item PIGLIN_SPAWN_EGG = Items.registerItem("piglin_spawn_egg", (Item)new SpawnEggItem(EntityType.PIGLIN, 10051392, 16380836, new Item.Properties()));
     public static final Item PIGLIN_BRUTE_SPAWN_EGG = Items.registerItem("piglin_brute_spawn_egg", (Item)new SpawnEggItem(EntityType.PIGLIN_BRUTE, 5843472, 16380836, new Item.Properties()));
     public static final Item PILLAGER_SPAWN_EGG = Items.registerItem("pillager_spawn_egg", (Item)new SpawnEggItem(EntityType.PILLAGER, 5451574, 0x959B9B, new Item.Properties()));
-    public static final Item POLAR_BEAR_SPAWN_EGG = Items.registerItem("polar_bear_spawn_egg", (Item)new SpawnEggItem(EntityType.POLAR_BEAR, 0xF2F2F2, 0x959590, new Item.Properties()));
+    public static final Item POLAR_BEAR_SPAWN_EGG = Items.registerItem("polar_bear_spawn_egg", (Item)new SpawnEggItem(EntityType.POLAR_BEAR, 0xEEEEDE, 14014157, new Item.Properties()));
     public static final Item PUFFERFISH_SPAWN_EGG = Items.registerItem("pufferfish_spawn_egg", (Item)new SpawnEggItem(EntityType.PUFFERFISH, 16167425, 3654642, new Item.Properties()));
     public static final Item RABBIT_SPAWN_EGG = Items.registerItem("rabbit_spawn_egg", (Item)new SpawnEggItem(EntityType.RABBIT, 10051392, 7555121, new Item.Properties()));
     public static final Item RAVAGER_SPAWN_EGG = Items.registerItem("ravager_spawn_egg", (Item)new SpawnEggItem(EntityType.RAVAGER, 7697520, 5984329, new Item.Properties()));
@@ -1100,6 +1102,7 @@ public class Items {
     public static final Item SKELETON_SPAWN_EGG = Items.registerItem("skeleton_spawn_egg", (Item)new SpawnEggItem(EntityType.SKELETON, 0xC1C1C1, 0x494949, new Item.Properties()));
     public static final Item SKELETON_HORSE_SPAWN_EGG = Items.registerItem("skeleton_horse_spawn_egg", (Item)new SpawnEggItem(EntityType.SKELETON_HORSE, 6842447, 15066584, new Item.Properties()));
     public static final Item SLIME_SPAWN_EGG = Items.registerItem("slime_spawn_egg", (Item)new SpawnEggItem(EntityType.SLIME, 5349438, 8306542, new Item.Properties()));
+    public static final Item SNOW_GOLEM_SPAWN_EGG = Items.registerItem("snow_golem_spawn_egg", (Item)new SpawnEggItem(EntityType.SNOW_GOLEM, 14283506, 8496292, new Item.Properties()));
     public static final Item SPIDER_SPAWN_EGG = Items.registerItem("spider_spawn_egg", (Item)new SpawnEggItem(EntityType.SPIDER, 3419431, 11013646, new Item.Properties()));
     public static final Item SQUID_SPAWN_EGG = Items.registerItem("squid_spawn_egg", (Item)new SpawnEggItem(EntityType.SQUID, 2243405, 7375001, new Item.Properties()));
     public static final Item STRAY_SPAWN_EGG = Items.registerItem("stray_spawn_egg", (Item)new SpawnEggItem(EntityType.STRAY, 0x617677, 0xDDEAEA, new Item.Properties()));
@@ -1114,6 +1117,7 @@ public class Items {
     public static final Item WANDERING_TRADER_SPAWN_EGG = Items.registerItem("wandering_trader_spawn_egg", (Item)new SpawnEggItem(EntityType.WANDERING_TRADER, 4547222, 15377456, new Item.Properties()));
     public static final Item WARDEN_SPAWN_EGG = Items.registerItem("warden_spawn_egg", (Item)new SpawnEggItem(EntityType.WARDEN, 1001033, 3790560, new Item.Properties()));
     public static final Item WITCH_SPAWN_EGG = Items.registerItem("witch_spawn_egg", (Item)new SpawnEggItem(EntityType.WITCH, 0x340000, 5349438, new Item.Properties()));
+    public static final Item WITHER_SPAWN_EGG = Items.registerItem("wither_spawn_egg", (Item)new SpawnEggItem(EntityType.WITHER, 0x141414, 5075616, new Item.Properties()));
     public static final Item WITHER_SKELETON_SPAWN_EGG = Items.registerItem("wither_skeleton_spawn_egg", (Item)new SpawnEggItem(EntityType.WITHER_SKELETON, 0x141414, 0x474D4D, new Item.Properties()));
     public static final Item WOLF_SPAWN_EGG = Items.registerItem("wolf_spawn_egg", (Item)new SpawnEggItem(EntityType.WOLF, 0xD7D3D3, 13545366, new Item.Properties()));
     public static final Item ZOGLIN_SPAWN_EGG = Items.registerItem("zoglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOGLIN, 13004373, 0xE6E6E6, new Item.Properties()));

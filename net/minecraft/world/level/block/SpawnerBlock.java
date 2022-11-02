@@ -3,9 +3,19 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.List;
+import java.util.Optional;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -50,8 +60,26 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-        return ItemStack.EMPTY;
+    public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
+        super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
+        Optional<Component> optional = this.getSpawnEntityDisplayName(itemStack);
+        if (optional.isPresent()) {
+            list.add(optional.get());
+        } else {
+            list.add(CommonComponents.EMPTY);
+            list.add(Component.translatable("block.minecraft.spawner.desc1").withStyle(ChatFormatting.GRAY));
+            list.add(Component.literal(" ").append(Component.translatable("block.minecraft.spawner.desc2").withStyle(ChatFormatting.BLUE)));
+        }
+    }
+
+    private Optional<Component> getSpawnEntityDisplayName(ItemStack itemStack) {
+        String string;
+        ResourceLocation resourceLocation;
+        CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
+        if (compoundTag != null && compoundTag.contains("SpawnData", 10) && (resourceLocation = ResourceLocation.tryParse(string = compoundTag.getCompound("SpawnData").getCompound("entity").getString("id"))) != null) {
+            return Registry.ENTITY_TYPE.getOptional(resourceLocation).map(entityType -> Component.translatable(entityType.getDescriptionId()).withStyle(ChatFormatting.GRAY));
+        }
+        return Optional.empty();
     }
 }
 

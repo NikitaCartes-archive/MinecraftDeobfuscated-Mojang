@@ -9,24 +9,29 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 
 public record SpawnData(CompoundTag entityToSpawn, Optional<CustomSpawnRules> customSpawnRules) {
-    public static final Codec<SpawnData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)CompoundTag.CODEC.fieldOf("entity")).forGetter(spawnData -> spawnData.entityToSpawn), CustomSpawnRules.CODEC.optionalFieldOf("custom_spawn_rules").forGetter(spawnData -> spawnData.customSpawnRules)).apply((Applicative<SpawnData, ?>)instance, SpawnData::new));
+    public static final String ENTITY_TAG = "entity";
+    public static final Codec<SpawnData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)CompoundTag.CODEC.fieldOf(ENTITY_TAG)).forGetter(spawnData -> spawnData.entityToSpawn), CustomSpawnRules.CODEC.optionalFieldOf("custom_spawn_rules").forGetter(spawnData -> spawnData.customSpawnRules)).apply((Applicative<SpawnData, ?>)instance, SpawnData::new));
     public static final Codec<SimpleWeightedRandomList<SpawnData>> LIST_CODEC = SimpleWeightedRandomList.wrappedCodecAllowingEmpty(CODEC);
-    public static final String DEFAULT_TYPE = "minecraft:pig";
 
     public SpawnData() {
-        this(Util.make(new CompoundTag(), compoundTag -> compoundTag.putString("id", DEFAULT_TYPE)), Optional.empty());
+        this(new CompoundTag(), Optional.empty());
     }
 
     public SpawnData {
-        ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("id"));
-        compoundTag.putString("id", resourceLocation != null ? resourceLocation.toString() : DEFAULT_TYPE);
+        if (compoundTag.contains("id")) {
+            ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("id"));
+            if (resourceLocation != null) {
+                compoundTag.putString("id", resourceLocation.toString());
+            } else {
+                compoundTag.remove("id");
+            }
+        }
     }
 
     public CompoundTag getEntityToSpawn() {

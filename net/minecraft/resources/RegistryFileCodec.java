@@ -10,6 +10,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -39,8 +40,8 @@ implements Codec<Holder<E>> {
     public <T> DataResult<T> encode(Holder<E> holder, DynamicOps<T> dynamicOps, T object) {
         RegistryOps registryOps;
         Optional optional;
-        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).registry(this.registryKey)).isPresent()) {
-            if (!holder.isValidInRegistry(optional.get())) {
+        if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).owner(this.registryKey)).isPresent()) {
+            if (!holder.canSerializeIn(optional.get())) {
                 return DataResult.error("Element " + holder + " is not valid in current registry set");
             }
             return holder.unwrap().map(resourceKey -> ResourceLocation.CODEC.encode(resourceKey.location(), dynamicOps, object), object2 -> this.elementCodec.encode(object2, dynamicOps, object));
@@ -52,11 +53,11 @@ implements Codec<Holder<E>> {
     public <T> DataResult<Pair<Holder<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
         if (dynamicOps instanceof RegistryOps) {
             RegistryOps registryOps = (RegistryOps)dynamicOps;
-            Optional optional = registryOps.registry(this.registryKey);
+            Optional optional = registryOps.getter(this.registryKey);
             if (optional.isEmpty()) {
                 return DataResult.error("Registry does not exist: " + this.registryKey);
             }
-            Registry registry = optional.get();
+            HolderGetter holderGetter = optional.get();
             DataResult dataResult = ResourceLocation.CODEC.decode(dynamicOps, object);
             if (dataResult.result().isEmpty()) {
                 if (!this.allowInline) {
@@ -66,8 +67,7 @@ implements Codec<Holder<E>> {
             }
             Pair pair2 = dataResult.result().get();
             ResourceKey resourceKey = ResourceKey.create(this.registryKey, (ResourceLocation)pair2.getFirst());
-            DataResult dataResult2 = registry.getOrCreateHolder(resourceKey);
-            return dataResult2.map((? super R holder) -> Pair.of(holder, pair2.getSecond())).setLifecycle(Lifecycle.stable());
+            return holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error("Failed to get element " + resourceKey)).map((? super R reference) -> Pair.of(reference, pair2.getSecond())).setLifecycle(Lifecycle.stable());
         }
         return this.elementCodec.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(Holder::direct));
     }

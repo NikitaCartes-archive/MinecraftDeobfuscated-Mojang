@@ -430,23 +430,43 @@ AutoCloseable {
         return this.shouldTickBlocksAt(ChunkPos.asLong(blockPos));
     }
 
-    public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Explosion.BlockInteraction blockInteraction) {
-        return this.explode(entity, null, null, d, e, f, g, false, blockInteraction);
+    public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, ExplosionInteraction explosionInteraction) {
+        return this.explode(entity, null, null, d, e, f, g, false, explosionInteraction);
     }
 
-    public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
-        return this.explode(entity, null, null, d, e, f, g, bl, blockInteraction);
+    public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, ExplosionInteraction explosionInteraction) {
+        return this.explode(entity, null, null, d, e, f, g, bl, explosionInteraction);
     }
 
-    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, Vec3 vec3, float f, boolean bl, Explosion.BlockInteraction blockInteraction) {
-        return this.explode(entity, damageSource, explosionDamageCalculator, vec3.x(), vec3.y(), vec3.z(), f, bl, blockInteraction);
+    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, Vec3 vec3, float f, boolean bl, ExplosionInteraction explosionInteraction) {
+        return this.explode(entity, damageSource, explosionDamageCalculator, vec3.x(), vec3.y(), vec3.z(), f, bl, explosionInteraction);
     }
 
-    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
+    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, double d, double e, double f, float g, boolean bl, ExplosionInteraction explosionInteraction) {
+        return this.explode(entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, true);
+    }
+
+    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, double d, double e, double f, float g, boolean bl, ExplosionInteraction explosionInteraction, boolean bl2) {
+        Explosion.BlockInteraction blockInteraction = switch (explosionInteraction) {
+            default -> throw new IncompatibleClassChangeError();
+            case ExplosionInteraction.NONE -> Explosion.BlockInteraction.KEEP;
+            case ExplosionInteraction.BLOCK -> this.getDestroyType(GameRules.RULE_BLOCK_EXPLOSION_DROP_DECAY);
+            case ExplosionInteraction.MOB -> {
+                if (this.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+                    yield this.getDestroyType(GameRules.RULE_MOB_EXPLOSION_DROP_DECAY);
+                }
+                yield Explosion.BlockInteraction.KEEP;
+            }
+            case ExplosionInteraction.TNT -> this.getDestroyType(GameRules.RULE_TNT_EXPLOSION_DROP_DECAY);
+        };
         Explosion explosion = new Explosion(this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction);
         explosion.explode();
-        explosion.finalizeExplosion(true);
+        explosion.finalizeExplosion(bl2);
         return explosion;
+    }
+
+    private Explosion.BlockInteraction getDestroyType(GameRules.Key<GameRules.BooleanValue> key) {
+        return this.getGameRules().getBoolean(key) ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.DESTROY;
     }
 
     public abstract String gatherChunkSourceStats();
@@ -887,6 +907,14 @@ AutoCloseable {
     @Override
     public /* synthetic */ ChunkAccess getChunk(int i, int j) {
         return this.getChunk(i, j);
+    }
+
+    public static enum ExplosionInteraction {
+        NONE,
+        BLOCK,
+        MOB,
+        TNT;
+
     }
 }
 

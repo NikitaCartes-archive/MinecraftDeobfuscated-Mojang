@@ -72,8 +72,8 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-        return blockGetter.getBlockState(blockPos.above()).isAir();
+    public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+        return levelReader.getBlockState(blockPos.above()).isAir();
     }
 
     @Override

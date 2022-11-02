@@ -20,6 +20,7 @@ public final class ItemTags {
     public static final TagKey<Item> WOODEN_STAIRS = ItemTags.bind("wooden_stairs");
     public static final TagKey<Item> WOODEN_SLABS = ItemTags.bind("wooden_slabs");
     public static final TagKey<Item> WOODEN_FENCES = ItemTags.bind("wooden_fences");
+    public static final TagKey<Item> FENCE_GATES = ItemTags.bind("fence_gates");
     public static final TagKey<Item> WOODEN_PRESSURE_PLATES = ItemTags.bind("wooden_pressure_plates");
     public static final TagKey<Item> WOODEN_TRAPDOORS = ItemTags.bind("wooden_trapdoors");
     public static final TagKey<Item> DOORS = ItemTags.bind("doors");

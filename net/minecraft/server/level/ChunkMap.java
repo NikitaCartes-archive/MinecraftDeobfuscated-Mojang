@@ -53,6 +53,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -88,6 +89,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -133,6 +135,7 @@ implements ChunkHolder.PlayerProvider {
     private final BlockableEventLoop<Runnable> mainThreadExecutor;
     private ChunkGenerator generator;
     private final RandomState randomState;
+    private final ChunkGeneratorStructureState chunkGeneratorState;
     private final Supplier<DimensionDataStorage> overworldDataStorage;
     private final PoiManager poiManager;
     final LongSet toDrop = new LongOpenHashSet();
@@ -160,12 +163,15 @@ implements ChunkHolder.PlayerProvider {
         this.storageName = path.getFileName().toString();
         this.level = serverLevel;
         this.generator = chunkGenerator;
+        RegistryAccess registryAccess = serverLevel.registryAccess();
+        long l = serverLevel.getSeed();
         if (chunkGenerator instanceof NoiseBasedChunkGenerator) {
             NoiseBasedChunkGenerator noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)chunkGenerator;
-            this.randomState = RandomState.create(noiseBasedChunkGenerator.generatorSettings().value(), serverLevel.registryAccess().registryOrThrow(Registry.NOISE_REGISTRY), serverLevel.getSeed());
+            this.randomState = RandomState.create(noiseBasedChunkGenerator.generatorSettings().value(), registryAccess.lookupOrThrow(Registry.NOISE_REGISTRY), l);
         } else {
-            this.randomState = RandomState.create(NoiseGeneratorSettings.dummy(), serverLevel.registryAccess().registryOrThrow(Registry.NOISE_REGISTRY), serverLevel.getSeed());
+            this.randomState = RandomState.create(NoiseGeneratorSettings.dummy(), registryAccess.lookupOrThrow(Registry.NOISE_REGISTRY), l);
         }
+        this.chunkGeneratorState = chunkGenerator.createState(registryAccess.lookupOrThrow(Registry.STRUCTURE_SET_REGISTRY), this.randomState, l);
         this.mainThreadExecutor = blockableEventLoop;
         ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(executor, "worldgen");
         ProcessorHandle<Runnable> processorHandle = ProcessorHandle.of("main", blockableEventLoop::tell);
@@ -178,12 +184,16 @@ implements ChunkHolder.PlayerProvider {
         this.lightEngine = new ThreadedLevelLightEngine(lightChunkGetter, this, this.level.dimensionType().hasSkyLight(), processorMailbox2, this.queueSorter.getProcessor(processorMailbox2, false));
         this.distanceManager = new DistanceManager(executor, blockableEventLoop);
         this.overworldDataStorage = supplier;
-        this.poiManager = new PoiManager(path.resolve("poi"), dataFixer, bl, serverLevel.registryAccess(), serverLevel);
+        this.poiManager = new PoiManager(path.resolve("poi"), dataFixer, bl, registryAccess, serverLevel);
         this.setViewDistance(i);
     }
 
     protected ChunkGenerator generator() {
         return this.generator;
+    }
+
+    protected ChunkGeneratorStructureState generatorState() {
+        return this.chunkGeneratorState;
     }
 
     protected RandomState randomState() {

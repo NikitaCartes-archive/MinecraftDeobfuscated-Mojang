@@ -17,9 +17,8 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
@@ -65,17 +64,17 @@ public abstract class StructurePlacement {
         return this.exclusionZone;
     }
 
-    public boolean isStructureChunk(ChunkGenerator chunkGenerator, RandomState randomState, long l, int i, int j) {
-        if (!this.isPlacementChunk(chunkGenerator, randomState, l, i, j)) {
+    public boolean isStructureChunk(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
+        if (!this.isPlacementChunk(chunkGeneratorStructureState, i, j)) {
             return false;
         }
-        if (this.frequency < 1.0f && !this.frequencyReductionMethod.shouldGenerate(l, this.salt, i, j, this.frequency)) {
+        if (this.frequency < 1.0f && !this.frequencyReductionMethod.shouldGenerate(chunkGeneratorStructureState.getLevelSeed(), this.salt, i, j, this.frequency)) {
             return false;
         }
-        return !this.exclusionZone.isPresent() || !this.exclusionZone.get().isPlacementForbidden(chunkGenerator, randomState, l, i, j);
+        return !this.exclusionZone.isPresent() || !this.exclusionZone.get().isPlacementForbidden(chunkGeneratorStructureState, i, j);
     }
 
-    protected abstract boolean isPlacementChunk(ChunkGenerator var1, RandomState var2, long var3, int var5, int var6);
+    protected abstract boolean isPlacementChunk(ChunkGeneratorStructureState var1, int var2, int var3);
 
     public BlockPos getLocatePos(ChunkPos chunkPos) {
         return new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ()).offset(this.locateOffset());
@@ -144,8 +143,8 @@ public abstract class StructurePlacement {
     public record ExclusionZone(Holder<StructureSet> otherSet, int chunkCount) {
         public static final Codec<ExclusionZone> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)RegistryFileCodec.create(Registry.STRUCTURE_SET_REGISTRY, StructureSet.DIRECT_CODEC, false).fieldOf("other_set")).forGetter(ExclusionZone::otherSet), ((MapCodec)Codec.intRange(1, 16).fieldOf("chunk_count")).forGetter(ExclusionZone::chunkCount)).apply((Applicative<ExclusionZone, ?>)instance, ExclusionZone::new));
 
-        boolean isPlacementForbidden(ChunkGenerator chunkGenerator, RandomState randomState, long l, int i, int j) {
-            return chunkGenerator.hasStructureChunkInRange(this.otherSet, randomState, l, i, j, this.chunkCount);
+        boolean isPlacementForbidden(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
+            return chunkGeneratorStructureState.hasStructureChunkInRange(this.otherSet, i, j, this.chunkCount);
         }
     }
 

@@ -69,7 +69,7 @@ implements ArgumentType<ParticleOptions> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-        return SharedSuggestionProvider.suggestResource(this.particles.listElements().map(ResourceKey::location), suggestionsBuilder);
+        return SharedSuggestionProvider.suggestResource(this.particles.listElementIds().map(ResourceKey::location), suggestionsBuilder);
     }
 
     @Override

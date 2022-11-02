@@ -13,10 +13,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -34,14 +33,14 @@ extends Iterable<Holder<T>> {
 
     public boolean contains(Holder<T> var1);
 
-    public boolean isValidInRegistry(Registry<T> var1);
+    public boolean canSerializeIn(HolderOwner<T> var1);
 
     public Optional<TagKey<T>> unwrapKey();
 
     @Deprecated
     @VisibleForTesting
-    public static <T> Named<T> emptyNamed(Registry<T> registry, TagKey<T> tagKey) {
-        return new Named<T>(registry, tagKey);
+    public static <T> Named<T> emptyNamed(HolderOwner<T> holderOwner, TagKey<T> tagKey) {
+        return new Named<T>(holderOwner, tagKey);
     }
 
     @SafeVarargs
@@ -64,12 +63,12 @@ extends Iterable<Holder<T>> {
 
     public static class Named<T>
     extends ListBacked<T> {
-        private final Registry<T> registry;
+        private final HolderOwner<T> owner;
         private final TagKey<T> key;
         private List<Holder<T>> contents = List.of();
 
-        Named(Registry<T> registry, TagKey<T> tagKey) {
-            this.registry = registry;
+        Named(HolderOwner<T> holderOwner, TagKey<T> tagKey) {
+            this.owner = holderOwner;
             this.key = tagKey;
         }
 
@@ -106,8 +105,8 @@ extends Iterable<Holder<T>> {
         }
 
         @Override
-        public boolean isValidInRegistry(Registry<T> registry) {
-            return this.registry == registry;
+        public boolean canSerializeIn(HolderOwner<T> holderOwner) {
+            return this.owner.canSerializeIn(holderOwner);
         }
     }
 
@@ -164,7 +163,6 @@ extends Iterable<Holder<T>> {
         }
 
         @Override
-        @NotNull
         public Iterator<Holder<T>> iterator() {
             return this.contents().iterator();
         }
@@ -185,7 +183,7 @@ extends Iterable<Holder<T>> {
         }
 
         @Override
-        public boolean isValidInRegistry(Registry<T> registry) {
+        public boolean canSerializeIn(HolderOwner<T> holderOwner) {
             return true;
         }
     }

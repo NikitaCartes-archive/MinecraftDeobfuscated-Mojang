@@ -70,8 +70,8 @@ implements ArgumentType<Result<T>> {
                 stringReader.skip();
                 ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
                 TagKey tagKey = TagKey.create(this.registryKey, resourceLocation);
-                HolderSet.Named<T> named = this.registryLookup.get(tagKey).orElseThrow(() -> ERROR_UNKNOWN_TAG.create(resourceLocation, this.registryKey.location()));
-                return new TagResult<T>(named);
+                HolderSet.Named named = this.registryLookup.get(tagKey).orElseThrow(() -> ERROR_UNKNOWN_TAG.create(resourceLocation, this.registryKey.location()));
+                return new TagResult(named);
             } catch (CommandSyntaxException commandSyntaxException) {
                 stringReader.setCursor(i);
                 throw commandSyntaxException;
@@ -79,14 +79,14 @@ implements ArgumentType<Result<T>> {
         }
         ResourceLocation resourceLocation2 = ResourceLocation.read(stringReader);
         ResourceKey resourceKey = ResourceKey.create(this.registryKey, resourceLocation2);
-        Holder.Reference<T> reference = this.registryLookup.get(resourceKey).orElseThrow(() -> ResourceArgument.ERROR_UNKNOWN_RESOURCE.create(resourceLocation2, this.registryKey.location()));
-        return new ResourceResult<T>(reference);
+        Holder.Reference reference = this.registryLookup.get(resourceKey).orElseThrow(() -> ResourceArgument.ERROR_UNKNOWN_RESOURCE.create(resourceLocation2, this.registryKey.location()));
+        return new ResourceResult(reference);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-        SharedSuggestionProvider.suggestResource(this.registryLookup.listTags().map(TagKey::location), suggestionsBuilder, "#");
-        return SharedSuggestionProvider.suggestResource(this.registryLookup.listElements().map(ResourceKey::location), suggestionsBuilder);
+        SharedSuggestionProvider.suggestResource(this.registryLookup.listTagIds().map(TagKey::location), suggestionsBuilder, "#");
+        return SharedSuggestionProvider.suggestResource(this.registryLookup.listElementIds().map(ResourceKey::location), suggestionsBuilder);
     }
 
     @Override

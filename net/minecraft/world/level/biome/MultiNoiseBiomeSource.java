@@ -20,9 +20,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -91,8 +91,8 @@ extends BiomeSource {
         list.add("Biome builder PV: " + OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(d) + " C: " + overworldBiomeBuilder.getDebugStringForContinentalness(f) + " E: " + overworldBiomeBuilder.getDebugStringForErosion(g) + " T: " + overworldBiomeBuilder.getDebugStringForTemperature(h) + " H: " + overworldBiomeBuilder.getDebugStringForHumidity(l));
     }
 
-    record PresetInstance(Preset preset, Registry<Biome> biomes) {
-        public static final MapCodec<PresetInstance> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(Preset.BY_NAME.get(resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown preset: " + resourceLocation)), preset -> DataResult.success(preset.name)).fieldOf("preset")).stable().forGetter(PresetInstance::preset), RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(PresetInstance::biomes)).apply((Applicative<PresetInstance, ?>)instance, instance.stable(PresetInstance::new)));
+    record PresetInstance(Preset preset, HolderGetter<Biome> biomes) {
+        public static final MapCodec<PresetInstance> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(Preset.BY_NAME.get(resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown preset: " + resourceLocation)), preset -> DataResult.success(preset.name)).fieldOf("preset")).stable().forGetter(PresetInstance::preset), RegistryOps.retrieveGetter(Registry.BIOME_REGISTRY)).apply((Applicative<PresetInstance, ?>)instance, instance.stable(PresetInstance::new)));
 
         public MultiNoiseBiomeSource biomeSource() {
             return this.preset.biomeSource(this, true);
@@ -101,16 +101,16 @@ extends BiomeSource {
 
     public static class Preset {
         static final Map<ResourceLocation, Preset> BY_NAME = Maps.newHashMap();
-        public static final Preset NETHER = new Preset(new ResourceLocation("nether"), registry -> new Climate.ParameterList(ImmutableList.of(Pair.of(Climate.parameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolderOrThrow(Biomes.NETHER_WASTES)), Pair.of(Climate.parameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolderOrThrow(Biomes.SOUL_SAND_VALLEY)), Pair.of(Climate.parameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), registry.getOrCreateHolderOrThrow(Biomes.CRIMSON_FOREST)), Pair.of(Climate.parameters(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.375f), registry.getOrCreateHolderOrThrow(Biomes.WARPED_FOREST)), Pair.of(Climate.parameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.175f), registry.getOrCreateHolderOrThrow(Biomes.BASALT_DELTAS)))));
-        public static final Preset OVERWORLD = new Preset(new ResourceLocation("overworld"), registry -> {
+        public static final Preset NETHER = new Preset(new ResourceLocation("nether"), holderGetter -> new Climate.ParameterList(ImmutableList.of(Pair.of(Climate.parameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), holderGetter.getOrThrow(Biomes.NETHER_WASTES)), Pair.of(Climate.parameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), holderGetter.getOrThrow(Biomes.SOUL_SAND_VALLEY)), Pair.of(Climate.parameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), holderGetter.getOrThrow(Biomes.CRIMSON_FOREST)), Pair.of(Climate.parameters(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.375f), holderGetter.getOrThrow(Biomes.WARPED_FOREST)), Pair.of(Climate.parameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.175f), holderGetter.getOrThrow(Biomes.BASALT_DELTAS)))));
+        public static final Preset OVERWORLD = new Preset(new ResourceLocation("overworld"), holderGetter -> {
             ImmutableList.Builder builder = ImmutableList.builder();
-            new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(registry::getOrCreateHolderOrThrow)));
+            new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(holderGetter::getOrThrow)));
             return new Climate.ParameterList(builder.build());
         });
         final ResourceLocation name;
-        private final Function<Registry<Biome>, Climate.ParameterList<Holder<Biome>>> parameterSource;
+        private final Function<HolderGetter<Biome>, Climate.ParameterList<Holder<Biome>>> parameterSource;
 
-        public Preset(ResourceLocation resourceLocation, Function<Registry<Biome>, Climate.ParameterList<Holder<Biome>>> function) {
+        public Preset(ResourceLocation resourceLocation, Function<HolderGetter<Biome>, Climate.ParameterList<Holder<Biome>>> function) {
             this.name = resourceLocation;
             this.parameterSource = function;
             BY_NAME.put(resourceLocation, this);
@@ -126,16 +126,16 @@ extends BiomeSource {
             return new MultiNoiseBiomeSource(parameterList, bl ? Optional.of(presetInstance) : Optional.empty());
         }
 
-        public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry, boolean bl) {
-            return this.biomeSource(new PresetInstance(this, registry), bl);
+        public MultiNoiseBiomeSource biomeSource(HolderGetter<Biome> holderGetter, boolean bl) {
+            return this.biomeSource(new PresetInstance(this, holderGetter), bl);
         }
 
-        public MultiNoiseBiomeSource biomeSource(Registry<Biome> registry) {
-            return this.biomeSource(registry, true);
+        public MultiNoiseBiomeSource biomeSource(HolderGetter<Biome> holderGetter) {
+            return this.biomeSource(holderGetter, true);
         }
 
-        public Stream<ResourceKey<Biome>> possibleBiomes() {
-            return this.biomeSource(BuiltinRegistries.BIOME).possibleBiomes().stream().flatMap(holder -> holder.unwrapKey().stream());
+        public Stream<ResourceKey<Biome>> possibleBiomes(HolderGetter<Biome> holderGetter) {
+            return this.biomeSource(holderGetter).possibleBiomes().stream().flatMap(holder -> holder.unwrapKey().stream());
         }
     }
 }

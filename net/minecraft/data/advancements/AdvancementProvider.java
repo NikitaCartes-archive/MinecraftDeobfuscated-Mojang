@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -19,27 +20,31 @@ public class AdvancementProvider
 implements DataProvider {
     private final PackOutput.PathProvider pathProvider;
     private final List<AdvancementSubProvider> subProviders;
+    private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public AdvancementProvider(PackOutput packOutput, List<AdvancementSubProvider> list) {
+    public AdvancementProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture, List<AdvancementSubProvider> list) {
         this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "advancements");
         this.subProviders = list;
+        this.registries = completableFuture;
     }
 
     @Override
     public CompletableFuture<?> run(CachedOutput cachedOutput) {
-        HashSet set = new HashSet();
-        ArrayList list = new ArrayList();
-        Consumer<Advancement> consumer = advancement -> {
-            if (!set.add(advancement.getId())) {
-                throw new IllegalStateException("Duplicate advancement " + advancement.getId());
+        return this.registries.thenCompose(provider -> {
+            HashSet set = new HashSet();
+            ArrayList list = new ArrayList();
+            Consumer<Advancement> consumer = advancement -> {
+                if (!set.add(advancement.getId())) {
+                    throw new IllegalStateException("Duplicate advancement " + advancement.getId());
+                }
+                Path path = this.pathProvider.json(advancement.getId());
+                list.add(DataProvider.saveStable(cachedOutput, advancement.deconstruct().serializeToJson(), path));
+            };
+            for (AdvancementSubProvider advancementSubProvider : this.subProviders) {
+                advancementSubProvider.generate((HolderLookup.Provider)provider, consumer);
             }
-            Path path = this.pathProvider.json(advancement.getId());
-            list.add(DataProvider.saveStable(cachedOutput, advancement.deconstruct().serializeToJson(), path));
-        };
-        for (AdvancementSubProvider advancementSubProvider : this.subProviders) {
-            advancementSubProvider.generate(consumer);
-        }
-        return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
+            return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
+        });
     }
 
     @Override

@@ -7,8 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -23,12 +23,12 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-        if (!blockGetter.getBlockState(blockPos.above()).propagatesSkylightDown(blockGetter, blockPos)) {
+    public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+        if (!levelReader.getBlockState(blockPos.above()).propagatesSkylightDown(levelReader, blockPos)) {
             return false;
         }
         for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1))) {
-            if (!blockGetter.getBlockState(blockPos2).is(BlockTags.NYLIUM)) continue;
+            if (!levelReader.getBlockState(blockPos2).is(BlockTags.NYLIUM)) continue;
             return true;
         }
         return false;

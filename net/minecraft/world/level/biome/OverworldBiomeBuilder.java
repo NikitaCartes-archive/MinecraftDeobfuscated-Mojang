@@ -7,7 +7,9 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.SharedConstants;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
@@ -64,31 +66,37 @@ public final class OverworldBiomeBuilder {
 
     protected void addBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
         if (SharedConstants.debugGenerateSquareTerrainWithoutNoise) {
-            CubicSpline cubicSpline2;
-            DensityFunctions.Spline.Coordinate coordinate = new DensityFunctions.Spline.Coordinate(BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(NoiseRouterData.CONTINENTS));
-            DensityFunctions.Spline.Coordinate coordinate2 = new DensityFunctions.Spline.Coordinate(BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(NoiseRouterData.EROSION));
-            DensityFunctions.Spline.Coordinate coordinate3 = new DensityFunctions.Spline.Coordinate(BuiltinRegistries.DENSITY_FUNCTION.getHolderOrThrow(NoiseRouterData.RIDGES_FOLDED));
-            consumer.accept(Pair.of(Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(0.0f), this.FULL_RANGE, 0.01f), Biomes.PLAINS));
-            CubicSpline cubicSpline = TerrainProvider.buildErosionOffsetSpline(coordinate2, coordinate3, -0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false, ToFloatFunction.IDENTITY);
-            if (cubicSpline instanceof CubicSpline.Multipoint) {
-                CubicSpline.Multipoint multipoint = (CubicSpline.Multipoint)cubicSpline;
-                ResourceKey<Biome> resourceKey = Biomes.DESERT;
-                for (float f : multipoint.locations()) {
-                    consumer.accept(Pair.of(Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(f), Climate.Parameter.point(0.0f), this.FULL_RANGE, 0.0f), resourceKey));
-                    resourceKey = resourceKey == Biomes.DESERT ? Biomes.BADLANDS : Biomes.DESERT;
-                }
-            }
-            if ((cubicSpline2 = TerrainProvider.overworldOffset(coordinate, coordinate2, coordinate3, false)) instanceof CubicSpline.Multipoint) {
-                CubicSpline.Multipoint multipoint2 = (CubicSpline.Multipoint)cubicSpline2;
-                for (float f : multipoint2.locations()) {
-                    consumer.accept(Pair.of(Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(f), this.FULL_RANGE, Climate.Parameter.point(0.0f), this.FULL_RANGE, 0.0f), Biomes.SNOWY_TAIGA));
-                }
-            }
+            this.addDebugBiomes(consumer);
             return;
         }
         this.addOffCoastBiomes(consumer);
         this.addInlandBiomes(consumer);
         this.addUndergroundBiomes(consumer);
+    }
+
+    private void addDebugBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
+        CubicSpline cubicSpline2;
+        HolderLookup.Provider provider = VanillaRegistries.createLookup();
+        HolderLookup.RegistryLookup<DensityFunction> holderGetter = provider.lookupOrThrow(Registry.DENSITY_FUNCTION_REGISTRY);
+        DensityFunctions.Spline.Coordinate coordinate = new DensityFunctions.Spline.Coordinate(holderGetter.getOrThrow(NoiseRouterData.CONTINENTS));
+        DensityFunctions.Spline.Coordinate coordinate2 = new DensityFunctions.Spline.Coordinate(holderGetter.getOrThrow(NoiseRouterData.EROSION));
+        DensityFunctions.Spline.Coordinate coordinate3 = new DensityFunctions.Spline.Coordinate(holderGetter.getOrThrow(NoiseRouterData.RIDGES_FOLDED));
+        consumer.accept(Pair.of(Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(0.0f), this.FULL_RANGE, 0.01f), Biomes.PLAINS));
+        CubicSpline cubicSpline = TerrainProvider.buildErosionOffsetSpline(coordinate2, coordinate3, -0.15f, 0.0f, 0.0f, 0.1f, 0.0f, -0.03f, false, false, ToFloatFunction.IDENTITY);
+        if (cubicSpline instanceof CubicSpline.Multipoint) {
+            CubicSpline.Multipoint multipoint = (CubicSpline.Multipoint)cubicSpline;
+            ResourceKey<Biome> resourceKey = Biomes.DESERT;
+            for (float f : multipoint.locations()) {
+                consumer.accept(Pair.of(Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(f), Climate.Parameter.point(0.0f), this.FULL_RANGE, 0.0f), resourceKey));
+                resourceKey = resourceKey == Biomes.DESERT ? Biomes.BADLANDS : Biomes.DESERT;
+            }
+        }
+        if ((cubicSpline2 = TerrainProvider.overworldOffset(coordinate, coordinate2, coordinate3, false)) instanceof CubicSpline.Multipoint) {
+            CubicSpline.Multipoint multipoint2 = (CubicSpline.Multipoint)cubicSpline2;
+            for (float f : multipoint2.locations()) {
+                consumer.accept(Pair.of(Climate.parameters(this.FULL_RANGE, this.FULL_RANGE, Climate.Parameter.point(f), this.FULL_RANGE, Climate.Parameter.point(0.0f), this.FULL_RANGE, 0.0f), Biomes.SNOWY_TAIGA));
+            }
+        }
     }
 
     private void addOffCoastBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {

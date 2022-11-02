@@ -35,8 +35,8 @@ extends AbstractPackResources {
     private static final Joiner PATH_JOINER = Joiner.on("/");
     private final Path root;
 
-    public PathPackResources(String string, Path path) {
-        super(string);
+    public PathPackResources(String string, Path path, boolean bl) {
+        super(string, bl);
         this.root = path;
     }
 

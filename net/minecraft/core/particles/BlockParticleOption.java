@@ -7,7 +7,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -22,7 +21,7 @@ implements ParticleOptions {
         @Override
         public BlockParticleOption fromCommand(ParticleType<BlockParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
             stringReader.expect(' ');
-            return new BlockParticleOption(particleType, BlockStateParser.parseForBlock(HolderLookup.forRegistry(Registry.BLOCK), stringReader, false).blockState());
+            return new BlockParticleOption(particleType, BlockStateParser.parseForBlock(Registry.BLOCK.asLookup(), stringReader, false).blockState());
         }
 
         @Override

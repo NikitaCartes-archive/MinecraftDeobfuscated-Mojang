@@ -7,10 +7,10 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructureSets;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 
@@ -35,8 +36,8 @@ public class FlatLevelGeneratorPresets {
     public static final ResourceKey<FlatLevelGeneratorPreset> REDSTONE_READY = FlatLevelGeneratorPresets.register("redstone_ready");
     public static final ResourceKey<FlatLevelGeneratorPreset> THE_VOID = FlatLevelGeneratorPresets.register("the_void");
 
-    public static Holder<FlatLevelGeneratorPreset> bootstrap(Registry<FlatLevelGeneratorPreset> registry) {
-        return new Bootstrap(registry).run();
+    public static void bootstrap(BootstapContext<FlatLevelGeneratorPreset> bootstapContext) {
+        new Bootstrap(bootstapContext).run();
     }
 
     private static ResourceKey<FlatLevelGeneratorPreset> register(String string) {
@@ -44,17 +45,18 @@ public class FlatLevelGeneratorPresets {
     }
 
     static class Bootstrap {
-        private final Registry<FlatLevelGeneratorPreset> presets;
-        private final Registry<Biome> biomes = BuiltinRegistries.BIOME;
-        private final Registry<StructureSet> structureSets = BuiltinRegistries.STRUCTURE_SETS;
+        private final BootstapContext<FlatLevelGeneratorPreset> context;
 
-        Bootstrap(Registry<FlatLevelGeneratorPreset> registry) {
-            this.presets = registry;
+        Bootstrap(BootstapContext<FlatLevelGeneratorPreset> bootstapContext) {
+            this.context = bootstapContext;
         }
 
-        private Holder<FlatLevelGeneratorPreset> register(ResourceKey<FlatLevelGeneratorPreset> resourceKey2, ItemLike itemLike, ResourceKey<Biome> resourceKey22, Set<ResourceKey<StructureSet>> set, boolean bl, boolean bl2, FlatLayerInfo ... flatLayerInfos) {
-            HolderSet.Direct direct = HolderSet.direct(set.stream().flatMap(resourceKey -> this.structureSets.getHolder((ResourceKey<StructureSet>)resourceKey).stream()).collect(Collectors.toList()));
-            FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(Optional.of(direct), this.biomes);
+        private void register(ResourceKey<FlatLevelGeneratorPreset> resourceKey, ItemLike itemLike, ResourceKey<Biome> resourceKey2, Set<ResourceKey<StructureSet>> set, boolean bl, boolean bl2, FlatLayerInfo ... flatLayerInfos) {
+            HolderGetter<StructureSet> holderGetter = this.context.lookup(Registry.STRUCTURE_SET_REGISTRY);
+            HolderGetter<PlacedFeature> holderGetter2 = this.context.lookup(Registry.PLACED_FEATURE_REGISTRY);
+            HolderGetter<Biome> holderGetter3 = this.context.lookup(Registry.BIOME_REGISTRY);
+            HolderSet.Direct direct = HolderSet.direct(set.stream().map(holderGetter::getOrThrow).collect(Collectors.toList()));
+            FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(Optional.of(direct), holderGetter3.getOrThrow(resourceKey2), FlatLevelGeneratorSettings.createLakesList(holderGetter2));
             if (bl) {
                 flatLevelGeneratorSettings.setDecoration();
             }
@@ -64,11 +66,10 @@ public class FlatLevelGeneratorPresets {
             for (int i = flatLayerInfos.length - 1; i >= 0; --i) {
                 flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
             }
-            flatLevelGeneratorSettings.setBiome(this.biomes.getOrCreateHolderOrThrow(resourceKey22));
-            return BuiltinRegistries.register(this.presets, resourceKey2, new FlatLevelGeneratorPreset(itemLike.asItem().builtInRegistryHolder(), flatLevelGeneratorSettings));
+            this.context.register(resourceKey, new FlatLevelGeneratorPreset(itemLike.asItem().builtInRegistryHolder(), flatLevelGeneratorSettings));
         }
 
-        public Holder<FlatLevelGeneratorPreset> run() {
+        public void run() {
             this.register(CLASSIC_FLAT, Blocks.GRASS_BLOCK, Biomes.PLAINS, ImmutableSet.of(BuiltinStructureSets.VILLAGES), false, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(2, Blocks.DIRT), new FlatLayerInfo(1, Blocks.BEDROCK));
             this.register(TUNNELERS_DREAM, Blocks.STONE, Biomes.WINDSWEPT_HILLS, ImmutableSet.of(BuiltinStructureSets.MINESHAFTS, BuiltinStructureSets.STRONGHOLDS), true, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(5, Blocks.DIRT), new FlatLayerInfo(230, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
             this.register(WATER_WORLD, Items.WATER_BUCKET, Biomes.DEEP_OCEAN, ImmutableSet.of(BuiltinStructureSets.OCEAN_RUINS, BuiltinStructureSets.SHIPWRECKS, BuiltinStructureSets.OCEAN_MONUMENTS), false, false, new FlatLayerInfo(90, Blocks.WATER), new FlatLayerInfo(5, Blocks.GRAVEL), new FlatLayerInfo(5, Blocks.DIRT), new FlatLayerInfo(5, Blocks.STONE), new FlatLayerInfo(64, Blocks.DEEPSLATE), new FlatLayerInfo(1, Blocks.BEDROCK));
@@ -77,7 +78,7 @@ public class FlatLevelGeneratorPresets {
             this.register(BOTTOMLESS_PIT, Items.FEATHER, Biomes.PLAINS, ImmutableSet.of(BuiltinStructureSets.VILLAGES), false, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(2, Blocks.COBBLESTONE));
             this.register(DESERT, Blocks.SAND, Biomes.DESERT, ImmutableSet.of(BuiltinStructureSets.VILLAGES, BuiltinStructureSets.DESERT_PYRAMIDS, BuiltinStructureSets.MINESHAFTS, BuiltinStructureSets.STRONGHOLDS), true, false, new FlatLayerInfo(8, Blocks.SAND), new FlatLayerInfo(52, Blocks.SANDSTONE), new FlatLayerInfo(3, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
             this.register(REDSTONE_READY, Items.REDSTONE, Biomes.DESERT, ImmutableSet.of(), false, false, new FlatLayerInfo(116, Blocks.SANDSTONE), new FlatLayerInfo(3, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
-            return this.register(THE_VOID, Blocks.BARRIER, Biomes.THE_VOID, ImmutableSet.of(), true, false, new FlatLayerInfo(1, Blocks.AIR));
+            this.register(THE_VOID, Blocks.BARRIER, Biomes.THE_VOID, ImmutableSet.of(), true, false, new FlatLayerInfo(1, Blocks.AIR));
         }
     }
 }

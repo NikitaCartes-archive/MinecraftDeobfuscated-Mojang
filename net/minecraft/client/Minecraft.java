@@ -567,7 +567,8 @@ implements WindowEventHandler {
             this.reloadStateTracker.finishReload();
         }), false));
         if (string != null) {
-            reloadInstance.done().thenRunAsync(() -> ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null), this);
+            ServerAddress serverAddress = new ServerAddress(string, i);
+            reloadInstance.done().thenRunAsync(() -> ConnectScreen.startConnecting(new TitleScreen(), this, serverAddress, new ServerData(I18n.get("selectServer.defaultName", new Object[0]), serverAddress.toString(), false)), this);
         } else if (this.shouldShowBanNotice()) {
             this.setScreen(BanNoticeScreen.create(bl -> {
                 if (bl) {
@@ -711,6 +712,10 @@ implements WindowEventHandler {
         this.searchRegistry.register(SearchRegistry.CREATIVE_NAMES, list -> new FullTextSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(Registry.ITEM.getKey(itemStack.getItem())), (List<ItemStack>)list));
         this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, list -> new IdSearchTree<ItemStack>(itemStack -> itemStack.getTags().map(TagKey::location), (List<ItemStack>)list));
         this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, list -> new FullTextSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> Registry.ITEM.getKey(recipe.getResultItem().getItem())), (List<RecipeCollection>)list));
+        CreativeModeTabs.TAB_SEARCH.setSearchTreeRebuilder(list -> {
+            this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, (List)list);
+            this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, (List)list);
+        });
     }
 
     private void onFullscreenError(int i, long l) {
@@ -815,7 +820,7 @@ implements WindowEventHandler {
                 bl = true;
             }
         }
-        for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags())) {
+        for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags(), true)) {
             String string = itemStack.getDescriptionId();
             String string2 = Component.translatable(string).getString();
             if (!string2.toLowerCase(Locale.ROOT).equals(itemStack.getItem().getDescriptionId())) continue;

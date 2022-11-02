@@ -13,7 +13,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -25,7 +24,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -67,22 +65,18 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 public final class NoiseBasedChunkGenerator
 extends ChunkGenerator {
-    public static final Codec<NoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> NoiseBasedChunkGenerator.commonCodec(instance).and(instance.group(RegistryOps.retrieveRegistry(Registry.NOISE_REGISTRY).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.noises), ((MapCodec)BiomeSource.CODEC.fieldOf("biome_source")).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.biomeSource), ((MapCodec)NoiseGeneratorSettings.CODEC.fieldOf("settings")).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.settings))).apply((Applicative<NoiseBasedChunkGenerator, ?>)instance, instance.stable(NoiseBasedChunkGenerator::new)));
+    public static final Codec<NoiseBasedChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BiomeSource.CODEC.fieldOf("biome_source")).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.biomeSource), ((MapCodec)NoiseGeneratorSettings.CODEC.fieldOf("settings")).forGetter(noiseBasedChunkGenerator -> noiseBasedChunkGenerator.settings)).apply((Applicative<NoiseBasedChunkGenerator, ?>)instance, instance.stable(NoiseBasedChunkGenerator::new)));
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
-    private final Registry<NormalNoise.NoiseParameters> noises;
     private final Holder<NoiseGeneratorSettings> settings;
     private final Supplier<Aquifer.FluidPicker> globalFluidPicker;
 
-    public NoiseBasedChunkGenerator(Registry<StructureSet> registry, Registry<NormalNoise.NoiseParameters> registry2, BiomeSource biomeSource, Holder<NoiseGeneratorSettings> holder) {
-        super(registry, Optional.empty(), biomeSource);
-        this.noises = registry2;
+    public NoiseBasedChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> holder) {
+        super(biomeSource);
         this.settings = holder;
         this.globalFluidPicker = Suppliers.memoize(() -> NoiseBasedChunkGenerator.createFluidPicker((NoiseGeneratorSettings)holder.value()));
     }
@@ -101,7 +95,7 @@ extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> createBiomes(Registry<Biome> registry, Executor executor, RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunkAccess) {
+    public CompletableFuture<ChunkAccess> createBiomes(Executor executor, RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunkAccess) {
         return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", () -> {
             this.doCreateBiomes(blender, randomState, structureManager, chunkAccess);
             return chunkAccess;

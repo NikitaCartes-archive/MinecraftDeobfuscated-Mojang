@@ -74,7 +74,7 @@ implements RepositorySource {
     protected void discoverPacksInPath(@Nullable Path path2, BiConsumer<String, Function<String, Pack>> biConsumer) {
         if (path2 != null && Files.isDirectory(path2, new LinkOption[0])) {
             try {
-                FolderRepositorySource.discoverPacks(path2, (path, resourcesSupplier) -> biConsumer.accept(BuiltInPackSource.pathToId(path), string -> this.createBuiltinPack((String)string, (Pack.ResourcesSupplier)resourcesSupplier, this.getPackTitle((String)string))));
+                FolderRepositorySource.discoverPacks(path2, true, (path, resourcesSupplier) -> biConsumer.accept(BuiltInPackSource.pathToId(path), string -> this.createBuiltinPack((String)string, (Pack.ResourcesSupplier)resourcesSupplier, this.getPackTitle((String)string))));
             } catch (IOException iOException) {
                 LOGGER.warn("Failed to discover packs in {}", (Object)path2, (Object)iOException);
             }

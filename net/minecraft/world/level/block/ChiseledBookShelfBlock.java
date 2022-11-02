@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -57,15 +58,13 @@ extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        return itemStack.is(ItemTags.BOOKSHELF_BOOKS) ? ChiseledBookShelfBlock.tryAddBook(blockState, level, blockPos, player, chiseledBookShelfBlockEntity, itemStack) : ChiseledBookShelfBlock.tryRemoveBook(blockState, level, blockPos, player, chiseledBookShelfBlockEntity);
+        return itemStack.is(ItemTags.BOOKSHELF_BOOKS) ? ChiseledBookShelfBlock.tryAddBook(level, blockPos, player, chiseledBookShelfBlockEntity, itemStack) : ChiseledBookShelfBlock.tryRemoveBook(level, blockPos, player, chiseledBookShelfBlockEntity);
     }
 
-    private static InteractionResult tryRemoveBook(BlockState blockState, Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
+    private static InteractionResult tryRemoveBook(Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
         if (!chiseledBookShelfBlockEntity.isEmpty()) {
             ItemStack itemStack = chiseledBookShelfBlockEntity.removeBook();
             level.playSound(null, blockPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0f, 1.0f);
-            int i = chiseledBookShelfBlockEntity.bookCount();
-            level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(BOOKS_STORED, i)).setValue(LAST_INTERACTION_BOOK_SLOT, i + 1), 3);
             level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
             if (!player.getInventory().add(itemStack)) {
                 player.drop(itemStack, false);
@@ -74,16 +73,15 @@ extends BaseEntityBlock {
         return InteractionResult.CONSUME;
     }
 
-    private static InteractionResult tryAddBook(BlockState blockState, Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity, ItemStack itemStack) {
-        if (!chiseledBookShelfBlockEntity.isFull()) {
-            chiseledBookShelfBlockEntity.addBook(itemStack.split(1));
+    private static InteractionResult tryAddBook(Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity, ItemStack itemStack) {
+        if (chiseledBookShelfBlockEntity.addBook(itemStack.split(1))) {
             level.playSound(null, blockPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0f, 1.0f);
             if (player.isCreative()) {
                 itemStack.grow(1);
             }
-            int i = chiseledBookShelfBlockEntity.bookCount();
-            level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(BOOKS_STORED, i)).setValue(LAST_INTERACTION_BOOK_SLOT, i), 3);
             level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
+        } else {
+            itemStack.grow(1);
         }
         return InteractionResult.CONSUME;
     }
@@ -107,11 +105,8 @@ extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof ChiseledBookShelfBlockEntity) {
             ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity = (ChiseledBookShelfBlockEntity)blockEntity;
-            ItemStack itemStack = chiseledBookShelfBlockEntity.removeBook();
-            while (!itemStack.isEmpty()) {
-                Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack);
-                itemStack = chiseledBookShelfBlockEntity.removeBook();
-            }
+            List<ItemStack> list = chiseledBookShelfBlockEntity.removeAllBooksWithoutBlockStateUpdate();
+            list.forEach(itemStack -> Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack));
             level.updateNeighbourForOutputSignal(blockPos, this);
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);

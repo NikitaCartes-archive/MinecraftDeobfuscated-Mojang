@@ -25,13 +25,14 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -283,15 +284,47 @@ IdMap<T> {
     public static final Registry<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT = Registry.registerSimple(STRUCTURE_POOL_ELEMENT_REGISTRY, registry -> StructurePoolElementType.EMPTY);
     public static final ResourceKey<Registry<ChatType>> CHAT_TYPE_REGISTRY = Registry.createRegistryKey("chat_type");
     public static final ResourceKey<Registry<CatVariant>> CAT_VARIANT_REGISTRY = Registry.createRegistryKey("cat_variant");
-    public static final Registry<CatVariant> CAT_VARIANT = Registry.registerSimple(CAT_VARIANT_REGISTRY, registry -> CatVariant.BLACK);
+    public static final Registry<CatVariant> CAT_VARIANT = Registry.registerSimple(CAT_VARIANT_REGISTRY, CatVariant::bootstrap);
     public static final ResourceKey<Registry<FrogVariant>> FROG_VARIANT_REGISTRY = Registry.createRegistryKey("frog_variant");
     public static final Registry<FrogVariant> FROG_VARIANT = Registry.registerSimple(FROG_VARIANT_REGISTRY, registry -> FrogVariant.TEMPERATE);
     public static final ResourceKey<Registry<BannerPattern>> BANNER_PATTERN_REGISTRY = Registry.createRegistryKey("banner_pattern");
     public static final Registry<BannerPattern> BANNER_PATTERN = Registry.registerSimple(BANNER_PATTERN_REGISTRY, BannerPatterns::bootstrap);
     public static final ResourceKey<Registry<Instrument>> INSTRUMENT_REGISTRY = Registry.createRegistryKey("instrument");
     public static final Registry<Instrument> INSTRUMENT = Registry.registerSimple(INSTRUMENT_REGISTRY, Instruments::bootstrap);
-    private final ResourceKey<? extends Registry<T>> key;
+    final ResourceKey<? extends Registry<T>> key;
     private final Lifecycle initialLifecycle;
+    final HolderLookup.RegistryLookup<T> lookup = new HolderLookup.RegistryLookup<T>(){
+
+        @Override
+        public ResourceKey<? extends Registry<? extends T>> key() {
+            return Registry.this.key;
+        }
+
+        @Override
+        public Lifecycle elementsLifecycle() {
+            return Registry.this.elementsLifecycle();
+        }
+
+        @Override
+        public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+            return Registry.this.getHolder(resourceKey);
+        }
+
+        @Override
+        public Stream<Holder.Reference<T>> listElements() {
+            return Registry.this.holders();
+        }
+
+        @Override
+        public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+            return Registry.this.getTag(tagKey);
+        }
+
+        @Override
+        public Stream<HolderSet.Named<T>> listTags() {
+            return Registry.this.getTags().map(Pair::getSecond);
+        }
+    };
 
     public static ResourceKey<Level> levelStemToLevel(ResourceKey<LevelStem> resourceKey) {
         return ResourceKey.create(DIMENSION_REGISTRY, resourceKey.location());
@@ -424,7 +457,7 @@ IdMap<T> {
 
     public abstract Set<ResourceKey<T>> registryKeySet();
 
-    public abstract Optional<Holder<T>> getRandom(RandomSource var1);
+    public abstract Optional<Holder.Reference<T>> getRandom(RandomSource var1);
 
     public Stream<T> stream() {
         return StreamSupport.stream(this.spliterator(), false);
@@ -453,10 +486,6 @@ IdMap<T> {
     }
 
     public abstract Registry<T> freeze();
-
-    public abstract Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> var1);
-
-    public abstract DataResult<Holder.Reference<T>> getOrCreateHolder(ResourceKey<T> var1);
 
     public abstract Holder.Reference<T> createIntrusiveHolder(T var1);
 
@@ -520,8 +549,35 @@ IdMap<T> {
         };
     }
 
+    public HolderOwner<T> holderOwner() {
+        return this.lookup;
+    }
+
+    public HolderLookup.RegistryLookup<T> asLookup() {
+        return this.lookup;
+    }
+
+    public HolderLookup.RegistryLookup<T> asTagAddingLookup() {
+        return new HolderLookup.RegistryLookup.Delegate<T>(){
+
+            @Override
+            protected HolderLookup.RegistryLookup<T> parent() {
+                return Registry.this.lookup;
+            }
+
+            @Override
+            public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+                return Optional.of(this.getOrThrow(tagKey));
+            }
+
+            @Override
+            public HolderSet.Named<T> getOrThrow(TagKey<T> tagKey) {
+                return Registry.this.getOrCreateTag(tagKey);
+            }
+        };
+    }
+
     static {
-        BuiltinRegistries.bootstrap();
         LOADERS.forEach((? super K resourceLocation, ? super V supplier) -> {
             if (supplier.get() == null) {
                 LOGGER.error("Unable to bootstrap registry '{}'", resourceLocation);

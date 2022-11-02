@@ -235,7 +235,7 @@ BiomeManager.NoiseBiomeSource {
 
     default public <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
         Registry registry = this.registryAccess().registryOrThrow(resourceKey);
-        return HolderLookup.forRegistry(registry).filterFeatures(this.enabledFeatures());
+        return registry.asLookup().filterFeatures(this.enabledFeatures());
     }
 }
 

@@ -50,7 +50,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -224,8 +223,7 @@ RangedAttackMob {
             int i2 = this.getInvulnerableTicks() - 1;
             this.bossEvent.setProgress(1.0f - (float)i2 / 220.0f);
             if (i2 <= 0) {
-                Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
-                this.level.explode((Entity)this, this.getX(), this.getEyeY(), this.getZ(), 7.0f, false, blockInteraction);
+                this.level.explode((Entity)this, this.getX(), this.getEyeY(), this.getZ(), 7.0f, false, Level.ExplosionInteraction.MOB);
                 if (!this.isSilent()) {
                     this.level.globalLevelEvent(1023, this.blockPosition(), 0);
                 }

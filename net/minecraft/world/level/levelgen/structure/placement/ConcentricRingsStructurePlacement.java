@@ -16,8 +16,7 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 
@@ -64,8 +63,8 @@ extends StructurePlacement {
     }
 
     @Override
-    protected boolean isPlacementChunk(ChunkGenerator chunkGenerator, RandomState randomState, long l, int i, int j) {
-        List<ChunkPos> list = chunkGenerator.getRingPositionsFor(this, randomState);
+    protected boolean isPlacementChunk(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
+        List<ChunkPos> list = chunkGeneratorStructureState.getRingPositionsFor(this);
         if (list == null) {
             return false;
         }

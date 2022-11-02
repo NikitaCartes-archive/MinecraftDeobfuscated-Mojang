@@ -51,7 +51,7 @@ public class ChunkStatus {
     public static final ChunkStatus STRUCTURE_STARTS = ChunkStatus.register("structure_starts", EMPTY, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess, bl) -> {
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
             if (serverLevel.getServer().getWorldData().worldGenOptions().generateStructures()) {
-                chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.getChunkSource().randomState(), serverLevel.structureManager(), chunkAccess, structureTemplateManager, serverLevel.getSeed());
+                chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.getChunkSource().getGeneratorState(), serverLevel.structureManager(), chunkAccess, structureTemplateManager);
             }
             if (chunkAccess instanceof ProtoChunk) {
                 ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
@@ -77,7 +77,7 @@ public class ChunkStatus {
     public static final ChunkStatus BIOMES = ChunkStatus.register("biomes", STRUCTURE_REFERENCES, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess2, bl) -> {
         if (bl || !chunkAccess2.getStatus().isOrAfter(chunkStatus)) {
             WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, -1);
-            return chunkGenerator.createBiomes(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), executor, serverLevel.getChunkSource().randomState(), Blender.of(worldGenRegion), serverLevel.structureManager().forWorldGenRegion(worldGenRegion), chunkAccess2).thenApply(chunkAccess -> {
+            return chunkGenerator.createBiomes(executor, serverLevel.getChunkSource().randomState(), Blender.of(worldGenRegion), serverLevel.structureManager().forWorldGenRegion(worldGenRegion), chunkAccess2).thenApply(chunkAccess -> {
                 if (chunkAccess instanceof ProtoChunk) {
                     ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
                 }

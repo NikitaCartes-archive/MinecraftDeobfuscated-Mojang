@@ -20,7 +20,7 @@ import net.minecraft.world.entity.animal.frog.Frog;
 @Environment(value=EnvType.CLIENT)
 public class FrogModel<T extends Frog>
 extends HierarchicalModel<T> {
-    private static final float WALK_ANIMATION_SPEED_FACTOR = 200.0f;
+    private static final float WALK_ANIMATION_SPEED_FACTOR = 9000.0f;
     public static final float MAX_WALK_ANIMATION_SPEED = 8.0f;
     private final ModelPart root;
     private final ModelPart body;
@@ -71,7 +71,7 @@ extends HierarchicalModel<T> {
     @Override
     public void setupAnim(T frog, float f, float g, float h, float i, float j) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
-        float k = Math.min((float)((Entity)frog).getDeltaMovement().lengthSqr() * 200.0f, 8.0f);
+        float k = Math.min((float)((Entity)frog).getDeltaMovement().horizontalDistanceSqr() * 9000.0f, 8.0f);
         this.animate(((Frog)frog).jumpAnimationState, FrogAnimation.FROG_JUMP, h);
         this.animate(((Frog)frog).croakAnimationState, FrogAnimation.FROG_CROAK, h);
         this.animate(((Frog)frog).tongueAnimationState, FrogAnimation.FROG_TONGUE, h);

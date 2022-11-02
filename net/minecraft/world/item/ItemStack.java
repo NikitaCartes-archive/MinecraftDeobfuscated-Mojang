@@ -30,7 +30,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -390,6 +389,12 @@ public final class ItemStack {
         return itemStack;
     }
 
+    public ItemStack copyWithCount(int i) {
+        ItemStack itemStack = this.copy();
+        itemStack.setCount(i);
+        return itemStack;
+    }
+
     public static boolean tagMatches(ItemStack itemStack, ItemStack itemStack2) {
         if (itemStack.isEmpty() && itemStack2.isEmpty()) {
             return true;
@@ -740,7 +745,7 @@ public final class ItemStack {
 
     private static Collection<Component> expandBlockState(String string) {
         try {
-            return BlockStateParser.parseForTesting(HolderLookup.forRegistry(Registry.BLOCK), string, true).map(blockResult -> Lists.newArrayList(blockResult.blockState().getBlock().getName().withStyle(ChatFormatting.DARK_GRAY)), tagResult -> tagResult.tag().stream().map(holder -> ((Block)holder.value()).getName().withStyle(ChatFormatting.DARK_GRAY)).collect(Collectors.toList()));
+            return BlockStateParser.parseForTesting(Registry.BLOCK.asLookup(), string, true).map(blockResult -> Lists.newArrayList(blockResult.blockState().getBlock().getName().withStyle(ChatFormatting.DARK_GRAY)), tagResult -> tagResult.tag().stream().map(holder -> ((Block)holder.value()).getName().withStyle(ChatFormatting.DARK_GRAY)).collect(Collectors.toList()));
         } catch (CommandSyntaxException commandSyntaxException) {
             return Lists.newArrayList(Component.literal("missingno").withStyle(ChatFormatting.DARK_GRAY));
         }

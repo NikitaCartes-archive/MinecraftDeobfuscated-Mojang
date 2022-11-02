@@ -436,6 +436,8 @@ extends Animal {
                 CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this.animal, this.partner, null);
             }
             this.turtle.setHasEgg(true);
+            this.animal.setAge(6000);
+            this.partner.setAge(6000);
             this.animal.resetLove();
             this.partner.resetLove();
             RandomSource randomSource = this.animal.getRandom();

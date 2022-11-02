@@ -21,9 +21,11 @@ public abstract class AbstractPackResources
 implements PackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
     private final String name;
+    private final boolean isBuiltin;
 
-    protected AbstractPackResources(String string) {
+    protected AbstractPackResources(String string, boolean bl) {
         this.name = string;
+        this.isBuiltin = bl;
     }
 
     @Override
@@ -62,6 +64,11 @@ implements PackResources {
     @Override
     public String packId() {
         return this.name;
+    }
+
+    @Override
+    public boolean isBuiltin() {
+        return this.isBuiltin;
     }
 }
 

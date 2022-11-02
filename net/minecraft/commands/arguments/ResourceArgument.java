@@ -102,7 +102,7 @@ implements ArgumentType<Holder.Reference<T>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-        return SharedSuggestionProvider.suggestResource(this.registryLookup.listElements().map(ResourceKey::location), suggestionsBuilder);
+        return SharedSuggestionProvider.suggestResource(this.registryLookup.listElementIds().map(ResourceKey::location), suggestionsBuilder);
     }
 
     @Override

@@ -18,9 +18,10 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -57,10 +58,9 @@ public class RegistryDataLoader {
 
     public static RegistryAccess.Frozen load(ResourceManager resourceManager, RegistryAccess registryAccess, List<RegistryData<?>> list) {
         HashMap map = new HashMap();
-        List<Pair> list2 = list.stream().map(registryData -> registryData.create(Lifecycle.stable(), map)).toList();
-        RegistryAccess.ImmutableRegistryAccess registryAccess2 = new RegistryAccess.ImmutableRegistryAccess(list2.stream().map(Pair::getFirst).toList());
-        RegistryAccess.ImmutableRegistryAccess registryAccess3 = new RegistryAccess.ImmutableRegistryAccess(Stream.concat(registryAccess.registries(), registryAccess2.registries()));
-        list2.forEach(pair -> ((Loader)pair.getSecond()).load(resourceManager, registryAccess3));
+        List<Pair<WritableRegistry<?>, Loader>> list2 = list.stream().map(registryData -> registryData.create(Lifecycle.stable(), map)).toList();
+        RegistryOps.RegistryInfoLookup registryInfoLookup = RegistryDataLoader.createContext(registryAccess, list2);
+        list2.forEach(pair -> ((Loader)pair.getSecond()).load(resourceManager, registryInfoLookup));
         list2.forEach(pair -> {
             Registry registry = (Registry)pair.getFirst();
             try {
@@ -73,7 +73,28 @@ public class RegistryDataLoader {
             RegistryDataLoader.logErrors(map);
             throw new IllegalStateException("Failed to load registries due to above errors");
         }
-        return registryAccess2.freeze();
+        return new RegistryAccess.ImmutableRegistryAccess(list2.stream().map(Pair::getFirst).toList()).freeze();
+    }
+
+    private static RegistryOps.RegistryInfoLookup createContext(RegistryAccess registryAccess, List<Pair<WritableRegistry<?>, Loader>> list) {
+        final HashMap map = new HashMap();
+        registryAccess.registries().forEach(registryEntry -> map.put(registryEntry.key(), RegistryDataLoader.createInfoForContextRegistry(registryEntry.value())));
+        list.forEach(pair -> map.put(((WritableRegistry)pair.getFirst()).key(), RegistryDataLoader.createInfoForNewRegistry((WritableRegistry)pair.getFirst())));
+        return new RegistryOps.RegistryInfoLookup(){
+
+            @Override
+            public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+                return Optional.ofNullable((RegistryOps.RegistryInfo)map.get(resourceKey));
+            }
+        };
+    }
+
+    private static <T> RegistryOps.RegistryInfo<T> createInfoForNewRegistry(WritableRegistry<T> writableRegistry) {
+        return new RegistryOps.RegistryInfo(writableRegistry.asLookup(), writableRegistry.createRegistrationLookup(), writableRegistry.elementsLifecycle());
+    }
+
+    private static <T> RegistryOps.RegistryInfo<T> createInfoForContextRegistry(Registry<T> registry) {
+        return new RegistryOps.RegistryInfo<T>(registry.asLookup(), registry.asTagAddingLookup(), registry.elementsLifecycle());
     }
 
     private static void logErrors(Map<ResourceKey<?>, Exception> map) {
@@ -95,10 +116,10 @@ public class RegistryDataLoader {
         return resourceLocation.getPath();
     }
 
-    static <E> void loadRegistryContents(RegistryAccess registryAccess, ResourceManager resourceManager, ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Decoder<E> decoder, Map<ResourceKey<?>, Exception> map) {
+    static <E> void loadRegistryContents(RegistryOps.RegistryInfoLookup registryInfoLookup, ResourceManager resourceManager, ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Decoder<E> decoder, Map<ResourceKey<?>, Exception> map) {
         String string2 = RegistryDataLoader.registryDirPath(resourceKey.location());
         FileToIdConverter fileToIdConverter = FileToIdConverter.json(string2);
-        RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+        RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryInfoLookup);
         for (Map.Entry<ResourceLocation, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
             ResourceLocation resourceLocation = entry.getKey();
             ResourceKey resourceKey2 = ResourceKey.create(resourceKey, fileToIdConverter.fileToId(resourceLocation));
@@ -115,19 +136,19 @@ public class RegistryDataLoader {
                     ((Reader)reader).close();
                 }
             } catch (Exception exception) {
-                map.put(resourceKey2, new IllegalStateException("Failed to parse %s from pack %s".formatted(resourceLocation, resource.sourcePackId()), exception));
+                map.put(resourceKey2, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse %s from pack %s", resourceLocation, resource.sourcePackId()), exception));
             }
         }
     }
 
     static interface Loader {
-        public void load(ResourceManager var1, RegistryAccess var2);
+        public void load(ResourceManager var1, RegistryOps.RegistryInfoLookup var2);
     }
 
     public record RegistryData<T>(ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec) {
-        public Pair<Registry<?>, Loader> create(Lifecycle lifecycle, Map<ResourceKey<?>, Exception> map) {
+        Pair<WritableRegistry<?>, Loader> create(Lifecycle lifecycle, Map<ResourceKey<?>, Exception> map) {
             MappedRegistry writableRegistry = new MappedRegistry(this.key, lifecycle);
-            Loader loader = (resourceManager, registryAccess) -> RegistryDataLoader.loadRegistryContents(registryAccess, resourceManager, this.key, writableRegistry, this.elementCodec, map);
+            Loader loader = (resourceManager, registryInfoLookup) -> RegistryDataLoader.loadRegistryContents(registryInfoLookup, resourceManager, this.key, writableRegistry, this.elementCodec, map);
             return Pair.of(writableRegistry, loader);
         }
     }

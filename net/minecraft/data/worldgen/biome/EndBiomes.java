@@ -3,6 +3,7 @@
  */
 package net.minecraft.data.worldgen.biome;
 
+import net.minecraft.core.HolderGetter;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
 import net.minecraft.data.worldgen.placement.EndPlacements;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
@@ -11,6 +12,8 @@ import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class EndBiomes {
     private static Biome baseEndBiome(BiomeGenerationSettings.Builder builder) {
@@ -19,28 +22,28 @@ public class EndBiomes {
         return new Biome.BiomeBuilder().precipitation(Biome.Precipitation.NONE).temperature(0.5f).downfall(0.5f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0xA080A0).skyColor(0).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).mobSpawnSettings(builder2.build()).generationSettings(builder.build()).build();
     }
 
-    public static Biome endBarrens() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder();
+    public static Biome endBarrens(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
         return EndBiomes.baseEndBiome(builder);
     }
 
-    public static Biome theEnd() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_SPIKE);
+    public static Biome theEnd(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2).addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_SPIKE);
         return EndBiomes.baseEndBiome(builder);
     }
 
-    public static Biome endMidlands() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder();
+    public static Biome endMidlands(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
         return EndBiomes.baseEndBiome(builder);
     }
 
-    public static Biome endHighlands() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_GATEWAY_RETURN).addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, EndPlacements.CHORUS_PLANT);
+    public static Biome endHighlands(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2).addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, EndPlacements.END_GATEWAY_RETURN).addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, EndPlacements.CHORUS_PLANT);
         return EndBiomes.baseEndBiome(builder);
     }
 
-    public static Biome smallEndIslands() {
-        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().addFeature(GenerationStep.Decoration.RAW_GENERATION, EndPlacements.END_ISLAND_DECORATED);
+    public static Biome smallEndIslands(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2).addFeature(GenerationStep.Decoration.RAW_GENERATION, EndPlacements.END_ISLAND_DECORATED);
         return EndBiomes.baseEndBiome(builder);
     }
 }

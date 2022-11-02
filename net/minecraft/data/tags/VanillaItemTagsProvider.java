@@ -3,23 +3,26 @@
  */
 package net.minecraft.data.tags;
 
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.Item;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 
 public class VanillaItemTagsProvider
 extends ItemTagsProvider {
-    public VanillaItemTagsProvider(PackOutput packOutput, TagsProvider<Block> tagsProvider) {
-        super(packOutput, tagsProvider);
+    public VanillaItemTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture, TagsProvider<Block> tagsProvider) {
+        super(packOutput, completableFuture, tagsProvider);
     }
 
     @Override
-    protected void addTags() {
+    protected void addTags(HolderLookup.Provider provider) {
         this.copy(BlockTags.WOOL, ItemTags.WOOL);
         this.copy(BlockTags.PLANKS, ItemTags.PLANKS);
         this.copy(BlockTags.STRIPPED_LOGS, ItemTags.STRIPPED_LOGS);
@@ -31,6 +34,7 @@ extends ItemTagsProvider {
         this.copy(BlockTags.WOODEN_STAIRS, ItemTags.WOODEN_STAIRS);
         this.copy(BlockTags.WOODEN_SLABS, ItemTags.WOODEN_SLABS);
         this.copy(BlockTags.WOODEN_FENCES, ItemTags.WOODEN_FENCES);
+        this.copy(BlockTags.FENCE_GATES, ItemTags.FENCE_GATES);
         this.copy(BlockTags.WOODEN_PRESSURE_PLATES, ItemTags.WOODEN_PRESSURE_PLATES);
         this.copy(BlockTags.DOORS, ItemTags.DOORS);
         this.copy(BlockTags.SAPLINGS, ItemTags.SAPLINGS);
@@ -75,29 +79,29 @@ extends ItemTagsProvider {
         this.copy(BlockTags.DIRT, ItemTags.DIRT);
         this.copy(BlockTags.TERRACOTTA, ItemTags.TERRACOTTA);
         this.copy(BlockTags.COMPLETES_FIND_TREE_TUTORIAL, ItemTags.COMPLETES_FIND_TREE_TUTORIAL);
-        this.tag(ItemTags.BANNERS).add((Item[])new Item[]{Items.WHITE_BANNER, Items.ORANGE_BANNER, Items.MAGENTA_BANNER, Items.LIGHT_BLUE_BANNER, Items.YELLOW_BANNER, Items.LIME_BANNER, Items.PINK_BANNER, Items.GRAY_BANNER, Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER, Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER});
-        this.tag(ItemTags.BOATS).add((Item[])new Item[]{Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT, Items.MANGROVE_BOAT}).addTag(ItemTags.CHEST_BOATS);
-        this.tag(ItemTags.CHEST_BOATS).add((Item[])new Item[]{Items.OAK_CHEST_BOAT, Items.SPRUCE_CHEST_BOAT, Items.BIRCH_CHEST_BOAT, Items.JUNGLE_CHEST_BOAT, Items.ACACIA_CHEST_BOAT, Items.DARK_OAK_CHEST_BOAT, Items.MANGROVE_CHEST_BOAT});
-        this.tag(ItemTags.FISHES).add((Item[])new Item[]{Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH});
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.BANNERS)).add(Items.WHITE_BANNER, Items.ORANGE_BANNER, Items.MAGENTA_BANNER, Items.LIGHT_BLUE_BANNER, Items.YELLOW_BANNER, Items.LIME_BANNER, Items.PINK_BANNER, Items.GRAY_BANNER, Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER, Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.BOATS)).add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT, Items.MANGROVE_BOAT).addTag((TagKey)ItemTags.CHEST_BOATS);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.CHEST_BOATS)).add(Items.OAK_CHEST_BOAT, Items.SPRUCE_CHEST_BOAT, Items.BIRCH_CHEST_BOAT, Items.JUNGLE_CHEST_BOAT, Items.ACACIA_CHEST_BOAT, Items.DARK_OAK_CHEST_BOAT, Items.MANGROVE_CHEST_BOAT);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.FISHES)).add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH);
         this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
-        this.tag(ItemTags.CREEPER_DROP_MUSIC_DISCS).add((Item[])new Item[]{Items.MUSIC_DISC_13, Items.MUSIC_DISC_CAT, Items.MUSIC_DISC_BLOCKS, Items.MUSIC_DISC_CHIRP, Items.MUSIC_DISC_FAR, Items.MUSIC_DISC_MALL, Items.MUSIC_DISC_MELLOHI, Items.MUSIC_DISC_STAL, Items.MUSIC_DISC_STRAD, Items.MUSIC_DISC_WARD, Items.MUSIC_DISC_11, Items.MUSIC_DISC_WAIT});
-        this.tag(ItemTags.MUSIC_DISCS).addTag(ItemTags.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_PIGSTEP).add(Items.MUSIC_DISC_OTHERSIDE).add(Items.MUSIC_DISC_5);
-        this.tag(ItemTags.COALS).add((Item[])new Item[]{Items.COAL, Items.CHARCOAL});
-        this.tag(ItemTags.ARROWS).add((Item[])new Item[]{Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW});
-        this.tag(ItemTags.LECTERN_BOOKS).add((Item[])new Item[]{Items.WRITTEN_BOOK, Items.WRITABLE_BOOK});
-        this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add((Item[])new Item[]{Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT});
-        this.tag(ItemTags.PIGLIN_REPELLENTS).add(Items.SOUL_TORCH).add(Items.SOUL_LANTERN).add(Items.SOUL_CAMPFIRE);
-        this.tag(ItemTags.PIGLIN_LOVED).addTag(ItemTags.GOLD_ORES).add((Item[])new Item[]{Items.GOLD_BLOCK, Items.GILDED_BLACKSTONE, Items.LIGHT_WEIGHTED_PRESSURE_PLATE, Items.GOLD_INGOT, Items.BELL, Items.CLOCK, Items.GOLDEN_CARROT, Items.GLISTERING_MELON_SLICE, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS, Items.GOLDEN_HORSE_ARMOR, Items.GOLDEN_SWORD, Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_AXE, Items.GOLDEN_HOE, Items.RAW_GOLD, Items.RAW_GOLD_BLOCK});
-        this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
-        this.tag(ItemTags.PIGLIN_FOOD).add((Item[])new Item[]{Items.PORKCHOP, Items.COOKED_PORKCHOP});
-        this.tag(ItemTags.FOX_FOOD).add((Item[])new Item[]{Items.SWEET_BERRIES, Items.GLOW_BERRIES});
-        this.tag(ItemTags.NON_FLAMMABLE_WOOD).add((Item[])new Item[]{Items.WARPED_STEM, Items.STRIPPED_WARPED_STEM, Items.WARPED_HYPHAE, Items.STRIPPED_WARPED_HYPHAE, Items.CRIMSON_STEM, Items.STRIPPED_CRIMSON_STEM, Items.CRIMSON_HYPHAE, Items.STRIPPED_CRIMSON_HYPHAE, Items.CRIMSON_PLANKS, Items.WARPED_PLANKS, Items.CRIMSON_SLAB, Items.WARPED_SLAB, Items.CRIMSON_PRESSURE_PLATE, Items.WARPED_PRESSURE_PLATE, Items.CRIMSON_FENCE, Items.WARPED_FENCE, Items.CRIMSON_TRAPDOOR, Items.WARPED_TRAPDOOR, Items.CRIMSON_FENCE_GATE, Items.WARPED_FENCE_GATE, Items.CRIMSON_STAIRS, Items.WARPED_STAIRS, Items.CRIMSON_BUTTON, Items.WARPED_BUTTON, Items.CRIMSON_DOOR, Items.WARPED_DOOR, Items.CRIMSON_SIGN, Items.WARPED_SIGN, Items.WARPED_HANGING_SIGN, Items.CRIMSON_HANGING_SIGN});
-        this.tag(ItemTags.STONE_TOOL_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE});
-        this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add((Item[])new Item[]{Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE});
-        this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES).add((Item[])new Item[]{Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_HORSE_ARMOR});
-        this.tag(ItemTags.AXOLOTL_TEMPT_ITEMS).add(Items.TROPICAL_FISH_BUCKET);
-        this.tag(ItemTags.CLUSTER_MAX_HARVESTABLES).add((Item[])new Item[]{Items.DIAMOND_PICKAXE, Items.GOLDEN_PICKAXE, Items.IRON_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE, Items.WOODEN_PICKAXE});
-        this.tag(ItemTags.COMPASSES).add(Items.COMPASS).add(Items.RECOVERY_COMPASS);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.CREEPER_DROP_MUSIC_DISCS)).add(Items.MUSIC_DISC_13, Items.MUSIC_DISC_CAT, Items.MUSIC_DISC_BLOCKS, Items.MUSIC_DISC_CHIRP, Items.MUSIC_DISC_FAR, Items.MUSIC_DISC_MALL, Items.MUSIC_DISC_MELLOHI, Items.MUSIC_DISC_STAL, Items.MUSIC_DISC_STRAD, Items.MUSIC_DISC_WARD, Items.MUSIC_DISC_11, Items.MUSIC_DISC_WAIT);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.MUSIC_DISCS)).addTag((TagKey)ItemTags.CREEPER_DROP_MUSIC_DISCS)).add(Items.MUSIC_DISC_PIGSTEP).add(Items.MUSIC_DISC_OTHERSIDE).add(Items.MUSIC_DISC_5);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.COALS)).add(Items.COAL, Items.CHARCOAL);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.ARROWS)).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.LECTERN_BOOKS)).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.BEACON_PAYMENT_ITEMS)).add(Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.PIGLIN_REPELLENTS)).add(Items.SOUL_TORCH).add(Items.SOUL_LANTERN).add(Items.SOUL_CAMPFIRE);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.PIGLIN_LOVED)).addTag((TagKey)ItemTags.GOLD_ORES)).add(Items.GOLD_BLOCK, Items.GILDED_BLACKSTONE, Items.LIGHT_WEIGHTED_PRESSURE_PLATE, Items.GOLD_INGOT, Items.BELL, Items.CLOCK, Items.GOLDEN_CARROT, Items.GLISTERING_MELON_SLICE, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS, Items.GOLDEN_HORSE_ARMOR, Items.GOLDEN_SWORD, Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_AXE, Items.GOLDEN_HOE, Items.RAW_GOLD, Items.RAW_GOLD_BLOCK);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.IGNORED_BY_PIGLIN_BABIES)).add(Items.LEATHER);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.PIGLIN_FOOD)).add(Items.PORKCHOP, Items.COOKED_PORKCHOP);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.FOX_FOOD)).add(Items.SWEET_BERRIES, Items.GLOW_BERRIES);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.NON_FLAMMABLE_WOOD)).add(Items.WARPED_STEM, Items.STRIPPED_WARPED_STEM, Items.WARPED_HYPHAE, Items.STRIPPED_WARPED_HYPHAE, Items.CRIMSON_STEM, Items.STRIPPED_CRIMSON_STEM, Items.CRIMSON_HYPHAE, Items.STRIPPED_CRIMSON_HYPHAE, Items.CRIMSON_PLANKS, Items.WARPED_PLANKS, Items.CRIMSON_SLAB, Items.WARPED_SLAB, Items.CRIMSON_PRESSURE_PLATE, Items.WARPED_PRESSURE_PLATE, Items.CRIMSON_FENCE, Items.WARPED_FENCE, Items.CRIMSON_TRAPDOOR, Items.WARPED_TRAPDOOR, Items.CRIMSON_FENCE_GATE, Items.WARPED_FENCE_GATE, Items.CRIMSON_STAIRS, Items.WARPED_STAIRS, Items.CRIMSON_BUTTON, Items.WARPED_BUTTON, Items.CRIMSON_DOOR, Items.WARPED_DOOR, Items.CRIMSON_SIGN, Items.WARPED_SIGN);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.STONE_TOOL_MATERIALS)).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.STONE_CRAFTING_MATERIALS)).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.FREEZE_IMMUNE_WEARABLES)).add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_HORSE_ARMOR);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.AXOLOTL_TEMPT_ITEMS)).add(Items.TROPICAL_FISH_BUCKET);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.CLUSTER_MAX_HARVESTABLES)).add(Items.DIAMOND_PICKAXE, Items.GOLDEN_PICKAXE, Items.IRON_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE, Items.WOODEN_PICKAXE);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)ItemTags.COMPASSES)).add(Items.COMPASS).add(Items.RECOVERY_COMPASS);
     }
 }
 

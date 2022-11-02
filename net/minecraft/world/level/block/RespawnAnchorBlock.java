@@ -123,7 +123,7 @@ extends Block {
             }
         };
         Vec3 vec3 = blockPos2.getCenter();
-        level.explode(null, DamageSource.badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+        level.explode(null, DamageSource.badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0f, true, Level.ExplosionInteraction.BLOCK);
     }
 
     public static boolean canSetSpawn(Level level) {

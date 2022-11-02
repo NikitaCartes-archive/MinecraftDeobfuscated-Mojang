@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -537,7 +537,7 @@ public class StructureTemplate {
         return compoundTag;
     }
 
-    public void load(HolderLookup<Block> holderLookup, CompoundTag compoundTag) {
+    public void load(HolderGetter<Block> holderGetter, CompoundTag compoundTag) {
         int i;
         ListTag listTag3;
         this.palettes.clear();
@@ -548,10 +548,10 @@ public class StructureTemplate {
         if (compoundTag.contains(PALETTE_LIST_TAG, 9)) {
             listTag3 = compoundTag.getList(PALETTE_LIST_TAG, 9);
             for (i = 0; i < listTag3.size(); ++i) {
-                this.loadPalette(holderLookup, listTag3.getList(i), listTag2);
+                this.loadPalette(holderGetter, listTag3.getList(i), listTag2);
             }
         } else {
-            this.loadPalette(holderLookup, compoundTag.getList(PALETTE_TAG, 10), listTag2);
+            this.loadPalette(holderGetter, compoundTag.getList(PALETTE_TAG, 10), listTag2);
         }
         listTag3 = compoundTag.getList(ENTITIES_TAG, 10);
         for (i = 0; i < listTag3.size(); ++i) {
@@ -566,10 +566,10 @@ public class StructureTemplate {
         }
     }
 
-    private void loadPalette(HolderLookup<Block> holderLookup, ListTag listTag, ListTag listTag2) {
+    private void loadPalette(HolderGetter<Block> holderGetter, ListTag listTag, ListTag listTag2) {
         SimplePalette simplePalette = new SimplePalette();
         for (int i = 0; i < listTag.size(); ++i) {
-            simplePalette.addMapping(NbtUtils.readBlockState(holderLookup, listTag.getCompound(i)), i);
+            simplePalette.addMapping(NbtUtils.readBlockState(holderGetter, listTag.getCompound(i)), i);
         }
         ArrayList<StructureBlockInfo> list = Lists.newArrayList();
         ArrayList<StructureBlockInfo> list2 = Lists.newArrayList();

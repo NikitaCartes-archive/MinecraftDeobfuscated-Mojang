@@ -213,6 +213,7 @@ public class PiglinAi {
     }
 
     protected static void pickUpItem(Piglin piglin, ItemEntity itemEntity) {
+        boolean bl;
         ItemStack itemStack;
         PiglinAi.stopWalking(piglin);
         if (itemEntity.getItem().is(Items.GOLD_NUGGET)) {
@@ -233,7 +234,7 @@ public class PiglinAi {
             PiglinAi.eat(piglin);
             return;
         }
-        boolean bl = piglin.equipItemIfPossible(itemStack);
+        boolean bl2 = bl = !piglin.equipItemIfPossible(itemStack).equals(ItemStack.EMPTY);
         if (bl) {
             return;
         }
@@ -262,15 +263,19 @@ public class PiglinAi {
         ItemStack itemStack = piglin.getItemInHand(InteractionHand.OFF_HAND);
         piglin.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         if (piglin.isAdult()) {
-            boolean bl3;
             boolean bl2 = PiglinAi.isBarterCurrency(itemStack);
             if (bl && bl2) {
                 PiglinAi.throwItems(piglin, PiglinAi.getBarterResponseItems(piglin));
-            } else if (!bl2 && !(bl3 = piglin.equipItemIfPossible(itemStack))) {
-                PiglinAi.putInInventory(piglin, itemStack);
+            } else if (!bl2) {
+                boolean bl3;
+                boolean bl4 = bl3 = !piglin.equipItemIfPossible(itemStack).isEmpty();
+                if (!bl3) {
+                    PiglinAi.putInInventory(piglin, itemStack);
+                }
             }
         } else {
-            boolean bl2 = piglin.equipItemIfPossible(itemStack);
+            boolean bl2;
+            boolean bl5 = bl2 = !piglin.equipItemIfPossible(itemStack).isEmpty();
             if (!bl2) {
                 ItemStack itemStack2 = piglin.getMainHandItem();
                 if (PiglinAi.isLovedItem(itemStack2)) {

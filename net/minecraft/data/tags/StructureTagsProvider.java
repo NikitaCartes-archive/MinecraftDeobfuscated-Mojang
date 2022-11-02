@@ -3,7 +3,9 @@
  */
 package net.minecraft.data.tags;
 
-import net.minecraft.data.BuiltinRegistries;
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.StructureTags;
@@ -12,12 +14,12 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class StructureTagsProvider
 extends TagsProvider<Structure> {
-    public StructureTagsProvider(PackOutput packOutput) {
-        super(packOutput, BuiltinRegistries.STRUCTURES);
+    public StructureTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+        super(packOutput, Registry.STRUCTURE_REGISTRY, completableFuture);
     }
 
     @Override
-    protected void addTags() {
+    protected void addTags(HolderLookup.Provider provider) {
         this.tag(StructureTags.VILLAGE).add(BuiltinStructures.VILLAGE_PLAINS).add(BuiltinStructures.VILLAGE_DESERT).add(BuiltinStructures.VILLAGE_SAVANNA).add(BuiltinStructures.VILLAGE_SNOWY).add(BuiltinStructures.VILLAGE_TAIGA);
         this.tag(StructureTags.MINESHAFT).add(BuiltinStructures.MINESHAFT).add(BuiltinStructures.MINESHAFT_MESA);
         this.tag(StructureTags.OCEAN_RUIN).add(BuiltinStructures.OCEAN_RUIN_COLD).add(BuiltinStructures.OCEAN_RUIN_WARM);

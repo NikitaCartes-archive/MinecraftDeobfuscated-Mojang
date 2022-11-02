@@ -36,8 +36,8 @@ extends AbstractPackResources {
     private ZipFile zipFile;
     private boolean failedToLoad;
 
-    public FilePackResources(String string, File file) {
-        super(string);
+    public FilePackResources(String string, File file, boolean bl) {
+        super(string, bl);
         this.file = file;
     }
 

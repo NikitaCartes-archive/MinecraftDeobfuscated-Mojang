@@ -46,6 +46,7 @@ import net.minecraft.world.level.LocalMobCapCalculator;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -378,6 +379,10 @@ extends ChunkSource {
 
     public ChunkGenerator getGenerator() {
         return this.chunkMap.generator();
+    }
+
+    public ChunkGeneratorStructureState getGeneratorState() {
+        return this.chunkMap.generatorState();
     }
 
     public RandomState randomState() {

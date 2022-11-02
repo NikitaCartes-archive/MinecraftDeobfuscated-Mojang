@@ -118,6 +118,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -216,7 +217,7 @@ implements WorldGenLevel {
         EntityStorage entityPersistentStorage = new EntityStorage(this, levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, minecraftServer);
         this.entityManager = new PersistentEntitySectionManager<Entity>(Entity.class, new EntityCallbacks(), entityPersistentStorage);
         this.chunkSource = new ServerChunkCache(this, levelStorageAccess, dataFixer, minecraftServer.getStructureManager(), executor, chunkGenerator, minecraftServer.getPlayerList().getViewDistance(), minecraftServer.getPlayerList().getSimulationDistance(), bl3, chunkProgressListener, this.entityManager::updateChunkStatus, () -> minecraftServer.overworld().getDataStorage());
-        chunkGenerator.ensureStructuresGenerated(this.chunkSource.randomState());
+        this.chunkSource.getGeneratorState().ensureStructuresGenerated();
         this.portalForcer = new PortalForcer(this);
         this.updateSkyBrightness();
         this.prepareWeather();
@@ -408,10 +409,20 @@ implements WorldGenLevel {
                 this.setBlockAndUpdate(blockPos2, Blocks.ICE.defaultBlockState());
             }
             if (bl) {
-                if (biome.shouldSnow(this, blockPos)) {
-                    this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
+                BlockState blockState;
+                int l = this.getGameRules().getInt(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT);
+                if (biome.shouldSnow(this, blockPos) && l > 0) {
+                    blockState = this.getBlockState(blockPos);
+                    if (blockState.is(Blocks.SNOW)) {
+                        int m = blockState.getValue(SnowLayerBlock.LAYERS);
+                        if (m < Math.min(l, 8)) {
+                            this.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(SnowLayerBlock.LAYERS, m + 1));
+                        }
+                    } else {
+                        this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
+                    }
                 }
-                BlockState blockState = this.getBlockState(blockPos2);
+                blockState = this.getBlockState(blockPos2);
                 Biome.Precipitation precipitation = biome.getPrecipitation();
                 if (precipitation == Biome.Precipitation.RAIN && biome.coldEnoughToSnow(blockPos2)) {
                     precipitation = Biome.Precipitation.SNOW;
@@ -423,12 +434,12 @@ implements WorldGenLevel {
         if (i > 0) {
             for (LevelChunkSection levelChunkSection : levelChunk.getSections()) {
                 if (!levelChunkSection.isRandomlyTicking()) continue;
-                int l = levelChunkSection.bottomBlockY();
+                int n = levelChunkSection.bottomBlockY();
                 for (int m = 0; m < i; ++m) {
                     FluidState fluidState;
-                    BlockPos blockPos3 = this.getBlockRandomPos(j, l, k, 15);
+                    BlockPos blockPos3 = this.getBlockRandomPos(j, n, k, 15);
                     profilerFiller.push("randomTick");
-                    BlockState blockState2 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - l, blockPos3.getZ() - k);
+                    BlockState blockState2 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
                     if (blockState2.isRandomlyTicking()) {
                         blockState2.randomTick(this, blockPos3, this.random);
                     }
@@ -767,7 +778,11 @@ implements WorldGenLevel {
 
     @Override
     public void globalLevelEvent(int i, BlockPos blockPos, int j) {
-        this.server.getPlayerList().broadcastAll(new ClientboundLevelEventPacket(i, blockPos, j, true));
+        if (this.getGameRules().getBoolean(GameRules.RULE_GLOBAL_SOUND_EVENTS)) {
+            this.server.getPlayerList().broadcastAll(new ClientboundLevelEventPacket(i, blockPos, j, true));
+        } else {
+            this.levelEvent(null, i, blockPos, j);
+        }
     }
 
     @Override
@@ -846,11 +861,9 @@ implements WorldGenLevel {
     }
 
     @Override
-    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
-        Explosion explosion = new Explosion(this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction);
-        explosion.explode();
-        explosion.finalizeExplosion(false);
-        if (blockInteraction == Explosion.BlockInteraction.NONE) {
+    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, double d, double e, double f, float g, boolean bl, Level.ExplosionInteraction explosionInteraction) {
+        Explosion explosion = this.explode(entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, false);
+        if (!explosion.interactsWithBlocks()) {
             explosion.clearToBlow();
         }
         for (ServerPlayer serverPlayer : this.players) {

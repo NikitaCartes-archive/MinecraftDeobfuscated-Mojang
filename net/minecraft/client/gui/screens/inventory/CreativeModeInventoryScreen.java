@@ -83,6 +83,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private boolean hasClickedOutside;
     private final Set<TagKey<Item>> visibleTags = new HashSet<TagKey<Item>>();
     private final FeatureFlagSet enabledFeatures;
+    private Set<ItemStack> searchTabDisplayList = Set.of();
 
     public CreativeModeInventoryScreen(Player player, FeatureFlagSet featureFlagSet) {
         super(new ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
@@ -326,7 +327,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         this.visibleTags.clear();
         String string = this.searchBox.getValue();
         if (string.isEmpty()) {
-            ((ItemPickerMenu)this.menu).items.addAll(CreativeModeTabs.TAB_SEARCH.getDisplayItems(this.enabledFeatures));
+            ((ItemPickerMenu)this.menu).items.addAll(this.searchTabDisplayList);
         } else {
             SearchTree<ItemStack> searchTree;
             if (string.startsWith("#")) {
@@ -429,8 +430,10 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
                 }
                 ((ItemPickerMenu)this.menu).items.addAll(hotbar);
             }
-        } else if (creativeModeTab != CreativeModeTabs.TAB_SEARCH) {
-            ((ItemPickerMenu)this.menu).items.addAll(creativeModeTab.getDisplayItems(this.enabledFeatures));
+        } else if (creativeModeTab == CreativeModeTabs.TAB_SEARCH) {
+            this.searchTabDisplayList = CreativeModeTabs.TAB_SEARCH.getDisplayItems(this.enabledFeatures, this.minecraft.player.canUseGameMasterBlocks());
+        } else {
+            ((ItemPickerMenu)this.menu).items.addAll(creativeModeTab.getDisplayItems(this.enabledFeatures, this.minecraft.player.canUseGameMasterBlocks()));
         }
         if (creativeModeTab == CreativeModeTabs.TAB_INVENTORY) {
             InventoryMenu abstractContainerMenu = this.minecraft.player.inventoryMenu;
@@ -557,7 +560,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             });
             int k = 1;
             for (CreativeModeTab creativeModeTab : CreativeModeTabs.TABS) {
-                if (creativeModeTab == CreativeModeTabs.TAB_SEARCH || !creativeModeTab.contains(this.enabledFeatures, itemStack)) continue;
+                if (creativeModeTab == CreativeModeTabs.TAB_SEARCH || !creativeModeTab.contains(this.enabledFeatures, itemStack, this.minecraft.player.canUseGameMasterBlocks())) continue;
                 list2.add(k++, creativeModeTab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
             }
             this.renderTooltip(poseStack, list2, itemStack.getTooltipImage(), i, j);

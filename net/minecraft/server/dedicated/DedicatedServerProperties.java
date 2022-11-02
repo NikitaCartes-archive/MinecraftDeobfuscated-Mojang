@@ -30,7 +30,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.Settings;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -43,7 +42,6 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -109,7 +107,7 @@ extends Settings<DedicatedServerProperties> {
         super(properties);
         String string2 = this.get("level-seed", "");
         boolean bl = this.get("generate-structures", true);
-        long l = WorldOptions.parseSeed(string2).orElse(RandomSource.create().nextLong());
+        long l = WorldOptions.parseSeedOrElseRandom(string2);
         this.worldOptions = new WorldOptions(l, bl, false);
         this.worldDimensionData = new WorldDimensionData(this.get("generator-settings", (String string) -> GsonHelper.parse(!string.isEmpty() ? string : "{}"), new JsonObject()), this.get("level-type", (String string) -> string.toLowerCase(Locale.ROOT), WorldPresets.NORMAL.location().toString()));
         this.serverResourcePackInfo = DedicatedServerProperties.getServerPackInfo(this.get("resource-pack", ""), this.get("resource-pack-sha1", ""), this.getLegacyString("resource-pack-hash"), this.get("require-resource-pack", false), this.get("resource-pack-prompt", ""));
@@ -203,8 +201,7 @@ extends Settings<DedicatedServerProperties> {
                 RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
                 Optional optional = FlatLevelGeneratorSettings.CODEC.parse(new Dynamic<JsonObject>(registryOps, this.generatorSettings())).resultOrPartial(LOGGER::error);
                 if (optional.isPresent()) {
-                    Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-                    return worldDimensions.replaceOverworldGenerator(registryAccess, new FlatLevelSource(registry2, (FlatLevelGeneratorSettings)optional.get()));
+                    return worldDimensions.replaceOverworldGenerator(registryAccess, new FlatLevelSource((FlatLevelGeneratorSettings)optional.get()));
                 }
             }
             return worldDimensions;

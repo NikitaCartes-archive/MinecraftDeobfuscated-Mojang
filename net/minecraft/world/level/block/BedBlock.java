@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.CollisionGetter;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -97,7 +96,7 @@ implements EntityBlock {
                 level.removeBlock(blockPos2, false);
             }
             Vec3 vec3 = blockPos.getCenter();
-            level.explode(null, DamageSource.badRespawnPointExplosion(vec3), null, vec3, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+            level.explode(null, DamageSource.badRespawnPointExplosion(vec3), null, vec3, 5.0f, true, Level.ExplosionInteraction.BLOCK);
             return InteractionResult.SUCCESS;
         }
         if (blockState.getValue(OCCUPIED).booleanValue()) {

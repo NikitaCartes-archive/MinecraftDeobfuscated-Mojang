@@ -3,16 +3,15 @@
  */
 package net.minecraft.world.level.levelgen;
 
-import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.RegistryOps;
@@ -35,11 +34,10 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
 
 public class DebugLevelSource
 extends ChunkGenerator {
-    public static final Codec<DebugLevelSource> CODEC = RecordCodecBuilder.create(instance -> DebugLevelSource.commonCodec(instance).and(RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(debugLevelSource -> debugLevelSource.biomes)).apply((Applicative<DebugLevelSource, ?>)instance, instance.stable(DebugLevelSource::new)));
+    public static final Codec<DebugLevelSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryOps.retrieveElement(Biomes.PLAINS)).apply(instance, instance.stable(DebugLevelSource::new)));
     private static final int BLOCK_MARGIN = 2;
     private static final List<BlockState> ALL_BLOCKS = StreamSupport.stream(Registry.BLOCK.spliterator(), false).flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).collect(Collectors.toList());
     private static final int GRID_WIDTH = Mth.ceil(Mth.sqrt(ALL_BLOCKS.size()));
@@ -48,15 +46,9 @@ extends ChunkGenerator {
     protected static final BlockState BARRIER = Blocks.BARRIER.defaultBlockState();
     public static final int HEIGHT = 70;
     public static final int BARRIER_HEIGHT = 60;
-    private final Registry<Biome> biomes;
 
-    public DebugLevelSource(Registry<StructureSet> registry, Registry<Biome> registry2) {
-        super(registry, Optional.empty(), new FixedBiomeSource(registry2.getOrCreateHolderOrThrow(Biomes.PLAINS)));
-        this.biomes = registry2;
-    }
-
-    public Registry<Biome> biomes() {
-        return this.biomes;
+    public DebugLevelSource(Holder.Reference<Biome> reference) {
+        super(new FixedBiomeSource(reference));
     }
 
     @Override

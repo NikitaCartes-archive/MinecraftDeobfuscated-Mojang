@@ -153,10 +153,10 @@ implements BonemealableBlock {
     }
 
     @Override
-    public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
+    public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
         int j;
-        int i = this.getHeightAboveUpToMax(blockGetter, blockPos);
-        return i + (j = this.getHeightBelowUpToMax(blockGetter, blockPos)) + 1 < 16 && blockGetter.getBlockState(blockPos.above(i)).getValue(STAGE) != 1;
+        int i = this.getHeightAboveUpToMax(levelReader, blockPos);
+        return i + (j = this.getHeightBelowUpToMax(levelReader, blockPos)) + 1 < 16 && levelReader.getBlockState(blockPos.above(i)).getValue(STAGE) != 1;
     }
 
     @Override

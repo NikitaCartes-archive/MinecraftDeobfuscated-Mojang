@@ -114,44 +114,44 @@ extends Fluid {
         return blockState.isFaceSturdy(blockGetter, blockPos, direction);
     }
 
-    protected void spread(LevelAccessor levelAccessor, BlockPos blockPos, FluidState fluidState) {
+    protected void spread(Level level, BlockPos blockPos, FluidState fluidState) {
         if (fluidState.isEmpty()) {
             return;
         }
-        BlockState blockState = levelAccessor.getBlockState(blockPos);
+        BlockState blockState = level.getBlockState(blockPos);
         BlockPos blockPos2 = blockPos.below();
-        BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
-        FluidState fluidState2 = this.getNewLiquid(levelAccessor, blockPos2, blockState2);
-        if (this.canSpreadTo(levelAccessor, blockPos, blockState, Direction.DOWN, blockPos2, blockState2, levelAccessor.getFluidState(blockPos2), fluidState2.getType())) {
-            this.spreadTo(levelAccessor, blockPos2, blockState2, Direction.DOWN, fluidState2);
-            if (this.sourceNeighborCount(levelAccessor, blockPos) >= 3) {
-                this.spreadToSides(levelAccessor, blockPos, fluidState, blockState);
+        BlockState blockState2 = level.getBlockState(blockPos2);
+        FluidState fluidState2 = this.getNewLiquid(level, blockPos2, blockState2);
+        if (this.canSpreadTo(level, blockPos, blockState, Direction.DOWN, blockPos2, blockState2, level.getFluidState(blockPos2), fluidState2.getType())) {
+            this.spreadTo(level, blockPos2, blockState2, Direction.DOWN, fluidState2);
+            if (this.sourceNeighborCount(level, blockPos) >= 3) {
+                this.spreadToSides(level, blockPos, fluidState, blockState);
             }
-        } else if (fluidState.isSource() || !this.isWaterHole(levelAccessor, fluidState2.getType(), blockPos, blockState, blockPos2, blockState2)) {
-            this.spreadToSides(levelAccessor, blockPos, fluidState, blockState);
+        } else if (fluidState.isSource() || !this.isWaterHole(level, fluidState2.getType(), blockPos, blockState, blockPos2, blockState2)) {
+            this.spreadToSides(level, blockPos, fluidState, blockState);
         }
     }
 
-    private void spreadToSides(LevelAccessor levelAccessor, BlockPos blockPos, FluidState fluidState, BlockState blockState) {
-        int i = fluidState.getAmount() - this.getDropOff(levelAccessor);
+    private void spreadToSides(Level level, BlockPos blockPos, FluidState fluidState, BlockState blockState) {
+        int i = fluidState.getAmount() - this.getDropOff(level);
         if (fluidState.getValue(FALLING).booleanValue()) {
             i = 7;
         }
         if (i <= 0) {
             return;
         }
-        Map<Direction, FluidState> map = this.getSpread(levelAccessor, blockPos, blockState);
+        Map<Direction, FluidState> map = this.getSpread(level, blockPos, blockState);
         for (Map.Entry<Direction, FluidState> entry : map.entrySet()) {
             BlockState blockState2;
             Direction direction = entry.getKey();
             FluidState fluidState2 = entry.getValue();
             BlockPos blockPos2 = blockPos.relative(direction);
-            if (!this.canSpreadTo(levelAccessor, blockPos, blockState, direction, blockPos2, blockState2 = levelAccessor.getBlockState(blockPos2), levelAccessor.getFluidState(blockPos2), fluidState2.getType())) continue;
-            this.spreadTo(levelAccessor, blockPos2, blockState2, direction, fluidState2);
+            if (!this.canSpreadTo(level, blockPos, blockState, direction, blockPos2, blockState2 = level.getBlockState(blockPos2), level.getFluidState(blockPos2), fluidState2.getType())) continue;
+            this.spreadTo(level, blockPos2, blockState2, direction, fluidState2);
         }
     }
 
-    protected FluidState getNewLiquid(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+    protected FluidState getNewLiquid(Level level, BlockPos blockPos, BlockState blockState) {
         BlockPos blockPos3;
         BlockState blockState4;
         FluidState fluidState3;
@@ -159,25 +159,25 @@ extends Fluid {
         int j = 0;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockPos2 = blockPos.relative(direction);
-            BlockState blockState2 = levelReader.getBlockState(blockPos2);
+            BlockState blockState2 = level.getBlockState(blockPos2);
             FluidState fluidState = blockState2.getFluidState();
-            if (!fluidState.getType().isSame(this) || !this.canPassThroughWall(direction, levelReader, blockPos, blockState, blockPos2, blockState2)) continue;
+            if (!fluidState.getType().isSame(this) || !this.canPassThroughWall(direction, level, blockPos, blockState, blockPos2, blockState2)) continue;
             if (fluidState.isSource()) {
                 ++j;
             }
             i = Math.max(i, fluidState.getAmount());
         }
-        if (this.canConvertToSource() && j >= 2) {
-            BlockState blockState3 = levelReader.getBlockState(blockPos.below());
+        if (this.canConvertToSource(level) && j >= 2) {
+            BlockState blockState3 = level.getBlockState(blockPos.below());
             FluidState fluidState2 = blockState3.getFluidState();
             if (blockState3.getMaterial().isSolid() || this.isSourceBlockOfThisType(fluidState2)) {
                 return this.getSource(false);
             }
         }
-        if (!(fluidState3 = (blockState4 = levelReader.getBlockState(blockPos3 = blockPos.above())).getFluidState()).isEmpty() && fluidState3.getType().isSame(this) && this.canPassThroughWall(Direction.UP, levelReader, blockPos, blockState, blockPos3, blockState4)) {
+        if (!(fluidState3 = (blockState4 = level.getBlockState(blockPos3 = blockPos.above())).getFluidState()).isEmpty() && fluidState3.getType().isSame(this) && this.canPassThroughWall(Direction.UP, level, blockPos, blockState, blockPos3, blockState4)) {
             return this.getFlowing(8, true);
         }
-        int k = i - this.getDropOff(levelReader);
+        int k = i - this.getDropOff(level);
         if (k <= 0) {
             return Fluids.EMPTY.defaultFluidState();
         }
@@ -221,7 +221,7 @@ extends Fluid {
         return (FluidState)this.getSource().defaultFluidState().setValue(FALLING, bl);
     }
 
-    protected abstract boolean canConvertToSource();
+    protected abstract boolean canConvertToSource(Level var1);
 
     protected void spreadTo(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Direction direction, FluidState fluidState) {
         if (blockState.getBlock() instanceof LiquidBlockContainer) {
@@ -301,7 +301,7 @@ extends Fluid {
         return i;
     }
 
-    protected Map<Direction, FluidState> getSpread(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+    protected Map<Direction, FluidState> getSpread(Level level, BlockPos blockPos, BlockState blockState) {
         int i = 1000;
         EnumMap<Direction, FluidState> map = Maps.newEnumMap(Direction.class);
         Short2ObjectOpenHashMap<Pair<BlockState, FluidState>> short2ObjectMap = new Short2ObjectOpenHashMap<Pair<BlockState, FluidState>>();
@@ -310,19 +310,19 @@ extends Fluid {
             BlockPos blockPos2 = blockPos.relative(direction);
             short s2 = FlowingFluid.getCacheKey(blockPos, blockPos2);
             Pair pair = short2ObjectMap.computeIfAbsent(s2, s -> {
-                BlockState blockState = levelReader.getBlockState(blockPos2);
+                BlockState blockState = level.getBlockState(blockPos2);
                 return Pair.of(blockState, blockState.getFluidState());
             });
             BlockState blockState2 = (BlockState)pair.getFirst();
             FluidState fluidState = (FluidState)pair.getSecond();
-            FluidState fluidState2 = this.getNewLiquid(levelReader, blockPos2, blockState2);
-            if (!this.canPassThrough(levelReader, fluidState2.getType(), blockPos, blockState, direction, blockPos2, blockState2, fluidState)) continue;
+            FluidState fluidState2 = this.getNewLiquid(level, blockPos2, blockState2);
+            if (!this.canPassThrough(level, fluidState2.getType(), blockPos, blockState, direction, blockPos2, blockState2, fluidState)) continue;
             BlockPos blockPos3 = blockPos2.below();
             boolean bl = short2BooleanMap.computeIfAbsent(s2, s -> {
-                BlockState blockState2 = levelReader.getBlockState(blockPos3);
-                return this.isWaterHole(levelReader, this.getFlowing(), blockPos2, blockState2, blockPos3, blockState2);
+                BlockState blockState2 = level.getBlockState(blockPos3);
+                return this.isWaterHole(level, this.getFlowing(), blockPos2, blockState2, blockPos3, blockState2);
             });
-            int j = bl ? 0 : this.getSlopeDistance(levelReader, blockPos2, 1, direction.getOpposite(), blockState2, blockPos, short2ObjectMap, short2BooleanMap);
+            int j = bl ? 0 : this.getSlopeDistance(level, blockPos2, 1, direction.getOpposite(), blockState2, blockPos, short2ObjectMap, short2BooleanMap);
             if (j < i) {
                 map.clear();
             }

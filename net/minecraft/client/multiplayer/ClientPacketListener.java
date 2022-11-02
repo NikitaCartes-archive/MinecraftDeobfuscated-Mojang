@@ -92,7 +92,6 @@ import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -283,7 +282,6 @@ import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -1238,7 +1236,7 @@ ClientGamePacketListener {
     @Override
     public void handleCommands(ClientboundCommandsPacket clientboundCommandsPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundCommandsPacket, this, this.minecraft);
-        this.commands = new CommandDispatcher<SharedSuggestionProvider>(clientboundCommandsPacket.getRoot(new CommandBuildContext(this.registryAccess.compositeAccess(), this.enabledFeatures)));
+        this.commands = new CommandDispatcher<SharedSuggestionProvider>(clientboundCommandsPacket.getRoot(CommandBuildContext.simple(this.registryAccess.compositeAccess(), this.enabledFeatures)));
     }
 
     @Override
@@ -1354,24 +1352,13 @@ ClientGamePacketListener {
         if (!this.connection.isMemoryConnection()) {
             Blocks.rebuildCache();
         }
-        this.rebuildCreativeScreenSearchData();
+        CreativeModeTabs.TAB_SEARCH.invalidateSearchTree();
     }
 
     @Override
     public void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket clientboundUpdateEnabledFeaturesPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundUpdateEnabledFeaturesPacket, this, this.minecraft);
         this.enabledFeatures = FeatureFlags.REGISTRY.fromNames(clientboundUpdateEnabledFeaturesPacket.features());
-        this.rebuildCreativeScreenSearchData();
-    }
-
-    private void rebuildCreativeScreenSearchData() {
-        for (CreativeModeTab creativeModeTab : CreativeModeTabs.TABS) {
-            creativeModeTab.invalidateDisplayListCache();
-        }
-        NonNullList<ItemStack> nonNullList = NonNullList.create();
-        nonNullList.addAll(CreativeModeTabs.TAB_SEARCH.getDisplayItems(this.enabledFeatures));
-        this.minecraft.populateSearchTree(SearchRegistry.CREATIVE_NAMES, nonNullList);
-        this.minecraft.populateSearchTree(SearchRegistry.CREATIVE_TAGS, nonNullList);
     }
 
     private <T> void updateTagsForRegistry(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
