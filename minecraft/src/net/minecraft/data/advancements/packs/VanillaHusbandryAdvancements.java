@@ -28,6 +28,7 @@ import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
@@ -116,7 +117,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 	};
 
 	@Override
-	public void generate(Consumer<Advancement> consumer) {
+	public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
 		Advancement advancement = Advancement.Builder.advancement()
 			.display(
 				Blocks.HAY_BLOCK,

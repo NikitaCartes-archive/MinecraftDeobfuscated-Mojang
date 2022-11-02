@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
@@ -44,10 +46,10 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
 	@Override
 	public <T> DataResult<Pair<HolderSet<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
 		if (dynamicOps instanceof RegistryOps<T> registryOps) {
-			Optional<? extends Registry<E>> optional = registryOps.registry(this.registryKey);
+			Optional<HolderGetter<E>> optional = registryOps.getter(this.registryKey);
 			if (optional.isPresent()) {
-				Registry<E> registry = (Registry<E>)optional.get();
-				return this.registryAwareCodec.decode(dynamicOps, object).map(pair -> pair.mapFirst(either -> either.map(registry::getOrCreateTag, HolderSet::direct)));
+				HolderGetter<E> holderGetter = (HolderGetter<E>)optional.get();
+				return this.registryAwareCodec.decode(dynamicOps, object).map(pair -> pair.mapFirst(either -> either.map(holderGetter::getOrThrow, HolderSet::direct)));
 			}
 		}
 
@@ -56,9 +58,9 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
 
 	public <T> DataResult<T> encode(HolderSet<E> holderSet, DynamicOps<T> dynamicOps, T object) {
 		if (dynamicOps instanceof RegistryOps<T> registryOps) {
-			Optional<? extends Registry<E>> optional = registryOps.registry(this.registryKey);
+			Optional<HolderOwner<E>> optional = registryOps.owner(this.registryKey);
 			if (optional.isPresent()) {
-				if (!holderSet.isValidInRegistry((Registry<E>)optional.get())) {
+				if (!holderSet.canSerializeIn((HolderOwner<E>)optional.get())) {
 					return DataResult.error("HolderSet " + holderSet + " is not valid in current registry set");
 				}
 

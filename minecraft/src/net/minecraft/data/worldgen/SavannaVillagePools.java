@@ -3,94 +3,113 @@ package net.minecraft.data.worldgen;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.placement.VillagePlacements;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 public class SavannaVillagePools {
-	public static final Holder<StructureTemplatePool> START = Pools.register(
-		new StructureTemplatePool(
-			new ResourceLocation("village/savanna/town_centers"),
-			new ResourceLocation("empty"),
-			ImmutableList.of(
-				Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_1"), 100),
-				Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_2"), 50),
-				Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_3"), 150),
-				Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_4"), 150),
-				Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-				Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", ProcessorLists.ZOMBIE_SAVANNA), 1),
-				Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", ProcessorLists.ZOMBIE_SAVANNA), 3),
-				Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", ProcessorLists.ZOMBIE_SAVANNA), 3)
-			),
-			StructureTemplatePool.Projection.RIGID
-		)
-	);
+	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("village/savanna/town_centers");
+	private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/savanna/terminators");
+	private static final ResourceKey<StructureTemplatePool> ZOMBIE_TERMINATORS_KEY = Pools.createKey("village/savanna/zombie/terminators");
 
-	public static void bootstrap() {
-	}
-
-	static {
-		Pools.register(
+	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
+		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
+		Holder<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.ACACIA_VILLAGE);
+		Holder<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PILE_HAY_VILLAGE);
+		Holder<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_MELON_VILLAGE);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_SAVANNA);
+		Holder<StructureProcessorList> holder5 = holderGetter2.getOrThrow(ProcessorLists.STREET_SAVANNA);
+		Holder<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.FARM_SAVANNA);
+		HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+		Holder<StructureTemplatePool> holder7 = holderGetter3.getOrThrow(Pools.EMPTY);
+		Holder<StructureTemplatePool> holder8 = holderGetter3.getOrThrow(TERMINATORS_KEY);
+		Holder<StructureTemplatePool> holder9 = holderGetter3.getOrThrow(ZOMBIE_TERMINATORS_KEY);
+		bootstapContext.register(
+			START,
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/streets"),
-				new ResourceLocation("village/savanna/terminators"),
+				holder7,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/corner_01", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/corner_03", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_02", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_04", ProcessorLists.STREET_SAVANNA), 7),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_05", ProcessorLists.STREET_SAVANNA), 3),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_06", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_08", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_09", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_10", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_11", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_02", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_03", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_04", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_05", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_06", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_07", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/split_01", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/split_02", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/streets/turn_01", ProcessorLists.STREET_SAVANNA), 3)
+					Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_1"), 100),
+					Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_2"), 50),
+					Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_3"), 150),
+					Pair.of(StructurePoolElement.legacy("village/savanna/town_centers/savanna_meeting_point_4"), 150),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_2", holder4), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_3", holder4), 3),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/town_centers/savanna_meeting_point_4", holder4), 3)
+				),
+				StructureTemplatePool.Projection.RIGID
+			)
+		);
+		Pools.register(
+			bootstapContext,
+			"village/savanna/streets",
+			new StructureTemplatePool(
+				holder8,
+				ImmutableList.of(
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/corner_01", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/corner_03", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_02", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_04", holder5), 7),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_05", holder5), 3),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_06", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_08", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_09", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_10", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/straight_11", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_02", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_03", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_04", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_05", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_06", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/crossroad_07", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/split_01", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/split_02", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/streets/turn_01", holder5), 3)
 				),
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/zombie/streets",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/zombie/streets"),
-				new ResourceLocation("village/savanna/zombie/terminators"),
+				holder9,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/corner_01", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/corner_03", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_02", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_04", ProcessorLists.STREET_SAVANNA), 7),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_05", ProcessorLists.STREET_SAVANNA), 3),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_06", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_08", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_09", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_10", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_11", ProcessorLists.STREET_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_02", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_03", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_04", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_05", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_06", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_07", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/split_01", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/split_02", ProcessorLists.STREET_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/turn_01", ProcessorLists.STREET_SAVANNA), 3)
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/corner_01", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/corner_03", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_02", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_04", holder5), 7),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_05", holder5), 3),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_06", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_08", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_09", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_10", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/straight_11", holder5), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_02", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_03", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_04", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_05", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_06", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/crossroad_07", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/split_01", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/split_02", holder5), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/streets/turn_01", holder5), 3)
 				),
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/houses",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/houses"),
-				new ResourceLocation("village/savanna/terminators"),
+				holder8,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_small_house_1"), 2),
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_small_house_2"), 2),
@@ -117,9 +136,9 @@ public class SavannaVillagePools {
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_weaponsmith_2"), 2),
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_temple_1"), 2),
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_temple_2"), 3),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_large_farm_1", ProcessorLists.FARM_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_large_farm_2", ProcessorLists.FARM_SAVANNA), 6),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_small_farm", ProcessorLists.FARM_SAVANNA), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_large_farm_1", holder6), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_large_farm_2", holder6), 6),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_small_farm", holder6), 4),
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_animal_pen_1"), 2),
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_animal_pen_2"), 2),
 					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_animal_pen_3"), 2),
@@ -129,114 +148,115 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/zombie/houses",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/zombie/houses"),
-				new ResourceLocation("village/savanna/zombie/terminators"),
+				holder9,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_2", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_3", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_4", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_5", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_6", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_7", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_8", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_medium_house_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_medium_house_2", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_butchers_shop_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_butchers_shop_2", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_tool_smith_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_fletcher_house_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_shepherd_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_armorer_1", ProcessorLists.ZOMBIE_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_fisher_cottage_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_tannery_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_cartographer_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_library_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_mason_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_weaponsmith_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_weaponsmith_2", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_temple_1", ProcessorLists.ZOMBIE_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_temple_2", ProcessorLists.ZOMBIE_SAVANNA), 3),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_large_farm_1", ProcessorLists.ZOMBIE_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_large_farm_2", ProcessorLists.ZOMBIE_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_small_farm", ProcessorLists.ZOMBIE_SAVANNA), 4),
-					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_animal_pen_1", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_animal_pen_2", ProcessorLists.ZOMBIE_SAVANNA), 2),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_animal_pen_3", ProcessorLists.ZOMBIE_SAVANNA), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_3", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_4", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_5", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_6", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_7", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_small_house_8", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_medium_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_medium_house_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_butchers_shop_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_butchers_shop_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_tool_smith_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_fletcher_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_shepherd_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_armorer_1", holder4), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_fisher_cottage_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_tannery_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_cartographer_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_library_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_mason_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_weaponsmith_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_weaponsmith_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_temple_1", holder4), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_temple_2", holder4), 3),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_large_farm_1", holder4), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_large_farm_2", holder4), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_small_farm", holder4), 4),
+					Pair.of(StructurePoolElement.legacy("village/savanna/houses/savanna_animal_pen_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_animal_pen_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/houses/savanna_animal_pen_3", holder4), 2),
 					Pair.of(StructurePoolElement.empty(), 5)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		Pools.register(
+		bootstapContext.register(
+			TERMINATORS_KEY,
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/terminators"),
-				new ResourceLocation("empty"),
+				holder7,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_01", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_02", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_03", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_04", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/savanna/terminators/terminator_05", ProcessorLists.STREET_SAVANNA), 1)
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_01", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_02", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_03", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_04", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/terminators/terminator_05", holder5), 1)
+				),
+				StructureTemplatePool.Projection.TERRAIN_MATCHING
+			)
+		);
+		bootstapContext.register(
+			ZOMBIE_TERMINATORS_KEY,
+			new StructureTemplatePool(
+				holder7,
+				ImmutableList.of(
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_01", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_02", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_03", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_04", holder5), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/terminators/terminator_05", holder5), 1)
 				),
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
 		Pools.register(
-			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/zombie/terminators"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_01", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_02", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_03", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_04", ProcessorLists.STREET_SAVANNA), 1),
-					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/terminators/terminator_05", ProcessorLists.STREET_SAVANNA), 1)
-				),
-				StructureTemplatePool.Projection.TERRAIN_MATCHING
-			)
+			bootstapContext,
+			"village/savanna/trees",
+			new StructureTemplatePool(holder7, ImmutableList.of(Pair.of(StructurePoolElement.feature(holder), 1)), StructureTemplatePool.Projection.RIGID)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/decor",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/trees"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(VillagePlacements.ACACIA_VILLAGE), 1)),
-				StructureTemplatePool.Projection.RIGID
-			)
-		);
-		Pools.register(
-			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/decor"),
-				new ResourceLocation("empty"),
+				holder7,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01"), 4),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.ACACIA_VILLAGE), 4),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 4),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_MELON_VILLAGE), 1),
+					Pair.of(StructurePoolElement.feature(holder), 4),
+					Pair.of(StructurePoolElement.feature(holder2), 4),
+					Pair.of(StructurePoolElement.feature(holder3), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/zombie/decor",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/zombie/decor"),
-				new ResourceLocation("empty"),
+				holder7,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01", ProcessorLists.ZOMBIE_SAVANNA), 4),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.ACACIA_VILLAGE), 4),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 4),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_MELON_VILLAGE), 1),
+					Pair.of(StructurePoolElement.legacy("village/savanna/savanna_lamp_post_01", holder4), 4),
+					Pair.of(StructurePoolElement.feature(holder), 4),
+					Pair.of(StructurePoolElement.feature(holder2), 4),
+					Pair.of(StructurePoolElement.feature(holder3), 1),
 					Pair.of(StructurePoolElement.empty(), 4)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/villagers",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/villagers"),
-				new ResourceLocation("empty"),
+				holder7,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/villagers/nitwit"), 1),
 					Pair.of(StructurePoolElement.legacy("village/savanna/villagers/baby"), 1),
@@ -246,9 +266,10 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/savanna/zombie/villagers",
 			new StructureTemplatePool(
-				new ResourceLocation("village/savanna/zombie/villagers"),
-				new ResourceLocation("empty"),
+				holder7,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/villagers/nitwit"), 1),
 					Pair.of(StructurePoolElement.legacy("village/savanna/zombie/villagers/unemployed"), 10)

@@ -26,7 +26,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.OAK_LOG);
 			output.accept(Items.OAK_WOOD);
 			output.accept(Items.STRIPPED_OAK_LOG);
@@ -151,56 +151,56 @@ public class CreativeModeTabs {
 			output.accept(Items.SMOOTH_STONE_SLAB);
 			output.accept(Items.STONE_BRICKS);
 			output.accept(Items.CRACKED_STONE_BRICKS);
-			output.accept(Items.CHISELED_STONE_BRICKS);
 			output.accept(Items.STONE_BRICK_STAIRS);
 			output.accept(Items.STONE_BRICK_SLAB);
 			output.accept(Items.STONE_BRICK_WALL);
+			output.accept(Items.CHISELED_STONE_BRICKS);
 			output.accept(Items.MOSSY_STONE_BRICKS);
 			output.accept(Items.MOSSY_STONE_BRICK_STAIRS);
 			output.accept(Items.MOSSY_STONE_BRICK_SLAB);
 			output.accept(Items.MOSSY_STONE_BRICK_WALL);
 			output.accept(Items.GRANITE);
-			output.accept(Items.POLISHED_GRANITE);
 			output.accept(Items.GRANITE_STAIRS);
-			output.accept(Items.POLISHED_GRANITE_STAIRS);
 			output.accept(Items.GRANITE_SLAB);
-			output.accept(Items.POLISHED_GRANITE_SLAB);
 			output.accept(Items.GRANITE_WALL);
+			output.accept(Items.POLISHED_GRANITE);
+			output.accept(Items.POLISHED_GRANITE_STAIRS);
+			output.accept(Items.POLISHED_GRANITE_SLAB);
 			output.accept(Items.DIORITE);
-			output.accept(Items.POLISHED_DIORITE);
 			output.accept(Items.DIORITE_STAIRS);
-			output.accept(Items.POLISHED_DIORITE_STAIRS);
 			output.accept(Items.DIORITE_SLAB);
-			output.accept(Items.POLISHED_DIORITE_SLAB);
 			output.accept(Items.DIORITE_WALL);
+			output.accept(Items.POLISHED_DIORITE);
+			output.accept(Items.POLISHED_DIORITE_STAIRS);
+			output.accept(Items.POLISHED_DIORITE_SLAB);
 			output.accept(Items.ANDESITE);
-			output.accept(Items.POLISHED_ANDESITE);
 			output.accept(Items.ANDESITE_STAIRS);
-			output.accept(Items.POLISHED_ANDESITE_STAIRS);
 			output.accept(Items.ANDESITE_SLAB);
-			output.accept(Items.POLISHED_ANDESITE_SLAB);
 			output.accept(Items.ANDESITE_WALL);
+			output.accept(Items.POLISHED_ANDESITE);
+			output.accept(Items.POLISHED_ANDESITE_STAIRS);
+			output.accept(Items.POLISHED_ANDESITE_SLAB);
 			output.accept(Items.DEEPSLATE);
 			output.accept(Items.COBBLED_DEEPSLATE);
+			output.accept(Items.COBBLED_DEEPSLATE_STAIRS);
+			output.accept(Items.COBBLED_DEEPSLATE_SLAB);
+			output.accept(Items.COBBLED_DEEPSLATE_WALL);
+			output.accept(Items.CHISELED_DEEPSLATE);
 			output.accept(Items.POLISHED_DEEPSLATE);
+			output.accept(Items.POLISHED_DEEPSLATE_STAIRS);
+			output.accept(Items.POLISHED_DEEPSLATE_SLAB);
+			output.accept(Items.POLISHED_DEEPSLATE_WALL);
 			output.accept(Items.DEEPSLATE_BRICKS);
 			output.accept(Items.CRACKED_DEEPSLATE_BRICKS);
+			output.accept(Items.DEEPSLATE_BRICK_STAIRS);
+			output.accept(Items.DEEPSLATE_BRICK_SLAB);
+			output.accept(Items.DEEPSLATE_BRICK_WALL);
 			output.accept(Items.DEEPSLATE_TILES);
 			output.accept(Items.CRACKED_DEEPSLATE_TILES);
-			output.accept(Items.CHISELED_DEEPSLATE);
-			output.accept(Items.REINFORCED_DEEPSLATE);
-			output.accept(Items.COBBLED_DEEPSLATE_STAIRS);
-			output.accept(Items.POLISHED_DEEPSLATE_STAIRS);
-			output.accept(Items.DEEPSLATE_BRICK_STAIRS);
 			output.accept(Items.DEEPSLATE_TILE_STAIRS);
-			output.accept(Items.COBBLED_DEEPSLATE_SLAB);
-			output.accept(Items.POLISHED_DEEPSLATE_SLAB);
-			output.accept(Items.DEEPSLATE_BRICK_SLAB);
 			output.accept(Items.DEEPSLATE_TILE_SLAB);
-			output.accept(Items.COBBLED_DEEPSLATE_WALL);
-			output.accept(Items.POLISHED_DEEPSLATE_WALL);
-			output.accept(Items.DEEPSLATE_BRICK_WALL);
 			output.accept(Items.DEEPSLATE_TILE_WALL);
+			output.accept(Items.REINFORCED_DEEPSLATE);
 			output.accept(Items.BRICKS);
 			output.accept(Items.BRICK_STAIRS);
 			output.accept(Items.BRICK_SLAB);
@@ -211,53 +211,44 @@ public class CreativeModeTabs {
 			output.accept(Items.MUD_BRICK_SLAB);
 			output.accept(Items.MUD_BRICK_WALL);
 			output.accept(Items.SANDSTONE);
-			output.accept(Items.SMOOTH_SANDSTONE);
-			output.accept(Items.CHISELED_SANDSTONE);
-			output.accept(Items.CUT_SANDSTONE);
 			output.accept(Items.SANDSTONE_STAIRS);
-			output.accept(Items.SMOOTH_SANDSTONE_STAIRS);
 			output.accept(Items.SANDSTONE_SLAB);
-			output.accept(Items.SMOOTH_SANDSTONE_SLAB);
-			output.accept(Items.CUT_STANDSTONE_SLAB);
 			output.accept(Items.SANDSTONE_WALL);
+			output.accept(Items.CHISELED_SANDSTONE);
+			output.accept(Items.SMOOTH_SANDSTONE);
+			output.accept(Items.SMOOTH_SANDSTONE_STAIRS);
+			output.accept(Items.SMOOTH_SANDSTONE_SLAB);
+			output.accept(Items.CUT_SANDSTONE);
+			output.accept(Items.CUT_STANDSTONE_SLAB);
 			output.accept(Items.RED_SANDSTONE);
-			output.accept(Items.SMOOTH_RED_SANDSTONE);
-			output.accept(Items.CHISELED_RED_SANDSTONE);
-			output.accept(Items.CUT_RED_SANDSTONE);
 			output.accept(Items.RED_SANDSTONE_STAIRS);
-			output.accept(Items.SMOOTH_RED_SANDSTONE_STAIRS);
 			output.accept(Items.RED_SANDSTONE_SLAB);
-			output.accept(Items.SMOOTH_RED_SANDSTONE_SLAB);
-			output.accept(Items.CUT_RED_SANDSTONE_SLAB);
 			output.accept(Items.RED_SANDSTONE_WALL);
+			output.accept(Items.CHISELED_RED_SANDSTONE);
+			output.accept(Items.SMOOTH_RED_SANDSTONE);
+			output.accept(Items.SMOOTH_RED_SANDSTONE_STAIRS);
+			output.accept(Items.SMOOTH_RED_SANDSTONE_SLAB);
+			output.accept(Items.CUT_RED_SANDSTONE);
+			output.accept(Items.CUT_RED_SANDSTONE_SLAB);
 			output.accept(Items.SEA_LANTERN);
 			output.accept(Items.PRISMARINE);
-			output.accept(Items.PRISMARINE_BRICKS);
 			output.accept(Items.PRISMARINE_STAIRS);
-			output.accept(Items.PRISMARINE_BRICK_STAIRS);
 			output.accept(Items.PRISMARINE_SLAB);
-			output.accept(Items.PRISMARINE_BRICK_SLAB);
 			output.accept(Items.PRISMARINE_WALL);
+			output.accept(Items.PRISMARINE_BRICKS);
+			output.accept(Items.PRISMARINE_BRICK_STAIRS);
+			output.accept(Items.PRISMARINE_BRICK_SLAB);
 			output.accept(Items.DARK_PRISMARINE);
 			output.accept(Items.DARK_PRISMARINE_STAIRS);
 			output.accept(Items.DARK_PRISMARINE_SLAB);
-			output.accept(Items.QUARTZ_BLOCK);
-			output.accept(Items.CHISELED_QUARTZ_BLOCK);
-			output.accept(Items.QUARTZ_BRICKS);
-			output.accept(Items.QUARTZ_PILLAR);
-			output.accept(Items.QUARTZ_STAIRS);
-			output.accept(Items.QUARTZ_SLAB);
-			output.accept(Items.SMOOTH_QUARTZ);
-			output.accept(Items.SMOOTH_QUARTZ_STAIRS);
-			output.accept(Items.SMOOTH_QUARTZ_SLAB);
 			output.accept(Items.NETHERRACK);
 			output.accept(Items.NETHER_BRICKS);
 			output.accept(Items.CRACKED_NETHER_BRICKS);
-			output.accept(Items.CHISELED_NETHER_BRICKS);
 			output.accept(Items.NETHER_BRICK_STAIRS);
 			output.accept(Items.NETHER_BRICK_SLAB);
 			output.accept(Items.NETHER_BRICK_WALL);
 			output.accept(Items.NETHER_BRICK_FENCE);
+			output.accept(Items.CHISELED_NETHER_BRICKS);
 			output.accept(Items.RED_NETHER_BRICKS);
 			output.accept(Items.RED_NETHER_BRICK_STAIRS);
 			output.accept(Items.RED_NETHER_BRICK_SLAB);
@@ -266,19 +257,19 @@ public class CreativeModeTabs {
 			output.accept(Items.SMOOTH_BASALT);
 			output.accept(Items.POLISHED_BASALT);
 			output.accept(Items.BLACKSTONE);
-			output.accept(Items.POLISHED_BLACKSTONE);
-			output.accept(Items.POLISHED_BLACKSTONE_BRICKS);
-			output.accept(Items.CRACKED_POLISHED_BLACKSTONE_BRICKS);
-			output.accept(Items.CHISELED_POLISHED_BLACKSTONE);
 			output.accept(Items.GILDED_BLACKSTONE);
 			output.accept(Items.BLACKSTONE_STAIRS);
-			output.accept(Items.POLISHED_BLACKSTONE_STAIRS);
-			output.accept(Items.POLISHED_BLACKSTONE_BRICK_STAIRS);
 			output.accept(Items.BLACKSTONE_SLAB);
-			output.accept(Items.POLISHED_BLACKSTONE_SLAB);
-			output.accept(Items.POLISHED_BLACKSTONE_BRICK_SLAB);
 			output.accept(Items.BLACKSTONE_WALL);
+			output.accept(Items.CHISELED_POLISHED_BLACKSTONE);
+			output.accept(Items.POLISHED_BLACKSTONE);
+			output.accept(Items.POLISHED_BLACKSTONE_STAIRS);
+			output.accept(Items.POLISHED_BLACKSTONE_SLAB);
 			output.accept(Items.POLISHED_BLACKSTONE_WALL);
+			output.accept(Items.POLISHED_BLACKSTONE_BRICKS);
+			output.accept(Items.CRACKED_POLISHED_BLACKSTONE_BRICKS);
+			output.accept(Items.POLISHED_BLACKSTONE_BRICK_STAIRS);
+			output.accept(Items.POLISHED_BLACKSTONE_BRICK_SLAB);
 			output.accept(Items.POLISHED_BLACKSTONE_BRICK_WALL);
 			output.accept(Items.END_STONE);
 			output.accept(Items.END_STONE_BRICKS);
@@ -289,15 +280,28 @@ public class CreativeModeTabs {
 			output.accept(Items.PURPUR_PILLAR);
 			output.accept(Items.PURPUR_STAIRS);
 			output.accept(Items.PURPUR_SLAB);
+			output.accept(Items.COAL_BLOCK);
 			output.accept(Items.IRON_BLOCK);
 			output.accept(Items.IRON_BARS);
 			output.accept(Items.IRON_DOOR);
 			output.accept(Items.IRON_TRAPDOOR);
+			output.accept(Items.CHAIN);
 			output.accept(Items.GOLD_BLOCK);
-			output.accept(Items.DIAMOND_BLOCK);
-			output.accept(Items.NETHERITE_BLOCK);
+			output.accept(Items.REDSTONE_BLOCK);
 			output.accept(Items.EMERALD_BLOCK);
 			output.accept(Items.LAPIS_BLOCK);
+			output.accept(Items.DIAMOND_BLOCK);
+			output.accept(Items.NETHERITE_BLOCK);
+			output.accept(Items.QUARTZ_BLOCK);
+			output.accept(Items.QUARTZ_STAIRS);
+			output.accept(Items.QUARTZ_SLAB);
+			output.accept(Items.CHISELED_QUARTZ_BLOCK);
+			output.accept(Items.QUARTZ_BRICKS);
+			output.accept(Items.QUARTZ_PILLAR);
+			output.accept(Items.SMOOTH_QUARTZ);
+			output.accept(Items.SMOOTH_QUARTZ_STAIRS);
+			output.accept(Items.SMOOTH_QUARTZ_SLAB);
+			output.accept(Items.AMETHYST_BLOCK);
 			output.accept(Items.COPPER_BLOCK);
 			output.accept(Items.CUT_COPPER);
 			output.accept(Items.CUT_COPPER_STAIRS);
@@ -330,6 +334,38 @@ public class CreativeModeTabs {
 			output.accept(Items.WAXED_OXIDIZED_CUT_COPPER);
 			output.accept(Items.WAXED_OXIDIZED_CUT_COPPER_STAIRS);
 			output.accept(Items.WAXED_OXIDIZED_CUT_COPPER_SLAB);
+			output.accept(Items.WHITE_WOOL);
+			output.accept(Items.LIGHT_GRAY_WOOL);
+			output.accept(Items.GRAY_WOOL);
+			output.accept(Items.BLACK_WOOL);
+			output.accept(Items.BROWN_WOOL);
+			output.accept(Items.RED_WOOL);
+			output.accept(Items.ORANGE_WOOL);
+			output.accept(Items.YELLOW_WOOL);
+			output.accept(Items.LIME_WOOL);
+			output.accept(Items.GREEN_WOOL);
+			output.accept(Items.CYAN_WOOL);
+			output.accept(Items.LIGHT_BLUE_WOOL);
+			output.accept(Items.BLUE_WOOL);
+			output.accept(Items.PURPLE_WOOL);
+			output.accept(Items.MAGENTA_WOOL);
+			output.accept(Items.PINK_WOOL);
+			output.accept(Items.WHITE_CARPET);
+			output.accept(Items.LIGHT_GRAY_CARPET);
+			output.accept(Items.GRAY_CARPET);
+			output.accept(Items.BLACK_CARPET);
+			output.accept(Items.BROWN_CARPET);
+			output.accept(Items.RED_CARPET);
+			output.accept(Items.ORANGE_CARPET);
+			output.accept(Items.YELLOW_CARPET);
+			output.accept(Items.LIME_CARPET);
+			output.accept(Items.GREEN_CARPET);
+			output.accept(Items.CYAN_CARPET);
+			output.accept(Items.LIGHT_BLUE_CARPET);
+			output.accept(Items.BLUE_CARPET);
+			output.accept(Items.PURPLE_CARPET);
+			output.accept(Items.MAGENTA_CARPET);
+			output.accept(Items.PINK_CARPET);
 			output.accept(Items.TERRACOTTA);
 			output.accept(Items.WHITE_TERRACOTTA);
 			output.accept(Items.LIGHT_GRAY_TERRACOTTA);
@@ -347,22 +383,6 @@ public class CreativeModeTabs {
 			output.accept(Items.PURPLE_TERRACOTTA);
 			output.accept(Items.MAGENTA_TERRACOTTA);
 			output.accept(Items.PINK_TERRACOTTA);
-			output.accept(Items.WHITE_GLAZED_TERRACOTTA);
-			output.accept(Items.LIGHT_GRAY_GLAZED_TERRACOTTA);
-			output.accept(Items.GRAY_GLAZED_TERRACOTTA);
-			output.accept(Items.BLACK_GLAZED_TERRACOTTA);
-			output.accept(Items.BROWN_GLAZED_TERRACOTTA);
-			output.accept(Items.RED_GLAZED_TERRACOTTA);
-			output.accept(Items.ORANGE_GLAZED_TERRACOTTA);
-			output.accept(Items.YELLOW_GLAZED_TERRACOTTA);
-			output.accept(Items.LIME_GLAZED_TERRACOTTA);
-			output.accept(Items.GREEN_GLAZED_TERRACOTTA);
-			output.accept(Items.CYAN_GLAZED_TERRACOTTA);
-			output.accept(Items.LIGHT_BLUE_GLAZED_TERRACOTTA);
-			output.accept(Items.BLUE_GLAZED_TERRACOTTA);
-			output.accept(Items.PURPLE_GLAZED_TERRACOTTA);
-			output.accept(Items.MAGENTA_GLAZED_TERRACOTTA);
-			output.accept(Items.PINK_GLAZED_TERRACOTTA);
 			output.accept(Items.WHITE_CONCRETE);
 			output.accept(Items.LIGHT_GRAY_CONCRETE);
 			output.accept(Items.GRAY_CONCRETE);
@@ -395,6 +415,22 @@ public class CreativeModeTabs {
 			output.accept(Items.PURPLE_CONCRETE_POWDER);
 			output.accept(Items.MAGENTA_CONCRETE_POWDER);
 			output.accept(Items.PINK_CONCRETE_POWDER);
+			output.accept(Items.WHITE_GLAZED_TERRACOTTA);
+			output.accept(Items.LIGHT_GRAY_GLAZED_TERRACOTTA);
+			output.accept(Items.GRAY_GLAZED_TERRACOTTA);
+			output.accept(Items.BLACK_GLAZED_TERRACOTTA);
+			output.accept(Items.BROWN_GLAZED_TERRACOTTA);
+			output.accept(Items.RED_GLAZED_TERRACOTTA);
+			output.accept(Items.ORANGE_GLAZED_TERRACOTTA);
+			output.accept(Items.YELLOW_GLAZED_TERRACOTTA);
+			output.accept(Items.LIME_GLAZED_TERRACOTTA);
+			output.accept(Items.GREEN_GLAZED_TERRACOTTA);
+			output.accept(Items.CYAN_GLAZED_TERRACOTTA);
+			output.accept(Items.LIGHT_BLUE_GLAZED_TERRACOTTA);
+			output.accept(Items.BLUE_GLAZED_TERRACOTTA);
+			output.accept(Items.PURPLE_GLAZED_TERRACOTTA);
+			output.accept(Items.MAGENTA_GLAZED_TERRACOTTA);
+			output.accept(Items.PINK_GLAZED_TERRACOTTA);
 			output.accept(Items.GLASS);
 			output.accept(Items.TINTED_GLASS);
 			output.accept(Items.WHITE_STAINED_GLASS);
@@ -430,38 +466,6 @@ public class CreativeModeTabs {
 			output.accept(Items.PURPLE_STAINED_GLASS_PANE);
 			output.accept(Items.MAGENTA_STAINED_GLASS_PANE);
 			output.accept(Items.PINK_STAINED_GLASS_PANE);
-			output.accept(Items.WHITE_WOOL);
-			output.accept(Items.LIGHT_GRAY_WOOL);
-			output.accept(Items.GRAY_WOOL);
-			output.accept(Items.BLACK_WOOL);
-			output.accept(Items.BROWN_WOOL);
-			output.accept(Items.RED_WOOL);
-			output.accept(Items.ORANGE_WOOL);
-			output.accept(Items.YELLOW_WOOL);
-			output.accept(Items.LIME_WOOL);
-			output.accept(Items.GREEN_WOOL);
-			output.accept(Items.CYAN_WOOL);
-			output.accept(Items.LIGHT_BLUE_WOOL);
-			output.accept(Items.BLUE_WOOL);
-			output.accept(Items.PURPLE_WOOL);
-			output.accept(Items.MAGENTA_WOOL);
-			output.accept(Items.PINK_WOOL);
-			output.accept(Items.WHITE_CARPET);
-			output.accept(Items.LIGHT_GRAY_CARPET);
-			output.accept(Items.GRAY_CARPET);
-			output.accept(Items.BLACK_CARPET);
-			output.accept(Items.BROWN_CARPET);
-			output.accept(Items.RED_CARPET);
-			output.accept(Items.ORANGE_CARPET);
-			output.accept(Items.YELLOW_CARPET);
-			output.accept(Items.LIME_CARPET);
-			output.accept(Items.GREEN_CARPET);
-			output.accept(Items.CYAN_CARPET);
-			output.accept(Items.LIGHT_BLUE_CARPET);
-			output.accept(Items.BLUE_CARPET);
-			output.accept(Items.PURPLE_CARPET);
-			output.accept(Items.MAGENTA_CARPET);
-			output.accept(Items.PINK_CARPET);
 		}
 	};
 	public static final CreativeModeTab TAB_NATURAL = new CreativeModeTab(1, Component.translatable("itemGroup.natural")) {
@@ -471,8 +475,10 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.GRASS_BLOCK);
+			output.accept(Items.MOSS_BLOCK);
+			output.accept(Items.MOSS_CARPET);
 			output.accept(Items.PODZOL);
 			output.accept(Items.MYCELIUM);
 			output.accept(Items.DIRT);
@@ -497,17 +503,17 @@ public class CreativeModeTabs {
 			output.accept(Items.SNOW_BLOCK);
 			output.accept(Items.SNOW);
 			output.accept(Items.STONE);
+			output.accept(Items.DEEPSLATE);
 			output.accept(Items.GRANITE);
 			output.accept(Items.DIORITE);
 			output.accept(Items.ANDESITE);
-			output.accept(Items.DEEPSLATE);
-			output.accept(Items.SANDSTONE);
-			output.accept(Items.RED_SANDSTONE);
-			output.accept(Items.PRISMARINE);
 			output.accept(Items.CALCITE);
 			output.accept(Items.TUFF);
 			output.accept(Items.DRIPSTONE_BLOCK);
 			output.accept(Items.POINTED_DRIPSTONE);
+			output.accept(Items.SANDSTONE);
+			output.accept(Items.RED_SANDSTONE);
+			output.accept(Items.PRISMARINE);
 			output.accept(Items.MAGMA_BLOCK);
 			output.accept(Items.OBSIDIAN);
 			output.accept(Items.CRYING_OBSIDIAN);
@@ -534,8 +540,6 @@ public class CreativeModeTabs {
 			output.accept(Items.NETHER_GOLD_ORE);
 			output.accept(Items.NETHER_QUARTZ_ORE);
 			output.accept(Items.ANCIENT_DEBRIS);
-			output.accept(Items.COAL_BLOCK);
-			output.accept(Items.REDSTONE_BLOCK);
 			output.accept(Items.RAW_IRON_BLOCK);
 			output.accept(Items.RAW_COPPER_BLOCK);
 			output.accept(Items.RAW_GOLD_BLOCK);
@@ -566,9 +570,9 @@ public class CreativeModeTabs {
 			output.accept(Items.ACACIA_LOG);
 			output.accept(Items.DARK_OAK_LOG);
 			output.accept(Items.MANGROVE_LOG);
+			output.accept(Items.MUSHROOM_STEM);
 			output.accept(Items.CRIMSON_STEM);
 			output.accept(Items.WARPED_STEM);
-			output.accept(Items.MUSHROOM_STEM);
 			output.accept(Items.OAK_LEAVES);
 			output.accept(Items.SPRUCE_LEAVES);
 			output.accept(Items.BIRCH_LEAVES);
@@ -603,12 +607,11 @@ public class CreativeModeTabs {
 			output.accept(Items.SPORE_BLOSSOM);
 			output.accept(Items.BAMBOO);
 			output.accept(Items.SUGAR_CANE);
+			output.accept(Items.CACTUS);
 			output.accept(Items.WITHER_ROSE);
 			output.accept(Items.CRIMSON_ROOTS);
 			output.accept(Items.WARPED_ROOTS);
 			output.accept(Items.NETHER_SPROUTS);
-			output.accept(Items.CHORUS_PLANT);
-			output.accept(Items.CHORUS_FLOWER);
 			output.accept(Items.TALL_GRASS);
 			output.accept(Items.LARGE_FERN);
 			output.accept(Items.SUNFLOWER);
@@ -617,6 +620,8 @@ public class CreativeModeTabs {
 			output.accept(Items.PEONY);
 			output.accept(Items.BIG_DRIPLEAF);
 			output.accept(Items.SMALL_DRIPLEAF);
+			output.accept(Items.CHORUS_PLANT);
+			output.accept(Items.CHORUS_FLOWER);
 			output.accept(Items.WEEPING_VINES);
 			output.accept(Items.TWISTING_VINES);
 			output.accept(Items.VINE);
@@ -667,22 +672,11 @@ public class CreativeModeTabs {
 			output.accept(Items.DEAD_HORN_CORAL_FAN);
 			output.accept(Items.SPONGE);
 			output.accept(Items.WET_SPONGE);
-			output.accept(Items.CACTUS);
 			output.accept(Items.MELON);
 			output.accept(Items.PUMPKIN);
 			output.accept(Items.CARVED_PUMPKIN);
 			output.accept(Items.JACK_O_LANTERN);
-			output.accept(Items.MOSS_BLOCK);
-			output.accept(Items.MOSS_CARPET);
-			output.accept(Items.SCULK);
-			output.accept(Items.SCULK_VEIN);
-			output.accept(Items.SCULK_CATALYST);
-			output.accept(Items.SCULK_SHRIEKER);
-			output.accept(Items.SCULK_SENSOR);
 			output.accept(Items.HAY_BLOCK);
-			output.accept(Items.COBWEB);
-			output.accept(Items.FROGSPAWN);
-			output.accept(Items.TURTLE_EGG);
 			output.accept(Items.BEE_NEST);
 			output.accept(Items.HONEYCOMB_BLOCK);
 			output.accept(Items.SLIME_BLOCK);
@@ -690,14 +684,14 @@ public class CreativeModeTabs {
 			output.accept(Items.OCHRE_FROGLIGHT);
 			output.accept(Items.VERDANT_FROGLIGHT);
 			output.accept(Items.PEARLESCENT_FROGLIGHT);
-			output.accept(Items.END_PORTAL_FRAME);
-			output.accept(Items.INFESTED_STONE);
-			output.accept(Items.INFESTED_COBBLESTONE);
-			output.accept(Items.INFESTED_STONE_BRICKS);
-			output.accept(Items.INFESTED_MOSSY_STONE_BRICKS);
-			output.accept(Items.INFESTED_CRACKED_STONE_BRICKS);
-			output.accept(Items.INFESTED_CHISELED_STONE_BRICKS);
-			output.accept(Items.INFESTED_DEEPSLATE);
+			output.accept(Items.SCULK);
+			output.accept(Items.SCULK_VEIN);
+			output.accept(Items.SCULK_CATALYST);
+			output.accept(Items.SCULK_SHRIEKER);
+			output.accept(Items.SCULK_SENSOR);
+			output.accept(Items.COBWEB);
+			output.accept(Items.FROGSPAWN);
+			output.accept(Items.TURTLE_EGG);
 			output.accept(Items.BEDROCK);
 		}
 	};
@@ -708,7 +702,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.TORCH);
 			output.accept(Items.SOUL_TORCH);
 			output.accept(Items.LANTERN);
@@ -743,6 +737,7 @@ public class CreativeModeTabs {
 			output.accept(Items.LODESTONE);
 			output.accept(Items.LADDER);
 			output.accept(Items.SCAFFOLDING);
+			output.accept(Items.BEE_NEST);
 			output.accept(Items.BEEHIVE);
 			output.accept(Items.LIGHTNING_ROD);
 			output.accept(Items.FLOWER_POT);
@@ -753,6 +748,7 @@ public class CreativeModeTabs {
 			output.accept(Items.BOOKSHELF);
 			output.accept(Items.CHISELED_BOOKSHELF);
 			output.accept(Items.LECTERN);
+			output.accept(Items.TINTED_GLASS);
 			output.accept(Items.OAK_SIGN);
 			output.accept(Items.OAK_HANGING_SIGN);
 			output.accept(Items.SPRUCE_SIGN);
@@ -793,6 +789,7 @@ public class CreativeModeTabs {
 			output.accept(Items.PURPLE_SHULKER_BOX);
 			output.accept(Items.MAGENTA_SHULKER_BOX);
 			output.accept(Items.PINK_SHULKER_BOX);
+			output.accept(Items.RESPAWN_ANCHOR);
 			output.accept(Items.WHITE_BED);
 			output.accept(Items.LIGHT_GRAY_BED);
 			output.accept(Items.GRAY_BED);
@@ -809,7 +806,6 @@ public class CreativeModeTabs {
 			output.accept(Items.PURPLE_BED);
 			output.accept(Items.MAGENTA_BED);
 			output.accept(Items.PINK_BED);
-			output.accept(Items.RESPAWN_ANCHOR);
 			output.accept(Items.CANDLE);
 			output.accept(Items.WHITE_CANDLE);
 			output.accept(Items.LIGHT_GRAY_CANDLE);
@@ -851,6 +847,14 @@ public class CreativeModeTabs {
 			output.accept(Items.CREEPER_HEAD);
 			output.accept(Items.DRAGON_HEAD);
 			output.accept(Items.DRAGON_EGG);
+			output.accept(Items.END_PORTAL_FRAME);
+			output.accept(Items.INFESTED_STONE);
+			output.accept(Items.INFESTED_COBBLESTONE);
+			output.accept(Items.INFESTED_STONE_BRICKS);
+			output.accept(Items.INFESTED_MOSSY_STONE_BRICKS);
+			output.accept(Items.INFESTED_CRACKED_STONE_BRICKS);
+			output.accept(Items.INFESTED_CHISELED_STONE_BRICKS);
+			output.accept(Items.INFESTED_DEEPSLATE);
 		}
 	};
 	public static final CreativeModeTab TAB_REDSTONE = new CreativeModeTab(3, Component.translatable("itemGroup.redstone")) {
@@ -860,7 +864,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.REDSTONE);
 			output.accept(Items.REDSTONE_TORCH);
 			output.accept(Items.REDSTONE_ORE);
@@ -876,6 +880,9 @@ public class CreativeModeTabs {
 			output.accept(Items.HOPPER);
 			output.accept(Items.DISPENSER);
 			output.accept(Items.DROPPER);
+			output.accept(Items.CHEST);
+			output.accept(Items.BARREL);
+			output.accept(Items.CAULDRON);
 			output.accept(Items.LECTERN);
 			output.accept(Items.TARGET);
 			output.accept(Items.LEVER);
@@ -892,6 +899,8 @@ public class CreativeModeTabs {
 			output.accept(Items.BIG_DRIPLEAF);
 			output.accept(Items.BELL);
 			output.accept(Items.CHISELED_BOOKSHELF);
+			output.accept(Items.FURNACE);
+			output.accept(Items.COMPOSTER);
 			output.accept(Items.RAIL);
 			output.accept(Items.POWERED_RAIL);
 			output.accept(Items.DETECTOR_RAIL);
@@ -901,6 +910,10 @@ public class CreativeModeTabs {
 			output.accept(Items.FURNACE_MINECART);
 			output.accept(Items.TNT_MINECART);
 			output.accept(Items.HOPPER_MINECART);
+			if (bl) {
+				output.accept(Items.COMMAND_BLOCK_MINECART);
+			}
+
 			output.accept(Items.OAK_CHEST_BOAT);
 			output.accept(Items.SPRUCE_CHEST_BOAT);
 			output.accept(Items.BIRCH_CHEST_BOAT);
@@ -921,10 +934,6 @@ public class CreativeModeTabs {
 			output.accept(Items.BAMBOO_BUTTON);
 			output.accept(Items.CRIMSON_BUTTON);
 			output.accept(Items.WARPED_BUTTON);
-			output.accept(Items.STONE_PRESSURE_PLATE);
-			output.accept(Items.POLISHED_BLACKSTONE_PRESSURE_PLATE);
-			output.accept(Items.LIGHT_WEIGHTED_PRESSURE_PLATE);
-			output.accept(Items.HEAVY_WEIGHTED_PRESSURE_PLATE);
 			output.accept(Items.OAK_PRESSURE_PLATE);
 			output.accept(Items.SPRUCE_PRESSURE_PLATE);
 			output.accept(Items.BIRCH_PRESSURE_PLATE);
@@ -935,6 +944,10 @@ public class CreativeModeTabs {
 			output.accept(Items.BAMBOO_PRESSURE_PLATE);
 			output.accept(Items.CRIMSON_PRESSURE_PLATE);
 			output.accept(Items.WARPED_PRESSURE_PLATE);
+			output.accept(Items.LIGHT_WEIGHTED_PRESSURE_PLATE);
+			output.accept(Items.HEAVY_WEIGHTED_PRESSURE_PLATE);
+			output.accept(Items.STONE_PRESSURE_PLATE);
+			output.accept(Items.POLISHED_BLACKSTONE_PRESSURE_PLATE);
 			output.accept(Items.IRON_DOOR);
 			output.accept(Items.OAK_DOOR);
 			output.accept(Items.SPRUCE_DOOR);
@@ -967,6 +980,16 @@ public class CreativeModeTabs {
 			output.accept(Items.BAMBOO_FENCE_GATE);
 			output.accept(Items.CRIMSON_FENCE_GATE);
 			output.accept(Items.WARPED_FENCE_GATE);
+			if (bl) {
+				output.accept(Items.COMMAND_BLOCK);
+				output.accept(Items.CHAIN_COMMAND_BLOCK);
+				output.accept(Items.REPEATING_COMMAND_BLOCK);
+				output.accept(Items.JIGSAW);
+				output.accept(Items.STRUCTURE_VOID);
+				output.accept(Items.BARRIER);
+				output.accept(Items.LIGHT);
+				output.accept(Items.DEBUG_STICK);
+			}
 		}
 	};
 	public static final CreativeModeTab TAB_HOTBAR = new CreativeModeTab(4, Component.translatable("itemGroup.hotbar")) {
@@ -976,7 +999,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 		}
 
 		@Override
@@ -991,12 +1014,12 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			Set<ItemStack> set = new ItemStackLinkedSet();
 
 			for (CreativeModeTab creativeModeTab : CreativeModeTabs.TABS) {
 				if (creativeModeTab != this) {
-					set.addAll(creativeModeTab.getSearchTabDisplayItems(featureFlagSet));
+					set.addAll(creativeModeTab.getSearchTabDisplayItems(featureFlagSet, bl));
 				}
 			}
 
@@ -1010,7 +1033,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.WOODEN_SHOVEL);
 			output.accept(Items.WOODEN_PICKAXE);
 			output.accept(Items.WOODEN_AXE);
@@ -1117,7 +1140,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.WOODEN_SWORD);
 			output.accept(Items.STONE_SWORD);
 			output.accept(Items.IRON_SWORD);
@@ -1174,46 +1197,46 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.APPLE);
-			output.accept(Items.MUSHROOM_STEW);
-			output.accept(Items.BREAD);
-			output.accept(Items.PORKCHOP);
-			output.accept(Items.COOKED_PORKCHOP);
 			output.accept(Items.GOLDEN_APPLE);
 			output.accept(Items.ENCHANTED_GOLDEN_APPLE);
-			output.accept(Items.COD);
-			output.accept(Items.SALMON);
-			output.accept(Items.TROPICAL_FISH);
-			output.accept(Items.PUFFERFISH);
-			output.accept(Items.COOKED_COD);
-			output.accept(Items.COOKED_SALMON);
-			output.accept(Items.CAKE);
-			output.accept(Items.COOKIE);
 			output.accept(Items.MELON_SLICE);
-			output.accept(Items.DRIED_KELP);
-			output.accept(Items.BEEF);
-			output.accept(Items.COOKED_BEEF);
-			output.accept(Items.CHICKEN);
-			output.accept(Items.COOKED_CHICKEN);
+			output.accept(Items.SWEET_BERRIES);
+			output.accept(Items.GLOW_BERRIES);
+			output.accept(Items.CHORUS_FRUIT);
 			output.accept(Items.CARROT);
 			output.accept(Items.GOLDEN_CARROT);
 			output.accept(Items.POTATO);
 			output.accept(Items.BAKED_POTATO);
-			output.accept(Items.PUMPKIN_PIE);
-			output.accept(Items.RABBIT);
-			output.accept(Items.COOKED_RABBIT);
-			output.accept(Items.RABBIT_STEW);
-			output.accept(Items.MUTTON);
-			output.accept(Items.COOKED_MUTTON);
-			output.accept(Items.BEETROOT);
-			output.accept(Items.BEETROOT_SOUP);
-			output.accept(Items.SWEET_BERRIES);
-			output.accept(Items.GLOW_BERRIES);
-			output.accept(Items.CHORUS_FRUIT);
-			output.accept(Items.ROTTEN_FLESH);
 			output.accept(Items.POISONOUS_POTATO);
+			output.accept(Items.BEETROOT);
+			output.accept(Items.DRIED_KELP);
+			output.accept(Items.COD);
+			output.accept(Items.SALMON);
+			output.accept(Items.TROPICAL_FISH);
+			output.accept(Items.PUFFERFISH);
+			output.accept(Items.BEEF);
+			output.accept(Items.PORKCHOP);
+			output.accept(Items.CHICKEN);
+			output.accept(Items.RABBIT);
+			output.accept(Items.MUTTON);
+			output.accept(Items.COOKED_COD);
+			output.accept(Items.COOKED_SALMON);
+			output.accept(Items.COOKED_BEEF);
+			output.accept(Items.COOKED_PORKCHOP);
+			output.accept(Items.COOKED_CHICKEN);
+			output.accept(Items.COOKED_RABBIT);
+			output.accept(Items.COOKED_MUTTON);
+			output.accept(Items.BREAD);
+			output.accept(Items.COOKIE);
+			output.accept(Items.CAKE);
+			output.accept(Items.PUMPKIN_PIE);
+			output.accept(Items.ROTTEN_FLESH);
 			output.accept(Items.SPIDER_EYE);
+			output.accept(Items.MUSHROOM_STEW);
+			output.accept(Items.BEETROOT_SOUP);
+			output.accept(Items.RABBIT_STEW);
 			output.accept(Items.MILK_BUCKET);
 			output.accept(Items.HONEY_BOTTLE);
 			CreativeModeTabs.generatePotionEffectTypes(output, Items.POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
@@ -1245,23 +1268,24 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.COAL);
 			output.accept(Items.CHARCOAL);
 			output.accept(Items.RAW_IRON);
 			output.accept(Items.RAW_COPPER);
 			output.accept(Items.RAW_GOLD);
-			output.accept(Items.DIAMOND);
-			output.accept(Items.AMETHYST_SHARD);
-			output.accept(Items.QUARTZ);
 			output.accept(Items.LAPIS_LAZULI);
 			output.accept(Items.EMERALD);
+			output.accept(Items.DIAMOND);
+			output.accept(Items.ANCIENT_DEBRIS);
+			output.accept(Items.QUARTZ);
+			output.accept(Items.AMETHYST_SHARD);
 			output.accept(Items.IRON_NUGGET);
 			output.accept(Items.GOLD_NUGGET);
-			output.accept(Items.NETHERITE_SCRAP);
 			output.accept(Items.IRON_INGOT);
 			output.accept(Items.COPPER_INGOT);
 			output.accept(Items.GOLD_INGOT);
+			output.accept(Items.NETHERITE_SCRAP);
 			output.accept(Items.NETHERITE_INGOT);
 			output.accept(Items.STICK);
 			output.accept(Items.FLINT);
@@ -1349,7 +1373,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 			output.accept(Items.SPAWNER);
 			output.accept(Items.ALLAY_SPAWN_EGG);
 			output.accept(Items.AXOLOTL_SPAWN_EGG);
@@ -1379,6 +1403,7 @@ public class CreativeModeTabs {
 			output.accept(Items.HOGLIN_SPAWN_EGG);
 			output.accept(Items.HORSE_SPAWN_EGG);
 			output.accept(Items.HUSK_SPAWN_EGG);
+			output.accept(Items.IRON_GOLEM_SPAWN_EGG);
 			output.accept(Items.LLAMA_SPAWN_EGG);
 			output.accept(Items.MAGMA_CUBE_SPAWN_EGG);
 			output.accept(Items.MOOSHROOM_SPAWN_EGG);
@@ -1402,6 +1427,7 @@ public class CreativeModeTabs {
 			output.accept(Items.SKELETON_SPAWN_EGG);
 			output.accept(Items.SKELETON_HORSE_SPAWN_EGG);
 			output.accept(Items.SLIME_SPAWN_EGG);
+			output.accept(Items.SNOW_GOLEM_SPAWN_EGG);
 			output.accept(Items.SPIDER_SPAWN_EGG);
 			output.accept(Items.SQUID_SPAWN_EGG);
 			output.accept(Items.STRAY_SPAWN_EGG);
@@ -1432,7 +1458,7 @@ public class CreativeModeTabs {
 		}
 
 		@Override
-		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output) {
+		public void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl) {
 		}
 	}).setBackgroundSuffix("inventory.png").hideScroll().hideTitle();
 	public static final CreativeModeTab[] TABS = createTabList(

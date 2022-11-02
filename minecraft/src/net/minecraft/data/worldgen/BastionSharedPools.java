@@ -2,19 +2,21 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public class BastionSharedPools {
-	public static void bootstrap() {
-	}
-
-	static {
+	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
+		HolderGetter<StructureTemplatePool> holderGetter = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+		Holder<StructureTemplatePool> holder = holderGetter.getOrThrow(Pools.EMPTY);
 		Pools.register(
+			bootstapContext,
+			"bastion/mobs/piglin",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/mobs/piglin"),
-				new ResourceLocation("empty"),
+				holder,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.single("bastion/mobs/melee_piglin"), 1),
 					Pair.of(StructurePoolElement.single("bastion/mobs/sword_piglin"), 4),
@@ -25,25 +27,28 @@ public class BastionSharedPools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/mobs/hoglin",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/mobs/hoglin"),
-				new ResourceLocation("empty"),
+				holder,
 				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/mobs/hoglin"), 2), Pair.of(StructurePoolElement.single("bastion/mobs/empty"), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/blocks/gold",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/blocks/gold"),
-				new ResourceLocation("empty"),
+				holder,
 				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/blocks/air"), 3), Pair.of(StructurePoolElement.single("bastion/blocks/gold"), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/mobs/piglin_melee",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/mobs/piglin_melee"),
-				new ResourceLocation("empty"),
+				holder,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.single("bastion/mobs/melee_piglin_always"), 1),
 					Pair.of(StructurePoolElement.single("bastion/mobs/melee_piglin"), 5),

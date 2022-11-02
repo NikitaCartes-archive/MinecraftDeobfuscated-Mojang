@@ -97,7 +97,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	private static final Component SERVER_OPEN_TOOLTIP = Component.translatable("mco.selectServer.open");
 	private static final Component SERVER_CLOSED_TOOLTIP = Component.translatable("mco.selectServer.closed");
 	private static final Component LEAVE_SERVER_TOOLTIP = Component.translatable("mco.selectServer.leave");
-	private static final Component CONFIGURE_SERVER_TOOLTIP = Component.translatable("mco.selectServer.configure");
+	private static final Component CONFIGURE_SERVER_TOOLTIP = Component.translatable("mco.selectServer.configureRealm");
 	private static final Component NEWS_TOOLTIP = Component.translatable("mco.news");
 	static final Component UNITIALIZED_WORLD_NARRATION = Component.translatable("gui.narrate.button", SERVER_UNITIALIZED_TEXT);
 	static final Component TRIAL_TEXT = CommonComponents.joinLines(TRIAL_MESSAGE_LINES);
@@ -248,7 +248,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	public void addButtons() {
 		this.leaveButton = this.addRenderableWidget(
 			Button.builder(Component.translatable("mco.selectServer.leave"), button -> this.leaveClicked(this.getSelectedServer()))
-				.bounds(this.width / 2 - 202, this.height - 32, 90, 20)
+				.bounds(this.width / 2 - 190, this.height - 32, 90, 20)
 				.build()
 		);
 		this.configureButton = this.addRenderableWidget(

@@ -43,6 +43,7 @@ public class FolderRepositorySource implements RepositorySource {
 			Files.createDirectories(this.folder);
 			discoverPacks(
 				this.folder,
+				false,
 				(path, resourcesSupplier) -> {
 					String string = nameFromPath(path);
 					Pack pack = Pack.readMetaAndCreate(
@@ -58,26 +59,26 @@ public class FolderRepositorySource implements RepositorySource {
 		}
 	}
 
-	public static void discoverPacks(Path path, BiConsumer<Path, Pack.ResourcesSupplier> biConsumer) throws IOException {
+	public static void discoverPacks(Path path, boolean bl, BiConsumer<Path, Pack.ResourcesSupplier> biConsumer) throws IOException {
 		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path);
 
 		try {
 			for (Path path2 : directoryStream) {
-				Pack.ResourcesSupplier resourcesSupplier = detectPackResources(path2);
+				Pack.ResourcesSupplier resourcesSupplier = detectPackResources(path2, bl);
 				if (resourcesSupplier != null) {
 					biConsumer.accept(path2, resourcesSupplier);
 				}
 			}
-		} catch (Throwable var7) {
+		} catch (Throwable var8) {
 			if (directoryStream != null) {
 				try {
 					directoryStream.close();
-				} catch (Throwable var6) {
-					var7.addSuppressed(var6);
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
 				}
 			}
 
-			throw var7;
+			throw var8;
 		}
 
 		if (directoryStream != null) {
@@ -86,25 +87,25 @@ public class FolderRepositorySource implements RepositorySource {
 	}
 
 	@Nullable
-	public static Pack.ResourcesSupplier detectPackResources(Path path) {
+	public static Pack.ResourcesSupplier detectPackResources(Path path, boolean bl) {
 		BasicFileAttributes basicFileAttributes;
 		try {
 			basicFileAttributes = Files.readAttributes(path, BasicFileAttributes.class);
-		} catch (NoSuchFileException var4) {
+		} catch (NoSuchFileException var5) {
 			return null;
-		} catch (IOException var5) {
-			LOGGER.warn("Failed to read properties of '{}', ignoring", path, var5);
+		} catch (IOException var6) {
+			LOGGER.warn("Failed to read properties of '{}', ignoring", path, var6);
 			return null;
 		}
 
 		if (basicFileAttributes.isDirectory() && Files.isRegularFile(path.resolve("pack.mcmeta"), new LinkOption[0])) {
-			return string -> new PathPackResources(string, path);
+			return string -> new PathPackResources(string, path, bl);
 		} else {
 			if (basicFileAttributes.isRegularFile() && path.getFileName().toString().endsWith(".zip")) {
 				FileSystem fileSystem = path.getFileSystem();
 				if (fileSystem == FileSystems.getDefault() || fileSystem instanceof LinkFileSystem) {
 					File file = path.toFile();
-					return string -> new FilePackResources(string, file);
+					return string -> new FilePackResources(string, file, bl);
 				}
 			}
 

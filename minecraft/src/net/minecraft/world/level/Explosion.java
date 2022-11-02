@@ -57,12 +57,8 @@ public class Explosion {
 	private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
 	private final Map<Player, Vec3> hitPlayers = Maps.<Player, Vec3>newHashMap();
 
-	public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g) {
-		this(level, entity, d, e, f, g, false, Explosion.BlockInteraction.DESTROY);
-	}
-
 	public Explosion(Level level, @Nullable Entity entity, double d, double e, double f, float g, List<BlockPos> list) {
-		this(level, entity, d, e, f, g, false, Explosion.BlockInteraction.DESTROY, list);
+		this(level, entity, d, e, f, g, false, Explosion.BlockInteraction.DESTROY_WITH_DECAY, list);
 	}
 
 	public Explosion(
@@ -244,7 +240,7 @@ public class Explosion {
 				);
 		}
 
-		boolean bl2 = this.blockInteraction != Explosion.BlockInteraction.NONE;
+		boolean bl2 = this.interactsWithBlocks();
 		if (bl) {
 			if (!(this.radius < 2.0F) && bl2) {
 				this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0, 0.0, 0.0);
@@ -275,7 +271,7 @@ public class Explosion {
 								.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
 								.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntityx)
 								.withOptionalParameter(LootContextParams.THIS_ENTITY, this.source);
-							if (this.blockInteraction == Explosion.BlockInteraction.DESTROY) {
+							if (this.blockInteraction == Explosion.BlockInteraction.DESTROY_WITH_DECAY) {
 								builder.withParameter(LootContextParams.EXPLOSION_RADIUS, this.radius);
 							}
 
@@ -304,6 +300,10 @@ public class Explosion {
 				}
 			}
 		}
+	}
+
+	public boolean interactsWithBlocks() {
+		return this.blockInteraction != Explosion.BlockInteraction.KEEP;
 	}
 
 	private static void addBlockDrops(ObjectArrayList<Pair<ItemStack, BlockPos>> objectArrayList, ItemStack itemStack, BlockPos blockPos) {
@@ -369,8 +369,8 @@ public class Explosion {
 	}
 
 	public static enum BlockInteraction {
-		NONE,
-		BREAK,
-		DESTROY;
+		KEEP,
+		DESTROY,
+		DESTROY_WITH_DECAY;
 	}
 }

@@ -1,8 +1,9 @@
 package net.minecraft.data.worldgen.features;
 
 import java.util.List;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -14,8 +15,6 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
@@ -25,103 +24,134 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStatePr
 import net.minecraft.world.level.material.Fluids;
 
 public class NetherFeatures {
-	public static final Holder<ConfiguredFeature<DeltaFeatureConfiguration, ?>> DELTA = FeatureUtils.register(
-		"delta",
-		Feature.DELTA_FEATURE,
-		new DeltaFeatureConfiguration(Blocks.LAVA.defaultBlockState(), Blocks.MAGMA_BLOCK.defaultBlockState(), UniformInt.of(3, 7), UniformInt.of(0, 2))
-	);
-	public static final Holder<ConfiguredFeature<ColumnFeatureConfiguration, ?>> SMALL_BASALT_COLUMNS = FeatureUtils.register(
-		"small_basalt_columns", Feature.BASALT_COLUMNS, new ColumnFeatureConfiguration(ConstantInt.of(1), UniformInt.of(1, 4))
-	);
-	public static final Holder<ConfiguredFeature<ColumnFeatureConfiguration, ?>> LARGE_BASALT_COLUMNS = FeatureUtils.register(
-		"large_basalt_columns", Feature.BASALT_COLUMNS, new ColumnFeatureConfiguration(UniformInt.of(2, 3), UniformInt.of(5, 10))
-	);
-	public static final Holder<ConfiguredFeature<ReplaceSphereConfiguration, ?>> BASALT_BLOBS = FeatureUtils.register(
-		"basalt_blobs",
-		Feature.REPLACE_BLOBS,
-		new ReplaceSphereConfiguration(Blocks.NETHERRACK.defaultBlockState(), Blocks.BASALT.defaultBlockState(), UniformInt.of(3, 7))
-	);
-	public static final Holder<ConfiguredFeature<ReplaceSphereConfiguration, ?>> BLACKSTONE_BLOBS = FeatureUtils.register(
-		"blackstone_blobs",
-		Feature.REPLACE_BLOBS,
-		new ReplaceSphereConfiguration(Blocks.NETHERRACK.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(), UniformInt.of(3, 7))
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> GLOWSTONE_EXTRA = FeatureUtils.register("glowstone_extra", Feature.GLOWSTONE_BLOB);
-	public static final WeightedStateProvider CRIMSON_VEGETATION_PROVIDER = new WeightedStateProvider(
-		SimpleWeightedRandomList.<BlockState>builder()
-			.add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87)
-			.add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11)
-			.add(Blocks.WARPED_FUNGUS.defaultBlockState(), 1)
-	);
-	public static final Holder<ConfiguredFeature<NetherForestVegetationConfig, ?>> CRIMSON_FOREST_VEGETATION = FeatureUtils.register(
-		"crimson_forest_vegetation", Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(CRIMSON_VEGETATION_PROVIDER, 8, 4)
-	);
-	public static final Holder<ConfiguredFeature<NetherForestVegetationConfig, ?>> CRIMSON_FOREST_VEGETATION_BONEMEAL = FeatureUtils.register(
-		"crimson_forest_vegetation_bonemeal", Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(CRIMSON_VEGETATION_PROVIDER, 3, 1)
-	);
-	public static final WeightedStateProvider WARPED_VEGETATION_PROVIDER = new WeightedStateProvider(
-		SimpleWeightedRandomList.<BlockState>builder()
-			.add(Blocks.WARPED_ROOTS.defaultBlockState(), 85)
-			.add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 1)
-			.add(Blocks.WARPED_FUNGUS.defaultBlockState(), 13)
-			.add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 1)
-	);
-	public static final Holder<ConfiguredFeature<NetherForestVegetationConfig, ?>> WARPED_FOREST_VEGETION = FeatureUtils.register(
-		"warped_forest_vegetation", Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(WARPED_VEGETATION_PROVIDER, 8, 4)
-	);
-	public static final Holder<ConfiguredFeature<NetherForestVegetationConfig, ?>> WARPED_FOREST_VEGETATION_BONEMEAL = FeatureUtils.register(
-		"warped_forest_vegetation_bonemeal", Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(WARPED_VEGETATION_PROVIDER, 3, 1)
-	);
-	public static final Holder<ConfiguredFeature<NetherForestVegetationConfig, ?>> NETHER_SPROUTS = FeatureUtils.register(
-		"nether_sprouts", Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(BlockStateProvider.simple(Blocks.NETHER_SPROUTS), 8, 4)
-	);
-	public static final Holder<ConfiguredFeature<NetherForestVegetationConfig, ?>> NETHER_SPROUTS_BONEMEAL = FeatureUtils.register(
-		"nether_sprouts_bonemeal", Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(BlockStateProvider.simple(Blocks.NETHER_SPROUTS), 3, 1)
-	);
-	public static final Holder<ConfiguredFeature<TwistingVinesConfig, ?>> TWISTING_VINES = FeatureUtils.register(
-		"twisting_vines", Feature.TWISTING_VINES, new TwistingVinesConfig(8, 4, 8)
-	);
-	public static final Holder<ConfiguredFeature<TwistingVinesConfig, ?>> TWISTING_VINES_BONEMEAL = FeatureUtils.register(
-		"twisting_vines_bonemeal", Feature.TWISTING_VINES, new TwistingVinesConfig(3, 1, 2)
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> WEEPING_VINES = FeatureUtils.register("weeping_vines", Feature.WEEPING_VINES);
-	public static final Holder<ConfiguredFeature<RandomPatchConfiguration, ?>> PATCH_CRIMSON_ROOTS = FeatureUtils.register(
-		"patch_crimson_roots",
-		Feature.RANDOM_PATCH,
-		FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.CRIMSON_ROOTS)))
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> BASALT_PILLAR = FeatureUtils.register("basalt_pillar", Feature.BASALT_PILLAR);
-	public static final Holder<ConfiguredFeature<SpringConfiguration, ?>> SPRING_LAVA_NETHER = FeatureUtils.register(
-		"spring_lava_nether",
-		Feature.SPRING,
-		new SpringConfiguration(
-			Fluids.LAVA.defaultFluidState(),
-			true,
-			4,
-			1,
-			HolderSet.direct(Block::builtInRegistryHolder, Blocks.NETHERRACK, Blocks.SOUL_SAND, Blocks.GRAVEL, Blocks.MAGMA_BLOCK, Blocks.BLACKSTONE)
-		)
-	);
-	public static final Holder<ConfiguredFeature<SpringConfiguration, ?>> SPRING_NETHER_CLOSED = FeatureUtils.register(
-		"spring_nether_closed",
-		Feature.SPRING,
-		new SpringConfiguration(Fluids.LAVA.defaultFluidState(), false, 5, 0, HolderSet.direct(Block::builtInRegistryHolder, Blocks.NETHERRACK))
-	);
-	public static final Holder<ConfiguredFeature<SpringConfiguration, ?>> SPRING_NETHER_OPEN = FeatureUtils.register(
-		"spring_nether_open",
-		Feature.SPRING,
-		new SpringConfiguration(Fluids.LAVA.defaultFluidState(), false, 4, 1, HolderSet.direct(Block::builtInRegistryHolder, Blocks.NETHERRACK))
-	);
-	public static final Holder<ConfiguredFeature<RandomPatchConfiguration, ?>> PATCH_FIRE = FeatureUtils.register(
-		"patch_fire",
-		Feature.RANDOM_PATCH,
-		FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.FIRE)), List.of(Blocks.NETHERRACK))
-	);
-	public static final Holder<ConfiguredFeature<RandomPatchConfiguration, ?>> PATCH_SOUL_FIRE = FeatureUtils.register(
-		"patch_soul_fire",
-		Feature.RANDOM_PATCH,
-		FeatureUtils.simplePatchConfiguration(
-			Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SOUL_FIRE)), List.of(Blocks.SOUL_SOIL)
-		)
-	);
+	public static final ResourceKey<ConfiguredFeature<?, ?>> DELTA = FeatureUtils.createKey("delta");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SMALL_BASALT_COLUMNS = FeatureUtils.createKey("small_basalt_columns");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> LARGE_BASALT_COLUMNS = FeatureUtils.createKey("large_basalt_columns");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> BASALT_BLOBS = FeatureUtils.createKey("basalt_blobs");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> BLACKSTONE_BLOBS = FeatureUtils.createKey("blackstone_blobs");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> GLOWSTONE_EXTRA = FeatureUtils.createKey("glowstone_extra");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> CRIMSON_FOREST_VEGETATION = FeatureUtils.createKey("crimson_forest_vegetation");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> CRIMSON_FOREST_VEGETATION_BONEMEAL = FeatureUtils.createKey("crimson_forest_vegetation_bonemeal");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> WARPED_FOREST_VEGETION = FeatureUtils.createKey("warped_forest_vegetation");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> WARPED_FOREST_VEGETATION_BONEMEAL = FeatureUtils.createKey("warped_forest_vegetation_bonemeal");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> NETHER_SPROUTS = FeatureUtils.createKey("nether_sprouts");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> NETHER_SPROUTS_BONEMEAL = FeatureUtils.createKey("nether_sprouts_bonemeal");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> TWISTING_VINES = FeatureUtils.createKey("twisting_vines");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> TWISTING_VINES_BONEMEAL = FeatureUtils.createKey("twisting_vines_bonemeal");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> WEEPING_VINES = FeatureUtils.createKey("weeping_vines");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_CRIMSON_ROOTS = FeatureUtils.createKey("patch_crimson_roots");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> BASALT_PILLAR = FeatureUtils.createKey("basalt_pillar");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SPRING_LAVA_NETHER = FeatureUtils.createKey("spring_lava_nether");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SPRING_NETHER_CLOSED = FeatureUtils.createKey("spring_nether_closed");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SPRING_NETHER_OPEN = FeatureUtils.createKey("spring_nether_open");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_FIRE = FeatureUtils.createKey("patch_fire");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> PATCH_SOUL_FIRE = FeatureUtils.createKey("patch_soul_fire");
+
+	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
+		FeatureUtils.register(
+			bootstapContext,
+			DELTA,
+			Feature.DELTA_FEATURE,
+			new DeltaFeatureConfiguration(Blocks.LAVA.defaultBlockState(), Blocks.MAGMA_BLOCK.defaultBlockState(), UniformInt.of(3, 7), UniformInt.of(0, 2))
+		);
+		FeatureUtils.register(bootstapContext, SMALL_BASALT_COLUMNS, Feature.BASALT_COLUMNS, new ColumnFeatureConfiguration(ConstantInt.of(1), UniformInt.of(1, 4)));
+		FeatureUtils.register(
+			bootstapContext, LARGE_BASALT_COLUMNS, Feature.BASALT_COLUMNS, new ColumnFeatureConfiguration(UniformInt.of(2, 3), UniformInt.of(5, 10))
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			BASALT_BLOBS,
+			Feature.REPLACE_BLOBS,
+			new ReplaceSphereConfiguration(Blocks.NETHERRACK.defaultBlockState(), Blocks.BASALT.defaultBlockState(), UniformInt.of(3, 7))
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			BLACKSTONE_BLOBS,
+			Feature.REPLACE_BLOBS,
+			new ReplaceSphereConfiguration(Blocks.NETHERRACK.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(), UniformInt.of(3, 7))
+		);
+		FeatureUtils.register(bootstapContext, GLOWSTONE_EXTRA, Feature.GLOWSTONE_BLOB);
+		WeightedStateProvider weightedStateProvider = new WeightedStateProvider(
+			SimpleWeightedRandomList.<BlockState>builder()
+				.add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87)
+				.add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11)
+				.add(Blocks.WARPED_FUNGUS.defaultBlockState(), 1)
+		);
+		FeatureUtils.register(
+			bootstapContext, CRIMSON_FOREST_VEGETATION, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(weightedStateProvider, 8, 4)
+		);
+		FeatureUtils.register(
+			bootstapContext, CRIMSON_FOREST_VEGETATION_BONEMEAL, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(weightedStateProvider, 3, 1)
+		);
+		WeightedStateProvider weightedStateProvider2 = new WeightedStateProvider(
+			SimpleWeightedRandomList.<BlockState>builder()
+				.add(Blocks.WARPED_ROOTS.defaultBlockState(), 85)
+				.add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 1)
+				.add(Blocks.WARPED_FUNGUS.defaultBlockState(), 13)
+				.add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 1)
+		);
+		FeatureUtils.register(
+			bootstapContext, WARPED_FOREST_VEGETION, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(weightedStateProvider2, 8, 4)
+		);
+		FeatureUtils.register(
+			bootstapContext, WARPED_FOREST_VEGETATION_BONEMEAL, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(weightedStateProvider2, 3, 1)
+		);
+		FeatureUtils.register(
+			bootstapContext, NETHER_SPROUTS, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(BlockStateProvider.simple(Blocks.NETHER_SPROUTS), 8, 4)
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			NETHER_SPROUTS_BONEMEAL,
+			Feature.NETHER_FOREST_VEGETATION,
+			new NetherForestVegetationConfig(BlockStateProvider.simple(Blocks.NETHER_SPROUTS), 3, 1)
+		);
+		FeatureUtils.register(bootstapContext, TWISTING_VINES, Feature.TWISTING_VINES, new TwistingVinesConfig(8, 4, 8));
+		FeatureUtils.register(bootstapContext, TWISTING_VINES_BONEMEAL, Feature.TWISTING_VINES, new TwistingVinesConfig(3, 1, 2));
+		FeatureUtils.register(bootstapContext, WEEPING_VINES, Feature.WEEPING_VINES);
+		FeatureUtils.register(
+			bootstapContext,
+			PATCH_CRIMSON_ROOTS,
+			Feature.RANDOM_PATCH,
+			FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.CRIMSON_ROOTS)))
+		);
+		FeatureUtils.register(bootstapContext, BASALT_PILLAR, Feature.BASALT_PILLAR);
+		FeatureUtils.register(
+			bootstapContext,
+			SPRING_LAVA_NETHER,
+			Feature.SPRING,
+			new SpringConfiguration(
+				Fluids.LAVA.defaultFluidState(),
+				true,
+				4,
+				1,
+				HolderSet.direct(Block::builtInRegistryHolder, Blocks.NETHERRACK, Blocks.SOUL_SAND, Blocks.GRAVEL, Blocks.MAGMA_BLOCK, Blocks.BLACKSTONE)
+			)
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			SPRING_NETHER_CLOSED,
+			Feature.SPRING,
+			new SpringConfiguration(Fluids.LAVA.defaultFluidState(), false, 5, 0, HolderSet.direct(Block::builtInRegistryHolder, Blocks.NETHERRACK))
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			SPRING_NETHER_OPEN,
+			Feature.SPRING,
+			new SpringConfiguration(Fluids.LAVA.defaultFluidState(), false, 4, 1, HolderSet.direct(Block::builtInRegistryHolder, Blocks.NETHERRACK))
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			PATCH_FIRE,
+			Feature.RANDOM_PATCH,
+			FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.FIRE)), List.of(Blocks.NETHERRACK))
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			PATCH_SOUL_FIRE,
+			Feature.RANDOM_PATCH,
+			FeatureUtils.simplePatchConfiguration(
+				Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SOUL_FIRE)), List.of(Blocks.SOUL_SOIL)
+			)
+		);
+	}
 }

@@ -121,7 +121,7 @@ public class PauseScreen extends Screen {
 
 		k++;
 		Component component = this.minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
-		gridWidget.addChild(Button.builder(component, buttonx -> {
+		this.disconnectButton = gridWidget.addChild(Button.builder(component, buttonx -> {
 			if (this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, true)) {
 				boolean bl = this.minecraft.isLocalServer();
 				boolean bl2 = this.minecraft.isConnectedToRealms();

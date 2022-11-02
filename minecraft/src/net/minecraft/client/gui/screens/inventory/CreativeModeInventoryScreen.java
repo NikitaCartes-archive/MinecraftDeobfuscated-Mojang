@@ -73,6 +73,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private boolean hasClickedOutside;
 	private final Set<TagKey<Item>> visibleTags = new HashSet();
 	private final FeatureFlagSet enabledFeatures;
+	private Set<ItemStack> searchTabDisplayList = Set.of();
 
 	public CreativeModeInventoryScreen(Player player, FeatureFlagSet featureFlagSet) {
 		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
@@ -333,7 +334,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		this.visibleTags.clear();
 		String string = this.searchBox.getValue();
 		if (string.isEmpty()) {
-			this.menu.items.addAll(CreativeModeTabs.TAB_SEARCH.getDisplayItems(this.enabledFeatures));
+			this.menu.items.addAll(this.searchTabDisplayList);
 		} else {
 			SearchTree<ItemStack> searchTree;
 			if (string.startsWith("#")) {
@@ -445,8 +446,10 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					this.menu.items.addAll(hotbar);
 				}
 			}
-		} else if (creativeModeTab != CreativeModeTabs.TAB_SEARCH) {
-			this.menu.items.addAll(creativeModeTab.getDisplayItems(this.enabledFeatures));
+		} else if (creativeModeTab == CreativeModeTabs.TAB_SEARCH) {
+			this.searchTabDisplayList = CreativeModeTabs.TAB_SEARCH.getDisplayItems(this.enabledFeatures, this.minecraft.player.canUseGameMasterBlocks());
+		} else {
+			this.menu.items.addAll(creativeModeTab.getDisplayItems(this.enabledFeatures, this.minecraft.player.canUseGameMasterBlocks()));
 		}
 
 		if (creativeModeTab == CreativeModeTabs.TAB_INVENTORY) {
@@ -598,7 +601,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			int k = 1;
 
 			for (CreativeModeTab creativeModeTab : CreativeModeTabs.TABS) {
-				if (creativeModeTab != CreativeModeTabs.TAB_SEARCH && creativeModeTab.contains(this.enabledFeatures, itemStack)) {
+				if (creativeModeTab != CreativeModeTabs.TAB_SEARCH
+					&& creativeModeTab.contains(this.enabledFeatures, itemStack, this.minecraft.player.canUseGameMasterBlocks())) {
 					list2.add(k++, creativeModeTab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
 				}
 			}

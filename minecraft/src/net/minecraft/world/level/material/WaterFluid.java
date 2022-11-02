@@ -14,6 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -75,8 +76,8 @@ public abstract class WaterFluid extends FlowingFluid {
 	}
 
 	@Override
-	protected boolean canConvertToSource() {
-		return true;
+	protected boolean canConvertToSource(Level level) {
+		return level.getGameRules().getBoolean(GameRules.RULE_WATER_SOURCE_CONVERSION);
 	}
 
 	@Override

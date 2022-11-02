@@ -18,7 +18,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
@@ -81,22 +83,42 @@ public class BiomeGenerationSettings {
 		return ((Set)this.featureSet.get()).contains(placedFeature);
 	}
 
-	public static class Builder {
+	public static class Builder extends BiomeGenerationSettings.PlainBuilder {
+		private final HolderGetter<PlacedFeature> placedFeatures;
+		private final HolderGetter<ConfiguredWorldCarver<?>> worldCarvers;
+
+		public Builder(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+			this.placedFeatures = holderGetter;
+			this.worldCarvers = holderGetter2;
+		}
+
+		public BiomeGenerationSettings.Builder addFeature(GenerationStep.Decoration decoration, ResourceKey<PlacedFeature> resourceKey) {
+			this.addFeature(decoration.ordinal(), this.placedFeatures.getOrThrow(resourceKey));
+			return this;
+		}
+
+		public BiomeGenerationSettings.Builder addCarver(GenerationStep.Carving carving, ResourceKey<ConfiguredWorldCarver<?>> resourceKey) {
+			this.addCarver(carving, this.worldCarvers.getOrThrow(resourceKey));
+			return this;
+		}
+	}
+
+	public static class PlainBuilder {
 		private final Map<GenerationStep.Carving, List<Holder<ConfiguredWorldCarver<?>>>> carvers = Maps.<GenerationStep.Carving, List<Holder<ConfiguredWorldCarver<?>>>>newLinkedHashMap();
 		private final List<List<Holder<PlacedFeature>>> features = Lists.<List<Holder<PlacedFeature>>>newArrayList();
 
-		public BiomeGenerationSettings.Builder addFeature(GenerationStep.Decoration decoration, Holder<PlacedFeature> holder) {
+		public BiomeGenerationSettings.PlainBuilder addFeature(GenerationStep.Decoration decoration, Holder<PlacedFeature> holder) {
 			return this.addFeature(decoration.ordinal(), holder);
 		}
 
-		public BiomeGenerationSettings.Builder addFeature(int i, Holder<PlacedFeature> holder) {
+		public BiomeGenerationSettings.PlainBuilder addFeature(int i, Holder<PlacedFeature> holder) {
 			this.addFeatureStepsUpTo(i);
 			((List)this.features.get(i)).add(holder);
 			return this;
 		}
 
-		public BiomeGenerationSettings.Builder addCarver(GenerationStep.Carving carving, Holder<? extends ConfiguredWorldCarver<?>> holder) {
-			((List)this.carvers.computeIfAbsent(carving, carvingx -> Lists.newArrayList())).add(Holder.hackyErase(holder));
+		public BiomeGenerationSettings.PlainBuilder addCarver(GenerationStep.Carving carving, Holder<ConfiguredWorldCarver<?>> holder) {
+			((List)this.carvers.computeIfAbsent(carving, carvingx -> Lists.newArrayList())).add(holder);
 			return this;
 		}
 

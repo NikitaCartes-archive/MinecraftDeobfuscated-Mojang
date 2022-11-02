@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
-import java.util.OptionalLong;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,7 +28,7 @@ public class WorldOptions {
 	}
 
 	public static WorldOptions defaultWithRandomSeed() {
-		return new WorldOptions(RandomSource.create().nextLong(), true, false);
+		return new WorldOptions(randomSeed(), true, false);
 	}
 
 	private WorldOptions(long l, boolean bl, boolean bl2, Optional<String> optional) {
@@ -63,20 +62,24 @@ public class WorldOptions {
 		return new WorldOptions(this.seed, bl, this.generateBonusChest, this.legacyCustomOptions);
 	}
 
-	public WorldOptions withSeed(OptionalLong optionalLong) {
-		return new WorldOptions(optionalLong.orElse(this.seed), this.generateStructures, this.generateBonusChest, this.legacyCustomOptions);
+	public WorldOptions withSeed(long l) {
+		return new WorldOptions(l, this.generateStructures, this.generateBonusChest, this.legacyCustomOptions);
 	}
 
-	public static OptionalLong parseSeed(String string) {
+	public static long parseSeedOrElseRandom(String string) {
 		string = string.trim();
 		if (StringUtils.isEmpty(string)) {
-			return OptionalLong.empty();
+			return randomSeed();
 		} else {
 			try {
-				return OptionalLong.of(Long.parseLong(string));
+				return Long.parseLong(string);
 			} catch (NumberFormatException var2) {
-				return OptionalLong.of((long)string.hashCode());
+				return (long)string.hashCode();
 			}
 		}
+	}
+
+	public static long randomSeed() {
+		return RandomSource.create().nextLong();
 	}
 }

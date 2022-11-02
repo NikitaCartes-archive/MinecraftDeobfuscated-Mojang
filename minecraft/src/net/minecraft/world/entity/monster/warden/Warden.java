@@ -123,7 +123,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 
 	@Override
 	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket((LivingEntity)this, this.hasPose(Pose.EMERGING) ? 1 : 0);
+		return new ClientboundAddEntityPacket(this, this.hasPose(Pose.EMERGING) ? 1 : 0);
 	}
 
 	@Override

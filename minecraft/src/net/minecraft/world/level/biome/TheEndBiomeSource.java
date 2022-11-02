@@ -4,15 +4,21 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.levelgen.DensityFunction;
 
 public class TheEndBiomeSource extends BiomeSource {
 	public static final Codec<TheEndBiomeSource> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(theEndBiomeSource -> null))
+		instance -> instance.group(
+					RegistryOps.retrieveElement(Biomes.THE_END),
+					RegistryOps.retrieveElement(Biomes.END_HIGHLANDS),
+					RegistryOps.retrieveElement(Biomes.END_MIDLANDS),
+					RegistryOps.retrieveElement(Biomes.SMALL_END_ISLANDS),
+					RegistryOps.retrieveElement(Biomes.END_BARRENS)
+				)
 				.apply(instance, instance.stable(TheEndBiomeSource::new))
 	);
 	private final Holder<Biome> end;
@@ -21,13 +27,13 @@ public class TheEndBiomeSource extends BiomeSource {
 	private final Holder<Biome> islands;
 	private final Holder<Biome> barrens;
 
-	public TheEndBiomeSource(Registry<Biome> registry) {
-		this(
-			registry.getOrCreateHolderOrThrow(Biomes.THE_END),
-			registry.getOrCreateHolderOrThrow(Biomes.END_HIGHLANDS),
-			registry.getOrCreateHolderOrThrow(Biomes.END_MIDLANDS),
-			registry.getOrCreateHolderOrThrow(Biomes.SMALL_END_ISLANDS),
-			registry.getOrCreateHolderOrThrow(Biomes.END_BARRENS)
+	public static TheEndBiomeSource create(HolderGetter<Biome> holderGetter) {
+		return new TheEndBiomeSource(
+			holderGetter.getOrThrow(Biomes.THE_END),
+			holderGetter.getOrThrow(Biomes.END_HIGHLANDS),
+			holderGetter.getOrThrow(Biomes.END_MIDLANDS),
+			holderGetter.getOrThrow(Biomes.SMALL_END_ISLANDS),
+			holderGetter.getOrThrow(Biomes.END_BARRENS)
 		);
 	}
 

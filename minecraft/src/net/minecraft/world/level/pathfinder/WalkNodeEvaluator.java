@@ -33,6 +33,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WalkNodeEvaluator extends NodeEvaluator {
 	public static final double SPACE_BETWEEN_WALL_POSTS = 0.5;
+	private static final double DEFAULT_MOB_JUMP_HEIGHT = 1.125;
 	protected float oldWaterCost;
 	private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
 	private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<>();
@@ -242,7 +243,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		Node node = null;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		double e = this.getFloorLevel(mutableBlockPos.set(i, j, k));
-		if (e - d > 1.125) {
+		if (e - d > this.getMobJumpHeight()) {
 			return null;
 		} else {
 			BlockPathTypes blockPathTypes2 = this.getCachedBlockType(this.mob, i, j, k);
@@ -259,7 +260,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			if (blockPathTypes2 != BlockPathTypes.WALKABLE && (!this.isAmphibious() || blockPathTypes2 != BlockPathTypes.WATER)) {
 				if ((node == null || node.costMalus < 0.0F)
 					&& l > 0
-					&& blockPathTypes2 != BlockPathTypes.FENCE
+					&& (blockPathTypes2 != BlockPathTypes.FENCE || this.canWalkOverFences())
 					&& blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL
 					&& blockPathTypes2 != BlockPathTypes.TRAPDOOR
 					&& blockPathTypes2 != BlockPathTypes.POWDER_SNOW) {
@@ -322,7 +323,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 					}
 				}
 
-				if (doesBlockHavePartialCollision(blockPathTypes2)) {
+				if (doesBlockHavePartialCollision(blockPathTypes2) && node == null) {
 					node = this.getNode(i, j, k);
 					if (node != null) {
 						node.closed = true;
@@ -336,6 +337,10 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				return node;
 			}
 		}
+	}
+
+	private double getMobJumpHeight() {
+		return Math.max(1.125, (double)this.mob.maxUpStep);
 	}
 
 	@Nullable

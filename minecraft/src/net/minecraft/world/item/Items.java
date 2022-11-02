@@ -277,7 +277,7 @@ public class Items {
 	public static final Item PURPUR_BLOCK = registerBlock(Blocks.PURPUR_BLOCK);
 	public static final Item PURPUR_PILLAR = registerBlock(Blocks.PURPUR_PILLAR);
 	public static final Item PURPUR_STAIRS = registerBlock(Blocks.PURPUR_STAIRS);
-	public static final Item SPAWNER = registerBlock(new BlockItem(Blocks.SPAWNER, new Item.Properties().rarity(Rarity.EPIC)));
+	public static final Item SPAWNER = registerBlock(Blocks.SPAWNER);
 	public static final Item CHEST = registerBlock(Blocks.CHEST);
 	public static final Item CRAFTING_TABLE = registerBlock(Blocks.CRAFTING_TABLE);
 	public static final Item FARMLAND = registerBlock(Blocks.FARMLAND);
@@ -1085,6 +1085,9 @@ public class Items {
 	public static final Item ELDER_GUARDIAN_SPAWN_EGG = registerItem(
 		"elder_guardian_spawn_egg", new SpawnEggItem(EntityType.ELDER_GUARDIAN, 13552826, 7632531, new Item.Properties())
 	);
+	public static final Item ENDER_DRAGON_SPAWN_EGG = registerItem(
+		"ender_dragon_spawn_egg", new SpawnEggItem(EntityType.ENDER_DRAGON, 1842204, 14711290, new Item.Properties())
+	);
 	public static final Item ENDERMAN_SPAWN_EGG = registerItem("enderman_spawn_egg", new SpawnEggItem(EntityType.ENDERMAN, 1447446, 0, new Item.Properties()));
 	public static final Item ENDERMITE_SPAWN_EGG = registerItem(
 		"endermite_spawn_egg", new SpawnEggItem(EntityType.ENDERMITE, 1447446, 7237230, new Item.Properties())
@@ -1103,6 +1106,9 @@ public class Items {
 	public static final Item HOGLIN_SPAWN_EGG = registerItem("hoglin_spawn_egg", new SpawnEggItem(EntityType.HOGLIN, 13004373, 6251620, new Item.Properties()));
 	public static final Item HORSE_SPAWN_EGG = registerItem("horse_spawn_egg", new SpawnEggItem(EntityType.HORSE, 12623485, 15656192, new Item.Properties()));
 	public static final Item HUSK_SPAWN_EGG = registerItem("husk_spawn_egg", new SpawnEggItem(EntityType.HUSK, 7958625, 15125652, new Item.Properties()));
+	public static final Item IRON_GOLEM_SPAWN_EGG = registerItem(
+		"iron_golem_spawn_egg", new SpawnEggItem(EntityType.IRON_GOLEM, 14405058, 7643954, new Item.Properties())
+	);
 	public static final Item LLAMA_SPAWN_EGG = registerItem("llama_spawn_egg", new SpawnEggItem(EntityType.LLAMA, 12623485, 10051392, new Item.Properties()));
 	public static final Item MAGMA_CUBE_SPAWN_EGG = registerItem(
 		"magma_cube_spawn_egg", new SpawnEggItem(EntityType.MAGMA_CUBE, 3407872, 16579584, new Item.Properties())
@@ -1124,7 +1130,7 @@ public class Items {
 		"pillager_spawn_egg", new SpawnEggItem(EntityType.PILLAGER, 5451574, 9804699, new Item.Properties())
 	);
 	public static final Item POLAR_BEAR_SPAWN_EGG = registerItem(
-		"polar_bear_spawn_egg", new SpawnEggItem(EntityType.POLAR_BEAR, 15921906, 9803152, new Item.Properties())
+		"polar_bear_spawn_egg", new SpawnEggItem(EntityType.POLAR_BEAR, 15658718, 14014157, new Item.Properties())
 	);
 	public static final Item PUFFERFISH_SPAWN_EGG = registerItem(
 		"pufferfish_spawn_egg", new SpawnEggItem(EntityType.PUFFERFISH, 16167425, 3654642, new Item.Properties())
@@ -1144,6 +1150,9 @@ public class Items {
 		"skeleton_horse_spawn_egg", new SpawnEggItem(EntityType.SKELETON_HORSE, 6842447, 15066584, new Item.Properties())
 	);
 	public static final Item SLIME_SPAWN_EGG = registerItem("slime_spawn_egg", new SpawnEggItem(EntityType.SLIME, 5349438, 8306542, new Item.Properties()));
+	public static final Item SNOW_GOLEM_SPAWN_EGG = registerItem(
+		"snow_golem_spawn_egg", new SpawnEggItem(EntityType.SNOW_GOLEM, 14283506, 8496292, new Item.Properties())
+	);
 	public static final Item SPIDER_SPAWN_EGG = registerItem("spider_spawn_egg", new SpawnEggItem(EntityType.SPIDER, 3419431, 11013646, new Item.Properties()));
 	public static final Item SQUID_SPAWN_EGG = registerItem("squid_spawn_egg", new SpawnEggItem(EntityType.SQUID, 2243405, 7375001, new Item.Properties()));
 	public static final Item STRAY_SPAWN_EGG = registerItem("stray_spawn_egg", new SpawnEggItem(EntityType.STRAY, 6387319, 14543594, new Item.Properties()));
@@ -1168,6 +1177,7 @@ public class Items {
 	);
 	public static final Item WARDEN_SPAWN_EGG = registerItem("warden_spawn_egg", new SpawnEggItem(EntityType.WARDEN, 1001033, 3790560, new Item.Properties()));
 	public static final Item WITCH_SPAWN_EGG = registerItem("witch_spawn_egg", new SpawnEggItem(EntityType.WITCH, 3407872, 5349438, new Item.Properties()));
+	public static final Item WITHER_SPAWN_EGG = registerItem("wither_spawn_egg", new SpawnEggItem(EntityType.WITHER, 1315860, 5075616, new Item.Properties()));
 	public static final Item WITHER_SKELETON_SPAWN_EGG = registerItem(
 		"wither_skeleton_spawn_egg", new SpawnEggItem(EntityType.WITHER_SKELETON, 1315860, 4672845, new Item.Properties())
 	);

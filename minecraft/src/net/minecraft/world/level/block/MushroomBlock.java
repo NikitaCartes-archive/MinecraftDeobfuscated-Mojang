@@ -1,8 +1,10 @@
 package net.minecraft.world.level.block;
 
-import java.util.function.Supplier;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -18,11 +20,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class MushroomBlock extends BushBlock implements BonemealableBlock {
 	protected static final float AABB_OFFSET = 3.0F;
 	protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0);
-	private final Supplier<Holder<? extends ConfiguredFeature<?, ?>>> featureSupplier;
+	private final ResourceKey<ConfiguredFeature<?, ?>> feature;
 
-	public MushroomBlock(BlockBehaviour.Properties properties, Supplier<Holder<? extends ConfiguredFeature<?, ?>>> supplier) {
+	public MushroomBlock(BlockBehaviour.Properties properties, ResourceKey<ConfiguredFeature<?, ?>> resourceKey) {
 		super(properties);
-		this.featureSupplier = supplier;
+		this.feature = resourceKey;
 	}
 
 	@Override
@@ -75,19 +77,24 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
-		serverLevel.removeBlock(blockPos, false);
-		if (((ConfiguredFeature)((Holder)this.featureSupplier.get()).value()).place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos)
-			)
-		 {
-			return true;
-		} else {
-			serverLevel.setBlock(blockPos, blockState, 3);
+		Optional<? extends Holder<ConfiguredFeature<?, ?>>> optional = serverLevel.registryAccess()
+			.registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY)
+			.getHolder(this.feature);
+		if (optional.isEmpty()) {
 			return false;
+		} else {
+			serverLevel.removeBlock(blockPos, false);
+			if (((ConfiguredFeature)((Holder)optional.get()).value()).place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos)) {
+				return true;
+			} else {
+				serverLevel.setBlock(blockPos, blockState, 3);
+				return false;
+			}
 		}
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
 		return true;
 	}
 

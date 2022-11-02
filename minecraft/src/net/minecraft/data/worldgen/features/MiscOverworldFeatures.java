@@ -2,8 +2,9 @@ package net.minecraft.data.worldgen.features;
 
 import java.util.List;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -13,138 +14,157 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedBlockStateProvider;
 import net.minecraft.world.level.material.Fluids;
 
 public class MiscOverworldFeatures {
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> ICE_SPIKE = FeatureUtils.register("ice_spike", Feature.ICE_SPIKE);
-	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> ICE_PATCH = FeatureUtils.register(
-		"ice_patch",
-		Feature.DISK,
-		new DiskConfiguration(
-			RuleBasedBlockStateProvider.simple(Blocks.PACKED_ICE),
-			BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM, Blocks.SNOW_BLOCK, Blocks.ICE)),
-			UniformInt.of(2, 3),
-			1
-		)
-	);
-	public static final Holder<ConfiguredFeature<BlockStateConfiguration, ?>> FOREST_ROCK = FeatureUtils.register(
-		"forest_rock", Feature.FOREST_ROCK, new BlockStateConfiguration(Blocks.MOSSY_COBBLESTONE.defaultBlockState())
-	);
-	public static final Holder<ConfiguredFeature<BlockStateConfiguration, ?>> ICEBERG_PACKED = FeatureUtils.register(
-		"iceberg_packed", Feature.ICEBERG, new BlockStateConfiguration(Blocks.PACKED_ICE.defaultBlockState())
-	);
-	public static final Holder<ConfiguredFeature<BlockStateConfiguration, ?>> ICEBERG_BLUE = FeatureUtils.register(
-		"iceberg_blue", Feature.ICEBERG, new BlockStateConfiguration(Blocks.BLUE_ICE.defaultBlockState())
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> BLUE_ICE = FeatureUtils.register("blue_ice", Feature.BLUE_ICE);
-	public static final Holder<ConfiguredFeature<LakeFeature.Configuration, ?>> LAKE_LAVA = FeatureUtils.register(
-		"lake_lava",
-		Feature.LAKE,
-		new LakeFeature.Configuration(BlockStateProvider.simple(Blocks.LAVA.defaultBlockState()), BlockStateProvider.simple(Blocks.STONE.defaultBlockState()))
-	);
-	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_CLAY = FeatureUtils.register(
-		"disk_clay",
-		Feature.DISK,
-		new DiskConfiguration(
-			RuleBasedBlockStateProvider.simple(Blocks.CLAY), BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.CLAY)), UniformInt.of(2, 3), 1
-		)
-	);
-	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_GRAVEL = FeatureUtils.register(
-		"disk_gravel",
-		Feature.DISK,
-		new DiskConfiguration(
-			RuleBasedBlockStateProvider.simple(Blocks.GRAVEL), BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK)), UniformInt.of(2, 5), 2
-		)
-	);
-	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_SAND = FeatureUtils.register(
-		"disk_sand",
-		Feature.DISK,
-		new DiskConfiguration(
-			new RuleBasedBlockStateProvider(
-				BlockStateProvider.simple(Blocks.SAND),
-				List.of(
-					new RuleBasedBlockStateProvider.Rule(BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.AIR), BlockStateProvider.simple(Blocks.SANDSTONE))
-				)
-			),
-			BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK)),
-			UniformInt.of(2, 6),
-			2
-		)
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> FREEZE_TOP_LAYER = FeatureUtils.register(
-		"freeze_top_layer", Feature.FREEZE_TOP_LAYER
-	);
-	public static final Holder<ConfiguredFeature<DiskConfiguration, ?>> DISK_GRASS = FeatureUtils.register(
-		"disk_grass",
-		Feature.DISK,
-		new DiskConfiguration(
-			new RuleBasedBlockStateProvider(
-				BlockStateProvider.simple(Blocks.DIRT),
-				List.of(
-					new RuleBasedBlockStateProvider.Rule(
-						BlockPredicate.not(
-							BlockPredicate.anyOf(BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.matchesFluids(Direction.UP.getNormal(), Fluids.WATER))
-						),
-						BlockStateProvider.simple(Blocks.GRASS_BLOCK)
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ICE_SPIKE = FeatureUtils.createKey("ice_spike");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ICE_PATCH = FeatureUtils.createKey("ice_patch");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> FOREST_ROCK = FeatureUtils.createKey("forest_rock");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ICEBERG_PACKED = FeatureUtils.createKey("iceberg_packed");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ICEBERG_BLUE = FeatureUtils.createKey("iceberg_blue");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> BLUE_ICE = FeatureUtils.createKey("blue_ice");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> LAKE_LAVA = FeatureUtils.createKey("lake_lava");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> DISK_CLAY = FeatureUtils.createKey("disk_clay");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> DISK_GRAVEL = FeatureUtils.createKey("disk_gravel");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> DISK_SAND = FeatureUtils.createKey("disk_sand");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> FREEZE_TOP_LAYER = FeatureUtils.createKey("freeze_top_layer");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> DISK_GRASS = FeatureUtils.createKey("disk_grass");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> BONUS_CHEST = FeatureUtils.createKey("bonus_chest");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> VOID_START_PLATFORM = FeatureUtils.createKey("void_start_platform");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> DESERT_WELL = FeatureUtils.createKey("desert_well");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SPRING_LAVA_OVERWORLD = FeatureUtils.createKey("spring_lava_overworld");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SPRING_LAVA_FROZEN = FeatureUtils.createKey("spring_lava_frozen");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SPRING_WATER = FeatureUtils.createKey("spring_water");
+
+	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
+		FeatureUtils.register(bootstapContext, ICE_SPIKE, Feature.ICE_SPIKE);
+		FeatureUtils.register(
+			bootstapContext,
+			ICE_PATCH,
+			Feature.DISK,
+			new DiskConfiguration(
+				RuleBasedBlockStateProvider.simple(Blocks.PACKED_ICE),
+				BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM, Blocks.SNOW_BLOCK, Blocks.ICE)),
+				UniformInt.of(2, 3),
+				1
+			)
+		);
+		FeatureUtils.register(bootstapContext, FOREST_ROCK, Feature.FOREST_ROCK, new BlockStateConfiguration(Blocks.MOSSY_COBBLESTONE.defaultBlockState()));
+		FeatureUtils.register(bootstapContext, ICEBERG_PACKED, Feature.ICEBERG, new BlockStateConfiguration(Blocks.PACKED_ICE.defaultBlockState()));
+		FeatureUtils.register(bootstapContext, ICEBERG_BLUE, Feature.ICEBERG, new BlockStateConfiguration(Blocks.BLUE_ICE.defaultBlockState()));
+		FeatureUtils.register(bootstapContext, BLUE_ICE, Feature.BLUE_ICE);
+		FeatureUtils.register(
+			bootstapContext,
+			LAKE_LAVA,
+			Feature.LAKE,
+			new LakeFeature.Configuration(BlockStateProvider.simple(Blocks.LAVA.defaultBlockState()), BlockStateProvider.simple(Blocks.STONE.defaultBlockState()))
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			DISK_CLAY,
+			Feature.DISK,
+			new DiskConfiguration(
+				RuleBasedBlockStateProvider.simple(Blocks.CLAY), BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.CLAY)), UniformInt.of(2, 3), 1
+			)
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			DISK_GRAVEL,
+			Feature.DISK,
+			new DiskConfiguration(
+				RuleBasedBlockStateProvider.simple(Blocks.GRAVEL), BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK)), UniformInt.of(2, 5), 2
+			)
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			DISK_SAND,
+			Feature.DISK,
+			new DiskConfiguration(
+				new RuleBasedBlockStateProvider(
+					BlockStateProvider.simple(Blocks.SAND),
+					List.of(
+						new RuleBasedBlockStateProvider.Rule(BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.AIR), BlockStateProvider.simple(Blocks.SANDSTONE))
 					)
+				),
+				BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK)),
+				UniformInt.of(2, 6),
+				2
+			)
+		);
+		FeatureUtils.register(bootstapContext, FREEZE_TOP_LAYER, Feature.FREEZE_TOP_LAYER);
+		FeatureUtils.register(
+			bootstapContext,
+			DISK_GRASS,
+			Feature.DISK,
+			new DiskConfiguration(
+				new RuleBasedBlockStateProvider(
+					BlockStateProvider.simple(Blocks.DIRT),
+					List.of(
+						new RuleBasedBlockStateProvider.Rule(
+							BlockPredicate.not(
+								BlockPredicate.anyOf(BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.matchesFluids(Direction.UP.getNormal(), Fluids.WATER))
+							),
+							BlockStateProvider.simple(Blocks.GRASS_BLOCK)
+						)
+					)
+				),
+				BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.MUD)),
+				UniformInt.of(2, 6),
+				2
+			)
+		);
+		FeatureUtils.register(bootstapContext, BONUS_CHEST, Feature.BONUS_CHEST);
+		FeatureUtils.register(bootstapContext, VOID_START_PLATFORM, Feature.VOID_START_PLATFORM);
+		FeatureUtils.register(bootstapContext, DESERT_WELL, Feature.DESERT_WELL);
+		FeatureUtils.register(
+			bootstapContext,
+			SPRING_LAVA_OVERWORLD,
+			Feature.SPRING,
+			new SpringConfiguration(
+				Fluids.LAVA.defaultFluidState(),
+				true,
+				4,
+				1,
+				HolderSet.direct(
+					Block::builtInRegistryHolder, Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF, Blocks.CALCITE, Blocks.DIRT
 				)
-			),
-			BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.MUD)),
-			UniformInt.of(2, 6),
-			2
-		)
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> BONUS_CHEST = FeatureUtils.register("bonus_chest", Feature.BONUS_CHEST);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> VOID_START_PLATFORM = FeatureUtils.register(
-		"void_start_platform", Feature.VOID_START_PLATFORM
-	);
-	public static final Holder<ConfiguredFeature<NoneFeatureConfiguration, ?>> DESERT_WELL = FeatureUtils.register("desert_well", Feature.DESERT_WELL);
-	public static final Holder<ConfiguredFeature<SpringConfiguration, ?>> SPRING_LAVA_OVERWORLD = FeatureUtils.register(
-		"spring_lava_overworld",
-		Feature.SPRING,
-		new SpringConfiguration(
-			Fluids.LAVA.defaultFluidState(),
-			true,
-			4,
-			1,
-			HolderSet.direct(
-				Block::builtInRegistryHolder, Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE, Blocks.DEEPSLATE, Blocks.TUFF, Blocks.CALCITE, Blocks.DIRT
 			)
-		)
-	);
-	public static final Holder<ConfiguredFeature<SpringConfiguration, ?>> SPRING_LAVA_FROZEN = FeatureUtils.register(
-		"spring_lava_frozen",
-		Feature.SPRING,
-		new SpringConfiguration(
-			Fluids.LAVA.defaultFluidState(), true, 4, 1, HolderSet.direct(Block::builtInRegistryHolder, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW, Blocks.PACKED_ICE)
-		)
-	);
-	public static final Holder<ConfiguredFeature<SpringConfiguration, ?>> SPRING_WATER = FeatureUtils.register(
-		"spring_water",
-		Feature.SPRING,
-		new SpringConfiguration(
-			Fluids.WATER.defaultFluidState(),
-			true,
-			4,
-			1,
-			HolderSet.direct(
-				Block::builtInRegistryHolder,
-				Blocks.STONE,
-				Blocks.GRANITE,
-				Blocks.DIORITE,
-				Blocks.ANDESITE,
-				Blocks.DEEPSLATE,
-				Blocks.TUFF,
-				Blocks.CALCITE,
-				Blocks.DIRT,
-				Blocks.SNOW_BLOCK,
-				Blocks.POWDER_SNOW,
-				Blocks.PACKED_ICE
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			SPRING_LAVA_FROZEN,
+			Feature.SPRING,
+			new SpringConfiguration(
+				Fluids.LAVA.defaultFluidState(), true, 4, 1, HolderSet.direct(Block::builtInRegistryHolder, Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW, Blocks.PACKED_ICE)
 			)
-		)
-	);
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			SPRING_WATER,
+			Feature.SPRING,
+			new SpringConfiguration(
+				Fluids.WATER.defaultFluidState(),
+				true,
+				4,
+				1,
+				HolderSet.direct(
+					Block::builtInRegistryHolder,
+					Blocks.STONE,
+					Blocks.GRANITE,
+					Blocks.DIORITE,
+					Blocks.ANDESITE,
+					Blocks.DEEPSLATE,
+					Blocks.TUFF,
+					Blocks.CALCITE,
+					Blocks.DIRT,
+					Blocks.SNOW_BLOCK,
+					Blocks.POWDER_SNOW,
+					Blocks.PACKED_ICE
+				)
+			)
+		);
+	}
 }

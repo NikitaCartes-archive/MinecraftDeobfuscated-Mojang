@@ -1,12 +1,12 @@
 package net.minecraft.data.worldgen.placement;
 
 import java.util.List;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.util.RandomSource;
+import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
@@ -37,27 +37,35 @@ public class PlacementUtils {
 	public static final PlacementModifier RANGE_4_4 = HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(4), VerticalAnchor.belowTop(4));
 	public static final PlacementModifier RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT = HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(256));
 
-	public static Holder<PlacedFeature> bootstrap(Registry<PlacedFeature> registry) {
-		List<Holder<PlacedFeature>> list = List.of(
-			AquaticPlacements.KELP_COLD,
-			CavePlacements.CAVE_VINES,
-			EndPlacements.CHORUS_PLANT,
-			MiscOverworldPlacements.BLUE_ICE,
-			NetherPlacements.BASALT_BLOBS,
-			OrePlacements.ORE_ANCIENT_DEBRIS_LARGE,
-			TreePlacements.ACACIA_CHECKED,
-			VegetationPlacements.BAMBOO_VEGETATION,
-			VillagePlacements.PILE_HAY_VILLAGE
-		);
-		return Util.getRandom(list, RandomSource.create());
+	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
+		AquaticPlacements.bootstrap(bootstapContext);
+		CavePlacements.bootstrap(bootstapContext);
+		EndPlacements.bootstrap(bootstapContext);
+		MiscOverworldPlacements.bootstrap(bootstapContext);
+		NetherPlacements.bootstrap(bootstapContext);
+		OrePlacements.bootstrap(bootstapContext);
+		TreePlacements.bootstrap(bootstapContext);
+		VegetationPlacements.bootstrap(bootstapContext);
+		VillagePlacements.bootstrap(bootstapContext);
 	}
 
-	public static Holder<PlacedFeature> register(String string, Holder<? extends ConfiguredFeature<?, ?>> holder, List<PlacementModifier> list) {
-		return BuiltinRegistries.register(BuiltinRegistries.PLACED_FEATURE, string, new PlacedFeature(Holder.hackyErase(holder), List.copyOf(list)));
+	public static ResourceKey<PlacedFeature> createKey(String string) {
+		return ResourceKey.create(Registry.PLACED_FEATURE_REGISTRY, new ResourceLocation(string));
 	}
 
-	public static Holder<PlacedFeature> register(String string, Holder<? extends ConfiguredFeature<?, ?>> holder, PlacementModifier... placementModifiers) {
-		return register(string, holder, List.of(placementModifiers));
+	public static void register(
+		BootstapContext<PlacedFeature> bootstapContext, ResourceKey<PlacedFeature> resourceKey, Holder<ConfiguredFeature<?, ?>> holder, List<PlacementModifier> list
+	) {
+		bootstapContext.register(resourceKey, new PlacedFeature(holder, List.copyOf(list)));
+	}
+
+	public static void register(
+		BootstapContext<PlacedFeature> bootstapContext,
+		ResourceKey<PlacedFeature> resourceKey,
+		Holder<ConfiguredFeature<?, ?>> holder,
+		PlacementModifier... placementModifiers
+	) {
+		register(bootstapContext, resourceKey, holder, List.of(placementModifiers));
 	}
 
 	public static PlacementModifier countExtra(int i, float f, int j) {
@@ -81,8 +89,8 @@ public class PlacementUtils {
 		return BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(block.defaultBlockState(), BlockPos.ZERO));
 	}
 
-	public static Holder<PlacedFeature> inlinePlaced(Holder<? extends ConfiguredFeature<?, ?>> holder, PlacementModifier... placementModifiers) {
-		return Holder.direct(new PlacedFeature(Holder.hackyErase(holder), List.of(placementModifiers)));
+	public static Holder<PlacedFeature> inlinePlaced(Holder<ConfiguredFeature<?, ?>> holder, PlacementModifier... placementModifiers) {
+		return Holder.direct(new PlacedFeature(holder, List.of(placementModifiers)));
 	}
 
 	public static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<PlacedFeature> inlinePlaced(

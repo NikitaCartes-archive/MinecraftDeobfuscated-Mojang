@@ -10,7 +10,9 @@ public abstract class WritableRegistry<T> extends Registry<T> {
 
 	public abstract Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
-	public abstract Holder<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
+	public abstract Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
 	public abstract boolean isEmpty();
+
+	public abstract HolderGetter<T> createRegistrationLookup();
 }

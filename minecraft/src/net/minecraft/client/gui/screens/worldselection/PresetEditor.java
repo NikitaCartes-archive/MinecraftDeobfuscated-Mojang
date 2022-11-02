@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.CreateBuffetWorldScreen;
 import net.minecraft.client.gui.screens.CreateFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -19,10 +20,10 @@ import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 @Environment(EnvType.CLIENT)
 public interface PresetEditor {
@@ -31,12 +32,15 @@ public interface PresetEditor {
 		(PresetEditor)(createWorldScreen, worldCreationContext) -> {
 			ChunkGenerator chunkGenerator = worldCreationContext.selectedDimensions().overworld();
 			RegistryAccess registryAccess = worldCreationContext.worldgenLoadContext();
-			Registry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-			Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+			HolderGetter<Biome> holderGetter = registryAccess.lookupOrThrow(Registry.BIOME_REGISTRY);
+			HolderGetter<StructureSet> holderGetter2 = registryAccess.lookupOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+			HolderGetter<PlacedFeature> holderGetter3 = registryAccess.lookupOrThrow(Registry.PLACED_FEATURE_REGISTRY);
 			return new CreateFlatWorldScreen(
 				createWorldScreen,
 				flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent.updateSettings(flatWorldConfigurator(flatLevelGeneratorSettings)),
-				chunkGenerator instanceof FlatLevelSource ? ((FlatLevelSource)chunkGenerator).settings() : FlatLevelGeneratorSettings.getDefault(registry, registry2)
+				chunkGenerator instanceof FlatLevelSource
+					? ((FlatLevelSource)chunkGenerator).settings()
+					: FlatLevelGeneratorSettings.getDefault(holderGetter, holderGetter2, holderGetter3)
 			);
 		},
 		Optional.of(WorldPresets.SINGLE_BIOME_SURFACE),
@@ -49,20 +53,17 @@ public interface PresetEditor {
 
 	private static WorldCreationContext.DimensionsUpdater flatWorldConfigurator(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
 		return (frozen, worldDimensions) -> {
-			Registry<StructureSet> registry = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-			ChunkGenerator chunkGenerator = new FlatLevelSource(registry, flatLevelGeneratorSettings);
+			ChunkGenerator chunkGenerator = new FlatLevelSource(flatLevelGeneratorSettings);
 			return worldDimensions.replaceOverworldGenerator(frozen, chunkGenerator);
 		};
 	}
 
 	private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> holder) {
 		return (frozen, worldDimensions) -> {
-			Registry<StructureSet> registry = frozen.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-			Registry<NoiseGeneratorSettings> registry2 = frozen.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-			Registry<NormalNoise.NoiseParameters> registry3 = frozen.registryOrThrow(Registry.NOISE_REGISTRY);
-			Holder<NoiseGeneratorSettings> holder2 = registry2.getOrCreateHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
+			Registry<NoiseGeneratorSettings> registry = frozen.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+			Holder<NoiseGeneratorSettings> holder2 = registry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
 			BiomeSource biomeSource = new FixedBiomeSource(holder);
-			ChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator(registry, registry3, biomeSource, holder2);
+			ChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator(biomeSource, holder2);
 			return worldDimensions.replaceOverworldGenerator(frozen, chunkGenerator);
 		};
 	}

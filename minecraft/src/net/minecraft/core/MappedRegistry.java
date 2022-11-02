@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
@@ -84,8 +83,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		}
 	}
 
-	@Override
-	public Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
+	public Holder.Reference<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
 		this.validateWrite(resourceKey);
 		Validate.notNull(resourceKey);
 		Validate.notNull(object);
@@ -106,7 +104,8 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 			reference.bindKey(resourceKey);
 		} else {
-			reference = (Holder.Reference<T>)this.byKey.computeIfAbsent(resourceKey, resourceKeyx -> Holder.Reference.createStandAlone(this, resourceKeyx));
+			reference = (Holder.Reference<T>)this.byKey
+				.computeIfAbsent(resourceKey, resourceKeyx -> Holder.Reference.createStandAlone(this.holderOwner(), resourceKeyx));
 		}
 
 		this.byKey.put(resourceKey, reference);
@@ -126,7 +125,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public Holder<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
+	public Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
 		return this.registerMapping(this.nextId, resourceKey, object, lifecycle);
 	}
 
@@ -169,35 +168,15 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		return Optional.ofNullable((Holder.Reference)this.byKey.get(resourceKey));
 	}
 
-	@Override
-	public Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> resourceKey) {
+	Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> resourceKey) {
 		return (Holder.Reference<T>)this.byKey.computeIfAbsent(resourceKey, resourceKeyx -> {
 			if (this.unregisteredIntrusiveHolders != null) {
 				throw new IllegalStateException("This registry can't create new holders without value");
 			} else {
 				this.validateWrite(resourceKeyx);
-				return Holder.Reference.createStandAlone(this, resourceKeyx);
+				return Holder.Reference.createStandAlone(this.holderOwner(), resourceKeyx);
 			}
 		});
-	}
-
-	@Override
-	public DataResult<Holder.Reference<T>> getOrCreateHolder(ResourceKey<T> resourceKey) {
-		Holder.Reference<T> reference = (Holder.Reference<T>)this.byKey.get(resourceKey);
-		if (reference == null) {
-			if (this.unregisteredIntrusiveHolders != null) {
-				return DataResult.error("This registry can't create new holders without value (requested key: " + resourceKey + ")");
-			}
-
-			if (this.frozen) {
-				return DataResult.error("Registry is already frozen (requested key: " + resourceKey + ")");
-			}
-
-			reference = Holder.Reference.createStandAlone(this, resourceKey);
-			this.byKey.put(resourceKey, reference);
-		}
-
-		return DataResult.success(reference);
 	}
 
 	@Override
@@ -275,7 +254,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	private HolderSet.Named<T> createTag(TagKey<T> tagKey) {
-		return new HolderSet.Named<>(this, tagKey);
+		return new HolderSet.Named<>(this.holderOwner(), tagKey);
 	}
 
 	@Override
@@ -289,8 +268,8 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public Optional<Holder<T>> getRandom(RandomSource randomSource) {
-		return Util.getRandomSafe(this.holdersInOrder(), randomSource).map(Holder::hackyErase);
+	public Optional<Holder.Reference<T>> getRandom(RandomSource randomSource) {
+		return Util.getRandomSafe(this.holdersInOrder(), randomSource);
 	}
 
 	@Override
@@ -339,7 +318,8 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			throw new IllegalStateException("This registry can't create intrusive holders");
 		} else {
 			this.validateWrite();
-			return (Holder.Reference<T>)this.unregisteredIntrusiveHolders.computeIfAbsent(object, objectx -> Holder.Reference.createIntrusive(this, (T)objectx));
+			return (Holder.Reference<T>)this.unregisteredIntrusiveHolders
+				.computeIfAbsent(object, objectx -> Holder.Reference.createIntrusive(this.asLookup(), (T)objectx));
 		}
 	}
 
@@ -354,7 +334,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		this.byKey.values().forEach(reference -> map2.put(reference, new ArrayList()));
 		map.forEach((tagKey, list) -> {
 			for (Holder<T> holder : list) {
-				if (!holder.isValidInRegistry(this)) {
+				if (!holder.canSerializeIn(this.asLookup())) {
 					throw new IllegalStateException("Can't create named set " + tagKey + " containing value " + holder + " from outside registry " + this);
 				}
 
@@ -384,5 +364,31 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	public void resetTags() {
 		this.tags.values().forEach(named -> named.bind(List.of()));
 		this.byKey.values().forEach(reference -> reference.bindTags(Set.of()));
+	}
+
+	@Override
+	public HolderGetter<T> createRegistrationLookup() {
+		this.validateWrite();
+		return new HolderGetter<T>() {
+			@Override
+			public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+				return Optional.of(this.getOrThrow(resourceKey));
+			}
+
+			@Override
+			public Holder.Reference<T> getOrThrow(ResourceKey<T> resourceKey) {
+				return MappedRegistry.this.getOrCreateHolderOrThrow(resourceKey);
+			}
+
+			@Override
+			public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+				return Optional.of(this.getOrThrow(tagKey));
+			}
+
+			@Override
+			public HolderSet.Named<T> getOrThrow(TagKey<T> tagKey) {
+				return MappedRegistry.this.getOrCreateTag(tagKey);
+			}
+		};
 	}
 }

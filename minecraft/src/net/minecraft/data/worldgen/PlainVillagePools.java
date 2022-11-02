@@ -3,124 +3,144 @@ package net.minecraft.data.worldgen;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.placement.VillagePlacements;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 public class PlainVillagePools {
-	public static final Holder<StructureTemplatePool> START = Pools.register(
-		new StructureTemplatePool(
-			new ResourceLocation("village/plains/town_centers"),
-			new ResourceLocation("empty"),
-			ImmutableList.of(
-				Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_fountain_01", ProcessorLists.MOSSIFY_20_PERCENT), 50),
-				Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_1", ProcessorLists.MOSSIFY_20_PERCENT), 50),
-				Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_2"), 50),
-				Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_3", ProcessorLists.MOSSIFY_70_PERCENT), 50),
-				Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_fountain_01", ProcessorLists.ZOMBIE_PLAINS), 1),
-				Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_1", ProcessorLists.ZOMBIE_PLAINS), 1),
-				Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_2", ProcessorLists.ZOMBIE_PLAINS), 1),
-				Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_3", ProcessorLists.ZOMBIE_PLAINS), 1)
-			),
-			StructureTemplatePool.Projection.RIGID
-		)
-	);
+	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("village/plains/town_centers");
+	private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/plains/terminators");
 
-	public static void bootstrap() {
-	}
-
-	static {
-		Pools.register(
+	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
+		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
+		Holder<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.OAK_VILLAGE);
+		Holder<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.FLOWER_PLAIN_VILLAGE);
+		Holder<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_HAY_VILLAGE);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.MOSSIFY_10_PERCENT);
+		Holder<StructureProcessorList> holder5 = holderGetter2.getOrThrow(ProcessorLists.MOSSIFY_20_PERCENT);
+		Holder<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.MOSSIFY_70_PERCENT);
+		Holder<StructureProcessorList> holder7 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_PLAINS);
+		Holder<StructureProcessorList> holder8 = holderGetter2.getOrThrow(ProcessorLists.STREET_PLAINS);
+		Holder<StructureProcessorList> holder9 = holderGetter2.getOrThrow(ProcessorLists.FARM_PLAINS);
+		HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+		Holder<StructureTemplatePool> holder10 = holderGetter3.getOrThrow(Pools.EMPTY);
+		Holder<StructureTemplatePool> holder11 = holderGetter3.getOrThrow(TERMINATORS_KEY);
+		bootstapContext.register(
+			START,
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/streets"),
-				new ResourceLocation("village/plains/terminators"),
+				holder10,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/corner_01", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/corner_02", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/corner_03", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_01", ProcessorLists.STREET_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_02", ProcessorLists.STREET_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_03", ProcessorLists.STREET_PLAINS), 7),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_04", ProcessorLists.STREET_PLAINS), 7),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_05", ProcessorLists.STREET_PLAINS), 3),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_06", ProcessorLists.STREET_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_01", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_02", ProcessorLists.STREET_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_03", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_04", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_05", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_06", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/streets/turn_01", ProcessorLists.STREET_PLAINS), 3)
+					Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_fountain_01", holder5), 50),
+					Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_1", holder5), 50),
+					Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_2"), 50),
+					Pair.of(StructurePoolElement.legacy("village/plains/town_centers/plains_meeting_point_3", holder6), 50),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_fountain_01", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_1", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_2", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/town_centers/plains_meeting_point_3", holder7), 1)
+				),
+				StructureTemplatePool.Projection.RIGID
+			)
+		);
+		Pools.register(
+			bootstapContext,
+			"village/plains/streets",
+			new StructureTemplatePool(
+				holder11,
+				ImmutableList.of(
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/corner_01", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/corner_02", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/corner_03", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_01", holder8), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_02", holder8), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_03", holder8), 7),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_04", holder8), 7),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_05", holder8), 3),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/straight_06", holder8), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_01", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_02", holder8), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_03", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_04", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_05", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/crossroad_06", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/streets/turn_01", holder8), 3)
 				),
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/zombie/streets",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/zombie/streets"),
-				new ResourceLocation("village/plains/terminators"),
+				holder11,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/corner_01", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/corner_02", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/corner_03", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_01", ProcessorLists.STREET_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_02", ProcessorLists.STREET_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_03", ProcessorLists.STREET_PLAINS), 7),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_04", ProcessorLists.STREET_PLAINS), 7),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_05", ProcessorLists.STREET_PLAINS), 3),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_06", ProcessorLists.STREET_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_01", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_02", ProcessorLists.STREET_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_03", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_04", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_05", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_06", ProcessorLists.STREET_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/turn_01", ProcessorLists.STREET_PLAINS), 3)
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/corner_01", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/corner_02", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/corner_03", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_01", holder8), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_02", holder8), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_03", holder8), 7),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_04", holder8), 7),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_05", holder8), 3),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/straight_06", holder8), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_01", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_02", holder8), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_03", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_04", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_05", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/crossroad_06", holder8), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/streets/turn_01", holder8), 3)
 				),
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/houses",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/houses"),
-				new ResourceLocation("village/plains/terminators"),
+				holder11,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_2", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_3", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_4", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_5", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_6", ProcessorLists.MOSSIFY_10_PERCENT), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_7", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_8", ProcessorLists.MOSSIFY_10_PERCENT), 3),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_medium_house_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_medium_house_2", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_big_house_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_butcher_shop_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_butcher_shop_2", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tool_smith_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_fletcher_house_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_3", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_4", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_5", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_6", holder4), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_7", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_house_8", holder4), 3),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_medium_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_medium_house_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_big_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_butcher_shop_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_butcher_shop_2", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tool_smith_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_fletcher_house_1", holder4), 2),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_shepherds_house_1"), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_armorer_house_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_fisher_cottage_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tannery_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_cartographer_1", ProcessorLists.MOSSIFY_10_PERCENT), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_1", ProcessorLists.MOSSIFY_10_PERCENT), 5),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_2", ProcessorLists.MOSSIFY_10_PERCENT), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_masons_house_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_weaponsmith_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_3", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_4", ProcessorLists.MOSSIFY_10_PERCENT), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_stable_1", ProcessorLists.MOSSIFY_10_PERCENT), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_armorer_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_fisher_cottage_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tannery_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_cartographer_1", holder4), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_1", holder4), 5),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_2", holder4), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_masons_house_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_weaponsmith_1", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_3", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_4", holder4), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_stable_1", holder4), 2),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_stable_2"), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_large_farm_1", ProcessorLists.FARM_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_farm_1", ProcessorLists.FARM_PLAINS), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_large_farm_1", holder9), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_farm_1", holder9), 4),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_1"), 1),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_2"), 1),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_3"), 5),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_accessory_1"), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_meeting_point_4", ProcessorLists.MOSSIFY_70_PERCENT), 3),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_meeting_point_4", holder6), 3),
 					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_meeting_point_5"), 1),
 					Pair.of(StructurePoolElement.empty(), 10)
 				),
@@ -128,103 +148,104 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/zombie/houses",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/zombie/houses"),
-				new ResourceLocation("village/plains/terminators"),
+				holder11,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_2", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_3", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_4", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_5", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_6", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_7", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_8", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_medium_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_medium_house_2", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_big_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_butcher_shop_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_butcher_shop_2", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tool_smith_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_fletcher_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_shepherds_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_armorer_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_fisher_cottage_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tannery_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_cartographer_1", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_1", ProcessorLists.ZOMBIE_PLAINS), 3),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_2", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_masons_house_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_weaponsmith_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_3", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_4", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_stable_1", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_stable_2", ProcessorLists.ZOMBIE_PLAINS), 2),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_large_farm_1", ProcessorLists.ZOMBIE_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_farm_1", ProcessorLists.ZOMBIE_PLAINS), 4),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_1", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_2", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_animal_pen_3", ProcessorLists.ZOMBIE_PLAINS), 5),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_meeting_point_4", ProcessorLists.ZOMBIE_PLAINS), 3),
-					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_meeting_point_5", ProcessorLists.ZOMBIE_PLAINS), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_2", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_3", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_4", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_5", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_6", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_7", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_small_house_8", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_medium_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_medium_house_2", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_big_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_butcher_shop_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_butcher_shop_2", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tool_smith_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_fletcher_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_shepherds_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_armorer_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_fisher_cottage_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_tannery_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_cartographer_1", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_1", holder7), 3),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_library_2", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_masons_house_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_weaponsmith_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_3", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_temple_4", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_stable_1", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_stable_2", holder7), 2),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_large_farm_1", holder7), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_small_farm_1", holder7), 4),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_1", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/houses/plains_animal_pen_2", holder7), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_animal_pen_3", holder7), 5),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_meeting_point_4", holder7), 3),
+					Pair.of(StructurePoolElement.legacy("village/plains/zombie/houses/plains_meeting_point_5", holder7), 1),
 					Pair.of(StructurePoolElement.empty(), 10)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		Pools.register(
+		bootstapContext.register(
+			TERMINATORS_KEY,
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/terminators"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_01", ProcessorLists.STREET_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_02", ProcessorLists.STREET_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_03", ProcessorLists.STREET_PLAINS), 1),
-					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_04", ProcessorLists.STREET_PLAINS), 1)
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_01", holder8), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_02", holder8), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_03", holder8), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/terminators/terminator_04", holder8), 1)
 				),
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
 		Pools.register(
-			new StructureTemplatePool(
-				new ResourceLocation("village/plains/trees"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.feature(VillagePlacements.OAK_VILLAGE), 1)),
-				StructureTemplatePool.Projection.RIGID
-			)
+			bootstapContext,
+			"village/plains/trees",
+			new StructureTemplatePool(holder10, ImmutableList.of(Pair.of(StructurePoolElement.feature(holder), 1)), StructureTemplatePool.Projection.RIGID)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/decor",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/decor"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/plains/plains_lamp_1"), 2),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.OAK_VILLAGE), 1),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.FLOWER_PLAIN_VILLAGE), 1),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 1),
+					Pair.of(StructurePoolElement.feature(holder), 1),
+					Pair.of(StructurePoolElement.feature(holder2), 1),
+					Pair.of(StructurePoolElement.feature(holder3), 1),
 					Pair.of(StructurePoolElement.empty(), 2)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/zombie/decor",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/zombie/decor"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.legacy("village/plains/plains_lamp_1", ProcessorLists.ZOMBIE_PLAINS), 1),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.OAK_VILLAGE), 1),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.FLOWER_PLAIN_VILLAGE), 1),
-					Pair.of(StructurePoolElement.feature(VillagePlacements.PILE_HAY_VILLAGE), 1),
+					Pair.of(StructurePoolElement.legacy("village/plains/plains_lamp_1", holder7), 1),
+					Pair.of(StructurePoolElement.feature(holder), 1),
+					Pair.of(StructurePoolElement.feature(holder2), 1),
+					Pair.of(StructurePoolElement.feature(holder3), 1),
 					Pair.of(StructurePoolElement.empty(), 2)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/villagers",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/villagers"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/plains/villagers/nitwit"), 1),
 					Pair.of(StructurePoolElement.legacy("village/plains/villagers/baby"), 1),
@@ -234,9 +255,10 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/plains/zombie/villagers",
 			new StructureTemplatePool(
-				new ResourceLocation("village/plains/zombie/villagers"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/plains/zombie/villagers/nitwit"), 1),
 					Pair.of(StructurePoolElement.legacy("village/plains/zombie/villagers/unemployed"), 10)
@@ -245,9 +267,10 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/common/animals",
 			new StructureTemplatePool(
-				new ResourceLocation("village/common/animals"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/common/animals/cows_1"), 7),
 					Pair.of(StructurePoolElement.legacy("village/common/animals/pigs_1"), 7),
@@ -264,9 +287,10 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/common/sheep",
 			new StructureTemplatePool(
-				new ResourceLocation("village/common/sheep"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/common/animals/sheep_1"), 1), Pair.of(StructurePoolElement.legacy("village/common/animals/sheep_2"), 1)
 				),
@@ -274,9 +298,10 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/common/cats",
 			new StructureTemplatePool(
-				new ResourceLocation("village/common/cats"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/common/animals/cat_black"), 1),
 					Pair.of(StructurePoolElement.legacy("village/common/animals/cat_british"), 1),
@@ -294,9 +319,10 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/common/butcher_animals",
 			new StructureTemplatePool(
-				new ResourceLocation("village/common/butcher_animals"),
-				new ResourceLocation("empty"),
+				holder10,
 				ImmutableList.of(
 					Pair.of(StructurePoolElement.legacy("village/common/animals/cows_1"), 3),
 					Pair.of(StructurePoolElement.legacy("village/common/animals/pigs_1"), 3),
@@ -307,19 +333,17 @@ public class PlainVillagePools {
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/common/iron_golem",
 			new StructureTemplatePool(
-				new ResourceLocation("village/common/iron_golem"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/common/iron_golem"), 1)),
-				StructureTemplatePool.Projection.RIGID
+				holder10, ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/common/iron_golem"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"village/common/well_bottoms",
 			new StructureTemplatePool(
-				new ResourceLocation("village/common/well_bottoms"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/common/well_bottom"), 1)),
-				StructureTemplatePool.Projection.RIGID
+				holder10, ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/common/well_bottom"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 	}

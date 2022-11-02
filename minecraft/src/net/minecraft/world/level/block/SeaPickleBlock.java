@@ -114,7 +114,7 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
 		return true;
 	}
 

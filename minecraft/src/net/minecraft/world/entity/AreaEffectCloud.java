@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.ParticleArgument;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -349,7 +348,7 @@ public class AreaEffectCloud extends Entity {
 
 		if (compoundTag.contains("Particle", 8)) {
 			try {
-				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), HolderLookup.forRegistry(Registry.PARTICLE_TYPE)));
+				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), Registry.PARTICLE_TYPE.asLookup()));
 			} catch (CommandSyntaxException var5) {
 				LOGGER.warn("Couldn't load custom particle {}", compoundTag.getString("Particle"), var5);
 			}

@@ -71,6 +71,7 @@ public abstract class BuiltInPackSource implements RepositorySource {
 			try {
 				FolderRepositorySource.discoverPacks(
 					path,
+					true,
 					(pathx, resourcesSupplier) -> biConsumer.accept(
 							pathToId(pathx), (Function)string -> this.createBuiltinPack(string, resourcesSupplier, this.getPackTitle(string))
 						)

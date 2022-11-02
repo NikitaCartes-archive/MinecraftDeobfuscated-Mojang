@@ -42,9 +42,12 @@ public class PackMetadataGenerator implements DataProvider {
 		return "Pack Metadata";
 	}
 
-	public static PackMetadataGenerator forFeaturePack(PackOutput packOutput, Component component, FeatureFlagSet featureFlagSet) {
+	public static PackMetadataGenerator forFeaturePack(PackOutput packOutput, Component component) {
 		return new PackMetadataGenerator(packOutput)
-			.add(PackMetadataSection.TYPE, new PackMetadataSection(component, DetectedVersion.BUILT_IN.getPackVersion(PackType.DATA)))
-			.add(FeatureFlagsMetadataSection.TYPE, new FeatureFlagsMetadataSection(featureFlagSet));
+			.add(PackMetadataSection.TYPE, new PackMetadataSection(component, DetectedVersion.BUILT_IN.getPackVersion(PackType.DATA)));
+	}
+
+	public static PackMetadataGenerator forFeaturePack(PackOutput packOutput, Component component, FeatureFlagSet featureFlagSet) {
+		return forFeaturePack(packOutput, component).add(FeatureFlagsMetadataSection.TYPE, new FeatureFlagsMetadataSection(featureFlagSet));
 	}
 }

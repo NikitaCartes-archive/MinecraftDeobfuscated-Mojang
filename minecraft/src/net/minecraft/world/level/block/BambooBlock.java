@@ -153,10 +153,10 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-		int i = this.getHeightAboveUpToMax(blockGetter, blockPos);
-		int j = this.getHeightBelowUpToMax(blockGetter, blockPos);
-		return i + j + 1 < 16 && (Integer)blockGetter.getBlockState(blockPos.above(i)).getValue(STAGE) != 1;
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+		int i = this.getHeightAboveUpToMax(levelReader, blockPos);
+		int j = this.getHeightBelowUpToMax(levelReader, blockPos);
+		return i + j + 1 < 16 && (Integer)levelReader.getBlockState(blockPos.above(i)).getValue(STAGE) != 1;
 	}
 
 	@Override

@@ -16,6 +16,7 @@ public final class ItemTags {
 	public static final TagKey<Item> WOODEN_STAIRS = bind("wooden_stairs");
 	public static final TagKey<Item> WOODEN_SLABS = bind("wooden_slabs");
 	public static final TagKey<Item> WOODEN_FENCES = bind("wooden_fences");
+	public static final TagKey<Item> FENCE_GATES = bind("fence_gates");
 	public static final TagKey<Item> WOODEN_PRESSURE_PLATES = bind("wooden_pressure_plates");
 	public static final TagKey<Item> WOODEN_TRAPDOORS = bind("wooden_trapdoors");
 	public static final TagKey<Item> DOORS = bind("doors");

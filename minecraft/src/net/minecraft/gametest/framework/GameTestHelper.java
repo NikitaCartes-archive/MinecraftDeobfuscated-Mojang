@@ -2,6 +2,7 @@ package net.minecraft.gametest.framework;
 
 import com.mojang.authlib.GameProfile;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -280,8 +281,8 @@ public class GameTestHelper {
 		BlockState blockState = this.getBlockState(blockPos);
 		boolean bl = blockState.hasProperty(property);
 		if (!bl || !blockState.getValue(property).equals(comparable)) {
-			String string = bl ? "was %s".formatted(blockState.getValue(property)) : "property %s is missing".formatted(property.getName());
-			String string2 = "Expected property %s to be %s, %s".formatted(property.getName(), comparable, string);
+			String string = bl ? "was " + blockState.getValue(property) : "property " + property.getName() + " is missing";
+			String string2 = String.format(Locale.ROOT, "Expected property %s to be %s, %s", property.getName(), comparable, string);
 			throw new GameTestAssertPosException(string2, this.absolutePos(blockPos), blockPos, this.testInfo.getTick());
 		}
 	}

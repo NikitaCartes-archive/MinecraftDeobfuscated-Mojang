@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -28,14 +27,14 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 
 	boolean contains(Holder<T> holder);
 
-	boolean isValidInRegistry(Registry<T> registry);
+	boolean canSerializeIn(HolderOwner<T> holderOwner);
 
 	Optional<TagKey<T>> unwrapKey();
 
 	@Deprecated
 	@VisibleForTesting
-	static <T> HolderSet.Named<T> emptyNamed(Registry<T> registry, TagKey<T> tagKey) {
-		return new HolderSet.Named<>(registry, tagKey);
+	static <T> HolderSet.Named<T> emptyNamed(HolderOwner<T> holderOwner, TagKey<T> tagKey) {
+		return new HolderSet.Named<>(holderOwner, tagKey);
 	}
 
 	@SafeVarargs
@@ -106,7 +105,6 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 			return this.contents().spliterator();
 		}
 
-		@NotNull
 		public Iterator<Holder<T>> iterator() {
 			return this.contents().iterator();
 		}
@@ -127,18 +125,18 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 		}
 
 		@Override
-		public boolean isValidInRegistry(Registry<T> registry) {
+		public boolean canSerializeIn(HolderOwner<T> holderOwner) {
 			return true;
 		}
 	}
 
 	public static class Named<T> extends HolderSet.ListBacked<T> {
-		private final Registry<T> registry;
+		private final HolderOwner<T> owner;
 		private final TagKey<T> key;
 		private List<Holder<T>> contents = List.of();
 
-		Named(Registry<T> registry, TagKey<T> tagKey) {
-			this.registry = registry;
+		Named(HolderOwner<T> holderOwner, TagKey<T> tagKey) {
+			this.owner = holderOwner;
 			this.key = tagKey;
 		}
 
@@ -175,8 +173,8 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 		}
 
 		@Override
-		public boolean isValidInRegistry(Registry<T> registry) {
-			return this.registry == registry;
+		public boolean canSerializeIn(HolderOwner<T> holderOwner) {
+			return this.owner.canSerializeIn(holderOwner);
 		}
 	}
 }

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
@@ -91,6 +92,7 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 					TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)entry.getValue();
 					writer.write(
 						String.format(
+							Locale.ROOT,
 							"%s\tx=%d\ty=%d\tw=%d\th=%d%n",
 							entry.getKey(),
 							textureAtlasSprite.getX(),

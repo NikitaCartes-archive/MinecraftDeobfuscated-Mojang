@@ -531,15 +531,19 @@ public abstract class Mob extends LivingEntity {
 
 	protected void pickUpItem(ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
-		if (this.equipItemIfPossible(itemStack)) {
+		ItemStack itemStack2 = this.equipItemIfPossible(itemStack.copy());
+		if (!itemStack2.isEmpty()) {
 			this.onItemPickup(itemEntity);
-			this.take(itemEntity, itemStack.getCount());
-			itemEntity.discard();
+			this.take(itemEntity, itemStack2.getCount());
+			itemStack.shrink(itemStack2.getCount());
+			if (itemStack.isEmpty()) {
+				itemEntity.discard();
+			}
 		}
 	}
 
-	public boolean equipItemIfPossible(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = getEquipmentSlotForItem(itemStack);
+	public ItemStack equipItemIfPossible(ItemStack itemStack) {
+		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItemStack(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 		boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2);
 		if (bl && this.canHoldItem(itemStack)) {
@@ -548,11 +552,23 @@ public abstract class Mob extends LivingEntity {
 				this.spawnAtLocation(itemStack2);
 			}
 
-			this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
-			return true;
+			if (equipmentSlot.isArmor() && itemStack.getCount() > 1) {
+				ItemStack itemStack3 = itemStack.copyWithCount(1);
+				this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack3);
+				return itemStack3;
+			} else {
+				this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
+				return itemStack;
+			}
 		} else {
-			return false;
+			return ItemStack.EMPTY;
 		}
+	}
+
+	private EquipmentSlot getEquipmentSlotForItemStack(ItemStack itemStack) {
+		EquipmentSlot equipmentSlot = getEquipmentSlotForItem(itemStack);
+		boolean bl = this.getItemBySlot(equipmentSlot).isEmpty();
+		return equipmentSlot.isArmor() && !bl ? EquipmentSlot.MAINHAND : equipmentSlot;
 	}
 
 	protected void setItemSlotAndDropWhenKilled(EquipmentSlot equipmentSlot, ItemStack itemStack) {

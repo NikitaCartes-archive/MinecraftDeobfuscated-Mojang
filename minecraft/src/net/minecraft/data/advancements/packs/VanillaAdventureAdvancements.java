@@ -32,6 +32,8 @@ import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
@@ -109,7 +111,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 	}
 
 	@Override
-	public void generate(Consumer<Advancement> consumer) {
+	public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
 		Advancement advancement = Advancement.Builder.advancement()
 			.display(
 				Items.MAP,
@@ -139,7 +141,8 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
-		addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes().toList())
+		HolderGetter<Biome> holderGetter = provider.lookupOrThrow(Registry.BIOME_REGISTRY);
+		addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes(holderGetter).toList())
 			.parent(advancement2)
 			.display(
 				Items.DIAMOND_BOOTS,

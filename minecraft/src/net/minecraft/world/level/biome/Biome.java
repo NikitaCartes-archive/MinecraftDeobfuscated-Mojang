@@ -187,7 +187,7 @@ public final class Biome {
 				&& blockPos.getY() < levelReader.getMaxBuildHeight()
 				&& levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
 				BlockState blockState = levelReader.getBlockState(blockPos);
-				if (blockState.isAir() && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos)) {
+				if ((blockState.isAir() || blockState.is(Blocks.SNOW)) && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos)) {
 					return true;
 				}
 			}

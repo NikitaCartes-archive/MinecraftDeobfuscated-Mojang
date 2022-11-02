@@ -133,7 +133,8 @@ public class LegacyUnicodeBitmapsProvider implements GlyphProvider {
 	}
 
 	private static ResourceLocation getSheetLocation(String string, int i) {
-		ResourceLocation resourceLocation = new ResourceLocation(String.format(Locale.ROOT, string, String.format("%02x", i / 256)));
+		String string2 = String.format(Locale.ROOT, "%02x", i / 256);
+		ResourceLocation resourceLocation = new ResourceLocation(String.format(Locale.ROOT, string, string2));
 		return resourceLocation.withPrefix("textures/");
 	}
 

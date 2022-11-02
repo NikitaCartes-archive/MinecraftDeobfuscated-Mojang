@@ -2,82 +2,94 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 public class BastionBridgePools {
-	public static void bootstrap() {
-	}
-
-	static {
+	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
+		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+		Holder<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.ENTRANCE_REPLACEMENT);
+		Holder<StructureProcessorList> holder2 = holderGetter.getOrThrow(ProcessorLists.BASTION_GENERIC_DEGRADATION);
+		Holder<StructureProcessorList> holder3 = holderGetter.getOrThrow(ProcessorLists.BRIDGE);
+		Holder<StructureProcessorList> holder4 = holderGetter.getOrThrow(ProcessorLists.RAMPART_DEGRADATION);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+		Holder<StructureTemplatePool> holder5 = holderGetter2.getOrThrow(Pools.EMPTY);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/starting_pieces",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/starting_pieces"),
-				new ResourceLocation("empty"),
+				holder5,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.single("bastion/bridge/starting_pieces/entrance", ProcessorLists.ENTRANCE_REPLACEMENT), 1),
-					Pair.of(StructurePoolElement.single("bastion/bridge/starting_pieces/entrance_face", ProcessorLists.BASTION_GENERIC_DEGRADATION), 1)
+					Pair.of(StructurePoolElement.single("bastion/bridge/starting_pieces/entrance", holder), 1),
+					Pair.of(StructurePoolElement.single("bastion/bridge/starting_pieces/entrance_face", holder2), 1)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/bridge_pieces",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/bridge_pieces"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/bridge/bridge_pieces/bridge", ProcessorLists.BRIDGE), 1)),
-				StructureTemplatePool.Projection.RIGID
+				holder5, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/bridge/bridge_pieces/bridge", holder3), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/legs",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/legs"),
-				new ResourceLocation("empty"),
+				holder5,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.single("bastion/bridge/legs/leg_0", ProcessorLists.BASTION_GENERIC_DEGRADATION), 1),
-					Pair.of(StructurePoolElement.single("bastion/bridge/legs/leg_1", ProcessorLists.BASTION_GENERIC_DEGRADATION), 1)
+					Pair.of(StructurePoolElement.single("bastion/bridge/legs/leg_0", holder2), 1),
+					Pair.of(StructurePoolElement.single("bastion/bridge/legs/leg_1", holder2), 1)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/walls",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/walls"),
-				new ResourceLocation("empty"),
+				holder5,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.single("bastion/bridge/walls/wall_base_0", ProcessorLists.RAMPART_DEGRADATION), 1),
-					Pair.of(StructurePoolElement.single("bastion/bridge/walls/wall_base_1", ProcessorLists.RAMPART_DEGRADATION), 1)
+					Pair.of(StructurePoolElement.single("bastion/bridge/walls/wall_base_0", holder4), 1),
+					Pair.of(StructurePoolElement.single("bastion/bridge/walls/wall_base_1", holder4), 1)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/ramparts",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/ramparts"),
-				new ResourceLocation("empty"),
+				holder5,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.single("bastion/bridge/ramparts/rampart_0", ProcessorLists.RAMPART_DEGRADATION), 1),
-					Pair.of(StructurePoolElement.single("bastion/bridge/ramparts/rampart_1", ProcessorLists.RAMPART_DEGRADATION), 1)
+					Pair.of(StructurePoolElement.single("bastion/bridge/ramparts/rampart_0", holder4), 1),
+					Pair.of(StructurePoolElement.single("bastion/bridge/ramparts/rampart_1", holder4), 1)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/rampart_plates",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/rampart_plates"),
-				new ResourceLocation("empty"),
-				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/bridge/rampart_plates/plate_0", ProcessorLists.RAMPART_DEGRADATION), 1)),
+				holder5,
+				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/bridge/rampart_plates/plate_0", holder4), 1)),
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
+			bootstapContext,
+			"bastion/bridge/connectors",
 			new StructureTemplatePool(
-				new ResourceLocation("bastion/bridge/connectors"),
-				new ResourceLocation("empty"),
+				holder5,
 				ImmutableList.of(
-					Pair.of(StructurePoolElement.single("bastion/bridge/connectors/back_bridge_top", ProcessorLists.BASTION_GENERIC_DEGRADATION), 1),
-					Pair.of(StructurePoolElement.single("bastion/bridge/connectors/back_bridge_bottom", ProcessorLists.BASTION_GENERIC_DEGRADATION), 1)
+					Pair.of(StructurePoolElement.single("bastion/bridge/connectors/back_bridge_top", holder2), 1),
+					Pair.of(StructurePoolElement.single("bastion/bridge/connectors/back_bridge_bottom", holder2), 1)
 				),
 				StructureTemplatePool.Projection.RIGID
 			)

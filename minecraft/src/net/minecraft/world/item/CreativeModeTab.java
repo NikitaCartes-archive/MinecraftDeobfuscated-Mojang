@@ -1,6 +1,10 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -17,6 +21,11 @@ public abstract class CreativeModeTab {
 	private ItemStackLinkedSet displayItems;
 	@Nullable
 	private ItemStackLinkedSet displayItemsSearchTab;
+	@Nullable
+	private CreativeModeTab.ItemDisplayParameters cachedParameters;
+	private boolean searchTreeDirty;
+	@Nullable
+	private Consumer<List<ItemStack>> searchTreeRebuilder;
 
 	public CreativeModeTab(int i, Component component) {
 		this.id = i;
@@ -42,7 +51,7 @@ public abstract class CreativeModeTab {
 
 	public abstract ItemStack makeIcon();
 
-	protected abstract void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output);
+	protected abstract void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl);
 
 	public String getBackgroundSuffix() {
 		return this.backgroundSuffix;
@@ -83,32 +92,47 @@ public abstract class CreativeModeTab {
 		return this.getColumn() == 5;
 	}
 
-	private ItemStackLinkedSet lazyBuildDisplayItems(FeatureFlagSet featureFlagSet, boolean bl) {
-		if (this.displayItems == null || this.displayItemsSearchTab == null) {
+	private ItemStackLinkedSet lazyBuildDisplayItems(FeatureFlagSet featureFlagSet, boolean bl, boolean bl2) {
+		CreativeModeTab.ItemDisplayParameters itemDisplayParameters = new CreativeModeTab.ItemDisplayParameters(featureFlagSet, bl2);
+		boolean bl3 = this.displayItems == null || this.displayItemsSearchTab == null || !Objects.equals(this.cachedParameters, itemDisplayParameters);
+		if (bl3) {
 			CreativeModeTab.ItemDisplayBuilder itemDisplayBuilder = new CreativeModeTab.ItemDisplayBuilder(this, featureFlagSet);
-			this.generateDisplayItems(featureFlagSet, itemDisplayBuilder);
+			this.generateDisplayItems(featureFlagSet, itemDisplayBuilder, bl2);
 			this.displayItems = itemDisplayBuilder.getTabContents();
 			this.displayItemsSearchTab = itemDisplayBuilder.getSearchTabContents();
+			this.cachedParameters = itemDisplayParameters;
+		}
+
+		if (this.searchTreeRebuilder != null && (bl3 || this.searchTreeDirty)) {
+			this.searchTreeRebuilder.accept(Lists.newArrayList(this.displayItemsSearchTab));
+			this.markSearchTreeRebuilt();
 		}
 
 		return bl ? this.displayItemsSearchTab : this.displayItems;
 	}
 
-	public ItemStackLinkedSet getDisplayItems(FeatureFlagSet featureFlagSet) {
-		return this.lazyBuildDisplayItems(featureFlagSet, false);
+	public ItemStackLinkedSet getDisplayItems(FeatureFlagSet featureFlagSet, boolean bl) {
+		return this.lazyBuildDisplayItems(featureFlagSet, false, bl);
 	}
 
-	public ItemStackLinkedSet getSearchTabDisplayItems(FeatureFlagSet featureFlagSet) {
-		return this.lazyBuildDisplayItems(featureFlagSet, true);
+	public ItemStackLinkedSet getSearchTabDisplayItems(FeatureFlagSet featureFlagSet, boolean bl) {
+		return this.lazyBuildDisplayItems(featureFlagSet, true, bl);
 	}
 
-	public boolean contains(FeatureFlagSet featureFlagSet, ItemStack itemStack) {
-		return this.getSearchTabDisplayItems(featureFlagSet).contains(itemStack);
+	public boolean contains(FeatureFlagSet featureFlagSet, ItemStack itemStack, boolean bl) {
+		return this.getSearchTabDisplayItems(featureFlagSet, bl).contains(itemStack);
 	}
 
-	public void invalidateDisplayListCache() {
-		this.displayItems = null;
-		this.displayItemsSearchTab = null;
+	public void setSearchTreeRebuilder(Consumer<List<ItemStack>> consumer) {
+		this.searchTreeRebuilder = consumer;
+	}
+
+	public void invalidateSearchTree() {
+		this.searchTreeDirty = true;
+	}
+
+	private void markSearchTreeRebuilt() {
+		this.searchTreeDirty = false;
 	}
 
 	static class ItemDisplayBuilder implements CreativeModeTab.Output {
@@ -156,6 +180,9 @@ public abstract class CreativeModeTab {
 		public ItemStackLinkedSet getSearchTabContents() {
 			return this.searchTabContents;
 		}
+	}
+
+	static record ItemDisplayParameters(FeatureFlagSet enabledFeatures, boolean hasPermissions) {
 	}
 
 	protected interface Output {

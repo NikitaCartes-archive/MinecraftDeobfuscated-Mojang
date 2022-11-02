@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -134,9 +133,7 @@ public class CreateWorldScreen extends Screen {
 		minecraft.managedBlock(completableFuture::isDone);
 		minecraft.setScreen(
 			new CreateWorldScreen(
-				screen,
-				WorldDataConfiguration.DEFAULT,
-				new WorldGenSettingsComponent((WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty())
+				screen, WorldDataConfiguration.DEFAULT, new WorldGenSettingsComponent((WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL))
 			)
 		);
 	}
@@ -148,9 +145,7 @@ public class CreateWorldScreen extends Screen {
 			screen,
 			worldCreationContext.dataConfiguration(),
 			new WorldGenSettingsComponent(
-				worldCreationContext,
-				WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()),
-				OptionalLong.of(worldCreationContext.options().seed())
+				worldCreationContext, WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()), worldCreationContext.options().seed()
 			)
 		);
 		createWorldScreen.initName = levelSettings.levelName();

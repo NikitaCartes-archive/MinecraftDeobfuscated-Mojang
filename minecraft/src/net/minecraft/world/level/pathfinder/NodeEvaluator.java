@@ -20,6 +20,7 @@ public abstract class NodeEvaluator {
 	protected boolean canPassDoors;
 	protected boolean canOpenDoors;
 	protected boolean canFloat;
+	protected boolean canWalkOverFences;
 
 	public void prepare(PathNavigationRegion pathNavigationRegion, Mob mob) {
 		this.level = pathNavigationRegion;
@@ -74,6 +75,10 @@ public abstract class NodeEvaluator {
 		this.canFloat = bl;
 	}
 
+	public void setCanWalkOverFences(boolean bl) {
+		this.canWalkOverFences = bl;
+	}
+
 	public boolean canPassDoors() {
 		return this.canPassDoors;
 	}
@@ -84,5 +89,9 @@ public abstract class NodeEvaluator {
 
 	public boolean canFloat() {
 		return this.canFloat;
+	}
+
+	public boolean canWalkOverFences() {
+		return this.canWalkOverFences;
 	}
 }

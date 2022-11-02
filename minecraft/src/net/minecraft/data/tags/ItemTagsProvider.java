@@ -1,6 +1,8 @@
 package net.minecraft.data.tags;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.TagBuilder;
@@ -8,11 +10,11 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
-public abstract class ItemTagsProvider extends TagsProvider<Item> {
+public abstract class ItemTagsProvider extends IntrinsicHolderTagsProvider<Item> {
 	private final Function<TagKey<Block>, TagBuilder> blockTags;
 
-	public ItemTagsProvider(PackOutput packOutput, TagsProvider<Block> tagsProvider) {
-		super(packOutput, Registry.ITEM);
+	public ItemTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture, TagsProvider<Block> tagsProvider) {
+		super(packOutput, Registry.ITEM_REGISTRY, completableFuture, item -> item.builtInRegistryHolder().key());
 		this.blockTags = tagsProvider::getOrCreateRawBuilder;
 	}
 

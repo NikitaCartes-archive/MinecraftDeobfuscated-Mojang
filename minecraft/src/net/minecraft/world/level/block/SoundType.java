@@ -14,7 +14,13 @@ public class SoundType {
 		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.GRASS_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
 	);
 	public static final SoundType LILY_PAD = new SoundType(
-		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.GRASS_STEP, SoundEvents.LILY_PAD_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
+		1.0F,
+		1.0F,
+		SoundEvents.BIG_DRIPLEAF_BREAK,
+		SoundEvents.BIG_DRIPLEAF_STEP,
+		SoundEvents.LILY_PAD_PLACE,
+		SoundEvents.BIG_DRIPLEAF_HIT,
+		SoundEvents.BIG_DRIPLEAF_FALL
 	);
 	public static final SoundType STONE = new SoundType(
 		1.0F, 1.0F, SoundEvents.STONE_BREAK, SoundEvents.STONE_STEP, SoundEvents.STONE_PLACE, SoundEvents.STONE_HIT, SoundEvents.STONE_FALL

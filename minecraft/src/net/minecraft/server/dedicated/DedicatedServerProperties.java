@@ -27,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -40,7 +39,6 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.slf4j.Logger;
 
 public class DedicatedServerProperties extends Settings<DedicatedServerProperties> {
@@ -104,7 +102,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 		super(properties);
 		String string = this.get("level-seed", "");
 		boolean bl = this.get("generate-structures", true);
-		long l = WorldOptions.parseSeed(string).orElse(RandomSource.create().nextLong());
+		long l = WorldOptions.parseSeedOrElseRandom(string);
 		this.worldOptions = new WorldOptions(l, bl, false);
 		this.worldDimensionData = new DedicatedServerProperties.WorldDimensionData(
 			this.get("generator-settings", stringx -> GsonHelper.parse(!stringx.isEmpty() ? stringx : "{}"), new JsonObject()),
@@ -220,8 +218,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 					.parse(new Dynamic<>(registryOps, this.generatorSettings()))
 					.resultOrPartial(DedicatedServerProperties.LOGGER::error);
 				if (optional.isPresent()) {
-					Registry<StructureSet> registry2 = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-					return worldDimensions.replaceOverworldGenerator(registryAccess, new FlatLevelSource(registry2, (FlatLevelGeneratorSettings)optional.get()));
+					return worldDimensions.replaceOverworldGenerator(registryAccess, new FlatLevelSource((FlatLevelGeneratorSettings)optional.get()));
 				}
 			}
 

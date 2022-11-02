@@ -1,5 +1,7 @@
 package net.minecraft.data.tags;
 
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.PaintingVariantTags;
@@ -7,12 +9,12 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.decoration.PaintingVariants;
 
 public class PaintingVariantTagsProvider extends TagsProvider<PaintingVariant> {
-	public PaintingVariantTagsProvider(PackOutput packOutput) {
-		super(packOutput, Registry.PAINTING_VARIANT);
+	public PaintingVariantTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+		super(packOutput, Registry.PAINTING_VARIANT_REGISTRY, completableFuture);
 	}
 
 	@Override
-	protected void addTags() {
+	protected void addTags(HolderLookup.Provider provider) {
 		this.tag(PaintingVariantTags.PLACEABLE)
 			.add(
 				PaintingVariants.KEBAB,

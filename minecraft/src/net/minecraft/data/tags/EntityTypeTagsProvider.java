@@ -1,17 +1,19 @@
 package net.minecraft.data.tags;
 
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 
-public class EntityTypeTagsProvider extends TagsProvider<EntityType<?>> {
-	public EntityTypeTagsProvider(PackOutput packOutput) {
-		super(packOutput, Registry.ENTITY_TYPE);
+public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityType<?>> {
+	public EntityTypeTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+		super(packOutput, Registry.ENTITY_TYPE_REGISTRY, completableFuture, entityType -> entityType.builtInRegistryHolder().key());
 	}
 
 	@Override
-	protected void addTags() {
+	protected void addTags(HolderLookup.Provider provider) {
 		this.tag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON);
 		this.tag(EntityTypeTags.RAIDERS)
 			.add(EntityType.EVOKER, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.VINDICATOR, EntityType.ILLUSIONER, EntityType.WITCH);

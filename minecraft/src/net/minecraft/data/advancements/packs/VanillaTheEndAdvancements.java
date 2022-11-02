@@ -15,6 +15,7 @@ import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +27,7 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 	@Override
-	public void generate(Consumer<Advancement> consumer) {
+	public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
 		Advancement advancement = Advancement.Builder.advancement()
 			.display(
 				Blocks.END_STONE,

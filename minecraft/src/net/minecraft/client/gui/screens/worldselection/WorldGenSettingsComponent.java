@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -62,12 +61,18 @@ public class WorldGenSettingsComponent implements Renderable {
 	private Button importSettingsButton;
 	private WorldCreationContext settings;
 	private Optional<Holder<WorldPreset>> preset;
-	private OptionalLong seed;
+	private long seed;
 
-	public WorldGenSettingsComponent(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, OptionalLong optionalLong) {
+	public WorldGenSettingsComponent(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, long l) {
 		this.settings = worldCreationContext;
 		this.preset = findPreset(worldCreationContext, optional);
-		this.seed = optionalLong;
+		this.seed = l;
+	}
+
+	public WorldGenSettingsComponent(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional) {
+		this.settings = worldCreationContext;
+		this.preset = findPreset(worldCreationContext, optional);
+		this.seed = WorldOptions.randomSeed();
 	}
 
 	private static Optional<Holder<WorldPreset>> findPreset(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional) {
@@ -78,8 +83,8 @@ public class WorldGenSettingsComponent implements Renderable {
 		this.font = font;
 		this.width = createWorldScreen.width;
 		this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, Component.translatable("selectWorld.enterSeed"));
-		this.seedEdit.setValue(toString(this.seed));
-		this.seedEdit.setResponder(string -> this.seed = WorldOptions.parseSeed(this.seedEdit.getValue()));
+		this.seedEdit.setValue(Long.toString(this.seed));
+		this.seedEdit.setResponder(string -> this.seed = WorldOptions.parseSeedOrElseRandom(this.seedEdit.getValue()));
 		createWorldScreen.addWidget(this.seedEdit);
 		int i = this.width / 2 - 155;
 		int j = this.width / 2 + 5;
@@ -220,8 +225,8 @@ public class WorldGenSettingsComponent implements Renderable {
 		this.settings = this.settings.withSettings(worldOptions, worldDimensions);
 		this.preset = findPreset(this.settings, WorldPresets.fromSettings(worldDimensions.dimensions()));
 		this.selectWorldTypeButton(true);
-		this.seed = OptionalLong.of(worldOptions.seed());
-		this.seedEdit.setValue(toString(this.seed));
+		this.seed = worldOptions.seed();
+		this.seedEdit.setValue(Long.toString(this.seed));
 	}
 
 	public void tick() {
@@ -252,12 +257,8 @@ public class WorldGenSettingsComponent implements Renderable {
 		this.settings = worldCreationContext;
 	}
 
-	private static String toString(OptionalLong optionalLong) {
-		return optionalLong.isPresent() ? Long.toString(optionalLong.getAsLong()) : "";
-	}
-
 	public WorldOptions createFinalOptions(boolean bl, boolean bl2) {
-		OptionalLong optionalLong = WorldOptions.parseSeed(this.seedEdit.getValue());
+		long l = WorldOptions.parseSeedOrElseRandom(this.seedEdit.getValue());
 		WorldOptions worldOptions = this.settings.options();
 		if (bl || bl2) {
 			worldOptions = worldOptions.withBonusChest(false);
@@ -267,7 +268,7 @@ public class WorldGenSettingsComponent implements Renderable {
 			worldOptions = worldOptions.withStructures(false);
 		}
 
-		return worldOptions.withSeed(optionalLong);
+		return worldOptions.withSeed(l);
 	}
 
 	public boolean isDebug() {

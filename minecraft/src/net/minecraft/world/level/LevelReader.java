@@ -222,6 +222,6 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	default <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 		Registry<T> registry = this.registryAccess().registryOrThrow(resourceKey);
-		return HolderLookup.forRegistry(registry).filterFeatures(this.enabledFeatures());
+		return registry.asLookup().filterFeatures(this.enabledFeatures());
 	}
 }

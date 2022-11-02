@@ -149,11 +149,11 @@ public class ItemParser {
 	}
 
 	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.items.listTags().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
+		return SharedSuggestionProvider.suggestResource(this.items.listTagIds().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
 	}
 
 	private CompletableFuture<Suggestions> suggestItem(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.items.listElements().map(ResourceKey::location), suggestionsBuilder);
+		return SharedSuggestionProvider.suggestResource(this.items.listElementIds().map(ResourceKey::location), suggestionsBuilder);
 	}
 
 	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder) {

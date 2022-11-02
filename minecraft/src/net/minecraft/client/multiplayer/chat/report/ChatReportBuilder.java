@@ -80,7 +80,7 @@ public class ChatReportBuilder {
 	}
 
 	public boolean hasContent() {
-		return StringUtils.isNotEmpty(this.comments()) || !this.reportedMessages().isEmpty();
+		return StringUtils.isNotEmpty(this.comments()) || !this.reportedMessages().isEmpty() || this.reason() != null;
 	}
 
 	@Nullable

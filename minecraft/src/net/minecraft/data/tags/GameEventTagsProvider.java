@@ -1,12 +1,14 @@
 package net.minecraft.data.tags;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-public class GameEventTagsProvider extends TagsProvider<GameEvent> {
+public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent> {
 	@VisibleForTesting
 	static final GameEvent[] VIBRATIONS_EXCEPT_FLAP = new GameEvent[]{
 		GameEvent.BLOCK_ATTACH,
@@ -51,12 +53,12 @@ public class GameEventTagsProvider extends TagsProvider<GameEvent> {
 		GameEvent.TELEPORT
 	};
 
-	public GameEventTagsProvider(PackOutput packOutput) {
-		super(packOutput, Registry.GAME_EVENT);
+	public GameEventTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+		super(packOutput, Registry.GAME_EVENT_REGISTRY, completableFuture, gameEvent -> gameEvent.builtInRegistryHolder().key());
 	}
 
 	@Override
-	protected void addTags() {
+	protected void addTags(HolderLookup.Provider provider) {
 		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.FLAP);
 		this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
 		this.tag(GameEventTags.WARDEN_CAN_LISTEN).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);

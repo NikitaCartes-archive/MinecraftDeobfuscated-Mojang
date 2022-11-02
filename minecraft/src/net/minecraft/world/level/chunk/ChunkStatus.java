@@ -54,12 +54,7 @@ public class ChunkStatus {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
 				if (serverLevel.getServer().getWorldData().worldGenOptions().generateStructures()) {
 					chunkGenerator.createStructures(
-						serverLevel.registryAccess(),
-						serverLevel.getChunkSource().randomState(),
-						serverLevel.structureManager(),
-						chunkAccess,
-						structureTemplateManager,
-						serverLevel.getSeed()
+						serverLevel.registryAccess(), serverLevel.getChunkSource().getGeneratorState(), serverLevel.structureManager(), chunkAccess, structureTemplateManager
 					);
 				}
 
@@ -107,7 +102,6 @@ public class ChunkStatus {
 			} else {
 				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list, chunkStatus, -1);
 				return chunkGenerator.createBiomes(
-						serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
 						executor,
 						serverLevel.getChunkSource().randomState(),
 						Blender.of(worldGenRegion),

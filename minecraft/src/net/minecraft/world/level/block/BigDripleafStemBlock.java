@@ -99,14 +99,14 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-		Optional<BlockPos> optional = BlockUtil.getTopConnectedBlock(blockGetter, blockPos, blockState.getBlock(), Direction.UP, Blocks.BIG_DRIPLEAF);
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+		Optional<BlockPos> optional = BlockUtil.getTopConnectedBlock(levelReader, blockPos, blockState.getBlock(), Direction.UP, Blocks.BIG_DRIPLEAF);
 		if (!optional.isPresent()) {
 			return false;
 		} else {
 			BlockPos blockPos2 = ((BlockPos)optional.get()).above();
-			BlockState blockState2 = blockGetter.getBlockState(blockPos2);
-			return BigDripleafBlock.canPlaceAt(blockGetter, blockPos2, blockState2);
+			BlockState blockState2 = levelReader.getBlockState(blockPos2);
+			return BigDripleafBlock.canPlaceAt(levelReader, blockPos2, blockState2);
 		}
 	}
 

@@ -7,6 +7,8 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.util.Optional;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
 
 public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
@@ -30,9 +32,9 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 
 	public <T> DataResult<T> encode(Holder<E> holder, DynamicOps<T> dynamicOps, T object) {
 		if (dynamicOps instanceof RegistryOps<?> registryOps) {
-			Optional<? extends Registry<E>> optional = registryOps.registry(this.registryKey);
+			Optional<HolderOwner<E>> optional = registryOps.owner(this.registryKey);
 			if (optional.isPresent()) {
-				if (!holder.isValidInRegistry((Registry<E>)optional.get())) {
+				if (!holder.canSerializeIn((HolderOwner<E>)optional.get())) {
 					return DataResult.error("Element " + holder + " is not valid in current registry set");
 				}
 
@@ -50,11 +52,11 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 	@Override
 	public <T> DataResult<Pair<Holder<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
 		if (dynamicOps instanceof RegistryOps<?> registryOps) {
-			Optional<? extends Registry<E>> optional = registryOps.registry(this.registryKey);
+			Optional<HolderGetter<E>> optional = registryOps.getter(this.registryKey);
 			if (optional.isEmpty()) {
 				return DataResult.error("Registry does not exist: " + this.registryKey);
 			} else {
-				Registry<E> registry = (Registry<E>)optional.get();
+				HolderGetter<E> holderGetter = (HolderGetter<E>)optional.get();
 				DataResult<Pair<ResourceLocation, T>> dataResult = ResourceLocation.CODEC.decode(dynamicOps, object);
 				if (dataResult.result().isEmpty()) {
 					return !this.allowInline
@@ -63,8 +65,9 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 				} else {
 					Pair<ResourceLocation, T> pair = (Pair<ResourceLocation, T>)dataResult.result().get();
 					ResourceKey<E> resourceKey = ResourceKey.create(this.registryKey, pair.getFirst());
-					DataResult<? extends Holder<E>> dataResult2 = registry.getOrCreateHolder(resourceKey);
-					return dataResult2.<Pair<Holder<E>, T>>map(holder -> Pair.of(holder, pair.getSecond())).setLifecycle(Lifecycle.stable());
+					return ((DataResult)holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error("Failed to get element " + resourceKey)))
+						.<Pair<Holder<E>, T>>map(reference -> Pair.of(reference, pair.getSecond()))
+						.setLifecycle(Lifecycle.stable());
 				}
 			}
 		} else {

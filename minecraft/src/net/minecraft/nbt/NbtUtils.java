@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
@@ -215,12 +215,12 @@ public final class NbtUtils {
 		return compoundTag;
 	}
 
-	public static BlockState readBlockState(HolderLookup<Block> holderLookup, CompoundTag compoundTag) {
+	public static BlockState readBlockState(HolderGetter<Block> holderGetter, CompoundTag compoundTag) {
 		if (!compoundTag.contains("Name", 8)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("Name"));
-			Optional<? extends Holder<Block>> optional = holderLookup.get(ResourceKey.create(Registry.BLOCK_REGISTRY, resourceLocation));
+			Optional<? extends Holder<Block>> optional = holderGetter.get(ResourceKey.create(Registry.BLOCK_REGISTRY, resourceLocation));
 			if (optional.isEmpty()) {
 				return Blocks.AIR.defaultBlockState();
 			} else {

@@ -12,7 +12,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 
 public class PrimedTnt extends Entity {
@@ -82,7 +81,7 @@ public class PrimedTnt extends Entity {
 
 	private void explode() {
 		float f = 4.0F;
-		this.level.explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0F, Explosion.BlockInteraction.BREAK);
+		this.level.explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);
 	}
 
 	@Override

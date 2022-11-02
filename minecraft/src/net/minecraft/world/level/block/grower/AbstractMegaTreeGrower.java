@@ -3,6 +3,8 @@ package net.minecraft.world.level.block.grower;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
@@ -27,29 +29,37 @@ public abstract class AbstractMegaTreeGrower extends AbstractTreeGrower {
 	}
 
 	@Nullable
-	protected abstract Holder<? extends ConfiguredFeature<?, ?>> getConfiguredMegaFeature(RandomSource randomSource);
+	protected abstract ResourceKey<ConfiguredFeature<?, ?>> getConfiguredMegaFeature(RandomSource randomSource);
 
 	public boolean placeMega(
 		ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, RandomSource randomSource, int i, int j
 	) {
-		Holder<? extends ConfiguredFeature<?, ?>> holder = this.getConfiguredMegaFeature(randomSource);
-		if (holder == null) {
+		ResourceKey<ConfiguredFeature<?, ?>> resourceKey = this.getConfiguredMegaFeature(randomSource);
+		if (resourceKey == null) {
 			return false;
 		} else {
-			ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)holder.value();
-			BlockState blockState2 = Blocks.AIR.defaultBlockState();
-			serverLevel.setBlock(blockPos.offset(i, 0, j), blockState2, 4);
-			serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);
-			serverLevel.setBlock(blockPos.offset(i, 0, j + 1), blockState2, 4);
-			serverLevel.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState2, 4);
-			if (configuredFeature.place(serverLevel, chunkGenerator, randomSource, blockPos.offset(i, 0, j))) {
-				return true;
-			} else {
-				serverLevel.setBlock(blockPos.offset(i, 0, j), blockState, 4);
-				serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState, 4);
-				serverLevel.setBlock(blockPos.offset(i, 0, j + 1), blockState, 4);
-				serverLevel.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState, 4);
+			Holder<ConfiguredFeature<?, ?>> holder = (Holder<ConfiguredFeature<?, ?>>)serverLevel.registryAccess()
+				.registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY)
+				.getHolder(resourceKey)
+				.orElse(null);
+			if (holder == null) {
 				return false;
+			} else {
+				ConfiguredFeature<?, ?> configuredFeature = holder.value();
+				BlockState blockState2 = Blocks.AIR.defaultBlockState();
+				serverLevel.setBlock(blockPos.offset(i, 0, j), blockState2, 4);
+				serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);
+				serverLevel.setBlock(blockPos.offset(i, 0, j + 1), blockState2, 4);
+				serverLevel.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState2, 4);
+				if (configuredFeature.place(serverLevel, chunkGenerator, randomSource, blockPos.offset(i, 0, j))) {
+					return true;
+				} else {
+					serverLevel.setBlock(blockPos.offset(i, 0, j), blockState, 4);
+					serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState, 4);
+					serverLevel.setBlock(blockPos.offset(i, 0, j + 1), blockState, 4);
+					serverLevel.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState, 4);
+					return false;
+				}
 			}
 		}
 	}

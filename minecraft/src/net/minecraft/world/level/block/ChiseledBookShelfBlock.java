@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -53,22 +54,18 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 			} else {
 				ItemStack itemStack = player.getItemInHand(interactionHand);
 				return itemStack.is(ItemTags.BOOKSHELF_BOOKS)
-					? tryAddBook(blockState, level, blockPos, player, chiseledBookShelfBlockEntity, itemStack)
-					: tryRemoveBook(blockState, level, blockPos, player, chiseledBookShelfBlockEntity);
+					? tryAddBook(level, blockPos, player, chiseledBookShelfBlockEntity, itemStack)
+					: tryRemoveBook(level, blockPos, player, chiseledBookShelfBlockEntity);
 			}
 		} else {
 			return InteractionResult.PASS;
 		}
 	}
 
-	private static InteractionResult tryRemoveBook(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity
-	) {
+	private static InteractionResult tryRemoveBook(Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
 		if (!chiseledBookShelfBlockEntity.isEmpty()) {
 			ItemStack itemStack = chiseledBookShelfBlockEntity.removeBook();
 			level.playSound(null, blockPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
-			int i = chiseledBookShelfBlockEntity.bookCount();
-			level.setBlock(blockPos, blockState.setValue(BOOKS_STORED, Integer.valueOf(i)).setValue(LAST_INTERACTION_BOOK_SLOT, Integer.valueOf(i + 1)), 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 			if (!player.getInventory().add(itemStack)) {
 				player.drop(itemStack, false);
@@ -79,18 +76,17 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 	}
 
 	private static InteractionResult tryAddBook(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity, ItemStack itemStack
+		Level level, BlockPos blockPos, Player player, ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity, ItemStack itemStack
 	) {
-		if (!chiseledBookShelfBlockEntity.isFull()) {
-			chiseledBookShelfBlockEntity.addBook(itemStack.split(1));
+		if (chiseledBookShelfBlockEntity.addBook(itemStack.split(1))) {
 			level.playSound(null, blockPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
 			if (player.isCreative()) {
 				itemStack.grow(1);
 			}
 
-			int i = chiseledBookShelfBlockEntity.bookCount();
-			level.setBlock(blockPos, blockState.setValue(BOOKS_STORED, Integer.valueOf(i)).setValue(LAST_INTERACTION_BOOK_SLOT, Integer.valueOf(i)), 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+		} else {
+			itemStack.grow(1);
 		}
 
 		return InteractionResult.CONSUME;
@@ -111,10 +107,8 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState.is(blockState2.getBlock())) {
 			if (level.getBlockEntity(blockPos) instanceof ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
-				for (ItemStack itemStack = chiseledBookShelfBlockEntity.removeBook(); !itemStack.isEmpty(); itemStack = chiseledBookShelfBlockEntity.removeBook()) {
-					Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
-				}
-
+				List<ItemStack> list = chiseledBookShelfBlockEntity.removeAllBooksWithoutBlockStateUpdate();
+				list.forEach(itemStack -> Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack));
 				level.updateNeighbourForOutputSignal(blockPos, this);
 			}
 

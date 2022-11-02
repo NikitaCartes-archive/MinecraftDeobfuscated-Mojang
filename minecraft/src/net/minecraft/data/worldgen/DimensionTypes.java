@@ -1,9 +1,6 @@
 package net.minecraft.data.worldgen;
 
 import java.util.OptionalLong;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -11,9 +8,8 @@ import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class DimensionTypes {
-	public static Holder<DimensionType> bootstrap(Registry<DimensionType> registry) {
-		BuiltinRegistries.register(
-			registry,
+	public static void bootstrap(BootstapContext<DimensionType> bootstapContext) {
+		bootstapContext.register(
 			BuiltinDimensionTypes.OVERWORLD,
 			new DimensionType(
 				OptionalLong.empty(),
@@ -33,8 +29,7 @@ public class DimensionTypes {
 				new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
 			)
 		);
-		BuiltinRegistries.register(
-			registry,
+		bootstapContext.register(
 			BuiltinDimensionTypes.NETHER,
 			new DimensionType(
 				OptionalLong.of(18000L),
@@ -54,8 +49,7 @@ public class DimensionTypes {
 				new DimensionType.MonsterSettings(true, false, ConstantInt.of(11), 15)
 			)
 		);
-		BuiltinRegistries.register(
-			registry,
+		bootstapContext.register(
 			BuiltinDimensionTypes.END,
 			new DimensionType(
 				OptionalLong.of(6000L),
@@ -75,8 +69,7 @@ public class DimensionTypes {
 				new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0)
 			)
 		);
-		return BuiltinRegistries.register(
-			registry,
+		bootstapContext.register(
 			BuiltinDimensionTypes.OVERWORLD_CAVES,
 			new DimensionType(
 				OptionalLong.empty(),

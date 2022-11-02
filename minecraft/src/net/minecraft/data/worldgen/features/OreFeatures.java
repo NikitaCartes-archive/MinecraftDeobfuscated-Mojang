@@ -1,7 +1,8 @@
 package net.minecraft.data.worldgen.features;
 
 import java.util.List;
-import net.minecraft.core.Holder;
+import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -12,150 +13,131 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
 public class OreFeatures {
-	public static final RuleTest NATURAL_STONE = new TagMatchTest(BlockTags.BASE_STONE_OVERWORLD);
-	public static final RuleTest STONE_ORE_REPLACEABLES = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
-	public static final RuleTest DEEPSLATE_ORE_REPLACEABLES = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
-	public static final RuleTest NETHERRACK = new BlockMatchTest(Blocks.NETHERRACK);
-	public static final RuleTest NETHER_ORE_REPLACEABLES = new TagMatchTest(BlockTags.BASE_STONE_NETHER);
-	public static final List<OreConfiguration.TargetBlockState> ORE_IRON_TARGET_LIST = List.of(
-		OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.IRON_ORE.defaultBlockState()),
-		OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_IRON_ORE.defaultBlockState())
-	);
-	public static final List<OreConfiguration.TargetBlockState> ORE_GOLD_TARGET_LIST = List.of(
-		OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.GOLD_ORE.defaultBlockState()),
-		OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState())
-	);
-	public static final List<OreConfiguration.TargetBlockState> ORE_DIAMOND_TARGET_LIST = List.of(
-		OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.DIAMOND_ORE.defaultBlockState()),
-		OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState())
-	);
-	public static final List<OreConfiguration.TargetBlockState> ORE_LAPIS_TARGET_LIST = List.of(
-		OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.LAPIS_ORE.defaultBlockState()),
-		OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState())
-	);
-	public static final List<OreConfiguration.TargetBlockState> ORE_COPPER_TARGET_LIST = List.of(
-		OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.COPPER_ORE.defaultBlockState()),
-		OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_COPPER_ORE.defaultBlockState())
-	);
-	public static final List<OreConfiguration.TargetBlockState> ORE_COAL_TARGET_LIST = List.of(
-		OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.COAL_ORE.defaultBlockState()),
-		OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_COAL_ORE.defaultBlockState())
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_MAGMA = FeatureUtils.register(
-		"ore_magma", Feature.ORE, new OreConfiguration(NETHERRACK, Blocks.MAGMA_BLOCK.defaultBlockState(), 33)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_SOUL_SAND = FeatureUtils.register(
-		"ore_soul_sand", Feature.ORE, new OreConfiguration(NETHERRACK, Blocks.SOUL_SAND.defaultBlockState(), 12)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_NETHER_GOLD = FeatureUtils.register(
-		"ore_nether_gold", Feature.ORE, new OreConfiguration(NETHERRACK, Blocks.NETHER_GOLD_ORE.defaultBlockState(), 10)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_QUARTZ = FeatureUtils.register(
-		"ore_quartz", Feature.ORE, new OreConfiguration(NETHERRACK, Blocks.NETHER_QUARTZ_ORE.defaultBlockState(), 14)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_GRAVEL_NETHER = FeatureUtils.register(
-		"ore_gravel_nether", Feature.ORE, new OreConfiguration(NETHERRACK, Blocks.GRAVEL.defaultBlockState(), 33)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_BLACKSTONE = FeatureUtils.register(
-		"ore_blackstone", Feature.ORE, new OreConfiguration(NETHERRACK, Blocks.BLACKSTONE.defaultBlockState(), 33)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_DIRT = FeatureUtils.register(
-		"ore_dirt", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.DIRT.defaultBlockState(), 33)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_GRAVEL = FeatureUtils.register(
-		"ore_gravel", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.GRAVEL.defaultBlockState(), 33)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_GRANITE = FeatureUtils.register(
-		"ore_granite", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.GRANITE.defaultBlockState(), 64)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_DIORITE = FeatureUtils.register(
-		"ore_diorite", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.DIORITE.defaultBlockState(), 64)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_ANDESITE = FeatureUtils.register(
-		"ore_andesite", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.ANDESITE.defaultBlockState(), 64)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_TUFF = FeatureUtils.register(
-		"ore_tuff", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.TUFF.defaultBlockState(), 64)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_COAL = FeatureUtils.register(
-		"ore_coal", Feature.ORE, new OreConfiguration(ORE_COAL_TARGET_LIST, 17)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_COAL_BURIED = FeatureUtils.register(
-		"ore_coal_buried", Feature.ORE, new OreConfiguration(ORE_COAL_TARGET_LIST, 17, 0.5F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_IRON = FeatureUtils.register(
-		"ore_iron", Feature.ORE, new OreConfiguration(ORE_IRON_TARGET_LIST, 9)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_IRON_SMALL = FeatureUtils.register(
-		"ore_iron_small", Feature.ORE, new OreConfiguration(ORE_IRON_TARGET_LIST, 4)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_GOLD = FeatureUtils.register(
-		"ore_gold", Feature.ORE, new OreConfiguration(ORE_GOLD_TARGET_LIST, 9)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_GOLD_BURIED = FeatureUtils.register(
-		"ore_gold_buried", Feature.ORE, new OreConfiguration(ORE_GOLD_TARGET_LIST, 9, 0.5F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_REDSTONE = FeatureUtils.register(
-		"ore_redstone",
-		Feature.ORE,
-		new OreConfiguration(
-			List.of(
-				OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.REDSTONE_ORE.defaultBlockState()),
-				OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_REDSTONE_ORE.defaultBlockState())
-			),
-			8
-		)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_DIAMOND_SMALL = FeatureUtils.register(
-		"ore_diamond_small", Feature.ORE, new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 4, 0.5F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_DIAMOND_LARGE = FeatureUtils.register(
-		"ore_diamond_large", Feature.ORE, new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 12, 0.7F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_DIAMOND_BURIED = FeatureUtils.register(
-		"ore_diamond_buried", Feature.ORE, new OreConfiguration(ORE_DIAMOND_TARGET_LIST, 8, 1.0F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_LAPIS = FeatureUtils.register(
-		"ore_lapis", Feature.ORE, new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_LAPIS_BURIED = FeatureUtils.register(
-		"ore_lapis_buried", Feature.ORE, new OreConfiguration(ORE_LAPIS_TARGET_LIST, 7, 1.0F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_INFESTED = FeatureUtils.register(
-		"ore_infested",
-		Feature.ORE,
-		new OreConfiguration(
-			List.of(
-				OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.INFESTED_STONE.defaultBlockState()),
-				OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.INFESTED_DEEPSLATE.defaultBlockState())
-			),
-			9
-		)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_EMERALD = FeatureUtils.register(
-		"ore_emerald",
-		Feature.ORE,
-		new OreConfiguration(
-			List.of(
-				OreConfiguration.target(STONE_ORE_REPLACEABLES, Blocks.EMERALD_ORE.defaultBlockState()),
-				OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, Blocks.DEEPSLATE_EMERALD_ORE.defaultBlockState())
-			),
-			3
-		)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_ANCIENT_DEBRIS_LARGE = FeatureUtils.register(
-		"ore_ancient_debris_large", Feature.SCATTERED_ORE, new OreConfiguration(NETHER_ORE_REPLACEABLES, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 3, 1.0F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_ANCIENT_DEBRIS_SMALL = FeatureUtils.register(
-		"ore_ancient_debris_small", Feature.SCATTERED_ORE, new OreConfiguration(NETHER_ORE_REPLACEABLES, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 2, 1.0F)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_COPPPER_SMALL = FeatureUtils.register(
-		"ore_copper_small", Feature.ORE, new OreConfiguration(ORE_COPPER_TARGET_LIST, 10)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_COPPER_LARGE = FeatureUtils.register(
-		"ore_copper_large", Feature.ORE, new OreConfiguration(ORE_COPPER_TARGET_LIST, 20)
-	);
-	public static final Holder<ConfiguredFeature<OreConfiguration, ?>> ORE_CLAY = FeatureUtils.register(
-		"ore_clay", Feature.ORE, new OreConfiguration(NATURAL_STONE, Blocks.CLAY.defaultBlockState(), 33)
-	);
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_MAGMA = FeatureUtils.createKey("ore_magma");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_SOUL_SAND = FeatureUtils.createKey("ore_soul_sand");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_NETHER_GOLD = FeatureUtils.createKey("ore_nether_gold");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_QUARTZ = FeatureUtils.createKey("ore_quartz");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_GRAVEL_NETHER = FeatureUtils.createKey("ore_gravel_nether");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_BLACKSTONE = FeatureUtils.createKey("ore_blackstone");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_DIRT = FeatureUtils.createKey("ore_dirt");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_GRAVEL = FeatureUtils.createKey("ore_gravel");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_GRANITE = FeatureUtils.createKey("ore_granite");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_DIORITE = FeatureUtils.createKey("ore_diorite");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_ANDESITE = FeatureUtils.createKey("ore_andesite");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_TUFF = FeatureUtils.createKey("ore_tuff");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_COAL = FeatureUtils.createKey("ore_coal");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_COAL_BURIED = FeatureUtils.createKey("ore_coal_buried");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_IRON = FeatureUtils.createKey("ore_iron");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_IRON_SMALL = FeatureUtils.createKey("ore_iron_small");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_GOLD = FeatureUtils.createKey("ore_gold");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_GOLD_BURIED = FeatureUtils.createKey("ore_gold_buried");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_REDSTONE = FeatureUtils.createKey("ore_redstone");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_DIAMOND_SMALL = FeatureUtils.createKey("ore_diamond_small");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_DIAMOND_LARGE = FeatureUtils.createKey("ore_diamond_large");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_DIAMOND_BURIED = FeatureUtils.createKey("ore_diamond_buried");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_LAPIS = FeatureUtils.createKey("ore_lapis");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_LAPIS_BURIED = FeatureUtils.createKey("ore_lapis_buried");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_INFESTED = FeatureUtils.createKey("ore_infested");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_EMERALD = FeatureUtils.createKey("ore_emerald");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_ANCIENT_DEBRIS_LARGE = FeatureUtils.createKey("ore_ancient_debris_large");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_ANCIENT_DEBRIS_SMALL = FeatureUtils.createKey("ore_ancient_debris_small");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_COPPPER_SMALL = FeatureUtils.createKey("ore_copper_small");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_COPPER_LARGE = FeatureUtils.createKey("ore_copper_large");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> ORE_CLAY = FeatureUtils.createKey("ore_clay");
+
+	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
+		RuleTest ruleTest = new TagMatchTest(BlockTags.BASE_STONE_OVERWORLD);
+		RuleTest ruleTest2 = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
+		RuleTest ruleTest3 = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+		RuleTest ruleTest4 = new BlockMatchTest(Blocks.NETHERRACK);
+		RuleTest ruleTest5 = new TagMatchTest(BlockTags.BASE_STONE_NETHER);
+		List<OreConfiguration.TargetBlockState> list = List.of(
+			OreConfiguration.target(ruleTest2, Blocks.IRON_ORE.defaultBlockState()), OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_IRON_ORE.defaultBlockState())
+		);
+		List<OreConfiguration.TargetBlockState> list2 = List.of(
+			OreConfiguration.target(ruleTest2, Blocks.GOLD_ORE.defaultBlockState()), OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState())
+		);
+		List<OreConfiguration.TargetBlockState> list3 = List.of(
+			OreConfiguration.target(ruleTest2, Blocks.DIAMOND_ORE.defaultBlockState()),
+			OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState())
+		);
+		List<OreConfiguration.TargetBlockState> list4 = List.of(
+			OreConfiguration.target(ruleTest2, Blocks.LAPIS_ORE.defaultBlockState()), OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState())
+		);
+		List<OreConfiguration.TargetBlockState> list5 = List.of(
+			OreConfiguration.target(ruleTest2, Blocks.COPPER_ORE.defaultBlockState()),
+			OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_COPPER_ORE.defaultBlockState())
+		);
+		List<OreConfiguration.TargetBlockState> list6 = List.of(
+			OreConfiguration.target(ruleTest2, Blocks.COAL_ORE.defaultBlockState()), OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_COAL_ORE.defaultBlockState())
+		);
+		FeatureUtils.register(bootstapContext, ORE_MAGMA, Feature.ORE, new OreConfiguration(ruleTest4, Blocks.MAGMA_BLOCK.defaultBlockState(), 33));
+		FeatureUtils.register(bootstapContext, ORE_SOUL_SAND, Feature.ORE, new OreConfiguration(ruleTest4, Blocks.SOUL_SAND.defaultBlockState(), 12));
+		FeatureUtils.register(bootstapContext, ORE_NETHER_GOLD, Feature.ORE, new OreConfiguration(ruleTest4, Blocks.NETHER_GOLD_ORE.defaultBlockState(), 10));
+		FeatureUtils.register(bootstapContext, ORE_QUARTZ, Feature.ORE, new OreConfiguration(ruleTest4, Blocks.NETHER_QUARTZ_ORE.defaultBlockState(), 14));
+		FeatureUtils.register(bootstapContext, ORE_GRAVEL_NETHER, Feature.ORE, new OreConfiguration(ruleTest4, Blocks.GRAVEL.defaultBlockState(), 33));
+		FeatureUtils.register(bootstapContext, ORE_BLACKSTONE, Feature.ORE, new OreConfiguration(ruleTest4, Blocks.BLACKSTONE.defaultBlockState(), 33));
+		FeatureUtils.register(bootstapContext, ORE_DIRT, Feature.ORE, new OreConfiguration(ruleTest, Blocks.DIRT.defaultBlockState(), 33));
+		FeatureUtils.register(bootstapContext, ORE_GRAVEL, Feature.ORE, new OreConfiguration(ruleTest, Blocks.GRAVEL.defaultBlockState(), 33));
+		FeatureUtils.register(bootstapContext, ORE_GRANITE, Feature.ORE, new OreConfiguration(ruleTest, Blocks.GRANITE.defaultBlockState(), 64));
+		FeatureUtils.register(bootstapContext, ORE_DIORITE, Feature.ORE, new OreConfiguration(ruleTest, Blocks.DIORITE.defaultBlockState(), 64));
+		FeatureUtils.register(bootstapContext, ORE_ANDESITE, Feature.ORE, new OreConfiguration(ruleTest, Blocks.ANDESITE.defaultBlockState(), 64));
+		FeatureUtils.register(bootstapContext, ORE_TUFF, Feature.ORE, new OreConfiguration(ruleTest, Blocks.TUFF.defaultBlockState(), 64));
+		FeatureUtils.register(bootstapContext, ORE_COAL, Feature.ORE, new OreConfiguration(list6, 17));
+		FeatureUtils.register(bootstapContext, ORE_COAL_BURIED, Feature.ORE, new OreConfiguration(list6, 17, 0.5F));
+		FeatureUtils.register(bootstapContext, ORE_IRON, Feature.ORE, new OreConfiguration(list, 9));
+		FeatureUtils.register(bootstapContext, ORE_IRON_SMALL, Feature.ORE, new OreConfiguration(list, 4));
+		FeatureUtils.register(bootstapContext, ORE_GOLD, Feature.ORE, new OreConfiguration(list2, 9));
+		FeatureUtils.register(bootstapContext, ORE_GOLD_BURIED, Feature.ORE, new OreConfiguration(list2, 9, 0.5F));
+		FeatureUtils.register(
+			bootstapContext,
+			ORE_REDSTONE,
+			Feature.ORE,
+			new OreConfiguration(
+				List.of(
+					OreConfiguration.target(ruleTest2, Blocks.REDSTONE_ORE.defaultBlockState()),
+					OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_REDSTONE_ORE.defaultBlockState())
+				),
+				8
+			)
+		);
+		FeatureUtils.register(bootstapContext, ORE_DIAMOND_SMALL, Feature.ORE, new OreConfiguration(list3, 4, 0.5F));
+		FeatureUtils.register(bootstapContext, ORE_DIAMOND_LARGE, Feature.ORE, new OreConfiguration(list3, 12, 0.7F));
+		FeatureUtils.register(bootstapContext, ORE_DIAMOND_BURIED, Feature.ORE, new OreConfiguration(list3, 8, 1.0F));
+		FeatureUtils.register(bootstapContext, ORE_LAPIS, Feature.ORE, new OreConfiguration(list4, 7));
+		FeatureUtils.register(bootstapContext, ORE_LAPIS_BURIED, Feature.ORE, new OreConfiguration(list4, 7, 1.0F));
+		FeatureUtils.register(
+			bootstapContext,
+			ORE_INFESTED,
+			Feature.ORE,
+			new OreConfiguration(
+				List.of(
+					OreConfiguration.target(ruleTest2, Blocks.INFESTED_STONE.defaultBlockState()),
+					OreConfiguration.target(ruleTest3, Blocks.INFESTED_DEEPSLATE.defaultBlockState())
+				),
+				9
+			)
+		);
+		FeatureUtils.register(
+			bootstapContext,
+			ORE_EMERALD,
+			Feature.ORE,
+			new OreConfiguration(
+				List.of(
+					OreConfiguration.target(ruleTest2, Blocks.EMERALD_ORE.defaultBlockState()),
+					OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_EMERALD_ORE.defaultBlockState())
+				),
+				3
+			)
+		);
+		FeatureUtils.register(
+			bootstapContext, ORE_ANCIENT_DEBRIS_LARGE, Feature.SCATTERED_ORE, new OreConfiguration(ruleTest5, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 3, 1.0F)
+		);
+		FeatureUtils.register(
+			bootstapContext, ORE_ANCIENT_DEBRIS_SMALL, Feature.SCATTERED_ORE, new OreConfiguration(ruleTest5, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 2, 1.0F)
+		);
+		FeatureUtils.register(bootstapContext, ORE_COPPPER_SMALL, Feature.ORE, new OreConfiguration(list5, 10));
+		FeatureUtils.register(bootstapContext, ORE_COPPER_LARGE, Feature.ORE, new OreConfiguration(list5, 20));
+		FeatureUtils.register(bootstapContext, ORE_CLAY, Feature.ORE, new OreConfiguration(ruleTest, Blocks.CLAY.defaultBlockState(), 33));
+	}
 }

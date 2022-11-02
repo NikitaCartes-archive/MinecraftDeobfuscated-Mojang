@@ -15,8 +15,7 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 
 public class ConcentricRingsStructurePlacement extends StructurePlacement {
 	public static final Codec<ConcentricRingsStructurePlacement> CODEC = RecordCodecBuilder.create(
@@ -81,8 +80,8 @@ public class ConcentricRingsStructurePlacement extends StructurePlacement {
 	}
 
 	@Override
-	protected boolean isPlacementChunk(ChunkGenerator chunkGenerator, RandomState randomState, long l, int i, int j) {
-		List<ChunkPos> list = chunkGenerator.getRingPositionsFor(this, randomState);
+	protected boolean isPlacementChunk(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
+		List<ChunkPos> list = chunkGeneratorStructureState.getRingPositionsFor(this);
 		return list == null ? false : list.contains(new ChunkPos(i, j));
 	}
 

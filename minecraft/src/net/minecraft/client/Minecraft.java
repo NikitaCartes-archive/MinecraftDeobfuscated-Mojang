@@ -453,8 +453,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			} else {
 				this.window.setIcon(this.getIconFile("icons", "icon_16x16.png"), this.getIconFile("icons", "icon_32x32.png"));
 			}
-		} catch (IOException var11) {
-			LOGGER.error("Couldn't set icon", (Throwable)var11);
+		} catch (IOException var12) {
+			LOGGER.error("Couldn't set icon", (Throwable)var12);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit().get());
@@ -573,7 +573,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				this.reloadStateTracker.finishReload();
 			}), false));
 		if (string != null) {
-			reloadInstance.done().thenRunAsync(() -> ConnectScreen.startConnecting(new TitleScreen(), this, new ServerAddress(string, i), null), this);
+			ServerAddress serverAddress = new ServerAddress(string, i);
+			reloadInstance.done()
+				.thenRunAsync(
+					() -> ConnectScreen.startConnecting(
+							new TitleScreen(), this, serverAddress, new ServerData(I18n.get("selectServer.defaultName"), serverAddress.toString(), false)
+						),
+					this
+				);
 		} else if (this.shouldShowBanNotice()) {
 			this.setScreen(BanNoticeScreen.create(bl -> {
 				if (bl) {
@@ -748,6 +755,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 						list
 					)
 			);
+		CreativeModeTabs.TAB_SEARCH.setSearchTreeRebuilder(list -> {
+			this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, list);
+			this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, list);
+		});
 	}
 
 	private void onFullscreenError(int i, long l) {
@@ -873,7 +884,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 		}
 
-		for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags())) {
+		for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags(), true)) {
 			String string = itemStack.getDescriptionId();
 			String string2 = Component.translatable(string).getString();
 			if (string2.toLowerCase(Locale.ROOT).equals(itemStack.getItem().getDescriptionId())) {

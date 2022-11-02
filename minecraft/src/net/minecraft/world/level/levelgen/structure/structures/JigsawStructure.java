@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -91,7 +90,6 @@ public final class JigsawStructure extends Structure {
 		int i = this.startHeight
 			.sample(generationContext.random(), new WorldGenerationContext(generationContext.chunkGenerator(), generationContext.heightAccessor()));
 		BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), i, chunkPos.getMinBlockZ());
-		Pools.forceBootstrap();
 		return JigsawPlacement.addPieces(
 			generationContext,
 			this.startPool,

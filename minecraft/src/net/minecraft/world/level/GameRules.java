@@ -145,6 +145,27 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.IntegerValue> RULE_PLAYERS_SLEEPING_PERCENTAGE = register(
 		"playersSleepingPercentage", GameRules.Category.PLAYER, GameRules.IntegerValue.create(100)
 	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_BLOCK_EXPLOSION_DROP_DECAY = register(
+		"blockExplosionDropDecay", GameRules.Category.DROPS, GameRules.BooleanValue.create(true)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_MOB_EXPLOSION_DROP_DECAY = register(
+		"mobExplosionDropDecay", GameRules.Category.DROPS, GameRules.BooleanValue.create(true)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_TNT_EXPLOSION_DROP_DECAY = register(
+		"tntExplosionDropDecay", GameRules.Category.DROPS, GameRules.BooleanValue.create(false)
+	);
+	public static final GameRules.Key<GameRules.IntegerValue> RULE_SNOW_ACCUMULATION_HEIGHT = register(
+		"snowAccumulationHeight", GameRules.Category.UPDATES, GameRules.IntegerValue.create(1)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_WATER_SOURCE_CONVERSION = register(
+		"waterSourceConversion", GameRules.Category.UPDATES, GameRules.BooleanValue.create(true)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_LAVA_SOURCE_CONVERSION = register(
+		"lavaSourceConversion", GameRules.Category.UPDATES, GameRules.BooleanValue.create(false)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_GLOBAL_SOUND_EVENTS = register(
+		"globalSoundEvents", GameRules.Category.MISC, GameRules.BooleanValue.create(true)
+	);
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
 
 	private static <T extends GameRules.Value<T>> GameRules.Key<T> register(String string, GameRules.Category category, GameRules.Type<T> type) {

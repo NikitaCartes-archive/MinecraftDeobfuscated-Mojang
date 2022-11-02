@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListener> {
@@ -28,26 +27,6 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 	private final byte yHeadRot;
 	private final int data;
 
-	public ClientboundAddEntityPacket(LivingEntity livingEntity) {
-		this(livingEntity, 0);
-	}
-
-	public ClientboundAddEntityPacket(LivingEntity livingEntity, int i) {
-		this(
-			livingEntity.getId(),
-			livingEntity.getUUID(),
-			livingEntity.getX(),
-			livingEntity.getY(),
-			livingEntity.getZ(),
-			livingEntity.getXRot(),
-			livingEntity.getYRot(),
-			livingEntity.getType(),
-			i,
-			livingEntity.getDeltaMovement(),
-			(double)livingEntity.yHeadRot
-		);
-	}
-
 	public ClientboundAddEntityPacket(Entity entity) {
 		this(entity, 0);
 	}
@@ -64,7 +43,7 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 			entity.getType(),
 			i,
 			entity.getDeltaMovement(),
-			0.0
+			(double)entity.getYHeadRot()
 		);
 	}
 
@@ -80,7 +59,7 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 			entity.getType(),
 			i,
 			entity.getDeltaMovement(),
-			0.0
+			(double)entity.getYHeadRot()
 		);
 	}
 

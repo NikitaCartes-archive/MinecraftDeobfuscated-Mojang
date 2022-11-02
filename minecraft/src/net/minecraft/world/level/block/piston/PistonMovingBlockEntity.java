@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -317,10 +317,8 @@ public class PistonMovingBlockEntity extends BlockEntity {
 	@Override
 	public void load(CompoundTag compoundTag) {
 		super.load(compoundTag);
-		HolderLookup<Block> holderLookup = (HolderLookup<Block>)(this.level != null
-			? this.level.holderLookup(Registry.BLOCK_REGISTRY)
-			: HolderLookup.forRegistry(Registry.BLOCK));
-		this.movedState = NbtUtils.readBlockState(holderLookup, compoundTag.getCompound("blockState"));
+		HolderGetter<Block> holderGetter = (HolderGetter<Block>)(this.level != null ? this.level.holderLookup(Registry.BLOCK_REGISTRY) : Registry.BLOCK.asLookup());
+		this.movedState = NbtUtils.readBlockState(holderGetter, compoundTag.getCompound("blockState"));
 		this.direction = Direction.from3DDataValue(compoundTag.getInt("facing"));
 		this.progress = compoundTag.getFloat("progress");
 		this.progressO = this.progress;

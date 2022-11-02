@@ -336,11 +336,11 @@ public class BlockStateParser {
 	}
 
 	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.blocks.listTags().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
+		return SharedSuggestionProvider.suggestResource(this.blocks.listTagIds().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
 	}
 
 	private CompletableFuture<Suggestions> suggestItem(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.blocks.listElements().map(ResourceKey::location), suggestionsBuilder);
+		return SharedSuggestionProvider.suggestResource(this.blocks.listElementIds().map(ResourceKey::location), suggestionsBuilder);
 	}
 
 	private CompletableFuture<Suggestions> suggestBlockIdOrTag(SuggestionsBuilder suggestionsBuilder) {

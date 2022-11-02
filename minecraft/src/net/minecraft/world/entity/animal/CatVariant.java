@@ -1,22 +1,41 @@
 package net.minecraft.world.entity.animal;
 
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public record CatVariant(ResourceLocation texture) {
-	public static final CatVariant TABBY = register("tabby", "textures/entity/cat/tabby.png");
-	public static final CatVariant BLACK = register("black", "textures/entity/cat/black.png");
-	public static final CatVariant RED = register("red", "textures/entity/cat/red.png");
-	public static final CatVariant SIAMESE = register("siamese", "textures/entity/cat/siamese.png");
-	public static final CatVariant BRITISH_SHORTHAIR = register("british_shorthair", "textures/entity/cat/british_shorthair.png");
-	public static final CatVariant CALICO = register("calico", "textures/entity/cat/calico.png");
-	public static final CatVariant PERSIAN = register("persian", "textures/entity/cat/persian.png");
-	public static final CatVariant RAGDOLL = register("ragdoll", "textures/entity/cat/ragdoll.png");
-	public static final CatVariant WHITE = register("white", "textures/entity/cat/white.png");
-	public static final CatVariant JELLIE = register("jellie", "textures/entity/cat/jellie.png");
-	public static final CatVariant ALL_BLACK = register("all_black", "textures/entity/cat/all_black.png");
+	public static final ResourceKey<CatVariant> TABBY = createKey("tabby");
+	public static final ResourceKey<CatVariant> BLACK = createKey("black");
+	public static final ResourceKey<CatVariant> RED = createKey("red");
+	public static final ResourceKey<CatVariant> SIAMESE = createKey("siamese");
+	public static final ResourceKey<CatVariant> BRITISH_SHORTHAIR = createKey("british_shorthair");
+	public static final ResourceKey<CatVariant> CALICO = createKey("calico");
+	public static final ResourceKey<CatVariant> PERSIAN = createKey("persian");
+	public static final ResourceKey<CatVariant> RAGDOLL = createKey("ragdoll");
+	public static final ResourceKey<CatVariant> WHITE = createKey("white");
+	public static final ResourceKey<CatVariant> JELLIE = createKey("jellie");
+	public static final ResourceKey<CatVariant> ALL_BLACK = createKey("all_black");
 
-	private static CatVariant register(String string, String string2) {
-		return Registry.register(Registry.CAT_VARIANT, string, new CatVariant(new ResourceLocation(string2)));
+	private static ResourceKey<CatVariant> createKey(String string) {
+		return ResourceKey.create(Registry.CAT_VARIANT_REGISTRY, new ResourceLocation(string));
+	}
+
+	public static CatVariant bootstrap(Registry<CatVariant> registry) {
+		register(registry, TABBY, "textures/entity/cat/tabby.png");
+		register(registry, BLACK, "textures/entity/cat/black.png");
+		register(registry, RED, "textures/entity/cat/red.png");
+		register(registry, SIAMESE, "textures/entity/cat/siamese.png");
+		register(registry, BRITISH_SHORTHAIR, "textures/entity/cat/british_shorthair.png");
+		register(registry, CALICO, "textures/entity/cat/calico.png");
+		register(registry, PERSIAN, "textures/entity/cat/persian.png");
+		register(registry, RAGDOLL, "textures/entity/cat/ragdoll.png");
+		register(registry, WHITE, "textures/entity/cat/white.png");
+		register(registry, JELLIE, "textures/entity/cat/jellie.png");
+		return register(registry, ALL_BLACK, "textures/entity/cat/all_black.png");
+	}
+
+	private static CatVariant register(Registry<CatVariant> registry, ResourceKey<CatVariant> resourceKey, String string) {
+		return Registry.register(registry, resourceKey, new CatVariant(new ResourceLocation(string)));
 	}
 }

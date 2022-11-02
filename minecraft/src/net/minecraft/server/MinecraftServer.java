@@ -57,7 +57,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -289,9 +289,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.playerDataStorage = levelStorageAccess.createPlayerStorage();
 			this.fixerUpper = dataFixer;
 			this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-			HolderLookup<Block> holderLookup = HolderLookup.forRegistry(this.registries.compositeAccess().registryOrThrow(Registry.BLOCK_REGISTRY))
+			HolderGetter<Block> holderGetter = this.registries
+				.compositeAccess()
+				.registryOrThrow(Registry.BLOCK_REGISTRY)
+				.asLookup()
 				.filterFeatures(this.worldData.enabledFeatures());
-			this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderLookup);
+			this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderGetter);
 			this.serverThread = thread;
 			this.executor = Util.backgroundExecutor();
 		}
@@ -440,13 +443,18 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			}
 
 			if (bl) {
-				ConfiguredFeature<?, ?> configuredFeature = MiscOverworldFeatures.BONUS_CHEST.value();
-				configuredFeature.place(
-					serverLevel,
-					serverChunkCache.getGenerator(),
-					serverLevel.random,
-					new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())
-				);
+				serverLevel.registryAccess()
+					.registry(Registry.CONFIGURED_FEATURE_REGISTRY)
+					.flatMap(registry -> registry.getHolder(MiscOverworldFeatures.BONUS_CHEST))
+					.ifPresent(
+						reference -> ((ConfiguredFeature)reference.value())
+								.place(
+									serverLevel,
+									serverChunkCache.getGenerator(),
+									serverLevel.random,
+									new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())
+								)
+					);
 			}
 		}
 	}

@@ -56,9 +56,7 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 
 	public static Registry<LevelStem> withOverworld(Registry<DimensionType> registry, Registry<LevelStem> registry2, ChunkGenerator chunkGenerator) {
 		LevelStem levelStem = registry2.get(LevelStem.OVERWORLD);
-		Holder<DimensionType> holder = (Holder<DimensionType>)(levelStem == null
-			? registry.getOrCreateHolderOrThrow(BuiltinDimensionTypes.OVERWORLD)
-			: levelStem.type());
+		Holder<DimensionType> holder = (Holder<DimensionType>)(levelStem == null ? registry.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD) : levelStem.type());
 		return withOverworld(registry2, holder, chunkGenerator);
 	}
 

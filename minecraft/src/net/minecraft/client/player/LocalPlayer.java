@@ -205,6 +205,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 				Entity entity = this.getRootVehicle();
 				if (entity != this && entity.isControlledByLocalInstance()) {
 					this.connection.send(new ServerboundMoveVehiclePacket(entity));
+					this.sendIsSprintingIfNeeded();
 				}
 			} else {
 				this.sendPosition();
@@ -227,22 +228,14 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	private void sendPosition() {
-		boolean bl = this.isSprinting();
-		if (bl != this.wasSprinting) {
+		this.sendIsSprintingIfNeeded();
+		boolean bl = this.isShiftKeyDown();
+		if (bl != this.wasShiftKeyDown) {
 			ServerboundPlayerCommandPacket.Action action = bl
-				? ServerboundPlayerCommandPacket.Action.START_SPRINTING
-				: ServerboundPlayerCommandPacket.Action.STOP_SPRINTING;
-			this.connection.send(new ServerboundPlayerCommandPacket(this, action));
-			this.wasSprinting = bl;
-		}
-
-		boolean bl2 = this.isShiftKeyDown();
-		if (bl2 != this.wasShiftKeyDown) {
-			ServerboundPlayerCommandPacket.Action action2 = bl2
 				? ServerboundPlayerCommandPacket.Action.PRESS_SHIFT_KEY
 				: ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY;
-			this.connection.send(new ServerboundPlayerCommandPacket(this, action2));
-			this.wasShiftKeyDown = bl2;
+			this.connection.send(new ServerboundPlayerCommandPacket(this, action));
+			this.wasShiftKeyDown = bl;
 		}
 
 		if (this.isControlledCamera()) {
@@ -252,36 +245,47 @@ public class LocalPlayer extends AbstractClientPlayer {
 			double g = (double)(this.getYRot() - this.yRotLast);
 			double h = (double)(this.getXRot() - this.xRotLast);
 			this.positionReminder++;
-			boolean bl3 = Mth.lengthSquared(d, e, f) > Mth.square(2.0E-4) || this.positionReminder >= 20;
-			boolean bl4 = g != 0.0 || h != 0.0;
+			boolean bl2 = Mth.lengthSquared(d, e, f) > Mth.square(2.0E-4) || this.positionReminder >= 20;
+			boolean bl3 = g != 0.0 || h != 0.0;
 			if (this.isPassenger()) {
 				Vec3 vec3 = this.getDeltaMovement();
 				this.connection.send(new ServerboundMovePlayerPacket.PosRot(vec3.x, -999.0, vec3.z, this.getYRot(), this.getXRot(), this.onGround));
-				bl3 = false;
-			} else if (bl3 && bl4) {
+				bl2 = false;
+			} else if (bl2 && bl3) {
 				this.connection.send(new ServerboundMovePlayerPacket.PosRot(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot(), this.onGround));
-			} else if (bl3) {
+			} else if (bl2) {
 				this.connection.send(new ServerboundMovePlayerPacket.Pos(this.getX(), this.getY(), this.getZ(), this.onGround));
-			} else if (bl4) {
+			} else if (bl3) {
 				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround));
 			} else if (this.lastOnGround != this.onGround) {
 				this.connection.send(new ServerboundMovePlayerPacket.StatusOnly(this.onGround));
 			}
 
-			if (bl3) {
+			if (bl2) {
 				this.xLast = this.getX();
 				this.yLast1 = this.getY();
 				this.zLast = this.getZ();
 				this.positionReminder = 0;
 			}
 
-			if (bl4) {
+			if (bl3) {
 				this.yRotLast = this.getYRot();
 				this.xRotLast = this.getXRot();
 			}
 
 			this.lastOnGround = this.onGround;
 			this.autoJumpEnabled = this.minecraft.options.autoJump().get();
+		}
+	}
+
+	private void sendIsSprintingIfNeeded() {
+		boolean bl = this.isSprinting();
+		if (bl != this.wasSprinting) {
+			ServerboundPlayerCommandPacket.Action action = bl
+				? ServerboundPlayerCommandPacket.Action.START_SPRINTING
+				: ServerboundPlayerCommandPacket.Action.STOP_SPRINTING;
+			this.connection.send(new ServerboundPlayerCommandPacket(this, action));
+			this.wasSprinting = bl;
 		}
 	}
 
@@ -699,7 +703,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.sprintTriggerTime = 0;
 		}
 
-		boolean bl5 = (float)this.getFoodData().getFoodLevel() > 6.0F || this.getAbilities().mayfly;
+		boolean bl5 = this.hasEnoughFoodToStartSprinting();
 		if ((this.onGround || this.isUnderWater() || this.isPassenger() && this.getVehicle().isOnGround())
 			&& !bl2
 			&& !bl3
@@ -1048,6 +1052,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean hasEnoughImpulseToStartSprinting() {
 		double d = 0.8;
 		return this.isUnderWater() ? this.input.hasForwardImpulse() : (double)this.input.forwardImpulse >= 0.8;
+	}
+
+	private boolean hasEnoughFoodToStartSprinting() {
+		return this.isPassenger() || (float)this.getFoodData().getFoodLevel() > 6.0F || this.getAbilities().mayfly;
 	}
 
 	public float getWaterVision() {
