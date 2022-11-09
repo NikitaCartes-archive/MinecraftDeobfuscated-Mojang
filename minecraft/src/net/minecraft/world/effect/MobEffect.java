@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -29,15 +29,15 @@ public class MobEffect {
 
 	@Nullable
 	public static MobEffect byId(int i) {
-		return Registry.MOB_EFFECT.byId(i);
+		return BuiltInRegistries.MOB_EFFECT.byId(i);
 	}
 
 	public static int getId(MobEffect mobEffect) {
-		return Registry.MOB_EFFECT.getId(mobEffect);
+		return BuiltInRegistries.MOB_EFFECT.getId(mobEffect);
 	}
 
 	public static int getIdFromNullable(@Nullable MobEffect mobEffect) {
-		return Registry.MOB_EFFECT.getId(mobEffect);
+		return BuiltInRegistries.MOB_EFFECT.getId(mobEffect);
 	}
 
 	protected MobEffect(MobEffectCategory mobEffectCategory, int i) {
@@ -114,7 +114,7 @@ public class MobEffect {
 
 	protected String getOrCreateDescriptionId() {
 		if (this.descriptionId == null) {
-			this.descriptionId = Util.makeDescriptionId("effect", Registry.MOB_EFFECT.getKey(this));
+			this.descriptionId = Util.makeDescriptionId("effect", BuiltInRegistries.MOB_EFFECT.getKey(this));
 		}
 
 		return this.descriptionId;

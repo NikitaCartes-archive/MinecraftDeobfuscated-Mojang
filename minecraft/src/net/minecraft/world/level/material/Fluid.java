@@ -6,8 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.IdMapper;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
@@ -24,7 +24,7 @@ public abstract class Fluid {
 	public static final IdMapper<FluidState> FLUID_STATE_REGISTRY = new IdMapper<>();
 	protected final StateDefinition<Fluid, FluidState> stateDefinition;
 	private FluidState defaultFluidState;
-	private final Holder.Reference<Fluid> builtInRegistryHolder = Registry.FLUID.createIntrusiveHolder(this);
+	private final Holder.Reference<Fluid> builtInRegistryHolder = BuiltInRegistries.FLUID.createIntrusiveHolder(this);
 
 	protected Fluid() {
 		StateDefinition.Builder<Fluid, FluidState> builder = new StateDefinition.Builder<>(this);

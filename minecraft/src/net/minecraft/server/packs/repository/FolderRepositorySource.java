@@ -14,6 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import net.minecraft.FileUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackType;
@@ -40,7 +41,7 @@ public class FolderRepositorySource implements RepositorySource {
 	@Override
 	public void loadPacks(Consumer<Pack> consumer) {
 		try {
-			Files.createDirectories(this.folder);
+			FileUtil.createDirectoriesSafe(this.folder);
 			discoverPacks(
 				this.folder,
 				false,

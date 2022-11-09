@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.CommonComponents;
@@ -125,7 +125,7 @@ public class PotionUtils {
 	}
 
 	public static ItemStack setPotion(ItemStack itemStack, Potion potion) {
-		ResourceLocation resourceLocation = Registry.POTION.getKey(potion);
+		ResourceLocation resourceLocation = BuiltInRegistries.POTION.getKey(potion);
 		if (potion == Potions.EMPTY) {
 			itemStack.removeTagKey("Potion");
 		} else {
@@ -152,12 +152,15 @@ public class PotionUtils {
 	}
 
 	public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
-		List<MobEffectInstance> list2 = getMobEffects(itemStack);
+		addPotionTooltip(getMobEffects(itemStack), list, f);
+	}
+
+	public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> list2, float f) {
 		List<Pair<Attribute, AttributeModifier>> list3 = Lists.<Pair<Attribute, AttributeModifier>>newArrayList();
-		if (list2.isEmpty()) {
-			list.add(NO_EFFECT);
+		if (list.isEmpty()) {
+			list2.add(NO_EFFECT);
 		} else {
-			for (MobEffectInstance mobEffectInstance : list2) {
+			for (MobEffectInstance mobEffectInstance : list) {
 				MutableComponent mutableComponent = Component.translatable(mobEffectInstance.getDescriptionId());
 				MobEffect mobEffect = mobEffectInstance.getEffect();
 				Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
@@ -181,13 +184,13 @@ public class PotionUtils {
 					mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
 				}
 
-				list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
+				list2.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
 			}
 		}
 
 		if (!list3.isEmpty()) {
-			list.add(CommonComponents.EMPTY);
-			list.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
+			list2.add(CommonComponents.EMPTY);
+			list2.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
 			for (Pair<Attribute, AttributeModifier> pair : list3) {
 				AttributeModifier attributeModifier3 = pair.getSecond();
@@ -201,7 +204,7 @@ public class PotionUtils {
 				}
 
 				if (d > 0.0) {
-					list.add(
+					list2.add(
 						Component.translatable(
 								"attribute.modifier.plus." + attributeModifier3.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
@@ -211,7 +214,7 @@ public class PotionUtils {
 					);
 				} else if (d < 0.0) {
 					e *= -1.0;
-					list.add(
+					list2.add(
 						Component.translatable(
 								"attribute.modifier.take." + attributeModifier3.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),

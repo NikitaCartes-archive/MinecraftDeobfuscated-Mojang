@@ -1,59 +1,39 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nullable;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.Villager;
+import org.apache.commons.lang3.mutable.MutableLong;
 
-public class StrollToPoiList extends Behavior<Villager> {
-	private final MemoryModuleType<List<GlobalPos>> strollToMemoryType;
-	private final MemoryModuleType<GlobalPos> mustBeCloseToMemoryType;
-	private final float speedModifier;
-	private final int closeEnoughDist;
-	private final int maxDistanceFromPoi;
-	private long nextOkStartTime;
-	@Nullable
-	private GlobalPos targetPos;
+public class StrollToPoiList {
+	public static BehaviorControl<Villager> create(
+		MemoryModuleType<List<GlobalPos>> memoryModuleType, float f, int i, int j, MemoryModuleType<GlobalPos> memoryModuleType2
+	) {
+		MutableLong mutableLong = new MutableLong(0L);
+		return BehaviorBuilder.create(
+			instance -> instance.group(instance.registered(MemoryModuleType.WALK_TARGET), instance.present(memoryModuleType), instance.present(memoryModuleType2))
+					.apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3) -> (serverLevel, villager, l) -> {
+							List<GlobalPos> list = instance.get(memoryAccessor2);
+							GlobalPos globalPos = instance.get(memoryAccessor3);
+							if (list.isEmpty()) {
+								return false;
+							} else {
+								GlobalPos globalPos2 = (GlobalPos)list.get(serverLevel.getRandom().nextInt(list.size()));
+								if (globalPos2 != null && serverLevel.dimension() == globalPos2.dimension() && globalPos.pos().closerToCenterThan(villager.position(), (double)j)) {
+									if (l > mutableLong.getValue()) {
+										memoryAccessor.set(new WalkTarget(globalPos2.pos(), f, i));
+										mutableLong.setValue(l + 100L);
+									}
 
-	public StrollToPoiList(MemoryModuleType<List<GlobalPos>> memoryModuleType, float f, int i, int j, MemoryModuleType<GlobalPos> memoryModuleType2) {
-		super(
-			ImmutableMap.of(
-				MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, memoryModuleType, MemoryStatus.VALUE_PRESENT, memoryModuleType2, MemoryStatus.VALUE_PRESENT
-			)
+									return true;
+								} else {
+									return false;
+								}
+							}
+						})
 		);
-		this.strollToMemoryType = memoryModuleType;
-		this.speedModifier = f;
-		this.closeEnoughDist = i;
-		this.maxDistanceFromPoi = j;
-		this.mustBeCloseToMemoryType = memoryModuleType2;
-	}
-
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-		Optional<List<GlobalPos>> optional = villager.getBrain().getMemory(this.strollToMemoryType);
-		Optional<GlobalPos> optional2 = villager.getBrain().getMemory(this.mustBeCloseToMemoryType);
-		if (optional.isPresent() && optional2.isPresent()) {
-			List<GlobalPos> list = (List<GlobalPos>)optional.get();
-			if (!list.isEmpty()) {
-				this.targetPos = (GlobalPos)list.get(serverLevel.getRandom().nextInt(list.size()));
-				return this.targetPos != null
-					&& serverLevel.dimension() == this.targetPos.dimension()
-					&& ((GlobalPos)optional2.get()).pos().closerToCenterThan(villager.position(), (double)this.maxDistanceFromPoi);
-			}
-		}
-
-		return false;
-	}
-
-	protected void start(ServerLevel serverLevel, Villager villager, long l) {
-		if (l > this.nextOkStartTime && this.targetPos != null) {
-			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.targetPos.pos(), this.speedModifier, this.closeEnoughDist));
-			this.nextOkStartTime = l + 100L;
-		}
 	}
 }

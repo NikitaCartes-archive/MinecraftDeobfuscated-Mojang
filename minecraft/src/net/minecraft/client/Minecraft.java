@@ -155,7 +155,7 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -219,9 +219,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlayerHeadItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -733,11 +733,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			.register(
 				SearchRegistry.CREATIVE_NAMES,
 				list -> new FullTextSearchTree(
-						itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL)
+						itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL.asCreative())
 								.stream()
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
 								.filter(string -> !string.isEmpty()),
-						itemStack -> Stream.of(Registry.ITEM.getKey(itemStack.getItem())),
+						itemStack -> Stream.of(BuiltInRegistries.ITEM.getKey(itemStack.getItem())),
 						list
 					)
 			);
@@ -751,11 +751,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 								.flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream())
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
 								.filter(string -> !string.isEmpty()),
-						recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> Registry.ITEM.getKey(recipe.getResultItem().getItem())),
+						recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem().getItem())),
 						list
 					)
 			);
-		CreativeModeTabs.TAB_SEARCH.setSearchTreeRebuilder(list -> {
+		CreativeModeTabs.searchTab().setSearchTreeBuilder(list -> {
 			this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, list);
 			this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, list);
 		});
@@ -860,7 +860,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		BlockModelShaper blockModelShaper = this.getBlockRenderer().getBlockModelShaper();
 		BakedModel bakedModel = blockModelShaper.getModelManager().getMissingModel();
 
-		for (Block block : Registry.BLOCK) {
+		for (Block block : BuiltInRegistries.BLOCK) {
 			for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
 				if (blockState.getRenderShape() == RenderShape.MODEL) {
 					BakedModel bakedModel2 = blockModelShaper.getBlockModel(blockState);
@@ -874,7 +874,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		TextureAtlasSprite textureAtlasSprite = bakedModel.getParticleIcon();
 
-		for (Block block2 : Registry.BLOCK) {
+		for (Block block2 : BuiltInRegistries.BLOCK) {
 			for (BlockState blockState2 : block2.getStateDefinition().getPossibleStates()) {
 				TextureAtlasSprite textureAtlasSprite2 = blockModelShaper.getParticleIcon(blockState2);
 				if (!blockState2.isAir() && textureAtlasSprite2 == textureAtlasSprite) {
@@ -884,11 +884,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 		}
 
-		for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags(), true)) {
+		for (Item item : BuiltInRegistries.ITEM) {
+			ItemStack itemStack = item.getDefaultInstance();
 			String string = itemStack.getDescriptionId();
 			String string2 = Component.translatable(string).getString();
-			if (string2.toLowerCase(Locale.ROOT).equals(itemStack.getItem().getDescriptionId())) {
-				LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
+			if (string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) {
+				LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, item);
 			}
 		}
 
@@ -2160,9 +2161,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			if (itemStack.isEmpty()) {
 				String string = "";
 				if (type == HitResult.Type.BLOCK) {
-					string = Registry.BLOCK.getKey(this.level.getBlockState(((BlockHitResult)this.hitResult).getBlockPos()).getBlock()).toString();
+					string = BuiltInRegistries.BLOCK.getKey(this.level.getBlockState(((BlockHitResult)this.hitResult).getBlockPos()).getBlock()).toString();
 				} else if (type == HitResult.Type.ENTITY) {
-					string = Registry.ENTITY_TYPE.getKey(((EntityHitResult)this.hitResult).getEntity().getType()).toString();
+					string = BuiltInRegistries.ENTITY_TYPE.getKey(((EntityHitResult)this.hitResult).getEntity().getType()).toString();
 				}
 
 				LOGGER.warn("Picking on: [{}] {} gave null item", type, string);
@@ -2307,6 +2308,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	public IntegratedServer getSingleplayerServer() {
 		return this.singleplayerServer;
+	}
+
+	public boolean isSingleplayer() {
+		IntegratedServer integratedServer = this.getSingleplayerServer();
+		return integratedServer != null && !integratedServer.isPublished();
 	}
 
 	public User getUser() {

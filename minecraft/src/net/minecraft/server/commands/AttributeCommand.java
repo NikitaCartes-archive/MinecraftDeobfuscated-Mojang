@@ -15,7 +15,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +45,7 @@ public class AttributeCommand {
 				.then(
 					Commands.argument("target", EntityArgument.entity())
 						.then(
-							Commands.argument("attribute", ResourceArgument.resource(commandBuildContext, Registry.ATTRIBUTE_REGISTRY))
+							Commands.argument("attribute", ResourceArgument.resource(commandBuildContext, Registries.ATTRIBUTE))
 								.then(
 									Commands.literal("get")
 										.executes(

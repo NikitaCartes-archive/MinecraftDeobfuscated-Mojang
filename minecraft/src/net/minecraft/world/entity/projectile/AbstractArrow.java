@@ -7,8 +7,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -448,7 +449,7 @@ public abstract class AbstractArrow extends Projectile {
 		compoundTag.putDouble("damage", this.baseDamage);
 		compoundTag.putBoolean("crit", this.isCritArrow());
 		compoundTag.putByte("PierceLevel", this.getPierceLevel());
-		compoundTag.putString("SoundEvent", Registry.SOUND_EVENT.getKey(this.soundEvent).toString());
+		compoundTag.putString("SoundEvent", BuiltInRegistries.SOUND_EVENT.getKey(this.soundEvent).toString());
 		compoundTag.putBoolean("ShotFromCrossbow", this.shotFromCrossbow());
 	}
 
@@ -457,7 +458,7 @@ public abstract class AbstractArrow extends Projectile {
 		super.readAdditionalSaveData(compoundTag);
 		this.life = compoundTag.getShort("life");
 		if (compoundTag.contains("inBlockState", 10)) {
-			this.lastState = NbtUtils.readBlockState(this.level.holderLookup(Registry.BLOCK_REGISTRY), compoundTag.getCompound("inBlockState"));
+			this.lastState = NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compoundTag.getCompound("inBlockState"));
 		}
 
 		this.shakeTime = compoundTag.getByte("shake") & 255;
@@ -470,7 +471,7 @@ public abstract class AbstractArrow extends Projectile {
 		this.setCritArrow(compoundTag.getBoolean("crit"));
 		this.setPierceLevel(compoundTag.getByte("PierceLevel"));
 		if (compoundTag.contains("SoundEvent", 8)) {
-			this.soundEvent = (SoundEvent)Registry.SOUND_EVENT
+			this.soundEvent = (SoundEvent)BuiltInRegistries.SOUND_EVENT
 				.getOptional(new ResourceLocation(compoundTag.getString("SoundEvent")))
 				.orElse(this.getDefaultHitGroundSoundEvent());
 		}

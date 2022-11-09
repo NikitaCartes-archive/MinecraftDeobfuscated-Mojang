@@ -1,35 +1,29 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 @Environment(EnvType.CLIENT)
 public class Button extends AbstractButton {
-	public static final Button.OnTooltip NO_TOOLTIP = (button, poseStack, i, j) -> {
-	};
 	public static final int SMALL_WIDTH = 120;
 	public static final int DEFAULT_WIDTH = 150;
 	public static final int DEFAULT_HEIGHT = 20;
 	protected static final Button.CreateNarration DEFAULT_NARRATION = supplier -> (MutableComponent)supplier.get();
 	protected final Button.OnPress onPress;
-	protected final Button.OnTooltip onTooltip;
 	protected final Button.CreateNarration createNarration;
 
 	public static Button.Builder builder(Component component, Button.OnPress onPress) {
 		return new Button.Builder(component, onPress);
 	}
 
-	protected Button(int i, int j, int k, int l, Component component, Button.OnPress onPress, Button.OnTooltip onTooltip, Button.CreateNarration createNarration) {
+	protected Button(int i, int j, int k, int l, Component component, Button.OnPress onPress, Button.CreateNarration createNarration) {
 		super(i, j, k, l, component);
 		this.onPress = onPress;
-		this.onTooltip = onTooltip;
 		this.createNarration = createNarration;
 	}
 
@@ -44,29 +38,16 @@ public class Button extends AbstractButton {
 	}
 
 	@Override
-	public void renderButton(PoseStack poseStack, int i, int j, float f) {
-		super.renderButton(poseStack, i, j, f);
-		if (this.isHoveredOrFocused()) {
-			this.renderToolTip(poseStack, i, j);
-		}
-	}
-
-	@Override
-	public void renderToolTip(PoseStack poseStack, int i, int j) {
-		this.onTooltip.onTooltip(this, poseStack, i, j);
-	}
-
-	@Override
-	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 		this.defaultButtonNarrationText(narrationElementOutput);
-		this.onTooltip.narrateTooltip(component -> narrationElementOutput.add(NarratedElementType.HINT, component));
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
 		private final Component message;
 		private final Button.OnPress onPress;
-		private Button.OnTooltip onTooltip = Button.NO_TOOLTIP;
+		@Nullable
+		private Tooltip tooltip;
 		private int x;
 		private int y;
 		private int width = 150;
@@ -99,8 +80,8 @@ public class Button extends AbstractButton {
 			return this.pos(i, j).size(k, l);
 		}
 
-		public Button.Builder tooltip(Button.OnTooltip onTooltip) {
-			this.onTooltip = onTooltip;
+		public Button.Builder tooltip(@Nullable Tooltip tooltip) {
+			this.tooltip = tooltip;
 			return this;
 		}
 
@@ -110,7 +91,9 @@ public class Button extends AbstractButton {
 		}
 
 		public Button build() {
-			return new Button(this.x, this.y, this.width, this.height, this.message, this.onPress, this.onTooltip, this.createNarration);
+			Button button = new Button(this.x, this.y, this.width, this.height, this.message, this.onPress, this.createNarration);
+			button.setTooltip(this.tooltip);
+			return button;
 		}
 	}
 
@@ -122,13 +105,5 @@ public class Button extends AbstractButton {
 	@Environment(EnvType.CLIENT)
 	public interface OnPress {
 		void onPress(Button button);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public interface OnTooltip {
-		void onTooltip(Button button, PoseStack poseStack, int i, int j);
-
-		default void narrateTooltip(Consumer<Component> consumer) {
-		}
 	}
 }

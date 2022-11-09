@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.resources.RegistryFileCodec;
@@ -44,21 +44,15 @@ public record NoiseGeneratorSettings(
 				)
 				.apply(instance, NoiseGeneratorSettings::new)
 	);
-	public static final Codec<Holder<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
-	public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(
-		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("overworld")
-	);
-	public static final ResourceKey<NoiseGeneratorSettings> LARGE_BIOMES = ResourceKey.create(
-		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("large_biomes")
-	);
-	public static final ResourceKey<NoiseGeneratorSettings> AMPLIFIED = ResourceKey.create(
-		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("amplified")
-	);
-	public static final ResourceKey<NoiseGeneratorSettings> NETHER = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("nether"));
-	public static final ResourceKey<NoiseGeneratorSettings> END = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("end"));
-	public static final ResourceKey<NoiseGeneratorSettings> CAVES = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("caves"));
+	public static final Codec<Holder<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registries.NOISE_SETTINGS, DIRECT_CODEC);
+	public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("overworld"));
+	public static final ResourceKey<NoiseGeneratorSettings> LARGE_BIOMES = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("large_biomes"));
+	public static final ResourceKey<NoiseGeneratorSettings> AMPLIFIED = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("amplified"));
+	public static final ResourceKey<NoiseGeneratorSettings> NETHER = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("nether"));
+	public static final ResourceKey<NoiseGeneratorSettings> END = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("end"));
+	public static final ResourceKey<NoiseGeneratorSettings> CAVES = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("caves"));
 	public static final ResourceKey<NoiseGeneratorSettings> FLOATING_ISLANDS = ResourceKey.create(
-		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("floating_islands")
+		Registries.NOISE_SETTINGS, new ResourceLocation("floating_islands")
 	);
 
 	public boolean isAquifersEnabled() {
@@ -84,7 +78,7 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.END_NOISE_SETTINGS,
 			Blocks.END_STONE.defaultBlockState(),
 			Blocks.AIR.defaultBlockState(),
-			NoiseRouterData.end(bootstapContext.lookup(Registry.DENSITY_FUNCTION_REGISTRY)),
+			NoiseRouterData.end(bootstapContext.lookup(Registries.DENSITY_FUNCTION)),
 			SurfaceRuleData.end(),
 			List.of(),
 			0,
@@ -100,7 +94,7 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.NETHER_NOISE_SETTINGS,
 			Blocks.NETHERRACK.defaultBlockState(),
 			Blocks.LAVA.defaultBlockState(),
-			NoiseRouterData.nether(bootstapContext.lookup(Registry.DENSITY_FUNCTION_REGISTRY), bootstapContext.lookup(Registry.NOISE_REGISTRY)),
+			NoiseRouterData.nether(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE)),
 			SurfaceRuleData.nether(),
 			List.of(),
 			32,
@@ -116,7 +110,7 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.OVERWORLD_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.overworld(bootstapContext.lookup(Registry.DENSITY_FUNCTION_REGISTRY), bootstapContext.lookup(Registry.NOISE_REGISTRY), bl2, bl),
+			NoiseRouterData.overworld(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE), bl2, bl),
 			SurfaceRuleData.overworld(),
 			new OverworldBiomeBuilder().spawnTarget(),
 			63,
@@ -132,7 +126,7 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.CAVES_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.caves(bootstapContext.lookup(Registry.DENSITY_FUNCTION_REGISTRY), bootstapContext.lookup(Registry.NOISE_REGISTRY)),
+			NoiseRouterData.caves(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE)),
 			SurfaceRuleData.overworldLike(false, true, true),
 			List.of(),
 			32,
@@ -148,7 +142,7 @@ public record NoiseGeneratorSettings(
 			NoiseSettings.FLOATING_ISLANDS_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.floatingIslands(bootstapContext.lookup(Registry.DENSITY_FUNCTION_REGISTRY), bootstapContext.lookup(Registry.NOISE_REGISTRY)),
+			NoiseRouterData.floatingIslands(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE)),
 			SurfaceRuleData.overworldLike(false, false, false),
 			List.of(),
 			-64,

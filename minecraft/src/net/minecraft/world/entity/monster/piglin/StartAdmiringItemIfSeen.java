@@ -1,37 +1,29 @@
 package net.minecraft.world.entity.monster.piglin;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.item.ItemEntity;
 
-public class StartAdmiringItemIfSeen<E extends Piglin> extends Behavior<E> {
-	private final int admireDuration;
-
-	public StartAdmiringItemIfSeen(int i) {
-		super(
-			ImmutableMap.of(
-				MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
-				MemoryStatus.VALUE_PRESENT,
-				MemoryModuleType.ADMIRING_ITEM,
-				MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.ADMIRING_DISABLED,
-				MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.DISABLE_WALK_TO_ADMIRE_ITEM,
-				MemoryStatus.VALUE_ABSENT
-			)
+public class StartAdmiringItemIfSeen {
+	public static BehaviorControl<LivingEntity> create(int i) {
+		return BehaviorBuilder.create(
+			instance -> instance.group(
+						instance.present(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM),
+						instance.absent(MemoryModuleType.ADMIRING_ITEM),
+						instance.absent(MemoryModuleType.ADMIRING_DISABLED),
+						instance.absent(MemoryModuleType.DISABLE_WALK_TO_ADMIRE_ITEM)
+					)
+					.apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4) -> (serverLevel, livingEntity, l) -> {
+							ItemEntity itemEntity = instance.get(memoryAccessor);
+							if (!PiglinAi.isLovedItem(itemEntity.getItem())) {
+								return false;
+							} else {
+								memoryAccessor2.setWithExpiry(true, (long)i);
+								return true;
+							}
+						})
 		);
-		this.admireDuration = i;
-	}
-
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E piglin) {
-		ItemEntity itemEntity = (ItemEntity)piglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM).get();
-		return PiglinAi.isLovedItem(itemEntity.getItem());
-	}
-
-	protected void start(ServerLevel serverLevel, E piglin, long l) {
-		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, (long)this.admireDuration);
 	}
 }

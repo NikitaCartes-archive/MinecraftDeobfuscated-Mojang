@@ -27,13 +27,15 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
-public class MappedRegistry<T> extends WritableRegistry<T> {
+public class MappedRegistry<T> implements WritableRegistry<T> {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	final ResourceKey<? extends Registry<T>> key;
 	private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<>(256);
 	private final Object2IntMap<T> toId = Util.make(
 		new Object2IntOpenCustomHashMap<>(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1)
@@ -42,7 +44,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	private final Map<ResourceKey<T>, Holder.Reference<T>> byKey = new HashMap();
 	private final Map<T, Holder.Reference<T>> byValue = new IdentityHashMap();
 	private final Map<T, Lifecycle> lifecycles = new IdentityHashMap();
-	private Lifecycle elementsLifecycle;
+	private Lifecycle registryLifecycle;
 	private volatile Map<TagKey<T>, HolderSet.Named<T>> tags = new IdentityHashMap();
 	private boolean frozen;
 	@Nullable
@@ -50,17 +52,58 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	@Nullable
 	private List<Holder.Reference<T>> holdersInOrder;
 	private int nextId;
+	private final HolderLookup.RegistryLookup<T> lookup = new HolderLookup.RegistryLookup<T>() {
+		@Override
+		public ResourceKey<? extends Registry<? extends T>> key() {
+			return MappedRegistry.this.key;
+		}
+
+		@Override
+		public Lifecycle registryLifecycle() {
+			return MappedRegistry.this.registryLifecycle();
+		}
+
+		@Override
+		public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+			return MappedRegistry.this.getHolder(resourceKey);
+		}
+
+		@Override
+		public Stream<Holder.Reference<T>> listElements() {
+			return MappedRegistry.this.holders();
+		}
+
+		@Override
+		public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+			return MappedRegistry.this.getTag(tagKey);
+		}
+
+		@Override
+		public Stream<HolderSet.Named<T>> listTags() {
+			return MappedRegistry.this.getTags().map(Pair::getSecond);
+		}
+	};
 
 	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
 		this(resourceKey, lifecycle, false);
 	}
 
 	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, boolean bl) {
-		super(resourceKey, lifecycle);
-		this.elementsLifecycle = lifecycle;
+		Bootstrap.checkBootstrapCalled(() -> "registry " + resourceKey);
+		this.key = resourceKey;
+		this.registryLifecycle = lifecycle;
 		if (bl) {
 			this.unregisteredIntrusiveHolders = new IdentityHashMap();
 		}
+	}
+
+	@Override
+	public ResourceKey<? extends Registry<T>> key() {
+		return this.key;
+	}
+
+	public String toString() {
+		return "Registry[" + this.key + " (" + this.registryLifecycle + ")]";
 	}
 
 	private List<Holder.Reference<T>> holdersInOrder() {
@@ -119,7 +162,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		}
 
 		this.lifecycles.put(object, lifecycle);
-		this.elementsLifecycle = this.elementsLifecycle.add(lifecycle);
+		this.registryLifecycle = this.registryLifecycle.add(lifecycle);
 		this.holdersInOrder = null;
 		return reference;
 	}
@@ -190,8 +233,8 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public Lifecycle elementsLifecycle() {
-		return this.elementsLifecycle;
+	public Lifecycle registryLifecycle() {
+		return this.registryLifecycle;
 	}
 
 	public Iterator<T> iterator() {
@@ -228,11 +271,6 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	@Override
 	public Stream<Holder.Reference<T>> holders() {
 		return this.holdersInOrder().stream();
-	}
-
-	@Override
-	public boolean isKnownTagName(TagKey<T> tagKey) {
-		return this.tags.containsKey(tagKey);
 	}
 
 	@Override
@@ -390,5 +428,15 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 				return MappedRegistry.this.getOrCreateTag(tagKey);
 			}
 		};
+	}
+
+	@Override
+	public HolderOwner<T> holderOwner() {
+		return this.lookup;
+	}
+
+	@Override
+	public HolderLookup.RegistryLookup<T> asLookup() {
+		return this.lookup;
 	}
 }

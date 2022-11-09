@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 
 public class StatType<T> implements Iterable<Stat<T>> {
@@ -38,7 +39,7 @@ public class StatType<T> implements Iterable<Stat<T>> {
 	}
 
 	public String getTranslationKey() {
-		return "stat_type." + Registry.STAT_TYPE.getKey(this).toString().replace(':', '.');
+		return "stat_type." + BuiltInRegistries.STAT_TYPE.getKey(this).toString().replace(':', '.');
 	}
 
 	public Component getDisplayName() {

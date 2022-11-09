@@ -15,8 +15,8 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -82,13 +82,13 @@ public class UpgradeData {
 		loadTicks(
 			compoundTag,
 			"neighbor_block_ticks",
-			stringx -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(stringx)).or(() -> Optional.of(Blocks.AIR)),
+			stringx -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(stringx)).or(() -> Optional.of(Blocks.AIR)),
 			this.neighborBlockTicks
 		);
 		loadTicks(
 			compoundTag,
 			"neighbor_fluid_ticks",
-			stringx -> Registry.FLUID.getOptional(ResourceLocation.tryParse(stringx)).or(() -> Optional.of(Fluids.EMPTY)),
+			stringx -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(stringx)).or(() -> Optional.of(Fluids.EMPTY)),
 			this.neighborFluidTicks
 		);
 	}
@@ -235,13 +235,13 @@ public class UpgradeData {
 		compoundTag.putByte("Sides", (byte)ix);
 		if (!this.neighborBlockTicks.isEmpty()) {
 			ListTag listTag = new ListTag();
-			this.neighborBlockTicks.forEach(savedTick -> listTag.add(savedTick.save(block -> Registry.BLOCK.getKey(block).toString())));
+			this.neighborBlockTicks.forEach(savedTick -> listTag.add(savedTick.save(block -> BuiltInRegistries.BLOCK.getKey(block).toString())));
 			compoundTag.put("neighbor_block_ticks", listTag);
 		}
 
 		if (!this.neighborFluidTicks.isEmpty()) {
 			ListTag listTag = new ListTag();
-			this.neighborFluidTicks.forEach(savedTick -> listTag.add(savedTick.save(fluid -> Registry.FLUID.getKey(fluid).toString())));
+			this.neighborFluidTicks.forEach(savedTick -> listTag.add(savedTick.save(fluid -> BuiltInRegistries.FLUID.getKey(fluid).toString())));
 			compoundTag.put("neighbor_fluid_ticks", listTag);
 		}
 

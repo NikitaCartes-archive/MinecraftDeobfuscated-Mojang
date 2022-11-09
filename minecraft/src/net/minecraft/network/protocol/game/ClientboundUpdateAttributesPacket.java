@@ -3,7 +3,7 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +34,7 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		this.attributes = friendlyByteBuf.readList(
 			friendlyByteBufx -> {
 				ResourceLocation resourceLocation = friendlyByteBufx.readResourceLocation();
-				Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
+				Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(resourceLocation);
 				double d = friendlyByteBufx.readDouble();
 				List<AttributeModifier> list = friendlyByteBufx.readList(
 					friendlyByteBufxx -> new AttributeModifier(
@@ -53,7 +53,7 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeCollection(this.attributes, (friendlyByteBufx, attributeSnapshot) -> {
-			friendlyByteBufx.writeResourceLocation(Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
+			friendlyByteBufx.writeResourceLocation(BuiltInRegistries.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
 			friendlyByteBufx.writeDouble(attributeSnapshot.getBase());
 			friendlyByteBufx.writeCollection(attributeSnapshot.getModifiers(), (friendlyByteBufxx, attributeModifier) -> {
 				friendlyByteBufxx.writeUUID(attributeModifier.getId());

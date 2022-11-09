@@ -5,7 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
@@ -30,7 +30,7 @@ public class BannerPattern {
 
 	@Nullable
 	public static Holder<BannerPattern> byHash(String string) {
-		return (Holder<BannerPattern>)Registry.BANNER_PATTERN
+		return (Holder<BannerPattern>)BuiltInRegistries.BANNER_PATTERN
 			.holders()
 			.filter(reference -> ((BannerPattern)reference.value()).hashname.equals(string))
 			.findAny()
@@ -41,7 +41,7 @@ public class BannerPattern {
 		private final List<Pair<Holder<BannerPattern>, DyeColor>> patterns = Lists.<Pair<Holder<BannerPattern>, DyeColor>>newArrayList();
 
 		public BannerPattern.Builder addPattern(ResourceKey<BannerPattern> resourceKey, DyeColor dyeColor) {
-			return this.addPattern(Registry.BANNER_PATTERN.getHolderOrThrow(resourceKey), dyeColor);
+			return this.addPattern(BuiltInRegistries.BANNER_PATTERN.getHolderOrThrow(resourceKey), dyeColor);
 		}
 
 		public BannerPattern.Builder addPattern(Holder<BannerPattern> holder, DyeColor dyeColor) {

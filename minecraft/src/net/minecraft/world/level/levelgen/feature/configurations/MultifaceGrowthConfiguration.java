@@ -8,8 +8,9 @@ import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.block.MultifaceBlock;
 public class MultifaceGrowthConfiguration implements FeatureConfiguration {
 	public static final Codec<MultifaceGrowthConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Registry.BLOCK
+					BuiltInRegistries.BLOCK
 						.byNameCodec()
 						.fieldOf("block")
 						.<Block>flatXmap(MultifaceGrowthConfiguration::apply, DataResult::success)
@@ -32,7 +33,7 @@ public class MultifaceGrowthConfiguration implements FeatureConfiguration {
 						.fieldOf("chance_of_spreading")
 						.orElse(0.5F)
 						.forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.chanceOfSpreading),
-					RegistryCodecs.homogeneousList(Registry.BLOCK_REGISTRY)
+					RegistryCodecs.homogeneousList(Registries.BLOCK)
 						.fieldOf("can_be_placed_on")
 						.forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canBePlacedOn)
 				)

@@ -5,7 +5,8 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
@@ -48,13 +49,13 @@ public class FluidPredicate {
 			Fluid fluid = null;
 			if (jsonObject.has("fluid")) {
 				ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "fluid"));
-				fluid = Registry.FLUID.get(resourceLocation);
+				fluid = BuiltInRegistries.FLUID.get(resourceLocation);
 			}
 
 			TagKey<Fluid> tagKey = null;
 			if (jsonObject.has("tag")) {
 				ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-				tagKey = TagKey.create(Registry.FLUID_REGISTRY, resourceLocation2);
+				tagKey = TagKey.create(Registries.FLUID, resourceLocation2);
 			}
 
 			StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
@@ -70,7 +71,7 @@ public class FluidPredicate {
 		} else {
 			JsonObject jsonObject = new JsonObject();
 			if (this.fluid != null) {
-				jsonObject.addProperty("fluid", Registry.FLUID.getKey(this.fluid).toString());
+				jsonObject.addProperty("fluid", BuiltInRegistries.FLUID.getKey(this.fluid).toString());
 			}
 
 			if (this.tag != null) {

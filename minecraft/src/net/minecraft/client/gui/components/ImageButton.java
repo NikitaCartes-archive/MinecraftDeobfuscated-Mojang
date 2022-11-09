@@ -33,25 +33,7 @@ public class ImageButton extends Button {
 	public ImageButton(
 		int i, int j, int k, int l, int m, int n, int o, ResourceLocation resourceLocation, int p, int q, Button.OnPress onPress, Component component
 	) {
-		this(i, j, k, l, m, n, o, resourceLocation, p, q, onPress, NO_TOOLTIP, component);
-	}
-
-	public ImageButton(
-		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		int n,
-		int o,
-		ResourceLocation resourceLocation,
-		int p,
-		int q,
-		Button.OnPress onPress,
-		Button.OnTooltip onTooltip,
-		Component component
-	) {
-		super(i, j, k, l, component, onPress, onTooltip, DEFAULT_NARRATION);
+		super(i, j, k, l, component, onPress, DEFAULT_NARRATION);
 		this.textureWidth = p;
 		this.textureHeight = q;
 		this.xTexStart = m;
@@ -79,8 +61,5 @@ public class ImageButton extends Button {
 
 		RenderSystem.enableDepthTest();
 		blit(poseStack, this.getX(), this.getY(), (float)this.xTexStart, (float)k, this.width, this.height, this.textureWidth, this.textureHeight);
-		if (this.isHovered) {
-			this.renderToolTip(poseStack, i, j);
-		}
 	}
 }

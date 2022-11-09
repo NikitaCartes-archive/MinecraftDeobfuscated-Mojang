@@ -3,7 +3,7 @@ package net.minecraft.world.inventory;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
@@ -136,10 +136,13 @@ public class LoomMenu extends AbstractContainerMenu {
 
 	private List<Holder<BannerPattern>> getSelectablePatterns(ItemStack itemStack) {
 		if (itemStack.isEmpty()) {
-			return (List<Holder<BannerPattern>>)Registry.BANNER_PATTERN.getTag(BannerPatternTags.NO_ITEM_REQUIRED).map(ImmutableList::copyOf).orElse(ImmutableList.of());
+			return (List<Holder<BannerPattern>>)BuiltInRegistries.BANNER_PATTERN
+				.getTag(BannerPatternTags.NO_ITEM_REQUIRED)
+				.map(ImmutableList::copyOf)
+				.orElse(ImmutableList.of());
 		} else {
 			return itemStack.getItem() instanceof BannerPatternItem bannerPatternItem
-				? (List)Registry.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of())
+				? (List)BuiltInRegistries.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of())
 				: List.of();
 		}
 	}

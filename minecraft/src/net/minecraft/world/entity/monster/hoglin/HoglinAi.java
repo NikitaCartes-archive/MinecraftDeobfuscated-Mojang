@@ -18,7 +18,6 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.BabyFollowAdult;
 import net.minecraft.world.entity.ai.behavior.BecomePassiveIfMemoryPresent;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.EraseMemoryIf;
@@ -26,15 +25,14 @@ import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
-import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.RunSometimes;
-import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
+import net.minecraft.world.entity.ai.behavior.SetEntityLookTargetSometimes;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetAwayFrom;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.schedule.Activity;
@@ -76,15 +74,13 @@ public class HoglinAi {
 			Activity.IDLE,
 			10,
 			ImmutableList.of(
-				new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200),
+				BecomePassiveIfMemoryPresent.create(MemoryModuleType.NEAREST_REPELLENT, 200),
 				new AnimalMakeLove(EntityType.HOGLIN, 0.6F),
 				SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, 1.0F, 8, true),
-				new StartAttacking(HoglinAi::findNearestValidAttackTarget),
-				new RunIf<PathfinderMob>(
-					Hoglin::isAdult, (Behavior<? super PathfinderMob>)SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, 0.4F, 8, false)
-				),
-				new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0F), UniformInt.of(30, 60)),
-				new BabyFollowAdult(ADULT_FOLLOW_RANGE, 0.6F),
+				StartAttacking.create(HoglinAi::findNearestValidAttackTarget),
+				BehaviorBuilder.triggerIf(Hoglin::isAdult, SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, 0.4F, 8, false)),
+				SetEntityLookTargetSometimes.create(8.0F, UniformInt.of(30, 60)),
+				BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 0.6F),
 				createIdleMovementBehaviors()
 			)
 		);
@@ -95,13 +91,13 @@ public class HoglinAi {
 			Activity.FIGHT,
 			10,
 			ImmutableList.of(
-				new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200),
+				BecomePassiveIfMemoryPresent.create(MemoryModuleType.NEAREST_REPELLENT, 200),
 				new AnimalMakeLove(EntityType.HOGLIN, 0.6F),
-				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
-				new RunIf<>(Hoglin::isAdult, new MeleeAttack(40)),
-				new RunIf<>(AgeableMob::isBaby, new MeleeAttack(15)),
-				new StopAttackingIfTargetInvalid(),
-				new EraseMemoryIf(HoglinAi::isBreeding, MemoryModuleType.ATTACK_TARGET)
+				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.0F),
+				BehaviorBuilder.triggerIf(Hoglin::isAdult, MeleeAttack.create(40)),
+				BehaviorBuilder.triggerIf(AgeableMob::isBaby, MeleeAttack.create(15)),
+				StopAttackingIfTargetInvalid.create(),
+				EraseMemoryIf.create(HoglinAi::isBreeding, MemoryModuleType.ATTACK_TARGET)
 			),
 			MemoryModuleType.ATTACK_TARGET
 		);
@@ -114,8 +110,8 @@ public class HoglinAi {
 			ImmutableList.of(
 				SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.3F, 15, false),
 				createIdleMovementBehaviors(),
-				new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0F), UniformInt.of(30, 60)),
-				new EraseMemoryIf(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
+				SetEntityLookTargetSometimes.create(8.0F, UniformInt.of(30, 60)),
+				EraseMemoryIf.<PathfinderMob>create(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
 			),
 			MemoryModuleType.AVOID_TARGET
 		);
@@ -123,7 +119,7 @@ public class HoglinAi {
 
 	private static RunOne<Hoglin> createIdleMovementBehaviors() {
 		return new RunOne<>(
-			ImmutableList.of(Pair.of(new RandomStroll(0.4F), 2), Pair.of(new SetWalkTargetFromLookTarget(0.4F, 3), 2), Pair.of(new DoNothing(30, 60), 1))
+			ImmutableList.of(Pair.of(RandomStroll.stroll(0.4F), 2), Pair.of(SetWalkTargetFromLookTarget.create(0.4F, 3), 2), Pair.of(new DoNothing(30, 60), 1))
 		);
 	}
 

@@ -1,6 +1,6 @@
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 
@@ -12,6 +12,6 @@ public class WorldPresetTags {
 	}
 
 	private static TagKey<WorldPreset> create(String string) {
-		return TagKey.create(Registry.WORLD_PRESET_REGISTRY, new ResourceLocation(string));
+		return TagKey.create(Registries.WORLD_PRESET, new ResourceLocation(string));
 	}
 }

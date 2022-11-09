@@ -27,8 +27,9 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -220,7 +221,7 @@ public final class NbtUtils {
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("Name"));
-			Optional<? extends Holder<Block>> optional = holderGetter.get(ResourceKey.create(Registry.BLOCK_REGISTRY, resourceLocation));
+			Optional<? extends Holder<Block>> optional = holderGetter.get(ResourceKey.create(Registries.BLOCK, resourceLocation));
 			if (optional.isEmpty()) {
 				return Blocks.AIR.defaultBlockState();
 			} else {
@@ -257,7 +258,7 @@ public final class NbtUtils {
 
 	public static CompoundTag writeBlockState(BlockState blockState) {
 		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", Registry.BLOCK.getKey(blockState.getBlock()).toString());
+		compoundTag.putString("Name", BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString());
 		ImmutableMap<Property<?>, Comparable<?>> immutableMap = blockState.getValues();
 		if (!immutableMap.isEmpty()) {
 			CompoundTag compoundTag2 = new CompoundTag();
@@ -275,7 +276,7 @@ public final class NbtUtils {
 
 	public static CompoundTag writeFluidState(FluidState fluidState) {
 		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", Registry.FLUID.getKey(fluidState.getType()).toString());
+		compoundTag.putString("Name", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());
 		ImmutableMap<Property<?>, Comparable<?>> immutableMap = fluidState.getValues();
 		if (!immutableMap.isEmpty()) {
 			CompoundTag compoundTag2 = new CompoundTag();

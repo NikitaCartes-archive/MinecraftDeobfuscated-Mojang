@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -112,7 +112,7 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 			super.serialize(jsonObject, setEnchantmentsFunction, jsonSerializationContext);
 			JsonObject jsonObject2 = new JsonObject();
 			setEnchantmentsFunction.enchantments.forEach((enchantment, numberProvider) -> {
-				ResourceLocation resourceLocation = Registry.ENCHANTMENT.getKey(enchantment);
+				ResourceLocation resourceLocation = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
 				if (resourceLocation == null) {
 					throw new IllegalArgumentException("Don't know how to serialize enchantment " + enchantment);
 				} else {
@@ -133,7 +133,7 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 				for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
 					String string = (String)entry.getKey();
 					JsonElement jsonElement = (JsonElement)entry.getValue();
-					Enchantment enchantment = (Enchantment)Registry.ENCHANTMENT
+					Enchantment enchantment = (Enchantment)BuiltInRegistries.ENCHANTMENT
 						.getOptional(new ResourceLocation(string))
 						.orElseThrow(() -> new JsonSyntaxException("Unknown enchantment '" + string + "'"));
 					NumberProvider numberProvider = jsonDeserializationContext.deserialize(jsonElement, NumberProvider.class);

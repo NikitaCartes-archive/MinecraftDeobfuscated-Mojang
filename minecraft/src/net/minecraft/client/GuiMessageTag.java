@@ -14,16 +14,22 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(EnvType.CLIENT)
 public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon icon, @Nullable Component text, @Nullable String logTag) {
 	private static final Component SYSTEM_TEXT = Component.translatable("chat.tag.system");
+	private static final Component SYSTEM_TEXT_SINGLE_PLAYER = Component.translatable("chat.tag.system_single_player");
 	private static final Component CHAT_NOT_SECURE_TEXT = Component.translatable("chat.tag.not_secure");
 	private static final Component CHAT_MODIFIED_TEXT = Component.translatable("chat.tag.modified");
 	private static final int CHAT_NOT_SECURE_INDICATOR_COLOR = 13684944;
 	private static final int CHAT_MODIFIED_INDICATOR_COLOR = 6316128;
 	private static final GuiMessageTag SYSTEM = new GuiMessageTag(13684944, null, SYSTEM_TEXT, "System");
+	private static final GuiMessageTag SYSTEM_SINGLE_PLAYER = new GuiMessageTag(13684944, null, SYSTEM_TEXT_SINGLE_PLAYER, "System");
 	private static final GuiMessageTag CHAT_NOT_SECURE = new GuiMessageTag(13684944, null, CHAT_NOT_SECURE_TEXT, "Not Secure");
 	static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/chat_tags.png");
 
 	public static GuiMessageTag system() {
 		return SYSTEM;
+	}
+
+	public static GuiMessageTag systemSinglePlayer() {
+		return SYSTEM_SINGLE_PLAYER;
 	}
 
 	public static GuiMessageTag chatNotSecure() {

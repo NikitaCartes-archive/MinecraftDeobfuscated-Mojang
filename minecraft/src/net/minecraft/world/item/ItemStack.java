@@ -26,6 +26,8 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -74,7 +76,7 @@ import org.slf4j.Logger;
 public final class ItemStack {
 	public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Registry.ITEM.byNameCodec().fieldOf("id").forGetter(itemStack -> itemStack.item),
+					BuiltInRegistries.ITEM.byNameCodec().fieldOf("id").forGetter(itemStack -> itemStack.item),
 					Codec.INT.fieldOf("Count").forGetter(itemStack -> itemStack.count),
 					CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.tag))
 				)
@@ -150,7 +152,7 @@ public final class ItemStack {
 	}
 
 	private ItemStack(CompoundTag compoundTag) {
-		this.item = Registry.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
+		this.item = BuiltInRegistries.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
 		this.count = compoundTag.getByte("Count");
 		if (compoundTag.contains("tag", 10)) {
 			this.tag = compoundTag.getCompound("tag");
@@ -227,7 +229,7 @@ public final class ItemStack {
 		BlockInWorld blockInWorld = new BlockInWorld(useOnContext.getLevel(), blockPos, false);
 		if (player != null
 			&& !player.getAbilities().mayBuild
-			&& !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), blockInWorld)) {
+			&& !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld)) {
 			return InteractionResult.PASS;
 		} else {
 			Item item = this.getItem();
@@ -253,7 +255,7 @@ public final class ItemStack {
 	}
 
 	public CompoundTag save(CompoundTag compoundTag) {
-		ResourceLocation resourceLocation = Registry.ITEM.getKey(this.getItem());
+		ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(this.getItem());
 		compoundTag.putString("id", resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
 		compoundTag.putByte("Count", (byte)this.count);
 		if (this.tag != null) {
@@ -762,7 +764,7 @@ public final class ItemStack {
 				list.add(Component.translatable("item.durability", this.getMaxDamage() - this.getDamageValue(), this.getMaxDamage()));
 			}
 
-			list.add(Component.literal(Registry.ITEM.getKey(this.getItem()).toString()).withStyle(ChatFormatting.DARK_GRAY));
+			list.add(Component.literal(BuiltInRegistries.ITEM.getKey(this.getItem()).toString()).withStyle(ChatFormatting.DARK_GRAY));
 			if (this.hasTag()) {
 				list.add(Component.translatable("item.nbt_tags", this.tag.getAllKeys().size()).withStyle(ChatFormatting.DARK_GRAY));
 			}
@@ -791,7 +793,7 @@ public final class ItemStack {
 	public static void appendEnchantmentNames(List<Component> list, ListTag listTag) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			Registry.ENCHANTMENT
+			BuiltInRegistries.ENCHANTMENT
 				.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag))
 				.ifPresent(enchantment -> list.add(enchantment.getFullname(EnchantmentHelper.getEnchantmentLevel(compoundTag))));
 		}
@@ -799,7 +801,7 @@ public final class ItemStack {
 
 	private static Collection<Component> expandBlockState(String string) {
 		try {
-			return BlockStateParser.parseForTesting(Registry.BLOCK.asLookup(), string, true)
+			return BlockStateParser.parseForTesting(BuiltInRegistries.BLOCK.asLookup(), string, true)
 				.map(
 					blockResult -> Lists.<Component>newArrayList(blockResult.blockState().getBlock().getName().withStyle(ChatFormatting.DARK_GRAY)),
 					tagResult -> (List)tagResult.tag()
@@ -877,7 +879,7 @@ public final class ItemStack {
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag = listTag.getCompound(i);
 				if (!compoundTag.contains("Slot", 8) || compoundTag.getString("Slot").equals(equipmentSlot.getName())) {
-					Optional<Attribute> optional = Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")));
+					Optional<Attribute> optional = BuiltInRegistries.ATTRIBUTE.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")));
 					if (optional.isPresent()) {
 						AttributeModifier attributeModifier = AttributeModifier.load(compoundTag);
 						if (attributeModifier != null && attributeModifier.getId().getLeastSignificantBits() != 0L && attributeModifier.getId().getMostSignificantBits() != 0L) {
@@ -901,7 +903,7 @@ public final class ItemStack {
 
 		ListTag listTag = this.tag.getList("AttributeModifiers", 10);
 		CompoundTag compoundTag = attributeModifier.save();
-		compoundTag.putString("AttributeName", Registry.ATTRIBUTE.getKey(attribute).toString());
+		compoundTag.putString("AttributeName", BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString());
 		if (equipmentSlot != null) {
 			compoundTag.putString("Slot", equipmentSlot.getName());
 		}

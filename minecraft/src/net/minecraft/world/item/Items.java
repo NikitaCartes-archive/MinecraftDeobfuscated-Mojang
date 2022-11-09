@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BannerPatternTags;
@@ -134,6 +135,7 @@ public class Items {
 	public static final Item MUDDY_MANGROVE_ROOTS = registerBlock(Blocks.MUDDY_MANGROVE_ROOTS);
 	public static final Item CRIMSON_STEM = registerBlock(Blocks.CRIMSON_STEM);
 	public static final Item WARPED_STEM = registerBlock(Blocks.WARPED_STEM);
+	public static final Item BAMBOO_BLOCK = registerBlock(Blocks.BAMBOO_BLOCK);
 	public static final Item STRIPPED_OAK_LOG = registerBlock(Blocks.STRIPPED_OAK_LOG);
 	public static final Item STRIPPED_SPRUCE_LOG = registerBlock(Blocks.STRIPPED_SPRUCE_LOG);
 	public static final Item STRIPPED_BIRCH_LOG = registerBlock(Blocks.STRIPPED_BIRCH_LOG);
@@ -152,6 +154,7 @@ public class Items {
 	public static final Item STRIPPED_MANGROVE_WOOD = registerBlock(Blocks.STRIPPED_MANGROVE_WOOD);
 	public static final Item STRIPPED_CRIMSON_HYPHAE = registerBlock(Blocks.STRIPPED_CRIMSON_HYPHAE);
 	public static final Item STRIPPED_WARPED_HYPHAE = registerBlock(Blocks.STRIPPED_WARPED_HYPHAE);
+	public static final Item STRIPPED_BAMBOO_BLOCK = registerBlock(Blocks.STRIPPED_BAMBOO_BLOCK);
 	public static final Item OAK_WOOD = registerBlock(Blocks.OAK_WOOD);
 	public static final Item SPRUCE_WOOD = registerBlock(Blocks.SPRUCE_WOOD);
 	public static final Item BIRCH_WOOD = registerBlock(Blocks.BIRCH_WOOD);
@@ -1474,7 +1477,7 @@ public class Items {
 	}
 
 	protected static Item registerBlock(Block block, Item item) {
-		return registerItem(Registry.BLOCK.getKey(block), item);
+		return registerItem(BuiltInRegistries.BLOCK.getKey(block), item);
 	}
 
 	private static Item registerItem(String string, Item item) {
@@ -1486,6 +1489,6 @@ public class Items {
 			((BlockItem)item).registerBlocks(Item.BY_BLOCK, item);
 		}
 
-		return Registry.register(Registry.ITEM, resourceLocation, item);
+		return Registry.register(BuiltInRegistries.ITEM, resourceLocation, item);
 	}
 }

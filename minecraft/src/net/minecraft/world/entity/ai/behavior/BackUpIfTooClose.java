@@ -1,54 +1,32 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 
-public class BackUpIfTooClose<E extends Mob> extends Behavior<E> {
-	private final int tooCloseDistance;
-	private final float strafeSpeed;
-
-	public BackUpIfTooClose(int i, float f) {
-		super(
-			ImmutableMap.of(
-				MemoryModuleType.WALK_TARGET,
-				MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.LOOK_TARGET,
-				MemoryStatus.REGISTERED,
-				MemoryModuleType.ATTACK_TARGET,
-				MemoryStatus.VALUE_PRESENT,
-				MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
-				MemoryStatus.VALUE_PRESENT
-			)
+public class BackUpIfTooClose {
+	public static OneShot<Mob> create(int i, float f) {
+		return BehaviorBuilder.create(
+			instance -> instance.group(
+						instance.absent(MemoryModuleType.WALK_TARGET),
+						instance.registered(MemoryModuleType.LOOK_TARGET),
+						instance.present(MemoryModuleType.ATTACK_TARGET),
+						instance.present(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
+					)
+					.apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4) -> (serverLevel, mob, l) -> {
+							LivingEntity livingEntity = instance.get(memoryAccessor3);
+							if (livingEntity.closerThan(mob, (double)i) && instance.<NearestVisibleLivingEntities>get(memoryAccessor4).contains(livingEntity)) {
+								memoryAccessor2.set(new EntityTracker(livingEntity, true));
+								mob.getMoveControl().strafe(-f, 0.0F);
+								mob.setYRot(Mth.rotateIfNecessary(mob.getYRot(), mob.yHeadRot, 0.0F));
+								return true;
+							} else {
+								return false;
+							}
+						})
 		);
-		this.tooCloseDistance = i;
-		this.strafeSpeed = f;
-	}
-
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
-		return this.isTargetVisible(mob) && this.isTargetTooClose(mob);
-	}
-
-	protected void start(ServerLevel serverLevel, E mob, long l) {
-		mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(this.getTarget(mob), true));
-		mob.getMoveControl().strafe(-this.strafeSpeed, 0.0F);
-		mob.setYRot(Mth.rotateIfNecessary(mob.getYRot(), mob.yHeadRot, 0.0F));
-	}
-
-	private boolean isTargetVisible(E mob) {
-		return ((NearestVisibleLivingEntities)mob.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get()).contains(this.getTarget(mob));
-	}
-
-	private boolean isTargetTooClose(E mob) {
-		return this.getTarget(mob).closerThan(mob, (double)this.tooCloseDistance);
-	}
-
-	private LivingEntity getTarget(E mob) {
-		return (LivingEntity)mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
 	}
 }

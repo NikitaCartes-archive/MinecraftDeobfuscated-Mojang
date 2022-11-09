@@ -1,14 +1,14 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TagMatchTest extends RuleTest {
-	public static final Codec<TagMatchTest> CODEC = TagKey.codec(Registry.BLOCK_REGISTRY)
+	public static final Codec<TagMatchTest> CODEC = TagKey.codec(Registries.BLOCK)
 		.fieldOf("tag")
 		.<TagMatchTest>xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag)
 		.codec();

@@ -1,48 +1,40 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class StartAttacking<E extends Mob> extends Behavior<E> {
-	private final Predicate<E> canAttackPredicate;
-	private final Function<E, Optional<? extends LivingEntity>> targetFinderFunction;
-
-	public StartAttacking(Predicate<E> predicate, Function<E, Optional<? extends LivingEntity>> function) {
-		this(predicate, function, 60);
+public class StartAttacking {
+	public static <E extends Mob> BehaviorControl<E> create(Function<E, Optional<? extends LivingEntity>> function) {
+		return create(mob -> true, function);
 	}
 
-	public StartAttacking(Predicate<E> predicate, Function<E, Optional<? extends LivingEntity>> function, int i) {
-		super(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED), i);
-		this.canAttackPredicate = predicate;
-		this.targetFinderFunction = function;
-	}
-
-	public StartAttacking(Function<E, Optional<? extends LivingEntity>> function) {
-		this(mob -> true, function);
-	}
-
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
-		if (!this.canAttackPredicate.test(mob)) {
-			return false;
-		} else {
-			Optional<? extends LivingEntity> optional = (Optional<? extends LivingEntity>)this.targetFinderFunction.apply(mob);
-			return optional.isPresent() ? mob.canAttack((LivingEntity)optional.get()) : false;
-		}
-	}
-
-	protected void start(ServerLevel serverLevel, E mob, long l) {
-		((Optional)this.targetFinderFunction.apply(mob)).ifPresent(livingEntity -> setAttackTarget(mob, livingEntity));
-	}
-
-	public static <E extends Mob> void setAttackTarget(E mob, LivingEntity livingEntity) {
-		mob.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, livingEntity);
-		mob.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+	public static <E extends Mob> BehaviorControl<E> create(Predicate<E> predicate, Function<E, Optional<? extends LivingEntity>> function) {
+		return BehaviorBuilder.create(
+			instance -> instance.group(instance.absent(MemoryModuleType.ATTACK_TARGET), instance.registered(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE))
+					.apply(instance, (memoryAccessor, memoryAccessor2) -> (serverLevel, mob, l) -> {
+							if (!predicate.test(mob)) {
+								return false;
+							} else {
+								Optional<? extends LivingEntity> optional = (Optional<? extends LivingEntity>)function.apply(mob);
+								if (optional.isEmpty()) {
+									return false;
+								} else {
+									LivingEntity livingEntity = (LivingEntity)optional.get();
+									if (!mob.canAttack(livingEntity)) {
+										return false;
+									} else {
+										memoryAccessor.set(livingEntity);
+										memoryAccessor2.erase();
+										return true;
+									}
+								}
+							}
+						})
+		);
 	}
 }

@@ -1,7 +1,7 @@
 package net.minecraft.data.worldgen;
 
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -25,11 +25,11 @@ public class Carvers {
 	public static final ResourceKey<ConfiguredWorldCarver<?>> NETHER_CAVE = createKey("nether_cave");
 
 	private static ResourceKey<ConfiguredWorldCarver<?>> createKey(String string) {
-		return ResourceKey.create(Registry.CONFIGURED_CARVER_REGISTRY, new ResourceLocation(string));
+		return ResourceKey.create(Registries.CONFIGURED_CARVER, new ResourceLocation(string));
 	}
 
 	public static void bootstrap(BootstapContext<ConfiguredWorldCarver<?>> bootstapContext) {
-		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registry.BLOCK_REGISTRY);
+		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registries.BLOCK);
 		bootstapContext.register(
 			CAVE,
 			WorldCarver.CAVE

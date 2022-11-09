@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.structure.structures.BuriedTreasureStructure;
 import net.minecraft.world.level.levelgen.structure.structures.DesertPyramidStructure;
 import net.minecraft.world.level.levelgen.structure.structures.EndCityStructure;
@@ -40,6 +41,6 @@ public interface StructureType<S extends Structure> {
 	Codec<S> codec();
 
 	private static <S extends Structure> StructureType<S> register(String string, Codec<S> codec) {
-		return Registry.register(Registry.STRUCTURE_TYPES, string, () -> codec);
+		return Registry.register(BuiltInRegistries.STRUCTURE_TYPE, string, () -> codec);
 	}
 }

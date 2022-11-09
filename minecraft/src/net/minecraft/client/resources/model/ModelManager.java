@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -174,7 +173,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 								}
 
 								return var2x;
-							} catch (IOException var6) {
+							} catch (Exception var6) {
 								LOGGER.error("Failed to load model {}", entry.getKey(), var6);
 								return null;
 							}
@@ -220,7 +219,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 									if (reader != null) {
 										reader.close();
 									}
-								} catch (IOException var10) {
+								} catch (Exception var10) {
 									LOGGER.error("Failed to load blockstate {} from pack {}", entry.getKey(), resource.sourcePackId(), var10);
 								}
 							}
@@ -265,7 +264,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 		BakedModel bakedModel = (BakedModel)map2.get(ModelBakery.MISSING_MODEL_LOCATION);
 		Map<BlockState, BakedModel> map3 = new IdentityHashMap();
 
-		for (Block block : Registry.BLOCK) {
+		for (Block block : BuiltInRegistries.BLOCK) {
 			block.getStateDefinition().getPossibleStates().forEach(blockState -> {
 				ResourceLocation resourceLocation = blockState.getBlock().builtInRegistryHolder().key().location();
 				BakedModel bakedModel2 = (BakedModel)map2.getOrDefault(BlockModelShaper.stateToModelLocation(resourceLocation, blockState), bakedModel);

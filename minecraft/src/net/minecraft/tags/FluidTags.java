@@ -1,6 +1,6 @@
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 
@@ -12,6 +12,6 @@ public final class FluidTags {
 	}
 
 	private static TagKey<Fluid> create(String string) {
-		return TagKey.create(Registry.FLUID_REGISTRY, new ResourceLocation(string));
+		return TagKey.create(Registries.FLUID, new ResourceLocation(string));
 	}
 }

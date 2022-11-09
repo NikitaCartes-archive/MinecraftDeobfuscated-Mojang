@@ -3,8 +3,8 @@ package net.minecraft.world.entity.projectile;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -135,7 +135,7 @@ public class Arrow extends AbstractArrow {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		if (this.potion != Potions.EMPTY) {
-			compoundTag.putString("Potion", Registry.POTION.getKey(this.potion).toString());
+			compoundTag.putString("Potion", BuiltInRegistries.POTION.getKey(this.potion).toString());
 		}
 
 		if (this.fixedColor) {

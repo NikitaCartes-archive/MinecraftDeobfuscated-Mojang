@@ -16,7 +16,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -566,13 +566,13 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 		this.generate();
 		Set<ResourceLocation> set = new HashSet();
 
-		for (Block block : Registry.BLOCK) {
+		for (Block block : BuiltInRegistries.BLOCK) {
 			if (block.isEnabled(this.enabledFeatures)) {
 				ResourceLocation resourceLocation = block.getLootTable();
 				if (resourceLocation != BuiltInLootTables.EMPTY && set.add(resourceLocation)) {
 					LootTable.Builder builder = (LootTable.Builder)this.map.remove(resourceLocation);
 					if (builder == null) {
-						throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, Registry.BLOCK.getKey(block)));
+						throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, BuiltInRegistries.BLOCK.getKey(block)));
 					}
 
 					biConsumer.accept(resourceLocation, builder);

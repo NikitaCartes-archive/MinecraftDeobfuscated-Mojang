@@ -9,7 +9,8 @@ import com.google.gson.JsonSyntaxException;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -72,7 +73,9 @@ public class BlockPredicate {
 
 				for (JsonElement jsonElement2 : jsonArray) {
 					ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.convertToString(jsonElement2, "block"));
-					builder.add((Block)Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block id '" + resourceLocation + "'")));
+					builder.add(
+						(Block)BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block id '" + resourceLocation + "'"))
+					);
 				}
 
 				set = builder.build();
@@ -81,7 +84,7 @@ public class BlockPredicate {
 			TagKey<Block> tagKey = null;
 			if (jsonObject.has("tag")) {
 				ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-				tagKey = TagKey.create(Registry.BLOCK_REGISTRY, resourceLocation2);
+				tagKey = TagKey.create(Registries.BLOCK, resourceLocation2);
 			}
 
 			StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
@@ -100,7 +103,7 @@ public class BlockPredicate {
 				JsonArray jsonArray = new JsonArray();
 
 				for (Block block : this.blocks) {
-					jsonArray.add(Registry.BLOCK.getKey(block).toString());
+					jsonArray.add(BuiltInRegistries.BLOCK.getKey(block).toString());
 				}
 
 				jsonObject.add("blocks", jsonArray);

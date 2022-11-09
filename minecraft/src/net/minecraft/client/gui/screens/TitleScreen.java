@@ -12,7 +12,6 @@ import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -25,6 +24,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.PlainTextButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -192,27 +192,17 @@ public class TitleScreen extends Screen {
 				.bounds(this.width / 2 - 100, i, 200, 20)
 				.build()
 		);
-		final Component component = this.getMultiplayerDisabledReason();
+		Component component = this.getMultiplayerDisabledReason();
 		boolean bl = component == null;
-		Button.OnTooltip onTooltip = component == null ? Button.NO_TOOLTIP : new Button.OnTooltip() {
-			@Override
-			public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-				TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(component, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
-			}
-
-			@Override
-			public void narrateTooltip(Consumer<Component> consumer) {
-				consumer.accept(component);
-			}
-		};
+		Tooltip tooltip = component != null ? Tooltip.create(component) : null;
 		this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), button -> {
 			Screen screen = (Screen)(this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this));
 			this.minecraft.setScreen(screen);
-		}).bounds(this.width / 2 - 100, i + j * 1, 200, 20).tooltip(onTooltip).build()).active = bl;
+		}).bounds(this.width / 2 - 100, i + j * 1, 200, 20).tooltip(tooltip).build()).active = bl;
 		this.addRenderableWidget(
 				Button.builder(Component.translatable("menu.online"), button -> this.realmsButtonClicked())
 					.bounds(this.width / 2 - 100, i + j * 2, 200, 20)
-					.tooltip(onTooltip)
+					.tooltip(tooltip)
 					.build()
 			)
 			.active = bl;

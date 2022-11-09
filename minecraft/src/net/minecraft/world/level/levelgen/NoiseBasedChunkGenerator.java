@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -237,7 +238,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				randomState,
 				structureManager,
 				worldGenRegion.getBiomeManager(),
-				worldGenRegion.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
+				worldGenRegion.registryAccess().registryOrThrow(Registries.BIOME),
 				Blender.of(worldGenRegion)
 			);
 		}

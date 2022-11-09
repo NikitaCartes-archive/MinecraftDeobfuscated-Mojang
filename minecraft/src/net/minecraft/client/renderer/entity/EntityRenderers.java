@@ -11,7 +11,7 @@ import net.minecraft.client.model.SquidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +36,7 @@ public class EntityRenderers {
 			try {
 				builder.put(entityType, entityRendererProvider.create(context));
 			} catch (Exception var5) {
-				throw new IllegalArgumentException("Failed to create model for " + Registry.ENTITY_TYPE.getKey(entityType), var5);
+				throw new IllegalArgumentException("Failed to create model for " + BuiltInRegistries.ENTITY_TYPE.getKey(entityType), var5);
 			}
 		});
 		return builder.build();
@@ -57,9 +57,9 @@ public class EntityRenderers {
 	public static boolean validateRegistrations() {
 		boolean bl = true;
 
-		for (EntityType<?> entityType : Registry.ENTITY_TYPE) {
+		for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
 			if (entityType != EntityType.PLAYER && !PROVIDERS.containsKey(entityType)) {
-				LOGGER.warn("No renderer registered for {}", Registry.ENTITY_TYPE.getKey(entityType));
+				LOGGER.warn("No renderer registered for {}", BuiltInRegistries.ENTITY_TYPE.getKey(entityType));
 				bl = false;
 			}
 		}

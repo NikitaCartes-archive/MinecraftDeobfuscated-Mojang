@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public interface PosRuleTestType<P extends PosRuleTest> {
 	PosRuleTestType<PosAlwaysTrueTest> ALWAYS_TRUE_TEST = register("always_true", PosAlwaysTrueTest.CODEC);
@@ -11,6 +12,6 @@ public interface PosRuleTestType<P extends PosRuleTest> {
 	Codec<P> codec();
 
 	static <P extends PosRuleTest> PosRuleTestType<P> register(String string, Codec<P> codec) {
-		return Registry.register(Registry.POS_RULE_TEST, string, () -> codec);
+		return Registry.register(BuiltInRegistries.POS_RULE_TEST, string, () -> codec);
 	}
 }

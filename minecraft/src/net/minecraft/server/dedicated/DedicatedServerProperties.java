@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -199,12 +200,12 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 		);
 
 		public WorldDimensions create(RegistryAccess registryAccess) {
-			Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
+			Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registries.WORLD_PRESET);
 			Holder.Reference<WorldPreset> reference = (Holder.Reference<WorldPreset>)registry.getHolder(WorldPresets.NORMAL)
 				.or(() -> registry.holders().findAny())
 				.orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default preset"));
 			Holder<WorldPreset> holder = (Holder<WorldPreset>)Optional.ofNullable(ResourceLocation.tryParse(this.levelType))
-				.map(resourceLocation -> ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, resourceLocation))
+				.map(resourceLocation -> ResourceKey.create(Registries.WORLD_PRESET, resourceLocation))
 				.or(() -> Optional.ofNullable((ResourceKey)LEGACY_PRESET_NAMES.get(this.levelType)))
 				.flatMap(registry::getHolder)
 				.orElseGet(() -> {

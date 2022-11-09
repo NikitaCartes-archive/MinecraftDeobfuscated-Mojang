@@ -10,6 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -18,14 +19,12 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 public class WorldPreset {
 	public static final Codec<WorldPreset> DIRECT_CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						Codec.unboundedMap(ResourceKey.codec(Registry.LEVEL_STEM_REGISTRY), LevelStem.CODEC)
-							.fieldOf("dimensions")
-							.forGetter(worldPreset -> worldPreset.dimensions)
+						Codec.unboundedMap(ResourceKey.codec(Registries.LEVEL_STEM), LevelStem.CODEC).fieldOf("dimensions").forGetter(worldPreset -> worldPreset.dimensions)
 					)
 					.apply(instance, WorldPreset::new)
 		)
 		.flatXmap(WorldPreset::requireOverworld, WorldPreset::requireOverworld);
-	public static final Codec<Holder<WorldPreset>> CODEC = RegistryFileCodec.create(Registry.WORLD_PRESET_REGISTRY, DIRECT_CODEC);
+	public static final Codec<Holder<WorldPreset>> CODEC = RegistryFileCodec.create(Registries.WORLD_PRESET, DIRECT_CODEC);
 	private final Map<ResourceKey<LevelStem>, LevelStem> dimensions;
 
 	public WorldPreset(Map<ResourceKey<LevelStem>, LevelStem> map) {
@@ -33,7 +32,7 @@ public class WorldPreset {
 	}
 
 	private Registry<LevelStem> createRegistry() {
-		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry<>(Registries.LEVEL_STEM, Lifecycle.experimental());
 		WorldDimensions.keysInOrder(this.dimensions.keySet().stream()).forEach(resourceKey -> {
 			LevelStem levelStem = (LevelStem)this.dimensions.get(resourceKey);
 			if (levelStem != null) {

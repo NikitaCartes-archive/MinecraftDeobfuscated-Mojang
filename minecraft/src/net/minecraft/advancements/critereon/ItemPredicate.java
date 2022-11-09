@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -129,7 +130,9 @@ public class ItemPredicate {
 
 					for (JsonElement jsonElement2 : jsonArray) {
 						ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.convertToString(jsonElement2, "item"));
-						builder.add((Item)Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation + "'")));
+						builder.add(
+							(Item)BuiltInRegistries.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation + "'"))
+						);
 					}
 
 					set = builder.build();
@@ -138,13 +141,15 @@ public class ItemPredicate {
 				TagKey<Item> tagKey = null;
 				if (jsonObject.has("tag")) {
 					ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-					tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation2);
+					tagKey = TagKey.create(Registries.ITEM, resourceLocation2);
 				}
 
 				Potion potion = null;
 				if (jsonObject.has("potion")) {
 					ResourceLocation resourceLocation3 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "potion"));
-					potion = (Potion)Registry.POTION.getOptional(resourceLocation3).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation3 + "'"));
+					potion = (Potion)BuiltInRegistries.POTION
+						.getOptional(resourceLocation3)
+						.orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation3 + "'"));
 				}
 
 				EnchantmentPredicate[] enchantmentPredicates = EnchantmentPredicate.fromJsonArray(jsonObject.get("enchantments"));
@@ -165,7 +170,7 @@ public class ItemPredicate {
 				JsonArray jsonArray = new JsonArray();
 
 				for (Item item : this.items) {
-					jsonArray.add(Registry.ITEM.getKey(item).toString());
+					jsonArray.add(BuiltInRegistries.ITEM.getKey(item).toString());
 				}
 
 				jsonObject.add("items", jsonArray);
@@ -199,7 +204,7 @@ public class ItemPredicate {
 			}
 
 			if (this.potion != null) {
-				jsonObject.addProperty("potion", Registry.POTION.getKey(this.potion).toString());
+				jsonObject.addProperty("potion", BuiltInRegistries.POTION.getKey(this.potion).toString());
 			}
 
 			return jsonObject;

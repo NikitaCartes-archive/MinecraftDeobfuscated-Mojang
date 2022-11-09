@@ -27,7 +27,7 @@ import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 import net.minecraft.client.gui.screens.inventory.SmokerScreen;
 import net.minecraft.client.gui.screens.inventory.StonecutterScreen;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -45,7 +45,7 @@ public class MenuScreens {
 		} else {
 			MenuScreens.ScreenConstructor<T, ?> screenConstructor = getConstructor(menuType);
 			if (screenConstructor == null) {
-				LOGGER.warn("Failed to create screen for menu type: {}", Registry.MENU.getKey(menuType));
+				LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(menuType));
 			} else {
 				screenConstructor.fromPacket(component, menuType, minecraft, i);
 			}
@@ -62,16 +62,16 @@ public class MenuScreens {
 	) {
 		MenuScreens.ScreenConstructor<?, ?> screenConstructor2 = (MenuScreens.ScreenConstructor<?, ?>)SCREENS.put(menuType, screenConstructor);
 		if (screenConstructor2 != null) {
-			throw new IllegalStateException("Duplicate registration for " + Registry.MENU.getKey(menuType));
+			throw new IllegalStateException("Duplicate registration for " + BuiltInRegistries.MENU.getKey(menuType));
 		}
 	}
 
 	public static boolean selfTest() {
 		boolean bl = false;
 
-		for (MenuType<?> menuType : Registry.MENU) {
+		for (MenuType<?> menuType : BuiltInRegistries.MENU) {
 			if (!SCREENS.containsKey(menuType)) {
-				LOGGER.debug("Menu {} has no matching screen", Registry.MENU.getKey(menuType));
+				LOGGER.debug("Menu {} has no matching screen", BuiltInRegistries.MENU.getKey(menuType));
 				bl = true;
 			}
 		}

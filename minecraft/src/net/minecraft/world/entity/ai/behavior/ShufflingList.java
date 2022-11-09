@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -7,11 +8,12 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.util.RandomSource;
 
-public class ShufflingList<U> {
+public class ShufflingList<U> implements Iterable<U> {
 	protected final List<ShufflingList.WeightedEntry<U>> entries;
 	private final RandomSource random = RandomSource.create();
 
@@ -40,6 +42,10 @@ public class ShufflingList<U> {
 
 	public Stream<U> stream() {
 		return this.entries.stream().map(ShufflingList.WeightedEntry::getData);
+	}
+
+	public Iterator<U> iterator() {
+		return Iterators.transform(this.entries.iterator(), ShufflingList.WeightedEntry::getData);
 	}
 
 	public String toString() {

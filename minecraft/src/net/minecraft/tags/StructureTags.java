@@ -1,6 +1,6 @@
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
@@ -19,6 +19,6 @@ public interface StructureTags {
 	TagKey<Structure> OCEAN_RUIN = create("ocean_ruin");
 
 	private static TagKey<Structure> create(String string) {
-		return TagKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation(string));
+		return TagKey.create(Registries.STRUCTURE, new ResourceLocation(string));
 	}
 }

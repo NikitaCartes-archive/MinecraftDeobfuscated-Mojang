@@ -36,7 +36,7 @@ public class RegistryOps<T> extends DelegatingOps<T> {
 					@Override
 					public <E> Optional<RegistryOps.RegistryInfo<E>> lookup(ResourceKey<? extends Registry<? extends E>> resourceKey) {
 						return provider.lookup(resourceKey)
-							.map(registryLookup -> new RegistryOps.RegistryInfo<>(registryLookup, registryLookup, registryLookup.elementsLifecycle()));
+							.map(registryLookup -> new RegistryOps.RegistryInfo<>(registryLookup, registryLookup, registryLookup.registryLifecycle()));
 					}
 				}
 			)

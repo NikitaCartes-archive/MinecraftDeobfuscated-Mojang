@@ -2,6 +2,7 @@ package net.minecraft.util.valueproviders;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public interface IntProviderType<P extends IntProvider> {
 	IntProviderType<ConstantInt> CONSTANT = register("constant", ConstantInt.CODEC);
@@ -14,6 +15,6 @@ public interface IntProviderType<P extends IntProvider> {
 	Codec<P> codec();
 
 	static <P extends IntProvider> IntProviderType<P> register(String string, Codec<P> codec) {
-		return Registry.register(Registry.INT_PROVIDER_TYPES, string, () -> codec);
+		return Registry.register(BuiltInRegistries.INT_PROVIDER_TYPE, string, () -> codec);
 	}
 }

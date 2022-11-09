@@ -85,6 +85,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -389,7 +391,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		ResourceKey<Level> resourceKey = clientboundLoginPacket.dimension();
 		Holder<DimensionType> holder = this.registryAccess
 			.compositeAccess()
-			.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
+			.registryOrThrow(Registries.DIMENSION_TYPE)
 			.getHolderOrThrow(clientboundLoginPacket.dimensionType());
 		this.serverChunkRadius = clientboundLoginPacket.chunkRadius();
 		this.serverSimulationDistance = clientboundLoginPacket.simulationDistance();
@@ -441,10 +443,13 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			);
 		this.lastSeenMessages = new LastSeenMessagesTracker(20);
 		this.messageSignatureCache = MessageSignatureCache.createDefault();
-		this.minecraft
-			.getProfileKeyPairManager()
-			.prepareKeyPair()
-			.thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> this.setChatSession(LocalChatSession.create(profileKeyPair))), this.minecraft);
+		if (this.connection.isEncrypted()) {
+			this.minecraft
+				.getProfileKeyPairManager()
+				.prepareKeyPair()
+				.thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> this.setChatSession(LocalChatSession.create(profileKeyPair))), this.minecraft);
+		}
+
 		this.minecraft.getGame().onStartGameSession();
 		this.telemetryManager.onPlayerInfoReceived(clientboundLoginPacket.gameType(), clientboundLoginPacket.hardcore());
 	}
@@ -1049,7 +1054,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
 		Holder<DimensionType> holder = this.registryAccess
 			.compositeAccess()
-			.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
+			.registryOrThrow(Registries.DIMENSION_TYPE)
 			.getHolderOrThrow(clientboundRespawnPacket.getDimensionType());
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
@@ -1178,7 +1183,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		} else {
 			boolean bl = false;
 			if (this.minecraft.screen instanceof CreativeModeInventoryScreen creativeModeInventoryScreen) {
-				bl = creativeModeInventoryScreen.getSelectedTab() != CreativeModeTabs.TAB_INVENTORY.getId();
+				bl = !creativeModeInventoryScreen.isInventoryOpen();
 			}
 
 			if (clientboundContainerSetSlotPacket.getContainerId() == 0 && InventoryMenu.isHotbarSlot(i)) {
@@ -1368,7 +1373,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			mapItemSavedData = MapItemSavedData.createForClient(
 				clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension()
 			);
-			this.minecraft.level.setMapData(string, mapItemSavedData);
+			this.minecraft.level.overrideMapData(string, mapItemSavedData);
 		}
 
 		clientboundMapItemDataPacket.applyToMap(mapItemSavedData);
@@ -1532,7 +1537,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			Blocks.rebuildCache();
 		}
 
-		CreativeModeTabs.TAB_SEARCH.invalidateSearchTree();
+		CreativeModeTabs.searchTab().rebuildSearchTree();
 	}
 
 	@Override
@@ -2028,10 +2033,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				BlockPos blockPos = friendlyByteBuf.readBlockPos();
 				((NeighborsUpdateRenderer)this.minecraft.debugRenderer.neighborsUpdateRenderer).addUpdate(l, blockPos);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_STRUCTURES_PACKET.equals(resourceLocation)) {
-				DimensionType dimensionType = this.registryAccess
-					.compositeAccess()
-					.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
-					.get(friendlyByteBuf.readResourceLocation());
+				DimensionType dimensionType = this.registryAccess.compositeAccess().registryOrThrow(Registries.DIMENSION_TYPE).get(friendlyByteBuf.readResourceLocation());
 				BoundingBox boundingBox = new BoundingBox(
 					friendlyByteBuf.readInt(),
 					friendlyByteBuf.readInt(),
@@ -2221,12 +2223,12 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				int ac = friendlyByteBuf.readInt();
 				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, m, string12, ac);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT.equals(resourceLocation)) {
-				GameEvent gameEvent = Registry.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
+				GameEvent gameEvent = BuiltInRegistries.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
 				Vec3 vec3 = new Vec3(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble());
 				this.minecraft.debugRenderer.gameEventListenerRenderer.trackGameEvent(gameEvent, vec3);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT_LISTENER.equals(resourceLocation)) {
 				ResourceLocation resourceLocation2 = friendlyByteBuf.readResourceLocation();
-				PositionSource positionSource = ((PositionSourceType)Registry.POSITION_SOURCE_TYPE
+				PositionSource positionSource = ((PositionSourceType)BuiltInRegistries.POSITION_SOURCE_TYPE
 						.getOptional(resourceLocation2)
 						.orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation2)))
 					.read(friendlyByteBuf);
@@ -2411,7 +2413,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : clientboundUpdateAttributesPacket.getValues()) {
 					AttributeInstance attributeInstance = attributeMap.getInstance(attributeSnapshot.getAttribute());
 					if (attributeInstance == null) {
-						LOGGER.warn("Entity {} does not have attribute {}", entity, Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
+						LOGGER.warn("Entity {} does not have attribute {}", entity, BuiltInRegistries.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
 					} else {
 						attributeInstance.setBaseValue(attributeSnapshot.getBase());
 						attributeInstance.removeModifiers();
@@ -2629,9 +2631,11 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 
 	@Override
 	public void tick() {
-		ProfileKeyPairManager profileKeyPairManager = this.minecraft.getProfileKeyPairManager();
-		if (profileKeyPairManager.shouldRefreshKeyPair()) {
-			profileKeyPairManager.prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(this::refreshKeyPair), this.minecraft);
+		if (this.connection.isEncrypted()) {
+			ProfileKeyPairManager profileKeyPairManager = this.minecraft.getProfileKeyPairManager();
+			if (profileKeyPairManager.shouldRefreshKeyPair()) {
+				profileKeyPairManager.prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(this::refreshKeyPair), this.minecraft);
+			}
 		}
 	}
 

@@ -1,26 +1,26 @@
 package net.minecraft.world.entity.animal.axolotl;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class ValidatePlayDead extends Behavior<Axolotl> {
-	public ValidatePlayDead() {
-		super(ImmutableMap.of(MemoryModuleType.PLAY_DEAD_TICKS, MemoryStatus.VALUE_PRESENT));
-	}
+public class ValidatePlayDead {
+	public static BehaviorControl<LivingEntity> create() {
+		return BehaviorBuilder.create(
+			instance -> instance.group(instance.present(MemoryModuleType.PLAY_DEAD_TICKS), instance.registered(MemoryModuleType.HURT_BY_ENTITY))
+					.apply(instance, (memoryAccessor, memoryAccessor2) -> (serverLevel, livingEntity, l) -> {
+							int i = instance.<Integer>get(memoryAccessor);
+							if (i <= 0) {
+								memoryAccessor.erase();
+								memoryAccessor2.erase();
+								livingEntity.getBrain().useDefaultActivity();
+							} else {
+								memoryAccessor.set(i - 1);
+							}
 
-	protected void start(ServerLevel serverLevel, Axolotl axolotl, long l) {
-		Brain<Axolotl> brain = axolotl.getBrain();
-		int i = (Integer)brain.getMemory(MemoryModuleType.PLAY_DEAD_TICKS).get();
-		if (i <= 0) {
-			brain.eraseMemory(MemoryModuleType.PLAY_DEAD_TICKS);
-			brain.eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
-			brain.useDefaultActivity();
-		} else {
-			brain.setMemory(MemoryModuleType.PLAY_DEAD_TICKS, i - 1);
-		}
+							return true;
+						})
+		);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.Util;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -20,9 +21,9 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class RegistrySynchronization {
 	private static final Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> NETWORKABLE_REGISTRIES = Util.make(() -> {
 		Builder<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> builder = ImmutableMap.builder();
-		put(builder, Registry.BIOME_REGISTRY, Biome.NETWORK_CODEC);
-		put(builder, Registry.CHAT_TYPE_REGISTRY, ChatType.CODEC);
-		put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC);
+		put(builder, Registries.BIOME, Biome.NETWORK_CODEC);
+		put(builder, Registries.CHAT_TYPE, ChatType.CODEC);
+		put(builder, Registries.DIMENSION_TYPE, DimensionType.DIRECT_CODEC);
 		return builder.build();
 	});
 	public static final Codec<RegistryAccess> NETWORK_CODEC = makeNetworkCodec();
@@ -67,9 +68,13 @@ public class RegistrySynchronization {
 		);
 	}
 
+	public static Stream<RegistryAccess.RegistryEntry<?>> networkedRegistries(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess) {
+		return ownedNetworkableRegistries(layeredRegistryAccess.getAccessFrom(RegistryLayer.WORLDGEN));
+	}
+
 	public static Stream<RegistryAccess.RegistryEntry<?>> networkSafeRegistries(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess) {
 		Stream<RegistryAccess.RegistryEntry<?>> stream = layeredRegistryAccess.getLayer(RegistryLayer.STATIC).registries();
-		Stream<RegistryAccess.RegistryEntry<?>> stream2 = ownedNetworkableRegistries(layeredRegistryAccess.getAccessFrom(RegistryLayer.WORLDGEN));
+		Stream<RegistryAccess.RegistryEntry<?>> stream2 = networkedRegistries(layeredRegistryAccess);
 		return Stream.concat(stream2, stream);
 	}
 

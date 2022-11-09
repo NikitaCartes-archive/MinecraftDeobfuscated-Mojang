@@ -3,6 +3,7 @@ package net.minecraft.core.particles;
 import com.mojang.serialization.Codec;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ParticleTypes {
 	public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = register("ambient_entity_effect", false);
@@ -112,16 +113,18 @@ public class ParticleTypes {
 	public static final ParticleType<ShriekParticleOption> SHRIEK = register(
 		"shriek", false, ShriekParticleOption.DESERIALIZER, particleType -> ShriekParticleOption.CODEC
 	);
-	public static final Codec<ParticleOptions> CODEC = Registry.PARTICLE_TYPE.byNameCodec().dispatch("type", ParticleOptions::getType, ParticleType::codec);
+	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
+		.byNameCodec()
+		.dispatch("type", ParticleOptions::getType, ParticleType::codec);
 
 	private static SimpleParticleType register(String string, boolean bl) {
-		return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));
+		return Registry.register(BuiltInRegistries.PARTICLE_TYPE, string, new SimpleParticleType(bl));
 	}
 
 	private static <T extends ParticleOptions> ParticleType<T> register(
 		String string, boolean bl, ParticleOptions.Deserializer<T> deserializer, Function<ParticleType<T>, Codec<T>> function
 	) {
-		return Registry.register(Registry.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer) {
+		return Registry.register(BuiltInRegistries.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer) {
 			@Override
 			public Codec<T> codec() {
 				return (Codec<T>)function.apply(this);

@@ -16,6 +16,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.KeyDispatchDataCodec;
@@ -157,7 +159,7 @@ public class SurfaceRules {
 
 	static final class BiomeConditionSource implements SurfaceRules.ConditionSource {
 		static final KeyDispatchDataCodec<SurfaceRules.BiomeConditionSource> CODEC = KeyDispatchDataCodec.of(
-			ResourceKey.codec(Registry.BIOME_REGISTRY).listOf().fieldOf("biome_is").xmap(SurfaceRules::isBiome, biomeConditionSource -> biomeConditionSource.biomes)
+			ResourceKey.codec(Registries.BIOME).listOf().fieldOf("biome_is").xmap(SurfaceRules::isBiome, biomeConditionSource -> biomeConditionSource.biomes)
 		);
 		private final List<ResourceKey<Biome>> biomes;
 		final Predicate<ResourceKey<Biome>> biomeNameTest;
@@ -228,7 +230,7 @@ public class SurfaceRules {
 	}
 
 	public interface ConditionSource extends Function<SurfaceRules.Context, SurfaceRules.Condition> {
-		Codec<SurfaceRules.ConditionSource> CODEC = Registry.CONDITION
+		Codec<SurfaceRules.ConditionSource> CODEC = BuiltInRegistries.MATERIAL_CONDITION
 			.byNameCodec()
 			.dispatch(conditionSource -> conditionSource.codec().codec(), Function.identity());
 
@@ -494,7 +496,7 @@ public class SurfaceRules {
 		static final KeyDispatchDataCodec<SurfaceRules.NoiseThresholdConditionSource> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(
 				instance -> instance.group(
-							ResourceKey.codec(Registry.NOISE_REGISTRY).fieldOf("noise").forGetter(SurfaceRules.NoiseThresholdConditionSource::noise),
+							ResourceKey.codec(Registries.NOISE).fieldOf("noise").forGetter(SurfaceRules.NoiseThresholdConditionSource::noise),
 							Codec.DOUBLE.fieldOf("min_threshold").forGetter(SurfaceRules.NoiseThresholdConditionSource::minThreshold),
 							Codec.DOUBLE.fieldOf("max_threshold").forGetter(SurfaceRules.NoiseThresholdConditionSource::maxThreshold)
 						)
@@ -551,7 +553,7 @@ public class SurfaceRules {
 	}
 
 	public interface RuleSource extends Function<SurfaceRules.Context, SurfaceRules.SurfaceRule> {
-		Codec<SurfaceRules.RuleSource> CODEC = Registry.RULE.byNameCodec().dispatch(ruleSource -> ruleSource.codec().codec(), Function.identity());
+		Codec<SurfaceRules.RuleSource> CODEC = BuiltInRegistries.MATERIAL_RULE.byNameCodec().dispatch(ruleSource -> ruleSource.codec().codec(), Function.identity());
 
 		static Codec<? extends SurfaceRules.RuleSource> bootstrap(Registry<Codec<? extends SurfaceRules.RuleSource>> registry) {
 			SurfaceRules.register(registry, "bandlands", SurfaceRules.Bandlands.CODEC);

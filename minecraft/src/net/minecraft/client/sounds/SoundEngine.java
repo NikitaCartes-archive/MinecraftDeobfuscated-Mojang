@@ -26,7 +26,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.sounds.SoundEvent;
@@ -81,10 +81,10 @@ public class SoundEngine {
 	public void reload() {
 		ONLY_WARN_ONCE.clear();
 
-		for (SoundEvent soundEvent : Registry.SOUND_EVENT) {
+		for (SoundEvent soundEvent : BuiltInRegistries.SOUND_EVENT) {
 			ResourceLocation resourceLocation = soundEvent.getLocation();
 			if (this.soundManager.getSoundEvent(resourceLocation) == null) {
-				LOGGER.warn("Missing sound for event: {}", Registry.SOUND_EVENT.getKey(soundEvent));
+				LOGGER.warn("Missing sound for event: {}", BuiltInRegistries.SOUND_EVENT.getKey(soundEvent));
 				ONLY_WARN_ONCE.add(resourceLocation);
 			}
 		}

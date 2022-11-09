@@ -2,7 +2,7 @@ package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.Fluid;
@@ -10,7 +10,7 @@ import net.minecraft.world.level.material.Fluids;
 
 public class FluidTagsProvider extends IntrinsicHolderTagsProvider<Fluid> {
 	public FluidTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-		super(packOutput, Registry.FLUID_REGISTRY, completableFuture, fluid -> fluid.builtInRegistryHolder().key());
+		super(packOutput, Registries.FLUID, completableFuture, fluid -> fluid.builtInRegistryHolder().key());
 	}
 
 	@Override

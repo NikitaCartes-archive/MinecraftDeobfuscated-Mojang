@@ -31,6 +31,7 @@ public class UpdateOneTwentyItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.TRAPDOORS, ItemTags.TRAPDOORS);
 		this.copy(BlockTags.FENCES, ItemTags.FENCES);
 		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
+		this.copy(BlockTags.BAMBOO_BLOCKS, ItemTags.BAMBOO_BLOCKS);
 		this.copy(BlockTags.CEILING_HANGING_SIGNS, ItemTags.HANGING_SIGNS);
 		this.tag(ItemTags.CHEST_BOATS).add(Items.BAMBOO_CHEST_RAFT);
 		this.tag(ItemTags.BOATS).add(Items.BAMBOO_RAFT);

@@ -2,8 +2,10 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -11,6 +13,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -33,6 +36,11 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 	public boolean visible = true;
 	protected float alpha = 1.0F;
 	private boolean focused;
+	@Nullable
+	private Tooltip tooltip;
+	private int tooltipMsDelay;
+	private long hoverOrFocusedStartTime;
+	private boolean wasHoveredOrFocused;
 
 	public AbstractWidget(int i, int j, int k, int l, Component component) {
 		this.x = i;
@@ -62,7 +70,36 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 		if (this.visible) {
 			this.isHovered = i >= this.getX() && j >= this.getY() && i < this.getX() + this.width && j < this.getY() + this.height;
 			this.renderButton(poseStack, i, j, f);
+			this.updateTooltip();
 		}
+	}
+
+	private void updateTooltip() {
+		if (this.tooltip != null) {
+			boolean bl = this.isHoveredOrFocused();
+			if (bl != this.wasHoveredOrFocused) {
+				if (bl) {
+					this.hoverOrFocusedStartTime = Util.getMillis();
+				}
+
+				this.wasHoveredOrFocused = bl;
+			}
+
+			if (bl && Util.getMillis() - this.hoverOrFocusedStartTime > (long)this.tooltipMsDelay) {
+				Screen screen = Minecraft.getInstance().screen;
+				if (screen != null) {
+					screen.setTooltipForNextRenderPass(this.tooltip);
+				}
+			}
+		}
+	}
+
+	public void setTooltip(@Nullable Tooltip tooltip) {
+		this.tooltip = tooltip;
+	}
+
+	public void setTooltipDelay(int i) {
+		this.tooltipMsDelay = i;
 	}
 
 	protected MutableComponent createNarrationMessage() {
@@ -183,9 +220,6 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 			&& e < (double)(this.getY() + this.height);
 	}
 
-	public void renderToolTip(PoseStack poseStack, int i, int j) {
-	}
-
 	public void playDownSound(SoundManager soundManager) {
 		soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 	}
@@ -231,6 +265,16 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 			return this.isHovered ? NarratableEntry.NarrationPriority.HOVERED : NarratableEntry.NarrationPriority.NONE;
 		}
 	}
+
+	@Override
+	public final void updateNarration(NarrationElementOutput narrationElementOutput) {
+		this.updateWidgetNarration(narrationElementOutput);
+		if (this.tooltip != null) {
+			this.tooltip.updateNarration(narrationElementOutput);
+		}
+	}
+
+	protected abstract void updateWidgetNarration(NarrationElementOutput narrationElementOutput);
 
 	protected void defaultButtonNarrationText(NarrationElementOutput narrationElementOutput) {
 		narrationElementOutput.add(NarratedElementType.TITLE, this.createNarrationMessage());

@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -36,7 +37,7 @@ public class CreateBuffetWorldScreen extends Screen {
 		super(Component.translatable("createWorld.customize.buffet.title"));
 		this.parent = screen;
 		this.applySettings = consumer;
-		this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registry.BIOME_REGISTRY);
+		this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registries.BIOME);
 		Holder<Biome> holder = (Holder<Biome>)this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
 		this.biome = (Holder<Biome>)worldCreationContext.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
 	}

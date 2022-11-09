@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -36,7 +36,7 @@ public class ImposterProtoChunk extends ProtoChunk {
 			levelChunk.getPos(),
 			UpgradeData.EMPTY,
 			levelChunk.levelHeightAccessor,
-			levelChunk.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
+			levelChunk.getLevel().registryAccess().registryOrThrow(Registries.BIOME),
 			levelChunk.getBlendingData()
 		);
 		this.wrapped = levelChunk;

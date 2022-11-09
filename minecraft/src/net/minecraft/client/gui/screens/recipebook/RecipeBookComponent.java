@@ -19,6 +19,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.StateSwitchingButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -100,9 +101,11 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 		this.searchBox.setVisible(true);
 		this.searchBox.setTextColor(16777215);
 		this.searchBox.setValue(string);
+		this.searchBox.setHint(SEARCH_HINT);
 		this.recipeBookPage.init(this.minecraft, i, j);
 		this.recipeBookPage.addListener(this);
 		this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, this.book.isFiltering(this.menu));
+		this.updateFilterButtonTooltip();
 		this.initFilterButtonTextures();
 		this.tabButtons.clear();
 
@@ -125,6 +128,10 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 		this.selectedTab.setStateTriggered(true);
 		this.updateCollections(false);
 		this.updateTabs();
+	}
+
+	private void updateFilterButtonTooltip() {
+		this.filterButton.setTooltip(this.filterButton.isStateTriggered() ? Tooltip.create(this.getRecipeFilterName()) : Tooltip.create(ALL_RECIPES_TOOLTIP));
 	}
 
 	@Override
@@ -255,11 +262,7 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 			int k = (this.width - 147) / 2 - this.xOffset;
 			int l = (this.height - 166) / 2;
 			this.blit(poseStack, k, l, 1, 1, 147, 166);
-			if (!this.searchBox.isFocused() && this.searchBox.getValue().isEmpty()) {
-				drawString(poseStack, this.minecraft.font, SEARCH_HINT, k + 25, l + 14, -1);
-			} else {
-				this.searchBox.render(poseStack, i, j, f);
-			}
+			this.searchBox.render(poseStack, i, j, f);
 
 			for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
 				recipeBookTabButton.render(poseStack, i, j, f);
@@ -274,19 +277,8 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 	public void renderTooltip(PoseStack poseStack, int i, int j, int k, int l) {
 		if (this.isVisible()) {
 			this.recipeBookPage.renderTooltip(poseStack, k, l);
-			if (this.filterButton.isHoveredOrFocused()) {
-				Component component = this.getFilterButtonTooltip();
-				if (this.minecraft.screen != null) {
-					this.minecraft.screen.renderTooltip(poseStack, component, k, l);
-				}
-			}
-
 			this.renderGhostRecipeTooltip(poseStack, i, j, k, l);
 		}
-	}
-
-	private Component getFilterButtonTooltip() {
-		return this.filterButton.isStateTriggered() ? this.getRecipeFilterName() : ALL_RECIPES_TOOLTIP;
 	}
 
 	protected Component getRecipeFilterName() {
@@ -338,6 +330,7 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 			} else if (this.filterButton.mouseClicked(d, e, i)) {
 				boolean bl = this.toggleFiltering();
 				this.filterButton.setStateTriggered(bl);
+				this.updateFilterButtonTooltip();
 				this.sendUpdateSettings();
 				this.updateCollections(false);
 				return true;

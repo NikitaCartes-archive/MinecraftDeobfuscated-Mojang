@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.StatType;
 
@@ -99,7 +99,7 @@ public class ObjectiveCriteria {
 			int i = string.indexOf(58);
 			return i < 0
 				? Optional.empty()
-				: Registry.STAT_TYPE
+				: BuiltInRegistries.STAT_TYPE
 					.getOptional(ResourceLocation.of(string.substring(0, i), '.'))
 					.flatMap(statType -> getStat(statType, ResourceLocation.of(string.substring(i + 1), '.')));
 		}

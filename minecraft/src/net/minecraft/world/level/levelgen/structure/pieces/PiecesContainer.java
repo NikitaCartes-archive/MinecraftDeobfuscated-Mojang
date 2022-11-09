@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -62,7 +62,7 @@ public record PiecesContainer(List<StructurePiece> pieces) {
 			String string = compoundTag.getString("id").toLowerCase(Locale.ROOT);
 			ResourceLocation resourceLocation = new ResourceLocation(string);
 			ResourceLocation resourceLocation2 = (ResourceLocation)RENAMES.getOrDefault(resourceLocation, resourceLocation);
-			StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(resourceLocation2);
+			StructurePieceType structurePieceType = BuiltInRegistries.STRUCTURE_PIECE.get(resourceLocation2);
 			if (structurePieceType == null) {
 				LOGGER.error("Unknown structure piece id: {}", resourceLocation2);
 			} else {

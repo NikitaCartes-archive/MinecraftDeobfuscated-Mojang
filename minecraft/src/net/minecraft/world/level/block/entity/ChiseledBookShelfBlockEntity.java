@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -102,17 +101,6 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 		}
 
 		return nonNullList;
-	}
-
-	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
-	}
-
-	@Override
-	public CompoundTag getUpdateTag() {
-		CompoundTag compoundTag = new CompoundTag();
-		ContainerHelper.saveAllItems(compoundTag, asNonNullList(this.books), true);
-		return compoundTag;
 	}
 
 	@Override

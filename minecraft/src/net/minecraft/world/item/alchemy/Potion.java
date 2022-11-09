@@ -3,7 +3,7 @@ package net.minecraft.world.item.alchemy;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 
@@ -13,7 +13,7 @@ public class Potion {
 	private final ImmutableList<MobEffectInstance> effects;
 
 	public static Potion byName(String string) {
-		return Registry.POTION.get(ResourceLocation.tryParse(string));
+		return BuiltInRegistries.POTION.get(ResourceLocation.tryParse(string));
 	}
 
 	public Potion(MobEffectInstance... mobEffectInstances) {
@@ -26,7 +26,7 @@ public class Potion {
 	}
 
 	public String getName(String string) {
-		return string + (this.name == null ? Registry.POTION.getKey(this).getPath() : this.name);
+		return string + (this.name == null ? BuiltInRegistries.POTION.getKey(this).getPath() : this.name);
 	}
 
 	public List<MobEffectInstance> getEffects() {

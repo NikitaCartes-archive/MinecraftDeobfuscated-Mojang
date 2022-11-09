@@ -40,7 +40,10 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	@Override
 	public void containerTick() {
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
-			this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures()));
+			this.minecraft
+				.setScreen(
+					new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get())
+				);
 		} else {
 			this.recipeBookComponent.tick();
 		}
@@ -49,7 +52,10 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	@Override
 	protected void init() {
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
-			this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures()));
+			this.minecraft
+				.setScreen(
+					new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get())
+				);
 		} else {
 			super.init();
 			this.widthTooNarrow = this.width < 379;

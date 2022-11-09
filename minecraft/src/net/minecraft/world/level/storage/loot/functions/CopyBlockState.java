@@ -7,7 +7,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -99,7 +99,7 @@ public class CopyBlockState extends LootItemConditionalFunction {
 	public static class Serializer extends LootItemConditionalFunction.Serializer<CopyBlockState> {
 		public void serialize(JsonObject jsonObject, CopyBlockState copyBlockState, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, copyBlockState, jsonSerializationContext);
-			jsonObject.addProperty("block", Registry.BLOCK.getKey(copyBlockState.block).toString());
+			jsonObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(copyBlockState.block).toString());
 			JsonArray jsonArray = new JsonArray();
 			copyBlockState.properties.forEach(property -> jsonArray.add(property.getName()));
 			jsonObject.add("properties", jsonArray);
@@ -107,7 +107,9 @@ public class CopyBlockState extends LootItemConditionalFunction {
 
 		public CopyBlockState deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-			Block block = (Block)Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
+			Block block = (Block)BuiltInRegistries.BLOCK
+				.getOptional(resourceLocation)
+				.orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
 			StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
 			Set<Property<?>> set = Sets.<Property<?>>newHashSet();
 			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "properties", null);

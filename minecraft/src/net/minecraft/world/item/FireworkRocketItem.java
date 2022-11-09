@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class FireworkRocketItem extends Item {
+	public static final byte[] CRAFTABLE_DURATIONS = new byte[]{1, 2, 3};
 	public static final String TAG_FIREWORKS = "Fireworks";
 	public static final String TAG_EXPLOSION = "Explosion";
 	public static final String TAG_EXPLOSIONS = "Explosions";
@@ -109,10 +110,14 @@ public class FireworkRocketItem extends Item {
 		}
 	}
 
+	public static void setDuration(ItemStack itemStack, byte b) {
+		itemStack.getOrCreateTagElement("Fireworks").putByte("Flight", b);
+	}
+
 	@Override
 	public ItemStack getDefaultInstance() {
 		ItemStack itemStack = new ItemStack(this);
-		itemStack.getOrCreateTag().putByte("Flight", (byte)1);
+		setDuration(itemStack, (byte)1);
 		return itemStack;
 	}
 

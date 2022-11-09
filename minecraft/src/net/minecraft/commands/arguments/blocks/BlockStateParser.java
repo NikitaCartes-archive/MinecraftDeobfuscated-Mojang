@@ -21,7 +21,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -352,7 +352,7 @@ public class BlockStateParser {
 	private void readBlock() throws CommandSyntaxException {
 		int i = this.reader.getCursor();
 		this.id = ResourceLocation.read(this.reader);
-		Block block = (Block)((Holder.Reference)this.blocks.get(ResourceKey.create(Registry.BLOCK_REGISTRY, this.id)).orElseThrow(() -> {
+		Block block = (Block)((Holder.Reference)this.blocks.get(ResourceKey.create(Registries.BLOCK, this.id)).orElseThrow(() -> {
 			this.reader.setCursor(i);
 			return ERROR_UNKNOWN_BLOCK.createWithContext(this.reader, this.id.toString());
 		})).value();
@@ -368,7 +368,7 @@ public class BlockStateParser {
 			this.reader.expect('#');
 			this.suggestions = this::suggestTag;
 			ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-			this.tag = (HolderSet<Block>)this.blocks.get(TagKey.create(Registry.BLOCK_REGISTRY, resourceLocation)).orElseThrow(() -> {
+			this.tag = (HolderSet<Block>)this.blocks.get(TagKey.create(Registries.BLOCK, resourceLocation)).orElseThrow(() -> {
 				this.reader.setCursor(i);
 				return ERROR_UNKNOWN_TAG.createWithContext(this.reader, resourceLocation.toString());
 			});

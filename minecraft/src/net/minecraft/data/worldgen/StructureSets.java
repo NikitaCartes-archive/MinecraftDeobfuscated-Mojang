@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructureSets;
@@ -19,8 +19,8 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 
 public interface StructureSets {
 	static void bootstrap(BootstapContext<StructureSet> bootstapContext) {
-		HolderGetter<Structure> holderGetter = bootstapContext.lookup(Registry.STRUCTURE_REGISTRY);
-		HolderGetter<Biome> holderGetter2 = bootstapContext.lookup(Registry.BIOME_REGISTRY);
+		HolderGetter<Structure> holderGetter = bootstapContext.lookup(Registries.STRUCTURE);
+		HolderGetter<Biome> holderGetter2 = bootstapContext.lookup(Registries.BIOME);
 		Holder.Reference<StructureSet> reference = bootstapContext.register(
 			BuiltinStructureSets.VILLAGES,
 			new StructureSet(

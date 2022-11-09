@@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.resources.ResourceKey;
@@ -60,12 +60,12 @@ public class NoiseRouterData {
 	private static final ResourceKey<DensityFunction> SPAGHETTI_2D = createKey("overworld/caves/spaghetti_2d");
 
 	private static ResourceKey<DensityFunction> createKey(String string) {
-		return ResourceKey.create(Registry.DENSITY_FUNCTION_REGISTRY, new ResourceLocation(string));
+		return ResourceKey.create(Registries.DENSITY_FUNCTION, new ResourceLocation(string));
 	}
 
 	public static Holder<? extends DensityFunction> bootstrap(BootstapContext<DensityFunction> bootstapContext) {
-		HolderGetter<NormalNoise.NoiseParameters> holderGetter = bootstapContext.lookup(Registry.NOISE_REGISTRY);
-		HolderGetter<DensityFunction> holderGetter2 = bootstapContext.lookup(Registry.DENSITY_FUNCTION_REGISTRY);
+		HolderGetter<NormalNoise.NoiseParameters> holderGetter = bootstapContext.lookup(Registries.NOISE);
+		HolderGetter<DensityFunction> holderGetter2 = bootstapContext.lookup(Registries.DENSITY_FUNCTION);
 		bootstapContext.register(ZERO, DensityFunctions.zero());
 		int i = DimensionType.MIN_Y * 2;
 		int j = DimensionType.MAX_Y * 2;

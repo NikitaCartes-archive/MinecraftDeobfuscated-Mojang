@@ -24,7 +24,7 @@ import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -256,7 +256,7 @@ public class KeyboardHandler {
 					break;
 				case ENTITY:
 					Entity entity = ((EntityHitResult)hitResult).getEntity();
-					ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(entity.getType());
+					ResourceLocation resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
 					if (bl) {
 						if (bl2) {
 							this.minecraft.player.connection.getDebugQueryHandler().queryEntityTag(entity.getId(), compoundTagx -> {

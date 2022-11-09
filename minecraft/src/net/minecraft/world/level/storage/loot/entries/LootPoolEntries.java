@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage.loot.entries;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.GsonAdapterFactory;
 import net.minecraft.world.level.storage.loot.Serializer;
@@ -16,11 +17,13 @@ public class LootPoolEntries {
 	public static final LootPoolEntryType GROUP = register("group", CompositeEntryBase.createSerializer(EntryGroup::new));
 
 	private static LootPoolEntryType register(String string, Serializer<? extends LootPoolEntryContainer> serializer) {
-		return Registry.register(Registry.LOOT_POOL_ENTRY_TYPE, new ResourceLocation(string), new LootPoolEntryType(serializer));
+		return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, new ResourceLocation(string), new LootPoolEntryType(serializer));
 	}
 
 	public static Object createGsonAdapter() {
-		return GsonAdapterFactory.<LootPoolEntryContainer, LootPoolEntryType>builder(Registry.LOOT_POOL_ENTRY_TYPE, "entry", "type", LootPoolEntryContainer::getType)
+		return GsonAdapterFactory.<LootPoolEntryContainer, LootPoolEntryType>builder(
+				BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, "entry", "type", LootPoolEntryContainer::getType
+			)
 			.build();
 	}
 }

@@ -3,7 +3,7 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import javax.annotation.Nullable;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -23,7 +23,9 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		Potion potion = null;
 		if (jsonObject.has("potion")) {
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "potion"));
-			potion = (Potion)Registry.POTION.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
+			potion = (Potion)BuiltInRegistries.POTION
+				.getOptional(resourceLocation)
+				.orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
 		}
 
 		return new BrewedPotionTrigger.TriggerInstance(composite, potion);
@@ -54,7 +56,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		public JsonObject serializeToJson(SerializationContext serializationContext) {
 			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			if (this.potion != null) {
-				jsonObject.addProperty("potion", Registry.POTION.getKey(this.potion).toString());
+				jsonObject.addProperty("potion", BuiltInRegistries.POTION.getKey(this.potion).toString());
 			}
 
 			return jsonObject;

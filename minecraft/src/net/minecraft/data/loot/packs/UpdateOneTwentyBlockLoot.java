@@ -13,6 +13,8 @@ public class UpdateOneTwentyBlockLoot extends BlockLootSubProvider {
 
 	@Override
 	protected void generate() {
+		this.dropSelf(Blocks.BAMBOO_BLOCK);
+		this.dropSelf(Blocks.STRIPPED_BAMBOO_BLOCK);
 		this.dropSelf(Blocks.BAMBOO_PLANKS);
 		this.dropSelf(Blocks.BAMBOO_MOSAIC);
 		this.dropSelf(Blocks.BAMBOO_STAIRS);

@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -52,11 +53,10 @@ public class LocateCommand {
 				.then(
 					Commands.literal("structure")
 						.then(
-							Commands.argument("structure", ResourceOrTagKeyArgument.resourceOrTagKey(Registry.STRUCTURE_REGISTRY))
+							Commands.argument("structure", ResourceOrTagKeyArgument.resourceOrTagKey(Registries.STRUCTURE))
 								.executes(
 									commandContext -> locateStructure(
-											commandContext.getSource(),
-											ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registry.STRUCTURE_REGISTRY, ERROR_STRUCTURE_INVALID)
+											commandContext.getSource(), ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registries.STRUCTURE, ERROR_STRUCTURE_INVALID)
 										)
 								)
 						)
@@ -64,19 +64,17 @@ public class LocateCommand {
 				.then(
 					Commands.literal("biome")
 						.then(
-							Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registry.BIOME_REGISTRY))
-								.executes(
-									commandContext -> locateBiome(commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "biome", Registry.BIOME_REGISTRY))
-								)
+							Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registries.BIOME))
+								.executes(commandContext -> locateBiome(commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "biome", Registries.BIOME)))
 						)
 				)
 				.then(
 					Commands.literal("poi")
 						.then(
-							Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registry.POINT_OF_INTEREST_TYPE_REGISTRY))
+							Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registries.POINT_OF_INTEREST_TYPE))
 								.executes(
 									commandContext -> locatePoi(
-											commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "poi", Registry.POINT_OF_INTEREST_TYPE_REGISTRY)
+											commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "poi", Registries.POINT_OF_INTEREST_TYPE)
 										)
 								)
 						)
@@ -89,7 +87,7 @@ public class LocateCommand {
 	}
 
 	private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagKeyArgument.Result<Structure> result) throws CommandSyntaxException {
-		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
 		HolderSet<Structure> holderSet = (HolderSet<Structure>)getHolders(result, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(result.asPrintable()));
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();

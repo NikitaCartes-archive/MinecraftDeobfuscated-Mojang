@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature.stateproviders;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class BlockStateProviderType<P extends BlockStateProvider> {
 	public static final BlockStateProviderType<SimpleStateProvider> SIMPLE_STATE_PROVIDER = register("simple_state_provider", SimpleStateProvider.CODEC);
@@ -18,7 +19,7 @@ public class BlockStateProviderType<P extends BlockStateProvider> {
 	private final Codec<P> codec;
 
 	private static <P extends BlockStateProvider> BlockStateProviderType<P> register(String string, Codec<P> codec) {
-		return Registry.register(Registry.BLOCKSTATE_PROVIDER_TYPES, string, new BlockStateProviderType<>(codec));
+		return Registry.register(BuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE, string, new BlockStateProviderType<>(codec));
 	}
 
 	private BlockStateProviderType(Codec<P> codec) {

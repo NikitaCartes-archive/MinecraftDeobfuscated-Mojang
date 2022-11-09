@@ -24,6 +24,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -140,10 +141,10 @@ public class Main {
 						executor -> WorldLoader.load(
 								initConfig,
 								dataLoadContext -> {
-									Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registry.LEVEL_STEM_REGISTRY);
+									Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
 									DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
 									Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(
-										dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allElementsLifecycle()
+										dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle()
 									);
 									if (pair != null) {
 										return new WorldLoader.DataLoadOutput<>(pair.getFirst(), pair.getSecond().dimensionsRegistryAccess());
@@ -171,7 +172,7 @@ public class Main {
 										}
 
 										WorldDimensions.Complete complete = worldDimensions.bake(registry);
-										Lifecycle lifecycle = complete.lifecycle().add(dataLoadContext.datapackWorldgen().allElementsLifecycle());
+										Lifecycle lifecycle = complete.lifecycle().add(dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
 										return new WorldLoader.DataLoadOutput<>(
 											new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), lifecycle), complete.dimensionsRegistryAccess()
 										);
@@ -192,7 +193,7 @@ public class Main {
 
 			RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
 			if (optionSet.has(optionSpec5)) {
-				forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, frozen.registryOrThrow(Registry.LEVEL_STEM_REGISTRY));
+				forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, frozen.registryOrThrow(Registries.LEVEL_STEM));
 			}
 
 			WorldData worldData = worldStem.worldData();

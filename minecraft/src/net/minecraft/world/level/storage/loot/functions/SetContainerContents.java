@@ -9,7 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -103,14 +103,14 @@ public class SetContainerContents extends LootItemConditionalFunction {
 	public static class Serializer extends LootItemConditionalFunction.Serializer<SetContainerContents> {
 		public void serialize(JsonObject jsonObject, SetContainerContents setContainerContents, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, setContainerContents, jsonSerializationContext);
-			jsonObject.addProperty("type", Registry.BLOCK_ENTITY_TYPE.getKey(setContainerContents.type).toString());
+			jsonObject.addProperty("type", BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(setContainerContents.type).toString());
 			jsonObject.add("entries", jsonSerializationContext.serialize(setContainerContents.entries));
 		}
 
 		public SetContainerContents deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
 			LootPoolEntryContainer[] lootPoolEntryContainers = GsonHelper.getAsObject(jsonObject, "entries", jsonDeserializationContext, LootPoolEntryContainer[].class);
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "type"));
-			BlockEntityType<?> blockEntityType = (BlockEntityType<?>)Registry.BLOCK_ENTITY_TYPE
+			BlockEntityType<?> blockEntityType = (BlockEntityType<?>)BuiltInRegistries.BLOCK_ENTITY_TYPE
 				.getOptional(resourceLocation)
 				.orElseThrow(() -> new JsonSyntaxException("Unknown block entity type id '" + resourceLocation + "'"));
 			return new SetContainerContents(lootItemConditions, blockEntityType, Arrays.asList(lootPoolEntryContainers));

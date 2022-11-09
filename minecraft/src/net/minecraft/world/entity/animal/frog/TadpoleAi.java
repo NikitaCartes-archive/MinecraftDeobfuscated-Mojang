@@ -10,16 +10,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
-import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.FollowTemptation;
 import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.RandomSwim;
-import net.minecraft.world.entity.ai.behavior.RunIf;
-import net.minecraft.world.entity.ai.behavior.RunSometimes;
-import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
+import net.minecraft.world.entity.ai.behavior.RandomStroll;
+import net.minecraft.world.entity.ai.behavior.SetEntityLookTargetSometimes;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
@@ -52,7 +50,7 @@ public class TadpoleAi {
 		brain.addActivity(
 			Activity.IDLE,
 			ImmutableList.of(
-				Pair.of(0, new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 6.0F), UniformInt.of(30, 60))),
+				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
 				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F)),
 				Pair.of(
 					2,
@@ -62,9 +60,9 @@ public class TadpoleAi {
 						GateBehavior.OrderPolicy.ORDERED,
 						GateBehavior.RunningPolicy.TRY_ALL,
 						ImmutableList.of(
-							Pair.of(new RandomSwim(0.5F), 2),
-							Pair.of(new SetWalkTargetFromLookTarget(0.5F, 3), 3),
-							Pair.of(new RunIf<>(Entity::isInWaterOrBubble, new DoNothing(30, 60)), 5)
+							Pair.of(RandomStroll.swim(0.5F), 2),
+							Pair.of(SetWalkTargetFromLookTarget.create(0.5F, 3), 3),
+							Pair.of(BehaviorBuilder.triggerIf(Entity::isInWaterOrBubble), 5)
 						)
 					)
 				)

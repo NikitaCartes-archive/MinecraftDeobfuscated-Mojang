@@ -64,8 +64,6 @@ public class SocialInteractionsScreen extends Screen {
 	private Component serverLabel;
 	private int playerCount;
 	private boolean initialized;
-	@Nullable
-	private Runnable postRenderRunnable;
 
 	public SocialInteractionsScreen() {
 		super(Component.translatable("gui.socialInteractions.title"));
@@ -135,6 +133,7 @@ public class SocialInteractionsScreen extends Screen {
 		this.searchBox.setVisible(true);
 		this.searchBox.setTextColor(16777215);
 		this.searchBox.setValue(string);
+		this.searchBox.setHint(SEARCH_HINT);
 		this.searchBox.setResponder(this::checkSearchStringUpdate);
 		this.addWidget(this.searchBox);
 		this.addWidget(this.socialInteractionsPlayerList);
@@ -232,17 +231,9 @@ public class SocialInteractionsScreen extends Screen {
 			drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (78 + this.listEnd()) / 2, -1);
 		}
 
-		if (!this.searchBox.isFocused() && this.searchBox.getValue().isEmpty()) {
-			drawString(poseStack, this.minecraft.font, SEARCH_HINT, this.searchBox.getX(), this.searchBox.getY(), -1);
-		} else {
-			this.searchBox.render(poseStack, i, j, f);
-		}
-
+		this.searchBox.render(poseStack, i, j, f);
 		this.blockingHintButton.visible = this.page == SocialInteractionsScreen.Page.BLOCKED;
 		super.render(poseStack, i, j, f);
-		if (this.postRenderRunnable != null) {
-			this.postRenderRunnable.run();
-		}
 	}
 
 	@Override
@@ -305,10 +296,6 @@ public class SocialInteractionsScreen extends Screen {
 
 	public void onRemovePlayer(UUID uUID) {
 		this.socialInteractionsPlayerList.removePlayer(uUID);
-	}
-
-	public void setPostRenderRunnable(@Nullable Runnable runnable) {
-		this.postRenderRunnable = runnable;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.placement.VegetationPlacements;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -36,7 +36,7 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 		BlockPos blockPos2 = blockPos.above();
 		BlockState blockState2 = Blocks.GRASS.defaultBlockState();
 		Optional<Holder.Reference<PlacedFeature>> optional = serverLevel.registryAccess()
-			.registryOrThrow(Registry.PLACED_FEATURE_REGISTRY)
+			.registryOrThrow(Registries.PLACED_FEATURE)
 			.getHolder(VegetationPlacements.GRASS_BONEMEAL);
 
 		label49:

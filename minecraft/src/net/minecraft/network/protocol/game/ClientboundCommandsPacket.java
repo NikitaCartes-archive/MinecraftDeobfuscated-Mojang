@@ -26,7 +26,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -121,7 +121,7 @@ public class ClientboundCommandsPacket implements Packet<ClientGamePacketListene
 		if (i == 2) {
 			String string = friendlyByteBuf.readUtf();
 			int j = friendlyByteBuf.readVarInt();
-			ArgumentTypeInfo<?, ?> argumentTypeInfo = Registry.COMMAND_ARGUMENT_TYPE.byId(j);
+			ArgumentTypeInfo<?, ?> argumentTypeInfo = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.byId(j);
 			if (argumentTypeInfo == null) {
 				return null;
 			} else {
@@ -232,7 +232,7 @@ public class ClientboundCommandsPacket implements Packet<ClientGamePacketListene
 		private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void serializeCap(
 			FriendlyByteBuf friendlyByteBuf, ArgumentTypeInfo<A, T> argumentTypeInfo, ArgumentTypeInfo.Template<A> template
 		) {
-			friendlyByteBuf.writeVarInt(Registry.COMMAND_ARGUMENT_TYPE.getId(argumentTypeInfo));
+			friendlyByteBuf.writeVarInt(BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getId(argumentTypeInfo));
 			argumentTypeInfo.serializeToNetwork((T)template, friendlyByteBuf);
 		}
 	}

@@ -1,41 +1,34 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
-public class MoveToSkySeeingSpot extends Behavior<LivingEntity> {
-	private final float speedModifier;
-
-	public MoveToSkySeeingSpot(float f) {
-		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speedModifier = f;
-	}
-
-	@Override
-	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-		Optional<Vec3> optional = Optional.ofNullable(this.getOutdoorPosition(serverLevel, livingEntity));
-		if (optional.isPresent()) {
-			livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speedModifier, 0)));
-		}
-	}
-
-	@Override
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-		return !serverLevel.canSeeSky(livingEntity.blockPosition());
+public class MoveToSkySeeingSpot {
+	public static OneShot<LivingEntity> create(float f) {
+		return BehaviorBuilder.create(
+			instance -> instance.group(instance.absent(MemoryModuleType.WALK_TARGET)).apply(instance, memoryAccessor -> (serverLevel, livingEntity, l) -> {
+						if (serverLevel.canSeeSky(livingEntity.blockPosition())) {
+							return false;
+						} else {
+							Optional<Vec3> optional = Optional.ofNullable(getOutdoorPosition(serverLevel, livingEntity));
+							optional.ifPresent(vec3 -> memoryAccessor.set(new WalkTarget(vec3, f, 0)));
+							return true;
+						}
+					})
+		);
 	}
 
 	@Nullable
-	private Vec3 getOutdoorPosition(ServerLevel serverLevel, LivingEntity livingEntity) {
+	private static Vec3 getOutdoorPosition(ServerLevel serverLevel, LivingEntity livingEntity) {
 		RandomSource randomSource = livingEntity.getRandom();
 		BlockPos blockPos = livingEntity.blockPosition();
 

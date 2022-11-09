@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.random.WeightedRandomList;
@@ -59,8 +59,8 @@ public class Structures {
 	}
 
 	public static void bootstrap(BootstapContext<Structure> bootstapContext) {
-		HolderGetter<Biome> holderGetter = bootstapContext.lookup(Registry.BIOME_REGISTRY);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+		HolderGetter<Biome> holderGetter = bootstapContext.lookup(Registries.BIOME);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
 		bootstapContext.register(
 			BuiltinStructures.PILLAGER_OUTPOST,
 			new JigsawStructure(

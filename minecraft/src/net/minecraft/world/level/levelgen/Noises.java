@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -70,7 +70,7 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> NETHER_STATE_SELECTOR = createKey("nether_state_selector");
 
 	private static ResourceKey<NormalNoise.NoiseParameters> createKey(String string) {
-		return ResourceKey.create(Registry.NOISE_REGISTRY, new ResourceLocation(string));
+		return ResourceKey.create(Registries.NOISE, new ResourceLocation(string));
 	}
 
 	public static NormalNoise instantiate(

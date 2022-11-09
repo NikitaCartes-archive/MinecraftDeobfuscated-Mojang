@@ -12,6 +12,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.CubicSpline;
 import net.minecraft.util.KeyDispatchDataCodec;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 import org.slf4j.Logger;
 
 public final class DensityFunctions {
-	private static final Codec<DensityFunction> CODEC = Registry.DENSITY_FUNCTION_TYPES
+	private static final Codec<DensityFunction> CODEC = BuiltInRegistries.DENSITY_FUNCTION_TYPE
 		.byNameCodec()
 		.dispatch(densityFunction -> densityFunction.codec().codec(), Function.identity());
 	protected static final double MAX_REASONABLE_NOISE_VALUE = 1000000.0;

@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -26,8 +26,8 @@ public class BlockListReport implements DataProvider {
 	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		JsonObject jsonObject = new JsonObject();
 
-		for (Block block : Registry.BLOCK) {
-			ResourceLocation resourceLocation = Registry.BLOCK.getKey(block);
+		for (Block block : BuiltInRegistries.BLOCK) {
+			ResourceLocation resourceLocation = BuiltInRegistries.BLOCK.getKey(block);
 			JsonObject jsonObject2 = new JsonObject();
 			StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
 			if (!stateDefinition.getProperties().isEmpty()) {

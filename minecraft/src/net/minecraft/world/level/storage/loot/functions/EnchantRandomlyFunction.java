@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
@@ -49,7 +49,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 		Enchantment enchantment;
 		if (this.enchantments.isEmpty()) {
 			boolean bl = itemStack.is(Items.BOOK);
-			List<Enchantment> list = (List<Enchantment>)Registry.ENCHANTMENT
+			List<Enchantment> list = (List<Enchantment>)BuiltInRegistries.ENCHANTMENT
 				.stream()
 				.filter(Enchantment::isDiscoverable)
 				.filter(enchantmentx -> bl || enchantmentx.canEnchant(itemStack))
@@ -112,7 +112,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 				JsonArray jsonArray = new JsonArray();
 
 				for (Enchantment enchantment : enchantRandomlyFunction.enchantments) {
-					ResourceLocation resourceLocation = Registry.ENCHANTMENT.getKey(enchantment);
+					ResourceLocation resourceLocation = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
 					if (resourceLocation == null) {
 						throw new IllegalArgumentException("Don't know how to serialize enchantment " + enchantment);
 					}
@@ -131,7 +131,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 			if (jsonObject.has("enchantments")) {
 				for (JsonElement jsonElement : GsonHelper.getAsJsonArray(jsonObject, "enchantments")) {
 					String string = GsonHelper.convertToString(jsonElement, "enchantment");
-					Enchantment enchantment = (Enchantment)Registry.ENCHANTMENT
+					Enchantment enchantment = (Enchantment)BuiltInRegistries.ENCHANTMENT
 						.getOptional(new ResourceLocation(string))
 						.orElseThrow(() -> new JsonSyntaxException("Unknown enchantment '" + string + "'"));
 					list.add(enchantment);

@@ -514,6 +514,24 @@ public class SoundType {
 		SoundEvents.HANGING_SIGN_HIT,
 		SoundEvents.HANGING_SIGN_FALL
 	);
+	public static final SoundType NETHER_WOOD_HANGING_SIGN = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.NETHER_WOOD_HANGING_SIGN_BREAK,
+		SoundEvents.NETHER_WOOD_HANGING_SIGN_STEP,
+		SoundEvents.NETHER_WOOD_HANGING_SIGN_PLACE,
+		SoundEvents.NETHER_WOOD_HANGING_SIGN_HIT,
+		SoundEvents.NETHER_WOOD_HANGING_SIGN_FALL
+	);
+	public static final SoundType BAMBOO_WOOD_HANGING_SIGN = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.BAMBOO_WOOD_HANGING_SIGN_BREAK,
+		SoundEvents.BAMBOO_WOOD_HANGING_SIGN_STEP,
+		SoundEvents.BAMBOO_WOOD_HANGING_SIGN_PLACE,
+		SoundEvents.BAMBOO_WOOD_HANGING_SIGN_HIT,
+		SoundEvents.BAMBOO_WOOD_HANGING_SIGN_FALL
+	);
 	public static final SoundType BAMBOO_WOOD = new SoundType(
 		1.0F,
 		1.0F,
@@ -531,6 +549,15 @@ public class SoundType {
 		SoundEvents.NETHER_WOOD_PLACE,
 		SoundEvents.NETHER_WOOD_HIT,
 		SoundEvents.NETHER_WOOD_FALL
+	);
+	public static final SoundType CHISELED_BOOKSHELF = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.CHISELED_BOOKSHELF_BREAK,
+		SoundEvents.CHISELED_BOOKSHELF_STEP,
+		SoundEvents.CHISELED_BOOKSHELF_PLACE,
+		SoundEvents.CHISELED_BOOKSHELF_HIT,
+		SoundEvents.CHISELED_BOOKSHELF_FALL
 	);
 	public final float volume;
 	public final float pitch;

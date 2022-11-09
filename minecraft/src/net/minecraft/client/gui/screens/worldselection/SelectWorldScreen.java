@@ -2,8 +2,6 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import java.util.List;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -11,7 +9,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import org.slf4j.Logger;
 
@@ -20,8 +17,6 @@ public class SelectWorldScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final WorldOptions TEST_OPTIONS = new WorldOptions((long)"test1".hashCode(), true, false);
 	protected final Screen lastScreen;
-	@Nullable
-	private List<FormattedCharSequence> toolTip;
 	private Button deleteButton;
 	private Button selectButton;
 	private Button renameButton;
@@ -105,18 +100,10 @@ public class SelectWorldScreen extends Screen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.toolTip = null;
 		this.list.render(poseStack, i, j, f);
 		this.searchBox.render(poseStack, i, j, f);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
 		super.render(poseStack, i, j, f);
-		if (this.toolTip != null) {
-			this.renderTooltip(poseStack, this.toolTip, i, j);
-		}
-	}
-
-	public void setToolTip(List<FormattedCharSequence> list) {
-		this.toolTip = list;
 	}
 
 	public void updateButtonStatus(boolean bl) {

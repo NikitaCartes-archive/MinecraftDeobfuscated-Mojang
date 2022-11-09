@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtUtils;
@@ -75,8 +76,8 @@ public class StructureCheck {
 		this.biomeSource = biomeSource;
 		this.seed = l;
 		this.fixerUpper = dataFixer;
-		this.biomes = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
-		this.structureConfigs = registryAccess.registryOrThrow(Registry.STRUCTURE_REGISTRY);
+		this.biomes = registryAccess.registryOrThrow(Registries.BIOME);
+		this.structureConfigs = registryAccess.registryOrThrow(Registries.STRUCTURE);
 	}
 
 	public StructureCheckResult checkStart(ChunkPos chunkPos, Structure structure, boolean bl) {
@@ -170,7 +171,7 @@ public class StructureCheck {
 					return Object2IntMaps.emptyMap();
 				} else {
 					Object2IntMap<Structure> object2IntMap = new Object2IntOpenHashMap<>();
-					Registry<Structure> registry = this.registryAccess.registryOrThrow(Registry.STRUCTURE_REGISTRY);
+					Registry<Structure> registry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
 
 					for (String string : compoundTag3.getAllKeys()) {
 						ResourceLocation resourceLocation = ResourceLocation.tryParse(string);

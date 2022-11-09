@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +37,7 @@ public class FlatLevelGeneratorPresets {
 	}
 
 	private static ResourceKey<FlatLevelGeneratorPreset> register(String string) {
-		return ResourceKey.create(Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY, new ResourceLocation(string));
+		return ResourceKey.create(Registries.FLAT_LEVEL_GENERATOR_PRESET, new ResourceLocation(string));
 	}
 
 	static class Bootstrap {
@@ -56,9 +56,9 @@ public class FlatLevelGeneratorPresets {
 			boolean bl2,
 			FlatLayerInfo... flatLayerInfos
 		) {
-			HolderGetter<StructureSet> holderGetter = this.context.lookup(Registry.STRUCTURE_SET_REGISTRY);
-			HolderGetter<PlacedFeature> holderGetter2 = this.context.lookup(Registry.PLACED_FEATURE_REGISTRY);
-			HolderGetter<Biome> holderGetter3 = this.context.lookup(Registry.BIOME_REGISTRY);
+			HolderGetter<StructureSet> holderGetter = this.context.lookup(Registries.STRUCTURE_SET);
+			HolderGetter<PlacedFeature> holderGetter2 = this.context.lookup(Registries.PLACED_FEATURE);
+			HolderGetter<Biome> holderGetter3 = this.context.lookup(Registries.BIOME);
 			HolderSet.Direct<StructureSet> direct = HolderSet.direct(
 				(List<? extends Holder<StructureSet>>)set.stream().map(holderGetter::getOrThrow).collect(Collectors.toList())
 			);

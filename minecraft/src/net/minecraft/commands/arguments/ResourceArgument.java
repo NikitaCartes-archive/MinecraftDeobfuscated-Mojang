@@ -20,6 +20,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -65,23 +66,23 @@ public class ResourceArgument<T> implements ArgumentType<Holder.Reference<T>> {
 	}
 
 	public static Holder.Reference<Attribute> getAttribute(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getResource(commandContext, string, Registry.ATTRIBUTE_REGISTRY);
+		return getResource(commandContext, string, Registries.ATTRIBUTE);
 	}
 
 	public static Holder.Reference<ConfiguredFeature<?, ?>> getConfiguredFeature(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getResource(commandContext, string, Registry.CONFIGURED_FEATURE_REGISTRY);
+		return getResource(commandContext, string, Registries.CONFIGURED_FEATURE);
 	}
 
 	public static Holder.Reference<Structure> getStructure(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getResource(commandContext, string, Registry.STRUCTURE_REGISTRY);
+		return getResource(commandContext, string, Registries.STRUCTURE);
 	}
 
 	public static Holder.Reference<EntityType<?>> getEntityType(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getResource(commandContext, string, Registry.ENTITY_TYPE_REGISTRY);
+		return getResource(commandContext, string, Registries.ENTITY_TYPE);
 	}
 
 	public static Holder.Reference<EntityType<?>> getSummonableEntityType(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		Holder.Reference<EntityType<?>> reference = getResource(commandContext, string, Registry.ENTITY_TYPE_REGISTRY);
+		Holder.Reference<EntityType<?>> reference = getResource(commandContext, string, Registries.ENTITY_TYPE);
 		if (!reference.value().canSummon()) {
 			throw ERROR_NOT_SUMMONABLE_ENTITY.create(reference.key().location().toString());
 		} else {
@@ -90,11 +91,11 @@ public class ResourceArgument<T> implements ArgumentType<Holder.Reference<T>> {
 	}
 
 	public static Holder.Reference<MobEffect> getMobEffect(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getResource(commandContext, string, Registry.MOB_EFFECT_REGISTRY);
+		return getResource(commandContext, string, Registries.MOB_EFFECT);
 	}
 
 	public static Holder.Reference<Enchantment> getEnchantment(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		return getResource(commandContext, string, Registry.ENCHANTMENT_REGISTRY);
+		return getResource(commandContext, string, Registries.ENCHANTMENT);
 	}
 
 	public Holder.Reference<T> parse(StringReader stringReader) throws CommandSyntaxException {

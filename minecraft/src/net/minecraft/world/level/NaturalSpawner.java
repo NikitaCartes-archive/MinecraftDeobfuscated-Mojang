@@ -13,7 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
@@ -259,7 +260,7 @@ public final class NaturalSpawner {
 				return (Mob)var3;
 			}
 
-			LOGGER.warn("Can't spawn entity of type: {}", Registry.ENTITY_TYPE.getKey(entityType));
+			LOGGER.warn("Can't spawn entity of type: {}", BuiltInRegistries.ENTITY_TYPE.getKey(entityType));
 		} catch (Exception var4) {
 			LOGGER.warn("Failed to create mob", (Throwable)var4);
 		}
@@ -313,7 +314,7 @@ public final class NaturalSpawner {
 
 	public static boolean isInNetherFortressBounds(BlockPos blockPos, ServerLevel serverLevel, MobCategory mobCategory, StructureManager structureManager) {
 		if (mobCategory == MobCategory.MONSTER && serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)) {
-			Structure structure = structureManager.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).get(BuiltinStructures.FORTRESS);
+			Structure structure = structureManager.registryAccess().registryOrThrow(Registries.STRUCTURE).get(BuiltinStructures.FORTRESS);
 			return structure == null ? false : structureManager.getStructureAt(blockPos, structure).isValid();
 		} else {
 			return false;

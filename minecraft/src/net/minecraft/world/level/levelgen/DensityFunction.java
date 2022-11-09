@@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen;
 import com.mojang.serialization.Codec;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public interface DensityFunction {
 	Codec<DensityFunction> DIRECT_CODEC = DensityFunctions.DIRECT_CODEC;
-	Codec<Holder<DensityFunction>> CODEC = RegistryFileCodec.create(Registry.DENSITY_FUNCTION_REGISTRY, DIRECT_CODEC);
+	Codec<Holder<DensityFunction>> CODEC = RegistryFileCodec.create(Registries.DENSITY_FUNCTION, DIRECT_CODEC);
 	Codec<DensityFunction> HOLDER_HELPER_CODEC = CODEC.xmap(
 		DensityFunctions.HolderHolder::new,
 		densityFunction -> (Holder)(densityFunction instanceof DensityFunctions.HolderHolder holderHolder

@@ -40,7 +40,7 @@ public class Checkbox extends AbstractButton {
 	}
 
 	@Override
-	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 		narrationElementOutput.add(NarratedElementType.TITLE, this.createNarrationMessage());
 		if (this.active) {
 			if (this.isFocused()) {

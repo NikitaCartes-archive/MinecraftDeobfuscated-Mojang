@@ -228,7 +228,7 @@ public class GameModeSwitcherScreen extends Screen {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 			this.defaultButtonNarrationText(narrationElementOutput);
 		}
 

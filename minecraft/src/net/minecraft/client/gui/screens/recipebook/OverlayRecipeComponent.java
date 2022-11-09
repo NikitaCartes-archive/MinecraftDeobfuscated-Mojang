@@ -216,7 +216,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 			this.defaultButtonNarrationText(narrationElementOutput);
 		}
 

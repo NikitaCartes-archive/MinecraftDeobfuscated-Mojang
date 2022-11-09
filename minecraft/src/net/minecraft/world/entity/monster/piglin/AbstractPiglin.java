@@ -9,8 +9,10 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
@@ -25,6 +27,7 @@ public abstract class AbstractPiglin extends Monster {
 		AbstractPiglin.class, EntityDataSerializers.BOOLEAN
 	);
 	protected static final int CONVERSION_TIME = 300;
+	protected static final float PIGLIN_EYE_HEIGHT = 1.79F;
 	protected int timeInOverworld;
 
 	public AbstractPiglin(EntityType<? extends AbstractPiglin> entityType, Level level) {
@@ -39,6 +42,11 @@ public abstract class AbstractPiglin extends Monster {
 		if (GoalUtils.hasGroundPathNavigation(this)) {
 			((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		}
+	}
+
+	@Override
+	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
+		return 1.79F;
 	}
 
 	protected abstract boolean canHunt();

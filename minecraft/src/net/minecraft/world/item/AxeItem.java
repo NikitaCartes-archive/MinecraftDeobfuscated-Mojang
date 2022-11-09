@@ -42,6 +42,7 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE)
 		.put(Blocks.MANGROVE_WOOD, Blocks.STRIPPED_MANGROVE_WOOD)
 		.put(Blocks.MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_LOG)
+		.put(Blocks.BAMBOO_BLOCK, Blocks.STRIPPED_BAMBOO_BLOCK)
 		.build();
 
 	protected AxeItem(Tier tier, float f, float g, Item.Properties properties) {

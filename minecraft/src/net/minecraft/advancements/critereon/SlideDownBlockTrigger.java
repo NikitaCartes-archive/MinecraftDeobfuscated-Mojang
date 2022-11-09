@@ -3,7 +3,7 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import javax.annotation.Nullable;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -36,7 +36,9 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 	private static Block deserializeBlock(JsonObject jsonObject) {
 		if (jsonObject.has("block")) {
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-			return (Block)Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
+			return (Block)BuiltInRegistries.BLOCK
+				.getOptional(resourceLocation)
+				.orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
 		} else {
 			return null;
 		}
@@ -65,7 +67,7 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 		public JsonObject serializeToJson(SerializationContext serializationContext) {
 			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			if (this.block != null) {
-				jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
+				jsonObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(this.block).toString());
 			}
 
 			jsonObject.add("state", this.state.serializeToJson());

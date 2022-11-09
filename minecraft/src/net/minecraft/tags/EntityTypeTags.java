@@ -1,6 +1,6 @@
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 
@@ -21,6 +21,6 @@ public final class EntityTypeTags {
 	}
 
 	private static TagKey<EntityType<?>> create(String string) {
-		return TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(string));
+		return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(string));
 	}
 }

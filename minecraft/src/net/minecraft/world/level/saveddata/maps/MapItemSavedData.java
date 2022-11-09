@@ -35,8 +35,8 @@ public class MapItemSavedData extends SavedData {
 	private static final int HALF_MAP_SIZE = 64;
 	public static final int MAX_SCALE = 4;
 	public static final int TRACKED_DECORATION_LIMIT = 256;
-	public final int x;
-	public final int z;
+	public final int centerX;
+	public final int centerZ;
 	public final ResourceKey<Level> dimension;
 	private final boolean trackingPosition;
 	private final boolean unlimitedTracking;
@@ -52,8 +52,8 @@ public class MapItemSavedData extends SavedData {
 
 	private MapItemSavedData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey<Level> resourceKey) {
 		this.scale = b;
-		this.x = i;
-		this.z = j;
+		this.centerX = i;
+		this.centerZ = j;
 		this.dimension = resourceKey;
 		this.trackingPosition = bl;
 		this.unlimitedTracking = bl2;
@@ -125,8 +125,8 @@ public class MapItemSavedData extends SavedData {
 			.encodeStart(NbtOps.INSTANCE, this.dimension.location())
 			.resultOrPartial(LOGGER::error)
 			.ifPresent(tag -> compoundTag.put("dimension", tag));
-		compoundTag.putInt("xCenter", this.x);
-		compoundTag.putInt("zCenter", this.z);
+		compoundTag.putInt("xCenter", this.centerX);
+		compoundTag.putInt("zCenter", this.centerZ);
 		compoundTag.putByte("scale", this.scale);
 		compoundTag.putByteArray("colors", this.colors);
 		compoundTag.putBoolean("trackingPosition", this.trackingPosition);
@@ -150,7 +150,9 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	public MapItemSavedData locked() {
-		MapItemSavedData mapItemSavedData = new MapItemSavedData(this.x, this.z, this.scale, this.trackingPosition, this.unlimitedTracking, true, this.dimension);
+		MapItemSavedData mapItemSavedData = new MapItemSavedData(
+			this.centerX, this.centerZ, this.scale, this.trackingPosition, this.unlimitedTracking, true, this.dimension
+		);
 		mapItemSavedData.bannerMarkers.putAll(this.bannerMarkers);
 		mapItemSavedData.decorations.putAll(this.decorations);
 		mapItemSavedData.trackedDecorationCount = this.trackedDecorationCount;
@@ -160,7 +162,9 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	public MapItemSavedData scaled(int i) {
-		return createFresh((double)this.x, (double)this.z, (byte)Mth.clamp(this.scale + i, 0, 4), this.trackingPosition, this.unlimitedTracking, this.dimension);
+		return createFresh(
+			(double)this.centerX, (double)this.centerZ, (byte)Mth.clamp(this.scale + i, 0, 4), this.trackingPosition, this.unlimitedTracking, this.dimension
+		);
 	}
 
 	public void tickCarriedBy(Player player, ItemStack itemStack) {
@@ -273,8 +277,8 @@ public class MapItemSavedData extends SavedData {
 		MapDecoration.Type type, @Nullable LevelAccessor levelAccessor, String string, double d, double e, double f, @Nullable Component component
 	) {
 		int i = 1 << this.scale;
-		float g = (float)(d - (double)this.x) / (float)i;
-		float h = (float)(e - (double)this.z) / (float)i;
+		float g = (float)(d - (double)this.centerX) / (float)i;
+		float h = (float)(e - (double)this.centerZ) / (float)i;
 		byte b = (byte)((int)((double)(g * 2.0F) + 0.5));
 		byte c = (byte)((int)((double)(h * 2.0F) + 0.5));
 		int j = 63;
@@ -371,8 +375,8 @@ public class MapItemSavedData extends SavedData {
 		double d = (double)blockPos.getX() + 0.5;
 		double e = (double)blockPos.getZ() + 0.5;
 		int i = 1 << this.scale;
-		double f = (d - (double)this.x) / (double)i;
-		double g = (e - (double)this.z) / (double)i;
+		double f = (d - (double)this.centerX) / (double)i;
+		double g = (e - (double)this.centerZ) / (double)i;
 		int j = 63;
 		if (f >= -63.0 && g >= -63.0 && f <= 63.0 && g <= 63.0) {
 			MapBanner mapBanner = MapBanner.fromWorld(levelAccessor, blockPos);

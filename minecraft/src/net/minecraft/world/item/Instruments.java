@@ -1,6 +1,7 @@
 package net.minecraft.world.item;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -19,7 +20,7 @@ public interface Instruments {
 	ResourceKey<Instrument> DREAM_GOAT_HORN = create("dream_goat_horn");
 
 	private static ResourceKey<Instrument> create(String string) {
-		return ResourceKey.create(Registry.INSTRUMENT_REGISTRY, new ResourceLocation(string));
+		return ResourceKey.create(Registries.INSTRUMENT, new ResourceLocation(string));
 	}
 
 	static Instrument bootstrap(Registry<Instrument> registry) {

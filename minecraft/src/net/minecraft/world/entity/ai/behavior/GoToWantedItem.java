@@ -1,57 +1,49 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.kinds.K1;
 import java.util.function.Predicate;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
+import net.minecraft.world.entity.ai.behavior.declarative.MemoryAccessor;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.item.ItemEntity;
 
-public class GoToWantedItem<E extends LivingEntity> extends Behavior<E> {
-	private final Predicate<E> predicate;
-	private final int maxDistToWalk;
-	private final float speedModifier;
-
-	public GoToWantedItem(float f, boolean bl, int i) {
-		this(livingEntity -> true, f, bl, i);
+public class GoToWantedItem {
+	public static BehaviorControl<LivingEntity> create(float f, boolean bl, int i) {
+		return create(livingEntity -> true, f, bl, i);
 	}
 
-	public GoToWantedItem(Predicate<E> predicate, float f, boolean bl, int i) {
-		super(
-			ImmutableMap.of(
-				MemoryModuleType.LOOK_TARGET,
-				MemoryStatus.REGISTERED,
-				MemoryModuleType.WALK_TARGET,
-				bl ? MemoryStatus.REGISTERED : MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
-				MemoryStatus.VALUE_PRESENT
-			)
+	public static <E extends LivingEntity> BehaviorControl<E> create(Predicate<E> predicate, float f, boolean bl, int i) {
+		return BehaviorBuilder.create(
+			instance -> {
+				BehaviorBuilder<E, ? extends MemoryAccessor<? extends K1, WalkTarget>> behaviorBuilder = bl
+					? instance.registered(MemoryModuleType.WALK_TARGET)
+					: instance.absent(MemoryModuleType.WALK_TARGET);
+				return instance.group(
+						instance.registered(MemoryModuleType.LOOK_TARGET),
+						behaviorBuilder,
+						instance.present(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM),
+						instance.registered(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS)
+					)
+					.apply(
+						instance,
+						(memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4) -> (serverLevel, livingEntity, l) -> {
+								ItemEntity itemEntity = instance.get(memoryAccessor3);
+								if (instance.tryGet(memoryAccessor4).isEmpty()
+									&& predicate.test(livingEntity)
+									&& itemEntity.closerThan(livingEntity, (double)i)
+									&& livingEntity.level.getWorldBorder().isWithinBounds(itemEntity.blockPosition())) {
+									WalkTarget walkTarget = new WalkTarget(new EntityTracker(itemEntity, false), f, 0);
+									memoryAccessor.set(new EntityTracker(itemEntity, true));
+									memoryAccessor2.set(walkTarget);
+									return true;
+								} else {
+									return false;
+								}
+							}
+					);
+			}
 		);
-		this.predicate = predicate;
-		this.maxDistToWalk = i;
-		this.speedModifier = f;
-	}
-
-	@Override
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
-		ItemEntity itemEntity = this.getClosestLovedItem(livingEntity);
-		return !this.isOnPickupCooldown(livingEntity)
-			&& this.predicate.test(livingEntity)
-			&& itemEntity.closerThan(livingEntity, (double)this.maxDistToWalk)
-			&& livingEntity.level.getWorldBorder().isWithinBounds(itemEntity.blockPosition());
-	}
-
-	@Override
-	protected void start(ServerLevel serverLevel, E livingEntity, long l) {
-		BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, this.getClosestLovedItem(livingEntity), this.speedModifier, 0);
-	}
-
-	private boolean isOnPickupCooldown(E livingEntity) {
-		return livingEntity.getBrain().checkMemory(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryStatus.VALUE_PRESENT);
-	}
-
-	private ItemEntity getClosestLovedItem(E livingEntity) {
-		return (ItemEntity)livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM).get();
 	}
 }

@@ -18,7 +18,6 @@ import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.Croak;
-import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.FollowTemptation;
 import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.behavior.LongJumpMidJump;
@@ -27,17 +26,15 @@ import net.minecraft.world.entity.ai.behavior.LongJumpToRandomPos;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
-import net.minecraft.world.entity.ai.behavior.RandomSwim;
-import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.RunSometimes;
-import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
+import net.minecraft.world.entity.ai.behavior.SetEntityLookTargetSometimes;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.behavior.TryFindLand;
 import net.minecraft.world.entity.ai.behavior.TryFindLandNearWater;
 import net.minecraft.world.entity.ai.behavior.TryLaySpawnOnWaterNearLand;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
@@ -95,20 +92,20 @@ public class FrogAi {
 		brain.addActivityWithConditions(
 			Activity.IDLE,
 			ImmutableList.of(
-				Pair.of(0, new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 6.0F), UniformInt.of(30, 60))),
+				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
 				Pair.of(0, new AnimalMakeLove(EntityType.FROG, 1.0F)),
 				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F)),
-				Pair.of(2, new StartAttacking<>(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
-				Pair.of(3, new TryFindLand(6, 1.0F)),
+				Pair.of(2, StartAttacking.create(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
+				Pair.of(3, TryFindLand.create(6, 1.0F)),
 				Pair.of(
 					4,
 					new RunOne<>(
 						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT),
 						ImmutableList.of(
-							Pair.of(new RandomStroll(1.0F), 1),
-							Pair.of(new SetWalkTargetFromLookTarget(1.0F, 3), 1),
+							Pair.of(RandomStroll.stroll(1.0F), 1),
+							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 1),
 							Pair.of(new Croak(), 3),
-							Pair.of(new RunIf<>(Entity::isOnGround, new DoNothing(5, 20)), 2)
+							Pair.of(BehaviorBuilder.triggerIf(Entity::isOnGround), 2)
 						)
 					)
 				)
@@ -121,10 +118,10 @@ public class FrogAi {
 		brain.addActivityWithConditions(
 			Activity.SWIM,
 			ImmutableList.of(
-				Pair.of(0, new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 6.0F), UniformInt.of(30, 60))),
+				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
 				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F)),
-				Pair.of(2, new StartAttacking<>(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
-				Pair.of(3, new TryFindLand(8, 1.5F)),
+				Pair.of(2, StartAttacking.create(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
+				Pair.of(3, TryFindLand.create(8, 1.5F)),
 				Pair.of(
 					5,
 					new GateBehavior<>(
@@ -133,10 +130,10 @@ public class FrogAi {
 						GateBehavior.OrderPolicy.ORDERED,
 						GateBehavior.RunningPolicy.TRY_ALL,
 						ImmutableList.of(
-							Pair.of(new RandomSwim(0.75F), 1),
-							Pair.of(new RandomStroll(1.0F, true), 1),
-							Pair.of(new SetWalkTargetFromLookTarget(1.0F, 3), 1),
-							Pair.of(new RunIf<>(Entity::isInWaterOrBubble, new DoNothing(30, 60)), 5)
+							Pair.of(RandomStroll.swim(0.75F), 1),
+							Pair.of(RandomStroll.stroll(1.0F, true), 1),
+							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 1),
+							Pair.of(BehaviorBuilder.triggerIf(Entity::isInWaterOrBubble), 5)
 						)
 					)
 				)
@@ -149,18 +146,18 @@ public class FrogAi {
 		brain.addActivityWithConditions(
 			Activity.LAY_SPAWN,
 			ImmutableList.of(
-				Pair.of(0, new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 6.0F), UniformInt.of(30, 60))),
-				Pair.of(1, new StartAttacking<>(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
-				Pair.of(2, new TryFindLandNearWater(8, 1.0F)),
-				Pair.of(3, new TryLaySpawnOnWaterNearLand(Blocks.FROGSPAWN, MemoryModuleType.IS_PREGNANT)),
+				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
+				Pair.of(1, StartAttacking.create(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
+				Pair.of(2, TryFindLandNearWater.create(8, 1.0F)),
+				Pair.of(3, TryLaySpawnOnWaterNearLand.create(Blocks.FROGSPAWN)),
 				Pair.of(
 					4,
 					new RunOne<>(
 						ImmutableList.of(
-							Pair.of(new RandomStroll(1.0F), 2),
-							Pair.of(new SetWalkTargetFromLookTarget(1.0F, 3), 1),
+							Pair.of(RandomStroll.stroll(1.0F), 2),
+							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 1),
 							Pair.of(new Croak(), 2),
-							Pair.of(new RunIf<>(Entity::isOnGround, new DoNothing(5, 20)), 1)
+							Pair.of(BehaviorBuilder.triggerIf(Entity::isOnGround), 1)
 						)
 					)
 				)
@@ -194,7 +191,7 @@ public class FrogAi {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.TONGUE,
 			0,
-			ImmutableList.of(new StopAttackingIfTargetInvalid<>(), new ShootTongue(SoundEvents.FROG_TONGUE, SoundEvents.FROG_EAT)),
+			ImmutableList.of(StopAttackingIfTargetInvalid.create(), new ShootTongue(SoundEvents.FROG_TONGUE, SoundEvents.FROG_EAT)),
 			MemoryModuleType.ATTACK_TARGET
 		);
 	}

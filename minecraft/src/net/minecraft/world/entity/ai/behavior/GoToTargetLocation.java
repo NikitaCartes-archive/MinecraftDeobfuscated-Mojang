@@ -1,44 +1,12 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public class GoToTargetLocation<E extends Mob> extends Behavior<E> {
-	private final MemoryModuleType<BlockPos> locationMemory;
-	private final int closeEnoughDist;
-	private final float speedModifier;
-
-	public GoToTargetLocation(MemoryModuleType<BlockPos> memoryModuleType, int i, float f) {
-		super(
-			ImmutableMap.of(
-				memoryModuleType,
-				MemoryStatus.VALUE_PRESENT,
-				MemoryModuleType.ATTACK_TARGET,
-				MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.WALK_TARGET,
-				MemoryStatus.VALUE_ABSENT,
-				MemoryModuleType.LOOK_TARGET,
-				MemoryStatus.REGISTERED
-			)
-		);
-		this.locationMemory = memoryModuleType;
-		this.closeEnoughDist = i;
-		this.speedModifier = f;
-	}
-
-	protected void start(ServerLevel serverLevel, Mob mob, long l) {
-		BlockPos blockPos = this.getTargetLocation(mob);
-		boolean bl = blockPos.closerThan(mob.blockPosition(), (double)this.closeEnoughDist);
-		if (!bl) {
-			BehaviorUtils.setWalkAndLookTargetMemories(mob, getNearbyPos(mob, blockPos), this.speedModifier, this.closeEnoughDist);
-		}
-	}
-
+public class GoToTargetLocation {
 	private static BlockPos getNearbyPos(Mob mob, BlockPos blockPos) {
 		RandomSource randomSource = mob.level.random;
 		return blockPos.offset(getRandomOffset(randomSource), 0, getRandomOffset(randomSource));
@@ -48,7 +16,23 @@ public class GoToTargetLocation<E extends Mob> extends Behavior<E> {
 		return randomSource.nextInt(3) - 1;
 	}
 
-	private BlockPos getTargetLocation(Mob mob) {
-		return (BlockPos)mob.getBrain().getMemory(this.locationMemory).get();
+	public static <E extends Mob> OneShot<E> create(MemoryModuleType<BlockPos> memoryModuleType, int i, float f) {
+		return BehaviorBuilder.create(
+			instance -> instance.group(
+						instance.present(memoryModuleType),
+						instance.absent(MemoryModuleType.ATTACK_TARGET),
+						instance.absent(MemoryModuleType.WALK_TARGET),
+						instance.registered(MemoryModuleType.LOOK_TARGET)
+					)
+					.apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4) -> (serverLevel, mob, l) -> {
+							BlockPos blockPos = instance.get(memoryAccessor);
+							boolean bl = blockPos.closerThan(mob.blockPosition(), (double)i);
+							if (!bl) {
+								BehaviorUtils.setWalkAndLookTargetMemories(mob, getNearbyPos(mob, blockPos), f, i);
+							}
+
+							return true;
+						})
+		);
 	}
 }

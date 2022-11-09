@@ -1,43 +1,38 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import org.apache.commons.lang3.mutable.MutableInt;
 
-public class SetHiddenState extends Behavior<LivingEntity> {
+public class SetHiddenState {
 	private static final int HIDE_TIMEOUT = 300;
-	private final int closeEnoughDist;
-	private final int stayHiddenTicks;
-	private int ticksHidden;
 
-	public SetHiddenState(int i, int j) {
-		super(ImmutableMap.of(MemoryModuleType.HIDING_PLACE, MemoryStatus.VALUE_PRESENT, MemoryModuleType.HEARD_BELL_TIME, MemoryStatus.VALUE_PRESENT));
-		this.stayHiddenTicks = i * 20;
-		this.ticksHidden = 0;
-		this.closeEnoughDist = j;
-	}
+	public static BehaviorControl<LivingEntity> create(int i, int j) {
+		int k = i * 20;
+		MutableInt mutableInt = new MutableInt(0);
+		return BehaviorBuilder.create(
+			instance -> instance.group(instance.present(MemoryModuleType.HIDING_PLACE), instance.present(MemoryModuleType.HEARD_BELL_TIME))
+					.apply(instance, (memoryAccessor, memoryAccessor2) -> (serverLevel, livingEntity, l) -> {
+							long m = instance.<Long>get(memoryAccessor2);
+							boolean bl = m + 300L <= l;
+							if (mutableInt.getValue() <= k && !bl) {
+								BlockPos blockPos = instance.<GlobalPos>get(memoryAccessor).pos();
+								if (blockPos.closerThan(livingEntity.blockPosition(), (double)j)) {
+									mutableInt.increment();
+								}
 
-	@Override
-	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-		Brain<?> brain = livingEntity.getBrain();
-		Optional<Long> optional = brain.getMemory(MemoryModuleType.HEARD_BELL_TIME);
-		boolean bl = (Long)optional.get() + 300L <= l;
-		if (this.ticksHidden <= this.stayHiddenTicks && !bl) {
-			BlockPos blockPos = ((GlobalPos)brain.getMemory(MemoryModuleType.HIDING_PLACE).get()).pos();
-			if (blockPos.closerThan(livingEntity.blockPosition(), (double)this.closeEnoughDist)) {
-				this.ticksHidden++;
-			}
-		} else {
-			brain.eraseMemory(MemoryModuleType.HEARD_BELL_TIME);
-			brain.eraseMemory(MemoryModuleType.HIDING_PLACE);
-			brain.updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
-			this.ticksHidden = 0;
-		}
+								return true;
+							} else {
+								memoryAccessor2.erase();
+								memoryAccessor.erase();
+								livingEntity.getBrain().updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
+								mutableInt.setValue(0);
+								return true;
+							}
+						})
+		);
 	}
 }

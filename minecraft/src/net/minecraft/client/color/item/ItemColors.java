@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.IdMapper;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeableLeatherItem;
@@ -96,7 +96,7 @@ public class ItemColors {
 	}
 
 	public int getColor(ItemStack itemStack, int i) {
-		ItemColor itemColor = this.itemColors.byId(Registry.ITEM.getId(itemStack.getItem()));
+		ItemColor itemColor = this.itemColors.byId(BuiltInRegistries.ITEM.getId(itemStack.getItem()));
 		return itemColor == null ? -1 : itemColor.getColor(itemStack, i);
 	}
 

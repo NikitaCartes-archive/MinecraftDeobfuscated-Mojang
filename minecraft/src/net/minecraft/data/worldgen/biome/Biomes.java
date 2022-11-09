@@ -1,7 +1,7 @@
 package net.minecraft.data.worldgen.biome;
 
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
@@ -9,8 +9,8 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public abstract class Biomes {
 	public static void bootstrap(BootstapContext<Biome> bootstapContext) {
-		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
-		HolderGetter<ConfiguredWorldCarver<?>> holderGetter2 = bootstapContext.lookup(Registry.CONFIGURED_CARVER_REGISTRY);
+		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
+		HolderGetter<ConfiguredWorldCarver<?>> holderGetter2 = bootstapContext.lookup(Registries.CONFIGURED_CARVER);
 		bootstapContext.register(net.minecraft.world.level.biome.Biomes.THE_VOID, OverworldBiomes.theVoid(holderGetter, holderGetter2));
 		bootstapContext.register(net.minecraft.world.level.biome.Biomes.PLAINS, OverworldBiomes.plains(holderGetter, holderGetter2, false, false, false));
 		bootstapContext.register(net.minecraft.world.level.biome.Biomes.SUNFLOWER_PLAINS, OverworldBiomes.plains(holderGetter, holderGetter2, true, false, false));

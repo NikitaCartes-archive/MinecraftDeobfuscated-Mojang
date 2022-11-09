@@ -1,6 +1,6 @@
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
@@ -22,7 +22,6 @@ public final class ItemTags {
 	public static final TagKey<Item> DOORS = bind("doors");
 	public static final TagKey<Item> SAPLINGS = bind("saplings");
 	public static final TagKey<Item> LOGS_THAT_BURN = bind("logs_that_burn");
-	public static final TagKey<Item> OVERWORLD_NATURAL_LOGS = bind("overworld_natural_logs");
 	public static final TagKey<Item> LOGS = bind("logs");
 	public static final TagKey<Item> DARK_OAK_LOGS = bind("dark_oak_logs");
 	public static final TagKey<Item> OAK_LOGS = bind("oak_logs");
@@ -33,6 +32,7 @@ public final class ItemTags {
 	public static final TagKey<Item> MANGROVE_LOGS = bind("mangrove_logs");
 	public static final TagKey<Item> CRIMSON_STEMS = bind("crimson_stems");
 	public static final TagKey<Item> WARPED_STEMS = bind("warped_stems");
+	public static final TagKey<Item> BAMBOO_BLOCKS = bind("bamboo_blocks");
 	public static final TagKey<Item> WART_BLOCKS = bind("wart_blocks");
 	public static final TagKey<Item> BANNERS = bind("banners");
 	public static final TagKey<Item> SAND = bind("sand");
@@ -91,6 +91,6 @@ public final class ItemTags {
 	}
 
 	private static TagKey<Item> bind(String string) {
-		return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(string));
+		return TagKey.create(Registries.ITEM, new ResourceLocation(string));
 	}
 }

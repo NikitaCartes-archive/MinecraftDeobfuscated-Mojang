@@ -14,7 +14,7 @@ public class LockIconButton extends Button {
 	private boolean locked;
 
 	public LockIconButton(int i, int j, Button.OnPress onPress) {
-		super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress, NO_TOOLTIP, DEFAULT_NARRATION);
+		super(i, j, 20, 20, Component.translatable("narrator.button.difficulty_lock"), onPress, DEFAULT_NARRATION);
 	}
 
 	@Override

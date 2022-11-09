@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -130,14 +130,14 @@ public class ClientboundLevelChunkPacketData {
 		private BlockEntityInfo(FriendlyByteBuf friendlyByteBuf) {
 			this.packedXZ = friendlyByteBuf.readByte();
 			this.y = friendlyByteBuf.readShort();
-			this.type = friendlyByteBuf.readById(Registry.BLOCK_ENTITY_TYPE);
+			this.type = friendlyByteBuf.readById(BuiltInRegistries.BLOCK_ENTITY_TYPE);
 			this.tag = friendlyByteBuf.readNbt();
 		}
 
 		void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeByte(this.packedXZ);
 			friendlyByteBuf.writeShort(this.y);
-			friendlyByteBuf.writeId(Registry.BLOCK_ENTITY_TYPE, this.type);
+			friendlyByteBuf.writeId(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.type);
 			friendlyByteBuf.writeNbt(this.tag);
 		}
 

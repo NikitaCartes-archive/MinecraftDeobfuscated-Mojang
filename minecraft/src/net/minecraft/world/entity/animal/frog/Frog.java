@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -173,13 +173,13 @@ public class Frog extends Animal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putString("variant", Registry.FROG_VARIANT.getKey(this.getVariant()).toString());
+		compoundTag.putString("variant", BuiltInRegistries.FROG_VARIANT.getKey(this.getVariant()).toString());
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		FrogVariant frogVariant = Registry.FROG_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
+		FrogVariant frogVariant = BuiltInRegistries.FROG_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
 		if (frogVariant != null) {
 			this.setVariant(frogVariant);
 		}

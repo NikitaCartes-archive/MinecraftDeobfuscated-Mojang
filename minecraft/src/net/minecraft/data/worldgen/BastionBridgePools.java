@@ -4,19 +4,19 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 public class BastionBridgePools {
 	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.ENTRANCE_REPLACEMENT);
 		Holder<StructureProcessorList> holder2 = holderGetter.getOrThrow(ProcessorLists.BASTION_GENERIC_DEGRADATION);
 		Holder<StructureProcessorList> holder3 = holderGetter.getOrThrow(ProcessorLists.BRIDGE);
 		Holder<StructureProcessorList> holder4 = holderGetter.getOrThrow(ProcessorLists.RAMPART_DEGRADATION);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder5 = holderGetter2.getOrThrow(Pools.EMPTY);
 		Pools.register(
 			bootstapContext,

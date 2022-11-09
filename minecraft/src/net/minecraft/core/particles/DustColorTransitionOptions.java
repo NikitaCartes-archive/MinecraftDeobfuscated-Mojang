@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.phys.Vec3;
@@ -68,7 +68,7 @@ public class DustColorTransitionOptions extends DustParticleOptionsBase {
 		return String.format(
 			Locale.ROOT,
 			"%s %.2f %.2f %.2f %.2f %.2f %.2f %.2f",
-			Registry.PARTICLE_TYPE.getKey(this.getType()),
+			BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()),
 			this.color.x(),
 			this.color.y(),
 			this.color.z(),

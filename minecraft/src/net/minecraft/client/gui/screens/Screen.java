@@ -36,6 +36,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -86,6 +87,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private long nextNarrationTime = Long.MAX_VALUE;
 	@Nullable
 	private NarratableEntry lastNarratable;
+	@Nullable
+	private List<FormattedCharSequence> tooltip;
 
 	protected Screen(Component component) {
 		this.title = component;
@@ -97,6 +100,14 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	public Component getNarrationMessage() {
 		return this.getTitle();
+	}
+
+	public final void renderWithTooltip(PoseStack poseStack, int i, int j, float f) {
+		this.render(poseStack, i, j, f);
+		if (this.tooltip != null) {
+			this.renderTooltip(poseStack, this.tooltip, i, j);
+			this.tooltip = null;
+		}
 	}
 
 	@Override
@@ -610,6 +621,18 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	public void narrationEnabled() {
 		this.scheduleNarration(NARRATE_DELAY_NARRATOR_ENABLED, false);
+	}
+
+	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list) {
+		this.tooltip = list;
+	}
+
+	protected void setTooltipForNextRenderPass(Component component) {
+		this.setTooltipForNextRenderPass(Tooltip.splitTooltip(this.minecraft, component));
+	}
+
+	public void setTooltipForNextRenderPass(Tooltip tooltip) {
+		this.setTooltipForNextRenderPass(tooltip.toCharSequence(this.minecraft));
 	}
 
 	protected static void hideWidgets(AbstractWidget... abstractWidgets) {

@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 
 public class BlockStateArgument implements ArgumentType<BlockInput> {
@@ -20,7 +20,7 @@ public class BlockStateArgument implements ArgumentType<BlockInput> {
 	private final HolderLookup<Block> blocks;
 
 	public BlockStateArgument(CommandBuildContext commandBuildContext) {
-		this.blocks = commandBuildContext.holderLookup(Registry.BLOCK_REGISTRY);
+		this.blocks = commandBuildContext.holderLookup(Registries.BLOCK);
 	}
 
 	public static BlockStateArgument block(CommandBuildContext commandBuildContext) {

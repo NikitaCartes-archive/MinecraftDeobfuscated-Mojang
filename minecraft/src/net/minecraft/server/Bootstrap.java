@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
-import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -34,7 +34,7 @@ public class Bootstrap {
 	public static void bootStrap() {
 		if (!isBootstrapped) {
 			isBootstrapped = true;
-			if (Registry.REGISTRY.keySet().isEmpty()) {
+			if (BuiltInRegistries.REGISTRY.keySet().isEmpty()) {
 				throw new IllegalStateException("Unable to load registries");
 			} else {
 				FireBlock.bootStrap();
@@ -46,8 +46,7 @@ public class Bootstrap {
 					EntitySelectorOptions.bootStrap();
 					DispenseItemBehavior.bootStrap();
 					CauldronInteraction.bootStrap();
-					Registry.freezeBuiltins();
-					Registry.checkRegistry(Registry.REGISTRY);
+					BuiltInRegistries.bootStrap();
 					wrapStreams();
 				}
 			}
@@ -78,13 +77,13 @@ public class Bootstrap {
 
 	public static Set<String> getMissingTranslations() {
 		Set<String> set = new TreeSet();
-		checkTranslations(Registry.ATTRIBUTE, Attribute::getDescriptionId, set);
-		checkTranslations(Registry.ENTITY_TYPE, EntityType::getDescriptionId, set);
-		checkTranslations(Registry.MOB_EFFECT, MobEffect::getDescriptionId, set);
-		checkTranslations(Registry.ITEM, Item::getDescriptionId, set);
-		checkTranslations(Registry.ENCHANTMENT, Enchantment::getDescriptionId, set);
-		checkTranslations(Registry.BLOCK, Block::getDescriptionId, set);
-		checkTranslations(Registry.CUSTOM_STAT, resourceLocation -> "stat." + resourceLocation.toString().replace(':', '.'), set);
+		checkTranslations(BuiltInRegistries.ATTRIBUTE, Attribute::getDescriptionId, set);
+		checkTranslations(BuiltInRegistries.ENTITY_TYPE, EntityType::getDescriptionId, set);
+		checkTranslations(BuiltInRegistries.MOB_EFFECT, MobEffect::getDescriptionId, set);
+		checkTranslations(BuiltInRegistries.ITEM, Item::getDescriptionId, set);
+		checkTranslations(BuiltInRegistries.ENCHANTMENT, Enchantment::getDescriptionId, set);
+		checkTranslations(BuiltInRegistries.BLOCK, Block::getDescriptionId, set);
+		checkTranslations(BuiltInRegistries.CUSTOM_STAT, resourceLocation -> "stat." + resourceLocation.toString().replace(':', '.'), set);
 		checkGameruleTranslations(set);
 		return set;
 	}

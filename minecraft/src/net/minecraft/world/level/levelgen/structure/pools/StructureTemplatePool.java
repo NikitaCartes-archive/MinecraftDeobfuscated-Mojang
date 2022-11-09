@@ -11,7 +11,7 @@ import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
@@ -38,7 +38,7 @@ public class StructureTemplatePool {
 				.apply(instance, StructureTemplatePool::new)
 	);
 	public static final Codec<Holder<StructureTemplatePool>> CODEC = Util.make(
-		RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC), CODEC_REFERENCE::setValue
+		RegistryFileCodec.create(Registries.TEMPLATE_POOL, DIRECT_CODEC), CODEC_REFERENCE::setValue
 	);
 	private final List<Pair<StructurePoolElement, Integer>> rawTemplates;
 	private final ObjectArrayList<StructurePoolElement> templates;

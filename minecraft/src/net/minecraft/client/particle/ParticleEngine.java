@@ -45,11 +45,11 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -194,13 +194,13 @@ public class ParticleEngine implements PreparableReloadListener {
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {
-		this.providers.put(Registry.PARTICLE_TYPE.getId(particleType), particleProvider);
+		this.providers.put(BuiltInRegistries.PARTICLE_TYPE.getId(particleType), particleProvider);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleEngine.SpriteParticleRegistration<T> spriteParticleRegistration) {
 		ParticleEngine.MutableSpriteSet mutableSpriteSet = new ParticleEngine.MutableSpriteSet();
-		this.spriteSets.put(Registry.PARTICLE_TYPE.getKey(particleType), mutableSpriteSet);
-		this.providers.put(Registry.PARTICLE_TYPE.getId(particleType), spriteParticleRegistration.create(mutableSpriteSet));
+		this.spriteSets.put(BuiltInRegistries.PARTICLE_TYPE.getKey(particleType), mutableSpriteSet);
+		this.providers.put(BuiltInRegistries.PARTICLE_TYPE.getId(particleType), spriteParticleRegistration.create(mutableSpriteSet));
 	}
 
 	@Override
@@ -356,7 +356,7 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	@Nullable
 	private <T extends ParticleOptions> Particle makeParticle(T particleOptions, double d, double e, double f, double g, double h, double i) {
-		ParticleProvider<T> particleProvider = (ParticleProvider<T>)this.providers.get(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
+		ParticleProvider<T> particleProvider = (ParticleProvider<T>)this.providers.get(BuiltInRegistries.PARTICLE_TYPE.getId(particleOptions.getType()));
 		return particleProvider == null ? null : particleProvider.createParticle(particleOptions, this.level, d, e, f, g, h, i);
 	}
 

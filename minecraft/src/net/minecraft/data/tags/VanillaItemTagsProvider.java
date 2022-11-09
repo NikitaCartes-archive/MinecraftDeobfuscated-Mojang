@@ -41,7 +41,6 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
 		this.copy(BlockTags.WART_BLOCKS, ItemTags.WART_BLOCKS);
 		this.copy(BlockTags.LOGS_THAT_BURN, ItemTags.LOGS_THAT_BURN);
-		this.copy(BlockTags.OVERWORLD_NATURAL_LOGS, ItemTags.OVERWORLD_NATURAL_LOGS);
 		this.copy(BlockTags.LOGS, ItemTags.LOGS);
 		this.copy(BlockTags.SAND, ItemTags.SAND);
 		this.copy(BlockTags.SLABS, ItemTags.SLABS);

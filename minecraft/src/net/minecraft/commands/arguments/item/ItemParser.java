@@ -15,7 +15,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -93,7 +93,7 @@ public class ItemParser {
 	private void readItem() throws CommandSyntaxException {
 		int i = this.reader.getCursor();
 		ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-		Optional<? extends Holder<Item>> optional = this.items.get(ResourceKey.create(Registry.ITEM_REGISTRY, resourceLocation));
+		Optional<? extends Holder<Item>> optional = this.items.get(ResourceKey.create(Registries.ITEM, resourceLocation));
 		this.result = Either.left((Holder<Item>)optional.orElseThrow(() -> {
 			this.reader.setCursor(i);
 			return ERROR_UNKNOWN_ITEM.createWithContext(this.reader, resourceLocation);
@@ -108,7 +108,7 @@ public class ItemParser {
 			this.reader.expect('#');
 			this.suggestions = this::suggestTag;
 			ResourceLocation resourceLocation = ResourceLocation.read(this.reader);
-			Optional<? extends HolderSet<Item>> optional = this.items.get(TagKey.create(Registry.ITEM_REGISTRY, resourceLocation));
+			Optional<? extends HolderSet<Item>> optional = this.items.get(TagKey.create(Registries.ITEM, resourceLocation));
 			this.result = Either.right((HolderSet<Item>)optional.orElseThrow(() -> {
 				this.reader.setCursor(i);
 				return ERROR_UNKNOWN_TAG.createWithContext(this.reader, resourceLocation);

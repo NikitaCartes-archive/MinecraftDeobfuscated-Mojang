@@ -2,7 +2,7 @@ package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.Blocks;
 
 public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvider<Block> {
 	public UpdateOneTwentyBlockTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-		super(packOutput, Registry.BLOCK_REGISTRY, completableFuture, block -> block.builtInRegistryHolder().key());
+		super(packOutput, Registries.BLOCK, completableFuture, block -> block.builtInRegistryHolder().key());
 	}
 
 	@Override
@@ -26,6 +26,7 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 		this.tag(BlockTags.STANDING_SIGNS).add(Blocks.BAMBOO_SIGN);
 		this.tag(BlockTags.WALL_SIGNS).add(Blocks.BAMBOO_WALL_SIGN);
 		this.tag(BlockTags.FENCE_GATES).add(Blocks.BAMBOO_FENCE_GATE);
+		this.tag(BlockTags.BAMBOO_BLOCKS).add(Blocks.BAMBOO_BLOCK, Blocks.STRIPPED_BAMBOO_BLOCK);
 		this.tag(BlockTags.CEILING_HANGING_SIGNS)
 			.add(
 				Blocks.OAK_HANGING_SIGN,
@@ -56,6 +57,7 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 		this.tag(BlockTags.MINEABLE_WITH_AXE)
 			.addTag(BlockTags.ALL_HANGING_SIGNS)
 			.add(Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS)
+			.addTag(BlockTags.BAMBOO_BLOCKS)
 			.add(Blocks.CHISELED_BOOKSHELF);
 	}
 }

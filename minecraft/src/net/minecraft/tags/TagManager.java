@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -17,15 +18,15 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 public class TagManager implements PreparableReloadListener {
 	private static final Map<ResourceKey<? extends Registry<?>>, String> CUSTOM_REGISTRY_DIRECTORIES = Map.of(
-		Registry.BLOCK_REGISTRY,
+		Registries.BLOCK,
 		"tags/blocks",
-		Registry.ENTITY_TYPE_REGISTRY,
+		Registries.ENTITY_TYPE,
 		"tags/entity_types",
-		Registry.FLUID_REGISTRY,
+		Registries.FLUID,
 		"tags/fluids",
-		Registry.GAME_EVENT_REGISTRY,
+		Registries.GAME_EVENT,
 		"tags/game_events",
-		Registry.ITEM_REGISTRY,
+		Registries.ITEM,
 		"tags/items"
 	);
 	private final RegistryAccess registryAccess;

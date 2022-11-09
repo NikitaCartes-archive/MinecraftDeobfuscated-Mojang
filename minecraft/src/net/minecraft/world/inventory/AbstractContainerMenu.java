@@ -19,7 +19,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
@@ -290,7 +290,7 @@ public abstract class AbstractContainerMenu {
 			CrashReport crashReport = CrashReport.forThrowable(var8, "Container click");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Click info");
 			crashReportCategory.setDetail(
-				"Menu Type", (CrashReportDetail<String>)(() -> this.menuType != null ? Registry.MENU.getKey(this.menuType).toString() : "<no type>")
+				"Menu Type", (CrashReportDetail<String>)(() -> this.menuType != null ? BuiltInRegistries.MENU.getKey(this.menuType).toString() : "<no type>")
 			);
 			crashReportCategory.setDetail("Menu Class", (CrashReportDetail<String>)(() -> this.getClass().getCanonicalName()));
 			crashReportCategory.setDetail("Slot Count", this.slots.size());

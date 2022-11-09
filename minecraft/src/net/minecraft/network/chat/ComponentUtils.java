@@ -141,4 +141,16 @@ public class ComponentUtils {
 			return true;
 		}
 	}
+
+	public static MutableComponent copyOnClickText(String string) {
+		return wrapInSquareBrackets(
+			Component.literal(string)
+				.withStyle(
+					style -> style.withColor(ChatFormatting.GREEN)
+							.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, string))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+							.withInsertion(string)
+				)
+		);
+	}
 }

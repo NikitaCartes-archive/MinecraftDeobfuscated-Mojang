@@ -6,7 +6,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import javax.annotation.Nullable;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
@@ -193,7 +193,7 @@ public class DisplayInfo {
 
 	private JsonObject serializeIcon() {
 		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("item", Registry.ITEM.getKey(this.icon.getItem()).toString());
+		jsonObject.addProperty("item", BuiltInRegistries.ITEM.getKey(this.icon.getItem()).toString());
 		if (this.icon.hasTag()) {
 			jsonObject.addProperty("nbt", this.icon.getTag().toString());
 		}

@@ -19,7 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -178,7 +178,7 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 							.fieldOf("preset")
 							.stable()
 							.forGetter(MultiNoiseBiomeSource.PresetInstance::preset),
-						RegistryOps.retrieveGetter(Registry.BIOME_REGISTRY)
+						RegistryOps.retrieveGetter(Registries.BIOME)
 					)
 					.apply(instance, instance.stable(MultiNoiseBiomeSource.PresetInstance::new))
 		);

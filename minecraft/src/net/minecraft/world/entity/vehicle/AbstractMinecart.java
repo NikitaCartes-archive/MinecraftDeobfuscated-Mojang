@@ -11,8 +11,8 @@ import net.minecraft.BlockUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -661,7 +661,7 @@ public abstract class AbstractMinecart extends Entity {
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		if (compoundTag.getBoolean("CustomDisplayTile")) {
-			this.setDisplayBlockState(NbtUtils.readBlockState(this.level.holderLookup(Registry.BLOCK_REGISTRY), compoundTag.getCompound("DisplayState")));
+			this.setDisplayBlockState(NbtUtils.readBlockState(this.level.holderLookup(Registries.BLOCK), compoundTag.getCompound("DisplayState")));
 			this.setDisplayOffset(compoundTag.getInt("DisplayOffset"));
 		}
 	}

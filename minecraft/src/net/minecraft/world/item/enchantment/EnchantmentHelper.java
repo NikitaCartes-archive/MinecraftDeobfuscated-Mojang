@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -57,7 +57,7 @@ public class EnchantmentHelper {
 
 	@Nullable
 	public static ResourceLocation getEnchantmentId(Enchantment enchantment) {
-		return Registry.ENCHANTMENT.getKey(enchantment);
+		return BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
 	}
 
 	public static int getItemEnchantmentLevel(Enchantment enchantment, ItemStack itemStack) {
@@ -89,7 +89,7 @@ public class EnchantmentHelper {
 
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			Registry.ENCHANTMENT.getOptional(getEnchantmentId(compoundTag)).ifPresent(enchantment -> map.put(enchantment, getEnchantmentLevel(compoundTag)));
+			BuiltInRegistries.ENCHANTMENT.getOptional(getEnchantmentId(compoundTag)).ifPresent(enchantment -> map.put(enchantment, getEnchantmentLevel(compoundTag)));
 		}
 
 		return map;
@@ -122,7 +122,7 @@ public class EnchantmentHelper {
 
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag = listTag.getCompound(i);
-				Registry.ENCHANTMENT
+				BuiltInRegistries.ENCHANTMENT
 					.getOptional(getEnchantmentId(compoundTag))
 					.ifPresent(enchantment -> enchantmentVisitor.accept(enchantment, getEnchantmentLevel(compoundTag)));
 			}
@@ -378,7 +378,7 @@ public class EnchantmentHelper {
 		Item item = itemStack.getItem();
 		boolean bl2 = itemStack.is(Items.BOOK);
 
-		for (Enchantment enchantment : Registry.ENCHANTMENT) {
+		for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
 			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.category.canEnchant(item) || bl2)) {
 				for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; j--) {
 					if (i >= enchantment.getMinCost(j) && i <= enchantment.getMaxCost(j)) {

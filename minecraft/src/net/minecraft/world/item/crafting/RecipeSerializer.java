@@ -2,6 +2,7 @@ package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
@@ -47,6 +48,6 @@ public interface RecipeSerializer<T extends Recipe<?>> {
 	void toNetwork(FriendlyByteBuf friendlyByteBuf, T recipe);
 
 	static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(String string, S recipeSerializer) {
-		return Registry.register(Registry.RECIPE_SERIALIZER, string, recipeSerializer);
+		return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, string, recipeSerializer);
 	}
 }

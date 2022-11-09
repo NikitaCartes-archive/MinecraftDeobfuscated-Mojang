@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -102,7 +102,7 @@ public class Goat extends Animal {
 	public ItemStack createHorn() {
 		RandomSource randomSource = RandomSource.create((long)this.getUUID().hashCode());
 		TagKey<Instrument> tagKey = this.isScreamingGoat() ? InstrumentTags.SCREAMING_GOAT_HORNS : InstrumentTags.REGULAR_GOAT_HORNS;
-		HolderSet<Instrument> holderSet = Registry.INSTRUMENT.getOrCreateTag(tagKey);
+		HolderSet<Instrument> holderSet = BuiltInRegistries.INSTRUMENT.getOrCreateTag(tagKey);
 		return InstrumentItem.create(Items.GOAT_HORN, (Holder<Instrument>)holderSet.getRandomElement(randomSource).get());
 	}
 

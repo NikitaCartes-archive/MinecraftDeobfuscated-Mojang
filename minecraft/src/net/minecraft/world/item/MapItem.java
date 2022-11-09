@@ -10,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -22,7 +23,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -38,6 +38,8 @@ public class MapItem extends ComplexItem {
 	public static final int IMAGE_HEIGHT = 128;
 	private static final int DEFAULT_MAP_COLOR = -12173266;
 	private static final String TAG_MAP = "map";
+	public static final String MAP_SCALE_TAG = "map_scale_direction";
+	public static final String MAP_LOCK_TAG = "map_to_lock";
 
 	public MapItem(Item.Properties properties) {
 		super(properties);
@@ -89,8 +91,8 @@ public class MapItem extends ComplexItem {
 	public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
 		if (level.dimension() == mapItemSavedData.dimension && entity instanceof Player) {
 			int i = 1 << mapItemSavedData.scale;
-			int j = mapItemSavedData.x;
-			int k = mapItemSavedData.z;
+			int j = mapItemSavedData.centerX;
+			int k = mapItemSavedData.centerZ;
 			int l = Mth.floor(entity.getX() - (double)j) / i + 64;
 			int m = Mth.floor(entity.getZ() - (double)k) / i + 64;
 			int n = 128 / i;
@@ -100,6 +102,8 @@ public class MapItem extends ComplexItem {
 
 			MapItemSavedData.HoldingPlayer holdingPlayer = mapItemSavedData.getHoldingPlayer((Player)entity);
 			holdingPlayer.step++;
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+			BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 			boolean bl = false;
 
 			for (int o = l - n + 1; o < l + n; o++) {
@@ -109,23 +113,19 @@ public class MapItem extends ComplexItem {
 
 					for (int p = m - n - 1; p < m + n; p++) {
 						if (o >= 0 && p >= -1 && o < 128 && p < 128) {
-							int q = o - l;
-							int r = p - m;
-							boolean bl2 = q * q + r * r > (n - 2) * (n - 2);
-							int s = (j / i + o - 64) * i;
-							int t = (k / i + p - 64) * i;
+							int q = Mth.square(o - l) + Mth.square(p - m);
+							boolean bl2 = q > (n - 2) * (n - 2);
+							int r = (j / i + o - 64) * i;
+							int s = (k / i + p - 64) * i;
 							Multiset<MaterialColor> multiset = LinkedHashMultiset.create();
-							LevelChunk levelChunk = level.getChunkAt(new BlockPos(s, 0, t));
+							LevelChunk levelChunk = level.getChunk(SectionPos.blockToSectionCoord(r), SectionPos.blockToSectionCoord(s));
 							if (!levelChunk.isEmpty()) {
-								ChunkPos chunkPos = levelChunk.getPos();
-								int u = s & 15;
-								int v = t & 15;
-								int w = 0;
+								int t = 0;
 								double e = 0.0;
 								if (level.dimensionType().hasCeiling()) {
-									int x = s + t * 231871;
-									x = x * x * 31287121 + x * 11;
-									if ((x >> 20 & 1) == 0) {
+									int u = r + s * 231871;
+									u = u * u * 31287121 + u * 11;
+									if ((u >> 20 & 1) == 0) {
 										multiset.add(Blocks.DIRT.defaultBlockState().getMapColor(level, BlockPos.ZERO), 10);
 									} else {
 										multiset.add(Blocks.STONE.defaultBlockState().getMapColor(level, BlockPos.ZERO), 100);
@@ -133,48 +133,46 @@ public class MapItem extends ComplexItem {
 
 									e = 100.0;
 								} else {
-									BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-									BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
-
-									for (int y = 0; y < i; y++) {
-										for (int z = 0; z < i; z++) {
-											int aa = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, y + u, z + v) + 1;
+									for (int u = 0; u < i; u++) {
+										for (int v = 0; v < i; v++) {
+											mutableBlockPos.set(r + u, 0, s + v);
+											int w = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, mutableBlockPos.getX(), mutableBlockPos.getZ()) + 1;
 											BlockState blockState;
-											if (aa <= level.getMinBuildHeight() + 1) {
+											if (w <= level.getMinBuildHeight() + 1) {
 												blockState = Blocks.BEDROCK.defaultBlockState();
 											} else {
 												do {
-													mutableBlockPos.set(chunkPos.getMinBlockX() + y + u, --aa, chunkPos.getMinBlockZ() + z + v);
+													mutableBlockPos.setY(--w);
 													blockState = levelChunk.getBlockState(mutableBlockPos);
-												} while (blockState.getMapColor(level, mutableBlockPos) == MaterialColor.NONE && aa > level.getMinBuildHeight());
+												} while (blockState.getMapColor(level, mutableBlockPos) == MaterialColor.NONE && w > level.getMinBuildHeight());
 
-												if (aa > level.getMinBuildHeight() && !blockState.getFluidState().isEmpty()) {
-													int ab = aa - 1;
+												if (w > level.getMinBuildHeight() && !blockState.getFluidState().isEmpty()) {
+													int x = w - 1;
 													mutableBlockPos2.set(mutableBlockPos);
 
 													BlockState blockState2;
 													do {
-														mutableBlockPos2.setY(ab--);
+														mutableBlockPos2.setY(x--);
 														blockState2 = levelChunk.getBlockState(mutableBlockPos2);
-														w++;
-													} while (ab > level.getMinBuildHeight() && !blockState2.getFluidState().isEmpty());
+														t++;
+													} while (x > level.getMinBuildHeight() && !blockState2.getFluidState().isEmpty());
 
 													blockState = this.getCorrectStateForFluidBlock(level, blockState, mutableBlockPos);
 												}
 											}
 
-											mapItemSavedData.checkBanners(level, chunkPos.getMinBlockX() + y + u, chunkPos.getMinBlockZ() + z + v);
-											e += (double)aa / (double)(i * i);
+											mapItemSavedData.checkBanners(level, mutableBlockPos.getX(), mutableBlockPos.getZ());
+											e += (double)w / (double)(i * i);
 											multiset.add(blockState.getMapColor(level, mutableBlockPos));
 										}
 									}
 								}
 
-								w /= i * i;
+								t /= i * i;
 								MaterialColor materialColor = Iterables.getFirst(Multisets.copyHighestCountFirst(multiset), MaterialColor.NONE);
 								MaterialColor.Brightness brightness;
 								if (materialColor == MaterialColor.WATER) {
-									double f = (double)w * 0.1 + (double)(o + p & 1) * 0.2;
+									double f = (double)t * 0.1 + (double)(o + p & 1) * 0.2;
 									if (f < 0.5) {
 										brightness = MaterialColor.Brightness.HIGH;
 									} else if (f > 0.9) {
@@ -194,7 +192,7 @@ public class MapItem extends ComplexItem {
 								}
 
 								d = e;
-								if (p >= 0 && q * q + r * r < n * n && (!bl2 || (o + p & 1) != 0)) {
+								if (p >= 0 && q < n * n && (!bl2 || (o + p & 1) != 0)) {
 									bl |= mapItemSavedData.updateColor(o, p, materialColor.getPackedId(brightness));
 								}
 							}
@@ -219,8 +217,8 @@ public class MapItem extends ComplexItem {
 		if (mapItemSavedData != null) {
 			if (serverLevel.dimension() == mapItemSavedData.dimension) {
 				int i = 1 << mapItemSavedData.scale;
-				int j = mapItemSavedData.x;
-				int k = mapItemSavedData.z;
+				int j = mapItemSavedData.centerX;
+				int k = mapItemSavedData.centerZ;
 				boolean[] bls = new boolean[16384];
 				int l = j / i - 64;
 				int m = k / i - 64;
@@ -349,15 +347,30 @@ public class MapItem extends ComplexItem {
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		Integer integer = getMapId(itemStack);
 		MapItemSavedData mapItemSavedData = level == null ? null : getSavedData(integer, level);
-		if (mapItemSavedData != null && mapItemSavedData.locked) {
+		CompoundTag compoundTag = itemStack.getTag();
+		boolean bl;
+		byte b;
+		if (compoundTag != null) {
+			bl = compoundTag.getBoolean("map_to_lock");
+			b = compoundTag.getByte("map_scale_direction");
+		} else {
+			bl = false;
+			b = 0;
+		}
+
+		if (mapItemSavedData != null && (mapItemSavedData.locked || bl)) {
 			list.add(Component.translatable("filled_map.locked", integer).withStyle(ChatFormatting.GRAY));
 		}
 
 		if (tooltipFlag.isAdvanced()) {
 			if (mapItemSavedData != null) {
-				list.add(Component.translatable("filled_map.id", integer).withStyle(ChatFormatting.GRAY));
-				list.add(Component.translatable("filled_map.scale", 1 << mapItemSavedData.scale).withStyle(ChatFormatting.GRAY));
-				list.add(Component.translatable("filled_map.level", mapItemSavedData.scale, 4).withStyle(ChatFormatting.GRAY));
+				if (!bl && b == 0) {
+					list.add(Component.translatable("filled_map.id", integer).withStyle(ChatFormatting.GRAY));
+				}
+
+				int i = Math.min(mapItemSavedData.scale + b, 4);
+				list.add(Component.translatable("filled_map.scale", 1 << i).withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("filled_map.level", i, 4).withStyle(ChatFormatting.GRAY));
 			} else {
 				list.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
 			}

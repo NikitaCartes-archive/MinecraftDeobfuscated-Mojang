@@ -3,16 +3,12 @@ package net.minecraft.core;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.ResourceKey;
 
-public abstract class WritableRegistry<T> extends Registry<T> {
-	public WritableRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
-		super(resourceKey, lifecycle);
-	}
+public interface WritableRegistry<T> extends Registry<T> {
+	Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
-	public abstract Holder<T> registerMapping(int i, ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
+	Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
-	public abstract Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
+	boolean isEmpty();
 
-	public abstract boolean isEmpty();
-
-	public abstract HolderGetter<T> createRegistrationLookup();
+	HolderGetter<T> createRegistrationLookup();
 }

@@ -45,7 +45,6 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.warden.SonicBoom;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -532,7 +531,8 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 
 	public void setAttackTarget(LivingEntity livingEntity) {
 		this.getBrain().eraseMemory(MemoryModuleType.ROAR_TARGET);
-		StartAttacking.setAttackTarget(this, livingEntity);
+		this.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, livingEntity);
+		this.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 		SonicBoom.setCooldown(this, 200);
 	}
 

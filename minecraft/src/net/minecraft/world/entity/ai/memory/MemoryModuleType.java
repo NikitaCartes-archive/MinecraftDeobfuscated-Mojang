@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
@@ -127,7 +128,7 @@ public class MemoryModuleType<U> {
 	}
 
 	public String toString() {
-		return Registry.MEMORY_MODULE_TYPE.getKey(this).toString();
+		return BuiltInRegistries.MEMORY_MODULE_TYPE.getKey(this).toString();
 	}
 
 	public Optional<Codec<ExpirableValue<U>>> getCodec() {
@@ -135,10 +136,10 @@ public class MemoryModuleType<U> {
 	}
 
 	private static <U> MemoryModuleType<U> register(String string, Codec<U> codec) {
-		return Registry.register(Registry.MEMORY_MODULE_TYPE, new ResourceLocation(string), new MemoryModuleType<>(Optional.of(codec)));
+		return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, new ResourceLocation(string), new MemoryModuleType<>(Optional.of(codec)));
 	}
 
 	private static <U> MemoryModuleType<U> register(String string) {
-		return Registry.register(Registry.MEMORY_MODULE_TYPE, new ResourceLocation(string), new MemoryModuleType<>(Optional.empty()));
+		return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, new ResourceLocation(string), new MemoryModuleType<>(Optional.empty()));
 	}
 }

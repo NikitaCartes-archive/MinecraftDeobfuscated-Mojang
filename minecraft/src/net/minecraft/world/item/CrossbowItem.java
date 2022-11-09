@@ -227,7 +227,7 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 				crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
 			} else {
 				Vec3 vec3 = livingEntity.getUpVector(1.0F);
-				Quaternionf quaternionf = new Quaternionf().setAngleAxis((double)i, vec3.x, vec3.y, vec3.z);
+				Quaternionf quaternionf = new Quaternionf().setAngleAxis((double)(i * (float) (Math.PI / 180.0)), vec3.x, vec3.y, vec3.z);
 				Vec3 vec32 = livingEntity.getViewVector(1.0F);
 				Vector3f vector3f = vec32.toVector3f().rotate(quaternionf);
 				projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), g, h);

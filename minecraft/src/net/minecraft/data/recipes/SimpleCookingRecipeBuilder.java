@@ -8,7 +8,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -183,7 +183,7 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 
 			jsonObject.addProperty("category", this.category.getSerializedName());
 			jsonObject.add("ingredient", this.ingredient.toJson());
-			jsonObject.addProperty("result", Registry.ITEM.getKey(this.result).toString());
+			jsonObject.addProperty("result", BuiltInRegistries.ITEM.getKey(this.result).toString());
 			jsonObject.addProperty("experience", this.experience);
 			jsonObject.addProperty("cookingtime", this.cookingTime);
 		}

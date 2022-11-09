@@ -776,9 +776,9 @@ public class ServerPlayer extends Player {
 				serverLevel2.getProfiler().pop();
 				serverLevel2.getProfiler().push("placing");
 				this.setLevel(serverLevel);
-				serverLevel.addDuringPortalTeleport(this);
 				this.connection.teleport(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, portalInfo.xRot);
 				this.connection.resetPosition();
+				serverLevel.addDuringPortalTeleport(this);
 				serverLevel2.getProfiler().pop();
 				this.triggerDimensionChangeTriggers(serverLevel2);
 				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));

@@ -13,7 +13,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
@@ -54,11 +54,11 @@ public class Sheets {
 		.collect(Collectors.toMap(Function.identity(), Sheets::createSignMaterial));
 	public static final Map<WoodType, Material> HANGING_SIGN_MATERIALS = (Map<WoodType, Material>)WoodType.values()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createHangingSignMaterial));
-	public static final Map<ResourceKey<BannerPattern>, Material> BANNER_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)Registry.BANNER_PATTERN
+	public static final Map<ResourceKey<BannerPattern>, Material> BANNER_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)BuiltInRegistries.BANNER_PATTERN
 		.registryKeySet()
 		.stream()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
-	public static final Map<ResourceKey<BannerPattern>, Material> SHIELD_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)Registry.BANNER_PATTERN
+	public static final Map<ResourceKey<BannerPattern>, Material> SHIELD_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)BuiltInRegistries.BANNER_PATTERN
 		.registryKeySet()
 		.stream()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));

@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import java.util.function.BiFunction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.GsonAdapterFactory;
@@ -37,11 +38,13 @@ public class LootItemFunctions {
 	public static final LootItemFunctionType SET_INSTRUMENT = register("set_instrument", new SetInstrumentFunction.Serializer());
 
 	private static LootItemFunctionType register(String string, Serializer<? extends LootItemFunction> serializer) {
-		return Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));
+		return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));
 	}
 
 	public static Object createGsonAdapter() {
-		return GsonAdapterFactory.<LootItemFunction, LootItemFunctionType>builder(Registry.LOOT_FUNCTION_TYPE, "function", "function", LootItemFunction::getType)
+		return GsonAdapterFactory.<LootItemFunction, LootItemFunctionType>builder(
+				BuiltInRegistries.LOOT_FUNCTION_TYPE, "function", "function", LootItemFunction::getType
+			)
 			.build();
 	}
 

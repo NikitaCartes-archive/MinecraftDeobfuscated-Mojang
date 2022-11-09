@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.random.Weight;
 import net.minecraft.util.random.WeightedEntry;
@@ -39,7 +39,7 @@ public class MobSpawnSettings {
 						)
 						.fieldOf("spawners")
 						.forGetter(mobSpawnSettings -> mobSpawnSettings.spawners),
-					Codec.simpleMap(Registry.ENTITY_TYPE.byNameCodec(), MobSpawnSettings.MobSpawnCost.CODEC, Registry.ENTITY_TYPE)
+					Codec.simpleMap(BuiltInRegistries.ENTITY_TYPE.byNameCodec(), MobSpawnSettings.MobSpawnCost.CODEC, BuiltInRegistries.ENTITY_TYPE)
 						.fieldOf("spawn_costs")
 						.forGetter(mobSpawnSettings -> mobSpawnSettings.mobSpawnCosts)
 				)
@@ -131,7 +131,7 @@ public class MobSpawnSettings {
 	public static class SpawnerData extends WeightedEntry.IntrusiveBase {
 		public static final Codec<MobSpawnSettings.SpawnerData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						Registry.ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(spawnerData -> spawnerData.type),
+						BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(spawnerData -> spawnerData.type),
 						Weight.CODEC.fieldOf("weight").forGetter(WeightedEntry.IntrusiveBase::getWeight),
 						Codec.INT.fieldOf("minCount").forGetter(spawnerData -> spawnerData.minCount),
 						Codec.INT.fieldOf("maxCount").forGetter(spawnerData -> spawnerData.maxCount)

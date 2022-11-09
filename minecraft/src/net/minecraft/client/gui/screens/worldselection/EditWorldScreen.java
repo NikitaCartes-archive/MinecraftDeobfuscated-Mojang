@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -84,7 +85,7 @@ public class EditWorldScreen extends Screen {
 			Path path = levelStorageSource.getBackupPath();
 
 			try {
-				Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath() : path);
+				FileUtil.createDirectoriesSafe(path);
 			} catch (IOException var5) {
 				throw new RuntimeException(var5);
 			}

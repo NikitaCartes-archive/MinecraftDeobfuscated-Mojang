@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -207,7 +207,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 			BlockPos blockPos3 = new BlockPos(vec3.x + 0.5, 75.0, vec3.z + 0.5);
 			LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", blockPos3);
 			serverLevel.registryAccess()
-				.registry(Registry.CONFIGURED_FEATURE_REGISTRY)
+				.registry(Registries.CONFIGURED_FEATURE)
 				.flatMap(registry -> registry.getHolder(EndFeatures.END_ISLAND))
 				.ifPresent(
 					reference -> ((ConfiguredFeature)reference.value())

@@ -15,9 +15,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +30,7 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 	private final HolderLookup<ParticleType<?>> particles;
 
 	public ParticleArgument(CommandBuildContext commandBuildContext) {
-		this.particles = commandBuildContext.holderLookup(Registry.PARTICLE_TYPE_REGISTRY);
+		this.particles = commandBuildContext.holderLookup(Registries.PARTICLE_TYPE);
 	}
 
 	public static ParticleArgument particle(CommandBuildContext commandBuildContext) {
@@ -57,7 +57,7 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 
 	private static ParticleType<?> readParticleType(StringReader stringReader, HolderLookup<ParticleType<?>> holderLookup) throws CommandSyntaxException {
 		ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
-		ResourceKey<ParticleType<?>> resourceKey = ResourceKey.create(Registry.PARTICLE_TYPE_REGISTRY, resourceLocation);
+		ResourceKey<ParticleType<?>> resourceKey = ResourceKey.create(Registries.PARTICLE_TYPE, resourceLocation);
 		return (ParticleType<?>)((Holder.Reference)holderLookup.get(resourceKey).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.create(resourceLocation))).value();
 	}
 

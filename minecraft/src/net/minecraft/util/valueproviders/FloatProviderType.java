@@ -2,6 +2,7 @@ package net.minecraft.util.valueproviders;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public interface FloatProviderType<P extends FloatProvider> {
 	FloatProviderType<ConstantFloat> CONSTANT = register("constant", ConstantFloat.CODEC);
@@ -12,6 +13,6 @@ public interface FloatProviderType<P extends FloatProvider> {
 	Codec<P> codec();
 
 	static <P extends FloatProvider> FloatProviderType<P> register(String string, Codec<P> codec) {
-		return Registry.register(Registry.FLOAT_PROVIDER_TYPES, string, () -> codec);
+		return Registry.register(BuiltInRegistries.FLOAT_PROVIDER_TYPE, string, () -> codec);
 	}
 }

@@ -3,8 +3,8 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.FluidState;
 
@@ -15,7 +15,7 @@ public class SpringConfiguration implements FeatureConfiguration {
 					Codec.BOOL.fieldOf("requires_block_below").orElse(true).forGetter(springConfiguration -> springConfiguration.requiresBlockBelow),
 					Codec.INT.fieldOf("rock_count").orElse(4).forGetter(springConfiguration -> springConfiguration.rockCount),
 					Codec.INT.fieldOf("hole_count").orElse(1).forGetter(springConfiguration -> springConfiguration.holeCount),
-					RegistryCodecs.homogeneousList(Registry.BLOCK_REGISTRY).fieldOf("valid_blocks").forGetter(springConfiguration -> springConfiguration.validBlocks)
+					RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("valid_blocks").forGetter(springConfiguration -> springConfiguration.validBlocks)
 				)
 				.apply(instance, SpringConfiguration::new)
 	);

@@ -41,10 +41,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
@@ -451,7 +452,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 			if (bl) {
 				int l = this.getGameRules().getInt(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT);
-				if (biome.shouldSnow(this, blockPos) && l > 0) {
+				if (l > 0 && biome.shouldSnow(this, blockPos)) {
 					BlockState blockState = this.getBlockState(blockPos);
 					if (blockState.is(Blocks.SNOW)) {
 						int m = (Integer)blockState.getValue(SnowLayerBlock.LAYERS);
@@ -684,7 +685,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		entity.setOldPosAndRot();
 		ProfilerFiller profilerFiller = this.getProfiler();
 		entity.tickCount++;
-		this.getProfiler().push((Supplier<String>)(() -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()));
+		this.getProfiler().push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
 		profilerFiller.incrementCounter("tickNonPassenger");
 		entity.tick();
 		this.getProfiler().pop();
@@ -701,7 +702,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			entity2.setOldPosAndRot();
 			entity2.tickCount++;
 			ProfilerFiller profilerFiller = this.getProfiler();
-			profilerFiller.push((Supplier<String>)(() -> Registry.ENTITY_TYPE.getKey(entity2.getType()).toString()));
+			profilerFiller.push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity2.getType()).toString()));
 			profilerFiller.incrementCounter("tickPassenger");
 			entity2.rideTick();
 			profilerFiller.pop();
@@ -1120,7 +1121,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		if (!this.server.getWorldData().worldGenOptions().generateStructures()) {
 			return null;
 		} else {
-			Optional<HolderSet.Named<Structure>> optional = this.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).getTag(tagKey);
+			Optional<HolderSet.Named<Structure>> optional = this.registryAccess().registryOrThrow(Registries.STRUCTURE).getTag(tagKey);
 			if (optional.isEmpty()) {
 				return null;
 			} else {
@@ -1431,7 +1432,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				entity.getY(),
 				entity.getZ(),
 				entity.getUUID(),
-				Registry.ENTITY_TYPE.getKey(entity.getType()),
+				BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()),
 				entity.isAlive(),
 				component2.getString(),
 				component != null ? component.getString() : null
@@ -1499,7 +1500,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			"players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s",
 			this.players.size(),
 			this.entityManager.gatherStats(),
-			getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()),
+			getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()),
 			this.blockEntityTickers.size(),
 			getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType),
 			this.getBlockTicks().count(),

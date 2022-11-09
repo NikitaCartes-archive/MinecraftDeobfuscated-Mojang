@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.attributes;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class Attributes {
 	public static final Attribute MAX_HEALTH = register(
@@ -36,6 +37,6 @@ public class Attributes {
 	);
 
 	private static Attribute register(String string, Attribute attribute) {
-		return Registry.register(Registry.ATTRIBUTE, string, attribute);
+		return Registry.register(BuiltInRegistries.ATTRIBUTE, string, attribute);
 	}
 }

@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -59,7 +59,7 @@ public record DimensionType(
 						Codec.intRange(MIN_Y, MAX_Y).fieldOf("min_y").forGetter(DimensionType::minY),
 						Codec.intRange(16, Y_SIZE).fieldOf("height").forGetter(DimensionType::height),
 						Codec.intRange(0, Y_SIZE).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
-						TagKey.hashedCodec(Registry.BLOCK_REGISTRY).fieldOf("infiniburn").forGetter(DimensionType::infiniburn),
+						TagKey.hashedCodec(Registries.BLOCK).fieldOf("infiniburn").forGetter(DimensionType::infiniburn),
 						ResourceLocation.CODEC.fieldOf("effects").orElse(BuiltinDimensionTypes.OVERWORLD_EFFECTS).forGetter(DimensionType::effectsLocation),
 						Codec.FLOAT.fieldOf("ambient_light").forGetter(DimensionType::ambientLight),
 						DimensionType.MonsterSettings.CODEC.forGetter(DimensionType::monsterSettings)
@@ -69,7 +69,7 @@ public record DimensionType(
 	);
 	private static final int MOON_PHASES = 8;
 	public static final float[] MOON_BRIGHTNESS_PER_PHASE = new float[]{1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
-	public static final Codec<Holder<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, DIRECT_CODEC);
+	public static final Codec<Holder<DimensionType>> CODEC = RegistryFileCodec.create(Registries.DIMENSION_TYPE, DIRECT_CODEC);
 
 	public DimensionType(
 		OptionalLong fixedTime,

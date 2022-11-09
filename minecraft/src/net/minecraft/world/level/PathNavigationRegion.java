@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.biome.Biome;
@@ -34,7 +34,7 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 
 	public PathNavigationRegion(Level level, BlockPos blockPos, BlockPos blockPos2) {
 		this.level = level;
-		this.plains = Suppliers.memoize(() -> level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS));
+		this.plains = Suppliers.memoize(() -> level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS));
 		this.centerX = SectionPos.blockToSectionCoord(blockPos.getX());
 		this.centerZ = SectionPos.blockToSectionCoord(blockPos.getZ());
 		int i = SectionPos.blockToSectionCoord(blockPos2.getX());

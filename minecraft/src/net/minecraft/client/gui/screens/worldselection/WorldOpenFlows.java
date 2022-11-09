@@ -24,6 +24,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
@@ -73,7 +74,7 @@ public class WorldOpenFlows {
 					packConfig,
 					dataLoadContext -> {
 						WorldDimensions.Complete complete = ((WorldDimensions)function.apply(dataLoadContext.datapackWorldgen()))
-							.bake(dataLoadContext.datapackDimensions().registryOrThrow(Registry.LEVEL_STEM_REGISTRY));
+							.bake(dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM));
 						return new WorldLoader.DataLoadOutput<>(
 							new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), complete.lifecycle()), complete.dimensionsRegistryAccess()
 						);
@@ -125,9 +126,9 @@ public class WorldOpenFlows {
 			packConfig,
 			dataLoadContext -> {
 				DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
-				Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registry.LEVEL_STEM_REGISTRY);
+				Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
 				Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(
-					dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allElementsLifecycle()
+					dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle()
 				);
 				if (pair == null) {
 					throw new IllegalStateException("Failed to load world");
@@ -151,9 +152,9 @@ public class WorldOpenFlows {
 			packConfig,
 			dataLoadContext -> {
 				DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
-				Registry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()).freeze();
+				Registry<LevelStem> registry = new MappedRegistry<>(Registries.LEVEL_STEM, Lifecycle.stable()).freeze();
 				Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(
-					dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allElementsLifecycle()
+					dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle()
 				);
 				if (pair == null) {
 					throw new IllegalStateException("Failed to load world");

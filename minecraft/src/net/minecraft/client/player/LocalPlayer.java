@@ -549,7 +549,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Nullable
 	public PlayerRideableJumping jumpableVehicle() {
-		if (this.getVehicle() instanceof PlayerRideableJumping playerRideableJumping && playerRideableJumping.canJump()) {
+		if (this.getVehicle() instanceof PlayerRideableJumping playerRideableJumping && playerRideableJumping.canJump(this)) {
 			return playerRideableJumping;
 		}
 

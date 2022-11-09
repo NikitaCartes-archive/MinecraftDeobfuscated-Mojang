@@ -11,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -117,13 +118,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
 		drawCenteredString(poseStack, this.font, PRIMARY_EFFECT_LABEL, 62, 10, 14737632);
 		drawCenteredString(poseStack, this.font, SECONDARY_EFFECT_LABEL, 169, 10, 14737632);
-
-		for (BeaconScreen.BeaconButton beaconButton : this.beaconButtons) {
-			if (beaconButton.isShowingTooltip()) {
-				beaconButton.renderToolTip(poseStack, i - this.leftPos, j - this.topPos);
-				break;
-			}
-		}
 	}
 
 	@Override
@@ -152,10 +146,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 	@Environment(EnvType.CLIENT)
 	interface BeaconButton {
-		boolean isShowingTooltip();
-
-		void renderToolTip(PoseStack poseStack, int i, int j);
-
 		void updateStatus(int i);
 	}
 
@@ -201,7 +191,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		protected final int tier;
 		private MobEffect effect;
 		private TextureAtlasSprite sprite;
-		private Component tooltip;
 
 		public BeaconPowerButton(int i, int j, MobEffect mobEffect, boolean bl, int k) {
 			super(i, j);
@@ -213,7 +202,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		protected void setEffect(MobEffect mobEffect) {
 			this.effect = mobEffect;
 			this.sprite = Minecraft.getInstance().getMobEffectTextures().get(mobEffect);
-			this.tooltip = this.createEffectDescription(mobEffect);
+			this.setTooltip(Tooltip.create(this.createEffectDescription(mobEffect), null));
 		}
 
 		protected MutableComponent createEffectDescription(MobEffect mobEffect) {
@@ -231,11 +220,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 				BeaconScreen.this.updateButtons();
 			}
-		}
-
-		@Override
-		public void renderToolTip(PoseStack poseStack, int i, int j) {
-			BeaconScreen.this.renderTooltip(poseStack, this.tooltip, i, j);
 		}
 
 		@Override
@@ -298,18 +282,13 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		public boolean isShowingTooltip() {
-			return this.isHovered;
-		}
-
-		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 			this.defaultButtonNarrationText(narrationElementOutput);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	abstract class BeaconSpriteScreenButton extends BeaconScreen.BeaconScreenButton {
+	abstract static class BeaconSpriteScreenButton extends BeaconScreen.BeaconScreenButton {
 		private final int iconX;
 		private final int iconY;
 
@@ -322,11 +301,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		@Override
 		protected void renderIcon(PoseStack poseStack) {
 			this.blit(poseStack, this.getX() + 2, this.getY() + 2, this.iconX, this.iconY, 18, 18);
-		}
-
-		@Override
-		public void renderToolTip(PoseStack poseStack, int i, int j) {
-			BeaconScreen.this.renderTooltip(poseStack, BeaconScreen.this.title, i, j);
 		}
 	}
 

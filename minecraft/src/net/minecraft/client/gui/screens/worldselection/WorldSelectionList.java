@@ -355,12 +355,12 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				if (this.summary.isLocked()) {
 					GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 					if (bl2) {
-						this.screen.setToolTip(this.minecraft.font.split(WorldSelectionList.WORLD_LOCKED_TOOLTIP, 175));
+						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.WORLD_LOCKED_TOOLTIP, 175));
 					}
 				} else if (this.summary.requiresManualConversion()) {
 					GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 					if (bl2) {
-						this.screen.setToolTip(this.minecraft.font.split(WorldSelectionList.WORLD_REQUIRES_CONVERSION, 175));
+						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.WORLD_REQUIRES_CONVERSION, 175));
 					}
 				} else if (this.summary.markVersionInList()) {
 					GuiComponent.blit(poseStack, k, j, 32.0F, (float)q, 32, 32, 256, 256);
@@ -368,7 +368,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 						GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 						if (bl2) {
 							this.screen
-								.setToolTip(
+								.setTooltipForNextRenderPass(
 									ImmutableList.of(WorldSelectionList.FROM_NEWER_TOOLTIP_1.getVisualOrderText(), WorldSelectionList.FROM_NEWER_TOOLTIP_2.getVisualOrderText())
 								);
 						}
@@ -376,7 +376,9 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 						GuiComponent.blit(poseStack, k, j, 64.0F, (float)q, 32, 32, 256, 256);
 						if (bl2) {
 							this.screen
-								.setToolTip(ImmutableList.of(WorldSelectionList.SNAPSHOT_TOOLTIP_1.getVisualOrderText(), WorldSelectionList.SNAPSHOT_TOOLTIP_2.getVisualOrderText()));
+								.setTooltipForNextRenderPass(
+									ImmutableList.of(WorldSelectionList.SNAPSHOT_TOOLTIP_1.getVisualOrderText(), WorldSelectionList.SNAPSHOT_TOOLTIP_2.getVisualOrderText())
+								);
 						}
 					}
 				} else {

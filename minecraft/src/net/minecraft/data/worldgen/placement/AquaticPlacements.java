@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.AquaticFeatures;
 import net.minecraft.resources.ResourceKey;
@@ -43,7 +43,7 @@ public class AquaticPlacements {
 	}
 
 	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registry.CONFIGURED_FEATURE_REGISTRY);
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder.Reference<ConfiguredFeature<?, ?>> reference = holderGetter.getOrThrow(AquaticFeatures.SEAGRASS_SHORT);
 		Holder.Reference<ConfiguredFeature<?, ?>> reference2 = holderGetter.getOrThrow(AquaticFeatures.SEAGRASS_SLIGHTLY_LESS_SHORT);
 		Holder.Reference<ConfiguredFeature<?, ?>> reference3 = holderGetter.getOrThrow(AquaticFeatures.SEAGRASS_MID);

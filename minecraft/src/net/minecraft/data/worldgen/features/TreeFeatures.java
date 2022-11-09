@@ -7,7 +7,7 @@ import java.util.OptionalInt;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
@@ -132,7 +132,7 @@ public class TreeFeatures {
 	}
 
 	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registry.BLOCK_REGISTRY);
+		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registries.BLOCK);
 		FeatureUtils.register(
 			bootstapContext,
 			CRIMSON_FUNGUS,

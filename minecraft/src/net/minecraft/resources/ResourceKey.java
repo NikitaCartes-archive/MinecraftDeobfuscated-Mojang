@@ -1,14 +1,14 @@
 package net.minecraft.resources;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.mojang.serialization.Codec;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ResourceKey<T> {
-	private static final Map<String, ResourceKey<?>> VALUES = Collections.synchronizedMap(Maps.newIdentityHashMap());
+	private static final ConcurrentMap<ResourceKey.InternKey, ResourceKey<?>> VALUES = new MapMaker().weakValues().makeMap();
 	private final ResourceLocation registryName;
 	private final ResourceLocation location;
 
@@ -21,12 +21,13 @@ public class ResourceKey<T> {
 	}
 
 	public static <T> ResourceKey<Registry<T>> createRegistryKey(ResourceLocation resourceLocation) {
-		return create(Registry.ROOT_REGISTRY_NAME, resourceLocation);
+		return create(BuiltInRegistries.ROOT_REGISTRY_NAME, resourceLocation);
 	}
 
 	private static <T> ResourceKey<T> create(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
-		String string = (resourceLocation + ":" + resourceLocation2).intern();
-		return (ResourceKey<T>)VALUES.computeIfAbsent(string, stringx -> new ResourceKey(resourceLocation, resourceLocation2));
+		return (ResourceKey<T>)VALUES.computeIfAbsent(
+			new ResourceKey.InternKey(resourceLocation, resourceLocation2), internKey -> new ResourceKey(internKey.registry, internKey.location)
+		);
 	}
 
 	private ResourceKey(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
@@ -52,5 +53,8 @@ public class ResourceKey<T> {
 
 	public ResourceLocation registry() {
 		return this.registryName;
+	}
+
+	static record InternKey(ResourceLocation registry, ResourceLocation location) {
 	}
 }

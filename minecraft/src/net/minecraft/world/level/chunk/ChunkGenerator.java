@@ -36,6 +36,8 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -76,7 +78,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class ChunkGenerator {
-	public static final Codec<ChunkGenerator> CODEC = Registry.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
+	public static final Codec<ChunkGenerator> CODEC = BuiltInRegistries.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
 	protected final BiomeSource biomeSource;
 	private final Supplier<List<FeatureSorter.StepFeatureData>> featuresPerStep;
 	private final Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter;
@@ -102,7 +104,7 @@ public abstract class ChunkGenerator {
 	}
 
 	public Optional<ResourceKey<Codec<? extends ChunkGenerator>>> getTypeNameForDataFixer() {
-		return Registry.CHUNK_GENERATOR.getResourceKey(this.codec());
+		return BuiltInRegistries.CHUNK_GENERATOR.getResourceKey(this.codec());
 	}
 
 	public CompletableFuture<ChunkAccess> createBiomes(
@@ -307,7 +309,7 @@ public abstract class ChunkGenerator {
 		if (!SharedConstants.debugVoidTerrain(chunkPos)) {
 			SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSection());
 			BlockPos blockPos = sectionPos.origin();
-			Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+			Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
 			Map<Integer, List<Structure>> map = (Map<Integer, List<Structure>>)registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
 			List<FeatureSorter.StepFeatureData> list = (List<FeatureSorter.StepFeatureData>)this.featuresPerStep.get();
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
@@ -324,7 +326,7 @@ public abstract class ChunkGenerator {
 			int i = list.size();
 
 			try {
-				Registry<PlacedFeature> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);
+				Registry<PlacedFeature> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
 				int j = Math.max(GenerationStep.Decoration.values().length, i);
 
 				for (int k = 0; k < j; k++) {
@@ -580,11 +582,13 @@ public abstract class ChunkGenerator {
 					} catch (Exception var21) {
 						CrashReport crashReport = CrashReport.forThrowable(var21, "Generating structure reference");
 						CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
-						Optional<? extends Registry<Structure>> optional = worldGenLevel.registryAccess().registry(Registry.STRUCTURE_REGISTRY);
+						Optional<? extends Registry<Structure>> optional = worldGenLevel.registryAccess().registry(Registries.STRUCTURE);
 						crashReportCategory.setDetail(
 							"Id", (CrashReportDetail<String>)(() -> (String)optional.map(registry -> registry.getKey(structureStart.getStructure()).toString()).orElse("UNKNOWN"))
 						);
-						crashReportCategory.setDetail("Name", (CrashReportDetail<String>)(() -> Registry.STRUCTURE_TYPES.getKey(structureStart.getStructure().type()).toString()));
+						crashReportCategory.setDetail(
+							"Name", (CrashReportDetail<String>)(() -> BuiltInRegistries.STRUCTURE_TYPE.getKey(structureStart.getStructure().type()).toString())
+						);
 						crashReportCategory.setDetail("Class", (CrashReportDetail<String>)(() -> structureStart.getStructure().getClass().getCanonicalName()));
 						throw new ReportedException(crashReport);
 					}

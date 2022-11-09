@@ -299,7 +299,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		final int index;
 
 		public TradeOfferButton(int i, int j, int k, Button.OnPress onPress) {
-			super(i, j, 89, 20, CommonComponents.EMPTY, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
+			super(i, j, 89, 20, CommonComponents.EMPTY, onPress, DEFAULT_NARRATION);
 			this.index = k;
 			this.visible = false;
 		}
@@ -308,7 +308,6 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 			return this.index;
 		}
 
-		@Override
 		public void renderToolTip(PoseStack poseStack, int i, int j) {
 			if (this.isHovered && MerchantScreen.this.menu.getOffers().size() > this.index + MerchantScreen.this.scrollOff) {
 				if (i < this.getX() + 20) {

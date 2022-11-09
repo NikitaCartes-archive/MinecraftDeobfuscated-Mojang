@@ -3,7 +3,7 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -37,14 +37,14 @@ public class ClientboundUpdateRecipesPacket implements Packet<ClientGamePacketLi
 	public static Recipe<?> fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 		ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
 		ResourceLocation resourceLocation2 = friendlyByteBuf.readResourceLocation();
-		return ((RecipeSerializer)Registry.RECIPE_SERIALIZER
+		return ((RecipeSerializer)BuiltInRegistries.RECIPE_SERIALIZER
 				.getOptional(resourceLocation)
 				.orElseThrow(() -> new IllegalArgumentException("Unknown recipe serializer " + resourceLocation)))
 			.fromNetwork(resourceLocation2, friendlyByteBuf);
 	}
 
 	public static <T extends Recipe<?>> void toNetwork(FriendlyByteBuf friendlyByteBuf, T recipe) {
-		friendlyByteBuf.writeResourceLocation(Registry.RECIPE_SERIALIZER.getKey(recipe.getSerializer()));
+		friendlyByteBuf.writeResourceLocation(BuiltInRegistries.RECIPE_SERIALIZER.getKey(recipe.getSerializer()));
 		friendlyByteBuf.writeResourceLocation(recipe.getId());
 		((RecipeSerializer<T>)recipe.getSerializer()).toNetwork(friendlyByteBuf, recipe);
 	}

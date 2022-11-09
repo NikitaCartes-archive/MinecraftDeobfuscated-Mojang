@@ -11,6 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -32,9 +33,9 @@ public interface PresetEditor {
 		(PresetEditor)(createWorldScreen, worldCreationContext) -> {
 			ChunkGenerator chunkGenerator = worldCreationContext.selectedDimensions().overworld();
 			RegistryAccess registryAccess = worldCreationContext.worldgenLoadContext();
-			HolderGetter<Biome> holderGetter = registryAccess.lookupOrThrow(Registry.BIOME_REGISTRY);
-			HolderGetter<StructureSet> holderGetter2 = registryAccess.lookupOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-			HolderGetter<PlacedFeature> holderGetter3 = registryAccess.lookupOrThrow(Registry.PLACED_FEATURE_REGISTRY);
+			HolderGetter<Biome> holderGetter = registryAccess.lookupOrThrow(Registries.BIOME);
+			HolderGetter<StructureSet> holderGetter2 = registryAccess.lookupOrThrow(Registries.STRUCTURE_SET);
+			HolderGetter<PlacedFeature> holderGetter3 = registryAccess.lookupOrThrow(Registries.PLACED_FEATURE);
 			return new CreateFlatWorldScreen(
 				createWorldScreen,
 				flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent.updateSettings(flatWorldConfigurator(flatLevelGeneratorSettings)),
@@ -60,7 +61,7 @@ public interface PresetEditor {
 
 	private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> holder) {
 		return (frozen, worldDimensions) -> {
-			Registry<NoiseGeneratorSettings> registry = frozen.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+			Registry<NoiseGeneratorSettings> registry = frozen.registryOrThrow(Registries.NOISE_SETTINGS);
 			Holder<NoiseGeneratorSettings> holder2 = registry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
 			BiomeSource biomeSource = new FixedBiomeSource(holder);
 			ChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator(biomeSource, holder2);

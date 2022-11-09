@@ -19,8 +19,8 @@ import net.minecraft.commands.arguments.TemplateRotationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -64,7 +64,7 @@ public class PlaceCommand {
 				.then(
 					Commands.literal("feature")
 						.then(
-							Commands.argument("feature", ResourceKeyArgument.key(Registry.CONFIGURED_FEATURE_REGISTRY))
+							Commands.argument("feature", ResourceKeyArgument.key(Registries.CONFIGURED_FEATURE))
 								.executes(
 									commandContext -> placeFeature(
 											commandContext.getSource(),
@@ -87,7 +87,7 @@ public class PlaceCommand {
 				.then(
 					Commands.literal("jigsaw")
 						.then(
-							Commands.argument("pool", ResourceKeyArgument.key(Registry.TEMPLATE_POOL_REGISTRY))
+							Commands.argument("pool", ResourceKeyArgument.key(Registries.TEMPLATE_POOL))
 								.then(
 									Commands.argument("target", ResourceLocationArgument.id())
 										.then(
@@ -120,7 +120,7 @@ public class PlaceCommand {
 				.then(
 					Commands.literal("structure")
 						.then(
-							Commands.argument("structure", ResourceKeyArgument.key(Registry.STRUCTURE_REGISTRY))
+							Commands.argument("structure", ResourceKeyArgument.key(Registries.STRUCTURE))
 								.executes(
 									commandContext -> placeStructure(
 											commandContext.getSource(), ResourceKeyArgument.getStructure(commandContext, "structure"), new BlockPos(commandContext.getSource().getPosition())

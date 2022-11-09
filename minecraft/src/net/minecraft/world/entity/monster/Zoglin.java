@@ -29,14 +29,13 @@ import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
-import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.RunSometimes;
-import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
+import net.minecraft.world.entity.ai.behavior.SetEntityLookTargetSometimes;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -107,9 +106,11 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 			Activity.IDLE,
 			10,
 			ImmutableList.of(
-				new StartAttacking<>(Zoglin::findNearestValidAttackTarget),
-				new RunSometimes(new SetEntityLookTarget(8.0F), UniformInt.of(30, 60)),
-				new RunOne(ImmutableList.of(Pair.of(new RandomStroll(0.4F), 2), Pair.of(new SetWalkTargetFromLookTarget(0.4F, 3), 2), Pair.of(new DoNothing(30, 60), 1)))
+				StartAttacking.create(Zoglin::findNearestValidAttackTarget),
+				SetEntityLookTargetSometimes.create(8.0F, UniformInt.of(30, 60)),
+				new RunOne<>(
+					ImmutableList.of(Pair.of(RandomStroll.stroll(0.4F), 2), Pair.of(SetWalkTargetFromLookTarget.create(0.4F, 3), 2), Pair.of(new DoNothing(30, 60), 1))
+				)
 			)
 		);
 	}
@@ -119,10 +120,10 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 			Activity.FIGHT,
 			10,
 			ImmutableList.of(
-				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
-				new RunIf<>(Zoglin::isAdult, new MeleeAttack(40)),
-				new RunIf<>(Zoglin::isBaby, new MeleeAttack(15)),
-				new StopAttackingIfTargetInvalid()
+				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.0F),
+				BehaviorBuilder.triggerIf(Zoglin::isAdult, MeleeAttack.create(40)),
+				BehaviorBuilder.triggerIf(Zoglin::isBaby, MeleeAttack.create(15)),
+				StopAttackingIfTargetInvalid.create()
 			),
 			MemoryModuleType.ATTACK_TARGET
 		);

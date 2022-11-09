@@ -117,7 +117,6 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 			this.name = component;
 			this.changeButton = Button.builder(component, button -> KeyBindsList.this.keyBindsScreen.selectedKey = keyMapping)
 				.bounds(0, 0, 75, 20)
-				.tooltip(Button.NO_TOOLTIP)
 				.createNarration(
 					supplier -> keyMapping.isUnbound()
 							? Component.translatable("narrator.controls.unbound", component)
@@ -127,7 +126,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 			this.resetButton = Button.builder(Component.translatable("controls.reset"), button -> {
 				KeyBindsList.this.minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
 				KeyMapping.resetMapping();
-			}).bounds(0, 0, 50, 20).tooltip(Button.NO_TOOLTIP).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
+			}).bounds(0, 0, 50, 20).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
 		}
 
 		@Override

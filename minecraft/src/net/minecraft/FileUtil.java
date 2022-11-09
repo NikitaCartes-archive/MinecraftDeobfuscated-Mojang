@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -172,5 +173,9 @@ public class FileUtil {
 				}
 			}
 		}
+	}
+
+	public static void createDirectoriesSafe(Path path) throws IOException {
+		Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath() : path);
 	}
 }

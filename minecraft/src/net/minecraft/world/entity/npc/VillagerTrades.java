@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
@@ -773,8 +773,8 @@ public class VillagerTrades {
 		private final int villagerXp;
 
 		public EmeraldsForVillagerTypeItem(int i, int j, int k, Map<VillagerType, Item> map) {
-			Registry.VILLAGER_TYPE.stream().filter(villagerType -> !map.containsKey(villagerType)).findAny().ifPresent(villagerType -> {
-				throw new IllegalStateException("Missing trade for villager type: " + Registry.VILLAGER_TYPE.getKey(villagerType));
+			BuiltInRegistries.VILLAGER_TYPE.stream().filter(villagerType -> !map.containsKey(villagerType)).findAny().ifPresent(villagerType -> {
+				throw new IllegalStateException("Missing trade for villager type: " + BuiltInRegistries.VILLAGER_TYPE.getKey(villagerType));
 			});
 			this.trades = map;
 			this.cost = i;
@@ -803,7 +803,7 @@ public class VillagerTrades {
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			List<Enchantment> list = (List<Enchantment>)Registry.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
+			List<Enchantment> list = (List<Enchantment>)BuiltInRegistries.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
 			Enchantment enchantment = (Enchantment)list.get(randomSource.nextInt(list.size()));
 			int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
 			ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i));
@@ -984,7 +984,7 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.EMERALD, this.emeraldCost);
-			List<Potion> list = (List<Potion>)Registry.POTION
+			List<Potion> list = (List<Potion>)BuiltInRegistries.POTION
 				.stream()
 				.filter(potionx -> !potionx.getEffects().isEmpty() && PotionBrewing.isBrewablePotion(potionx))
 				.collect(Collectors.toList());

@@ -3,7 +3,7 @@ package net.minecraft.data.worldgen.placement;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.resources.ResourceKey;
@@ -72,7 +72,7 @@ public class OrePlacements {
 	}
 
 	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registry.CONFIGURED_FEATURE_REGISTRY);
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(OreFeatures.ORE_MAGMA);
 		Holder<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(OreFeatures.ORE_SOUL_SAND);
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(OreFeatures.ORE_NETHER_GOLD);

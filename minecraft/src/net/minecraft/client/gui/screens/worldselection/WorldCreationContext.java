@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.world.level.WorldDataConfiguration;
@@ -42,7 +43,7 @@ public record WorldCreationContext(
 	) {
 		this(
 			worldOptions,
-			layeredRegistryAccess.getLayer(RegistryLayer.DIMENSIONS).registryOrThrow(Registry.LEVEL_STEM_REGISTRY),
+			layeredRegistryAccess.getLayer(RegistryLayer.DIMENSIONS).registryOrThrow(Registries.LEVEL_STEM),
 			worldDimensions,
 			layeredRegistryAccess.replaceFrom(RegistryLayer.DIMENSIONS),
 			reloadableServerResources,

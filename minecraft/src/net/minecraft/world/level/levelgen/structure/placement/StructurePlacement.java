@@ -8,8 +8,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
@@ -20,7 +21,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 
 public abstract class StructurePlacement {
-	public static final Codec<StructurePlacement> CODEC = Registry.STRUCTURE_PLACEMENT_TYPE
+	public static final Codec<StructurePlacement> CODEC = BuiltInRegistries.STRUCTURE_PLACEMENT
 		.byNameCodec()
 		.dispatch(StructurePlacement::type, StructurePlacementType::codec);
 	private static final int HIGHLY_ARBITRARY_RANDOM_SALT = 10387320;
@@ -123,7 +124,7 @@ public abstract class StructurePlacement {
 	public static record ExclusionZone(Holder<StructureSet> otherSet, int chunkCount) {
 		public static final Codec<StructurePlacement.ExclusionZone> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						RegistryFileCodec.create(Registry.STRUCTURE_SET_REGISTRY, StructureSet.DIRECT_CODEC, false)
+						RegistryFileCodec.create(Registries.STRUCTURE_SET, StructureSet.DIRECT_CODEC, false)
 							.fieldOf("other_set")
 							.forGetter(StructurePlacement.ExclusionZone::otherSet),
 						Codec.intRange(1, 16).fieldOf("chunk_count").forGetter(StructurePlacement.ExclusionZone::chunkCount)

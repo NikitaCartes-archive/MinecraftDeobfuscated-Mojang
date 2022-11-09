@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class Schedule {
 	public static final int WORK_START_TIME = 2000;
@@ -30,7 +31,7 @@ public class Schedule {
 	private final Map<Activity, Timeline> timelines = Maps.<Activity, Timeline>newHashMap();
 
 	protected static ScheduleBuilder register(String string) {
-		Schedule schedule = Registry.register(Registry.SCHEDULE, string, new Schedule());
+		Schedule schedule = Registry.register(BuiltInRegistries.SCHEDULE, string, new Schedule());
 		return new ScheduleBuilder(schedule);
 	}
 

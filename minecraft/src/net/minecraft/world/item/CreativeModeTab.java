@@ -3,38 +3,49 @@ package net.minecraft.world.item;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ItemLike;
 
-public abstract class CreativeModeTab {
-	private final int id;
+public class CreativeModeTab {
 	private final Component displayName;
-	private String backgroundSuffix = "items.png";
-	private boolean canScroll = true;
-	private boolean showTitle = true;
+	String backgroundSuffix = "items.png";
+	boolean canScroll = true;
+	boolean showTitle = true;
+	boolean alignedRight = false;
+	private final CreativeModeTab.Row row;
+	private final int column;
+	private final CreativeModeTab.Type type;
+	@Nullable
 	private ItemStack iconItemStack;
+	private ItemStackLinkedSet displayItems = new ItemStackLinkedSet();
+	private ItemStackLinkedSet displayItemsSearchTab = new ItemStackLinkedSet();
 	@Nullable
-	private ItemStackLinkedSet displayItems;
-	@Nullable
-	private ItemStackLinkedSet displayItemsSearchTab;
-	@Nullable
-	private CreativeModeTab.ItemDisplayParameters cachedParameters;
-	private boolean searchTreeDirty;
-	@Nullable
-	private Consumer<List<ItemStack>> searchTreeRebuilder;
+	private Consumer<List<ItemStack>> searchTreeBuilder;
+	private final Supplier<ItemStack> iconGenerator;
+	private final CreativeModeTab.DisplayItemsGenerator displayItemsGenerator;
 
-	public CreativeModeTab(int i, Component component) {
-		this.id = i;
+	CreativeModeTab(
+		CreativeModeTab.Row row,
+		int i,
+		CreativeModeTab.Type type,
+		Component component,
+		Supplier<ItemStack> supplier,
+		CreativeModeTab.DisplayItemsGenerator displayItemsGenerator
+	) {
+		this.row = row;
+		this.column = i;
 		this.displayName = component;
-		this.iconItemStack = ItemStack.EMPTY;
+		this.iconGenerator = supplier;
+		this.displayItemsGenerator = displayItemsGenerator;
+		this.type = type;
 	}
 
-	public int getId() {
-		return this.id;
+	public static CreativeModeTab.Builder builder(CreativeModeTab.Row row, int i) {
+		return new CreativeModeTab.Builder(row, i);
 	}
 
 	public Component getDisplayName() {
@@ -42,97 +53,154 @@ public abstract class CreativeModeTab {
 	}
 
 	public ItemStack getIconItem() {
-		if (this.iconItemStack.isEmpty()) {
-			this.iconItemStack = this.makeIcon();
+		if (this.iconItemStack == null) {
+			this.iconItemStack = (ItemStack)this.iconGenerator.get();
 		}
 
 		return this.iconItemStack;
 	}
 
-	public abstract ItemStack makeIcon();
-
-	protected abstract void generateDisplayItems(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl);
-
 	public String getBackgroundSuffix() {
 		return this.backgroundSuffix;
-	}
-
-	public CreativeModeTab setBackgroundSuffix(String string) {
-		this.backgroundSuffix = string;
-		return this;
 	}
 
 	public boolean showTitle() {
 		return this.showTitle;
 	}
 
-	public CreativeModeTab hideTitle() {
-		this.showTitle = false;
-		return this;
-	}
-
 	public boolean canScroll() {
 		return this.canScroll;
 	}
 
-	public CreativeModeTab hideScroll() {
-		this.canScroll = false;
-		return this;
+	public int column() {
+		return this.column;
 	}
 
-	public int getColumn() {
-		return this.id % 6;
+	public CreativeModeTab.Row row() {
+		return this.row;
 	}
 
-	public boolean isTopRow() {
-		return this.id < 6;
+	public boolean hasAnyItems() {
+		return !this.displayItems.isEmpty();
+	}
+
+	public boolean shouldDisplay() {
+		return this.type != CreativeModeTab.Type.CATEGORY || this.hasAnyItems();
 	}
 
 	public boolean isAlignedRight() {
-		return this.getColumn() == 5;
+		return this.alignedRight;
 	}
 
-	private ItemStackLinkedSet lazyBuildDisplayItems(FeatureFlagSet featureFlagSet, boolean bl, boolean bl2) {
-		CreativeModeTab.ItemDisplayParameters itemDisplayParameters = new CreativeModeTab.ItemDisplayParameters(featureFlagSet, bl2);
-		boolean bl3 = this.displayItems == null || this.displayItemsSearchTab == null || !Objects.equals(this.cachedParameters, itemDisplayParameters);
-		if (bl3) {
-			CreativeModeTab.ItemDisplayBuilder itemDisplayBuilder = new CreativeModeTab.ItemDisplayBuilder(this, featureFlagSet);
-			this.generateDisplayItems(featureFlagSet, itemDisplayBuilder, bl2);
-			this.displayItems = itemDisplayBuilder.getTabContents();
-			this.displayItemsSearchTab = itemDisplayBuilder.getSearchTabContents();
-			this.cachedParameters = itemDisplayParameters;
+	public CreativeModeTab.Type getType() {
+		return this.type;
+	}
+
+	public void buildContents(FeatureFlagSet featureFlagSet, boolean bl) {
+		CreativeModeTab.ItemDisplayBuilder itemDisplayBuilder = new CreativeModeTab.ItemDisplayBuilder(this, featureFlagSet);
+		this.displayItemsGenerator.accept(featureFlagSet, itemDisplayBuilder, bl);
+		this.displayItems = itemDisplayBuilder.getTabContents();
+		this.displayItemsSearchTab = itemDisplayBuilder.getSearchTabContents();
+		this.rebuildSearchTree();
+	}
+
+	public ItemStackLinkedSet getDisplayItems() {
+		return this.displayItems;
+	}
+
+	public ItemStackLinkedSet getSearchTabDisplayItems() {
+		return this.displayItemsSearchTab;
+	}
+
+	public boolean contains(ItemStack itemStack) {
+		return this.displayItemsSearchTab.contains(itemStack);
+	}
+
+	public void setSearchTreeBuilder(Consumer<List<ItemStack>> consumer) {
+		this.searchTreeBuilder = consumer;
+	}
+
+	public void rebuildSearchTree() {
+		if (this.searchTreeBuilder != null) {
+			this.searchTreeBuilder.accept(Lists.newArrayList(this.displayItemsSearchTab));
+		}
+	}
+
+	public static class Builder {
+		private static final CreativeModeTab.DisplayItemsGenerator EMPTY_GENERATOR = (featureFlagSet, output, bl) -> {
+		};
+		private final CreativeModeTab.Row row;
+		private final int column;
+		private Component displayName = Component.empty();
+		private Supplier<ItemStack> iconGenerator = () -> ItemStack.EMPTY;
+		private CreativeModeTab.DisplayItemsGenerator displayItemsGenerator = EMPTY_GENERATOR;
+		private boolean canScroll = true;
+		private boolean showTitle = true;
+		private boolean alignedRight = false;
+		private CreativeModeTab.Type type = CreativeModeTab.Type.CATEGORY;
+		private String backgroundSuffix = "items.png";
+
+		public Builder(CreativeModeTab.Row row, int i) {
+			this.row = row;
+			this.column = i;
 		}
 
-		if (this.searchTreeRebuilder != null && (bl3 || this.searchTreeDirty)) {
-			this.searchTreeRebuilder.accept(Lists.newArrayList(this.displayItemsSearchTab));
-			this.markSearchTreeRebuilt();
+		public CreativeModeTab.Builder title(Component component) {
+			this.displayName = component;
+			return this;
 		}
 
-		return bl ? this.displayItemsSearchTab : this.displayItems;
+		public CreativeModeTab.Builder icon(Supplier<ItemStack> supplier) {
+			this.iconGenerator = supplier;
+			return this;
+		}
+
+		public CreativeModeTab.Builder displayItems(CreativeModeTab.DisplayItemsGenerator displayItemsGenerator) {
+			this.displayItemsGenerator = displayItemsGenerator;
+			return this;
+		}
+
+		public CreativeModeTab.Builder alignedRight() {
+			this.alignedRight = true;
+			return this;
+		}
+
+		public CreativeModeTab.Builder hideTitle() {
+			this.showTitle = false;
+			return this;
+		}
+
+		public CreativeModeTab.Builder noScrollBar() {
+			this.canScroll = false;
+			return this;
+		}
+
+		protected CreativeModeTab.Builder type(CreativeModeTab.Type type) {
+			this.type = type;
+			return this;
+		}
+
+		public CreativeModeTab.Builder backgroundSuffix(String string) {
+			this.backgroundSuffix = string;
+			return this;
+		}
+
+		public CreativeModeTab build() {
+			if ((this.type == CreativeModeTab.Type.HOTBAR || this.type == CreativeModeTab.Type.INVENTORY) && this.displayItemsGenerator != EMPTY_GENERATOR) {
+				throw new IllegalStateException("Special tabs can't have display items");
+			} else {
+				CreativeModeTab creativeModeTab = new CreativeModeTab(this.row, this.column, this.type, this.displayName, this.iconGenerator, this.displayItemsGenerator);
+				creativeModeTab.alignedRight = this.alignedRight;
+				creativeModeTab.showTitle = this.showTitle;
+				creativeModeTab.canScroll = this.canScroll;
+				creativeModeTab.backgroundSuffix = this.backgroundSuffix;
+				return creativeModeTab;
+			}
+		}
 	}
 
-	public ItemStackLinkedSet getDisplayItems(FeatureFlagSet featureFlagSet, boolean bl) {
-		return this.lazyBuildDisplayItems(featureFlagSet, false, bl);
-	}
-
-	public ItemStackLinkedSet getSearchTabDisplayItems(FeatureFlagSet featureFlagSet, boolean bl) {
-		return this.lazyBuildDisplayItems(featureFlagSet, true, bl);
-	}
-
-	public boolean contains(FeatureFlagSet featureFlagSet, ItemStack itemStack, boolean bl) {
-		return this.getSearchTabDisplayItems(featureFlagSet, bl).contains(itemStack);
-	}
-
-	public void setSearchTreeRebuilder(Consumer<List<ItemStack>> consumer) {
-		this.searchTreeRebuilder = consumer;
-	}
-
-	public void invalidateSearchTree() {
-		this.searchTreeDirty = true;
-	}
-
-	private void markSearchTreeRebuilt() {
-		this.searchTreeDirty = false;
+	public interface DisplayItemsGenerator {
+		void accept(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl);
 	}
 
 	static class ItemDisplayBuilder implements CreativeModeTab.Output {
@@ -182,9 +250,6 @@ public abstract class CreativeModeTab {
 		}
 	}
 
-	static record ItemDisplayParameters(FeatureFlagSet enabledFeatures, boolean hasPermissions) {
-	}
-
 	protected interface Output {
 		void accept(ItemStack itemStack, CreativeModeTab.TabVisibility tabVisibility);
 
@@ -209,9 +274,21 @@ public abstract class CreativeModeTab {
 		}
 	}
 
+	public static enum Row {
+		TOP,
+		BOTTOM;
+	}
+
 	protected static enum TabVisibility {
 		PARENT_AND_SEARCH_TABS,
 		PARENT_TAB_ONLY,
 		SEARCH_TAB_ONLY;
+	}
+
+	public static enum Type {
+		CATEGORY,
+		INVENTORY,
+		HOTBAR,
+		SEARCH;
 	}
 }

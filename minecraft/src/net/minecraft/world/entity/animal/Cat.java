@@ -2,7 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -148,7 +148,7 @@ public class Cat extends TamableAnimal {
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
-		this.entityData.define(DATA_VARIANT_ID, Registry.CAT_VARIANT.getOrThrow(CatVariant.BLACK));
+		this.entityData.define(DATA_VARIANT_ID, BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.BLACK));
 		this.entityData.define(IS_LYING, false);
 		this.entityData.define(RELAX_STATE_ONE, false);
 		this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
@@ -157,14 +157,14 @@ public class Cat extends TamableAnimal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putString("variant", Registry.CAT_VARIANT.getKey(this.getCatVariant()).toString());
+		compoundTag.putString("variant", BuiltInRegistries.CAT_VARIANT.getKey(this.getCatVariant()).toString());
 		compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		CatVariant catVariant = Registry.CAT_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
+		CatVariant catVariant = BuiltInRegistries.CAT_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
 		if (catVariant != null) {
 			this.setCatVariant(catVariant);
 		}
@@ -351,13 +351,13 @@ public class Cat extends TamableAnimal {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9F;
 		TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
-		Registry.CAT_VARIANT
+		BuiltInRegistries.CAT_VARIANT
 			.getTag(tagKey)
 			.flatMap(named -> named.getRandomElement(serverLevelAccessor.getRandom()))
 			.ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
 		ServerLevel serverLevel = serverLevelAccessor.getLevel();
 		if (serverLevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
-			this.setCatVariant(Registry.CAT_VARIANT.getOrThrow(CatVariant.ALL_BLACK));
+			this.setCatVariant(BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.ALL_BLACK));
 			this.setPersistenceRequired();
 		}
 

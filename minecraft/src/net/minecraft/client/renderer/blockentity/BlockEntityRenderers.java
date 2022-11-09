@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
@@ -24,7 +24,7 @@ public class BlockEntityRenderers {
 			try {
 				builder.put(blockEntityType, blockEntityRendererProvider.create(context));
 			} catch (Exception var5) {
-				throw new IllegalStateException("Failed to create model for " + Registry.BLOCK_ENTITY_TYPE.getKey(blockEntityType), var5);
+				throw new IllegalStateException("Failed to create model for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType), var5);
 			}
 		});
 		return builder.build();

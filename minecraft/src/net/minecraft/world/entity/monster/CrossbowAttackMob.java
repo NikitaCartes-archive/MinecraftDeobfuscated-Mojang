@@ -44,10 +44,10 @@ public interface CrossbowAttackMob extends RangedAttackMob {
 
 	default Vector3f getProjectileShotVector(LivingEntity livingEntity, Vec3 vec3, float f) {
 		Vector3f vector3f = vec3.toVector3f().normalize();
-		Vector3f vector3f2 = vector3f.cross(new Vector3f(0.0F, 1.0F, 0.0F));
+		Vector3f vector3f2 = new Vector3f(vector3f).cross(new Vector3f(0.0F, 1.0F, 0.0F));
 		if ((double)vector3f2.lengthSquared() <= 1.0E-7) {
 			Vec3 vec32 = livingEntity.getUpVector(1.0F);
-			vector3f2 = vector3f.cross(vec32.toVector3f());
+			vector3f2 = new Vector3f(vector3f).cross(vec32.toVector3f());
 		}
 
 		Vector3f vector3f3 = new Vector3f(vector3f).rotateAxis((float) (Math.PI / 2), vector3f2.x, vector3f2.y, vector3f2.z);

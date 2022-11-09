@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 
@@ -15,6 +15,6 @@ public class MobEffectTextureManager extends TextureAtlasHolder {
 	}
 
 	public TextureAtlasSprite get(MobEffect mobEffect) {
-		return this.getSprite(Registry.MOB_EFFECT.getKey(mobEffect));
+		return this.getSprite(BuiltInRegistries.MOB_EFFECT.getKey(mobEffect));
 	}
 }

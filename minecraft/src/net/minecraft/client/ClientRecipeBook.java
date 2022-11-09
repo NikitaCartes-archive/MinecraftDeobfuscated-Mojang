@@ -14,7 +14,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
@@ -115,7 +115,7 @@ public class ClientRecipeBook extends RecipeBook {
 			} else if (recipeType == RecipeType.SMITHING) {
 				return RecipeBookCategories.SMITHING;
 			} else {
-				LOGGER.warn("Unknown recipe category: {}/{}", LogUtils.defer(() -> Registry.RECIPE_TYPE.getKey(recipe.getType())), LogUtils.defer(recipe::getId));
+				LOGGER.warn("Unknown recipe category: {}/{}", LogUtils.defer(() -> BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType())), LogUtils.defer(recipe::getId));
 				return RecipeBookCategories.UNKNOWN;
 			}
 		}

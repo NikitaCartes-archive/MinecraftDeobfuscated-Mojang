@@ -19,7 +19,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,7 +30,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class EditBox extends AbstractWidget implements Renderable, GuiEventListener {
+public class EditBox extends AbstractWidget implements Renderable {
 	public static final int BACKWARDS = -1;
 	public static final int FORWARDS = 1;
 	private static final int CURSOR_INSERT_WIDTH = 1;
@@ -60,6 +59,8 @@ public class EditBox extends AbstractWidget implements Renderable, GuiEventListe
 	private Consumer<String> responder;
 	private Predicate<String> filter = Objects::nonNull;
 	private BiFunction<String, Integer, FormattedCharSequence> formatter = (string, integer) -> FormattedCharSequence.forward(string, Style.EMPTY);
+	@Nullable
+	private Component hint;
 
 	public EditBox(Font font, int i, int j, int k, int l, Component component) {
 		this(font, i, j, k, l, null, component);
@@ -415,6 +416,10 @@ public class EditBox extends AbstractWidget implements Renderable, GuiEventListe
 				this.font.drawShadow(poseStack, (FormattedCharSequence)this.formatter.apply(string.substring(l), this.cursorPos), (float)p, (float)o, k);
 			}
 
+			if (this.hint != null && string.isEmpty() && !this.isFocused()) {
+				this.font.drawShadow(poseStack, this.hint, (float)p, (float)o, k);
+			}
+
 			if (!bl3 && this.suggestion != null) {
 				this.font.drawShadow(poseStack, this.suggestion, (float)(q - 1), (float)o, -8355712);
 			}
@@ -584,7 +589,11 @@ public class EditBox extends AbstractWidget implements Renderable, GuiEventListe
 	}
 
 	@Override
-	public void updateNarration(NarrationElementOutput narrationElementOutput) {
-		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.edit_box", this.getValue()));
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+		narrationElementOutput.add(NarratedElementType.TITLE, this.createNarrationMessage());
+	}
+
+	public void setHint(Component component) {
+		this.hint = component;
 	}
 }

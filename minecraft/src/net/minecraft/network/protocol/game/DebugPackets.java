@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +31,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -154,7 +154,7 @@ public class DebugPackets {
 		}
 
 		friendlyByteBuf.writeCollection(brain.getActiveActivities(), (friendlyByteBufx, activity) -> friendlyByteBufx.writeUtf(activity.getName()));
-		Set<String> set = (Set<String>)brain.getRunningBehaviors().stream().map(Behavior::toString).collect(Collectors.toSet());
+		Set<String> set = (Set<String>)brain.getRunningBehaviors().stream().map(BehaviorControl::debugString).collect(Collectors.toSet());
 		friendlyByteBuf.writeCollection(set, FriendlyByteBuf::writeUtf);
 		friendlyByteBuf.writeCollection(getMemoryDescriptions(livingEntity, l), (friendlyByteBufx, string) -> {
 			String string2 = StringUtil.truncateStringIfNecessary(string, 255, true);
@@ -218,7 +218,7 @@ public class DebugPackets {
 				string = "-";
 			}
 
-			list.add(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType).getPath() + ": " + string);
+			list.add(BuiltInRegistries.MEMORY_MODULE_TYPE.getKey(memoryModuleType).getPath() + ": " + string);
 		}
 
 		list.sort(String::compareTo);
