@@ -17,8 +17,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -358,7 +358,7 @@ implements FeatureElement {
 
     public final ResourceLocation getLootTable() {
         if (this.drops == null) {
-            ResourceLocation resourceLocation = Registry.BLOCK.getKey(this.asBlock());
+            ResourceLocation resourceLocation = BuiltInRegistries.BLOCK.getKey(this.asBlock());
             this.drops = resourceLocation.withPrefix("blocks/");
         }
         return this.drops;
@@ -1067,7 +1067,7 @@ implements FeatureElement {
                 }
                 this.collisionShape = block.getCollisionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
                 if (!this.collisionShape.isEmpty() && blockState.getOffsetType() != OffsetType.NONE) {
-                    throw new IllegalStateException(String.format(Locale.ROOT, "%s has a collision shape and an offset type, but is not marked as dynamicShape in its properties.", Registry.BLOCK.getKey(block)));
+                    throw new IllegalStateException(String.format(Locale.ROOT, "%s has a collision shape and an offset type, but is not marked as dynamicShape in its properties.", BuiltInRegistries.BLOCK.getKey(block)));
                 }
                 this.largeCollisionShape = Arrays.stream(Direction.Axis.values()).anyMatch(axis -> this.collisionShape.min((Direction.Axis)axis) < 0.0 || this.collisionShape.max((Direction.Axis)axis) > 1.0);
                 this.faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];

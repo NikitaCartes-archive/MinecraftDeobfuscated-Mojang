@@ -5,6 +5,7 @@ package net.minecraft.world.level.storage.loot.predicates;
 
 import java.util.function.Predicate;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.GsonAdapterFactory;
 import net.minecraft.world.level.storage.loot.Serializer;
@@ -48,11 +49,11 @@ public class LootItemConditions {
     public static final LootItemConditionType VALUE_CHECK = LootItemConditions.register("value_check", new ValueCheckCondition.Serializer());
 
     private static LootItemConditionType register(String string, Serializer<? extends LootItemCondition> serializer) {
-        return Registry.register(Registry.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(serializer));
+        return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(serializer));
     }
 
     public static Object createGsonAdapter() {
-        return GsonAdapterFactory.builder(Registry.LOOT_CONDITION_TYPE, "condition", "condition", LootItemCondition::getType).build();
+        return GsonAdapterFactory.builder(BuiltInRegistries.LOOT_CONDITION_TYPE, "condition", "condition", LootItemCondition::getType).build();
     }
 
     public static <T> Predicate<T> andConditions(Predicate<T>[] predicates) {

@@ -44,10 +44,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -411,7 +412,7 @@ implements WorldGenLevel {
             if (bl) {
                 BlockState blockState;
                 int l = this.getGameRules().getInt(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT);
-                if (biome.shouldSnow(this, blockPos) && l > 0) {
+                if (l > 0 && biome.shouldSnow(this, blockPos)) {
                     blockState = this.getBlockState(blockPos);
                     if (blockState.is(Blocks.SNOW)) {
                         int m = blockState.getValue(SnowLayerBlock.LAYERS);
@@ -598,7 +599,7 @@ implements WorldGenLevel {
         entity.setOldPosAndRot();
         ProfilerFiller profilerFiller = this.getProfiler();
         ++entity.tickCount;
-        this.getProfiler().push(() -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString());
+        this.getProfiler().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
         profilerFiller.incrementCounter("tickNonPassenger");
         entity.tick();
         this.getProfiler().pop();
@@ -618,7 +619,7 @@ implements WorldGenLevel {
         entity2.setOldPosAndRot();
         ++entity2.tickCount;
         ProfilerFiller profilerFiller = this.getProfiler();
-        profilerFiller.push(() -> Registry.ENTITY_TYPE.getKey(entity2.getType()).toString());
+        profilerFiller.push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity2.getType()).toString());
         profilerFiller.incrementCounter("tickPassenger");
         entity2.rideTick();
         profilerFiller.pop();
@@ -976,7 +977,7 @@ implements WorldGenLevel {
         if (!this.server.getWorldData().worldGenOptions().generateStructures()) {
             return null;
         }
-        Optional<HolderSet.Named<Structure>> optional = this.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).getTag(tagKey);
+        Optional<HolderSet.Named<Structure>> optional = this.registryAccess().registryOrThrow(Registries.STRUCTURE).getTag(tagKey);
         if (optional.isEmpty()) {
             return null;
         }
@@ -1164,7 +1165,7 @@ implements WorldGenLevel {
         for (Entity entity : iterable) {
             Component component = entity.getCustomName();
             Component component2 = entity.getDisplayName();
-            csvOutput.writeRow(entity.getX(), entity.getY(), entity.getZ(), entity.getUUID(), Registry.ENTITY_TYPE.getKey(entity.getType()), entity.isAlive(), component2.getString(), component != null ? component.getString() : null);
+            csvOutput.writeRow(entity.getX(), entity.getY(), entity.getZ(), entity.getUUID(), BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()), entity.isAlive(), component2.getString(), component != null ? component.getString() : null);
         }
     }
 
@@ -1222,7 +1223,7 @@ implements WorldGenLevel {
 
     @VisibleForTesting
     public String getWatchdogStats() {
-        return String.format(Locale.ROOT, "players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entityManager.gatherStats(), ServerLevel.getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString()), this.blockEntityTickers.size(), ServerLevel.getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType), ((LevelTicks)this.getBlockTicks()).count(), ((LevelTicks)this.getFluidTicks()).count(), this.gatherChunkSourceStats());
+        return String.format(Locale.ROOT, "players: %s, entities: %s [%s], block_entities: %d [%s], block_ticks: %d, fluid_ticks: %d, chunk_source: %s", this.players.size(), this.entityManager.gatherStats(), ServerLevel.getTypeCount(this.entityManager.getEntityGetter().getAll(), entity -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()), this.blockEntityTickers.size(), ServerLevel.getTypeCount(this.blockEntityTickers, TickingBlockEntity::getType), ((LevelTicks)this.getBlockTicks()).count(), ((LevelTicks)this.getFluidTicks()).count(), this.gatherChunkSourceStats());
     }
 
     private static <T> String getTypeCount(Iterable<T> iterable, Function<T, String> function) {

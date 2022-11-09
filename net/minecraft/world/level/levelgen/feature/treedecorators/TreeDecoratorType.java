@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.AttachedToLeavesDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorator;
@@ -23,7 +24,7 @@ public class TreeDecoratorType<P extends TreeDecorator> {
     private final Codec<P> codec;
 
     private static <P extends TreeDecorator> TreeDecoratorType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.TREE_DECORATOR_TYPES, string, new TreeDecoratorType<P>(codec));
+        return Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, string, new TreeDecoratorType<P>(codec));
     }
 
     private TreeDecoratorType(Codec<P> codec) {

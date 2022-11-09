@@ -16,6 +16,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -35,9 +36,9 @@ public interface PresetEditor {
     public static final Map<Optional<ResourceKey<WorldPreset>>, PresetEditor> EDITORS = Map.of(Optional.of(WorldPresets.FLAT), (createWorldScreen, worldCreationContext) -> {
         ChunkGenerator chunkGenerator = worldCreationContext.selectedDimensions().overworld();
         RegistryAccess.Frozen registryAccess = worldCreationContext.worldgenLoadContext();
-        HolderLookup.RegistryLookup<Biome> holderGetter = registryAccess.lookupOrThrow(Registry.BIOME_REGISTRY);
-        HolderLookup.RegistryLookup<StructureSet> holderGetter2 = registryAccess.lookupOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-        HolderLookup.RegistryLookup<PlacedFeature> holderGetter3 = registryAccess.lookupOrThrow(Registry.PLACED_FEATURE_REGISTRY);
+        HolderLookup.RegistryLookup<Biome> holderGetter = registryAccess.lookupOrThrow(Registries.BIOME);
+        HolderLookup.RegistryLookup<StructureSet> holderGetter2 = registryAccess.lookupOrThrow(Registries.STRUCTURE_SET);
+        HolderLookup.RegistryLookup<PlacedFeature> holderGetter3 = registryAccess.lookupOrThrow(Registries.PLACED_FEATURE);
         return new CreateFlatWorldScreen(createWorldScreen, flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent.updateSettings(PresetEditor.flatWorldConfigurator(flatLevelGeneratorSettings)), chunkGenerator instanceof FlatLevelSource ? ((FlatLevelSource)chunkGenerator).settings() : FlatLevelGeneratorSettings.getDefault(holderGetter, holderGetter2, holderGetter3));
     }, Optional.of(WorldPresets.SINGLE_BIOME_SURFACE), (createWorldScreen, worldCreationContext) -> new CreateBuffetWorldScreen(createWorldScreen, worldCreationContext, holder -> createWorldScreen.worldGenSettingsComponent.updateSettings(PresetEditor.fixedBiomeConfigurator(holder))));
 
@@ -52,7 +53,7 @@ public interface PresetEditor {
 
     private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> holder) {
         return (frozen, worldDimensions) -> {
-            Registry<NoiseGeneratorSettings> registry = frozen.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+            Registry<NoiseGeneratorSettings> registry = frozen.registryOrThrow(Registries.NOISE_SETTINGS);
             Holder.Reference<NoiseGeneratorSettings> holder2 = registry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
             FixedBiomeSource biomeSource = new FixedBiomeSource(holder);
             NoiseBasedChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator((BiomeSource)biomeSource, holder2);

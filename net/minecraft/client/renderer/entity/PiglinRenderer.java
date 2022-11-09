@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -56,6 +57,11 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
     @Override
     protected /* synthetic */ boolean isShaking(LivingEntity livingEntity) {
         return this.isShaking((Mob)livingEntity);
+    }
+
+    @Override
+    public /* synthetic */ ResourceLocation getTextureLocation(Entity entity) {
+        return this.getTextureLocation((Mob)entity);
     }
 }
 

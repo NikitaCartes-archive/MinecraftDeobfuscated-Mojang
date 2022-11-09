@@ -172,7 +172,7 @@ extends AbstractContainerMenu {
 
     public void tryMoveItems(int i) {
         ItemStack itemStack2;
-        if (this.getOffers().size() <= i) {
+        if (i < 0 || this.getOffers().size() <= i) {
             return;
         }
         ItemStack itemStack = this.tradeContainer.getItem(0);

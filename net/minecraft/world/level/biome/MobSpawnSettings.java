@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.random.Weight;
 import net.minecraft.util.random.WeightedEntry;
@@ -31,7 +31,7 @@ public class MobSpawnSettings {
     private static final float DEFAULT_CREATURE_SPAWN_PROBABILITY = 0.1f;
     public static final WeightedRandomList<SpawnerData> EMPTY_MOB_LIST = WeightedRandomList.create();
     public static final MobSpawnSettings EMPTY = new Builder().build();
-    public static final MapCodec<MobSpawnSettings> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(Codec.floatRange(0.0f, 0.9999999f).optionalFieldOf("creature_spawn_probability", Float.valueOf(0.1f)).forGetter(mobSpawnSettings -> Float.valueOf(mobSpawnSettings.creatureGenerationProbability)), Codec.simpleMap(MobCategory.CODEC, WeightedRandomList.codec(SpawnerData.CODEC).promotePartial((Consumer)Util.prefix("Spawn data: ", LOGGER::error)), StringRepresentable.keys(MobCategory.values())).fieldOf("spawners").forGetter(mobSpawnSettings -> mobSpawnSettings.spawners), Codec.simpleMap(Registry.ENTITY_TYPE.byNameCodec(), MobSpawnCost.CODEC, Registry.ENTITY_TYPE).fieldOf("spawn_costs").forGetter(mobSpawnSettings -> mobSpawnSettings.mobSpawnCosts)).apply((Applicative<MobSpawnSettings, ?>)instance, MobSpawnSettings::new));
+    public static final MapCodec<MobSpawnSettings> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(Codec.floatRange(0.0f, 0.9999999f).optionalFieldOf("creature_spawn_probability", Float.valueOf(0.1f)).forGetter(mobSpawnSettings -> Float.valueOf(mobSpawnSettings.creatureGenerationProbability)), Codec.simpleMap(MobCategory.CODEC, WeightedRandomList.codec(SpawnerData.CODEC).promotePartial((Consumer)Util.prefix("Spawn data: ", LOGGER::error)), StringRepresentable.keys(MobCategory.values())).fieldOf("spawners").forGetter(mobSpawnSettings -> mobSpawnSettings.spawners), Codec.simpleMap(BuiltInRegistries.ENTITY_TYPE.byNameCodec(), MobSpawnCost.CODEC, BuiltInRegistries.ENTITY_TYPE).fieldOf("spawn_costs").forGetter(mobSpawnSettings -> mobSpawnSettings.mobSpawnCosts)).apply((Applicative<MobSpawnSettings, ?>)instance, MobSpawnSettings::new));
     private final float creatureGenerationProbability;
     private final Map<MobCategory, WeightedRandomList<SpawnerData>> spawners;
     private final Map<EntityType<?>, MobSpawnCost> mobSpawnCosts;
@@ -76,7 +76,7 @@ public class MobSpawnSettings {
 
     public static class SpawnerData
     extends WeightedEntry.IntrusiveBase {
-        public static final Codec<SpawnerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.ENTITY_TYPE.byNameCodec().fieldOf("type")).forGetter(spawnerData -> spawnerData.type), ((MapCodec)Weight.CODEC.fieldOf("weight")).forGetter(WeightedEntry.IntrusiveBase::getWeight), ((MapCodec)Codec.INT.fieldOf("minCount")).forGetter(spawnerData -> spawnerData.minCount), ((MapCodec)Codec.INT.fieldOf("maxCount")).forGetter(spawnerData -> spawnerData.maxCount)).apply((Applicative<SpawnerData, ?>)instance, SpawnerData::new));
+        public static final Codec<SpawnerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type")).forGetter(spawnerData -> spawnerData.type), ((MapCodec)Weight.CODEC.fieldOf("weight")).forGetter(WeightedEntry.IntrusiveBase::getWeight), ((MapCodec)Codec.INT.fieldOf("minCount")).forGetter(spawnerData -> spawnerData.minCount), ((MapCodec)Codec.INT.fieldOf("maxCount")).forGetter(spawnerData -> spawnerData.maxCount)).apply((Applicative<SpawnerData, ?>)instance, SpawnerData::new));
         public final EntityType<?> type;
         public final int minCount;
         public final int maxCount;

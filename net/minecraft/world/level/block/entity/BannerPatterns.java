@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -52,7 +53,7 @@ public class BannerPatterns {
     public static final ResourceKey<BannerPattern> PIGLIN = BannerPatterns.create("piglin");
 
     private static ResourceKey<BannerPattern> create(String string) {
-        return ResourceKey.create(Registry.BANNER_PATTERN_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.BANNER_PATTERN, new ResourceLocation(string));
     }
 
     public static BannerPattern bootstrap(Registry<BannerPattern> registry) {

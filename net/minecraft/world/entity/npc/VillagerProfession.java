@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.function.Predicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -56,7 +57,7 @@ public record VillagerProfession(String name, Predicate<Holder<PoiType>> heldJob
     }
 
     private static VillagerProfession register(String string, Predicate<Holder<PoiType>> predicate, Predicate<Holder<PoiType>> predicate2, ImmutableSet<Item> immutableSet, ImmutableSet<Block> immutableSet2, @Nullable SoundEvent soundEvent) {
-        return Registry.register(Registry.VILLAGER_PROFESSION, new ResourceLocation(string), new VillagerProfession(string, predicate, predicate2, immutableSet, immutableSet2, soundEvent));
+        return Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, new ResourceLocation(string), new VillagerProfession(string, predicate, predicate2, immutableSet, immutableSet2, soundEvent));
     }
 
     @Nullable

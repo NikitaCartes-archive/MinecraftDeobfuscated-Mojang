@@ -22,7 +22,7 @@ extends Button {
     private final boolean playTurnSound;
 
     public PageButton(int i, int j, boolean bl, Button.OnPress onPress, boolean bl2) {
-        super(i, j, 23, 13, CommonComponents.EMPTY, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
+        super(i, j, 23, 13, CommonComponents.EMPTY, onPress, DEFAULT_NARRATION);
         this.isForward = bl;
         this.playTurnSound = bl2;
     }

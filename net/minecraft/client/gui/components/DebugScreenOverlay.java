@@ -45,8 +45,8 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -334,7 +334,7 @@ extends GuiComponent {
             BlockState blockState = this.minecraft.level.getBlockState(blockPos);
             list.add("");
             list.add(ChatFormatting.UNDERLINE + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
-            list.add(String.valueOf(Registry.BLOCK.getKey(blockState.getBlock())));
+            list.add(String.valueOf(BuiltInRegistries.BLOCK.getKey(blockState.getBlock())));
             for (Map.Entry entry : blockState.getValues().entrySet()) {
                 list.add(this.getPropertyValueString(entry));
             }
@@ -345,7 +345,7 @@ extends GuiComponent {
             FluidState fluidState = this.minecraft.level.getFluidState(blockPos);
             list.add("");
             list.add(ChatFormatting.UNDERLINE + "Targeted Fluid: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
-            list.add(String.valueOf(Registry.FLUID.getKey(fluidState.getType())));
+            list.add(String.valueOf(BuiltInRegistries.FLUID.getKey(fluidState.getType())));
             for (Map.Entry entry : fluidState.getValues().entrySet()) {
                 list.add(this.getPropertyValueString(entry));
             }
@@ -354,7 +354,7 @@ extends GuiComponent {
         if ((entity = this.minecraft.crosshairPickEntity) != null) {
             list.add("");
             list.add(ChatFormatting.UNDERLINE + "Targeted Entity");
-            list.add(String.valueOf(Registry.ENTITY_TYPE.getKey(entity.getType())));
+            list.add(String.valueOf(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType())));
         }
         return list;
     }

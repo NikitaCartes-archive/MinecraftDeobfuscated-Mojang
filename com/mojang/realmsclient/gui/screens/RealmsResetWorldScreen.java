@@ -203,7 +203,7 @@ extends RealmsScreen {
         private final ResourceLocation image;
 
         public FrameButton(int i, int j, Component component, ResourceLocation resourceLocation, Button.OnPress onPress) {
-            super(i, j, 60, 72, component, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
+            super(i, j, 60, 72, component, onPress, DEFAULT_NARRATION);
             this.image = resourceLocation;
         }
 

@@ -15,6 +15,9 @@ public class ModelTemplates {
     public static final ModelTemplate CUBE_ALL = ModelTemplates.create("cube_all", TextureSlot.ALL);
     public static final ModelTemplate CUBE_MIRRORED_ALL = ModelTemplates.create("cube_mirrored_all", "_mirrored", TextureSlot.ALL);
     public static final ModelTemplate CUBE_NORTH_WEST_MIRRORED_ALL = ModelTemplates.create("cube_north_west_mirrored_all", "_north_west_mirrored", TextureSlot.ALL);
+    public static final ModelTemplate CUBE_COLUMN_UV_LOCKED_X = ModelTemplates.create("cube_column_uv_locked_x", "_x", TextureSlot.END, TextureSlot.SIDE);
+    public static final ModelTemplate CUBE_COLUMN_UV_LOCKED_Y = ModelTemplates.create("cube_column_uv_locked_y", "_y", TextureSlot.END, TextureSlot.SIDE);
+    public static final ModelTemplate CUBE_COLUMN_UV_LOCKED_Z = ModelTemplates.create("cube_column_uv_locked_z", "_z", TextureSlot.END, TextureSlot.SIDE);
     public static final ModelTemplate CUBE_COLUMN = ModelTemplates.create("cube_column", TextureSlot.END, TextureSlot.SIDE);
     public static final ModelTemplate CUBE_COLUMN_HORIZONTAL = ModelTemplates.create("cube_column_horizontal", "_horizontal", TextureSlot.END, TextureSlot.SIDE);
     public static final ModelTemplate CUBE_COLUMN_MIRRORED = ModelTemplates.create("cube_column_mirrored", "_mirrored", TextureSlot.END, TextureSlot.SIDE);

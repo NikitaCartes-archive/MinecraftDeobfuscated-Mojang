@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.placement.BiomeFilter;
 import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskPlacement;
@@ -42,7 +43,7 @@ public interface PlacementModifierType<P extends PlacementModifier> {
     public Codec<P> codec();
 
     private static <P extends PlacementModifier> PlacementModifierType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.PLACEMENT_MODIFIERS, string, () -> codec);
+        return Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, string, () -> codec);
     }
 }
 

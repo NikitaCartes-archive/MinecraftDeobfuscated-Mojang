@@ -53,8 +53,6 @@ extends Screen {
     final ChatReportBuilder report;
     private final Consumer<ChatReportBuilder> onSelected;
     private ChatSelectionLogFiller chatLogFiller;
-    @Nullable
-    private List<FormattedCharSequence> tooltip;
 
     public ChatSelectionScreen(@Nullable Screen screen, ReportingContext reportingContext, ChatReportBuilder chatReportBuilder, Consumer<ChatReportBuilder> consumer) {
         super(TITLE);
@@ -110,10 +108,6 @@ extends Screen {
         ChatSelectionScreen.drawCenteredString(poseStack, this.font, component, this.width / 2, 16 + this.font.lineHeight * 3 / 2, 0xA0A0A0);
         this.contextInfoLabel.renderCentered(poseStack, this.width / 2, this.chatSelectionList.getFooterTop());
         super.render(poseStack, i, j, f);
-        if (this.tooltip != null) {
-            this.renderTooltip(poseStack, this.tooltip, i, j);
-            this.tooltip = null;
-        }
     }
 
     @Override
@@ -124,10 +118,6 @@ extends Screen {
     @Override
     public Component getNarrationMessage() {
         return CommonComponents.joinForNarration(super.getNarrationMessage(), CONTEXT_INFO);
-    }
-
-    void setTooltip(@Nullable List<FormattedCharSequence> list) {
-        this.tooltip = list;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -290,7 +280,7 @@ extends Screen {
                 int q = j + 1 + (m - ((ChatSelectionScreen)ChatSelectionScreen.this).font.lineHeight) / 2;
                 GuiComponent.drawString(poseStack, ChatSelectionScreen.this.font, Language.getInstance().getVisualOrder(this.text), p, q, this.canReport ? -1 : -1593835521);
                 if (this.hoverText != null && bl) {
-                    ChatSelectionScreen.this.setTooltip(this.hoverText);
+                    ChatSelectionScreen.this.setTooltipForNextRenderPass(this.hoverText);
                 }
                 int r = ChatSelectionScreen.this.font.width(this.text);
                 this.renderTag(poseStack, p + r + 4, j, m, n, o);
@@ -301,7 +291,7 @@ extends Screen {
                     int n = j + (k - this.tagIcon.height) / 2;
                     this.tagIcon.draw(poseStack, i, n);
                     if (this.tagHoverText != null && l >= i && l <= i + this.tagIcon.width && m >= n && m <= n + this.tagIcon.height) {
-                        ChatSelectionScreen.this.setTooltip(this.tagHoverText);
+                        ChatSelectionScreen.this.setTooltipForNextRenderPass(this.tagHoverText);
                     }
                 }
             }

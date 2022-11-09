@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -77,7 +77,7 @@ extends BaseEntityBlock {
         ResourceLocation resourceLocation;
         CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
         if (compoundTag != null && compoundTag.contains("SpawnData", 10) && (resourceLocation = ResourceLocation.tryParse(string = compoundTag.getCompound("SpawnData").getCompound("entity").getString("id"))) != null) {
-            return Registry.ENTITY_TYPE.getOptional(resourceLocation).map(entityType -> Component.translatable(entityType.getDescriptionId()).withStyle(ChatFormatting.GRAY));
+            return BuiltInRegistries.ENTITY_TYPE.getOptional(resourceLocation).map(entityType -> Component.translatable(entityType.getDescriptionId()).withStyle(ChatFormatting.GRAY));
         }
         return Optional.empty();
     }

@@ -11,7 +11,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
@@ -199,7 +199,7 @@ extends LootItemConditionalFunction {
         @Override
         public void serialize(JsonObject jsonObject, ApplyBonusCount applyBonusCount, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, applyBonusCount, jsonSerializationContext);
-            jsonObject.addProperty("enchantment", Registry.ENCHANTMENT.getKey(applyBonusCount.enchantment).toString());
+            jsonObject.addProperty("enchantment", BuiltInRegistries.ENCHANTMENT.getKey(applyBonusCount.enchantment).toString());
             jsonObject.addProperty("formula", applyBonusCount.formula.getType().toString());
             JsonObject jsonObject2 = new JsonObject();
             applyBonusCount.formula.serializeParams(jsonObject2, jsonSerializationContext);
@@ -211,7 +211,7 @@ extends LootItemConditionalFunction {
         @Override
         public ApplyBonusCount deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "enchantment"));
-            Enchantment enchantment = Registry.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
+            Enchantment enchantment = BuiltInRegistries.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "formula"));
             FormulaDeserializer formulaDeserializer = FORMULAS.get(resourceLocation2);
             if (formulaDeserializer == null) {

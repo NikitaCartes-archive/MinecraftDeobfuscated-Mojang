@@ -16,6 +16,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -26,9 +27,9 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class RegistrySynchronization {
     private static final Map<ResourceKey<? extends Registry<?>>, NetworkedRegistryData<?>> NETWORKABLE_REGISTRIES = Util.make(() -> {
         ImmutableMap.Builder<ResourceKey<Registry<?>>, NetworkedRegistryData<?>> builder = ImmutableMap.builder();
-        RegistrySynchronization.put(builder, Registry.BIOME_REGISTRY, Biome.NETWORK_CODEC);
-        RegistrySynchronization.put(builder, Registry.CHAT_TYPE_REGISTRY, ChatType.CODEC);
-        RegistrySynchronization.put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC);
+        RegistrySynchronization.put(builder, Registries.BIOME, Biome.NETWORK_CODEC);
+        RegistrySynchronization.put(builder, Registries.CHAT_TYPE, ChatType.CODEC);
+        RegistrySynchronization.put(builder, Registries.DIMENSION_TYPE, DimensionType.DIRECT_CODEC);
         return builder.build();
     });
     public static final Codec<RegistryAccess> NETWORK_CODEC = RegistrySynchronization.makeNetworkCodec();
@@ -56,9 +57,13 @@ public class RegistrySynchronization {
         return unboundedMapCodec.xmap(RegistryAccess.ImmutableRegistryAccess::new, registryAccess -> RegistrySynchronization.ownedNetworkableRegistries(registryAccess).collect(ImmutableMap.toImmutableMap(registryEntry -> registryEntry.key(), registryEntry -> registryEntry.value())));
     }
 
+    public static Stream<RegistryAccess.RegistryEntry<?>> networkedRegistries(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess) {
+        return RegistrySynchronization.ownedNetworkableRegistries(layeredRegistryAccess.getAccessFrom(RegistryLayer.WORLDGEN));
+    }
+
     public static Stream<RegistryAccess.RegistryEntry<?>> networkSafeRegistries(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess) {
         Stream<RegistryAccess.RegistryEntry<?>> stream = layeredRegistryAccess.getLayer(RegistryLayer.STATIC).registries();
-        Stream<RegistryAccess.RegistryEntry<?>> stream2 = RegistrySynchronization.ownedNetworkableRegistries(layeredRegistryAccess.getAccessFrom(RegistryLayer.WORLDGEN));
+        Stream<RegistryAccess.RegistryEntry<?>> stream2 = RegistrySynchronization.networkedRegistries(layeredRegistryAccess);
         return Stream.concat(stream2, stream);
     }
 

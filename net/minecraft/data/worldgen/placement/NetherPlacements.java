@@ -6,7 +6,7 @@ package net.minecraft.data.worldgen.placement;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
@@ -44,7 +44,7 @@ public class NetherPlacements {
     public static final ResourceKey<PlacedFeature> PATCH_FIRE = PlacementUtils.createKey("patch_fire");
 
     public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-        HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registry.CONFIGURED_FEATURE_REGISTRY);
+        HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
         Holder.Reference<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(NetherFeatures.DELTA);
         Holder.Reference<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(NetherFeatures.SMALL_BASALT_COLUMNS);
         Holder.Reference<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(NetherFeatures.LARGE_BASALT_COLUMNS);

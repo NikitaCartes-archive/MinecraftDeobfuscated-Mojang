@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class FireworkRocketItem
 extends Item {
+    public static final byte[] CRAFTABLE_DURATIONS = new byte[]{1, 2, 3};
     public static final String TAG_FIREWORKS = "Fireworks";
     public static final String TAG_EXPLOSION = "Explosion";
     public static final String TAG_EXPLOSIONS = "Explosions";
@@ -100,10 +101,14 @@ extends Item {
         }
     }
 
+    public static void setDuration(ItemStack itemStack, byte b) {
+        itemStack.getOrCreateTagElement(TAG_FIREWORKS).putByte(TAG_FLIGHT, b);
+    }
+
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack itemStack = new ItemStack(this);
-        itemStack.getOrCreateTag().putByte(TAG_FLIGHT, (byte)1);
+        FireworkRocketItem.setDuration(itemStack, (byte)1);
         return itemStack;
     }
 

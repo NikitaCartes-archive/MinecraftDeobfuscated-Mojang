@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
@@ -23,15 +23,15 @@ public class SnowyVillagePools {
     private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/snowy/terminators");
 
     public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-        HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
+        HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
         Holder.Reference<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.SPRUCE_VILLAGE);
         Holder.Reference<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PILE_SNOW_VILLAGE);
         Holder.Reference<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_ICE_VILLAGE);
-        HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+        HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
         Holder.Reference<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.STREET_SNOWY_OR_TAIGA);
         Holder.Reference<StructureProcessorList> holder5 = holderGetter2.getOrThrow(ProcessorLists.FARM_SNOWY);
         Holder.Reference<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_SNOWY);
-        HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder7 = holderGetter3.getOrThrow(Pools.EMPTY);
         Holder.Reference<StructureTemplatePool> holder8 = holderGetter3.getOrThrow(TERMINATORS_KEY);
         bootstapContext.register(START, new StructureTemplatePool(holder7, ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_1"), 100), Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_2"), 50), Pair.of(StructurePoolElement.legacy("village/snowy/town_centers/snowy_meeting_point_3"), 150), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_1"), 2), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_2"), 1), Pair.of(StructurePoolElement.legacy("village/snowy/zombie/town_centers/snowy_meeting_point_3"), 3)), StructureTemplatePool.Projection.RIGID));

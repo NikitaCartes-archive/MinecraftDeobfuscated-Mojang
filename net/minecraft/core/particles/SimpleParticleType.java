@@ -6,9 +6,9 @@ package net.minecraft.core.particles;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class SimpleParticleType
@@ -57,7 +57,7 @@ implements ParticleOptions {
 
     @Override
     public String writeToString() {
-        return Registry.PARTICLE_TYPE.getKey(this).toString();
+        return BuiltInRegistries.PARTICLE_TYPE.getKey(this).toString();
     }
 
     public /* synthetic */ ParticleType getType() {

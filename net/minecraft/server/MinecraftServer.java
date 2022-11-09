@@ -67,6 +67,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.ChatDecorator;
@@ -278,7 +279,7 @@ AutoCloseable {
         super("Server");
         this.registries = worldStem.registries();
         this.worldData = worldStem.worldData();
-        if (!this.registries.compositeAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY).containsKey(LevelStem.OVERWORLD)) {
+        if (!this.registries.compositeAccess().registryOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
             throw new IllegalStateException("Missing Overworld dimension data");
         }
         this.proxy = proxy;
@@ -294,7 +295,7 @@ AutoCloseable {
         this.playerDataStorage = levelStorageAccess.createPlayerStorage();
         this.fixerUpper = dataFixer;
         this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-        HolderLookup<Block> holderGetter = this.registries.compositeAccess().registryOrThrow(Registry.BLOCK_REGISTRY).asLookup().filterFeatures(this.worldData.enabledFeatures());
+        HolderLookup<Block> holderGetter = this.registries.compositeAccess().registryOrThrow(Registries.BLOCK).asLookup().filterFeatures(this.worldData.enabledFeatures());
         this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderGetter);
         this.serverThread = thread;
         this.executor = Util.backgroundExecutor();
@@ -335,7 +336,7 @@ AutoCloseable {
     protected void createLevels(ChunkProgressListener chunkProgressListener) {
         ServerLevelData serverLevelData = this.worldData.overworldData();
         boolean bl = this.worldData.isDebugWorld();
-        Registry<LevelStem> registry = this.registries.compositeAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY);
+        Registry<LevelStem> registry = this.registries.compositeAccess().registryOrThrow(Registries.LEVEL_STEM);
         WorldOptions worldOptions = this.worldData.worldGenOptions();
         long l = worldOptions.seed();
         long m = BiomeManager.obfuscateSeed(l);
@@ -372,7 +373,7 @@ AutoCloseable {
         for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
             ResourceKey<LevelStem> resourceKey = entry.getKey();
             if (resourceKey == LevelStem.OVERWORLD) continue;
-            ResourceKey<Level> resourceKey2 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey.location());
+            ResourceKey<Level> resourceKey2 = ResourceKey.create(Registries.DIMENSION, resourceKey.location());
             DerivedLevelData derivedLevelData = new DerivedLevelData(this.worldData, serverLevelData);
             ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, resourceKey2, entry.getValue(), chunkProgressListener, bl, m, ImmutableList.of(), false);
             worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
@@ -414,7 +415,7 @@ AutoCloseable {
             k += m;
         }
         if (bl) {
-            serverLevel.registryAccess().registry(Registry.CONFIGURED_FEATURE_REGISTRY).flatMap(registry -> registry.getHolder(MiscOverworldFeatures.BONUS_CHEST)).ifPresent(reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())));
+            serverLevel.registryAccess().registry(Registries.CONFIGURED_FEATURE).flatMap(registry -> registry.getHolder(MiscOverworldFeatures.BONUS_CHEST)).ifPresent(reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())));
         }
     }
 

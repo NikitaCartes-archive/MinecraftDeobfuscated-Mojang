@@ -29,6 +29,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
@@ -78,7 +79,7 @@ public class WorldOpenFlows {
         try {
             WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, false);
             WorldStem worldStem = this.loadWorldDataBlocking(packConfig, dataLoadContext -> {
-                WorldDimensions.Complete complete = ((WorldDimensions)function.apply(dataLoadContext.datapackWorldgen())).bake(dataLoadContext.datapackDimensions().registryOrThrow(Registry.LEVEL_STEM_REGISTRY));
+                WorldDimensions.Complete complete = ((WorldDimensions)function.apply(dataLoadContext.datapackWorldgen())).bake(dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM));
                 return new WorldLoader.DataLoadOutput<PrimaryLevelData>(new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), complete.lifecycle()), complete.dimensionsRegistryAccess());
             }, WorldStem::new);
             this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
@@ -110,8 +111,8 @@ public class WorldOpenFlows {
         WorldLoader.PackConfig packConfig = this.getPackConfigFromLevelData(levelStorageAccess, bl, packRepository);
         return this.loadWorldDataBlocking(packConfig, dataLoadContext -> {
             RegistryOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
-            Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registry.LEVEL_STEM_REGISTRY);
-            Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allElementsLifecycle());
+            Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
+            Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
             if (pair == null) {
                 throw new IllegalStateException("Failed to load world");
             }
@@ -127,8 +128,8 @@ public class WorldOpenFlows {
         WorldLoader.PackConfig packConfig = this.getPackConfigFromLevelData(levelStorageAccess, false, packRepository);
         return this.loadWorldDataBlocking(packConfig, dataLoadContext -> {
             RegistryOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
-            Registry<LevelStem> registry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()).freeze();
-            Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allElementsLifecycle());
+            Registry<LevelStem> registry = new MappedRegistry<LevelStem>(Registries.LEVEL_STEM, Lifecycle.stable()).freeze();
+            Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
             if (pair == null) {
                 throw new IllegalStateException("Failed to load world");
             }

@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -138,6 +138,7 @@ StackedContentsCompatible {
         AbstractFurnaceBlockEntity.add(map, Items.COAL, 1600);
         AbstractFurnaceBlockEntity.add(map, Items.CHARCOAL, 1600);
         AbstractFurnaceBlockEntity.add(map, ItemTags.LOGS, 300);
+        AbstractFurnaceBlockEntity.add(map, ItemTags.BAMBOO_BLOCKS, 300);
         AbstractFurnaceBlockEntity.add(map, ItemTags.PLANKS, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.BAMBOO_MOSAIC, 300);
         AbstractFurnaceBlockEntity.add(map, ItemTags.WOODEN_STAIRS, 300);
@@ -198,7 +199,7 @@ StackedContentsCompatible {
     }
 
     private static void add(Map<Item, Integer> map, TagKey<Item> tagKey, int i) {
-        for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(tagKey)) {
+        for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(tagKey)) {
             if (AbstractFurnaceBlockEntity.isNeverAFurnaceFuel(holder.value())) continue;
             map.put(holder.value(), i);
         }

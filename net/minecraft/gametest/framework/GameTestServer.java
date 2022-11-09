@@ -21,6 +21,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestBatch;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.GameTestRunner;
@@ -82,8 +83,8 @@ extends MinecraftServer {
             LOGGER.debug("Starting resource loading");
             Stopwatch stopwatch = Stopwatch.createStarted();
             WorldStem worldStem = (WorldStem)Util.blockUntilDone(executor -> WorldLoader.load(initConfig, dataLoadContext -> {
-                Registry<LevelStem> registry = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()).freeze();
-                WorldDimensions.Complete complete = dataLoadContext.datapackWorldgen().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions().bake(registry);
+                Registry<LevelStem> registry = new MappedRegistry<LevelStem>(Registries.LEVEL_STEM, Lifecycle.stable()).freeze();
+                WorldDimensions.Complete complete = dataLoadContext.datapackWorldgen().registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions().bake(registry);
                 return new WorldLoader.DataLoadOutput<PrimaryLevelData>(new PrimaryLevelData(levelSettings, WORLD_OPTIONS, complete.specialWorldProperty(), complete.lifecycle()), complete.dimensionsRegistryAccess());
             }, WorldStem::new, Util.backgroundExecutor(), executor)).get();
             stopwatch.stop();

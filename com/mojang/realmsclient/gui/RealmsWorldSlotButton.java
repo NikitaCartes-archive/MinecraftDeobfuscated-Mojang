@@ -40,7 +40,7 @@ extends Button {
     private State state;
 
     public RealmsWorldSlotButton(int i, int j, int k, int l, Supplier<RealmsServer> supplier, Consumer<Component> consumer, int m, Button.OnPress onPress) {
-        super(i, j, k, l, CommonComponents.EMPTY, onPress, NO_TOOLTIP, DEFAULT_NARRATION);
+        super(i, j, k, l, CommonComponents.EMPTY, onPress, DEFAULT_NARRATION);
         this.serverDataProvider = supplier;
         this.slotIndex = m;
         this.toolTipSetter = consumer;

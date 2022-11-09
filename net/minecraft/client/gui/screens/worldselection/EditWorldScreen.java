@@ -19,10 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -83,7 +83,7 @@ extends Screen {
             LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
             Path path = levelStorageSource.getBackupPath();
             try {
-                Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath(new LinkOption[0]) : path, new FileAttribute[0]);
+                FileUtil.createDirectoriesSafe(path);
             } catch (IOException iOException) {
                 throw new RuntimeException(iOException);
             }

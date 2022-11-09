@@ -12,21 +12,18 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.TooltipAccessor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class CycleButton<T>
-extends AbstractButton
-implements TooltipAccessor {
+extends AbstractButton {
     static final BooleanSupplier DEFAULT_ALT_LIST_SELECTOR = Screen::hasAltDown;
     private static final List<Boolean> BOOLEAN_OPTIONS = ImmutableList.of(Boolean.TRUE, Boolean.FALSE);
     private final Component name;
@@ -36,8 +33,8 @@ implements TooltipAccessor {
     private final Function<T, Component> valueStringifier;
     private final Function<CycleButton<T>, MutableComponent> narrationProvider;
     private final OnValueChange<T> onValueChange;
-    private final OptionInstance.TooltipSupplier<T> tooltipSupplier;
     private final boolean displayOnlyValue;
+    private final OptionInstance.TooltipSupplier<T> tooltipSupplier;
 
     CycleButton(int i, int j, int k, int l, Component component, Component component2, int m, T object, ValueListSupplier<T> valueListSupplier, Function<T, Component> function, Function<CycleButton<T>, MutableComponent> function2, OnValueChange<T> onValueChange, OptionInstance.TooltipSupplier<T> tooltipSupplier, boolean bl) {
         super(i, j, k, l, component);
@@ -48,8 +45,13 @@ implements TooltipAccessor {
         this.valueStringifier = function;
         this.narrationProvider = function2;
         this.onValueChange = onValueChange;
-        this.tooltipSupplier = tooltipSupplier;
         this.displayOnlyValue = bl;
+        this.tooltipSupplier = tooltipSupplier;
+        this.updateTooltip();
+    }
+
+    private void updateTooltip() {
+        this.setTooltip(this.tooltipSupplier.apply(this.value));
     }
 
     @Override
@@ -97,6 +99,7 @@ implements TooltipAccessor {
         Component component = this.createLabelForValue(object);
         this.setMessage(component);
         this.value = object;
+        this.updateTooltip();
     }
 
     private Component createLabelForValue(T object) {
@@ -117,7 +120,7 @@ implements TooltipAccessor {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
         narrationElementOutput.add(NarratedElementType.TITLE, (Component)this.createNarrationMessage());
         if (this.active) {
             T object = this.getCycledValue(1);
@@ -132,11 +135,6 @@ implements TooltipAccessor {
 
     public MutableComponent createDefaultNarrationMessage() {
         return CycleButton.wrapDefaultNarrationMessage(this.displayOnlyValue ? this.createFullName(this.value) : this.getMessage());
-    }
-
-    @Override
-    public List<FormattedCharSequence> getTooltip() {
-        return (List)this.tooltipSupplier.apply(this.value);
     }
 
     public static <T> Builder<T> builder(Function<T, Component> function) {
@@ -206,7 +204,7 @@ implements TooltipAccessor {
         @Nullable
         private T initialValue;
         private final Function<T, Component> valueStringifier;
-        private OptionInstance.TooltipSupplier<T> tooltipSupplier = object -> ImmutableList.of();
+        private OptionInstance.TooltipSupplier<T> tooltipSupplier = object -> null;
         private Function<CycleButton<T>, MutableComponent> narrationProvider = CycleButton::createDefaultNarrationMessage;
         private ValueListSupplier<T> values = ValueListSupplier.create(ImmutableList.of());
         private boolean displayOnlyValue;

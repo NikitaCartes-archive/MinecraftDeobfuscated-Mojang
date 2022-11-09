@@ -36,6 +36,8 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -81,7 +83,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class ChunkGenerator {
-    public static final Codec<ChunkGenerator> CODEC = Registry.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
+    public static final Codec<ChunkGenerator> CODEC = BuiltInRegistries.CHUNK_GENERATOR.byNameCodec().dispatchStable(ChunkGenerator::codec, Function.identity());
     protected final BiomeSource biomeSource;
     private final Supplier<List<FeatureSorter.StepFeatureData>> featuresPerStep;
     private final Function<Holder<Biome>, BiomeGenerationSettings> generationSettingsGetter;
@@ -103,7 +105,7 @@ public abstract class ChunkGenerator {
     }
 
     public Optional<ResourceKey<Codec<? extends ChunkGenerator>>> getTypeNameForDataFixer() {
-        return Registry.CHUNK_GENERATOR.getResourceKey(this.codec());
+        return BuiltInRegistries.CHUNK_GENERATOR.getResourceKey(this.codec());
     }
 
     public CompletableFuture<ChunkAccess> createBiomes(Executor executor, RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunkAccess) {
@@ -239,7 +241,7 @@ public abstract class ChunkGenerator {
         }
         SectionPos sectionPos = SectionPos.of(chunkPos2, worldGenLevel.getMinSection());
         BlockPos blockPos = sectionPos.origin();
-        Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
         Map<Integer, List<Structure>> map = registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
         List<FeatureSorter.StepFeatureData> list = this.featuresPerStep.get();
         WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
@@ -254,7 +256,7 @@ public abstract class ChunkGenerator {
         set.retainAll(this.biomeSource.possibleBiomes());
         int i = list.size();
         try {
-            Registry<PlacedFeature> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY);
+            Registry<PlacedFeature> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
             int j = Math.max(GenerationStep.Decoration.values().length, i);
             for (int k = 0; k < j; ++k) {
                 int m = 0;
@@ -436,9 +438,9 @@ public abstract class ChunkGenerator {
                     } catch (Exception exception) {
                         CrashReport crashReport = CrashReport.forThrowable(exception, "Generating structure reference");
                         CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
-                        Optional<Registry<Structure>> optional = worldGenLevel.registryAccess().registry(Registry.STRUCTURE_REGISTRY);
+                        Optional<Registry<Structure>> optional = worldGenLevel.registryAccess().registry(Registries.STRUCTURE);
                         crashReportCategory.setDetail("Id", () -> optional.map(registry -> registry.getKey(structureStart.getStructure()).toString()).orElse("UNKNOWN"));
-                        crashReportCategory.setDetail("Name", () -> Registry.STRUCTURE_TYPES.getKey(structureStart.getStructure().type()).toString());
+                        crashReportCategory.setDetail("Name", () -> BuiltInRegistries.STRUCTURE_TYPE.getKey(structureStart.getStructure().type()).toString());
                         crashReportCategory.setDetail("Class", () -> structureStart.getStructure().getClass().getCanonicalName());
                         throw new ReportedException(crashReport);
                     }

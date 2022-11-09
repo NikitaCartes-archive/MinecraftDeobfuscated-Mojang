@@ -21,7 +21,7 @@ extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
     }
 
     public static AbstractWidget width(int i) {

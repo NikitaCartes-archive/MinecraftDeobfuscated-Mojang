@@ -30,6 +30,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -55,7 +56,7 @@ extends Screen {
     static final Logger LOGGER = LogUtils.getLogger();
     private static final int LIST_WIDTH = 200;
     private static final Component DRAG_AND_DROP = Component.translatable("pack.dropInfo").withStyle(ChatFormatting.GRAY);
-    static final Component DIRECTORY_BUTTON_TOOLTIP = Component.translatable("pack.folderInfo");
+    private static final Component DIRECTORY_BUTTON_TOOLTIP = Component.translatable("pack.folderInfo");
     private static final int RELOAD_COOLDOWN = 20;
     private static final ResourceLocation DEFAULT_ICON = new ResourceLocation("textures/misc/unknown_pack.png");
     private final PackSelectionModel model;
@@ -98,18 +99,7 @@ extends Screen {
     @Override
     protected void init() {
         this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 + 4, this.height - 48, 150, 20).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("pack.openFolder"), button -> Util.getPlatform().openUri(this.packDir.toUri())).bounds(this.width / 2 - 154, this.height - 48, 150, 20).tooltip(new Button.OnTooltip(){
-
-            @Override
-            public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-                PackSelectionScreen.this.renderTooltip(poseStack, DIRECTORY_BUTTON_TOOLTIP, i, j);
-            }
-
-            @Override
-            public void narrateTooltip(Consumer<Component> consumer) {
-                consumer.accept(DIRECTORY_BUTTON_TOOLTIP);
-            }
-        }).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("pack.openFolder"), button -> Util.getPlatform().openUri(this.packDir.toUri())).bounds(this.width / 2 - 154, this.height - 48, 150, 20).tooltip(Tooltip.create(DIRECTORY_BUTTON_TOOLTIP)).build());
         this.availablePackList = new TransferableSelectionList(this.minecraft, 200, this.height, Component.translatable("pack.available.title"));
         this.availablePackList.setLeftPos(this.width / 2 - 4 - 200);
         this.addWidget(this.availablePackList);

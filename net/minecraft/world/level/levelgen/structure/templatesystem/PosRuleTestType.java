@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.structure.templatesystem.AxisAlignedLinearPosTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LinearPosTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosAlwaysTrueTest;
@@ -18,7 +19,7 @@ public interface PosRuleTestType<P extends PosRuleTest> {
     public Codec<P> codec();
 
     public static <P extends PosRuleTest> PosRuleTestType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.POS_RULE_TEST, string, () -> codec);
+        return Registry.register(BuiltInRegistries.POS_RULE_TEST, string, () -> codec);
     }
 }
 

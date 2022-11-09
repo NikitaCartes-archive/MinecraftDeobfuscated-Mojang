@@ -22,10 +22,10 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -195,7 +195,7 @@ extends LivingEntity {
             return false;
         }
         ItemStack itemStack = this.getMainHandItem();
-        return itemStack.isEmpty() || !itemStack.hasAdventureModeBreakTagForBlock(level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), new BlockInWorld(level, blockPos, false));
+        return itemStack.isEmpty() || !itemStack.hasAdventureModeBreakTagForBlock(level.registryAccess().registryOrThrow(Registries.BLOCK), new BlockInWorld(level, blockPos, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -1529,7 +1529,7 @@ extends LivingEntity {
         }
         BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
         BlockInWorld blockInWorld = new BlockInWorld(this.level, blockPos2, false);
-        return itemStack.hasAdventureModePlaceTagForBlock(this.level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY), blockInWorld);
+        return itemStack.hasAdventureModePlaceTagForBlock(this.level.registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld);
     }
 
     @Override

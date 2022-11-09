@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.structure;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
@@ -29,7 +29,7 @@ public interface BuiltinStructureSets {
     public static final ResourceKey<StructureSet> STRONGHOLDS = BuiltinStructureSets.register("strongholds");
 
     private static ResourceKey<StructureSet> register(String string) {
-        return ResourceKey.create(Registry.STRUCTURE_SET_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.STRUCTURE_SET, new ResourceLocation(string));
     }
 }
 

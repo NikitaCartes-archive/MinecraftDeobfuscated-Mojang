@@ -10,10 +10,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -90,13 +90,13 @@ public class EntityDataSerializers {
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, ParticleOptions particleOptions) {
-            friendlyByteBuf.writeId(Registry.PARTICLE_TYPE, particleOptions.getType());
+            friendlyByteBuf.writeId(BuiltInRegistries.PARTICLE_TYPE, particleOptions.getType());
             particleOptions.writeToNetwork(friendlyByteBuf);
         }
 
         @Override
         public ParticleOptions read(FriendlyByteBuf friendlyByteBuf) {
-            return this.readParticle(friendlyByteBuf, friendlyByteBuf.readById(Registry.PARTICLE_TYPE));
+            return this.readParticle(friendlyByteBuf, friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE));
         }
 
         private <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {
@@ -158,14 +158,14 @@ public class EntityDataSerializers {
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, VillagerData villagerData) {
-            friendlyByteBuf.writeId(Registry.VILLAGER_TYPE, villagerData.getType());
-            friendlyByteBuf.writeId(Registry.VILLAGER_PROFESSION, villagerData.getProfession());
+            friendlyByteBuf.writeId(BuiltInRegistries.VILLAGER_TYPE, villagerData.getType());
+            friendlyByteBuf.writeId(BuiltInRegistries.VILLAGER_PROFESSION, villagerData.getProfession());
             friendlyByteBuf.writeVarInt(villagerData.getLevel());
         }
 
         @Override
         public VillagerData read(FriendlyByteBuf friendlyByteBuf) {
-            return new VillagerData(friendlyByteBuf.readById(Registry.VILLAGER_TYPE), friendlyByteBuf.readById(Registry.VILLAGER_PROFESSION), friendlyByteBuf.readVarInt());
+            return new VillagerData(friendlyByteBuf.readById(BuiltInRegistries.VILLAGER_TYPE), friendlyByteBuf.readById(BuiltInRegistries.VILLAGER_PROFESSION), friendlyByteBuf.readVarInt());
         }
 
         @Override
@@ -192,9 +192,9 @@ public class EntityDataSerializers {
         }
     };
     public static final EntityDataSerializer<Pose> POSE = EntityDataSerializer.simpleEnum(Pose.class);
-    public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.simpleId(Registry.CAT_VARIANT);
-    public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.simpleId(Registry.FROG_VARIANT);
-    public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.simpleId(Registry.PAINTING_VARIANT.asHolderIdMap());
+    public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.CAT_VARIANT);
+    public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.FROG_VARIANT);
+    public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.PAINTING_VARIANT.asHolderIdMap());
 
     public static void registerSerializer(EntityDataSerializer<?> entityDataSerializer) {
         SERIALIZERS.add(entityDataSerializer);

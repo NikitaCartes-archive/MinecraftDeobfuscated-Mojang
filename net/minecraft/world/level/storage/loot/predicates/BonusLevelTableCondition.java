@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -63,14 +63,14 @@ implements LootItemCondition {
     implements net.minecraft.world.level.storage.loot.Serializer<BonusLevelTableCondition> {
         @Override
         public void serialize(JsonObject jsonObject, BonusLevelTableCondition bonusLevelTableCondition, JsonSerializationContext jsonSerializationContext) {
-            jsonObject.addProperty("enchantment", Registry.ENCHANTMENT.getKey(bonusLevelTableCondition.enchantment).toString());
+            jsonObject.addProperty("enchantment", BuiltInRegistries.ENCHANTMENT.getKey(bonusLevelTableCondition.enchantment).toString());
             jsonObject.add("chances", jsonSerializationContext.serialize(bonusLevelTableCondition.values));
         }
 
         @Override
         public BonusLevelTableCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "enchantment"));
-            Enchantment enchantment = Registry.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
+            Enchantment enchantment = BuiltInRegistries.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
             float[] fs = GsonHelper.getAsObject(jsonObject, "chances", jsonDeserializationContext, float[].class);
             return new BonusLevelTableCondition(enchantment, fs);
         }

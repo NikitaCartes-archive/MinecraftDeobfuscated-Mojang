@@ -3,7 +3,7 @@
  */
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Instrument;
@@ -14,7 +14,7 @@ public interface InstrumentTags {
     public static final TagKey<Instrument> GOAT_HORNS = InstrumentTags.create("goat_horns");
 
     private static TagKey<Instrument> create(String string) {
-        return TagKey.create(Registry.INSTRUMENT_REGISTRY, new ResourceLocation(string));
+        return TagKey.create(Registries.INSTRUMENT, new ResourceLocation(string));
     }
 }
 

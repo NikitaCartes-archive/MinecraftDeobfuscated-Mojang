@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -69,7 +69,7 @@ public class ProcessorLists {
     public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_WALLS_DEGRADATION = ProcessorLists.createKey("ancient_city_walls_degradation");
 
     private static ResourceKey<StructureProcessorList> createKey(String string) {
-        return ResourceKey.create(Registry.PROCESSOR_LIST_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.PROCESSOR_LIST, new ResourceLocation(string));
     }
 
     private static void register(BootstapContext<StructureProcessorList> bootstapContext, ResourceKey<StructureProcessorList> resourceKey, List<StructureProcessor> list) {
@@ -77,7 +77,7 @@ public class ProcessorLists {
     }
 
     public static void bootstrap(BootstapContext<StructureProcessorList> bootstapContext) {
-        HolderGetter<Block> holderGetter = bootstapContext.lookup(Registry.BLOCK_REGISTRY);
+        HolderGetter<Block> holderGetter = bootstapContext.lookup(Registries.BLOCK);
         ProcessorRule processorRule = new ProcessorRule(new RandomBlockMatchTest(Blocks.BLACKSTONE, 0.01f), AlwaysTrueTest.INSTANCE, Blocks.GILDED_BLACKSTONE.defaultBlockState());
         ProcessorRule processorRule2 = new ProcessorRule(new RandomBlockMatchTest(Blocks.GILDED_BLACKSTONE, 0.5f), AlwaysTrueTest.INSTANCE, Blocks.BLACKSTONE.defaultBlockState());
         ProcessorLists.register(bootstapContext, EMPTY, ImmutableList.of());

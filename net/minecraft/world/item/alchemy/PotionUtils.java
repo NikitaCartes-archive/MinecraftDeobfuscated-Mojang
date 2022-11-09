@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.CommonComponents;
@@ -125,7 +125,7 @@ public class PotionUtils {
     }
 
     public static ItemStack setPotion(ItemStack itemStack, Potion potion) {
-        ResourceLocation resourceLocation = Registry.POTION.getKey(potion);
+        ResourceLocation resourceLocation = BuiltInRegistries.POTION.getKey(potion);
         if (potion == Potions.EMPTY) {
             itemStack.removeTagKey(TAG_POTION);
         } else {
@@ -148,12 +148,15 @@ public class PotionUtils {
     }
 
     public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
-        List<MobEffectInstance> list2 = PotionUtils.getMobEffects(itemStack);
+        PotionUtils.addPotionTooltip(PotionUtils.getMobEffects(itemStack), list, f);
+    }
+
+    public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> list2, float f) {
         ArrayList<Pair<Attribute, AttributeModifier>> list3 = Lists.newArrayList();
-        if (list2.isEmpty()) {
-            list.add(NO_EFFECT);
+        if (list.isEmpty()) {
+            list2.add(NO_EFFECT);
         } else {
-            for (MobEffectInstance mobEffectInstance : list2) {
+            for (MobEffectInstance mobEffectInstance : list) {
                 MutableComponent mutableComponent = Component.translatable(mobEffectInstance.getDescriptionId());
                 MobEffect mobEffect = mobEffectInstance.getEffect();
                 Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
@@ -170,22 +173,22 @@ public class PotionUtils {
                 if (mobEffectInstance.getDuration() > 20) {
                     mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
                 }
-                list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
+                list2.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
             }
         }
         if (!list3.isEmpty()) {
-            list.add(CommonComponents.EMPTY);
-            list.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
+            list2.add(CommonComponents.EMPTY);
+            list2.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
             for (Pair pair : list3) {
                 AttributeModifier attributeModifier3 = (AttributeModifier)pair.getSecond();
                 double d = attributeModifier3.getAmount();
                 double e = attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? attributeModifier3.getAmount() * 100.0 : attributeModifier3.getAmount();
                 if (d > 0.0) {
-                    list.add(Component.translatable("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.BLUE));
+                    list2.add(Component.translatable("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.BLUE));
                     continue;
                 }
                 if (!(d < 0.0)) continue;
-                list.add(Component.translatable("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.RED));
+                list2.add(Component.translatable("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), Component.translatable(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.RED));
             }
         }
     }

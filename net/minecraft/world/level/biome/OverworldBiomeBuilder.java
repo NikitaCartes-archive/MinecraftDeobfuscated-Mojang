@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.resources.ResourceKey;
@@ -77,7 +77,7 @@ public final class OverworldBiomeBuilder {
     private void addDebugBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer) {
         CubicSpline cubicSpline2;
         HolderLookup.Provider provider = VanillaRegistries.createLookup();
-        HolderLookup.RegistryLookup<DensityFunction> holderGetter = provider.lookupOrThrow(Registry.DENSITY_FUNCTION_REGISTRY);
+        HolderLookup.RegistryLookup<DensityFunction> holderGetter = provider.lookupOrThrow(Registries.DENSITY_FUNCTION);
         DensityFunctions.Spline.Coordinate coordinate = new DensityFunctions.Spline.Coordinate(holderGetter.getOrThrow(NoiseRouterData.CONTINENTS));
         DensityFunctions.Spline.Coordinate coordinate2 = new DensityFunctions.Spline.Coordinate(holderGetter.getOrThrow(NoiseRouterData.EROSION));
         DensityFunctions.Spline.Coordinate coordinate3 = new DensityFunctions.Spline.Coordinate(holderGetter.getOrThrow(NoiseRouterData.RIDGES_FOLDED));

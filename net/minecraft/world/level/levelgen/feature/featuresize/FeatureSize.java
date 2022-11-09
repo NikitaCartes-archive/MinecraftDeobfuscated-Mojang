@@ -7,11 +7,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.OptionalInt;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 
 public abstract class FeatureSize {
-    public static final Codec<FeatureSize> CODEC = Registry.FEATURE_SIZE_TYPES.byNameCodec().dispatch(FeatureSize::type, FeatureSizeType::codec);
+    public static final Codec<FeatureSize> CODEC = BuiltInRegistries.FEATURE_SIZE_TYPE.byNameCodec().dispatch(FeatureSize::type, FeatureSizeType::codec);
     protected static final int MAX_WIDTH = 16;
     protected final OptionalInt minClippedHeight;
 

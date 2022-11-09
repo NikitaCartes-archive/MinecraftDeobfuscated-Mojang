@@ -61,13 +61,18 @@ extends Behavior<Warden> {
     }
 
     @Override
+    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        return this.canStillUse(serverLevel, (Warden)livingEntity, l);
+    }
+
+    @Override
     protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.stop(serverLevel, (Warden)livingEntity, l);
     }
 
     @Override
-    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (Warden)livingEntity, l);
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (Warden)livingEntity, l);
     }
 }
 

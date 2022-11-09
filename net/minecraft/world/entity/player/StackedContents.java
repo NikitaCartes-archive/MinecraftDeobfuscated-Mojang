@@ -14,7 +14,7 @@ import it.unimi.dsi.fastutil.ints.IntListIterator;
 import java.util.BitSet;
 import java.util.List;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -44,7 +44,7 @@ public class StackedContents {
     }
 
     public static int getStackingIndex(ItemStack itemStack) {
-        return Registry.ITEM.getId(itemStack.getItem());
+        return BuiltInRegistries.ITEM.getId(itemStack.getItem());
     }
 
     boolean has(int i) {

@@ -36,7 +36,6 @@ import com.mojang.realmsclient.util.RealmsPersistence;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.task.GetServerDetailsTask;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -129,8 +128,6 @@ extends RealmsScreen {
     private Button renewButton;
     private Button configureButton;
     private Button leaveButton;
-    @Nullable
-    private List<Component> toolTip;
     private List<RealmsServer> realmsServers = ImmutableList.of();
     volatile int numberOfPendingInvites;
     int animTick;
@@ -657,7 +654,6 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.hoveredElement = HoveredElement.NONE;
-        this.toolTip = null;
         this.renderBackground(poseStack);
         this.realmSelectionList.render(poseStack, i, j, f);
         this.drawRealmsLogo(poseStack, this.width / 2 - 50, 7);
@@ -681,9 +677,6 @@ extends RealmsScreen {
             this.showingPopup = false;
         }
         super.render(poseStack, i, j, f);
-        if (this.toolTip != null) {
-            this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
-        }
         if (this.trialsAvailable && !this.createdTrial && this.shouldShowPopup()) {
             RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -862,7 +855,7 @@ extends RealmsScreen {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
-            this.setTooltip(SERVER_EXPIRED_TOOLTIP);
+            this.setTooltipForNextRenderPass(SERVER_EXPIRED_TOOLTIP);
         }
     }
 
@@ -876,11 +869,11 @@ extends RealmsScreen {
         }
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
             if (m <= 0) {
-                this.setTooltip(SERVER_EXPIRES_SOON_TOOLTIP);
+                this.setTooltipForNextRenderPass(SERVER_EXPIRES_SOON_TOOLTIP);
             } else if (m == 1) {
-                this.setTooltip(SERVER_EXPIRES_IN_DAY_TOOLTIP);
+                this.setTooltipForNextRenderPass(SERVER_EXPIRES_IN_DAY_TOOLTIP);
             } else {
-                this.setTooltip(Component.translatable("mco.selectServer.expires.days", m));
+                this.setTooltipForNextRenderPass(Component.translatable("mco.selectServer.expires.days", m));
             }
         }
     }
@@ -890,7 +883,7 @@ extends RealmsScreen {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
-            this.setTooltip(SERVER_OPEN_TOOLTIP);
+            this.setTooltipForNextRenderPass(SERVER_OPEN_TOOLTIP);
         }
     }
 
@@ -899,7 +892,7 @@ extends RealmsScreen {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
-            this.setTooltip(SERVER_CLOSED_TOOLTIP);
+            this.setTooltipForNextRenderPass(SERVER_CLOSED_TOOLTIP);
         }
     }
 
@@ -913,7 +906,7 @@ extends RealmsScreen {
         float f = bl ? 28.0f : 0.0f;
         GuiComponent.blit(poseStack, i, j, f, 0.0f, 28, 28, 56, 28);
         if (bl) {
-            this.setTooltip(LEAVE_SERVER_TOOLTIP);
+            this.setTooltipForNextRenderPass(LEAVE_SERVER_TOOLTIP);
             this.hoveredElement = HoveredElement.LEAVE;
         }
     }
@@ -928,32 +921,8 @@ extends RealmsScreen {
         float f = bl ? 28.0f : 0.0f;
         GuiComponent.blit(poseStack, i, j, f, 0.0f, 28, 28, 56, 28);
         if (bl) {
-            this.setTooltip(CONFIGURE_SERVER_TOOLTIP);
+            this.setTooltipForNextRenderPass(CONFIGURE_SERVER_TOOLTIP);
             this.hoveredElement = HoveredElement.CONFIGURE;
-        }
-    }
-
-    protected void renderMousehoverTooltip(PoseStack poseStack, List<Component> list, int i, int j) {
-        if (list.isEmpty()) {
-            return;
-        }
-        int k = 0;
-        int l = 0;
-        for (Component component : list) {
-            int m = this.font.width(component);
-            if (m <= l) continue;
-            l = m;
-        }
-        int n = i - l - 5;
-        int o = j;
-        if (n < 0) {
-            n = i + 12;
-        }
-        for (Component component2 : list) {
-            int p = o - (k == 0 ? 3 : 0) + k;
-            this.fillGradient(poseStack, n - 3, p, n + l + 3, o + 8 + 3 + k, -1073741824, -1073741824);
-            this.font.drawShadow(poseStack, component2, (float)n, (float)(o + k), 0xFFFFFF);
-            k += 10;
         }
     }
 
@@ -972,7 +941,7 @@ extends RealmsScreen {
         float f = bl5 ? 20.0f : 0.0f;
         GuiComponent.blit(poseStack, k, l, f, 0.0f, 20, 20, 40, 20);
         if (bl4 && bl3) {
-            this.setTooltip(NEWS_TOOLTIP);
+            this.setTooltipForNextRenderPass(NEWS_TOOLTIP);
         }
         if (bl && bl3) {
             int m = bl4 ? 0 : (int)(Math.max(0.0f, Math.max(Mth.sin((float)(10 + this.animTick) * 0.57f), Mth.cos((float)this.animTick * 0.35f))) * -6.0f);
@@ -1013,10 +982,6 @@ extends RealmsScreen {
     public static void updateTeaserImages(ResourceManager resourceManager) {
         Set<ResourceLocation> collection = resourceManager.listResources("textures/gui/images", resourceLocation -> resourceLocation.getPath().endsWith(".png")).keySet();
         teaserImages = collection.stream().filter(resourceLocation -> resourceLocation.getNamespace().equals("realms")).toList();
-    }
-
-    void setTooltip(Component ... components) {
-        this.toolTip = Arrays.asList(components);
     }
 
     private void pendingButtonPress(Button button) {
@@ -1137,7 +1102,7 @@ extends RealmsScreen {
                     realmsMainScreen.hasUnreadNews = false;
                     RealmsPersistence.writeFile(realmsPersistenceData);
                 }
-            }, NO_TOOLTIP, DEFAULT_NARRATION);
+            }, DEFAULT_NARRATION);
         }
 
         @Override
@@ -1150,7 +1115,7 @@ extends RealmsScreen {
     class PendingInvitesButton
     extends Button {
         public PendingInvitesButton() {
-            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, CommonComponents.EMPTY, RealmsMainScreen.this::pendingButtonPress, NO_TOOLTIP, DEFAULT_NARRATION);
+            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, CommonComponents.EMPTY, RealmsMainScreen.this::pendingButtonPress, DEFAULT_NARRATION);
         }
 
         public void tick() {
@@ -1167,7 +1132,7 @@ extends RealmsScreen {
     class CloseButton
     extends Button {
         public CloseButton() {
-            super(RealmsMainScreen.this.popupX0() + 4, RealmsMainScreen.this.popupY0() + 4, 12, 12, Component.translatable("mco.selectServer.close"), button -> RealmsMainScreen.this.onClosePopup(), NO_TOOLTIP, DEFAULT_NARRATION);
+            super(RealmsMainScreen.this.popupX0() + 4, RealmsMainScreen.this.popupY0() + 4, 12, 12, Component.translatable("mco.selectServer.close"), button -> RealmsMainScreen.this.onClosePopup(), DEFAULT_NARRATION);
         }
 
         @Override
@@ -1177,7 +1142,7 @@ extends RealmsScreen {
             float g = this.isHoveredOrFocused() ? 12.0f : 0.0f;
             CloseButton.blit(poseStack, this.getX(), this.getY(), 0.0f, g, 12, 12, 12, 24);
             if (this.isMouseOver(i, j)) {
-                RealmsMainScreen.this.setTooltip(this.getMessage());
+                RealmsMainScreen.this.setTooltipForNextRenderPass(this.getMessage());
             }
         }
     }
@@ -1304,7 +1269,7 @@ extends RealmsScreen {
                 String string = ChatFormatting.GRAY + realmsServer.serverPing.nrOfPlayers;
                 RealmsMainScreen.this.font.draw(poseStack, string, (float)(i + 207 - RealmsMainScreen.this.font.width(string)), (float)(j + 3), 0x808080);
                 if (k >= i + 207 - RealmsMainScreen.this.font.width(string) && k <= i + 207 && l >= j + 1 && l <= j + 10 && l < RealmsMainScreen.this.height - 40 && l > 32 && !RealmsMainScreen.this.shouldShowPopup()) {
-                    RealmsMainScreen.this.setTooltip(Component.literal(realmsServer.serverPing.playerList));
+                    RealmsMainScreen.this.setTooltipForNextRenderPass(Component.literal(realmsServer.serverPing.playerList));
                 }
             }
             if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.expired) {

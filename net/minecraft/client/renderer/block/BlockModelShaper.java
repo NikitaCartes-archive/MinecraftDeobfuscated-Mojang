@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -45,7 +45,7 @@ public class BlockModelShaper {
     }
 
     public static ModelResourceLocation stateToModelLocation(BlockState blockState) {
-        return BlockModelShaper.stateToModelLocation(Registry.BLOCK.getKey(blockState.getBlock()), blockState);
+        return BlockModelShaper.stateToModelLocation(BuiltInRegistries.BLOCK.getKey(blockState.getBlock()), blockState);
     }
 
     public static ModelResourceLocation stateToModelLocation(ResourceLocation resourceLocation, BlockState blockState) {

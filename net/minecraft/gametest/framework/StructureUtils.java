@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.StructureUpdater;
@@ -275,7 +275,7 @@ public class StructureUtils {
     private static void clearBlock(int i, BlockPos blockPos, ServerLevel serverLevel) {
         BlockState blockState = null;
         RegistryAccess registryAccess = serverLevel.registryAccess();
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault(registryAccess.lookupOrThrow(Registry.BIOME_REGISTRY), registryAccess.lookupOrThrow(Registry.STRUCTURE_SET_REGISTRY), registryAccess.lookupOrThrow(Registry.PLACED_FEATURE_REGISTRY));
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault(registryAccess.lookupOrThrow(Registries.BIOME), registryAccess.lookupOrThrow(Registries.STRUCTURE_SET), registryAccess.lookupOrThrow(Registries.PLACED_FEATURE));
         List<BlockState> list = flatLevelGeneratorSettings.getLayers();
         int j = blockPos.getY() - serverLevel.getMinBuildHeight();
         if (blockPos.getY() < i && j > 0 && j <= list.size()) {

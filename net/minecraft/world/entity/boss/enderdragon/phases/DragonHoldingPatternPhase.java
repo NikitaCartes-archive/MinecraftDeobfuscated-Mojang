@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -65,12 +64,9 @@ extends AbstractDragonPhaseInstance {
                 this.dragon.getPhaseManager().setPhase(EnderDragonPhase.LANDING_APPROACH);
                 return;
             }
-            double d = 64.0;
             Player player = this.dragon.level.getNearestPlayer(NEW_TARGET_TARGETING, this.dragon, (double)blockPos.getX(), (double)blockPos.getY(), blockPos.getZ());
-            if (player != null) {
-                d = blockPos.distToCenterSqr(player.position()) / 512.0;
-            }
-            if (player != null && (this.dragon.getRandom().nextInt(Mth.abs((int)d) + 2) == 0 || this.dragon.getRandom().nextInt(i + 2) == 0)) {
+            double d = player != null ? blockPos.distToCenterSqr(player.position()) / 512.0 : 64.0;
+            if (player != null && (this.dragon.getRandom().nextInt((int)(d + 2.0)) == 0 || this.dragon.getRandom().nextInt(i + 2) == 0)) {
                 this.strafePlayer(player);
                 return;
             }

@@ -13,8 +13,9 @@ import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -23,7 +24,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 
 public class MultifaceGrowthConfiguration
 implements FeatureConfiguration {
-    public static final Codec<MultifaceGrowthConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.BLOCK.byNameCodec().fieldOf("block")).flatXmap(MultifaceGrowthConfiguration::apply, DataResult::success).orElse((MultifaceBlock)Blocks.GLOW_LICHEN).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.placeBlock), ((MapCodec)Codec.intRange(1, 64).fieldOf("search_range")).orElse(10).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.searchRange), ((MapCodec)Codec.BOOL.fieldOf("can_place_on_floor")).orElse(false).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canPlaceOnFloor), ((MapCodec)Codec.BOOL.fieldOf("can_place_on_ceiling")).orElse(false).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canPlaceOnCeiling), ((MapCodec)Codec.BOOL.fieldOf("can_place_on_wall")).orElse(false).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canPlaceOnWall), ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("chance_of_spreading")).orElse(Float.valueOf(0.5f)).forGetter(multifaceGrowthConfiguration -> Float.valueOf(multifaceGrowthConfiguration.chanceOfSpreading)), ((MapCodec)RegistryCodecs.homogeneousList(Registry.BLOCK_REGISTRY).fieldOf("can_be_placed_on")).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canBePlacedOn)).apply((Applicative<MultifaceGrowthConfiguration, ?>)instance, MultifaceGrowthConfiguration::new));
+    public static final Codec<MultifaceGrowthConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block")).flatXmap(MultifaceGrowthConfiguration::apply, DataResult::success).orElse((MultifaceBlock)Blocks.GLOW_LICHEN).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.placeBlock), ((MapCodec)Codec.intRange(1, 64).fieldOf("search_range")).orElse(10).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.searchRange), ((MapCodec)Codec.BOOL.fieldOf("can_place_on_floor")).orElse(false).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canPlaceOnFloor), ((MapCodec)Codec.BOOL.fieldOf("can_place_on_ceiling")).orElse(false).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canPlaceOnCeiling), ((MapCodec)Codec.BOOL.fieldOf("can_place_on_wall")).orElse(false).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canPlaceOnWall), ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("chance_of_spreading")).orElse(Float.valueOf(0.5f)).forGetter(multifaceGrowthConfiguration -> Float.valueOf(multifaceGrowthConfiguration.chanceOfSpreading)), ((MapCodec)RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("can_be_placed_on")).forGetter(multifaceGrowthConfiguration -> multifaceGrowthConfiguration.canBePlacedOn)).apply((Applicative<MultifaceGrowthConfiguration, ?>)instance, MultifaceGrowthConfiguration::new));
     public final MultifaceBlock placeBlock;
     public final int searchRange;
     public final boolean canPlaceOnFloor;

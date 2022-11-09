@@ -11,7 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.HashSet;
 import java.util.Set;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -114,7 +114,7 @@ extends LootItemConditionalFunction {
         @Override
         public void serialize(JsonObject jsonObject, CopyBlockState copyBlockState, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, copyBlockState, jsonSerializationContext);
-            jsonObject.addProperty("block", Registry.BLOCK.getKey(copyBlockState.block).toString());
+            jsonObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(copyBlockState.block).toString());
             JsonArray jsonArray = new JsonArray();
             copyBlockState.properties.forEach(property -> jsonArray.add(property.getName()));
             jsonObject.add("properties", jsonArray);
@@ -123,7 +123,7 @@ extends LootItemConditionalFunction {
         @Override
         public CopyBlockState deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-            Block block = Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
+            Block block = (Block)BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
             StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
             HashSet<Property<?>> set = Sets.newHashSet();
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "properties", null);

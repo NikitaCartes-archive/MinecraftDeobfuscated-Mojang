@@ -8,7 +8,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,7 +29,7 @@ public abstract class Enchantment {
 
     @Nullable
     public static Enchantment byId(int i) {
-        return (Enchantment)Registry.ENCHANTMENT.byId(i);
+        return (Enchantment)BuiltInRegistries.ENCHANTMENT.byId(i);
     }
 
     protected Enchantment(Rarity rarity, EnchantmentCategory enchantmentCategory, EquipmentSlot[] equipmentSlots) {
@@ -86,7 +86,7 @@ public abstract class Enchantment {
 
     protected String getOrCreateDescriptionId() {
         if (this.descriptionId == null) {
-            this.descriptionId = Util.makeDescriptionId("enchantment", Registry.ENCHANTMENT.getKey(this));
+            this.descriptionId = Util.makeDescriptionId("enchantment", BuiltInRegistries.ENCHANTMENT.getKey(this));
         }
         return this.descriptionId;
     }

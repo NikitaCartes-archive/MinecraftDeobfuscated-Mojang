@@ -9,7 +9,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +39,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -135,8 +134,8 @@ AutoCloseable {
                                     }
                                 }
                                 throw throwable;
-                            } catch (IOException iOException) {
-                                LOGGER.error("Failed to load model {}", entry.getKey(), (Object)iOException);
+                            } catch (Exception exception) {
+                                LOGGER.error("Failed to load model {}", entry.getKey(), (Object)exception);
                                 return null;
                             }
                         }
@@ -166,8 +165,8 @@ AutoCloseable {
                                 if (reader == null) continue;
                                 ((Reader)reader).close();
                             }
-                        } catch (IOException iOException) {
-                            LOGGER.error("Failed to load blockstate {} from pack {}", entry.getKey(), resource.sourcePackId(), iOException);
+                        } catch (Exception exception) {
+                            LOGGER.error("Failed to load blockstate {} from pack {}", entry.getKey(), resource.sourcePackId(), exception);
                         }
                     }
                     return Pair.of((ResourceLocation)entry.getKey(), list2);
@@ -195,7 +194,7 @@ AutoCloseable {
         Map<ResourceLocation, BakedModel> map2 = modelBakery.getBakedTopLevelModels();
         BakedModel bakedModel = map2.get(ModelBakery.MISSING_MODEL_LOCATION);
         IdentityHashMap<BlockState, BakedModel> map3 = new IdentityHashMap<BlockState, BakedModel>();
-        for (Block block : Registry.BLOCK) {
+        for (Block block : BuiltInRegistries.BLOCK) {
             block.getStateDefinition().getPossibleStates().forEach(blockState -> {
                 ResourceLocation resourceLocation = blockState.getBlock().builtInRegistryHolder().key().location();
                 BakedModel bakedModel2 = map2.getOrDefault(BlockModelShaper.stateToModelLocation(resourceLocation, blockState), bakedModel);

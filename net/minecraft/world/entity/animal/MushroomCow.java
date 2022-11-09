@@ -29,8 +29,6 @@ import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -38,9 +36,8 @@ import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -197,11 +194,9 @@ implements Shearable {
     }
 
     private Optional<Pair<MobEffect, Integer>> getEffectFromItemStack(ItemStack itemStack) {
-        Block block;
-        Item item = itemStack.getItem();
-        if (item instanceof BlockItem && (block = ((BlockItem)item).getBlock()) instanceof FlowerBlock) {
-            FlowerBlock flowerBlock = (FlowerBlock)block;
-            return Optional.of(Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration()));
+        SuspiciousEffectHolder suspiciousEffectHolder = SuspiciousEffectHolder.tryGet(itemStack.getItem());
+        if (suspiciousEffectHolder != null) {
+            return Optional.of(Pair.of(suspiciousEffectHolder.getSuspiciousEffect(), suspiciousEffectHolder.getEffectDuration()));
         }
         return Optional.empty();
     }

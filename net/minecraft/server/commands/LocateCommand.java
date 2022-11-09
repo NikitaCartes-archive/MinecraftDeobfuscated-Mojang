@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -45,7 +46,7 @@ public class LocateCommand {
     private static final int POI_SEARCH_RADIUS = 256;
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locate").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.literal("structure").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("structure", ResourceOrTagKeyArgument.resourceOrTagKey(Registry.STRUCTURE_REGISTRY)).executes(commandContext -> LocateCommand.locateStructure((CommandSourceStack)commandContext.getSource(), ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registry.STRUCTURE_REGISTRY, ERROR_STRUCTURE_INVALID)))))).then(Commands.literal("biome").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registry.BIOME_REGISTRY)).executes(commandContext -> LocateCommand.locateBiome((CommandSourceStack)commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "biome", Registry.BIOME_REGISTRY)))))).then(Commands.literal("poi").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registry.POINT_OF_INTEREST_TYPE_REGISTRY)).executes(commandContext -> LocateCommand.locatePoi((CommandSourceStack)commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "poi", Registry.POINT_OF_INTEREST_TYPE_REGISTRY))))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locate").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.literal("structure").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("structure", ResourceOrTagKeyArgument.resourceOrTagKey(Registries.STRUCTURE)).executes(commandContext -> LocateCommand.locateStructure((CommandSourceStack)commandContext.getSource(), ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registries.STRUCTURE, ERROR_STRUCTURE_INVALID)))))).then(Commands.literal("biome").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registries.BIOME)).executes(commandContext -> LocateCommand.locateBiome((CommandSourceStack)commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "biome", Registries.BIOME)))))).then(Commands.literal("poi").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("poi", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registries.POINT_OF_INTEREST_TYPE)).executes(commandContext -> LocateCommand.locatePoi((CommandSourceStack)commandContext.getSource(), ResourceOrTagArgument.getResourceOrTag(commandContext, "poi", Registries.POINT_OF_INTEREST_TYPE))))));
     }
 
     private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(ResourceOrTagKeyArgument.Result<Structure> result, Registry<Structure> registry) {
@@ -53,7 +54,7 @@ public class LocateCommand {
     }
 
     private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagKeyArgument.Result<Structure> result) throws CommandSyntaxException {
-        Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+        Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
         HolderSet holderSet = LocateCommand.getHolders(result, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(result.asPrintable()));
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
         ServerLevel serverLevel = commandSourceStack.getLevel();

@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import java.util.Map;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.GlowSquid;
 import net.minecraft.world.entity.LivingEntity;
@@ -94,7 +94,7 @@ public class DefaultAttributes {
     }
 
     public static void validate() {
-        Registry.ENTITY_TYPE.stream().filter(entityType -> entityType.getCategory() != MobCategory.MISC).filter(entityType -> !DefaultAttributes.hasSupplier(entityType)).map(Registry.ENTITY_TYPE::getKey).forEach(resourceLocation -> Util.logAndPauseIfInIde("Entity " + resourceLocation + " has no attributes"));
+        BuiltInRegistries.ENTITY_TYPE.stream().filter(entityType -> entityType.getCategory() != MobCategory.MISC).filter(entityType -> !DefaultAttributes.hasSupplier(entityType)).map(BuiltInRegistries.ENTITY_TYPE::getKey).forEach(resourceLocation -> Util.logAndPauseIfInIde("Entity " + resourceLocation + " has no attributes"));
     }
 }
 

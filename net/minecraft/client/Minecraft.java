@@ -175,7 +175,7 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -238,9 +238,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlayerHeadItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -709,10 +709,10 @@ implements WindowEventHandler {
     }
 
     private void createSearchTrees() {
-        this.searchRegistry.register(SearchRegistry.CREATIVE_NAMES, list -> new FullTextSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(Registry.ITEM.getKey(itemStack.getItem())), (List<ItemStack>)list));
+        this.searchRegistry.register(SearchRegistry.CREATIVE_NAMES, list -> new FullTextSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL.asCreative()).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(BuiltInRegistries.ITEM.getKey(itemStack.getItem())), (List<ItemStack>)list));
         this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, list -> new IdSearchTree<ItemStack>(itemStack -> itemStack.getTags().map(TagKey::location), (List<ItemStack>)list));
-        this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, list -> new FullTextSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> Registry.ITEM.getKey(recipe.getResultItem().getItem())), (List<RecipeCollection>)list));
-        CreativeModeTabs.TAB_SEARCH.setSearchTreeRebuilder(list -> {
+        this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, list -> new FullTextSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem().getItem())), (List<RecipeCollection>)list));
+        CreativeModeTabs.searchTab().setSearchTreeBuilder(list -> {
             this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, (List)list);
             this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, (List)list);
         });
@@ -803,7 +803,7 @@ implements WindowEventHandler {
         boolean bl = false;
         BlockModelShaper blockModelShaper = this.getBlockRenderer().getBlockModelShaper();
         BakedModel bakedModel = blockModelShaper.getModelManager().getMissingModel();
-        for (Block block : Registry.BLOCK) {
+        for (Block block : BuiltInRegistries.BLOCK) {
             for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
                 BakedModel bakedModel2;
                 if (blockState.getRenderShape() != RenderShape.MODEL || (bakedModel2 = blockModelShaper.getBlockModel(blockState)) != bakedModel) continue;
@@ -812,7 +812,7 @@ implements WindowEventHandler {
             }
         }
         TextureAtlasSprite textureAtlasSprite = bakedModel.getParticleIcon();
-        for (Block block2 : Registry.BLOCK) {
+        for (Block block2 : BuiltInRegistries.BLOCK) {
             for (BlockState blockState2 : block2.getStateDefinition().getPossibleStates()) {
                 TextureAtlasSprite textureAtlasSprite2 = blockModelShaper.getParticleIcon(blockState2);
                 if (blockState2.isAir() || textureAtlasSprite2 != textureAtlasSprite) continue;
@@ -820,11 +820,12 @@ implements WindowEventHandler {
                 bl = true;
             }
         }
-        for (ItemStack itemStack : CreativeModeTabs.TAB_SEARCH.getDisplayItems(FeatureFlags.REGISTRY.allFlags(), true)) {
+        for (Item item : BuiltInRegistries.ITEM) {
+            ItemStack itemStack = item.getDefaultInstance();
             String string = itemStack.getDescriptionId();
             String string2 = Component.translatable(string).getString();
-            if (!string2.toLowerCase(Locale.ROOT).equals(itemStack.getItem().getDescriptionId())) continue;
-            LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, itemStack.getItem());
+            if (!string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) continue;
+            LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, item);
         }
         bl |= MenuScreens.selfTest();
         if (bl |= EntityRenderers.validateRegistrations()) {
@@ -1942,9 +1943,9 @@ implements WindowEventHandler {
         if (itemStack.isEmpty()) {
             String string = "";
             if (type == HitResult.Type.BLOCK) {
-                string = Registry.BLOCK.getKey(this.level.getBlockState(((BlockHitResult)this.hitResult).getBlockPos()).getBlock()).toString();
+                string = BuiltInRegistries.BLOCK.getKey(this.level.getBlockState(((BlockHitResult)this.hitResult).getBlockPos()).getBlock()).toString();
             } else if (type == HitResult.Type.ENTITY) {
-                string = Registry.ENTITY_TYPE.getKey(((EntityHitResult)this.hitResult).getEntity().getType()).toString();
+                string = BuiltInRegistries.ENTITY_TYPE.getKey(((EntityHitResult)this.hitResult).getEntity().getType()).toString();
             }
             LOGGER.warn("Picking on: [{}] {} gave null item", (Object)type, (Object)string);
             return;
@@ -2066,6 +2067,11 @@ implements WindowEventHandler {
     @Nullable
     public IntegratedServer getSingleplayerServer() {
         return this.singleplayerServer;
+    }
+
+    public boolean isSingleplayer() {
+        IntegratedServer integratedServer = this.getSingleplayerServer();
+        return integratedServer != null && !integratedServer.isPublished();
     }
 
     public User getUser() {

@@ -113,7 +113,7 @@ import net.minecraft.client.renderer.entity.ZoglinRenderer;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.client.renderer.entity.ZombieVillagerRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.GlowSquid;
@@ -137,7 +137,7 @@ public class EntityRenderers {
             try {
                 builder.put(entityType, entityRendererProvider.create(context));
             } catch (Exception exception) {
-                throw new IllegalArgumentException("Failed to create model for " + Registry.ENTITY_TYPE.getKey((EntityType<?>)entityType), exception);
+                throw new IllegalArgumentException("Failed to create model for " + BuiltInRegistries.ENTITY_TYPE.getKey((EntityType<?>)entityType), exception);
             }
         });
         return builder.build();
@@ -157,9 +157,9 @@ public class EntityRenderers {
 
     public static boolean validateRegistrations() {
         boolean bl = true;
-        for (EntityType entityType : Registry.ENTITY_TYPE) {
+        for (EntityType entityType : BuiltInRegistries.ENTITY_TYPE) {
             if (entityType == EntityType.PLAYER || PROVIDERS.containsKey(entityType)) continue;
-            LOGGER.warn("No renderer registered for {}", (Object)Registry.ENTITY_TYPE.getKey(entityType));
+            LOGGER.warn("No renderer registered for {}", (Object)BuiltInRegistries.ENTITY_TYPE.getKey(entityType));
             bl = false;
         }
         return !bl;

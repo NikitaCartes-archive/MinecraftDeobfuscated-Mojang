@@ -5,7 +5,7 @@ package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.CatVariantTags;
@@ -14,7 +14,7 @@ import net.minecraft.world.entity.animal.CatVariant;
 public class CatVariantTagsProvider
 extends TagsProvider<CatVariant> {
     public CatVariantTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-        super(packOutput, Registry.CAT_VARIANT_REGISTRY, completableFuture);
+        super(packOutput, Registries.CAT_VARIANT, completableFuture);
     }
 
     @Override

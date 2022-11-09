@@ -3,7 +3,7 @@
  */
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -16,7 +16,7 @@ public class GameEventTags {
     public static final TagKey<GameEvent> ALLAY_CAN_LISTEN = GameEventTags.create("allay_can_listen");
 
     private static TagKey<GameEvent> create(String string) {
-        return TagKey.create(Registry.GAME_EVENT_REGISTRY, new ResourceLocation(string));
+        return TagKey.create(Registries.GAME_EVENT, new ResourceLocation(string));
     }
 }
 

@@ -6,7 +6,7 @@ package net.minecraft.world.item.alchemy;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -177,17 +177,17 @@ public class PotionBrewing {
 
     private static void addContainerRecipe(Item item, Item item2, Item item3) {
         if (!(item instanceof PotionItem)) {
-            throw new IllegalArgumentException("Expected a potion, got: " + Registry.ITEM.getKey(item));
+            throw new IllegalArgumentException("Expected a potion, got: " + BuiltInRegistries.ITEM.getKey(item));
         }
         if (!(item3 instanceof PotionItem)) {
-            throw new IllegalArgumentException("Expected a potion, got: " + Registry.ITEM.getKey(item3));
+            throw new IllegalArgumentException("Expected a potion, got: " + BuiltInRegistries.ITEM.getKey(item3));
         }
         CONTAINER_MIXES.add(new Mix<Item>(item, Ingredient.of(item2), item3));
     }
 
     private static void addContainer(Item item) {
         if (!(item instanceof PotionItem)) {
-            throw new IllegalArgumentException("Expected a potion, got: " + Registry.ITEM.getKey(item));
+            throw new IllegalArgumentException("Expected a potion, got: " + BuiltInRegistries.ITEM.getKey(item));
         }
         ALLOWED_CONTAINERS.add(Ingredient.of(item));
     }

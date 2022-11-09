@@ -9,8 +9,8 @@ import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +34,7 @@ import net.minecraft.world.level.material.Fluids;
 
 public interface BlockPredicate
 extends BiPredicate<WorldGenLevel, BlockPos> {
-    public static final Codec<BlockPredicate> CODEC = Registry.BLOCK_PREDICATE_TYPES.byNameCodec().dispatch(BlockPredicate::type, BlockPredicateType::codec);
+    public static final Codec<BlockPredicate> CODEC = BuiltInRegistries.BLOCK_PREDICATE_TYPE.byNameCodec().dispatch(BlockPredicate::type, BlockPredicateType::codec);
     public static final BlockPredicate ONLY_IN_AIR_PREDICATE = BlockPredicate.matchesBlocks(Blocks.AIR);
     public static final BlockPredicate ONLY_IN_AIR_OR_WATER_PREDICATE = BlockPredicate.matchesBlocks(Blocks.AIR, Blocks.WATER);
 

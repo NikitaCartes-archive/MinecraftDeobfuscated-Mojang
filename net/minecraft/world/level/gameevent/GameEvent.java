@@ -5,6 +5,7 @@ package net.minecraft.world.level.gameevent;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,7 +63,7 @@ public class GameEvent {
     public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
     private final String name;
     private final int notificationRadius;
-    private final Holder.Reference<GameEvent> builtInRegistryHolder = Registry.GAME_EVENT.createIntrusiveHolder(this);
+    private final Holder.Reference<GameEvent> builtInRegistryHolder = BuiltInRegistries.GAME_EVENT.createIntrusiveHolder(this);
 
     public GameEvent(String string, int i) {
         this.name = string;
@@ -82,7 +83,7 @@ public class GameEvent {
     }
 
     private static GameEvent register(String string, int i) {
-        return Registry.register(Registry.GAME_EVENT, string, new GameEvent(string, i));
+        return Registry.register(BuiltInRegistries.GAME_EVENT, string, new GameEvent(string, i));
     }
 
     public String toString() {

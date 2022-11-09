@@ -6,7 +6,6 @@ package net.minecraft.client.gui.screens.worldselection;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
-import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
@@ -17,7 +16,6 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -25,7 +23,6 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -34,8 +31,6 @@ extends Screen {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final WorldOptions TEST_OPTIONS = new WorldOptions("test1".hashCode(), true, false);
     protected final Screen lastScreen;
-    @Nullable
-    private List<FormattedCharSequence> toolTip;
     private Button deleteButton;
     private Button selectButton;
     private Button renameButton;
@@ -96,18 +91,10 @@ extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.toolTip = null;
         this.list.render(poseStack, i, j, f);
         this.searchBox.render(poseStack, i, j, f);
         SelectWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         super.render(poseStack, i, j, f);
-        if (this.toolTip != null) {
-            this.renderTooltip(poseStack, this.toolTip, i, j);
-        }
-    }
-
-    public void setToolTip(List<FormattedCharSequence> list) {
-        this.toolTip = list;
     }
 
     public void updateButtonStatus(boolean bl) {

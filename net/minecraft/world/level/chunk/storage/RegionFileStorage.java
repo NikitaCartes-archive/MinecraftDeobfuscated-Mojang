@@ -7,9 +7,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
+import net.minecraft.FileUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StreamTagVisitor;
@@ -40,7 +39,7 @@ implements AutoCloseable {
         if (this.regionCache.size() >= 256) {
             this.regionCache.removeLast().close();
         }
-        Files.createDirectories(this.folder, new FileAttribute[0]);
+        FileUtil.createDirectoriesSafe(this.folder);
         Path path = this.folder.resolve("r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ANVIL_EXTENSION);
         RegionFile regionFile2 = new RegionFile(path, this.folder, this.sync);
         this.regionCache.putAndMoveToFirst(l, regionFile2);

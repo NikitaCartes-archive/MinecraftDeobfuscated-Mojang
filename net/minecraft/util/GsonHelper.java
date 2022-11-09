@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.apache.commons.lang3.StringUtils;
@@ -131,7 +131,7 @@ public class GsonHelper {
     public static Item convertToItem(JsonElement jsonElement, String string) {
         if (jsonElement.isJsonPrimitive()) {
             String string2 = jsonElement.getAsString();
-            return Registry.ITEM.getOptional(new ResourceLocation(string2)).orElseThrow(() -> new JsonSyntaxException("Expected " + string + " to be an item, was unknown string '" + string2 + "'"));
+            return (Item)BuiltInRegistries.ITEM.getOptional(new ResourceLocation(string2)).orElseThrow(() -> new JsonSyntaxException("Expected " + string + " to be an item, was unknown string '" + string2 + "'"));
         }
         throw new JsonSyntaxException("Expected " + string + " to be an item, was " + GsonHelper.getType(jsonElement));
     }

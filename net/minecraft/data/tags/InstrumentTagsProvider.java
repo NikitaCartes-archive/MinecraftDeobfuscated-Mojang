@@ -5,7 +5,7 @@ package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.InstrumentTags;
@@ -15,7 +15,7 @@ import net.minecraft.world.item.Instruments;
 public class InstrumentTagsProvider
 extends TagsProvider<Instrument> {
     public InstrumentTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-        super(packOutput, Registry.INSTRUMENT_REGISTRY, completableFuture);
+        super(packOutput, Registries.INSTRUMENT, completableFuture);
     }
 
     @Override

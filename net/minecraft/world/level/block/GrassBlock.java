@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.placement.VegetationPlacements;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -43,7 +43,7 @@ implements BonemealableBlock {
     public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
         BlockPos blockPos2 = blockPos.above();
         BlockState blockState2 = Blocks.GRASS.defaultBlockState();
-        Optional<Holder.Reference<PlacedFeature>> optional = serverLevel.registryAccess().registryOrThrow(Registry.PLACED_FEATURE_REGISTRY).getHolder(VegetationPlacements.GRASS_BONEMEAL);
+        Optional<Holder.Reference<PlacedFeature>> optional = serverLevel.registryAccess().registryOrThrow(Registries.PLACED_FEATURE).getHolder(VegetationPlacements.GRASS_BONEMEAL);
         block0: for (int i = 0; i < 128; ++i) {
             Holder<PlacedFeature> holder;
             BlockPos blockPos3 = blockPos2;

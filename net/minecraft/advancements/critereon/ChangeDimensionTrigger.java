@@ -9,7 +9,7 @@ import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,8 +28,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
 
     @Override
     public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
-        ResourceKey<Level> resourceKey = jsonObject.has("from") ? ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
-        ResourceKey<Level> resourceKey2 = jsonObject.has("to") ? ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
+        ResourceKey<Level> resourceKey = jsonObject.has("from") ? ResourceKey.create(Registries.DIMENSION, new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
+        ResourceKey<Level> resourceKey2 = jsonObject.has("to") ? ResourceKey.create(Registries.DIMENSION, new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
         return new TriggerInstance(composite, resourceKey, resourceKey2);
     }
 

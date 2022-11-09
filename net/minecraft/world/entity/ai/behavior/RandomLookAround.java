@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
@@ -41,6 +42,11 @@ extends Behavior<Mob> {
         Vec3 vec3 = Vec3.directionFromRotation(f, g);
         mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(mob.getEyePosition().add(vec3)));
         mob.getBrain().setMemory(MemoryModuleType.GAZE_COOLDOWN_TICKS, this.interval.sample(randomSource));
+    }
+
+    @Override
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (Mob)livingEntity, l);
     }
 }
 

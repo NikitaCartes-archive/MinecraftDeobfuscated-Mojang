@@ -60,5 +60,10 @@ extends LongJumpToRandomPos<E> {
         }
         return Optional.empty();
     }
+
+    @Override
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (E)((Mob)livingEntity), l);
+    }
 }
 

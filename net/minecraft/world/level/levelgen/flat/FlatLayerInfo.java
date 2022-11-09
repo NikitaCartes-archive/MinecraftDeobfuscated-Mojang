@@ -7,14 +7,14 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class FlatLayerInfo {
-    public static final Codec<FlatLayerInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, DimensionType.Y_SIZE).fieldOf("height")).forGetter(FlatLayerInfo::getHeight), ((MapCodec)Registry.BLOCK.byNameCodec().fieldOf("block")).orElse(Blocks.AIR).forGetter(flatLayerInfo -> flatLayerInfo.getBlockState().getBlock())).apply((Applicative<FlatLayerInfo, ?>)instance, FlatLayerInfo::new));
+    public static final Codec<FlatLayerInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, DimensionType.Y_SIZE).fieldOf("height")).forGetter(FlatLayerInfo::getHeight), ((MapCodec)BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block")).orElse(Blocks.AIR).forGetter(flatLayerInfo -> flatLayerInfo.getBlockState().getBlock())).apply((Applicative<FlatLayerInfo, ?>)instance, FlatLayerInfo::new));
     private final Block block;
     private final int height;
 
@@ -32,7 +32,7 @@ public class FlatLayerInfo {
     }
 
     public String toString() {
-        return (String)(this.height != 1 ? this.height + "*" : "") + Registry.BLOCK.getKey(this.block);
+        return (String)(this.height != 1 ? this.height + "*" : "") + BuiltInRegistries.BLOCK.getKey(this.block);
     }
 }
 

@@ -10,7 +10,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -116,7 +116,7 @@ implements RecipeBuilder {
                 jsonObject.addProperty("group", this.group);
             }
             jsonObject.add("ingredient", this.ingredient.toJson());
-            jsonObject.addProperty("result", Registry.ITEM.getKey(this.result).toString());
+            jsonObject.addProperty("result", BuiltInRegistries.ITEM.getKey(this.result).toString());
             jsonObject.addProperty("count", this.count);
         }
 

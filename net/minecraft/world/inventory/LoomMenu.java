@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
@@ -148,12 +148,12 @@ extends AbstractContainerMenu {
 
     private List<Holder<BannerPattern>> getSelectablePatterns(ItemStack itemStack) {
         if (itemStack.isEmpty()) {
-            return Registry.BANNER_PATTERN.getTag(BannerPatternTags.NO_ITEM_REQUIRED).map(ImmutableList::copyOf).orElse(ImmutableList.of());
+            return BuiltInRegistries.BANNER_PATTERN.getTag(BannerPatternTags.NO_ITEM_REQUIRED).map(ImmutableList::copyOf).orElse(ImmutableList.of());
         }
         Item item = itemStack.getItem();
         if (item instanceof BannerPatternItem) {
             BannerPatternItem bannerPatternItem = (BannerPatternItem)item;
-            return Registry.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of());
+            return BuiltInRegistries.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of());
         }
         return List.of();
     }

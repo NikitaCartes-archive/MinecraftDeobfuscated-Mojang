@@ -3,7 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -24,13 +24,13 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundRemoveMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
         this.entityId = friendlyByteBuf.readVarInt();
-        this.effect = friendlyByteBuf.readById(Registry.MOB_EFFECT);
+        this.effect = friendlyByteBuf.readById(BuiltInRegistries.MOB_EFFECT);
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entityId);
-        friendlyByteBuf.writeId(Registry.MOB_EFFECT, this.effect);
+        friendlyByteBuf.writeId(BuiltInRegistries.MOB_EFFECT, this.effect);
     }
 
     @Override

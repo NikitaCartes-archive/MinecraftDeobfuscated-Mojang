@@ -4,6 +4,7 @@
 package net.minecraft.world.item.alchemy;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.alchemy.Potion;
@@ -54,7 +55,7 @@ public class Potions {
     public static final Potion LONG_SLOW_FALLING = Potions.register("long_slow_falling", new Potion("slow_falling", new MobEffectInstance(MobEffects.SLOW_FALLING, 4800)));
 
     private static Potion register(String string, Potion potion) {
-        return Registry.register(Registry.POTION, string, potion);
+        return Registry.register(BuiltInRegistries.POTION, string, potion);
     }
 }
 

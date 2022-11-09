@@ -17,7 +17,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +34,7 @@ public class SummonCommand {
     private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(Component.translatable("commands.summon.invalidPosition"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("summon").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(((RequiredArgumentBuilder)Commands.argument("entity", ResourceArgument.resource(commandBuildContext, Registry.ENTITY_TYPE_REGISTRY)).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), ((CommandSourceStack)commandContext.getSource()).getPosition(), new CompoundTag(), true))).then(((RequiredArgumentBuilder)Commands.argument("pos", Vec3Argument.vec3()).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), Vec3Argument.getVec3(commandContext, "pos"), new CompoundTag(), true))).then(Commands.argument("nbt", CompoundTagArgument.compoundTag()).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), Vec3Argument.getVec3(commandContext, "pos"), CompoundTagArgument.getCompoundTag(commandContext, "nbt"), false))))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("summon").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(((RequiredArgumentBuilder)Commands.argument("entity", ResourceArgument.resource(commandBuildContext, Registries.ENTITY_TYPE)).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), ((CommandSourceStack)commandContext.getSource()).getPosition(), new CompoundTag(), true))).then(((RequiredArgumentBuilder)Commands.argument("pos", Vec3Argument.vec3()).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), Vec3Argument.getVec3(commandContext, "pos"), new CompoundTag(), true))).then(Commands.argument("nbt", CompoundTagArgument.compoundTag()).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), Vec3Argument.getVec3(commandContext, "pos"), CompoundTagArgument.getCompoundTag(commandContext, "nbt"), false))))));
     }
 
     private static int spawnEntity(CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl) throws CommandSyntaxException {

@@ -26,6 +26,7 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.RegistryOps;
@@ -53,8 +54,8 @@ import org.slf4j.Logger;
 
 public class RegistryDataLoader {
     private static final Logger LOGGER = LogUtils.getLogger();
-    public static final List<RegistryData<?>> WORLDGEN_REGISTRIES = List.of(new RegistryData<DimensionType>(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC), new RegistryData<Biome>(Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC), new RegistryData<ChatType>(Registry.CHAT_TYPE_REGISTRY, ChatType.CODEC), new RegistryData(Registry.CONFIGURED_CARVER_REGISTRY, ConfiguredWorldCarver.DIRECT_CODEC), new RegistryData(Registry.CONFIGURED_FEATURE_REGISTRY, ConfiguredFeature.DIRECT_CODEC), new RegistryData<PlacedFeature>(Registry.PLACED_FEATURE_REGISTRY, PlacedFeature.DIRECT_CODEC), new RegistryData<Structure>(Registry.STRUCTURE_REGISTRY, Structure.DIRECT_CODEC), new RegistryData<StructureSet>(Registry.STRUCTURE_SET_REGISTRY, StructureSet.DIRECT_CODEC), new RegistryData<StructureProcessorList>(Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC), new RegistryData<StructureTemplatePool>(Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC), new RegistryData<NoiseGeneratorSettings>(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC), new RegistryData<NormalNoise.NoiseParameters>(Registry.NOISE_REGISTRY, NormalNoise.NoiseParameters.DIRECT_CODEC), new RegistryData<DensityFunction>(Registry.DENSITY_FUNCTION_REGISTRY, DensityFunction.DIRECT_CODEC), new RegistryData<WorldPreset>(Registry.WORLD_PRESET_REGISTRY, WorldPreset.DIRECT_CODEC), new RegistryData<FlatLevelGeneratorPreset>(Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY, FlatLevelGeneratorPreset.DIRECT_CODEC));
-    public static final List<RegistryData<?>> DIMENSION_REGISTRIES = List.of(new RegistryData<LevelStem>(Registry.LEVEL_STEM_REGISTRY, LevelStem.CODEC));
+    public static final List<RegistryData<?>> WORLDGEN_REGISTRIES = List.of(new RegistryData<DimensionType>(Registries.DIMENSION_TYPE, DimensionType.DIRECT_CODEC), new RegistryData<Biome>(Registries.BIOME, Biome.DIRECT_CODEC), new RegistryData<ChatType>(Registries.CHAT_TYPE, ChatType.CODEC), new RegistryData(Registries.CONFIGURED_CARVER, ConfiguredWorldCarver.DIRECT_CODEC), new RegistryData(Registries.CONFIGURED_FEATURE, ConfiguredFeature.DIRECT_CODEC), new RegistryData<PlacedFeature>(Registries.PLACED_FEATURE, PlacedFeature.DIRECT_CODEC), new RegistryData<Structure>(Registries.STRUCTURE, Structure.DIRECT_CODEC), new RegistryData<StructureSet>(Registries.STRUCTURE_SET, StructureSet.DIRECT_CODEC), new RegistryData<StructureProcessorList>(Registries.PROCESSOR_LIST, StructureProcessorType.DIRECT_CODEC), new RegistryData<StructureTemplatePool>(Registries.TEMPLATE_POOL, StructureTemplatePool.DIRECT_CODEC), new RegistryData<NoiseGeneratorSettings>(Registries.NOISE_SETTINGS, NoiseGeneratorSettings.DIRECT_CODEC), new RegistryData<NormalNoise.NoiseParameters>(Registries.NOISE, NormalNoise.NoiseParameters.DIRECT_CODEC), new RegistryData<DensityFunction>(Registries.DENSITY_FUNCTION, DensityFunction.DIRECT_CODEC), new RegistryData<WorldPreset>(Registries.WORLD_PRESET, WorldPreset.DIRECT_CODEC), new RegistryData<FlatLevelGeneratorPreset>(Registries.FLAT_LEVEL_GENERATOR_PRESET, FlatLevelGeneratorPreset.DIRECT_CODEC));
+    public static final List<RegistryData<?>> DIMENSION_REGISTRIES = List.of(new RegistryData<LevelStem>(Registries.LEVEL_STEM, LevelStem.CODEC));
 
     public static RegistryAccess.Frozen load(ResourceManager resourceManager, RegistryAccess registryAccess, List<RegistryData<?>> list) {
         HashMap map = new HashMap();
@@ -90,11 +91,11 @@ public class RegistryDataLoader {
     }
 
     private static <T> RegistryOps.RegistryInfo<T> createInfoForNewRegistry(WritableRegistry<T> writableRegistry) {
-        return new RegistryOps.RegistryInfo(writableRegistry.asLookup(), writableRegistry.createRegistrationLookup(), writableRegistry.elementsLifecycle());
+        return new RegistryOps.RegistryInfo(writableRegistry.asLookup(), writableRegistry.createRegistrationLookup(), writableRegistry.registryLifecycle());
     }
 
     private static <T> RegistryOps.RegistryInfo<T> createInfoForContextRegistry(Registry<T> registry) {
-        return new RegistryOps.RegistryInfo<T>(registry.asLookup(), registry.asTagAddingLookup(), registry.elementsLifecycle());
+        return new RegistryOps.RegistryInfo<T>(registry.asLookup(), registry.asTagAddingLookup(), registry.registryLifecycle());
     }
 
     private static void logErrors(Map<ResourceKey<?>, Exception> map) {

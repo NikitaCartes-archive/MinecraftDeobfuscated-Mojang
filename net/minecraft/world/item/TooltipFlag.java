@@ -4,22 +4,27 @@
 package net.minecraft.world.item;
 
 public interface TooltipFlag {
+    public static final Default NORMAL = new Default(false, false);
+    public static final Default ADVANCED = new Default(true, false);
+
     public boolean isAdvanced();
 
-    public static enum Default implements TooltipFlag
+    public boolean isCreative();
+
+    public record Default(boolean advanced, boolean creative) implements TooltipFlag
     {
-        NORMAL(false),
-        ADVANCED(true);
-
-        private final boolean advanced;
-
-        private Default(boolean bl) {
-            this.advanced = bl;
-        }
-
         @Override
         public boolean isAdvanced() {
             return this.advanced;
+        }
+
+        @Override
+        public boolean isCreative() {
+            return this.creative;
+        }
+
+        public Default asCreative() {
+            return new Default(this.advanced, true);
         }
     }
 }

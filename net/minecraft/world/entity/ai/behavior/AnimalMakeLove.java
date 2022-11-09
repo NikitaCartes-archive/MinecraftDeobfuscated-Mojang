@@ -94,13 +94,18 @@ extends Behavior<Animal> {
     }
 
     @Override
+    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        return this.canStillUse(serverLevel, (Animal)livingEntity, l);
+    }
+
+    @Override
     protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.stop(serverLevel, (Animal)livingEntity, l);
     }
 
     @Override
-    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (Animal)livingEntity, l);
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (Animal)livingEntity, l);
     }
 }
 

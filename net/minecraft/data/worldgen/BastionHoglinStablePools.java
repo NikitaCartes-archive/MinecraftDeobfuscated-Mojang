@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
@@ -17,10 +17,10 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 
 public class BastionHoglinStablePools {
     public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-        HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+        HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
         Holder.Reference<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.STABLE_DEGRADATION);
         Holder.Reference<StructureProcessorList> holder2 = holderGetter.getOrThrow(ProcessorLists.SIDE_WALL_DEGRADATION);
-        HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder3 = holderGetter2.getOrThrow(Pools.EMPTY);
         Pools.register(bootstapContext, "bastion/hoglin_stable/starting_pieces", new StructureTemplatePool(holder3, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/starting_stairs_0", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/starting_stairs_1", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/starting_stairs_2", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/starting_stairs_3", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/starting_stairs_4", holder), 1)), StructureTemplatePool.Projection.RIGID));
         Pools.register(bootstapContext, "bastion/hoglin_stable/mirrored_starting_pieces", new StructureTemplatePool(holder3, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/stairs_0_mirrored", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/stairs_1_mirrored", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/stairs_2_mirrored", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/stairs_3_mirrored", holder), 1), Pair.of(StructurePoolElement.single("bastion/hoglin_stable/starting_pieces/stairs_4_mirrored", holder), 1)), StructureTemplatePool.Projection.RIGID));

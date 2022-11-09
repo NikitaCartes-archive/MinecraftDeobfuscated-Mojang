@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -176,7 +177,7 @@ implements FeatureElement,
 EntityTypeTest<Entity, T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final String ENTITY_TAG = "EntityTag";
-    private final Holder.Reference<EntityType<?>> builtInRegistryHolder = Registry.ENTITY_TYPE.createIntrusiveHolder(this);
+    private final Holder.Reference<EntityType<?>> builtInRegistryHolder = BuiltInRegistries.ENTITY_TYPE.createIntrusiveHolder(this);
     private static final float MAGIC_HORSE_WIDTH = 1.3964844f;
     public static final EntityType<Allay> ALLAY = EntityType.register("allay", Builder.of(Allay::new, MobCategory.CREATURE).sized(0.35f, 0.6f).clientTrackingRange(8).updateInterval(2));
     public static final EntityType<AreaEffectCloud> AREA_EFFECT_CLOUD = EntityType.register("area_effect_cloud", Builder.of(AreaEffectCloud::new, MobCategory.MISC).fireImmune().sized(6.0f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
@@ -316,15 +317,15 @@ EntityTypeTest<Entity, T> {
     private final FeatureFlagSet requiredFeatures;
 
     private static <T extends Entity> EntityType<T> register(String string, Builder<T> builder) {
-        return Registry.register(Registry.ENTITY_TYPE, string, builder.build(string));
+        return Registry.register(BuiltInRegistries.ENTITY_TYPE, string, builder.build(string));
     }
 
     public static ResourceLocation getKey(EntityType<?> entityType) {
-        return Registry.ENTITY_TYPE.getKey(entityType);
+        return BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
     }
 
     public static Optional<EntityType<?>> byString(String string) {
-        return Registry.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
+        return BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
     }
 
     public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j, FeatureFlagSet featureFlagSet) {
@@ -432,7 +433,7 @@ EntityTypeTest<Entity, T> {
 
     public String getDescriptionId() {
         if (this.descriptionId == null) {
-            this.descriptionId = Util.makeDescriptionId("entity", Registry.ENTITY_TYPE.getKey(this));
+            this.descriptionId = Util.makeDescriptionId("entity", BuiltInRegistries.ENTITY_TYPE.getKey(this));
         }
         return this.descriptionId;
     }
@@ -455,7 +456,7 @@ EntityTypeTest<Entity, T> {
 
     public ResourceLocation getDefaultLootTable() {
         if (this.lootTable == null) {
-            ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(this);
+            ResourceLocation resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(this);
             this.lootTable = resourceLocation.withPrefix("entities/");
         }
         return this.lootTable;
@@ -506,7 +507,7 @@ EntityTypeTest<Entity, T> {
     }
 
     public static Optional<EntityType<?>> by(CompoundTag compoundTag) {
-        return Registry.ENTITY_TYPE.getOptional(new ResourceLocation(compoundTag.getString("id")));
+        return BuiltInRegistries.ENTITY_TYPE.getOptional(new ResourceLocation(compoundTag.getString("id")));
     }
 
     @Nullable

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.StatType;
 
@@ -68,7 +68,7 @@ public class ObjectiveCriteria {
         if (i < 0) {
             return Optional.empty();
         }
-        return Registry.STAT_TYPE.getOptional(ResourceLocation.of(string.substring(0, i), '.')).flatMap(statType -> ObjectiveCriteria.getStat(statType, ResourceLocation.of(string.substring(i + 1), '.')));
+        return BuiltInRegistries.STAT_TYPE.getOptional(ResourceLocation.of(string.substring(0, i), '.')).flatMap(statType -> ObjectiveCriteria.getStat(statType, ResourceLocation.of(string.substring(i + 1), '.')));
     }
 
     private static <T> Optional<ObjectiveCriteria> getStat(StatType<T> statType, ResourceLocation resourceLocation) {

@@ -10,8 +10,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockRotProcessor
 extends StructureProcessor {
-    public static final Codec<BlockRotProcessor> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryCodecs.homogeneousList(Registry.BLOCK_REGISTRY).optionalFieldOf("rottable_blocks").forGetter(blockRotProcessor -> blockRotProcessor.rottableBlocks), ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("integrity")).forGetter(blockRotProcessor -> Float.valueOf(blockRotProcessor.integrity))).apply((Applicative<BlockRotProcessor, ?>)instance, BlockRotProcessor::new));
+    public static final Codec<BlockRotProcessor> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryCodecs.homogeneousList(Registries.BLOCK).optionalFieldOf("rottable_blocks").forGetter(blockRotProcessor -> blockRotProcessor.rottableBlocks), ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("integrity")).forGetter(blockRotProcessor -> Float.valueOf(blockRotProcessor.integrity))).apply((Applicative<BlockRotProcessor, ?>)instance, BlockRotProcessor::new));
     private final Optional<HolderSet<Block>> rottableBlocks;
     private final float integrity;
 

@@ -5,6 +5,7 @@ package net.minecraft.util.valueproviders;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.valueproviders.ClampedNormalFloat;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.FloatProvider;
@@ -20,7 +21,7 @@ public interface FloatProviderType<P extends FloatProvider> {
     public Codec<P> codec();
 
     public static <P extends FloatProvider> FloatProviderType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.FLOAT_PROVIDER_TYPES, string, () -> codec);
+        return Registry.register(BuiltInRegistries.FLOAT_PROVIDER_TYPE, string, () -> codec);
     }
 }
 

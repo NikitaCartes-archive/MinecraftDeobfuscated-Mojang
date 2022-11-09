@@ -35,6 +35,7 @@ extends OptionsSubScreen {
         this.addRenderableWidget(this.options.toggleCrouch().createButton(this.options, i, k += 24, 150));
         this.addRenderableWidget(this.options.toggleSprint().createButton(this.options, j, k, 150));
         this.addRenderableWidget(this.options.autoJump().createButton(this.options, i, k += 24, 150));
+        this.addRenderableWidget(this.options.operatorItemsTab().createButton(this.options, j, k, 150));
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, k += 24, 200, 20).build());
     }
 

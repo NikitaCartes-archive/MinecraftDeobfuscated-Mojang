@@ -4,7 +4,10 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -60,7 +63,12 @@ extends Behavior<LivingEntity> {
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         if (l > this.nextOkStartTime) {
-            InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, null, null);
+            Brain<Collection<Object>> brain = livingEntity.getBrain();
+            if (brain.hasMemoryValue(MemoryModuleType.DOORS_TO_CLOSE)) {
+                Set<GlobalPos> set = brain.getMemory(MemoryModuleType.DOORS_TO_CLOSE).get();
+                Optional<List<LivingEntity>> optional = brain.hasMemoryValue(MemoryModuleType.NEAREST_LIVING_ENTITIES) ? brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES) : Optional.empty();
+                InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, null, null, set, optional);
+            }
             livingEntity.startSleeping(livingEntity.getBrain().getMemory(MemoryModuleType.HOME).get().pos());
         }
     }

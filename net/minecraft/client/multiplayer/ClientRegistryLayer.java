@@ -7,8 +7,8 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 @Environment(value=EnvType.CLIENT)
 public enum ClientRegistryLayer {
@@ -24,7 +24,7 @@ public enum ClientRegistryLayer {
 
     static {
         VALUES = List.of(ClientRegistryLayer.values());
-        STATIC_ACCESS = RegistryAccess.fromRegistryOfRegistries(Registry.REGISTRY);
+        STATIC_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     }
 }
 

@@ -14,7 +14,7 @@ import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,7 +51,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     private static Block deserializeBlock(JsonObject jsonObject) {
         if (jsonObject.has("block")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-            return Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
+            return (Block)BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
         }
         return null;
     }
@@ -103,7 +103,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         public JsonObject serializeToJson(SerializationContext serializationContext) {
             JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (this.block != null) {
-                jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
+                jsonObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(this.block).toString());
             }
             jsonObject.add("state", this.state.serializeToJson());
             jsonObject.add("location", this.location.serializeToJson());

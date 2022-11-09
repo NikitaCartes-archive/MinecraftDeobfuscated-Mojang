@@ -15,8 +15,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
@@ -206,7 +207,7 @@ public final class NaturalSpawner {
                 Mob mob = (Mob)obj;
                 return mob;
             }
-            LOGGER.warn("Can't spawn entity of type: {}", (Object)Registry.ENTITY_TYPE.getKey(entityType));
+            LOGGER.warn("Can't spawn entity of type: {}", (Object)BuiltInRegistries.ENTITY_TYPE.getKey(entityType));
         } catch (Exception exception) {
             LOGGER.warn("Failed to create mob", exception);
         }
@@ -243,7 +244,7 @@ public final class NaturalSpawner {
         if (mobCategory != MobCategory.MONSTER || !serverLevel.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)) {
             return false;
         }
-        Structure structure = structureManager.registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY).get(BuiltinStructures.FORTRESS);
+        Structure structure = structureManager.registryAccess().registryOrThrow(Registries.STRUCTURE).get(BuiltinStructures.FORTRESS);
         if (structure == null) {
             return false;
         }

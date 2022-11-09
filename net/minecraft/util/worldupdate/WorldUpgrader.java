@@ -28,6 +28,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -64,7 +65,7 @@ public class WorldUpgrader {
 
     public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, Registry<LevelStem> registry, boolean bl) {
         this.dimensions = registry;
-        this.levels = registry.registryKeySet().stream().map(Registry::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
+        this.levels = registry.registryKeySet().stream().map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
         this.eraseCache = bl;
         this.dataFixer = dataFixer;
         this.levelStorage = levelStorageAccess;
@@ -123,7 +124,7 @@ public class WorldUpgrader {
                         if (compoundTag != null) {
                             boolean bl3;
                             int i = ChunkStorage.getVersion(compoundTag);
-                            ChunkGenerator chunkGenerator = this.dimensions.getOrThrow(Registry.levelToLevelStem(resourceKey3)).generator();
+                            ChunkGenerator chunkGenerator = this.dimensions.getOrThrow(Registries.levelToLevelStem(resourceKey3)).generator();
                             CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(resourceKey3, () -> this.overworldDataStorage, compoundTag, chunkGenerator.getTypeNameForDataFixer());
                             ChunkPos chunkPos2 = new ChunkPos(compoundTag2.getInt("xPos"), compoundTag2.getInt("zPos"));
                             if (!chunkPos2.equals(chunkPos)) {

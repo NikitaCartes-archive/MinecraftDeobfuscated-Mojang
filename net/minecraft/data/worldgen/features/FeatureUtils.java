@@ -6,7 +6,7 @@ package net.minecraft.data.worldgen.features;
 import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.AquaticFeatures;
 import net.minecraft.data.worldgen.features.CaveFeatures;
@@ -64,7 +64,7 @@ public class FeatureUtils {
     }
 
     public static ResourceKey<ConfiguredFeature<?, ?>> createKey(String string) {
-        return ResourceKey.create(Registry.CONFIGURED_FEATURE_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.CONFIGURED_FEATURE, new ResourceLocation(string));
     }
 
     public static void register(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, Feature<NoneFeatureConfiguration> feature) {

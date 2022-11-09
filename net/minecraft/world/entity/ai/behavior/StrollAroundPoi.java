@@ -3,48 +3,37 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.OneShot;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.mutable.MutableLong;
 
-public class StrollAroundPoi
-extends Behavior<PathfinderMob> {
+public class StrollAroundPoi {
     private static final int MIN_TIME_BETWEEN_STROLLS = 180;
     private static final int STROLL_MAX_XZ_DIST = 8;
     private static final int STROLL_MAX_Y_DIST = 6;
-    private final MemoryModuleType<GlobalPos> memoryType;
-    private long nextOkStartTime;
-    private final int maxDistanceFromPoi;
-    private final float speedModifier;
 
-    public StrollAroundPoi(MemoryModuleType<GlobalPos> memoryModuleType, float f, int i) {
-        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, memoryModuleType, MemoryStatus.VALUE_PRESENT));
-        this.memoryType = memoryModuleType;
-        this.speedModifier = f;
-        this.maxDistanceFromPoi = i;
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-        Optional<GlobalPos> optional = pathfinderMob.getBrain().getMemory(this.memoryType);
-        return optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerToCenterThan(pathfinderMob.position(), this.maxDistanceFromPoi);
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-        if (l > this.nextOkStartTime) {
+    public static OneShot<PathfinderMob> create(MemoryModuleType<GlobalPos> memoryModuleType, float f, int i) {
+        MutableLong mutableLong = new MutableLong(0L);
+        return BehaviorBuilder.create(instance -> instance.group(instance.registered(MemoryModuleType.WALK_TARGET), instance.present(memoryModuleType)).apply(instance, (memoryAccessor, memoryAccessor2) -> (serverLevel, pathfinderMob, l) -> {
+            GlobalPos globalPos = (GlobalPos)instance.get(memoryAccessor2);
+            if (serverLevel.dimension() != globalPos.dimension() || !globalPos.pos().closerToCenterThan(pathfinderMob.position(), i)) {
+                return false;
+            }
+            if (l <= mutableLong.getValue()) {
+                return true;
+            }
             Optional<Vec3> optional = Optional.ofNullable(LandRandomPos.getPos(pathfinderMob, 8, 6));
-            pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget((Vec3)vec3, this.speedModifier, 1)));
-            this.nextOkStartTime = l + 180L;
-        }
+            memoryAccessor.setOrErase(optional.map(vec3 -> new WalkTarget((Vec3)vec3, f, 1)));
+            mutableLong.setValue(l + 180L);
+            return true;
+        }));
     }
 }
 

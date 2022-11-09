@@ -5,7 +5,7 @@ package net.minecraft.data.recipes;
 
 import java.util.function.Consumer;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -37,7 +37,7 @@ public interface RecipeBuilder {
     }
 
     public static ResourceLocation getDefaultRecipeId(ItemLike itemLike) {
-        return Registry.ITEM.getKey(itemLike.asItem());
+        return BuiltInRegistries.ITEM.getKey(itemLike.asItem());
     }
 }
 

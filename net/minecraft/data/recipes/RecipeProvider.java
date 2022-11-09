@@ -20,7 +20,7 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
 import net.minecraft.data.CachedOutput;
@@ -117,12 +117,20 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(recipeCategory, itemLike, 1).define(Character.valueOf('#'), itemLike2).pattern("##").pattern("##").unlockedBy(RecipeProvider.getHasName(itemLike2), RecipeProvider.has(itemLike2)).save(consumer);
     }
 
-    protected static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, 4).requires(tagKey).group("planks").unlockedBy("has_log", RecipeProvider.has(tagKey)).save(consumer);
+    protected static void threeByThreePacker(Consumer<FinishedRecipe> consumer, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2, String string) {
+        ShapelessRecipeBuilder.shapeless(recipeCategory, itemLike).requires(itemLike2, 9).unlockedBy(string, RecipeProvider.has(itemLike2)).save(consumer);
     }
 
-    protected static void planksFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, 4).requires(tagKey).group("planks").unlockedBy("has_logs", RecipeProvider.has(tagKey)).save(consumer);
+    protected static void threeByThreePacker(Consumer<FinishedRecipe> consumer, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+        RecipeProvider.threeByThreePacker(consumer, recipeCategory, itemLike, itemLike2, RecipeProvider.getHasName(itemLike2));
+    }
+
+    protected static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey, int i) {
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i).requires(tagKey).group("planks").unlockedBy("has_log", RecipeProvider.has(tagKey)).save(consumer);
+    }
+
+    protected static void planksFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey, int i) {
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i).requires(tagKey).group("planks").unlockedBy("has_logs", RecipeProvider.has(tagKey)).save(consumer);
     }
 
     protected static void woodFromLogs(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -184,11 +192,7 @@ implements DataProvider {
     }
 
     protected static void hangingSign(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-        RecipeProvider.hangingSign(consumer, itemLike, itemLike2, 6);
-    }
-
-    protected static void hangingSign(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2, int i) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, i).group("hanging_sign").define(Character.valueOf('#'), itemLike2).define(Character.valueOf('X'), Items.CHAIN).pattern("X X").pattern("###").pattern("###").unlockedBy("has_stripped_logs", RecipeProvider.has(ItemTags.STRIPPED_LOGS)).save(consumer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 6).group("hanging_sign").define(Character.valueOf('#'), itemLike2).define(Character.valueOf('X'), Items.CHAIN).pattern("X X").pattern("###").pattern("###").unlockedBy("has_stripped_logs", RecipeProvider.has(ItemTags.STRIPPED_LOGS)).save(consumer);
     }
 
     protected static void coloredWoolFromWhiteWoolAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -375,7 +379,7 @@ implements DataProvider {
     }
 
     protected static String getItemName(ItemLike itemLike) {
-        return Registry.ITEM.getKey(itemLike.asItem()).getPath();
+        return BuiltInRegistries.ITEM.getKey(itemLike.asItem()).getPath();
     }
 
     protected static String getSimpleRecipeName(ItemLike itemLike) {

@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.feature.featuresize;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSize;
 import net.minecraft.world.level.levelgen.feature.featuresize.ThreeLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
@@ -15,7 +16,7 @@ public class FeatureSizeType<P extends FeatureSize> {
     private final Codec<P> codec;
 
     private static <P extends FeatureSize> FeatureSizeType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.FEATURE_SIZE_TYPES, string, new FeatureSizeType<P>(codec));
+        return Registry.register(BuiltInRegistries.FEATURE_SIZE_TYPE, string, new FeatureSizeType<P>(codec));
     }
 
     private FeatureSizeType(Codec<P> codec) {

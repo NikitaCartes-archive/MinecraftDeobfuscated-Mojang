@@ -5,7 +5,7 @@ package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -63,7 +63,7 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundAddEntityPacket(FriendlyByteBuf friendlyByteBuf) {
         this.id = friendlyByteBuf.readVarInt();
         this.uuid = friendlyByteBuf.readUUID();
-        this.type = friendlyByteBuf.readById(Registry.ENTITY_TYPE);
+        this.type = friendlyByteBuf.readById(BuiltInRegistries.ENTITY_TYPE);
         this.x = friendlyByteBuf.readDouble();
         this.y = friendlyByteBuf.readDouble();
         this.z = friendlyByteBuf.readDouble();
@@ -80,7 +80,7 @@ implements Packet<ClientGamePacketListener> {
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.id);
         friendlyByteBuf.writeUUID(this.uuid);
-        friendlyByteBuf.writeId(Registry.ENTITY_TYPE, this.type);
+        friendlyByteBuf.writeId(BuiltInRegistries.ENTITY_TYPE, this.type);
         friendlyByteBuf.writeDouble(this.x);
         friendlyByteBuf.writeDouble(this.y);
         friendlyByteBuf.writeDouble(this.z);

@@ -51,8 +51,8 @@ extends Behavior<E> {
     }
 
     @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (E)((Warden)livingEntity), l);
+    protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.stop(serverLevel, (E)((Warden)livingEntity), l);
     }
 
     @Override

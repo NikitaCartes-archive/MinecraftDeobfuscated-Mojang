@@ -63,6 +63,7 @@ import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
 import net.minecraft.client.ToggleKeyMapping;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
@@ -78,7 +79,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -145,16 +145,11 @@ public class Options {
     private static final Component GRAPHICS_TOOLTIP_FAST = Component.translatable("options.graphics.fast.tooltip");
     private static final Component GRAPHICS_TOOLTIP_FABULOUS = Component.translatable("options.graphics.fabulous.tooltip", Component.translatable("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC));
     private static final Component GRAPHICS_TOOLTIP_FANCY = Component.translatable("options.graphics.fancy.tooltip");
-    private final OptionInstance<GraphicsStatus> graphicsMode = new OptionInstance<GraphicsStatus>("options.graphics", minecraft -> {
-        List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, GRAPHICS_TOOLTIP_FAST);
-        List<FormattedCharSequence> list2 = OptionInstance.splitTooltip(minecraft, GRAPHICS_TOOLTIP_FANCY);
-        List<FormattedCharSequence> list3 = OptionInstance.splitTooltip(minecraft, GRAPHICS_TOOLTIP_FABULOUS);
-        return graphicsStatus -> switch (graphicsStatus) {
-            default -> throw new IncompatibleClassChangeError();
-            case GraphicsStatus.FANCY -> list2;
-            case GraphicsStatus.FAST -> list;
-            case GraphicsStatus.FABULOUS -> list3;
-        };
+    private final OptionInstance<GraphicsStatus> graphicsMode = new OptionInstance<GraphicsStatus>("options.graphics", graphicsStatus -> switch (graphicsStatus) {
+        default -> throw new IncompatibleClassChangeError();
+        case GraphicsStatus.FANCY -> Tooltip.create(GRAPHICS_TOOLTIP_FANCY);
+        case GraphicsStatus.FAST -> Tooltip.create(GRAPHICS_TOOLTIP_FAST);
+        case GraphicsStatus.FABULOUS -> Tooltip.create(GRAPHICS_TOOLTIP_FABULOUS);
     }, (component, graphicsStatus) -> {
         MutableComponent mutableComponent = Component.translatable(graphicsStatus.getKey());
         if (graphicsStatus == GraphicsStatus.FABULOUS) {
@@ -175,16 +170,11 @@ public class Options {
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_NONE = Component.translatable("options.prioritizeChunkUpdates.none.tooltip");
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED = Component.translatable("options.prioritizeChunkUpdates.byPlayer.tooltip");
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_NEARBY = Component.translatable("options.prioritizeChunkUpdates.nearby.tooltip");
-    private final OptionInstance<PrioritizeChunkUpdates> prioritizeChunkUpdates = new OptionInstance<PrioritizeChunkUpdates>("options.prioritizeChunkUpdates", minecraft -> {
-        List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, PRIORITIZE_CHUNK_TOOLTIP_NONE);
-        List<FormattedCharSequence> list2 = OptionInstance.splitTooltip(minecraft, PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED);
-        List<FormattedCharSequence> list3 = OptionInstance.splitTooltip(minecraft, PRIORITIZE_CHUNK_TOOLTIP_NEARBY);
-        return prioritizeChunkUpdates -> switch (prioritizeChunkUpdates) {
-            default -> throw new IncompatibleClassChangeError();
-            case PrioritizeChunkUpdates.NONE -> list;
-            case PrioritizeChunkUpdates.PLAYER_AFFECTED -> list2;
-            case PrioritizeChunkUpdates.NEARBY -> list3;
-        };
+    private final OptionInstance<PrioritizeChunkUpdates> prioritizeChunkUpdates = new OptionInstance<PrioritizeChunkUpdates>("options.prioritizeChunkUpdates", prioritizeChunkUpdates -> switch (prioritizeChunkUpdates) {
+        default -> throw new IncompatibleClassChangeError();
+        case PrioritizeChunkUpdates.NONE -> Tooltip.create(PRIORITIZE_CHUNK_TOOLTIP_NONE);
+        case PrioritizeChunkUpdates.PLAYER_AFFECTED -> Tooltip.create(PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED);
+        case PrioritizeChunkUpdates.NEARBY -> Tooltip.create(PRIORITIZE_CHUNK_TOOLTIP_NEARBY);
     }, OptionInstance.forOptionEnum(), new OptionInstance.Enum<PrioritizeChunkUpdates>(Arrays.asList(PrioritizeChunkUpdates.values()), Codec.INT.xmap(PrioritizeChunkUpdates::byId, PrioritizeChunkUpdates::getId)), PrioritizeChunkUpdates.NONE, prioritizeChunkUpdates -> {});
     public List<String> resourcePacks = Lists.newArrayList();
     public List<String> incompatibleResourcePacks = Lists.newArrayList();
@@ -242,6 +232,7 @@ public class Options {
     });
     public int glDebugVerbosity = 1;
     private final OptionInstance<Boolean> autoJump = OptionInstance.createBoolean("options.autoJump", true);
+    private final OptionInstance<Boolean> operatorItemsTab = OptionInstance.createBoolean("options.operatorItemsTab", false);
     private final OptionInstance<Boolean> autoSuggestions = OptionInstance.createBoolean("options.autoSuggestCommands", true);
     private final OptionInstance<Boolean> chatColors = OptionInstance.createBoolean("options.chat.color", true);
     private final OptionInstance<Boolean> chatLinks = OptionInstance.createBoolean("options.chat.links", true);
@@ -273,11 +264,7 @@ public class Options {
     private final OptionInstance<Boolean> showSubtitles = OptionInstance.createBoolean("options.showSubtitles", false);
     private static final Component DIRECTIONAL_AUDIO_TOOLTIP_ON = Component.translatable("options.directionalAudio.on.tooltip");
     private static final Component DIRECTIONAL_AUDIO_TOOLTIP_OFF = Component.translatable("options.directionalAudio.off.tooltip");
-    private final OptionInstance<Boolean> directionalAudio = OptionInstance.createBoolean("options.directionalAudio", minecraft -> {
-        List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, DIRECTIONAL_AUDIO_TOOLTIP_ON);
-        List<FormattedCharSequence> list2 = OptionInstance.splitTooltip(minecraft, DIRECTIONAL_AUDIO_TOOLTIP_OFF);
-        return boolean_ -> boolean_ != false ? list : list2;
-    }, false, boolean_ -> {
+    private final OptionInstance<Boolean> directionalAudio = OptionInstance.createBoolean("options.directionalAudio", boolean_ -> boolean_ != false ? Tooltip.create(DIRECTIONAL_AUDIO_TOOLTIP_ON) : Tooltip.create(DIRECTIONAL_AUDIO_TOOLTIP_OFF), false, boolean_ -> {
         SoundManager soundManager = Minecraft.getInstance().getSoundManager();
         soundManager.reload();
         soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
@@ -533,6 +520,10 @@ public class Options {
         return this.autoJump;
     }
 
+    public OptionInstance<Boolean> operatorItemsTab() {
+        return this.operatorItemsTab;
+    }
+
     public OptionInstance<Boolean> autoSuggestions() {
         return this.autoSuggestions;
     }
@@ -678,10 +669,10 @@ public class Options {
         return this.soundDevice;
     }
 
-    public Options(Minecraft minecraft2, File file) {
-        this.minecraft = minecraft2;
+    public Options(Minecraft minecraft, File file) {
+        this.minecraft = minecraft;
         this.optionsFile = new File(file, "options.txt");
-        boolean bl = minecraft2.is64Bit();
+        boolean bl = minecraft.is64Bit();
         boolean bl2 = bl && Runtime.getRuntime().maxMemory() >= 1000000000L;
         this.renderDistance = new OptionInstance<Integer>("options.renderDistance", OptionInstance.noTooltip(), (component, integer) -> Options.genericValueLabel(component, Component.translatable("options.chunks", integer)), new OptionInstance.IntRange(2, bl2 ? 32 : 16), bl ? 12 : 8, integer -> Minecraft.getInstance().levelRenderer.needsUpdate());
         this.simulationDistance = new OptionInstance<Integer>("options.simulationDistance", OptionInstance.noTooltip(), (component, integer) -> Options.genericValueLabel(component, Component.translatable("options.chunks", integer)), new OptionInstance.IntRange(5, bl2 ? 32 : 16), bl ? 12 : 8, integer -> {});
@@ -708,6 +699,7 @@ public class Options {
 
     private void processOptions(FieldAccess fieldAccess) {
         fieldAccess.process("autoJump", this.autoJump);
+        fieldAccess.process("operatorItemsTab", this.operatorItemsTab);
         fieldAccess.process("autoSuggestions", this.autoSuggestions);
         fieldAccess.process("chatColors", this.chatColors);
         fieldAccess.process("chatLinks", this.chatLinks);

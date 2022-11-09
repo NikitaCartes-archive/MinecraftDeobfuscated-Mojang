@@ -37,7 +37,7 @@ extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
         narrationElementOutput.add(NarratedElementType.TITLE, (Component)this.createNarrationMessage());
         if (this.active) {
             if (this.isFocused()) {

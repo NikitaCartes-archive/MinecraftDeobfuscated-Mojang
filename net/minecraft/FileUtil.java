@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
@@ -157,6 +158,10 @@ public class FileUtil {
             if (!string.equals("..") && !string.equals(".") && FileUtil.isValidStrictPathSegment(string)) continue;
             throw new IllegalArgumentException("Illegal segment " + string + " in path " + Arrays.toString(strings));
         }
+    }
+
+    public static void createDirectoriesSafe(Path path) throws IOException {
+        Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath(new LinkOption[0]) : path, new FileAttribute[0]);
     }
 }
 

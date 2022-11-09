@@ -11,8 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class FluidState
 extends StateHolder<Fluid, FluidState> {
-    public static final Codec<FluidState> CODEC = FluidState.codec(Registry.FLUID.byNameCodec(), Fluid::defaultFluidState).stable();
+    public static final Codec<FluidState> CODEC = FluidState.codec(BuiltInRegistries.FLUID.byNameCodec(), Fluid::defaultFluidState).stable();
     public static final int AMOUNT_MAX = 9;
     public static final int AMOUNT_FULL = 8;
 

@@ -28,11 +28,14 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.Validate;
@@ -40,15 +43,16 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public class MappedRegistry<T>
-extends WritableRegistry<T> {
+implements WritableRegistry<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
+    final ResourceKey<? extends Registry<T>> key;
     private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<Holder.Reference<T>>(256);
     private final Object2IntMap<T> toId = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1));
     private final Map<ResourceLocation, Holder.Reference<T>> byLocation = new HashMap<ResourceLocation, Holder.Reference<T>>();
     private final Map<ResourceKey<T>, Holder.Reference<T>> byKey = new HashMap<ResourceKey<T>, Holder.Reference<T>>();
     private final Map<T, Holder.Reference<T>> byValue = new IdentityHashMap<T, Holder.Reference<T>>();
     private final Map<T, Lifecycle> lifecycles = new IdentityHashMap<T, Lifecycle>();
-    private Lifecycle elementsLifecycle;
+    private Lifecycle registryLifecycle;
     private volatile Map<TagKey<T>, HolderSet.Named<T>> tags = new IdentityHashMap<TagKey<T>, HolderSet.Named<T>>();
     private boolean frozen;
     @Nullable
@@ -56,17 +60,59 @@ extends WritableRegistry<T> {
     @Nullable
     private List<Holder.Reference<T>> holdersInOrder;
     private int nextId;
+    private final HolderLookup.RegistryLookup<T> lookup = new HolderLookup.RegistryLookup<T>(){
+
+        @Override
+        public ResourceKey<? extends Registry<? extends T>> key() {
+            return MappedRegistry.this.key;
+        }
+
+        @Override
+        public Lifecycle registryLifecycle() {
+            return MappedRegistry.this.registryLifecycle();
+        }
+
+        @Override
+        public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+            return MappedRegistry.this.getHolder(resourceKey);
+        }
+
+        @Override
+        public Stream<Holder.Reference<T>> listElements() {
+            return MappedRegistry.this.holders();
+        }
+
+        @Override
+        public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+            return MappedRegistry.this.getTag(tagKey);
+        }
+
+        @Override
+        public Stream<HolderSet.Named<T>> listTags() {
+            return MappedRegistry.this.getTags().map(Pair::getSecond);
+        }
+    };
 
     public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
         this(resourceKey, lifecycle, false);
     }
 
     public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, boolean bl) {
-        super(resourceKey, lifecycle);
-        this.elementsLifecycle = lifecycle;
+        Bootstrap.checkBootstrapCalled(() -> "registry " + resourceKey);
+        this.key = resourceKey;
+        this.registryLifecycle = lifecycle;
         if (bl) {
             this.unregisteredIntrusiveHolders = new IdentityHashMap<T, Holder.Reference<T>>();
         }
+    }
+
+    @Override
+    public ResourceKey<? extends Registry<T>> key() {
+        return this.key;
+    }
+
+    public String toString() {
+        return "Registry[" + this.key + " (" + this.registryLifecycle + ")]";
     }
 
     private List<Holder.Reference<T>> holdersInOrder() {
@@ -119,7 +165,7 @@ extends WritableRegistry<T> {
             this.nextId = i + 1;
         }
         this.lifecycles.put(object, lifecycle);
-        this.elementsLifecycle = this.elementsLifecycle.add(lifecycle);
+        this.registryLifecycle = this.registryLifecycle.add(lifecycle);
         this.holdersInOrder = null;
         return reference;
     }
@@ -195,8 +241,8 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public Lifecycle elementsLifecycle() {
-        return this.elementsLifecycle;
+    public Lifecycle registryLifecycle() {
+        return this.registryLifecycle;
     }
 
     @Override
@@ -237,11 +283,6 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public boolean isKnownTagName(TagKey<T> tagKey) {
-        return this.tags.containsKey(tagKey);
-    }
-
-    @Override
     public Stream<Pair<TagKey<T>, HolderSet.Named<T>>> getTags() {
         return this.tags.entrySet().stream().map(entry -> Pair.of((TagKey)entry.getKey(), (HolderSet.Named)entry.getValue()));
     }
@@ -259,7 +300,7 @@ extends WritableRegistry<T> {
     }
 
     private HolderSet.Named<T> createTag(TagKey<T> tagKey) {
-        return new HolderSet.Named(this.holderOwner(), tagKey);
+        return new HolderSet.Named<T>(this.holderOwner(), tagKey);
     }
 
     @Override
@@ -379,6 +420,16 @@ extends WritableRegistry<T> {
                 return MappedRegistry.this.getOrCreateTag(tagKey);
             }
         };
+    }
+
+    @Override
+    public HolderOwner<T> holderOwner() {
+        return this.lookup;
+    }
+
+    @Override
+    public HolderLookup.RegistryLookup<T> asLookup() {
+        return this.lookup;
     }
 
     @Override

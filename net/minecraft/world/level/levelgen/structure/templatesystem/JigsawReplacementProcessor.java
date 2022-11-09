@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,7 +35,7 @@ extends StructureProcessor {
         }
         String string = structureBlockInfo2.nbt.getString("final_state");
         try {
-            BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(levelReader.holderLookup(Registry.BLOCK_REGISTRY), string, true);
+            BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(levelReader.holderLookup(Registries.BLOCK), string, true);
             blockState2 = blockResult.blockState();
         } catch (CommandSyntaxException commandSyntaxException) {
             throw new RuntimeException(commandSyntaxException);

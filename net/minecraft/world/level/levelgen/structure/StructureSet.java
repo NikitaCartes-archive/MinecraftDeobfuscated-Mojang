@@ -9,7 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 
 public record StructureSet(List<StructureSelectionEntry> structures, StructurePlacement placement) {
     public static final Codec<StructureSet> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSelectionEntry.CODEC.listOf().fieldOf("structures")).forGetter(StructureSet::structures), ((MapCodec)StructurePlacement.CODEC.fieldOf("placement")).forGetter(StructureSet::placement)).apply((Applicative<StructureSet, ?>)instance, StructureSet::new));
-    public static final Codec<Holder<StructureSet>> CODEC = RegistryFileCodec.create(Registry.STRUCTURE_SET_REGISTRY, DIRECT_CODEC);
+    public static final Codec<Holder<StructureSet>> CODEC = RegistryFileCodec.create(Registries.STRUCTURE_SET, DIRECT_CODEC);
 
     public StructureSet(Holder<Structure> holder, StructurePlacement structurePlacement) {
         this(List.of(new StructureSelectionEntry(holder, 1)), structurePlacement);

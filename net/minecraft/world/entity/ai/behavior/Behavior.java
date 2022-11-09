@@ -6,10 +6,12 @@ package net.minecraft.world.entity.ai.behavior;
 import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
-public abstract class Behavior<E extends LivingEntity> {
+public abstract class Behavior<E extends LivingEntity>
+implements BehaviorControl<E> {
     public static final int DEFAULT_DURATION = 60;
     protected final Map<MemoryModuleType<?>, MemoryStatus> entryCondition;
     private Status status = Status.STOPPED;
@@ -31,10 +33,12 @@ public abstract class Behavior<E extends LivingEntity> {
         this.entryCondition = map;
     }
 
+    @Override
     public Status getStatus() {
         return this.status;
     }
 
+    @Override
     public final boolean tryStart(ServerLevel serverLevel, E livingEntity, long l) {
         if (this.hasRequiredMemories(livingEntity) && this.checkExtraStartConditions(serverLevel, livingEntity)) {
             this.status = Status.RUNNING;
@@ -49,6 +53,7 @@ public abstract class Behavior<E extends LivingEntity> {
     protected void start(ServerLevel serverLevel, E livingEntity, long l) {
     }
 
+    @Override
     public final void tickOrStop(ServerLevel serverLevel, E livingEntity, long l) {
         if (!this.timedOut(l) && this.canStillUse(serverLevel, livingEntity, l)) {
             this.tick(serverLevel, livingEntity, l);
@@ -60,6 +65,7 @@ public abstract class Behavior<E extends LivingEntity> {
     protected void tick(ServerLevel serverLevel, E livingEntity, long l) {
     }
 
+    @Override
     public final void doStop(ServerLevel serverLevel, E livingEntity, long l) {
         this.status = Status.STOPPED;
         this.stop(serverLevel, livingEntity, l);
@@ -80,11 +86,12 @@ public abstract class Behavior<E extends LivingEntity> {
         return true;
     }
 
-    public String toString() {
+    @Override
+    public String debugString() {
         return this.getClass().getSimpleName();
     }
 
-    private boolean hasRequiredMemories(E livingEntity) {
+    protected boolean hasRequiredMemories(E livingEntity) {
         for (Map.Entry<MemoryModuleType<?>, MemoryStatus> entry : this.entryCondition.entrySet()) {
             MemoryModuleType<?> memoryModuleType = entry.getKey();
             MemoryStatus memoryStatus = entry.getValue();

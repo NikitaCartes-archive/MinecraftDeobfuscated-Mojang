@@ -19,7 +19,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,7 +35,7 @@ public class EnchantCommand {
     private static final SimpleCommandExceptionType ERROR_NOTHING_HAPPENED = new SimpleCommandExceptionType(Component.translatable("commands.enchant.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("enchant").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("targets", EntityArgument.entities()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("enchantment", ResourceArgument.resource(commandBuildContext, Registry.ENCHANTMENT_REGISTRY)).executes(commandContext -> EnchantCommand.enchant((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ResourceArgument.getEnchantment(commandContext, "enchantment"), 1))).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes(commandContext -> EnchantCommand.enchant((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ResourceArgument.getEnchantment(commandContext, "enchantment"), IntegerArgumentType.getInteger(commandContext, "level")))))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("enchant").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("targets", EntityArgument.entities()).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("enchantment", ResourceArgument.resource(commandBuildContext, Registries.ENCHANTMENT)).executes(commandContext -> EnchantCommand.enchant((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ResourceArgument.getEnchantment(commandContext, "enchantment"), 1))).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes(commandContext -> EnchantCommand.enchant((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ResourceArgument.getEnchantment(commandContext, "enchantment"), IntegerArgumentType.getInteger(commandContext, "level")))))));
     }
 
     private static int enchant(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection, Holder<Enchantment> holder, int i) throws CommandSyntaxException {

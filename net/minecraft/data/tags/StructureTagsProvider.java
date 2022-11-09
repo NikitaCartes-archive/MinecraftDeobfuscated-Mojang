@@ -5,7 +5,7 @@ package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.StructureTags;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 public class StructureTagsProvider
 extends TagsProvider<Structure> {
     public StructureTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-        super(packOutput, Registry.STRUCTURE_REGISTRY, completableFuture);
+        super(packOutput, Registries.STRUCTURE, completableFuture);
     }
 
     @Override

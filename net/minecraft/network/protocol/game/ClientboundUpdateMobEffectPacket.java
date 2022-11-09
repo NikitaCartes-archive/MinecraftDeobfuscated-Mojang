@@ -3,7 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -46,7 +46,7 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf2) {
         this.entityId = friendlyByteBuf2.readVarInt();
-        this.effect = friendlyByteBuf2.readById(Registry.MOB_EFFECT);
+        this.effect = friendlyByteBuf2.readById(BuiltInRegistries.MOB_EFFECT);
         this.effectAmplifier = friendlyByteBuf2.readByte();
         this.effectDurationTicks = friendlyByteBuf2.readVarInt();
         this.flags = friendlyByteBuf2.readByte();
@@ -56,7 +56,7 @@ implements Packet<ClientGamePacketListener> {
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf2) {
         friendlyByteBuf2.writeVarInt(this.entityId);
-        friendlyByteBuf2.writeId(Registry.MOB_EFFECT, this.effect);
+        friendlyByteBuf2.writeId(BuiltInRegistries.MOB_EFFECT, this.effect);
         friendlyByteBuf2.writeByte(this.effectAmplifier);
         friendlyByteBuf2.writeVarInt(this.effectDurationTicks);
         friendlyByteBuf2.writeByte(this.flags);

@@ -238,8 +238,13 @@ extends Behavior<E> {
     }
 
     @Override
-    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (E)((Mob)livingEntity), l);
+    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        return this.canStillUse(serverLevel, (Mob)livingEntity, l);
+    }
+
+    @Override
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (E)((Mob)livingEntity), l);
     }
 
     public static class PossibleJump

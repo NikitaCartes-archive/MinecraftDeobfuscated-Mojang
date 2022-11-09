@@ -3,9 +3,9 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -37,7 +37,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundLevelParticlesPacket(FriendlyByteBuf friendlyByteBuf) {
-        ParticleType<?> particleType = friendlyByteBuf.readById(Registry.PARTICLE_TYPE);
+        ParticleType<?> particleType = friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE);
         this.overrideLimiter = friendlyByteBuf.readBoolean();
         this.x = friendlyByteBuf.readDouble();
         this.y = friendlyByteBuf.readDouble();
@@ -56,7 +56,7 @@ implements Packet<ClientGamePacketListener> {
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeId(Registry.PARTICLE_TYPE, this.particle.getType());
+        friendlyByteBuf.writeId(BuiltInRegistries.PARTICLE_TYPE, this.particle.getType());
         friendlyByteBuf.writeBoolean(this.overrideLimiter);
         friendlyByteBuf.writeDouble(this.x);
         friendlyByteBuf.writeDouble(this.y);

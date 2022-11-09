@@ -24,7 +24,7 @@ import net.minecraft.client.gui.screens.achievement.StatsUpdateListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -231,7 +231,7 @@ implements StatsUpdateListener {
             this.itemColumns = Lists.newArrayList(Stats.ITEM_BROKEN, Stats.ITEM_CRAFTED, Stats.ITEM_USED, Stats.ITEM_PICKED_UP, Stats.ITEM_DROPPED);
             this.setRenderHeader(true, 20);
             Set<Item> set = Sets.newIdentityHashSet();
-            for (Item item : Registry.ITEM) {
+            for (Item item : BuiltInRegistries.ITEM) {
                 bl = false;
                 for (StatType<Item> statType : this.itemColumns) {
                     if (!statType.contains(item) || StatsScreen.this.stats.getValue(statType.get(item)) <= 0) continue;
@@ -240,7 +240,7 @@ implements StatsUpdateListener {
                 if (!bl) continue;
                 set.add(item);
             }
-            for (Block block : Registry.BLOCK) {
+            for (Block block : BuiltInRegistries.BLOCK) {
                 bl = false;
                 for (StatType<FeatureElement> statType : this.blockColumns) {
                     if (!statType.contains(block) || StatsScreen.this.stats.getValue(statType.get(block)) <= 0) continue;
@@ -458,7 +458,7 @@ implements StatsUpdateListener {
     extends ObjectSelectionList<MobRow> {
         public MobsStatisticsList(Minecraft minecraft) {
             super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, ((StatsScreen)StatsScreen.this).font.lineHeight * 4);
-            for (EntityType entityType : Registry.ENTITY_TYPE) {
+            for (EntityType entityType : BuiltInRegistries.ENTITY_TYPE) {
                 if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType)) <= 0 && StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType)) <= 0) continue;
                 this.addEntry(new MobRow(entityType));
             }

@@ -3,25 +3,26 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VexModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Vex;
 
 @Environment(value=EnvType.CLIENT)
 public class VexRenderer
-extends HumanoidMobRenderer<Vex, VexModel> {
+extends MobRenderer<Vex, VexModel> {
     private static final ResourceLocation VEX_LOCATION = new ResourceLocation("textures/entity/illager/vex.png");
     private static final ResourceLocation VEX_CHARGING_LOCATION = new ResourceLocation("textures/entity/illager/vex_charging.png");
 
     public VexRenderer(EntityRendererProvider.Context context) {
         super(context, new VexModel(context.bakeLayer(ModelLayers.VEX)), 0.3f);
+        this.addLayer(new ItemInHandLayer<Vex, VexModel>(this, context.getItemInHandRenderer()));
     }
 
     @Override
@@ -35,11 +36,6 @@ extends HumanoidMobRenderer<Vex, VexModel> {
             return VEX_CHARGING_LOCATION;
         }
         return VEX_LOCATION;
-    }
-
-    @Override
-    protected void scale(Vex vex, PoseStack poseStack, float f) {
-        poseStack.scale(0.4f, 0.4f, 0.4f);
     }
 }
 

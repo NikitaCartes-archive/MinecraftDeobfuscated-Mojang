@@ -45,7 +45,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -687,7 +687,7 @@ ServerGamePacketListener {
             JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
             jigsawBlockEntity.setName(serverboundSetJigsawBlockPacket.getName());
             jigsawBlockEntity.setTarget(serverboundSetJigsawBlockPacket.getTarget());
-            jigsawBlockEntity.setPool(ResourceKey.create(Registry.TEMPLATE_POOL_REGISTRY, serverboundSetJigsawBlockPacket.getPool()));
+            jigsawBlockEntity.setPool(ResourceKey.create(Registries.TEMPLATE_POOL, serverboundSetJigsawBlockPacket.getPool()));
             jigsawBlockEntity.setFinalState(serverboundSetJigsawBlockPacket.getFinalState());
             jigsawBlockEntity.setJoint(serverboundSetJigsawBlockPacket.getJoint());
             jigsawBlockEntity.setChanged();
@@ -1347,7 +1347,7 @@ ServerGamePacketListener {
                 if (!(this.player.getVehicle() instanceof PlayerRideableJumping)) break;
                 PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)((Object)this.player.getVehicle());
                 int i = serverboundPlayerCommandPacket.getData();
-                if (!playerRideableJumping.canJump() || i <= 0) break;
+                if (!playerRideableJumping.canJump(this.player) || i <= 0) break;
                 playerRideableJumping.handleStartJump(i);
                 break;
             }

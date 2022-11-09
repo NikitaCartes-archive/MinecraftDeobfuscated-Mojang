@@ -539,7 +539,7 @@ extends AbstractClientPlayer {
     public PlayerRideableJumping jumpableVehicle() {
         PlayerRideableJumping playerRideableJumping;
         Entity entity = this.getVehicle();
-        return entity instanceof PlayerRideableJumping && (playerRideableJumping = (PlayerRideableJumping)((Object)entity)).canJump() ? playerRideableJumping : null;
+        return entity instanceof PlayerRideableJumping && (playerRideableJumping = (PlayerRideableJumping)((Object)entity)).canJump(this) ? playerRideableJumping : null;
     }
 
     public float getJumpRidingScale() {

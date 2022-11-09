@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.commands.arguments.ParticleArgument;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -331,7 +331,7 @@ extends Entity {
         }
         if (compoundTag.contains("Particle", 8)) {
             try {
-                this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), Registry.PARTICLE_TYPE.asLookup()));
+                this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), BuiltInRegistries.PARTICLE_TYPE.asLookup()));
             } catch (CommandSyntaxException commandSyntaxException) {
                 LOGGER.warn("Couldn't load custom particle {}", (Object)compoundTag.getString("Particle"), (Object)commandSyntaxException);
             }
@@ -371,7 +371,7 @@ extends Entity {
             compoundTag.putInt("Color", this.getColor());
         }
         if (this.potion != Potions.EMPTY) {
-            compoundTag.putString("Potion", Registry.POTION.getKey(this.potion).toString());
+            compoundTag.putString("Potion", BuiltInRegistries.POTION.getKey(this.potion).toString());
         }
         if (!this.effects.isEmpty()) {
             ListTag listTag = new ListTag();

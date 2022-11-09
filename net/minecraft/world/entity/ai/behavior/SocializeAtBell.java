@@ -3,43 +3,34 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.behavior.OneShot;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
-public class SocializeAtBell
-extends Behavior<LivingEntity> {
+public class SocializeAtBell {
     private static final float SPEED_MODIFIER = 0.3f;
 
-    public SocializeAtBell() {
-        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT, MemoryModuleType.INTERACTION_TARGET, MemoryStatus.VALUE_ABSENT));
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity2) {
-        Brain<?> brain = livingEntity2.getBrain();
-        Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
-        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerToCenterThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel, LivingEntity livingEntity2, long l) {
-        Brain<?> brain = livingEntity2.getBrain();
-        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap(nearestVisibleLivingEntities -> nearestVisibleLivingEntities.findClosest(livingEntity2 -> EntityType.VILLAGER.equals(livingEntity2.getType()) && livingEntity2.distanceToSqr(livingEntity2) <= 32.0)).ifPresent(livingEntity -> {
-            brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
-            brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true));
-            brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker((Entity)livingEntity, false), 0.3f, 1));
-        });
+    public static OneShot<LivingEntity> create() {
+        return BehaviorBuilder.create(instance -> instance.group(instance.registered(MemoryModuleType.WALK_TARGET), instance.registered(MemoryModuleType.LOOK_TARGET), instance.present(MemoryModuleType.MEETING_POINT), instance.present(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES), instance.absent(MemoryModuleType.INTERACTION_TARGET)).apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4, memoryAccessor5) -> (serverLevel, livingEntity3, l) -> {
+            GlobalPos globalPos = (GlobalPos)instance.get(memoryAccessor3);
+            NearestVisibleLivingEntities nearestVisibleLivingEntities = (NearestVisibleLivingEntities)instance.get(memoryAccessor4);
+            if (serverLevel.getRandom().nextInt(100) == 0 && serverLevel.dimension() == globalPos.dimension() && globalPos.pos().closerToCenterThan(livingEntity3.position(), 4.0) && nearestVisibleLivingEntities.contains(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()))) {
+                nearestVisibleLivingEntities.findClosest(livingEntity2 -> EntityType.VILLAGER.equals(livingEntity2.getType()) && livingEntity2.distanceToSqr(livingEntity3) <= 32.0).ifPresent(livingEntity -> {
+                    memoryAccessor5.set(livingEntity);
+                    memoryAccessor2.set(new EntityTracker((Entity)livingEntity, true));
+                    memoryAccessor.set(new WalkTarget(new EntityTracker((Entity)livingEntity, false), 0.3f, 1));
+                });
+                return true;
+            }
+            return false;
+        }));
     }
 }
 

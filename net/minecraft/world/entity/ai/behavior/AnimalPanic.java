@@ -77,8 +77,13 @@ extends Behavior<PathfinderMob> {
     }
 
     @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (PathfinderMob)livingEntity, l);
+    protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.stop(serverLevel, (PathfinderMob)livingEntity, l);
+    }
+
+    @Override
+    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.tick(serverLevel, (PathfinderMob)livingEntity, l);
     }
 
     @Override

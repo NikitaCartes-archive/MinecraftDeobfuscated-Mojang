@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -24,7 +24,7 @@ public class AttributeSupplier {
     private AttributeInstance getAttributeInstance(Attribute attribute) {
         AttributeInstance attributeInstance = this.instances.get(attribute);
         if (attributeInstance == null) {
-            throw new IllegalArgumentException("Can't find attribute " + Registry.ATTRIBUTE.getKey(attribute));
+            throw new IllegalArgumentException("Can't find attribute " + BuiltInRegistries.ATTRIBUTE.getKey(attribute));
         }
         return attributeInstance;
     }
@@ -40,7 +40,7 @@ public class AttributeSupplier {
     public double getModifierValue(Attribute attribute, UUID uUID) {
         AttributeModifier attributeModifier = this.getAttributeInstance(attribute).getModifier(uUID);
         if (attributeModifier == null) {
-            throw new IllegalArgumentException("Can't find modifier " + uUID + " on attribute " + Registry.ATTRIBUTE.getKey(attribute));
+            throw new IllegalArgumentException("Can't find modifier " + uUID + " on attribute " + BuiltInRegistries.ATTRIBUTE.getKey(attribute));
         }
         return attributeModifier.getAmount();
     }
@@ -76,7 +76,7 @@ public class AttributeSupplier {
         private AttributeInstance create(Attribute attribute) {
             AttributeInstance attributeInstance2 = new AttributeInstance(attribute, attributeInstance -> {
                 if (this.instanceFrozen) {
-                    throw new UnsupportedOperationException("Tried to change value for default attribute instance: " + Registry.ATTRIBUTE.getKey(attribute));
+                    throw new UnsupportedOperationException("Tried to change value for default attribute instance: " + BuiltInRegistries.ATTRIBUTE.getKey(attribute));
                 }
             });
             this.builder.put(attribute, attributeInstance2);

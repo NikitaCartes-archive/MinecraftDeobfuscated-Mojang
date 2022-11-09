@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
@@ -36,7 +36,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -157,7 +157,7 @@ public class DebugPackets {
             friendlyByteBuf2.writeInt(-1);
         }
         friendlyByteBuf2.writeCollection(brain.getActiveActivities(), (friendlyByteBuf, activity) -> friendlyByteBuf.writeUtf(activity.getName()));
-        Set set = brain.getRunningBehaviors().stream().map(Behavior::toString).collect(Collectors.toSet());
+        Set set = brain.getRunningBehaviors().stream().map(BehaviorControl::debugString).collect(Collectors.toSet());
         friendlyByteBuf2.writeCollection(set, FriendlyByteBuf::writeUtf);
         friendlyByteBuf2.writeCollection(DebugPackets.getMemoryDescriptions(livingEntity, l), (friendlyByteBuf, string) -> {
             String string2 = StringUtil.truncateStringIfNecessary(string, 255, true);
@@ -207,7 +207,7 @@ public class DebugPackets {
             } else {
                 string = "-";
             }
-            list.add(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType).getPath() + ": " + (String)string);
+            list.add(BuiltInRegistries.MEMORY_MODULE_TYPE.getKey(memoryModuleType).getPath() + ": " + (String)string);
         }
         list.sort(String::compareTo);
         return list;

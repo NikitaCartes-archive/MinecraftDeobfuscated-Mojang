@@ -39,11 +39,6 @@ extends Behavior<Axolotl> {
     }
 
     @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Axolotl)livingEntity, l);
-    }
-
-    @Override
     protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.start(serverLevel, (Axolotl)livingEntity, l);
     }

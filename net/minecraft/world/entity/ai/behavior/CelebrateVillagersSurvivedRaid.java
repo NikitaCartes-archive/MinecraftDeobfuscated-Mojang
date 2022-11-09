@@ -12,7 +12,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.MoveToSkySeeingSpot;
 import net.minecraft.world.entity.npc.Villager;
@@ -85,21 +84,6 @@ extends Behavior<Villager> {
             compoundTag2.put("Explosions", listTag);
         }
         return itemStack;
-    }
-
-    @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Villager)livingEntity, l);
-    }
-
-    @Override
-    protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.stop(serverLevel, (Villager)livingEntity, l);
-    }
-
-    @Override
-    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (Villager)livingEntity, l);
     }
 }
 

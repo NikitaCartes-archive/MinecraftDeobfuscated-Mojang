@@ -3,7 +3,7 @@
  */
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -38,6 +38,7 @@ public final class BlockTags {
     public static final TagKey<Block> MANGROVE_LOGS = BlockTags.create("mangrove_logs");
     public static final TagKey<Block> CRIMSON_STEMS = BlockTags.create("crimson_stems");
     public static final TagKey<Block> WARPED_STEMS = BlockTags.create("warped_stems");
+    public static final TagKey<Block> BAMBOO_BLOCKS = BlockTags.create("bamboo_blocks");
     public static final TagKey<Block> WART_BLOCKS = BlockTags.create("wart_blocks");
     public static final TagKey<Block> BANNERS = BlockTags.create("banners");
     public static final TagKey<Block> SAND = BlockTags.create("sand");
@@ -170,7 +171,7 @@ public final class BlockTags {
     }
 
     private static TagKey<Block> create(String string) {
-        return TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(string));
+        return TagKey.create(Registries.BLOCK, new ResourceLocation(string));
     }
 }
 

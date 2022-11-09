@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.sensing;
 
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.sensing.AdultSensor;
@@ -66,7 +67,7 @@ public class SensorType<U extends Sensor<?>> {
     }
 
     private static <U extends Sensor<?>> SensorType<U> register(String string, Supplier<U> supplier) {
-        return Registry.register(Registry.SENSOR_TYPE, new ResourceLocation(string), new SensorType<U>(supplier));
+        return Registry.register(BuiltInRegistries.SENSOR_TYPE, new ResourceLocation(string), new SensorType<U>(supplier));
     }
 }
 

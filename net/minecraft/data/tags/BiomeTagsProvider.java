@@ -5,7 +5,7 @@ package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BiomeTags;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 public class BiomeTagsProvider
 extends TagsProvider<Biome> {
     public BiomeTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-        super(packOutput, Registry.BIOME_REGISTRY, completableFuture);
+        super(packOutput, Registries.BIOME, completableFuture);
     }
 
     @Override
@@ -32,7 +32,7 @@ extends TagsProvider<Biome> {
         this.tag(BiomeTags.IS_JUNGLE).add(Biomes.BAMBOO_JUNGLE).add(Biomes.JUNGLE).add(Biomes.SPARSE_JUNGLE);
         this.tag(BiomeTags.IS_FOREST).add(Biomes.FOREST).add(Biomes.FLOWER_FOREST).add(Biomes.BIRCH_FOREST).add(Biomes.OLD_GROWTH_BIRCH_FOREST).add(Biomes.DARK_FOREST).add(Biomes.GROVE);
         this.tag(BiomeTags.IS_SAVANNA).add(Biomes.SAVANNA).add(Biomes.SAVANNA_PLATEAU).add(Biomes.WINDSWEPT_SAVANNA);
-        HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registry.BIOME_REGISTRY);
+        HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
         TagsProvider.TagAppender<Biome> tagAppender = this.tag(BiomeTags.IS_NETHER);
         MultiNoiseBiomeSource.Preset.NETHER.possibleBiomes(holderGetter).forEach(tagAppender::add);
         TagsProvider.TagAppender<Biome> tagAppender2 = this.tag(BiomeTags.IS_OVERWORLD);

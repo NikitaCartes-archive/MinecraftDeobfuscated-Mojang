@@ -3,56 +3,34 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Optional;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.Villager;
-import org.jetbrains.annotations.Nullable;
+import org.apache.commons.lang3.mutable.MutableLong;
 
-public class StrollToPoiList
-extends Behavior<Villager> {
-    private final MemoryModuleType<List<GlobalPos>> strollToMemoryType;
-    private final MemoryModuleType<GlobalPos> mustBeCloseToMemoryType;
-    private final float speedModifier;
-    private final int closeEnoughDist;
-    private final int maxDistanceFromPoi;
-    private long nextOkStartTime;
-    @Nullable
-    private GlobalPos targetPos;
-
-    public StrollToPoiList(MemoryModuleType<List<GlobalPos>> memoryModuleType, float f, int i, int j, MemoryModuleType<GlobalPos> memoryModuleType2) {
-        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, memoryModuleType, MemoryStatus.VALUE_PRESENT, memoryModuleType2, MemoryStatus.VALUE_PRESENT));
-        this.strollToMemoryType = memoryModuleType;
-        this.speedModifier = f;
-        this.closeEnoughDist = i;
-        this.maxDistanceFromPoi = j;
-        this.mustBeCloseToMemoryType = memoryModuleType2;
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-        List<GlobalPos> list;
-        Optional<List<GlobalPos>> optional = villager.getBrain().getMemory(this.strollToMemoryType);
-        Optional<GlobalPos> optional2 = villager.getBrain().getMemory(this.mustBeCloseToMemoryType);
-        if (optional.isPresent() && optional2.isPresent() && !(list = optional.get()).isEmpty()) {
-            this.targetPos = list.get(serverLevel.getRandom().nextInt(list.size()));
-            return this.targetPos != null && serverLevel.dimension() == this.targetPos.dimension() && optional2.get().pos().closerToCenterThan(villager.position(), this.maxDistanceFromPoi);
-        }
-        return false;
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel, Villager villager, long l) {
-        if (l > this.nextOkStartTime && this.targetPos != null) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.targetPos.pos(), this.speedModifier, this.closeEnoughDist));
-            this.nextOkStartTime = l + 100L;
-        }
+public class StrollToPoiList {
+    public static BehaviorControl<Villager> create(MemoryModuleType<List<GlobalPos>> memoryModuleType, float f, int i, int j, MemoryModuleType<GlobalPos> memoryModuleType2) {
+        MutableLong mutableLong = new MutableLong(0L);
+        return BehaviorBuilder.create(instance -> instance.group(instance.registered(MemoryModuleType.WALK_TARGET), instance.present(memoryModuleType), instance.present(memoryModuleType2)).apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3) -> (serverLevel, villager, l) -> {
+            List list = (List)instance.get(memoryAccessor2);
+            GlobalPos globalPos = (GlobalPos)instance.get(memoryAccessor3);
+            if (list.isEmpty()) {
+                return false;
+            }
+            GlobalPos globalPos2 = (GlobalPos)list.get(serverLevel.getRandom().nextInt(list.size()));
+            if (globalPos2 == null || serverLevel.dimension() != globalPos2.dimension() || !globalPos.pos().closerToCenterThan(villager.position(), j)) {
+                return false;
+            }
+            if (l > mutableLong.getValue()) {
+                memoryAccessor.set(new WalkTarget(globalPos2.pos(), f, i));
+                mutableLong.setValue(l + 100L);
+            }
+            return true;
+        }));
     }
 }
 

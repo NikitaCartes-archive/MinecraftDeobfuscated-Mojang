@@ -6,8 +6,8 @@ package net.minecraft.world.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
@@ -90,12 +90,12 @@ extends Item {
             Holder<Biome> holder2 = level.getBiome(blockPos2);
             if (holder2.is(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL)) {
                 if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
-                    blockState = Registry.BLOCK.getTag(BlockTags.WALL_CORALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
+                    blockState = BuiltInRegistries.BLOCK.getTag(BlockTags.WALL_CORALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
                     if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
                         blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, direction);
                     }
                 } else if (randomSource.nextInt(4) == 0) {
-                    blockState = Registry.BLOCK.getTag(BlockTags.UNDERWATER_BONEMEALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
+                    blockState = BuiltInRegistries.BLOCK.getTag(BlockTags.UNDERWATER_BONEMEALS).flatMap(named -> named.getRandomElement(level.random)).map(holder -> ((Block)holder.value()).defaultBlockState()).orElse(blockState);
                 }
             }
             if (blockState.is(BlockTags.WALL_CORALS, blockStateBase -> blockStateBase.hasProperty(BaseCoralWallFanBlock.FACING))) {

@@ -5,6 +5,7 @@ package net.minecraft.world.level.gameevent;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
@@ -22,16 +23,16 @@ public interface PositionSourceType<T extends PositionSource> {
     public Codec<T> codec();
 
     public static <S extends PositionSourceType<T>, T extends PositionSource> S register(String string, S positionSourceType) {
-        return (S)Registry.register(Registry.POSITION_SOURCE_TYPE, string, positionSourceType);
+        return (S)Registry.register(BuiltInRegistries.POSITION_SOURCE_TYPE, string, positionSourceType);
     }
 
     public static PositionSource fromNetwork(FriendlyByteBuf friendlyByteBuf) {
         ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-        return Registry.POSITION_SOURCE_TYPE.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation)).read(friendlyByteBuf);
+        return BuiltInRegistries.POSITION_SOURCE_TYPE.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation)).read(friendlyByteBuf);
     }
 
     public static <T extends PositionSource> void toNetwork(T positionSource, FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeResourceLocation(Registry.POSITION_SOURCE_TYPE.getKey(positionSource.getType()));
+        friendlyByteBuf.writeResourceLocation(BuiltInRegistries.POSITION_SOURCE_TYPE.getKey(positionSource.getType()));
         positionSource.getType().write(friendlyByteBuf, positionSource);
     }
 }

@@ -20,7 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -46,14 +47,10 @@ implements Predicate<ItemStack> {
     }
 
     public ItemStack[] getItems() {
-        this.dissolve();
-        return this.itemStacks;
-    }
-
-    private void dissolve() {
         if (this.itemStacks == null) {
             this.itemStacks = (ItemStack[])Arrays.stream(this.values).flatMap(value -> value.getItems().stream()).distinct().toArray(ItemStack[]::new);
         }
+        return this.itemStacks;
     }
 
     @Override
@@ -61,11 +58,10 @@ implements Predicate<ItemStack> {
         if (itemStack == null) {
             return false;
         }
-        this.dissolve();
-        if (this.itemStacks.length == 0) {
+        if (this.isEmpty()) {
             return itemStack.isEmpty();
         }
-        for (ItemStack itemStack2 : this.itemStacks) {
+        for (ItemStack itemStack2 : this.getItems()) {
             if (!itemStack2.is(itemStack.getItem())) continue;
             return true;
         }
@@ -74,9 +70,9 @@ implements Predicate<ItemStack> {
 
     public IntList getStackingIds() {
         if (this.stackingIds == null) {
-            this.dissolve();
-            this.stackingIds = new IntArrayList(this.itemStacks.length);
-            for (ItemStack itemStack : this.itemStacks) {
+            ItemStack[] itemStacks = this.getItems();
+            this.stackingIds = new IntArrayList(itemStacks.length);
+            for (ItemStack itemStack : itemStacks) {
                 this.stackingIds.add(StackedContents.getStackingIndex(itemStack));
             }
             this.stackingIds.sort(IntComparators.NATURAL_COMPARATOR);
@@ -85,8 +81,7 @@ implements Predicate<ItemStack> {
     }
 
     public void toNetwork(FriendlyByteBuf friendlyByteBuf) {
-        this.dissolve();
-        friendlyByteBuf.writeCollection(Arrays.asList(this.itemStacks), FriendlyByteBuf::writeItem);
+        friendlyByteBuf.writeCollection(Arrays.asList(this.getItems()), FriendlyByteBuf::writeItem);
     }
 
     public JsonElement toJson() {
@@ -101,12 +96,12 @@ implements Predicate<ItemStack> {
     }
 
     public boolean isEmpty() {
-        return !(this.values.length != 0 || this.itemStacks != null && this.itemStacks.length != 0 || this.stackingIds != null && !this.stackingIds.isEmpty());
+        return this.values.length == 0;
     }
 
     private static Ingredient fromValues(Stream<? extends Value> stream) {
         Ingredient ingredient = new Ingredient(stream);
-        return ingredient.values.length == 0 ? EMPTY : ingredient;
+        return ingredient.isEmpty() ? EMPTY : ingredient;
     }
 
     public static Ingredient of() {
@@ -160,7 +155,7 @@ implements Predicate<ItemStack> {
         }
         if (jsonObject.has("tag")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-            TagKey<Item> tagKey = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation);
+            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, resourceLocation);
             return new TagValue(tagKey);
         }
         throw new JsonParseException("An ingredient entry needs either a tag or an item");
@@ -188,7 +183,7 @@ implements Predicate<ItemStack> {
         @Override
         public Collection<ItemStack> getItems() {
             ArrayList<ItemStack> list = Lists.newArrayList();
-            for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(this.tag)) {
+            for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(this.tag)) {
                 list.add(new ItemStack(holder));
             }
             return list;
@@ -218,7 +213,7 @@ implements Predicate<ItemStack> {
         @Override
         public JsonObject serialize() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("item", Registry.ITEM.getKey(this.item.getItem()).toString());
+            jsonObject.addProperty("item", BuiltInRegistries.ITEM.getKey(this.item.getItem()).toString());
             return jsonObject;
         }
     }

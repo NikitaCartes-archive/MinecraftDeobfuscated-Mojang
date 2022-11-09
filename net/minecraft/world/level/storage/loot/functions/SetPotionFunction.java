@@ -7,7 +7,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -48,13 +48,13 @@ extends LootItemConditionalFunction {
         @Override
         public void serialize(JsonObject jsonObject, SetPotionFunction setPotionFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, setPotionFunction, jsonSerializationContext);
-            jsonObject.addProperty("id", Registry.POTION.getKey(setPotionFunction.potion).toString());
+            jsonObject.addProperty("id", BuiltInRegistries.POTION.getKey(setPotionFunction.potion).toString());
         }
 
         @Override
         public SetPotionFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             String string = GsonHelper.getAsString(jsonObject, "id");
-            Potion potion = Registry.POTION.getOptional(ResourceLocation.tryParse(string)).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + string + "'"));
+            Potion potion = (Potion)BuiltInRegistries.POTION.getOptional(ResourceLocation.tryParse(string)).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + string + "'"));
             return new SetPotionFunction(lootItemConditions, potion);
         }
 

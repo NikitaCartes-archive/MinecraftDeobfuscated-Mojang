@@ -23,6 +23,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -342,7 +343,7 @@ implements SharedSuggestionProvider {
 
     @Override
     public Collection<ResourceLocation> getAvailableSoundEvents() {
-        return Registry.SOUND_EVENT.keySet();
+        return BuiltInRegistries.SOUND_EVENT.keySet();
     }
 
     @Override

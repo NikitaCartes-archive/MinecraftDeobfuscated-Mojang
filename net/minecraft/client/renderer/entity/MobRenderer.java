@@ -110,5 +110,15 @@ extends LivingEntityRenderer<T, M> {
         vertexConsumer.vertex(matrix4f, z - o, aa + n, ab + p).color(w, x, y, 1.0f).uv2(u).endVertex();
         vertexConsumer.vertex(matrix4f, z + o, aa + m - n, ab - p).color(w, x, y, 1.0f).uv2(u).endVertex();
     }
+
+    @Override
+    protected /* synthetic */ boolean shouldShowName(LivingEntity livingEntity) {
+        return this.shouldShowName((T)((Mob)livingEntity));
+    }
+
+    @Override
+    protected /* synthetic */ boolean shouldShowName(Entity entity) {
+        return this.shouldShowName((T)((Mob)entity));
+    }
 }
 

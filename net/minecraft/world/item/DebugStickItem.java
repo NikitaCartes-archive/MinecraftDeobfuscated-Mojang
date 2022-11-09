@@ -6,7 +6,7 @@ package net.minecraft.world.item;
 import java.util.Collection;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,7 +61,7 @@ extends Item {
         Block block = blockState.getBlock();
         StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
         Collection<Property<?>> collection = stateDefinition.getProperties();
-        String string = Registry.BLOCK.getKey(block).toString();
+        String string = BuiltInRegistries.BLOCK.getKey(block).toString();
         if (collection.isEmpty()) {
             DebugStickItem.message(player, Component.translatable(this.getDescriptionId() + ".empty", string));
             return false;

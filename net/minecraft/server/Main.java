@@ -29,6 +29,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -142,9 +143,9 @@ public class Main {
                     WorldDimensions worldDimensions;
                     WorldOptions worldOptions;
                     LevelSettings levelSettings;
-                    Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registry.LEVEL_STEM_REGISTRY);
+                    Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
                     RegistryOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
-                    Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allElementsLifecycle());
+                    Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
                     if (pair != null) {
                         return new WorldLoader.DataLoadOutput<WorldData>(pair.getFirst(), pair.getSecond().dimensionsRegistryAccess());
                     }
@@ -159,7 +160,7 @@ public class Main {
                         worldDimensions = dedicatedServerProperties.createDimensions(dataLoadContext.datapackWorldgen());
                     }
                     WorldDimensions.Complete complete = worldDimensions.bake(registry);
-                    Lifecycle lifecycle = complete.lifecycle().add(dataLoadContext.datapackWorldgen().allElementsLifecycle());
+                    Lifecycle lifecycle = complete.lifecycle().add(dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
                     return new WorldLoader.DataLoadOutput<PrimaryLevelData>(new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), lifecycle), complete.dimensionsRegistryAccess());
                 }, WorldStem::new, Util.backgroundExecutor(), executor)).get();
             } catch (Exception exception) {
@@ -168,7 +169,7 @@ public class Main {
             }
             RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
             if (optionSet.has(optionSpec5)) {
-                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, frozen.registryOrThrow(Registry.LEVEL_STEM_REGISTRY));
+                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, frozen.registryOrThrow(Registries.LEVEL_STEM));
             }
             WorldData worldData = worldStem.worldData();
             levelStorageAccess.saveDataTag(frozen, worldData);

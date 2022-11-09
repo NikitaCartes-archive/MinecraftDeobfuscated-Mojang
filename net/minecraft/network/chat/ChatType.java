@@ -11,6 +11,7 @@ import java.util.Optional;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatTypeDecoration;
@@ -32,7 +33,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
     public static final ResourceKey<ChatType> EMOTE_COMMAND = ChatType.create("emote_command");
 
     private static ResourceKey<ChatType> create(String string) {
-        return ResourceKey.create(Registry.CHAT_TYPE_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation(string));
     }
 
     public static void bootstrap(BootstapContext<ChatType> bootstapContext) {
@@ -54,7 +55,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
     }
 
     public static Bound bind(ResourceKey<ChatType> resourceKey, RegistryAccess registryAccess, Component component) {
-        Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+        Registry<ChatType> registry = registryAccess.registryOrThrow(Registries.CHAT_TYPE);
         return registry.getOrThrow(resourceKey).bind(component);
     }
 
@@ -80,7 +81,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
         }
 
         public BoundNetwork toNetwork(RegistryAccess registryAccess) {
-            Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+            Registry<ChatType> registry = registryAccess.registryOrThrow(Registries.CHAT_TYPE);
             return new BoundNetwork(registry.getId(this.chatType), this.name, this.targetName);
         }
 
@@ -102,7 +103,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
         }
 
         public Optional<Bound> resolve(RegistryAccess registryAccess) {
-            Registry<ChatType> registry = registryAccess.registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+            Registry<ChatType> registry = registryAccess.registryOrThrow(Registries.CHAT_TYPE);
             ChatType chatType2 = (ChatType)registry.byId(this.chatType);
             return Optional.ofNullable(chatType2).map(chatType -> new Bound((ChatType)chatType, this.name, this.targetName));
         }

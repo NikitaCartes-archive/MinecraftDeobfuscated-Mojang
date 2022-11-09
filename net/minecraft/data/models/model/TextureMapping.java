@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -276,22 +276,22 @@ public class TextureMapping {
     }
 
     public static ResourceLocation getBlockTexture(Block block) {
-        ResourceLocation resourceLocation = Registry.BLOCK.getKey(block);
+        ResourceLocation resourceLocation = BuiltInRegistries.BLOCK.getKey(block);
         return resourceLocation.withPrefix("block/");
     }
 
     public static ResourceLocation getBlockTexture(Block block, String string) {
-        ResourceLocation resourceLocation = Registry.BLOCK.getKey(block);
+        ResourceLocation resourceLocation = BuiltInRegistries.BLOCK.getKey(block);
         return resourceLocation.withPath(string2 -> "block/" + string2 + string);
     }
 
     public static ResourceLocation getItemTexture(Item item) {
-        ResourceLocation resourceLocation = Registry.ITEM.getKey(item);
+        ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(item);
         return resourceLocation.withPrefix("item/");
     }
 
     public static ResourceLocation getItemTexture(Item item, String string) {
-        ResourceLocation resourceLocation = Registry.ITEM.getKey(item);
+        ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(item);
         return resourceLocation.withPath(string2 -> "item/" + string2 + string);
     }
 }

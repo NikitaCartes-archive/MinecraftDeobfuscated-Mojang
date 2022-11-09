@@ -94,7 +94,7 @@ public class LevelStorageSource {
     public LevelStorageSource(Path path, Path path2, DataFixer dataFixer) {
         this.fixerUpper = dataFixer;
         try {
-            Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath(new LinkOption[0]) : path, new FileAttribute[0]);
+            FileUtil.createDirectoriesSafe(path);
         } catch (IOException iOException) {
             throw new RuntimeException(iOException);
         }
@@ -494,7 +494,7 @@ public class LevelStorageSource {
             String string = LocalDateTime.now().format(FORMATTER) + "_" + this.levelId;
             Path path = LevelStorageSource.this.getBackupPath();
             try {
-                Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath(new LinkOption[0]) : path, new FileAttribute[0]);
+                FileUtil.createDirectoriesSafe(path);
             } catch (IOException iOException) {
                 throw new RuntimeException(iOException);
             }

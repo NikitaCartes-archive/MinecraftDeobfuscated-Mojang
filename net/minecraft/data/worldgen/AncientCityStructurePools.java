@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
@@ -19,12 +19,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 
 public class AncientCityStructurePools {
     public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-        HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
+        HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
         Holder.Reference<PlacedFeature> holder = holderGetter.getOrThrow(CavePlacements.SCULK_PATCH_ANCIENT_CITY);
-        HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+        HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
         Holder.Reference<StructureProcessorList> holder2 = holderGetter2.getOrThrow(ProcessorLists.ANCIENT_CITY_GENERIC_DEGRADATION);
         Holder.Reference<StructureProcessorList> holder3 = holderGetter2.getOrThrow(ProcessorLists.ANCIENT_CITY_WALLS_DEGRADATION);
-        HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder4 = holderGetter3.getOrThrow(Pools.EMPTY);
         Pools.register(bootstapContext, "ancient_city/structures", new StructureTemplatePool(holder4, ImmutableList.of(Pair.of(StructurePoolElement.empty(), 7), Pair.of(StructurePoolElement.single("ancient_city/structures/barracks", holder2), 4), Pair.of(StructurePoolElement.single("ancient_city/structures/chamber_1", holder2), 4), Pair.of(StructurePoolElement.single("ancient_city/structures/chamber_2", holder2), 4), Pair.of(StructurePoolElement.single("ancient_city/structures/chamber_3", holder2), 4), Pair.of(StructurePoolElement.single("ancient_city/structures/sauna_1", holder2), 4), Pair.of(StructurePoolElement.single("ancient_city/structures/small_statue", holder2), 4), Pair.of(StructurePoolElement.single("ancient_city/structures/large_ruin_1", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/tall_ruin_1", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/tall_ruin_2", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/tall_ruin_3", holder2), 2), Pair.of(StructurePoolElement.single("ancient_city/structures/tall_ruin_4", holder2), 2), new Pair[]{Pair.of(StructurePoolElement.list(ImmutableList.of(StructurePoolElement.single("ancient_city/structures/camp_1", holder2), StructurePoolElement.single("ancient_city/structures/camp_2", holder2), StructurePoolElement.single("ancient_city/structures/camp_3", holder2))), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/medium_ruin_1", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/medium_ruin_2", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/small_ruin_1", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/small_ruin_2", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/large_pillar_1", holder2), 1), Pair.of(StructurePoolElement.single("ancient_city/structures/medium_pillar_1", holder2), 1), Pair.of(StructurePoolElement.list(ImmutableList.of(StructurePoolElement.single("ancient_city/structures/ice_box_1"))), 1)}), StructureTemplatePool.Projection.RIGID));
         Pools.register(bootstapContext, "ancient_city/sculk", new StructureTemplatePool(holder4, ImmutableList.of(Pair.of(StructurePoolElement.feature(holder), 6), Pair.of(StructurePoolElement.empty(), 1)), StructureTemplatePool.Projection.RIGID));

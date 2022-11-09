@@ -8,7 +8,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
@@ -33,7 +33,7 @@ extends Feature<NoneFeatureConfiguration> {
         RandomSource randomSource = featurePlaceContext.random();
         WorldGenLevel worldGenLevel = featurePlaceContext.level();
         BlockPos blockPos = featurePlaceContext.origin();
-        Optional<Block> optional = Registry.BLOCK.getTag(BlockTags.CORAL_BLOCKS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value);
+        Optional<Block> optional = BuiltInRegistries.BLOCK.getTag(BlockTags.CORAL_BLOCKS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value);
         if (optional.isEmpty()) {
             return false;
         }
@@ -50,14 +50,14 @@ extends Feature<NoneFeatureConfiguration> {
         }
         levelAccessor.setBlock(blockPos, blockState, 3);
         if (randomSource.nextFloat() < 0.25f) {
-            Registry.BLOCK.getTag(BlockTags.CORALS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value).ifPresent(block -> levelAccessor.setBlock(blockPos2, block.defaultBlockState(), 2));
+            BuiltInRegistries.BLOCK.getTag(BlockTags.CORALS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value).ifPresent(block -> levelAccessor.setBlock(blockPos2, block.defaultBlockState(), 2));
         } else if (randomSource.nextFloat() < 0.05f) {
             levelAccessor.setBlock(blockPos2, (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, randomSource.nextInt(4) + 1), 2);
         }
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockPos3;
             if (!(randomSource.nextFloat() < 0.2f) || !levelAccessor.getBlockState(blockPos3 = blockPos.relative(direction)).is(Blocks.WATER)) continue;
-            Registry.BLOCK.getTag(BlockTags.WALL_CORALS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value).ifPresent(block -> {
+            BuiltInRegistries.BLOCK.getTag(BlockTags.WALL_CORALS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value).ifPresent(block -> {
                 BlockState blockState = block.defaultBlockState();
                 if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
                     blockState = (BlockState)blockState.setValue(BaseCoralWallFanBlock.FACING, direction);

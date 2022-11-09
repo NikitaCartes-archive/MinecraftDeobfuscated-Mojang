@@ -11,14 +11,11 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 
 @Environment(value=EnvType.CLIENT)
-public class HumanoidMobRenderer<T extends Mob, M extends HumanoidModel<T>>
+public abstract class HumanoidMobRenderer<T extends Mob, M extends HumanoidModel<T>>
 extends MobRenderer<T, M> {
-    private static final ResourceLocation DEFAULT_LOCATION = new ResourceLocation("textures/entity/steve.png");
-
     public HumanoidMobRenderer(EntityRendererProvider.Context context, M humanoidModel, float f) {
         this(context, humanoidModel, f, 1.0f, 1.0f, 1.0f);
     }
@@ -28,11 +25,6 @@ extends MobRenderer<T, M> {
         this.addLayer(new CustomHeadLayer(this, context.getModelSet(), g, h, i, context.getItemInHandRenderer()));
         this.addLayer(new ElytraLayer(this, context.getModelSet()));
         this.addLayer(new ItemInHandLayer(this, context.getItemInHandRenderer()));
-    }
-
-    @Override
-    public ResourceLocation getTextureLocation(T mob) {
-        return DEFAULT_LOCATION;
     }
 }
 

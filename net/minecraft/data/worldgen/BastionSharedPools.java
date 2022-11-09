@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public class BastionSharedPools {
     public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-        HolderGetter<StructureTemplatePool> holderGetter = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<StructureTemplatePool> holderGetter = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder = holderGetter.getOrThrow(Pools.EMPTY);
         Pools.register(bootstapContext, "bastion/mobs/piglin", new StructureTemplatePool(holder, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/mobs/melee_piglin"), 1), Pair.of(StructurePoolElement.single("bastion/mobs/sword_piglin"), 4), Pair.of(StructurePoolElement.single("bastion/mobs/crossbow_piglin"), 4), Pair.of(StructurePoolElement.single("bastion/mobs/empty"), 1)), StructureTemplatePool.Projection.RIGID));
         Pools.register(bootstapContext, "bastion/mobs/hoglin", new StructureTemplatePool(holder, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/mobs/hoglin"), 2), Pair.of(StructurePoolElement.single("bastion/mobs/empty"), 1)), StructureTemplatePool.Projection.RIGID));

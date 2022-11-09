@@ -63,23 +63,23 @@ public class PiglinBruteAi {
     }
 
     private static void initCoreActivity(PiglinBrute piglinBrute, Brain<PiglinBrute> brain) {
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(), new InteractWithDoor(), new StopBeingAngryIfTargetDead()));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(), InteractWithDoor.create(), StopBeingAngryIfTargetDead.create()));
     }
 
     private static void initIdleActivity(PiglinBrute piglinBrute, Brain<PiglinBrute> brain) {
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new StartAttacking<PiglinBrute>(PiglinBruteAi::findNearestValidAttackTarget), PiglinBruteAi.createIdleLookBehaviors(), PiglinBruteAi.createIdleMovementBehaviors(), new SetLookAndInteract(EntityType.PLAYER, 4)));
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(StartAttacking.create(PiglinBruteAi::findNearestValidAttackTarget), PiglinBruteAi.createIdleLookBehaviors(), PiglinBruteAi.createIdleMovementBehaviors(), SetLookAndInteract.create(EntityType.PLAYER, 4)));
     }
 
     private static void initFightActivity(PiglinBrute piglinBrute, Brain<PiglinBrute> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new StopAttackingIfTargetInvalid(livingEntity -> !PiglinBruteAi.isNearestValidAttackTarget(piglinBrute, livingEntity)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0f), new MeleeAttack(20)), MemoryModuleType.ATTACK_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(StopAttackingIfTargetInvalid.create(livingEntity -> !PiglinBruteAi.isNearestValidAttackTarget(piglinBrute, livingEntity)), SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.0f), MeleeAttack.create(20)), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static RunOne<PiglinBrute> createIdleLookBehaviors() {
-        return new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0f), 1), Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0f), 1), Pair.of(new SetEntityLookTarget(EntityType.PIGLIN_BRUTE, 8.0f), 1), Pair.of(new SetEntityLookTarget(8.0f), 1), Pair.of(new DoNothing(30, 60), 1)));
+        return new RunOne<PiglinBrute>(ImmutableList.of(Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 8.0f), 1), Pair.of(SetEntityLookTarget.create(EntityType.PIGLIN, 8.0f), 1), Pair.of(SetEntityLookTarget.create(EntityType.PIGLIN_BRUTE, 8.0f), 1), Pair.of(SetEntityLookTarget.create(8.0f), 1), Pair.of(new DoNothing(30, 60), 1)));
     }
 
     private static RunOne<PiglinBrute> createIdleMovementBehaviors() {
-        return new RunOne(ImmutableList.of(Pair.of(new RandomStroll(0.6f), 2), Pair.of(InteractWith.of(EntityType.PIGLIN, 8, MemoryModuleType.INTERACTION_TARGET, 0.6f, 2), 2), Pair.of(InteractWith.of(EntityType.PIGLIN_BRUTE, 8, MemoryModuleType.INTERACTION_TARGET, 0.6f, 2), 2), Pair.of(new StrollToPoi(MemoryModuleType.HOME, 0.6f, 2, 100), 2), Pair.of(new StrollAroundPoi(MemoryModuleType.HOME, 0.6f, 5), 2), Pair.of(new DoNothing(30, 60), 1)));
+        return new RunOne<PiglinBrute>(ImmutableList.of(Pair.of(RandomStroll.stroll(0.6f), 2), Pair.of(InteractWith.of(EntityType.PIGLIN, 8, MemoryModuleType.INTERACTION_TARGET, 0.6f, 2), 2), Pair.of(InteractWith.of(EntityType.PIGLIN_BRUTE, 8, MemoryModuleType.INTERACTION_TARGET, 0.6f, 2), 2), Pair.of(StrollToPoi.create(MemoryModuleType.HOME, 0.6f, 2, 100), 2), Pair.of(StrollAroundPoi.create(MemoryModuleType.HOME, 0.6f, 5), 2), Pair.of(new DoNothing(30, 60), 1)));
     }
 
     protected static void updateActivity(PiglinBrute piglinBrute) {

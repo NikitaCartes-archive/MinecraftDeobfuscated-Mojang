@@ -20,6 +20,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.GenericWaitingScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.WarningScreen;
@@ -67,7 +68,7 @@ extends Screen {
     private Button sendButton;
     private ChatReportBuilder reportBuilder;
     @Nullable
-    ChatReportBuilder.CannotBuildReason cannotBuildReason;
+    private ChatReportBuilder.CannotBuildReason cannotBuildReason;
 
     private ChatReportScreen(@Nullable Screen screen, ReportingContext reportingContext, ChatReportBuilder chatReportBuilder) {
         super(Component.translatable("gui.chatReport.title"));
@@ -110,13 +111,14 @@ extends Screen {
             this.onReportChanged();
         });
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(i - 120, this.completeButtonTop(), 120, 20).build());
-        this.sendButton = this.addRenderableWidget(Button.builder(Component.translatable("gui.chatReport.send"), button -> this.sendReport()).bounds(i + 10, this.completeButtonTop(), 120, 20).tooltip(new SubmitButtonTooltip()).build());
+        this.sendButton = this.addRenderableWidget(Button.builder(Component.translatable("gui.chatReport.send"), button -> this.sendReport()).bounds(i + 10, this.completeButtonTop(), 120, 20).build());
         this.onReportChanged();
     }
 
     private void onReportChanged() {
         this.cannotBuildReason = this.reportBuilder.checkBuildable();
         this.sendButton.active = this.cannotBuildReason == null;
+        this.sendButton.setTooltip(Util.mapNullable(this.cannotBuildReason, cannotBuildReason -> Tooltip.create(cannotBuildReason.message())));
     }
 
     private void sendReport() {
@@ -255,21 +257,6 @@ extends Screen {
 
     private int completeButtonTop() {
         return this.contentBottom() - 20 - 10;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    class SubmitButtonTooltip
-    implements Button.OnTooltip {
-        SubmitButtonTooltip() {
-        }
-
-        @Override
-        public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-            if (ChatReportScreen.this.cannotBuildReason != null) {
-                Component component = ChatReportScreen.this.cannotBuildReason.message();
-                ChatReportScreen.this.renderTooltip(poseStack, ChatReportScreen.this.font.split(component, Math.max(ChatReportScreen.this.width / 2 - 43, 170)), i, j);
-            }
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

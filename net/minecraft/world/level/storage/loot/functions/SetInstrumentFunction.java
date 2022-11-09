@@ -7,7 +7,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -58,7 +58,7 @@ extends LootItemConditionalFunction {
             if (!string.startsWith("#")) {
                 throw new JsonSyntaxException("Inline tag value not supported: " + string);
             }
-            return new SetInstrumentFunction(lootItemConditions, TagKey.create(Registry.INSTRUMENT_REGISTRY, new ResourceLocation(string.substring(1))));
+            return new SetInstrumentFunction(lootItemConditions, TagKey.create(Registries.INSTRUMENT, new ResourceLocation(string.substring(1))));
         }
 
         @Override

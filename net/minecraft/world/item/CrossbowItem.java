@@ -210,7 +210,7 @@ implements Vanishable {
             crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
         } else {
             Vec3 vec3 = livingEntity2.getUpVector(1.0f);
-            Quaternionf quaternionf = new Quaternionf().setAngleAxis((double)i, vec3.x, vec3.y, vec3.z);
+            Quaternionf quaternionf = new Quaternionf().setAngleAxis((double)(i * ((float)Math.PI / 180)), vec3.x, vec3.y, vec3.z);
             Vec3 vec32 = livingEntity2.getViewVector(1.0f);
             Vector3f vector3f = vec32.toVector3f().rotate(quaternionf);
             projectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), g, h);

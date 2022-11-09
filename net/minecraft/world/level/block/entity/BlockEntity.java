@@ -6,7 +6,7 @@ package net.minecraft.world.level.block.entity;
 import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -106,7 +106,7 @@ public abstract class BlockEntity {
             LOGGER.error("Block entity has invalid type: {}", (Object)string);
             return null;
         }
-        return Registry.BLOCK_ENTITY_TYPE.getOptional(resourceLocation).map(blockEntityType -> {
+        return BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(resourceLocation).map(blockEntityType -> {
             try {
                 return blockEntityType.create(blockPos, blockState);
             } catch (Throwable throwable) {
@@ -174,7 +174,7 @@ public abstract class BlockEntity {
     }
 
     public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-        crashReportCategory.setDetail("Name", () -> Registry.BLOCK_ENTITY_TYPE.getKey(this.getType()) + " // " + this.getClass().getCanonicalName());
+        crashReportCategory.setDetail("Name", () -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.getType()) + " // " + this.getClass().getCanonicalName());
         if (this.level == null) {
             return;
         }

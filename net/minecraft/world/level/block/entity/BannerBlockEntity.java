@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -139,7 +139,7 @@ implements Nameable {
 
     public static List<Pair<Holder<BannerPattern>, DyeColor>> createPatterns(DyeColor dyeColor, @Nullable ListTag listTag) {
         ArrayList<Pair<Holder<BannerPattern>, DyeColor>> list = Lists.newArrayList();
-        list.add(Pair.of(Registry.BANNER_PATTERN.getHolderOrThrow(BannerPatterns.BASE), dyeColor));
+        list.add(Pair.of(BuiltInRegistries.BANNER_PATTERN.getHolderOrThrow(BannerPatterns.BASE), dyeColor));
         if (listTag != null) {
             for (int i = 0; i < listTag.size(); ++i) {
                 CompoundTag compoundTag = listTag.getCompound(i);

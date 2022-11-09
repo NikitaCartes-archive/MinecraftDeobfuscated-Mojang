@@ -21,6 +21,7 @@ import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntitySubPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
@@ -132,7 +133,7 @@ implements EntitySubPredicate {
             for (JsonElement jsonElement : jsonArray) {
                 JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement, "stats entry");
                 ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject2, "type"));
-                StatType<?> statType = Registry.STAT_TYPE.get(resourceLocation);
+                StatType<?> statType = BuiltInRegistries.STAT_TYPE.get(resourceLocation);
                 if (statType == null) {
                     throw new JsonParseException("Invalid stat type: " + resourceLocation);
                 }
@@ -164,7 +165,7 @@ implements EntitySubPredicate {
         Registry<T> registry = statType.getRegistry();
         T object = registry.get(resourceLocation);
         if (object == null) {
-            throw new JsonParseException("Unknown object " + resourceLocation + " for stat type " + Registry.STAT_TYPE.getKey(statType));
+            throw new JsonParseException("Unknown object " + resourceLocation + " for stat type " + BuiltInRegistries.STAT_TYPE.getKey(statType));
         }
         return statType.get(object);
     }
@@ -185,7 +186,7 @@ implements EntitySubPredicate {
             JsonArray jsonArray = new JsonArray();
             this.stats.forEach((stat, ints) -> {
                 JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("type", Registry.STAT_TYPE.getKey(stat.getType()).toString());
+                jsonObject.addProperty("type", BuiltInRegistries.STAT_TYPE.getKey(stat.getType()).toString());
                 jsonObject.addProperty("stat", PlayerPredicate.getStatValueId(stat).toString());
                 jsonObject.add("value", ints.serializeToJson());
                 jsonArray.add(jsonObject);

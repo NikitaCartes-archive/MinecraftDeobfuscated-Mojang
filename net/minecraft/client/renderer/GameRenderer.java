@@ -56,6 +56,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -905,7 +906,7 @@ implements AutoCloseable {
         }
         if (this.minecraft.screen != null) {
             try {
-                this.minecraft.screen.render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
+                this.minecraft.screen.renderWithTooltip(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
             } catch (Throwable throwable) {
                 CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering screen");
                 CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
@@ -993,7 +994,7 @@ implements AutoCloseable {
                     bl = blockState.getMenuProvider(this.minecraft.level, blockPos) != null;
                 } else {
                     BlockInWorld blockInWorld = new BlockInWorld(this.minecraft.level, blockPos, false);
-                    Registry<Block> registry = this.minecraft.level.registryAccess().registryOrThrow(Registry.BLOCK_REGISTRY);
+                    Registry<Block> registry = this.minecraft.level.registryAccess().registryOrThrow(Registries.BLOCK);
                     bl = !itemStack.isEmpty() && (itemStack.hasAdventureModeBreakTagForBlock(registry, blockInWorld) || itemStack.hasAdventureModePlaceTagForBlock(registry, blockInWorld));
                 }
             }

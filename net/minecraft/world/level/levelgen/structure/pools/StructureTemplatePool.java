@@ -16,7 +16,7 @@ import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
@@ -34,7 +34,7 @@ public class StructureTemplatePool {
     private static final int SIZE_UNSET = Integer.MIN_VALUE;
     private static final MutableObject<Codec<Holder<StructureTemplatePool>>> CODEC_REFERENCE = new MutableObject();
     public static final Codec<StructureTemplatePool> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.lazyInitializedCodec(CODEC_REFERENCE::getValue).fieldOf("fallback")).forGetter(StructureTemplatePool::getFallback), ((MapCodec)Codec.mapPair(StructurePoolElement.CODEC.fieldOf("element"), Codec.intRange(1, 150).fieldOf("weight")).codec().listOf().fieldOf("elements")).forGetter(structureTemplatePool -> structureTemplatePool.rawTemplates)).apply((Applicative<StructureTemplatePool, ?>)instance, StructureTemplatePool::new));
-    public static final Codec<Holder<StructureTemplatePool>> CODEC = Util.make(RegistryFileCodec.create(Registry.TEMPLATE_POOL_REGISTRY, DIRECT_CODEC), CODEC_REFERENCE::setValue);
+    public static final Codec<Holder<StructureTemplatePool>> CODEC = Util.make(RegistryFileCodec.create(Registries.TEMPLATE_POOL, DIRECT_CODEC), CODEC_REFERENCE::setValue);
     private final List<Pair<StructurePoolElement, Integer>> rawTemplates;
     private final ObjectArrayList<StructurePoolElement> templates;
     private final Holder<StructureTemplatePool> fallback;

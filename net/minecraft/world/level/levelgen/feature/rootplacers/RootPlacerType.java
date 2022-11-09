@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.feature.rootplacers;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.feature.rootplacers.MangroveRootPlacer;
 import net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacer;
 
@@ -13,7 +14,7 @@ public class RootPlacerType<P extends RootPlacer> {
     private final Codec<P> codec;
 
     private static <P extends RootPlacer> RootPlacerType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.ROOT_PLACER_TYPES, string, new RootPlacerType<P>(codec));
+        return Registry.register(BuiltInRegistries.ROOT_PLACER_TYPE, string, new RootPlacerType<P>(codec));
     }
 
     private RootPlacerType(Codec<P> codec) {

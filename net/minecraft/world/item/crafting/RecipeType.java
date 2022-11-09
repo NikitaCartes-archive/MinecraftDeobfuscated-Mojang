@@ -4,6 +4,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -24,7 +25,7 @@ public interface RecipeType<T extends Recipe<?>> {
     public static final RecipeType<UpgradeRecipe> SMITHING = RecipeType.register("smithing");
 
     public static <T extends Recipe<?>> RecipeType<T> register(final String string) {
-        return Registry.register(Registry.RECIPE_TYPE, new ResourceLocation(string), new RecipeType<T>(){
+        return Registry.register(BuiltInRegistries.RECIPE_TYPE, new ResourceLocation(string), new RecipeType<T>(){
 
             public String toString() {
                 return string;

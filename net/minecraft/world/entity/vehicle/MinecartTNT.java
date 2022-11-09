@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import org.jetbrains.annotations.Nullable;
 
 public class MinecartTNT
 extends AbstractMinecart {
@@ -66,7 +67,8 @@ extends AbstractMinecart {
         AbstractArrow abstractArrow;
         Entity entity = damageSource.getDirectEntity();
         if (entity instanceof AbstractArrow && (abstractArrow = (AbstractArrow)entity).isOnFire()) {
-            this.explode(abstractArrow.getDeltaMovement().lengthSqr());
+            DamageSource damageSource2 = DamageSource.explosion(this, damageSource.getEntity());
+            this.explode(damageSource2, abstractArrow.getDeltaMovement().lengthSqr());
         }
         return super.hurt(damageSource, f);
     }
@@ -90,12 +92,16 @@ extends AbstractMinecart {
     }
 
     protected void explode(double d) {
+        this.explode(null, d);
+    }
+
+    protected void explode(@Nullable DamageSource damageSource, double d) {
         if (!this.level.isClientSide) {
             double e = Math.sqrt(d);
             if (e > 5.0) {
                 e = 5.0;
             }
-            this.level.explode(this, this.getX(), this.getY(), this.getZ(), (float)(4.0 + this.random.nextDouble() * 1.5 * e), Level.ExplosionInteraction.TNT);
+            this.level.explode(this, damageSource, null, this.getX(), this.getY(), this.getZ(), (float)(4.0 + this.random.nextDouble() * 1.5 * e), false, Level.ExplosionInteraction.TNT);
             this.discard();
         }
     }

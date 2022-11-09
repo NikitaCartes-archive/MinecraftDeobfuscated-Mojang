@@ -20,7 +20,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.metadata.animation.VillagerMetaDataSection;
 import net.minecraft.core.DefaultedRegistry;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
@@ -60,15 +60,15 @@ extends RenderLayer<T, M> {
         VillagerData villagerData = ((VillagerDataHolder)livingEntity).getVillagerData();
         VillagerType villagerType = villagerData.getType();
         VillagerProfession villagerProfession = villagerData.getProfession();
-        VillagerMetaDataSection.Hat hat = this.getHatData(this.typeHatCache, "type", Registry.VILLAGER_TYPE, villagerType);
-        VillagerMetaDataSection.Hat hat2 = this.getHatData(this.professionHatCache, "profession", Registry.VILLAGER_PROFESSION, villagerProfession);
+        VillagerMetaDataSection.Hat hat = this.getHatData(this.typeHatCache, "type", BuiltInRegistries.VILLAGER_TYPE, villagerType);
+        VillagerMetaDataSection.Hat hat2 = this.getHatData(this.professionHatCache, "profession", BuiltInRegistries.VILLAGER_PROFESSION, villagerProfession);
         Object entityModel = this.getParentModel();
         ((VillagerHeadModel)entityModel).hatVisible(hat2 == VillagerMetaDataSection.Hat.NONE || hat2 == VillagerMetaDataSection.Hat.PARTIAL && hat != VillagerMetaDataSection.Hat.FULL);
-        ResourceLocation resourceLocation = this.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerType));
+        ResourceLocation resourceLocation = this.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(villagerType));
         VillagerProfessionLayer.renderColoredCutoutModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntity, 1.0f, 1.0f, 1.0f);
         ((VillagerHeadModel)entityModel).hatVisible(true);
         if (villagerProfession != VillagerProfession.NONE && !((LivingEntity)livingEntity).isBaby()) {
-            ResourceLocation resourceLocation2 = this.getResourceLocation("profession", Registry.VILLAGER_PROFESSION.getKey(villagerProfession));
+            ResourceLocation resourceLocation2 = this.getResourceLocation("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(villagerProfession));
             VillagerProfessionLayer.renderColoredCutoutModel(entityModel, resourceLocation2, poseStack, multiBufferSource, i, livingEntity, 1.0f, 1.0f, 1.0f);
             if (villagerProfession != VillagerProfession.NITWIT) {
                 ResourceLocation resourceLocation3 = this.getResourceLocation("profession_level", (ResourceLocation)LEVEL_LOCATIONS.get(Mth.clamp(villagerData.getLevel(), 1, LEVEL_LOCATIONS.size())));

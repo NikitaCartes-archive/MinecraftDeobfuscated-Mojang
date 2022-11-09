@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
@@ -23,18 +23,18 @@ public class TaigaVillagePools {
     private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/taiga/terminators");
 
     public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-        HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
+        HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
         Holder.Reference<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.SPRUCE_VILLAGE);
         Holder.Reference<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PINE_VILLAGE);
         Holder.Reference<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_PUMPKIN_VILLAGE);
         Holder.Reference<PlacedFeature> holder4 = holderGetter.getOrThrow(VillagePlacements.PATCH_TAIGA_GRASS_VILLAGE);
         Holder.Reference<PlacedFeature> holder5 = holderGetter.getOrThrow(VillagePlacements.PATCH_BERRY_BUSH_VILLAGE);
-        HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+        HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
         Holder.Reference<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.MOSSIFY_10_PERCENT);
         Holder.Reference<StructureProcessorList> holder7 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_TAIGA);
         Holder.Reference<StructureProcessorList> holder8 = holderGetter2.getOrThrow(ProcessorLists.STREET_SNOWY_OR_TAIGA);
         Holder.Reference<StructureProcessorList> holder9 = holderGetter2.getOrThrow(ProcessorLists.FARM_TAIGA);
-        HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder10 = holderGetter3.getOrThrow(Pools.EMPTY);
         Holder.Reference<StructureTemplatePool> holder11 = holderGetter3.getOrThrow(TERMINATORS_KEY);
         bootstapContext.register(START, new StructureTemplatePool(holder10, ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/taiga/town_centers/taiga_meeting_point_1", holder6), 49), Pair.of(StructurePoolElement.legacy("village/taiga/town_centers/taiga_meeting_point_2", holder6), 49), Pair.of(StructurePoolElement.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_1", holder7), 1), Pair.of(StructurePoolElement.legacy("village/taiga/zombie/town_centers/taiga_meeting_point_2", holder7), 1)), StructureTemplatePool.Projection.RIGID));

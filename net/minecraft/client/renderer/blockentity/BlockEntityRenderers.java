@@ -28,7 +28,7 @@ import net.minecraft.client.renderer.blockentity.SpawnerRenderer;
 import net.minecraft.client.renderer.blockentity.StructureBlockRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndGatewayRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
@@ -46,7 +46,7 @@ public class BlockEntityRenderers {
             try {
                 builder.put(blockEntityType, blockEntityRendererProvider.create(context));
             } catch (Exception exception) {
-                throw new IllegalStateException("Failed to create model for " + Registry.BLOCK_ENTITY_TYPE.getKey((BlockEntityType<?>)blockEntityType), exception);
+                throw new IllegalStateException("Failed to create model for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey((BlockEntityType<?>)blockEntityType), exception);
             }
         });
         return builder.build();

@@ -5,7 +5,7 @@ package net.minecraft.data.worldgen.placement;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
@@ -28,7 +28,7 @@ public class EndPlacements {
     public static final ResourceKey<PlacedFeature> END_ISLAND_DECORATED = PlacementUtils.createKey("end_island_decorated");
 
     public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-        HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registry.CONFIGURED_FEATURE_REGISTRY);
+        HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
         Holder.Reference<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(EndFeatures.END_SPIKE);
         Holder.Reference<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(EndFeatures.END_GATEWAY_RETURN);
         Holder.Reference<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(EndFeatures.CHORUS_PLANT);

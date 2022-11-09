@@ -29,20 +29,19 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractOptionSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.TooltipAccessor;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.OptionEnum;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public final class OptionInstance<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Enum<Boolean> BOOLEAN_VALUES = new Enum<Boolean>(ImmutableList.of(Boolean.TRUE, Boolean.FALSE), Codec.BOOL);
-    private static final int TOOLTIP_WIDTH = 200;
-    private final TooltipSupplierFactory<T> tooltip;
+    private final TooltipSupplier<T> tooltip;
     final Function<T, Component> toString;
     private final ValueSet<T> values;
     private final Codec<T> codec;
@@ -59,21 +58,21 @@ public final class OptionInstance<T> {
         return OptionInstance.createBoolean(string, OptionInstance.noTooltip(), bl, boolean_ -> {});
     }
 
-    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplierFactory<Boolean> tooltipSupplierFactory, boolean bl) {
-        return OptionInstance.createBoolean(string, tooltipSupplierFactory, bl, boolean_ -> {});
+    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplier<Boolean> tooltipSupplier, boolean bl) {
+        return OptionInstance.createBoolean(string, tooltipSupplier, bl, boolean_ -> {});
     }
 
-    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplierFactory<Boolean> tooltipSupplierFactory, boolean bl, Consumer<Boolean> consumer) {
-        return new OptionInstance<Boolean>(string, tooltipSupplierFactory, (component, boolean_) -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF, BOOLEAN_VALUES, bl, consumer);
+    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplier<Boolean> tooltipSupplier, boolean bl, Consumer<Boolean> consumer) {
+        return new OptionInstance<Boolean>(string, tooltipSupplier, (component, boolean_) -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF, BOOLEAN_VALUES, bl, consumer);
     }
 
-    public OptionInstance(String string, TooltipSupplierFactory<T> tooltipSupplierFactory, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, T object, Consumer<T> consumer) {
-        this(string, tooltipSupplierFactory, captionBasedToString, valueSet, valueSet.codec(), object, consumer);
+    public OptionInstance(String string, TooltipSupplier<T> tooltipSupplier, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, T object, Consumer<T> consumer) {
+        this(string, tooltipSupplier, captionBasedToString, valueSet, valueSet.codec(), object, consumer);
     }
 
-    public OptionInstance(String string, TooltipSupplierFactory<T> tooltipSupplierFactory, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, Codec<T> codec, T object2, Consumer<T> consumer) {
+    public OptionInstance(String string, TooltipSupplier<T> tooltipSupplier, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, Codec<T> codec, T object2, Consumer<T> consumer) {
         this.caption = Component.translatable(string);
-        this.tooltip = tooltipSupplierFactory;
+        this.tooltip = tooltipSupplier;
         this.toString = object -> captionBasedToString.toString(this.caption, object);
         this.values = valueSet;
         this.codec = codec;
@@ -82,28 +81,20 @@ public final class OptionInstance<T> {
         this.value = this.initialValue;
     }
 
-    public static <T> TooltipSupplierFactory<T> noTooltip() {
-        return minecraft -> object -> ImmutableList.of();
+    public static <T> TooltipSupplier<T> noTooltip() {
+        return object -> null;
     }
 
-    public static <T> TooltipSupplierFactory<T> cachedConstantTooltip(Component component) {
-        return minecraft -> {
-            List<FormattedCharSequence> list = OptionInstance.splitTooltip(minecraft, component);
-            return object -> list;
-        };
+    public static <T> TooltipSupplier<T> cachedConstantTooltip(Component component) {
+        return object -> Tooltip.create(component);
     }
 
     public static <T extends OptionEnum> CaptionBasedToString<T> forOptionEnum() {
         return (component, optionEnum) -> optionEnum.getCaption();
     }
 
-    protected static List<FormattedCharSequence> splitTooltip(Minecraft minecraft, Component component) {
-        return minecraft.font.split(component, 200);
-    }
-
     public AbstractWidget createButton(Options options, int i, int j, int k) {
-        TooltipSupplier tooltipSupplier = (TooltipSupplier)this.tooltip.apply(Minecraft.getInstance());
-        return this.values.createButton(tooltipSupplier, options, i, j, k).apply(this);
+        return this.values.createButton(this.tooltip, options, i, j, k).apply(this);
     }
 
     public T get() {
@@ -137,9 +128,11 @@ public final class OptionInstance<T> {
         return this.values;
     }
 
+    @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
-    public static interface TooltipSupplierFactory<T>
-    extends Function<Minecraft, TooltipSupplier<T>> {
+    public static interface TooltipSupplier<T> {
+        @Nullable
+        public Tooltip apply(T var1);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -168,12 +161,6 @@ public final class OptionInstance<T> {
         public Optional<T> validateValue(T var1);
 
         public Codec<T> codec();
-    }
-
-    @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
-    public static interface TooltipSupplier<T>
-    extends Function<T, List<FormattedCharSequence>> {
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -334,34 +321,29 @@ public final class OptionInstance<T> {
 
     @Environment(value=EnvType.CLIENT)
     static final class OptionInstanceSliderButton<N>
-    extends AbstractOptionSliderButton
-    implements TooltipAccessor {
+    extends AbstractOptionSliderButton {
         private final OptionInstance<N> instance;
         private final SliderableValueSet<N> values;
-        private final TooltipSupplier<N> tooltip;
+        private final TooltipSupplier<N> tooltipSupplier;
 
         OptionInstanceSliderButton(Options options, int i, int j, int k, int l, OptionInstance<N> optionInstance, SliderableValueSet<N> sliderableValueSet, TooltipSupplier<N> tooltipSupplier) {
             super(options, i, j, k, l, sliderableValueSet.toSliderValue(optionInstance.get()));
             this.instance = optionInstance;
             this.values = sliderableValueSet;
-            this.tooltip = tooltipSupplier;
+            this.tooltipSupplier = tooltipSupplier;
             this.updateMessage();
         }
 
         @Override
         protected void updateMessage() {
             this.setMessage(this.instance.toString.apply(this.instance.get()));
+            this.setTooltip(this.tooltipSupplier.apply(this.values.fromSliderValue(this.value)));
         }
 
         @Override
         protected void applyValue() {
             this.instance.set(this.values.fromSliderValue(this.value));
             this.options.save();
-        }
-
-        @Override
-        public List<FormattedCharSequence> getTooltip() {
-            return (List)this.tooltip.apply(this.values.fromSliderValue(this.value));
         }
     }
 

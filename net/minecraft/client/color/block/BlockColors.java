@@ -13,7 +13,7 @@ import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.IdMapper;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
@@ -91,7 +91,7 @@ public class BlockColors {
     }
 
     public int getColor(BlockState blockState, Level level, BlockPos blockPos) {
-        BlockColor blockColor = this.blockColors.byId(Registry.BLOCK.getId(blockState.getBlock()));
+        BlockColor blockColor = this.blockColors.byId(BuiltInRegistries.BLOCK.getId(blockState.getBlock()));
         if (blockColor != null) {
             return blockColor.getColor(blockState, null, null, 0);
         }
@@ -100,13 +100,13 @@ public class BlockColors {
     }
 
     public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
-        BlockColor blockColor = this.blockColors.byId(Registry.BLOCK.getId(blockState.getBlock()));
+        BlockColor blockColor = this.blockColors.byId(BuiltInRegistries.BLOCK.getId(blockState.getBlock()));
         return blockColor == null ? -1 : blockColor.getColor(blockState, blockAndTintGetter, blockPos, i);
     }
 
     public void register(BlockColor blockColor, Block ... blocks) {
         for (Block block : blocks) {
-            this.blockColors.addMapping(blockColor, Registry.BLOCK.getId(block));
+            this.blockColors.addMapping(blockColor, BuiltInRegistries.BLOCK.getId(block));
         }
     }
 

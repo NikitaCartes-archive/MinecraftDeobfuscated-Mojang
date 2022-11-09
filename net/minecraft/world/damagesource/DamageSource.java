@@ -127,7 +127,7 @@ public class DamageSource {
             return new IndirectEntityDamageSource("explosion.player", entity, entity2).setScalesWithDifficulty().setExplosion();
         }
         if (entity != null) {
-            return new EntityDamageSource("explosion.player", entity).setScalesWithDifficulty().setExplosion();
+            return new EntityDamageSource("explosion", entity).setScalesWithDifficulty().setExplosion();
         }
         return new DamageSource("explosion").setScalesWithDifficulty().setExplosion();
     }

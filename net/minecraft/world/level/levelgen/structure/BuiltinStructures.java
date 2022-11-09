@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.structure;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -43,7 +43,7 @@ public interface BuiltinStructures {
     public static final ResourceKey<Structure> ANCIENT_CITY = BuiltinStructures.createKey("ancient_city");
 
     private static ResourceKey<Structure> createKey(String string) {
-        return ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.STRUCTURE, new ResourceLocation(string));
     }
 }
 

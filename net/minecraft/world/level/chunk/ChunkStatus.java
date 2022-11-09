@@ -17,6 +17,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
@@ -175,7 +176,7 @@ public class ChunkStatus {
     }
 
     private static ChunkStatus register(String string, @Nullable ChunkStatus chunkStatus, int i, EnumSet<Heightmap.Types> enumSet, ChunkType chunkType, GenerationTask generationTask, LoadingTask loadingTask) {
-        return Registry.register(Registry.CHUNK_STATUS, string, new ChunkStatus(string, chunkStatus, i, enumSet, chunkType, generationTask, loadingTask));
+        return Registry.register(BuiltInRegistries.CHUNK_STATUS, string, new ChunkStatus(string, chunkStatus, i, enumSet, chunkType, generationTask, loadingTask));
     }
 
     public static List<ChunkStatus> getStatusList() {
@@ -257,7 +258,7 @@ public class ChunkStatus {
     }
 
     public static ChunkStatus byName(String string) {
-        return Registry.CHUNK_STATUS.get(ResourceLocation.tryParse(string));
+        return BuiltInRegistries.CHUNK_STATUS.get(ResourceLocation.tryParse(string));
     }
 
     public EnumSet<Heightmap.Types> heightmapsAfter() {
@@ -269,7 +270,7 @@ public class ChunkStatus {
     }
 
     public String toString() {
-        return Registry.CHUNK_STATUS.getKey(this).toString();
+        return BuiltInRegistries.CHUNK_STATUS.getKey(this).toString();
     }
 
     public static enum ChunkType {

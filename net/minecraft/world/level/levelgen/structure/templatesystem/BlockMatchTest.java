@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 
 public class BlockMatchTest
 extends RuleTest {
-    public static final Codec<BlockMatchTest> CODEC = ((MapCodec)Registry.BLOCK.byNameCodec().fieldOf("block")).xmap(BlockMatchTest::new, blockMatchTest -> blockMatchTest.block).codec();
+    public static final Codec<BlockMatchTest> CODEC = ((MapCodec)BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block")).xmap(BlockMatchTest::new, blockMatchTest -> blockMatchTest.block).codec();
     private final Block block;
 
     public BlockMatchTest(Block block) {

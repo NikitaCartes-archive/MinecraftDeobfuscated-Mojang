@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -43,7 +43,7 @@ extends ProtoChunk {
     private final boolean allowWrites;
 
     public ImposterProtoChunk(LevelChunk levelChunk, boolean bl) {
-        super(levelChunk.getPos(), UpgradeData.EMPTY, levelChunk.levelHeightAccessor, levelChunk.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), levelChunk.getBlendingData());
+        super(levelChunk.getPos(), UpgradeData.EMPTY, levelChunk.levelHeightAccessor, levelChunk.getLevel().registryAccess().registryOrThrow(Registries.BIOME), levelChunk.getBlendingData());
         this.wrapped = levelChunk;
         this.allowWrites = bl;
     }

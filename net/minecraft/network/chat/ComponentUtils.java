@@ -15,6 +15,7 @@ import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -146,6 +147,10 @@ public class ComponentUtils {
             return Language.getInstance().has(string);
         }
         return true;
+    }
+
+    public static MutableComponent copyOnClickText(String string) {
+        return ComponentUtils.wrapInSquareBrackets(Component.literal(string).withStyle(style -> style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, string)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(string)));
     }
 }
 

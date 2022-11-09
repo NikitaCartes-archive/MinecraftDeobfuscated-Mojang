@@ -30,7 +30,7 @@ import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.client.sounds.Weighted;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -104,13 +104,13 @@ extends SimplePreparableReloadListener<Preparations> {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             for (ResourceLocation resourceLocation : this.registry.keySet()) {
                 WeighedSoundEvents weighedSoundEvents = this.registry.get(resourceLocation);
-                if (ComponentUtils.isTranslationResolvable(weighedSoundEvents.getSubtitle()) || !Registry.SOUND_EVENT.containsKey(resourceLocation)) continue;
+                if (ComponentUtils.isTranslationResolvable(weighedSoundEvents.getSubtitle()) || !BuiltInRegistries.SOUND_EVENT.containsKey(resourceLocation)) continue;
                 LOGGER.error("Missing subtitle {} for sound event: {}", (Object)weighedSoundEvents.getSubtitle(), (Object)resourceLocation);
             }
         }
         if (LOGGER.isDebugEnabled()) {
             for (ResourceLocation resourceLocation : this.registry.keySet()) {
-                if (Registry.SOUND_EVENT.containsKey(resourceLocation)) continue;
+                if (BuiltInRegistries.SOUND_EVENT.containsKey(resourceLocation)) continue;
                 LOGGER.debug("Not having sound event for: {}", (Object)resourceLocation);
             }
         }

@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -135,7 +135,7 @@ public class AttributeMap {
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
             String string = compoundTag.getString("Name");
-            Util.ifElse(Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(string)), attribute -> {
+            Util.ifElse(BuiltInRegistries.ATTRIBUTE.getOptional(ResourceLocation.tryParse(string)), attribute -> {
                 AttributeInstance attributeInstance = this.getInstance((Attribute)attribute);
                 if (attributeInstance != null) {
                     attributeInstance.load(compoundTag);

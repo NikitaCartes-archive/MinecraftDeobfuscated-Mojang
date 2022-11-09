@@ -84,6 +84,7 @@ extends Monster {
     public static final int REINFORCEMENT_ATTEMPTS = 50;
     public static final int REINFORCEMENT_RANGE_MAX = 40;
     public static final int REINFORCEMENT_RANGE_MIN = 7;
+    protected static final float BABY_EYE_HEIGHT_ADJUSTMENT = 0.81f;
     private static final float BREAK_DOOR_CHANCE = 0.1f;
     private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.HARD;
     private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, DOOR_BREAKING_PREDICATE);

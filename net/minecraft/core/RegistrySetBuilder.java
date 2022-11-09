@@ -188,7 +188,7 @@ public class RegistrySetBuilder {
                 }
 
                 @Override
-                public Lifecycle elementsLifecycle() {
+                public Lifecycle registryLifecycle() {
                     return stub.lifecycle();
                 }
 

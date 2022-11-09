@@ -48,7 +48,7 @@ import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -247,7 +247,7 @@ extends Screen {
         WorldDimensions.Complete complete = worldCreationContext.selectedDimensions().bake(worldCreationContext.datapackDimensions());
         LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = worldCreationContext.worldgenRegistries().replaceFrom(RegistryLayer.DIMENSIONS, complete.dimensionsRegistryAccess());
         Lifecycle lifecycle = FeatureFlags.isExperimental(worldCreationContext.dataConfiguration().enabledFeatures()) ? Lifecycle.experimental() : Lifecycle.stable();
-        Lifecycle lifecycle2 = layeredRegistryAccess.compositeAccess().allElementsLifecycle();
+        Lifecycle lifecycle2 = layeredRegistryAccess.compositeAccess().allRegistriesLifecycle();
         Lifecycle lifecycle3 = lifecycle2.add(lifecycle);
         WorldOpenFlows.confirmWorldCreation(this.minecraft, this, lifecycle3, () -> this.createNewWorld(complete.specialWorldProperty(), layeredRegistryAccess, lifecycle3));
     }
@@ -443,10 +443,10 @@ extends Screen {
         this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(Component.translatable("dataPack.validation.working"))));
         WorldLoader.InitConfig initConfig = CreateWorldScreen.createDefaultLoadConfig(packRepository, worldDataConfiguration);
         ((CompletableFuture)WorldLoader.load(initConfig, dataLoadContext -> {
-            if (dataLoadContext.datapackWorldgen().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).size() == 0) {
+            if (dataLoadContext.datapackWorldgen().registryOrThrow(Registries.WORLD_PRESET).size() == 0) {
                 throw new IllegalStateException("Needs at least one world preset to continue");
             }
-            if (dataLoadContext.datapackWorldgen().registryOrThrow(Registry.BIOME_REGISTRY).size() == 0) {
+            if (dataLoadContext.datapackWorldgen().registryOrThrow(Registries.BIOME).size() == 0) {
                 throw new IllegalStateException("Needs at least one biome continue");
             }
             WorldCreationContext worldCreationContext = this.worldGenSettingsComponent.settings();
@@ -523,7 +523,7 @@ extends Screen {
             Stream<Path> stream = Files.walk(this.tempDataPackDir, new FileVisitOption[0]);
             try {
                 Path path3 = levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR);
-                Files.createDirectories(path3, new FileAttribute[0]);
+                FileUtil.createDirectoriesSafe(path3);
                 stream.filter(path -> !path.equals(this.tempDataPackDir)).forEach(path2 -> CreateWorldScreen.copyBetweenDirs(this.tempDataPackDir, path3, path2));
                 optional = Optional.of(levelStorageAccess);
                 if (stream == null) break block12;

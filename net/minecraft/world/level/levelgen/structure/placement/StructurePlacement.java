@@ -11,8 +11,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 
 public abstract class StructurePlacement {
-    public static final Codec<StructurePlacement> CODEC = Registry.STRUCTURE_PLACEMENT_TYPE.byNameCodec().dispatch(StructurePlacement::type, StructurePlacementType::codec);
+    public static final Codec<StructurePlacement> CODEC = BuiltInRegistries.STRUCTURE_PLACEMENT.byNameCodec().dispatch(StructurePlacement::type, StructurePlacementType::codec);
     private static final int HIGHLY_ARBITRARY_RANDOM_SALT = 10387320;
     private final Vec3i locateOffset;
     private final FrequencyReductionMethod frequencyReductionMethod;
@@ -141,7 +142,7 @@ public abstract class StructurePlacement {
 
     @Deprecated
     public record ExclusionZone(Holder<StructureSet> otherSet, int chunkCount) {
-        public static final Codec<ExclusionZone> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)RegistryFileCodec.create(Registry.STRUCTURE_SET_REGISTRY, StructureSet.DIRECT_CODEC, false).fieldOf("other_set")).forGetter(ExclusionZone::otherSet), ((MapCodec)Codec.intRange(1, 16).fieldOf("chunk_count")).forGetter(ExclusionZone::chunkCount)).apply((Applicative<ExclusionZone, ?>)instance, ExclusionZone::new));
+        public static final Codec<ExclusionZone> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)RegistryFileCodec.create(Registries.STRUCTURE_SET, StructureSet.DIRECT_CODEC, false).fieldOf("other_set")).forGetter(ExclusionZone::otherSet), ((MapCodec)Codec.intRange(1, 16).fieldOf("chunk_count")).forGetter(ExclusionZone::chunkCount)).apply((Applicative<ExclusionZone, ?>)instance, ExclusionZone::new));
 
         boolean isPlacementForbidden(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
             return chunkGeneratorStructureState.hasStructureChunkInRange(this.otherSet, i, j, this.chunkCount);

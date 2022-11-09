@@ -333,24 +333,24 @@ extends ObjectSelectionList<Entry> {
                 if (this.summary.isLocked()) {
                     GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                     if (bl2) {
-                        this.screen.setToolTip(this.minecraft.font.split(WORLD_LOCKED_TOOLTIP, 175));
+                        this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WORLD_LOCKED_TOOLTIP, 175));
                     }
                 } else if (this.summary.requiresManualConversion()) {
                     GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                     if (bl2) {
-                        this.screen.setToolTip(this.minecraft.font.split(WORLD_REQUIRES_CONVERSION, 175));
+                        this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WORLD_REQUIRES_CONVERSION, 175));
                     }
                 } else if (this.summary.markVersionInList()) {
                     GuiComponent.blit(poseStack, k, j, 32.0f, q, 32, 32, 256, 256);
                     if (this.summary.askToOpenWorld()) {
                         GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                         if (bl2) {
-                            this.screen.setToolTip(ImmutableList.of(FROM_NEWER_TOOLTIP_1.getVisualOrderText(), FROM_NEWER_TOOLTIP_2.getVisualOrderText()));
+                            this.screen.setTooltipForNextRenderPass(ImmutableList.of(FROM_NEWER_TOOLTIP_1.getVisualOrderText(), FROM_NEWER_TOOLTIP_2.getVisualOrderText()));
                         }
                     } else if (!SharedConstants.getCurrentVersion().isStable()) {
                         GuiComponent.blit(poseStack, k, j, 64.0f, q, 32, 32, 256, 256);
                         if (bl2) {
-                            this.screen.setToolTip(ImmutableList.of(SNAPSHOT_TOOLTIP_1.getVisualOrderText(), SNAPSHOT_TOOLTIP_2.getVisualOrderText()));
+                            this.screen.setTooltipForNextRenderPass(ImmutableList.of(SNAPSHOT_TOOLTIP_1.getVisualOrderText(), SNAPSHOT_TOOLTIP_2.getVisualOrderText()));
                         }
                     }
                 } else {

@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.effect.MobEffect;
@@ -80,7 +80,7 @@ public class MobEffectsPredicate {
         LinkedHashMap<MobEffect, MobEffectInstancePredicate> map = Maps.newLinkedHashMap();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             ResourceLocation resourceLocation = new ResourceLocation(entry.getKey());
-            MobEffect mobEffect = Registry.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown effect '" + resourceLocation + "'"));
+            MobEffect mobEffect = BuiltInRegistries.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown effect '" + resourceLocation + "'"));
             MobEffectInstancePredicate mobEffectInstancePredicate = MobEffectInstancePredicate.fromJson(GsonHelper.convertToJsonObject(entry.getValue(), entry.getKey()));
             map.put(mobEffect, mobEffectInstancePredicate);
         }
@@ -93,7 +93,7 @@ public class MobEffectsPredicate {
         }
         JsonObject jsonObject = new JsonObject();
         for (Map.Entry<MobEffect, MobEffectInstancePredicate> entry : this.effects.entrySet()) {
-            jsonObject.add(Registry.MOB_EFFECT.getKey(entry.getKey()).toString(), entry.getValue().serializeToJson());
+            jsonObject.add(BuiltInRegistries.MOB_EFFECT.getKey(entry.getKey()).toString(), entry.getValue().serializeToJson());
         }
         return jsonObject;
     }

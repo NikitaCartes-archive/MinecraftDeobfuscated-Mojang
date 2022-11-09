@@ -92,7 +92,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -101,6 +100,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.BlockDestructionProgress;
@@ -1104,7 +1104,7 @@ AutoCloseable {
                 SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos2.asLong());
                 if (sortedSet != null && !sortedSet.isEmpty() && (m = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
                     PoseStack.Pose pose = poseStack.last();
-                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(m)), pose.pose(), pose.normal());
+                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(m)), pose.pose(), pose.normal(), 1.0f);
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
@@ -1155,7 +1155,7 @@ AutoCloseable {
             poseStack.pushPose();
             poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
             PoseStack.Pose pose2 = poseStack.last();
-            SheetedDecalTextureGenerator vertexConsumer2 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(r)), pose2.pose(), pose2.normal());
+            SheetedDecalTextureGenerator vertexConsumer2 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(r)), pose2.pose(), pose2.normal(), 1.0f);
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos), blockPos, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
@@ -2222,7 +2222,7 @@ AutoCloseable {
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception while adding particle");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being added");
-            crashReportCategory.setDetail("ID", Registry.PARTICLE_TYPE.getKey(particleOptions.getType()));
+            crashReportCategory.setDetail("ID", BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType()));
             crashReportCategory.setDetail("Parameters", particleOptions.writeToString());
             crashReportCategory.setDetail("Position", () -> CrashReportCategory.formatLocation((LevelHeightAccessor)this.level, d, e, f));
             throw new ReportedException(crashReport);

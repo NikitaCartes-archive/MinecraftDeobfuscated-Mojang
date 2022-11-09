@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 
 public class TagMatchTest
 extends RuleTest {
-    public static final Codec<TagMatchTest> CODEC = ((MapCodec)TagKey.codec(Registry.BLOCK_REGISTRY).fieldOf("tag")).xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag).codec();
+    public static final Codec<TagMatchTest> CODEC = ((MapCodec)TagKey.codec(Registries.BLOCK).fieldOf("tag")).xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag).codec();
     private final TagKey<Block> tag;
 
     public TagMatchTest(TagKey<Block> tagKey) {

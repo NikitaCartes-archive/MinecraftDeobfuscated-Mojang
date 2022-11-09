@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure.pools;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.structure.pools.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.FeaturePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.LegacySinglePoolElement;
@@ -22,7 +23,7 @@ public interface StructurePoolElementType<P extends StructurePoolElement> {
     public Codec<P> codec();
 
     public static <P extends StructurePoolElement> StructurePoolElementType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.STRUCTURE_POOL_ELEMENT, string, () -> codec);
+        return Registry.register(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, string, () -> codec);
     }
 }
 

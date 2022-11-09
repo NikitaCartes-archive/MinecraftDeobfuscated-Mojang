@@ -7,7 +7,7 @@ import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -125,7 +125,7 @@ extends AbstractContainerMenu {
                         List<EnchantmentInstance> list;
                         if (this.costs[j] <= 0 || (list = this.getEnchantmentList(itemStack, j, this.costs[j])) == null || list.isEmpty()) continue;
                         EnchantmentInstance enchantmentInstance = list.get(this.random.nextInt(list.size()));
-                        this.enchantClue[j] = Registry.ENCHANTMENT.getId(enchantmentInstance.enchantment);
+                        this.enchantClue[j] = BuiltInRegistries.ENCHANTMENT.getId(enchantmentInstance.enchantment);
                         this.levelClue[j] = enchantmentInstance.level;
                     }
                     this.broadcastChanges();

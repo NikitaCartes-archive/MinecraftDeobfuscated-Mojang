@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -60,11 +60,11 @@ implements DataProvider {
         Consumer<Item> consumer2 = set::add;
         new BlockModelGenerators(consumer, biConsumer, consumer2).run();
         new ItemModelGenerators(biConsumer).run();
-        List<Block> list = Registry.BLOCK.stream().filter(block -> !map.containsKey(block)).toList();
+        List<Block> list = BuiltInRegistries.BLOCK.stream().filter(block -> !map.containsKey(block)).toList();
         if (!list.isEmpty()) {
             throw new IllegalStateException("Missing blockstate definitions for: " + list);
         }
-        Registry.BLOCK.forEach(block -> {
+        BuiltInRegistries.BLOCK.forEach(block -> {
             Item item = Item.BY_BLOCK.get(block);
             if (item != null) {
                 if (set.contains(item)) {

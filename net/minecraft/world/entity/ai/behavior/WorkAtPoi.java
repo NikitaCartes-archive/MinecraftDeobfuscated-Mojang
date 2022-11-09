@@ -67,5 +67,15 @@ extends Behavior<Villager> {
     protected /* synthetic */ boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
         return this.checkExtraStartConditions(serverLevel, (Villager)livingEntity);
     }
+
+    @Override
+    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        return this.canStillUse(serverLevel, (Villager)livingEntity, l);
+    }
+
+    @Override
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (Villager)livingEntity, l);
+    }
 }
 

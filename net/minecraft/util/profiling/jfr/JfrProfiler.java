@@ -10,11 +10,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.SocketAddress;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -31,6 +28,7 @@ import jdk.jfr.FlightRecorder;
 import jdk.jfr.FlightRecorderListener;
 import jdk.jfr.Recording;
 import jdk.jfr.RecordingState;
+import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
@@ -145,9 +143,7 @@ implements JvmProfiler {
                 recording.setName(String.format(Locale.ROOT, "%s-%s-%s", environment.getDescription(), SharedConstants.getCurrentVersion().getName(), string));
             });
             Path path = Paths.get(String.format(Locale.ROOT, "debug/%s-%s.jfr", environment.getDescription(), string), new String[0]);
-            if (!Files.exists(path.getParent(), new LinkOption[0])) {
-                Files.createDirectories(path.getParent(), new FileAttribute[0]);
-            }
+            FileUtil.createDirectoriesSafe(path.getParent());
             this.recording.setDestination(path);
             this.recording.start();
             this.setupSummaryListener();

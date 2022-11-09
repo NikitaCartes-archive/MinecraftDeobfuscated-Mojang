@@ -10,7 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -22,7 +22,7 @@ public class PoiRecord {
     private final Runnable setDirty;
 
     public static Codec<PoiRecord> codec(Runnable runnable) {
-        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockPos.CODEC.fieldOf("pos")).forGetter(poiRecord -> poiRecord.pos), ((MapCodec)RegistryFixedCodec.create(Registry.POINT_OF_INTEREST_TYPE_REGISTRY).fieldOf("type")).forGetter(poiRecord -> poiRecord.poiType), ((MapCodec)Codec.INT.fieldOf("free_tickets")).orElse(0).forGetter(poiRecord -> poiRecord.freeTickets), RecordCodecBuilder.point(runnable)).apply((Applicative<PoiRecord, ?>)instance, PoiRecord::new));
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockPos.CODEC.fieldOf("pos")).forGetter(poiRecord -> poiRecord.pos), ((MapCodec)RegistryFixedCodec.create(Registries.POINT_OF_INTEREST_TYPE).fieldOf("type")).forGetter(poiRecord -> poiRecord.poiType), ((MapCodec)Codec.INT.fieldOf("free_tickets")).orElse(0).forGetter(poiRecord -> poiRecord.freeTickets), RecordCodecBuilder.point(runnable)).apply((Applicative<PoiRecord, ?>)instance, PoiRecord::new));
     }
 
     private PoiRecord(BlockPos blockPos, Holder<PoiType> holder, int i, Runnable runnable) {

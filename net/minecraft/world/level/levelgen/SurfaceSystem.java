@@ -9,6 +9,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -168,7 +169,7 @@ public class SurfaceSystem {
 
     @Deprecated
     public Optional<BlockState> topMaterial(SurfaceRules.RuleSource ruleSource, CarvingContext carvingContext, Function<BlockPos, Holder<Biome>> function, ChunkAccess chunkAccess, NoiseChunk noiseChunk, BlockPos blockPos, boolean bl) {
-        SurfaceRules.Context context = new SurfaceRules.Context(this, carvingContext.randomState(), chunkAccess, noiseChunk, function, carvingContext.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), carvingContext);
+        SurfaceRules.Context context = new SurfaceRules.Context(this, carvingContext.randomState(), chunkAccess, noiseChunk, function, carvingContext.registryAccess().registryOrThrow(Registries.BIOME), carvingContext);
         SurfaceRules.SurfaceRule surfaceRule = (SurfaceRules.SurfaceRule)ruleSource.apply(context);
         int i = blockPos.getX();
         int j = blockPos.getY();

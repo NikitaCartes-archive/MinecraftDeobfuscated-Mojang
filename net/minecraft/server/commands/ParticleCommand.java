@@ -18,8 +18,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -40,7 +40,7 @@ public class ParticleCommand {
         if (j == 0) {
             throw ERROR_FAILED.create();
         }
-        commandSourceStack.sendSuccess(Component.translatable("commands.particle.success", Registry.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true);
+        commandSourceStack.sendSuccess(Component.translatable("commands.particle.success", BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true);
         return j;
     }
 }

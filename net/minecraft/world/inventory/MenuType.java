@@ -4,6 +4,7 @@
 package net.minecraft.world.inventory;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -54,7 +55,7 @@ public class MenuType<T extends AbstractContainerMenu> {
     private final MenuSupplier<T> constructor;
 
     private static <T extends AbstractContainerMenu> MenuType<T> register(String string, MenuSupplier<T> menuSupplier) {
-        return Registry.register(Registry.MENU, string, new MenuType<T>(menuSupplier));
+        return Registry.register(BuiltInRegistries.MENU, string, new MenuType<T>(menuSupplier));
     }
 
     private MenuType(MenuSupplier<T> menuSupplier) {

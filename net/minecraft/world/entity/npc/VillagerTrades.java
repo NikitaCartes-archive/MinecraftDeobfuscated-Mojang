@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
@@ -250,8 +250,8 @@ public class VillagerTrades {
         private final int villagerXp;
 
         public EmeraldsForVillagerTypeItem(int i, int j, int k, Map<VillagerType, Item> map) {
-            Registry.VILLAGER_TYPE.stream().filter(villagerType -> !map.containsKey(villagerType)).findAny().ifPresent(villagerType -> {
-                throw new IllegalStateException("Missing trade for villager type: " + Registry.VILLAGER_TYPE.getKey((VillagerType)villagerType));
+            BuiltInRegistries.VILLAGER_TYPE.stream().filter(villagerType -> !map.containsKey(villagerType)).findAny().ifPresent(villagerType -> {
+                throw new IllegalStateException("Missing trade for villager type: " + BuiltInRegistries.VILLAGER_TYPE.getKey((VillagerType)villagerType));
             });
             this.trades = map;
             this.cost = i;
@@ -295,7 +295,7 @@ public class VillagerTrades {
         @Override
         public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
             ItemStack itemStack = new ItemStack(Items.EMERALD, this.emeraldCost);
-            List list = Registry.POTION.stream().filter(potion -> !potion.getEffects().isEmpty() && PotionBrewing.isBrewablePotion(potion)).collect(Collectors.toList());
+            List list = BuiltInRegistries.POTION.stream().filter(potion -> !potion.getEffects().isEmpty() && PotionBrewing.isBrewablePotion(potion)).collect(Collectors.toList());
             Potion potion2 = (Potion)list.get(randomSource.nextInt(list.size()));
             ItemStack itemStack2 = PotionUtils.setPotion(new ItemStack(this.toItem.getItem(), this.toCount), potion2);
             return new MerchantOffer(itemStack, new ItemStack(this.fromItem, this.fromCount), itemStack2, this.maxUses, this.villagerXp, this.priceMultiplier);
@@ -312,7 +312,7 @@ public class VillagerTrades {
 
         @Override
         public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-            List list = Registry.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
+            List list = BuiltInRegistries.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
             Enchantment enchantment = (Enchantment)list.get(randomSource.nextInt(list.size()));
             int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
             ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i));

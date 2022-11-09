@@ -141,18 +141,8 @@ extends Behavior<Villager> {
     }
 
     @Override
-    public /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Villager)livingEntity, l);
-    }
-
-    @Override
     public /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.stop(serverLevel, (Villager)livingEntity, l);
-    }
-
-    @Override
-    public /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (Villager)livingEntity, l);
     }
 
     @Override

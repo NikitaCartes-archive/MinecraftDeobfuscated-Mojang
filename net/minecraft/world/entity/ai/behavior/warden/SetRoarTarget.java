@@ -3,36 +3,25 @@
  */
 package net.minecraft.world.entity.ai.behavior.warden;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import java.util.function.Function;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.monster.warden.Warden;
 
-public class SetRoarTarget<E extends Warden>
-extends Behavior<E> {
-    private final Function<E, Optional<? extends LivingEntity>> targetFinderFunction;
-
-    public SetRoarTarget(Function<E, Optional<? extends LivingEntity>> function) {
-        super(ImmutableMap.of(MemoryModuleType.ROAR_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED));
-        this.targetFinderFunction = function;
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, E warden) {
-        return this.targetFinderFunction.apply(warden).filter(arg_0 -> warden.canTargetEntity(arg_0)).isPresent();
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel, E warden, long l) {
-        this.targetFinderFunction.apply(warden).ifPresent(livingEntity -> {
-            warden.getBrain().setMemory(MemoryModuleType.ROAR_TARGET, livingEntity);
-            warden.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-        });
+public class SetRoarTarget {
+    public static <E extends Warden> BehaviorControl<E> create(Function<E, Optional<? extends LivingEntity>> function) {
+        return BehaviorBuilder.create((BehaviorBuilder.Instance<E> instance) -> instance.group(instance.absent(MemoryModuleType.ROAR_TARGET), instance.absent(MemoryModuleType.ATTACK_TARGET), instance.registered(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)).apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3) -> (serverLevel, warden, l) -> {
+            Optional optional = (Optional)function.apply(warden);
+            if (optional.filter(warden::canTargetEntity).isEmpty()) {
+                return false;
+            }
+            memoryAccessor.set((LivingEntity)optional.get());
+            memoryAccessor3.erase();
+            return true;
+        }));
     }
 }
 

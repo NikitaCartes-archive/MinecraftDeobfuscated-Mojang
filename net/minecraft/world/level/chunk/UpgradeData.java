@@ -18,9 +18,9 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction8;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -80,8 +80,8 @@ public class UpgradeData {
             if ((j & 1 << direction8.ordinal()) == 0) continue;
             this.sides.add(direction8);
         }
-        UpgradeData.loadTicks(compoundTag, "neighbor_block_ticks", string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)).or(() -> Optional.of(Blocks.AIR)), this.neighborBlockTicks);
-        UpgradeData.loadTicks(compoundTag, "neighbor_fluid_ticks", string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)).or(() -> Optional.of(Fluids.EMPTY)), this.neighborFluidTicks);
+        UpgradeData.loadTicks(compoundTag, "neighbor_block_ticks", string -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(string)).or(() -> Optional.of(Blocks.AIR)), this.neighborBlockTicks);
+        UpgradeData.loadTicks(compoundTag, "neighbor_fluid_ticks", string -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(string)).or(() -> Optional.of(Fluids.EMPTY)), this.neighborFluidTicks);
     }
 
     private static <T> void loadTicks(CompoundTag compoundTag, String string, Function<String, Optional<T>> function, List<SavedTick<T>> list) {
@@ -209,12 +209,12 @@ public class UpgradeData {
         compoundTag.putByte("Sides", (byte)i);
         if (!this.neighborBlockTicks.isEmpty()) {
             listTag = new ListTag();
-            this.neighborBlockTicks.forEach(savedTick -> listTag.add(savedTick.save(block -> Registry.BLOCK.getKey((Block)block).toString())));
+            this.neighborBlockTicks.forEach(savedTick -> listTag.add(savedTick.save(block -> BuiltInRegistries.BLOCK.getKey((Block)block).toString())));
             compoundTag.put("neighbor_block_ticks", listTag);
         }
         if (!this.neighborFluidTicks.isEmpty()) {
             listTag = new ListTag();
-            this.neighborFluidTicks.forEach(savedTick -> listTag.add(savedTick.save(fluid -> Registry.FLUID.getKey((Fluid)fluid).toString())));
+            this.neighborFluidTicks.forEach(savedTick -> listTag.add(savedTick.save(fluid -> BuiltInRegistries.FLUID.getKey((Fluid)fluid).toString())));
             compoundTag.put("neighbor_fluid_ticks", listTag);
         }
         return compoundTag;

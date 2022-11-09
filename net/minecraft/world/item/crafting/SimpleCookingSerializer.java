@@ -6,7 +6,7 @@ package net.minecraft.world.item.crafting;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Objects;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -16,6 +16,7 @@ import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.ItemLike;
 
 public class SimpleCookingSerializer<T extends AbstractCookingRecipe>
 implements RecipeSerializer<T> {
@@ -35,7 +36,7 @@ implements RecipeSerializer<T> {
         Ingredient ingredient = Ingredient.fromJson(jsonElement);
         String string2 = GsonHelper.getAsString(jsonObject, "result");
         ResourceLocation resourceLocation2 = new ResourceLocation(string2);
-        ItemStack itemStack = new ItemStack(Registry.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new IllegalStateException("Item: " + string2 + " does not exist")));
+        ItemStack itemStack = new ItemStack((ItemLike)BuiltInRegistries.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new IllegalStateException("Item: " + string2 + " does not exist")));
         float f = GsonHelper.getAsFloat(jsonObject, "experience", 0.0f);
         int i = GsonHelper.getAsInt(jsonObject, "cookingtime", this.defaultCookingTime);
         return this.factory.create(resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);

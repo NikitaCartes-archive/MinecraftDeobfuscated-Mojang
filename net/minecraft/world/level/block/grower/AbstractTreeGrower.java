@@ -5,7 +5,7 @@ package net.minecraft.world.level.block.grower;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -25,7 +25,7 @@ public abstract class AbstractTreeGrower {
         if (resourceKey == null) {
             return false;
         }
-        Holder holder = serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY).getHolder(resourceKey).orElse(null);
+        Holder holder = serverLevel.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(resourceKey).orElse(null);
         if (holder == null) {
             return false;
         }

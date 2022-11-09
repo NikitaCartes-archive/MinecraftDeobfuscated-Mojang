@@ -14,7 +14,6 @@ import com.mojang.serialization.codecs.UnboundedMapCodec;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.HolderSetCodec;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.RegistryFixedCodec;
@@ -29,7 +28,7 @@ public class RegistryCodecs {
         return RegistryCodecs.withNameAndId(resourceKey, codec.fieldOf("element")).codec().listOf().xmap(list -> {
             MappedRegistry writableRegistry = new MappedRegistry(resourceKey, lifecycle);
             for (RegistryEntry registryEntry : list) {
-                ((WritableRegistry)writableRegistry).registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
+                writableRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
             }
             return writableRegistry;
         }, registry -> {
@@ -46,7 +45,7 @@ public class RegistryCodecs {
         return codec2.xmap(map -> {
             MappedRegistry writableRegistry = new MappedRegistry(resourceKey, lifecycle);
             map.forEach((resourceKey, object) -> writableRegistry.register(resourceKey, object, lifecycle));
-            return ((Registry)writableRegistry).freeze();
+            return writableRegistry.freeze();
         }, registry -> ImmutableMap.copyOf(registry.entrySet()));
     }
 

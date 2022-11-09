@@ -5,6 +5,7 @@ package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.ArmorDyeRecipe;
@@ -63,7 +64,7 @@ public interface RecipeSerializer<T extends Recipe<?>> {
     public void toNetwork(FriendlyByteBuf var1, T var2);
 
     public static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(String string, S recipeSerializer) {
-        return (S)Registry.register(Registry.RECIPE_SERIALIZER, string, recipeSerializer);
+        return (S)Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, string, recipeSerializer);
     }
 }
 

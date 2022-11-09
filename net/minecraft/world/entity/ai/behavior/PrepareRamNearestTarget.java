@@ -151,8 +151,13 @@ extends Behavior<E> {
     }
 
     @Override
-    protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.stop(serverLevel, (E)((PathfinderMob)livingEntity), l);
+    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.tick(serverLevel, (E)((PathfinderMob)livingEntity), l);
+    }
+
+    @Override
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (PathfinderMob)livingEntity, l);
     }
 
     public static class RamCandidate {

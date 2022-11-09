@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class ProtectedBlockProcessor
 extends StructureProcessor {
     public final TagKey<Block> cannotReplace;
-    public static final Codec<ProtectedBlockProcessor> CODEC = TagKey.hashedCodec(Registry.BLOCK_REGISTRY).xmap(ProtectedBlockProcessor::new, protectedBlockProcessor -> protectedBlockProcessor.cannotReplace);
+    public static final Codec<ProtectedBlockProcessor> CODEC = TagKey.hashedCodec(Registries.BLOCK).xmap(ProtectedBlockProcessor::new, protectedBlockProcessor -> protectedBlockProcessor.cannotReplace);
 
     public ProtectedBlockProcessor(TagKey<Block> tagKey) {
         this.cannotReplace = tagKey;

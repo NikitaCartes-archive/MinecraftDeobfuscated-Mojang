@@ -29,8 +29,9 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
@@ -211,7 +212,7 @@ public final class NbtUtils {
             return Blocks.AIR.defaultBlockState();
         }
         ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("Name"));
-        Optional<Holder.Reference<Block>> optional = holderGetter.get(ResourceKey.create(Registry.BLOCK_REGISTRY, resourceLocation));
+        Optional<Holder.Reference<Block>> optional = holderGetter.get(ResourceKey.create(Registries.BLOCK, resourceLocation));
         if (optional.isEmpty()) {
             return Blocks.AIR.defaultBlockState();
         }
@@ -240,7 +241,7 @@ public final class NbtUtils {
 
     public static CompoundTag writeBlockState(BlockState blockState) {
         CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("Name", Registry.BLOCK.getKey(blockState.getBlock()).toString());
+        compoundTag.putString("Name", BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString());
         ImmutableMap<net.minecraft.world.level.block.state.properties.Property<?>, Comparable<?>> immutableMap = blockState.getValues();
         if (!immutableMap.isEmpty()) {
             CompoundTag compoundTag2 = new CompoundTag();
@@ -255,7 +256,7 @@ public final class NbtUtils {
 
     public static CompoundTag writeFluidState(FluidState fluidState) {
         CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("Name", Registry.FLUID.getKey(fluidState.getType()).toString());
+        compoundTag.putString("Name", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());
         ImmutableMap<net.minecraft.world.level.block.state.properties.Property<?>, Comparable<?>> immutableMap = fluidState.getValues();
         if (!immutableMap.isEmpty()) {
             CompoundTag compoundTag2 = new CompoundTag();

@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
@@ -67,7 +67,7 @@ extends CustomRecipe {
             HashMap<Enchantment, Integer> map = Maps.newHashMap();
             Map<Enchantment, Integer> map2 = EnchantmentHelper.getEnchantments(itemStack3);
             Map<Enchantment, Integer> map3 = EnchantmentHelper.getEnchantments(itemStack);
-            Registry.ENCHANTMENT.stream().filter(Enchantment::isCurse).forEach(enchantment -> {
+            BuiltInRegistries.ENCHANTMENT.stream().filter(Enchantment::isCurse).forEach(enchantment -> {
                 int i = Math.max(map2.getOrDefault(enchantment, 0), map3.getOrDefault(enchantment, 0));
                 if (i > 0) {
                     map.put((Enchantment)enchantment, i);

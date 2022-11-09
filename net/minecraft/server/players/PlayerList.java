@@ -30,6 +30,8 @@ import net.minecraft.FileUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -136,6 +138,7 @@ public abstract class PlayerList {
     private final PlayerDataStorage playerIo;
     private boolean doWhiteList;
     private final LayeredRegistryAccess<RegistryLayer> registries;
+    private final RegistryAccess.Frozen synchronizedRegistries;
     protected final int maxPlayers;
     private int viewDistance;
     private int simulationDistance;
@@ -146,6 +149,7 @@ public abstract class PlayerList {
     public PlayerList(MinecraftServer minecraftServer, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, PlayerDataStorage playerDataStorage, int i) {
         this.server = minecraftServer;
         this.registries = layeredRegistryAccess;
+        this.synchronizedRegistries = new RegistryAccess.ImmutableRegistryAccess(RegistrySynchronization.networkedRegistries(layeredRegistryAccess)).freeze();
         this.maxPlayers = i;
         this.playerIo = playerDataStorage;
     }
@@ -180,7 +184,7 @@ public abstract class PlayerList {
         GameRules gameRules = serverLevel2.getGameRules();
         boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
         boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
-        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), levelData.isHardcore(), serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer(), this.server.levelKeys(), this.registries.getAccessFrom(RegistryLayer.WORLDGEN), serverLevel2.dimensionTypeId(), serverLevel2.dimension(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), this.getMaxPlayers(), this.viewDistance, this.simulationDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat(), serverPlayer.getLastDeathLocation()));
+        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), levelData.isHardcore(), serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer(), this.server.levelKeys(), this.synchronizedRegistries, serverLevel2.dimensionTypeId(), serverLevel2.dimension(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), this.getMaxPlayers(), this.viewDistance, this.simulationDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat(), serverPlayer.getLastDeathLocation()));
         serverGamePacketListenerImpl.send(new ClientboundUpdateEnabledFeaturesPacket(FeatureFlags.REGISTRY.toNames(serverLevel2.enabledFeatures())));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));

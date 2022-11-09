@@ -3,7 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -25,14 +25,14 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundOpenScreenPacket(FriendlyByteBuf friendlyByteBuf) {
         this.containerId = friendlyByteBuf.readVarInt();
-        this.type = friendlyByteBuf.readById(Registry.MENU);
+        this.type = friendlyByteBuf.readById(BuiltInRegistries.MENU);
         this.title = friendlyByteBuf.readComponent();
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.containerId);
-        friendlyByteBuf.writeId(Registry.MENU, this.type);
+        friendlyByteBuf.writeId(BuiltInRegistries.MENU, this.type);
         friendlyByteBuf.writeComponent(this.title);
     }
 

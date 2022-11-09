@@ -2235,7 +2235,7 @@ CommandSource {
                 axis = Direction.Axis.X;
                 vec3 = new Vec3(0.5, 0.0, 0.0);
             }
-            return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this.getDimensions(this.getPose()), this.getDeltaMovement(), this.getYRot(), this.getXRot());
+            return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot());
         }).orElse(null);
     }
 

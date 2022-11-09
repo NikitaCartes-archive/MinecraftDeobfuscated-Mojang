@@ -48,7 +48,7 @@ implements RecipeUpdateListener {
     @Override
     public void containerTick() {
         if (this.minecraft.gameMode.hasInfiniteItems()) {
-            this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures()));
+            this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
             return;
         }
         this.recipeBookComponent.tick();
@@ -57,7 +57,7 @@ implements RecipeUpdateListener {
     @Override
     protected void init() {
         if (this.minecraft.gameMode.hasInfiniteItems()) {
-            this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures()));
+            this.minecraft.setScreen(new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()));
             return;
         }
         super.init();

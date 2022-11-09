@@ -19,6 +19,7 @@ extends DefaultedVertexConsumer {
     private final VertexConsumer delegate;
     private final Matrix4f cameraInversePose;
     private final Matrix3f normalInversePose;
+    private final float textureScale;
     private float x;
     private float y;
     private float z;
@@ -29,10 +30,11 @@ extends DefaultedVertexConsumer {
     private float ny;
     private float nz;
 
-    public SheetedDecalTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f) {
+    public SheetedDecalTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, float f) {
         this.delegate = vertexConsumer;
         this.cameraInversePose = new Matrix4f(matrix4f).invert();
         this.normalInversePose = new Matrix3f(matrix3f).invert();
+        this.textureScale = f;
         this.resetState();
     }
 
@@ -56,8 +58,8 @@ extends DefaultedVertexConsumer {
         vector4f.rotateY((float)Math.PI);
         vector4f.rotateX(-1.5707964f);
         vector4f.rotate(direction.getRotation());
-        float f = -vector4f.x();
-        float g = -vector4f.y();
+        float f = -vector4f.x() * this.textureScale;
+        float g = -vector4f.y() * this.textureScale;
         this.delegate.vertex(this.x, this.y, this.z).color(1.0f, 1.0f, 1.0f, 1.0f).uv(f, g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
         this.resetState();
     }

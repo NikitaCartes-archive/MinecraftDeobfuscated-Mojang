@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +65,7 @@ public class EnchantmentHelper {
 
     @Nullable
     public static ResourceLocation getEnchantmentId(Enchantment enchantment) {
-        return Registry.ENCHANTMENT.getKey(enchantment);
+        return BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
     }
 
     public static int getItemEnchantmentLevel(Enchantment enchantment, ItemStack itemStack) {
@@ -92,7 +92,7 @@ public class EnchantmentHelper {
         LinkedHashMap<Enchantment, Integer> map = Maps.newLinkedHashMap();
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
-            Registry.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag)).ifPresent(enchantment -> map.put((Enchantment)enchantment, EnchantmentHelper.getEnchantmentLevel(compoundTag)));
+            BuiltInRegistries.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag)).ifPresent(enchantment -> map.put((Enchantment)enchantment, EnchantmentHelper.getEnchantmentLevel(compoundTag)));
         }
         return map;
     }
@@ -121,7 +121,7 @@ public class EnchantmentHelper {
         ListTag listTag = itemStack.getEnchantmentTags();
         for (int i = 0; i < listTag.size(); ++i) {
             CompoundTag compoundTag = listTag.getCompound(i);
-            Registry.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag)).ifPresent(enchantment -> enchantmentVisitor.accept((Enchantment)enchantment, EnchantmentHelper.getEnchantmentLevel(compoundTag)));
+            BuiltInRegistries.ENCHANTMENT.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag)).ifPresent(enchantment -> enchantmentVisitor.accept((Enchantment)enchantment, EnchantmentHelper.getEnchantmentLevel(compoundTag)));
         }
     }
 
@@ -352,7 +352,7 @@ public class EnchantmentHelper {
         ArrayList<EnchantmentInstance> list = Lists.newArrayList();
         Item item = itemStack.getItem();
         boolean bl2 = itemStack.is(Items.BOOK);
-        block0: for (Enchantment enchantment : Registry.ENCHANTMENT) {
+        block0: for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
             if (enchantment.isTreasureOnly() && !bl || !enchantment.isDiscoverable() || !enchantment.category.canEnchant(item) && !bl2) continue;
             for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; --j) {
                 if (i < enchantment.getMinCost(j) || i > enchantment.getMaxCost(j)) continue;

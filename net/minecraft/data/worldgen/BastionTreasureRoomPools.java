@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
@@ -17,13 +17,13 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 
 public class BastionTreasureRoomPools {
     public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-        HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registry.PROCESSOR_LIST_REGISTRY);
+        HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
         Holder.Reference<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.TREASURE_ROOMS);
         Holder.Reference<StructureProcessorList> holder2 = holderGetter.getOrThrow(ProcessorLists.HIGH_WALL);
         Holder.Reference<StructureProcessorList> holder3 = holderGetter.getOrThrow(ProcessorLists.BOTTOM_RAMPART);
         Holder.Reference<StructureProcessorList> holder4 = holderGetter.getOrThrow(ProcessorLists.HIGH_RAMPART);
         Holder.Reference<StructureProcessorList> holder5 = holderGetter.getOrThrow(ProcessorLists.ROOF);
-        HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder6 = holderGetter2.getOrThrow(Pools.EMPTY);
         Pools.register(bootstapContext, "bastion/treasure/bases", new StructureTemplatePool(holder6, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/treasure/bases/lava_basin", holder), 1)), StructureTemplatePool.Projection.RIGID));
         Pools.register(bootstapContext, "bastion/treasure/stairs", new StructureTemplatePool(holder6, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/treasure/stairs/lower_stairs", holder), 1)), StructureTemplatePool.Projection.RIGID));

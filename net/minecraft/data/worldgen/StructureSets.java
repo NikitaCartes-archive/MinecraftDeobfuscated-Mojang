@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
@@ -23,8 +23,8 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 
 public interface StructureSets {
     public static void bootstrap(BootstapContext<StructureSet> bootstapContext) {
-        HolderGetter<Structure> holderGetter = bootstapContext.lookup(Registry.STRUCTURE_REGISTRY);
-        HolderGetter<Biome> holderGetter2 = bootstapContext.lookup(Registry.BIOME_REGISTRY);
+        HolderGetter<Structure> holderGetter = bootstapContext.lookup(Registries.STRUCTURE);
+        HolderGetter<Biome> holderGetter2 = bootstapContext.lookup(Registries.BIOME);
         Holder.Reference<StructureSet> reference = bootstapContext.register(BuiltinStructureSets.VILLAGES, new StructureSet(List.of(StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_PLAINS)), StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_DESERT)), StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_SAVANNA)), StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_SNOWY)), StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_TAIGA))), (StructurePlacement)new RandomSpreadStructurePlacement(34, 8, RandomSpreadType.LINEAR, 10387312)));
         bootstapContext.register(BuiltinStructureSets.DESERT_PYRAMIDS, new StructureSet(holderGetter.getOrThrow(BuiltinStructures.DESERT_PYRAMID), (StructurePlacement)new RandomSpreadStructurePlacement(32, 8, RandomSpreadType.LINEAR, 14357617)));
         bootstapContext.register(BuiltinStructureSets.IGLOOS, new StructureSet(holderGetter.getOrThrow(BuiltinStructures.IGLOO), (StructurePlacement)new RandomSpreadStructurePlacement(32, 8, RandomSpreadType.LINEAR, 14357618)));

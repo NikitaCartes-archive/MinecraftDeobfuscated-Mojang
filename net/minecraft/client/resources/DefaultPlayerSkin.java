@@ -10,31 +10,41 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
 public class DefaultPlayerSkin {
-    private static final ResourceLocation STEVE_SKIN_LOCATION = new ResourceLocation("textures/entity/steve.png");
-    private static final ResourceLocation ALEX_SKIN_LOCATION = new ResourceLocation("textures/entity/alex.png");
-    private static final String STEVE_MODEL = "default";
-    private static final String ALEX_MODEL = "slim";
+    private static final SkinType[] DEFAULT_SKINS = new SkinType[]{new SkinType("textures/entity/player/slim/alex.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/ari.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/efe.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/kai.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/makena.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/noor.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/steve.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/sunny.png", ModelType.SLIM), new SkinType("textures/entity/player/slim/zuri.png", ModelType.SLIM), new SkinType("textures/entity/player/wide/alex.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/ari.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/efe.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/kai.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/makena.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/noor.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/steve.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/sunny.png", ModelType.WIDE), new SkinType("textures/entity/player/wide/zuri.png", ModelType.WIDE)};
 
     public static ResourceLocation getDefaultSkin() {
-        return STEVE_SKIN_LOCATION;
+        return DEFAULT_SKINS[6].texture();
     }
 
     public static ResourceLocation getDefaultSkin(UUID uUID) {
-        if (DefaultPlayerSkin.isAlexDefault(uUID)) {
-            return ALEX_SKIN_LOCATION;
-        }
-        return STEVE_SKIN_LOCATION;
+        return DefaultPlayerSkin.getSkinType((UUID)uUID).texture;
     }
 
     public static String getSkinModelName(UUID uUID) {
-        if (DefaultPlayerSkin.isAlexDefault(uUID)) {
-            return ALEX_MODEL;
-        }
-        return STEVE_MODEL;
+        return DefaultPlayerSkin.getSkinType((UUID)uUID).model.id;
     }
 
-    private static boolean isAlexDefault(UUID uUID) {
-        return (uUID.hashCode() & 1) == 1;
+    private static SkinType getSkinType(UUID uUID) {
+        return DEFAULT_SKINS[Math.floorMod(uUID.hashCode(), DEFAULT_SKINS.length)];
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    record SkinType(ResourceLocation texture, ModelType model) {
+        public SkinType(String string, ModelType modelType) {
+            this(new ResourceLocation(string), modelType);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static enum ModelType {
+        SLIM("slim"),
+        WIDE("default");
+
+        final String id;
+
+        private ModelType(String string2) {
+            this.id = string2;
+        }
     }
 }
 

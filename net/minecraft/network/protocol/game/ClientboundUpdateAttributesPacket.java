@@ -6,7 +6,7 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -32,7 +32,7 @@ implements Packet<ClientGamePacketListener> {
         this.entityId = friendlyByteBuf.readVarInt();
         this.attributes = friendlyByteBuf.readList(friendlyByteBuf2 -> {
             ResourceLocation resourceLocation = friendlyByteBuf2.readResourceLocation();
-            Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
+            Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(resourceLocation);
             double d = friendlyByteBuf2.readDouble();
             List<AttributeModifier> list = friendlyByteBuf2.readList(friendlyByteBuf -> new AttributeModifier(friendlyByteBuf.readUUID(), "Unknown synced attribute modifier", friendlyByteBuf.readDouble(), AttributeModifier.Operation.fromValue(friendlyByteBuf.readByte())));
             return new AttributeSnapshot(attribute, d, list);
@@ -43,7 +43,7 @@ implements Packet<ClientGamePacketListener> {
     public void write(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeVarInt(this.entityId);
         friendlyByteBuf.writeCollection(this.attributes, (friendlyByteBuf2, attributeSnapshot) -> {
-            friendlyByteBuf2.writeResourceLocation(Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
+            friendlyByteBuf2.writeResourceLocation(BuiltInRegistries.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
             friendlyByteBuf2.writeDouble(attributeSnapshot.getBase());
             friendlyByteBuf2.writeCollection(attributeSnapshot.getModifiers(), (friendlyByteBuf, attributeModifier) -> {
                 friendlyByteBuf.writeUUID(attributeModifier.getId());

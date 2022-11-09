@@ -8,15 +8,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.material.FluidState;
 
 public class SpringConfiguration
 implements FeatureConfiguration {
-    public static final Codec<SpringConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)FluidState.CODEC.fieldOf("state")).forGetter(springConfiguration -> springConfiguration.state), ((MapCodec)Codec.BOOL.fieldOf("requires_block_below")).orElse(true).forGetter(springConfiguration -> springConfiguration.requiresBlockBelow), ((MapCodec)Codec.INT.fieldOf("rock_count")).orElse(4).forGetter(springConfiguration -> springConfiguration.rockCount), ((MapCodec)Codec.INT.fieldOf("hole_count")).orElse(1).forGetter(springConfiguration -> springConfiguration.holeCount), ((MapCodec)RegistryCodecs.homogeneousList(Registry.BLOCK_REGISTRY).fieldOf("valid_blocks")).forGetter(springConfiguration -> springConfiguration.validBlocks)).apply((Applicative<SpringConfiguration, ?>)instance, SpringConfiguration::new));
+    public static final Codec<SpringConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)FluidState.CODEC.fieldOf("state")).forGetter(springConfiguration -> springConfiguration.state), ((MapCodec)Codec.BOOL.fieldOf("requires_block_below")).orElse(true).forGetter(springConfiguration -> springConfiguration.requiresBlockBelow), ((MapCodec)Codec.INT.fieldOf("rock_count")).orElse(4).forGetter(springConfiguration -> springConfiguration.rockCount), ((MapCodec)Codec.INT.fieldOf("hole_count")).orElse(1).forGetter(springConfiguration -> springConfiguration.holeCount), ((MapCodec)RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("valid_blocks")).forGetter(springConfiguration -> springConfiguration.validBlocks)).apply((Applicative<SpringConfiguration, ?>)instance, SpringConfiguration::new));
     public final FluidState state;
     public final boolean requiresBlockBelow;
     public final int rockCount;

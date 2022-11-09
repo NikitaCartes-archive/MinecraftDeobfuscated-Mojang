@@ -103,11 +103,11 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleGroup;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -248,13 +248,13 @@ implements PreparableReloadListener {
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {
-        this.providers.put(Registry.PARTICLE_TYPE.getId(particleType), (ParticleProvider<?>)particleProvider);
+        this.providers.put(BuiltInRegistries.PARTICLE_TYPE.getId(particleType), (ParticleProvider<?>)particleProvider);
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, SpriteParticleRegistration<T> spriteParticleRegistration) {
         MutableSpriteSet mutableSpriteSet = new MutableSpriteSet();
-        this.spriteSets.put(Registry.PARTICLE_TYPE.getKey(particleType), mutableSpriteSet);
-        this.providers.put(Registry.PARTICLE_TYPE.getId(particleType), (ParticleProvider<?>)spriteParticleRegistration.create(mutableSpriteSet));
+        this.spriteSets.put(BuiltInRegistries.PARTICLE_TYPE.getKey(particleType), mutableSpriteSet);
+        this.providers.put(BuiltInRegistries.PARTICLE_TYPE.getId(particleType), (ParticleProvider<?>)spriteParticleRegistration.create(mutableSpriteSet));
     }
 
     @Override
@@ -327,7 +327,7 @@ implements PreparableReloadListener {
 
     @Nullable
     private <T extends ParticleOptions> Particle makeParticle(T particleOptions, double d, double e, double f, double g, double h, double i) {
-        ParticleProvider particleProvider = (ParticleProvider)this.providers.get(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
+        ParticleProvider particleProvider = (ParticleProvider)this.providers.get(BuiltInRegistries.PARTICLE_TYPE.getId(particleOptions.getType()));
         if (particleProvider == null) {
             return null;
         }

@@ -3,37 +3,33 @@
  */
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Button
 extends AbstractButton {
-    public static final OnTooltip NO_TOOLTIP = (button, poseStack, i, j) -> {};
     public static final int SMALL_WIDTH = 120;
     public static final int DEFAULT_WIDTH = 150;
     public static final int DEFAULT_HEIGHT = 20;
     protected static final CreateNarration DEFAULT_NARRATION = supplier -> (MutableComponent)supplier.get();
     protected final OnPress onPress;
-    protected final OnTooltip onTooltip;
     protected final CreateNarration createNarration;
 
     public static Builder builder(Component component, OnPress onPress) {
         return new Builder(component, onPress);
     }
 
-    protected Button(int i, int j, int k, int l, Component component, OnPress onPress, OnTooltip onTooltip, CreateNarration createNarration) {
+    protected Button(int i, int j, int k, int l, Component component, OnPress onPress, CreateNarration createNarration) {
         super(i, j, k, l, component);
         this.onPress = onPress;
-        this.onTooltip = onTooltip;
         this.createNarration = createNarration;
     }
 
@@ -48,29 +44,16 @@ extends AbstractButton {
     }
 
     @Override
-    public void renderButton(PoseStack poseStack, int i, int j, float f) {
-        super.renderButton(poseStack, i, j, f);
-        if (this.isHoveredOrFocused()) {
-            this.renderToolTip(poseStack, i, j);
-        }
-    }
-
-    @Override
-    public void renderToolTip(PoseStack poseStack, int i, int j) {
-        this.onTooltip.onTooltip(this, poseStack, i, j);
-    }
-
-    @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
         this.defaultButtonNarrationText(narrationElementOutput);
-        this.onTooltip.narrateTooltip(component -> narrationElementOutput.add(NarratedElementType.HINT, (Component)component));
     }
 
     @Environment(value=EnvType.CLIENT)
     public static class Builder {
         private final Component message;
         private final OnPress onPress;
-        private OnTooltip onTooltip = NO_TOOLTIP;
+        @Nullable
+        private Tooltip tooltip;
         private int x;
         private int y;
         private int width = 150;
@@ -103,8 +86,8 @@ extends AbstractButton {
             return this.pos(i, j).size(k, l);
         }
 
-        public Builder tooltip(OnTooltip onTooltip) {
-            this.onTooltip = onTooltip;
+        public Builder tooltip(@Nullable Tooltip tooltip) {
+            this.tooltip = tooltip;
             return this;
         }
 
@@ -114,21 +97,15 @@ extends AbstractButton {
         }
 
         public Button build() {
-            return new Button(this.x, this.y, this.width, this.height, this.message, this.onPress, this.onTooltip, this.createNarration);
+            Button button = new Button(this.x, this.y, this.width, this.height, this.message, this.onPress, this.createNarration);
+            button.setTooltip(this.tooltip);
+            return button;
         }
     }
 
     @Environment(value=EnvType.CLIENT)
     public static interface OnPress {
         public void onPress(Button var1);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static interface OnTooltip {
-        public void onTooltip(Button var1, PoseStack var2, int var3, int var4);
-
-        default public void narrateTooltip(Consumer<Component> consumer) {
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

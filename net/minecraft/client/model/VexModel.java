@@ -3,11 +3,12 @@
  */
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.ArmedModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -15,62 +16,97 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.Vex;
 
 @Environment(value=EnvType.CLIENT)
 public class VexModel
-extends HumanoidModel<Vex> {
-    private final ModelPart leftWing;
+extends HierarchicalModel<Vex>
+implements ArmedModel {
+    private final ModelPart root;
+    private final ModelPart body;
+    private final ModelPart rightArm;
+    private final ModelPart leftArm;
     private final ModelPart rightWing;
+    private final ModelPart leftWing;
 
     public VexModel(ModelPart modelPart) {
-        super(modelPart);
-        this.leftLeg.visible = false;
-        this.hat.visible = false;
-        this.rightWing = modelPart.getChild("right_wing");
-        this.leftWing = modelPart.getChild("left_wing");
+        super(RenderType::entityTranslucent);
+        this.root = modelPart.getChild("root");
+        this.body = this.root.getChild("body");
+        this.rightArm = this.body.getChild("right_arm");
+        this.leftArm = this.body.getChild("left_arm");
+        this.rightWing = this.body.getChild("right_wing");
+        this.leftWing = this.body.getChild("left_wing");
     }
 
     public static LayerDefinition createBodyLayer() {
-        MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0f);
+        MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(32, 0).addBox(-1.0f, -1.0f, -2.0f, 6.0f, 10.0f, 4.0f), PartPose.offset(-1.9f, 12.0f, 0.0f));
-        partDefinition.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(0, 32).addBox(-20.0f, 0.0f, 0.0f, 20.0f, 12.0f, 1.0f), PartPose.ZERO);
-        partDefinition.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 32).mirror().addBox(0.0f, 0.0f, 0.0f, 20.0f, 12.0f, 1.0f), PartPose.ZERO);
-        return LayerDefinition.create(meshDefinition, 64, 64);
-    }
-
-    @Override
-    protected Iterable<ModelPart> bodyParts() {
-        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.rightWing, this.leftWing));
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0f, 0.0f, 0.0f));
+        partDefinition2.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5f, -5.0f, -2.5f, 5.0f, 5.0f, 5.0f, new CubeDeformation(0.0f)), PartPose.offset(0.0f, 20.0f, 0.0f));
+        PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 10).addBox(-1.5f, 0.0f, -1.0f, 3.0f, 4.0f, 2.0f, new CubeDeformation(0.0f)).texOffs(0, 16).addBox(-1.5f, 1.0f, -1.0f, 3.0f, 5.0f, 2.0f, new CubeDeformation(-0.2f)), PartPose.offset(0.0f, 20.0f, 0.0f));
+        partDefinition3.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(23, 0).addBox(-1.25f, -0.5f, -1.0f, 2.0f, 4.0f, 2.0f, new CubeDeformation(-0.1f)), PartPose.offset(-1.75f, 0.25f, 0.0f));
+        partDefinition3.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(23, 6).addBox(-0.75f, -0.5f, -1.0f, 2.0f, 4.0f, 2.0f, new CubeDeformation(-0.1f)), PartPose.offset(1.75f, 0.25f, 0.0f));
+        partDefinition3.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(16, 14).mirror().addBox(0.0f, 0.0f, 0.0f, 0.0f, 5.0f, 8.0f, new CubeDeformation(0.0f)).mirror(false), PartPose.offset(0.5f, 1.0f, 1.0f));
+        partDefinition3.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(16, 14).addBox(0.0f, 0.0f, 0.0f, 0.0f, 5.0f, 8.0f, new CubeDeformation(0.0f)), PartPose.offset(-0.5f, 1.0f, 1.0f));
+        return LayerDefinition.create(meshDefinition, 32, 32);
     }
 
     @Override
     public void setupAnim(Vex vex, float f, float g, float h, float i, float j) {
-        super.setupAnim(vex, f, g, h, i, j);
+        this.root().getAllParts().forEach(ModelPart::resetPose);
+        this.body.xRot = 6.440265f;
+        float k = 0.62831855f + Mth.cos(h * 5.5f * ((float)Math.PI / 180)) * 0.1f;
         if (vex.isCharging()) {
-            if (vex.getMainHandItem().isEmpty()) {
-                this.rightArm.xRot = 4.712389f;
-                this.leftArm.xRot = 4.712389f;
-            } else if (vex.getMainArm() == HumanoidArm.RIGHT) {
-                this.rightArm.xRot = 3.7699115f;
-            } else {
-                this.leftArm.xRot = 3.7699115f;
-            }
+            this.body.xRot = 0.0f;
+            this.rightArm.xRot = 3.6651914f;
+            this.rightArm.yRot = 0.2617994f;
+            this.rightArm.zRot = -0.47123888f;
+        } else {
+            this.body.xRot = 0.15707964f;
+            this.rightArm.xRot = 0.0f;
+            this.rightArm.yRot = 0.0f;
+            this.rightArm.zRot = k;
         }
-        this.rightLeg.xRot += 0.62831855f;
-        this.rightWing.z = 2.0f;
-        this.leftWing.z = 2.0f;
+        this.leftArm.zRot = -k;
         this.rightWing.y = 1.0f;
         this.leftWing.y = 1.0f;
-        this.rightWing.yRot = 0.47123894f + Mth.cos(h * 45.836624f * ((float)Math.PI / 180)) * (float)Math.PI * 0.05f;
-        this.leftWing.yRot = -this.rightWing.yRot;
-        this.leftWing.zRot = -0.47123894f;
-        this.leftWing.xRot = 0.47123894f;
-        this.rightWing.xRot = 0.47123894f;
-        this.rightWing.zRot = 0.47123894f;
+        this.leftWing.yRot = 1.0995574f + Mth.cos(h * 45.836624f * ((float)Math.PI / 180)) * ((float)Math.PI / 180) * 16.2f;
+        this.rightWing.yRot = -this.leftWing.yRot;
+        this.leftWing.xRot = 0.47123888f;
+        this.leftWing.zRot = -0.47123888f;
+        this.rightWing.xRot = 0.47123888f;
+        this.rightWing.zRot = 0.47123888f;
+    }
+
+    @Override
+    public ModelPart root() {
+        return this.root;
+    }
+
+    @Override
+    public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+        this.offsetSwordPivot(poseStack);
+        this.rotateSwordWithArm(poseStack);
+        poseStack.scale(0.55f, 0.55f, 0.55f);
+        this.offsetSwordPosition(poseStack);
+    }
+
+    private void offsetSwordPivot(PoseStack poseStack) {
+        poseStack.translate((this.body.x + this.rightArm.x) / 16.0f, (this.body.y + this.rightArm.y) / 16.0f, (this.body.z + this.rightArm.z) / 16.0f);
+    }
+
+    private void rotateSwordWithArm(PoseStack poseStack) {
+        poseStack.mulPose(Axis.ZP.rotation(this.rightArm.zRot));
+        poseStack.mulPose(Axis.YP.rotation(this.rightArm.yRot));
+        poseStack.mulPose(Axis.XP.rotation(this.rightArm.xRot));
+    }
+
+    private void offsetSwordPosition(PoseStack poseStack) {
+        poseStack.translate(0.046875, -0.15625, 0.078125);
     }
 }
 

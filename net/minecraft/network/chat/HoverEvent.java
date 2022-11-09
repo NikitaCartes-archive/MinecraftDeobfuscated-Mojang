@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -210,10 +210,10 @@ public class HoverEvent {
 
         private static ItemStackInfo create(JsonElement jsonElement) {
             if (jsonElement.isJsonPrimitive()) {
-                return new ItemStackInfo(Registry.ITEM.get(new ResourceLocation(jsonElement.getAsString())), 1, null);
+                return new ItemStackInfo(BuiltInRegistries.ITEM.get(new ResourceLocation(jsonElement.getAsString())), 1, null);
             }
             JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "item");
-            Item item = Registry.ITEM.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "id")));
+            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "id")));
             int i = GsonHelper.getAsInt(jsonObject, "count", 1);
             if (jsonObject.has("tag")) {
                 String string = GsonHelper.getAsString(jsonObject, "tag");
@@ -240,7 +240,7 @@ public class HoverEvent {
 
         private JsonElement serialize() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("id", Registry.ITEM.getKey(this.item).toString());
+            jsonObject.addProperty("id", BuiltInRegistries.ITEM.getKey(this.item).toString());
             if (this.count != 1) {
                 jsonObject.addProperty("count", this.count);
             }
@@ -271,7 +271,7 @@ public class HoverEvent {
                 return null;
             }
             JsonObject jsonObject = jsonElement.getAsJsonObject();
-            EntityType<?> entityType = Registry.ENTITY_TYPE.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "type")));
+            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "type")));
             UUID uUID = UUID.fromString(GsonHelper.getAsString(jsonObject, "id"));
             MutableComponent component = Component.Serializer.fromJson(jsonObject.get("name"));
             return new EntityTooltipInfo(entityType, uUID, component);
@@ -282,7 +282,7 @@ public class HoverEvent {
             try {
                 CompoundTag compoundTag = TagParser.parseTag(component.getString());
                 MutableComponent component2 = Component.Serializer.fromJson(compoundTag.getString("name"));
-                EntityType<?> entityType = Registry.ENTITY_TYPE.get(new ResourceLocation(compoundTag.getString("type")));
+                EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(compoundTag.getString("type")));
                 UUID uUID = UUID.fromString(compoundTag.getString("id"));
                 return new EntityTooltipInfo(entityType, uUID, component2);
             } catch (Exception exception) {
@@ -292,7 +292,7 @@ public class HoverEvent {
 
         public JsonElement serialize() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("type", Registry.ENTITY_TYPE.getKey(this.type).toString());
+            jsonObject.addProperty("type", BuiltInRegistries.ENTITY_TYPE.getKey(this.type).toString());
             jsonObject.addProperty("id", this.id.toString());
             if (this.name != null) {
                 jsonObject.add("name", Component.Serializer.toJsonTree(this.name));

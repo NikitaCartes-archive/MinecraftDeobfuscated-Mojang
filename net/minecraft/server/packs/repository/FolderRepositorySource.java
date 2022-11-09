@@ -14,9 +14,9 @@ import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import net.minecraft.FileUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackType;
@@ -48,7 +48,7 @@ implements RepositorySource {
     @Override
     public void loadPacks(Consumer<Pack> consumer) {
         try {
-            Files.createDirectories(this.folder, new FileAttribute[0]);
+            FileUtil.createDirectoriesSafe(this.folder);
             FolderRepositorySource.discoverPacks(this.folder, false, (path, resourcesSupplier) -> {
                 String string = FolderRepositorySource.nameFromPath(path);
                 Pack pack = Pack.readMetaAndCreate("file/" + string, Component.literal(string), false, resourcesSupplier, this.packType, Pack.Position.TOP, this.packSource);

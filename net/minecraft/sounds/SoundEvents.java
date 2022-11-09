@@ -6,6 +6,7 @@ package net.minecraft.sounds;
 import com.google.common.collect.ImmutableList;
 import java.util.stream.IntStream;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
@@ -249,6 +250,15 @@ public class SoundEvents {
     public static final SoundEvent CHICKEN_EGG = SoundEvents.register("entity.chicken.egg");
     public static final SoundEvent CHICKEN_HURT = SoundEvents.register("entity.chicken.hurt");
     public static final SoundEvent CHICKEN_STEP = SoundEvents.register("entity.chicken.step");
+    public static final SoundEvent CHISELED_BOOKSHELF_BREAK = SoundEvents.register("block.chiseled_bookshelf.break");
+    public static final SoundEvent CHISELED_BOOKSHELF_FALL = SoundEvents.register("block.chiseled_bookshelf.fall");
+    public static final SoundEvent CHISELED_BOOKSHELF_HIT = SoundEvents.register("block.chiseled_bookshelf.hit");
+    public static final SoundEvent CHISELED_BOOKSHELF_INSERT = SoundEvents.register("block.chiseled_bookshelf.insert");
+    public static final SoundEvent CHISELED_BOOKSHELF_INSERT_ENCHANTED = SoundEvents.register("block.chiseled_bookshelf.insert.enchanted");
+    public static final SoundEvent CHISELED_BOOKSHELF_STEP = SoundEvents.register("block.chiseled_bookshelf.step");
+    public static final SoundEvent CHISELED_BOOKSHELF_PICKUP = SoundEvents.register("block.chiseled_bookshelf.pickup");
+    public static final SoundEvent CHISELED_BOOKSHELF_PICKUP_ENCHANTED = SoundEvents.register("block.chiseled_bookshelf.pickup.enchanted");
+    public static final SoundEvent CHISELED_BOOKSHELF_PLACE = SoundEvents.register("block.chiseled_bookshelf.place");
     public static final SoundEvent CHORUS_FLOWER_DEATH = SoundEvents.register("block.chorus_flower.death");
     public static final SoundEvent CHORUS_FLOWER_GROW = SoundEvents.register("block.chorus_flower.grow");
     public static final SoundEvent CHORUS_FRUIT_TELEPORT = SoundEvents.register("item.chorus_fruit.teleport");
@@ -548,6 +558,16 @@ public class SoundEvents {
     public static final SoundEvent HANGING_SIGN_FALL = SoundEvents.register("block.hanging_sign.fall");
     public static final SoundEvent HANGING_SIGN_HIT = SoundEvents.register("block.hanging_sign.hit");
     public static final SoundEvent HANGING_SIGN_PLACE = SoundEvents.register("block.hanging_sign.place");
+    public static final SoundEvent NETHER_WOOD_HANGING_SIGN_STEP = SoundEvents.register("block.nether_wood_hanging_sign.step");
+    public static final SoundEvent NETHER_WOOD_HANGING_SIGN_BREAK = SoundEvents.register("block.nether_wood_hanging_sign.break");
+    public static final SoundEvent NETHER_WOOD_HANGING_SIGN_FALL = SoundEvents.register("block.nether_wood_hanging_sign.fall");
+    public static final SoundEvent NETHER_WOOD_HANGING_SIGN_HIT = SoundEvents.register("block.nether_wood_hanging_sign.hit");
+    public static final SoundEvent NETHER_WOOD_HANGING_SIGN_PLACE = SoundEvents.register("block.nether_wood_hanging_sign.place");
+    public static final SoundEvent BAMBOO_WOOD_HANGING_SIGN_STEP = SoundEvents.register("block.bamboo_wood_hanging_sign.step");
+    public static final SoundEvent BAMBOO_WOOD_HANGING_SIGN_BREAK = SoundEvents.register("block.bamboo_wood_hanging_sign.break");
+    public static final SoundEvent BAMBOO_WOOD_HANGING_SIGN_FALL = SoundEvents.register("block.bamboo_wood_hanging_sign.fall");
+    public static final SoundEvent BAMBOO_WOOD_HANGING_SIGN_HIT = SoundEvents.register("block.bamboo_wood_hanging_sign.hit");
+    public static final SoundEvent BAMBOO_WOOD_HANGING_SIGN_PLACE = SoundEvents.register("block.bamboo_wood_hanging_sign.place");
     public static final SoundEvent HOE_TILL = SoundEvents.register("item.hoe.till");
     public static final SoundEvent HOGLIN_AMBIENT = SoundEvents.register("entity.hoglin.ambient");
     public static final SoundEvent HOGLIN_ANGRY = SoundEvents.register("entity.hoglin.angry");
@@ -1373,11 +1393,11 @@ public class SoundEvents {
     public static final SoundEvent ZOMBIE_VILLAGER_STEP = SoundEvents.register("entity.zombie_villager.step");
 
     private static SoundEvent register(String string, float f) {
-        return Registry.register(Registry.SOUND_EVENT, string, new SoundEvent(new ResourceLocation(string), f));
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, string, new SoundEvent(new ResourceLocation(string), f));
     }
 
     private static SoundEvent register(String string) {
-        return Registry.register(Registry.SOUND_EVENT, string, new SoundEvent(new ResourceLocation(string)));
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, string, new SoundEvent(new ResourceLocation(string)));
     }
 
     private static ImmutableList<SoundEvent> registerGoatHornSoundVariants() {

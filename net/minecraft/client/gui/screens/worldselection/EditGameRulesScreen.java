@@ -81,13 +81,6 @@ extends Screen {
         this.rules.render(poseStack, i, j, f);
         EditGameRulesScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         super.render(poseStack, i, j, f);
-        if (this.tooltip != null) {
-            this.renderTooltip(poseStack, this.tooltip, i, j);
-        }
-    }
-
-    void setTooltip(@Nullable List<FormattedCharSequence> list) {
-        this.tooltip = list;
     }
 
     private void updateDoneButton() {
@@ -155,7 +148,7 @@ extends Screen {
             super.render(poseStack, i, j, f);
             RuleEntry ruleEntry = (RuleEntry)this.getHovered();
             if (ruleEntry != null) {
-                EditGameRulesScreen.this.setTooltip(ruleEntry.tooltip);
+                EditGameRulesScreen.this.setTooltipForNextRenderPass(ruleEntry.tooltip);
             }
         }
     }

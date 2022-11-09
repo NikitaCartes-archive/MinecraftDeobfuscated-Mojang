@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.biome;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -74,7 +74,7 @@ public abstract class Biomes {
     public static final ResourceKey<Biome> END_BARRENS = Biomes.register("end_barrens");
 
     private static ResourceKey<Biome> register(String string) {
-        return ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(string));
+        return ResourceKey.create(Registries.BIOME, new ResourceLocation(string));
     }
 }
 

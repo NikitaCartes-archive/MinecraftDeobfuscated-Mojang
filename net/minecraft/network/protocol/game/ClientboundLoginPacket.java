@@ -7,9 +7,9 @@ import com.google.common.collect.Sets;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 public record ClientboundLoginPacket(int playerId, boolean hardcore, GameType gameType, @Nullable GameType previousGameType, Set<ResourceKey<Level>> levels, RegistryAccess.Frozen registryHolder, ResourceKey<DimensionType> dimensionType, ResourceKey<Level> dimension, long seed, int maxPlayers, int chunkRadius, int simulationDistance, boolean reducedDebugInfo, boolean showDeathScreen, boolean isDebug, boolean isFlat, Optional<GlobalPos> lastDeathLocation) implements Packet<ClientGamePacketListener>
 {
     public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> friendlyByteBuf.readResourceKey(Registry.DIMENSION_REGISTRY)), friendlyByteBuf2.readWithCodec(RegistrySynchronization.NETWORK_CODEC).freeze(), friendlyByteBuf2.readResourceKey(Registry.DIMENSION_TYPE_REGISTRY), friendlyByteBuf2.readResourceKey(Registry.DIMENSION_REGISTRY), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readOptional(FriendlyByteBuf::readGlobalPos));
+        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> friendlyByteBuf.readResourceKey(Registries.DIMENSION)), friendlyByteBuf2.readWithCodec(RegistrySynchronization.NETWORK_CODEC).freeze(), friendlyByteBuf2.readResourceKey(Registries.DIMENSION_TYPE), friendlyByteBuf2.readResourceKey(Registries.DIMENSION), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readOptional(FriendlyByteBuf::readGlobalPos));
     }
 
     @Override

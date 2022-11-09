@@ -4,7 +4,7 @@
 package net.minecraft.data.structures;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.structures.SnbtToNbt;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -44,7 +44,7 @@ implements SnbtToNbt.Filter {
             LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", i, 3200, string);
         }
         CompoundTag compoundTag2 = NbtUtils.update(DataFixers.getDataFixer(), DataFixTypes.STRUCTURE, compoundTag, i);
-        structureTemplate.load(Registry.BLOCK.asLookup(), compoundTag2);
+        structureTemplate.load(BuiltInRegistries.BLOCK.asLookup(), compoundTag2);
         return structureTemplate.save(new CompoundTag());
     }
 }

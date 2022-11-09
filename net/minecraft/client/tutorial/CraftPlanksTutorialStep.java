@@ -11,7 +11,7 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.client.tutorial.TutorialStepInstance;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
@@ -73,7 +73,7 @@ implements TutorialStepInstance {
     }
 
     public static boolean hasCraftedPlanksPreviously(LocalPlayer localPlayer, TagKey<Item> tagKey) {
-        for (Holder<Item> holder : Registry.ITEM.getTagOrEmpty(tagKey)) {
+        for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(tagKey)) {
             if (localPlayer.getStats().getValue(Stats.ITEM_CRAFTED.get(holder.value())) <= 0) continue;
             return true;
         }

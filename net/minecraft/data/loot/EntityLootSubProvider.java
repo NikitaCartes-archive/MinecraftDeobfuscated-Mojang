@@ -17,7 +17,7 @@ import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntitySubPredicate;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -55,7 +55,7 @@ implements LootTableSubProvider {
     public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
         this.generate();
         HashSet set = Sets.newHashSet();
-        Registry.ENTITY_TYPE.holders().forEach(reference -> {
+        BuiltInRegistries.ENTITY_TYPE.holders().forEach(reference -> {
             EntityType entityType = (EntityType)reference.value();
             if (!entityType.isEnabled(this.enabledFeatures)) {
                 return;

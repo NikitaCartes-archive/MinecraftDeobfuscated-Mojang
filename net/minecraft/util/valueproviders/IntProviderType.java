@@ -5,6 +5,7 @@ package net.minecraft.util.valueproviders;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.valueproviders.BiasedToBottomInt;
 import net.minecraft.util.valueproviders.ClampedInt;
 import net.minecraft.util.valueproviders.ClampedNormalInt;
@@ -24,7 +25,7 @@ public interface IntProviderType<P extends IntProvider> {
     public Codec<P> codec();
 
     public static <P extends IntProvider> IntProviderType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.INT_PROVIDER_TYPES, string, () -> codec);
+        return Registry.register(BuiltInRegistries.INT_PROVIDER_TYPE, string, () -> codec);
     }
 }
 

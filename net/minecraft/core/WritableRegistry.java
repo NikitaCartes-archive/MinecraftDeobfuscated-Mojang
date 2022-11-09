@@ -9,18 +9,14 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
-public abstract class WritableRegistry<T>
+public interface WritableRegistry<T>
 extends Registry<T> {
-    public WritableRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
-        super(resourceKey, lifecycle);
-    }
+    public Holder<T> registerMapping(int var1, ResourceKey<T> var2, T var3, Lifecycle var4);
 
-    public abstract Holder<T> registerMapping(int var1, ResourceKey<T> var2, T var3, Lifecycle var4);
+    public Holder.Reference<T> register(ResourceKey<T> var1, T var2, Lifecycle var3);
 
-    public abstract Holder.Reference<T> register(ResourceKey<T> var1, T var2, Lifecycle var3);
+    public boolean isEmpty();
 
-    public abstract boolean isEmpty();
-
-    public abstract HolderGetter<T> createRegistrationLookup();
+    public HolderGetter<T> createRegistrationLookup();
 }
 

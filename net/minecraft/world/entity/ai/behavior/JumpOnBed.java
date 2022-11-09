@@ -127,8 +127,13 @@ extends Behavior<Mob> {
     }
 
     @Override
-    protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.stop(serverLevel, (Mob)livingEntity, l);
+    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.tick(serverLevel, (Mob)livingEntity, l);
+    }
+
+    @Override
+    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
+        this.start(serverLevel, (Mob)livingEntity, l);
     }
 }
 

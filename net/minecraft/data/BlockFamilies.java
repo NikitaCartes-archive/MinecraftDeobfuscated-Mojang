@@ -6,7 +6,7 @@ package net.minecraft.data;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.stream.Stream;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.BlockFamily;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
@@ -84,7 +84,7 @@ public class BlockFamilies {
         BlockFamily.Builder builder = new BlockFamily.Builder(block);
         BlockFamily blockFamily = MAP.put(block, builder.getFamily());
         if (blockFamily != null) {
-            throw new IllegalStateException("Duplicate family definition for " + Registry.BLOCK.getKey(block));
+            throw new IllegalStateException("Duplicate family definition for " + BuiltInRegistries.BLOCK.getKey(block));
         }
         return builder;
     }

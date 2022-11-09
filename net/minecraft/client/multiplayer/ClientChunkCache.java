@@ -14,8 +14,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
@@ -43,7 +43,7 @@ extends ChunkSource {
 
     public ClientChunkCache(ClientLevel clientLevel, int i) {
         this.level = clientLevel;
-        this.emptyChunk = new EmptyLevelChunk(clientLevel, new ChunkPos(0, 0), clientLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS));
+        this.emptyChunk = new EmptyLevelChunk(clientLevel, new ChunkPos(0, 0), clientLevel.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS));
         this.lightEngine = new LevelLightEngine(this, true, clientLevel.dimensionType().hasSkyLight());
         this.storage = new Storage(ClientChunkCache.calculateStorageRange(i));
     }

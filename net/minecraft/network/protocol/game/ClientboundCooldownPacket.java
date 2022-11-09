@@ -3,7 +3,7 @@
  */
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -20,13 +20,13 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundCooldownPacket(FriendlyByteBuf friendlyByteBuf) {
-        this.item = friendlyByteBuf.readById(Registry.ITEM);
+        this.item = friendlyByteBuf.readById(BuiltInRegistries.ITEM);
         this.duration = friendlyByteBuf.readVarInt();
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) {
-        friendlyByteBuf.writeId(Registry.ITEM, this.item);
+        friendlyByteBuf.writeId(BuiltInRegistries.ITEM, this.item);
         friendlyByteBuf.writeVarInt(this.duration);
     }
 

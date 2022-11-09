@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -41,7 +42,7 @@ extends Screen {
         super(Component.translatable("createWorld.customize.buffet.title"));
         this.parent = screen;
         this.applySettings = consumer;
-        this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registry.BIOME_REGISTRY);
+        this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registries.BIOME);
         Holder holder = this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
         this.biome = worldCreationContext.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
     }

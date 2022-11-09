@@ -8,6 +8,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -32,7 +33,7 @@ extends BlockEntity {
     public static final String FINAL_STATE = "final_state";
     private ResourceLocation name = new ResourceLocation("empty");
     private ResourceLocation target = new ResourceLocation("empty");
-    private ResourceKey<StructureTemplatePool> pool = ResourceKey.create(Registry.TEMPLATE_POOL_REGISTRY, new ResourceLocation("empty"));
+    private ResourceKey<StructureTemplatePool> pool = ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation("empty"));
     private JointType joint = JointType.ROLLABLE;
     private String finalState = "minecraft:air";
 
@@ -95,7 +96,7 @@ extends BlockEntity {
         super.load(compoundTag);
         this.name = new ResourceLocation(compoundTag.getString(NAME));
         this.target = new ResourceLocation(compoundTag.getString(TARGET));
-        this.pool = ResourceKey.create(Registry.TEMPLATE_POOL_REGISTRY, new ResourceLocation(compoundTag.getString(POOL)));
+        this.pool = ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(compoundTag.getString(POOL)));
         this.finalState = compoundTag.getString(FINAL_STATE);
         this.joint = JointType.byName(compoundTag.getString(JOINT)).orElseGet(() -> JigsawBlock.getFrontFacing(this.getBlockState()).getAxis().isHorizontal() ? JointType.ALIGNED : JointType.ROLLABLE);
     }
@@ -111,7 +112,7 @@ extends BlockEntity {
 
     public void generate(ServerLevel serverLevel, int i, boolean bl) {
         BlockPos blockPos = this.getBlockPos().relative(this.getBlockState().getValue(JigsawBlock.ORIENTATION).front());
-        Registry<StructureTemplatePool> registry = serverLevel.registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+        Registry<StructureTemplatePool> registry = serverLevel.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL);
         Holder.Reference<StructureTemplatePool> holder = registry.getHolderOrThrow(this.pool);
         JigsawPlacement.generateJigsaw(serverLevel, holder, this.target, i, blockPos, bl);
     }

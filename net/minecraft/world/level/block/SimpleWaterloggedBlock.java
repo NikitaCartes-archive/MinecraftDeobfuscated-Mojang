@@ -23,7 +23,7 @@ extends BucketPickup,
 LiquidBlockContainer {
     @Override
     default public boolean canPlaceLiquid(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Fluid fluid) {
-        return blockState.getValue(BlockStateProperties.WATERLOGGED) == false && fluid == Fluids.WATER;
+        return fluid == Fluids.WATER;
     }
 
     @Override

@@ -65,8 +65,8 @@ extends HolderLookup.Provider {
         return new FrozenAccess(this.registries().map(RegistryEntry::freeze));
     }
 
-    default public Lifecycle allElementsLifecycle() {
-        return this.registries().map(registryEntry -> registryEntry.value.elementsLifecycle()).reduce(Lifecycle.stable(), Lifecycle::add);
+    default public Lifecycle allRegistriesLifecycle() {
+        return this.registries().map(registryEntry -> registryEntry.value.registryLifecycle()).reduce(Lifecycle.stable(), Lifecycle::add);
     }
 
     public record RegistryEntry<T>(ResourceKey<? extends Registry<T>> key, Registry<T> value) {

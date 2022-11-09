@@ -33,6 +33,7 @@ import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -84,7 +85,7 @@ implements Renderable {
     }
 
     private static Optional<Holder<WorldPreset>> findPreset(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional) {
-        return optional.flatMap(resourceKey -> worldCreationContext.worldgenLoadContext().registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolder((ResourceKey<WorldPreset>)resourceKey));
+        return optional.flatMap(resourceKey -> worldCreationContext.worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET).getHolder((ResourceKey<WorldPreset>)resourceKey));
     }
 
     public void init(CreateWorldScreen createWorldScreen, Minecraft minecraft, Font font) {
@@ -100,7 +101,7 @@ implements Renderable {
         int j = this.width / 2 + 5;
         this.featuresButton = createWorldScreen.addRenderableWidget(CycleButton.onOffBuilder(this.settings.options().generateStructures()).withCustomNarration(cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.mapFeatures.info"))).create(i, 100, 150, 20, Component.translatable("selectWorld.mapFeatures"), (cycleButton, boolean_) -> this.updateSettings(worldOptions -> worldOptions.withStructures((boolean)boolean_))));
         this.featuresButton.visible = false;
-        Registry<WorldPreset> registry = this.settings.worldgenLoadContext().registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
+        Registry<WorldPreset> registry = this.settings.worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET);
         List list = WorldGenSettingsComponent.getNonEmptyList(registry, WorldPresetTags.NORMAL).orElseGet(() -> registry.holders().collect(Collectors.toUnmodifiableList()));
         List<Holder<WorldPreset>> list2 = WorldGenSettingsComponent.getNonEmptyList(registry, WorldPresetTags.EXTENDED).orElse(list);
         this.typeButton = createWorldScreen.addRenderableWidget(CycleButton.builder(WorldGenSettingsComponent::describePreset).withValues(list, list2).withCustomNarration(cycleButton -> {

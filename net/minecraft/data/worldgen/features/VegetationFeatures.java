@@ -9,8 +9,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.data.worldgen.features.TreeFeatures;
@@ -95,13 +95,13 @@ public class VegetationFeatures {
     }
 
     public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-        HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registry.CONFIGURED_FEATURE_REGISTRY);
+        HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
         Holder.Reference<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(TreeFeatures.HUGE_BROWN_MUSHROOM);
         Holder.Reference<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(TreeFeatures.HUGE_RED_MUSHROOM);
         Holder.Reference<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(TreeFeatures.FANCY_OAK_BEES_005);
         Holder.Reference<ConfiguredFeature<?, ?>> holder4 = holderGetter.getOrThrow(TreeFeatures.OAK_BEES_005);
         Holder.Reference<ConfiguredFeature<?, ?>> holder5 = holderGetter.getOrThrow(PATCH_GRASS_JUNGLE);
-        HolderGetter<PlacedFeature> holderGetter2 = bootstapContext.lookup(Registry.PLACED_FEATURE_REGISTRY);
+        HolderGetter<PlacedFeature> holderGetter2 = bootstapContext.lookup(Registries.PLACED_FEATURE);
         Holder.Reference<PlacedFeature> holder6 = holderGetter2.getOrThrow(TreePlacements.DARK_OAK_CHECKED);
         Holder.Reference<PlacedFeature> holder7 = holderGetter2.getOrThrow(TreePlacements.BIRCH_CHECKED);
         Holder.Reference<PlacedFeature> holder8 = holderGetter2.getOrThrow(TreePlacements.FANCY_OAK_CHECKED);

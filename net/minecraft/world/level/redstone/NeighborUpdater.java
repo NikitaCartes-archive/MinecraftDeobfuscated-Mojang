@@ -9,7 +9,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -46,9 +46,9 @@ public interface NeighborUpdater {
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");
             crashReportCategory.setDetail("Source block type", () -> {
                 try {
-                    return String.format(Locale.ROOT, "ID #%s (%s // %s)", Registry.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
+                    return String.format(Locale.ROOT, "ID #%s (%s // %s)", BuiltInRegistries.BLOCK.getKey(block), block.getDescriptionId(), block.getClass().getCanonicalName());
                 } catch (Throwable throwable) {
-                    return "ID #" + Registry.BLOCK.getKey(block);
+                    return "ID #" + BuiltInRegistries.BLOCK.getKey(block);
                 }
             });
             CrashReportCategory.populateBlockDetails(crashReportCategory, level, blockPos, blockState);

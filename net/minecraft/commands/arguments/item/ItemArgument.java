@@ -16,7 +16,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 
 public class ItemArgument
@@ -25,7 +25,7 @@ implements ArgumentType<ItemInput> {
     private final HolderLookup<Item> items;
 
     public ItemArgument(CommandBuildContext commandBuildContext) {
-        this.items = commandBuildContext.holderLookup(Registry.ITEM_REGISTRY);
+        this.items = commandBuildContext.holderLookup(Registries.ITEM);
     }
 
     public static ItemArgument item(CommandBuildContext commandBuildContext) {

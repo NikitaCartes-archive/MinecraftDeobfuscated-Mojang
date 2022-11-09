@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.AncientCityStructurePieces;
 import net.minecraft.data.worldgen.BastionPieces;
 import net.minecraft.data.worldgen.BootstapContext;
@@ -70,8 +70,8 @@ public class Structures {
     }
 
     public static void bootstrap(BootstapContext<Structure> bootstapContext) {
-        HolderGetter<Biome> holderGetter = bootstapContext.lookup(Registry.BIOME_REGISTRY);
-        HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registry.TEMPLATE_POOL_REGISTRY);
+        HolderGetter<Biome> holderGetter = bootstapContext.lookup(Registries.BIOME);
+        HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
         bootstapContext.register(BuiltinStructures.PILLAGER_OUTPOST, new JigsawStructure(Structures.structure(holderGetter.getOrThrow(BiomeTags.HAS_PILLAGER_OUTPOST), Map.of(MobCategory.MONSTER, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create((WeightedEntry[])new MobSpawnSettings.SpawnerData[]{new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1)}))), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.BEARD_THIN), holderGetter2.getOrThrow(PillagerOutpostPools.START), 7, ConstantHeight.of(VerticalAnchor.absolute(0)), true, Heightmap.Types.WORLD_SURFACE_WG));
         bootstapContext.register(BuiltinStructures.MINESHAFT, new MineshaftStructure(Structures.structure(holderGetter.getOrThrow(BiomeTags.HAS_MINESHAFT), GenerationStep.Decoration.UNDERGROUND_STRUCTURES, TerrainAdjustment.NONE), MineshaftStructure.Type.NORMAL));
         bootstapContext.register(BuiltinStructures.MINESHAFT_MESA, new MineshaftStructure(Structures.structure(holderGetter.getOrThrow(BiomeTags.HAS_MINESHAFT_MESA), GenerationStep.Decoration.UNDERGROUND_STRUCTURES, TerrainAdjustment.NONE), MineshaftStructure.Type.MESA));

@@ -15,7 +15,7 @@ import net.minecraft.advancements.critereon.FishingHookPredicate;
 import net.minecraft.advancements.critereon.LighthingBoltPredicate;
 import net.minecraft.advancements.critereon.PlayerPredicate;
 import net.minecraft.advancements.critereon.SlimePredicate;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
@@ -91,7 +91,7 @@ public interface EntitySubPredicate {
         public static final Type FISHING_HOOK = FishingHookPredicate::fromJson;
         public static final Type PLAYER = PlayerPredicate::fromJson;
         public static final Type SLIME = SlimePredicate::fromJson;
-        public static final EntityVariantPredicate<CatVariant> CAT = EntityVariantPredicate.create(Registry.CAT_VARIANT, entity -> {
+        public static final EntityVariantPredicate<CatVariant> CAT = EntityVariantPredicate.create(BuiltInRegistries.CAT_VARIANT, entity -> {
             Optional<Object> optional;
             if (entity instanceof Cat) {
                 Cat cat = (Cat)entity;
@@ -101,7 +101,7 @@ public interface EntitySubPredicate {
             }
             return optional;
         });
-        public static final EntityVariantPredicate<FrogVariant> FROG = EntityVariantPredicate.create(Registry.FROG_VARIANT, entity -> {
+        public static final EntityVariantPredicate<FrogVariant> FROG = EntityVariantPredicate.create(BuiltInRegistries.FROG_VARIANT, entity -> {
             Optional<Object> optional;
             if (entity instanceof Frog) {
                 Frog frog = (Frog)entity;

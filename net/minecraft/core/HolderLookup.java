@@ -111,7 +111,7 @@ extends HolderGetter<T> {
     HolderOwner<T> {
         public ResourceKey<? extends Registry<? extends T>> key();
 
-        public Lifecycle elementsLifecycle();
+        public Lifecycle registryLifecycle();
 
         default public HolderLookup<T> filterFeatures(FeatureFlagSet featureFlagSet) {
             if (FeatureElement.FILTERED_REGISTRIES.contains(this.key())) {
@@ -130,8 +130,8 @@ extends HolderGetter<T> {
             }
 
             @Override
-            public Lifecycle elementsLifecycle() {
-                return this.parent().elementsLifecycle();
+            public Lifecycle registryLifecycle() {
+                return this.parent().registryLifecycle();
             }
 
             @Override

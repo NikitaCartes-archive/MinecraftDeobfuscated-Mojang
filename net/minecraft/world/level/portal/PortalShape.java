@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -19,7 +20,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class PortalShape {
@@ -28,6 +32,8 @@ public class PortalShape {
     private static final int MIN_HEIGHT = 3;
     public static final int MAX_HEIGHT = 21;
     private static final BlockBehaviour.StatePredicate FRAME = (blockState, blockGetter, blockPos) -> blockState.is(Blocks.OBSIDIAN);
+    private static final float SAFE_TRAVEL_MAX_ENTITY_XY = 4.0f;
+    private static final double SAFE_TRAVEL_MAX_VERTICAL_DELTA = 1.0;
     private final LevelAccessor level;
     private final Direction.Axis axis;
     private final Direction rightDir;
@@ -186,12 +192,13 @@ public class PortalShape {
         return new Vec3(g, h, i);
     }
 
-    public static PortalInfo createPortalInfo(ServerLevel serverLevel, BlockUtil.FoundRectangle foundRectangle, Direction.Axis axis, Vec3 vec3, EntityDimensions entityDimensions, Vec3 vec32, float f, float g) {
+    public static PortalInfo createPortalInfo(ServerLevel serverLevel, BlockUtil.FoundRectangle foundRectangle, Direction.Axis axis, Vec3 vec3, Entity entity, Vec3 vec32, float f, float g) {
         BlockPos blockPos = foundRectangle.minCorner;
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Direction.Axis axis2 = blockState.getOptionalValue(BlockStateProperties.HORIZONTAL_AXIS).orElse(Direction.Axis.X);
         double d = foundRectangle.axis1Size;
         double e = foundRectangle.axis2Size;
+        EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
         int i = axis == axis2 ? 0 : 90;
         Vec3 vec33 = axis == axis2 ? vec32 : new Vec3(vec32.z, vec32.y, -vec32.x);
         double h = (double)entityDimensions.width / 2.0 + (d - (double)entityDimensions.width) * vec3.x();
@@ -199,7 +206,20 @@ public class PortalShape {
         double k = 0.5 + vec3.z();
         boolean bl = axis2 == Direction.Axis.X;
         Vec3 vec34 = new Vec3((double)blockPos.getX() + (bl ? h : k), (double)blockPos.getY() + j, (double)blockPos.getZ() + (bl ? k : h));
-        return new PortalInfo(vec34, vec33, f + (float)i, g);
+        Vec3 vec35 = PortalShape.findCollisionFreePosition(vec34, serverLevel, entity, entityDimensions);
+        return new PortalInfo(vec35, vec33, f + (float)i, g);
+    }
+
+    private static Vec3 findCollisionFreePosition(Vec3 vec32, ServerLevel serverLevel, Entity entity, EntityDimensions entityDimensions) {
+        if (entityDimensions.width > 4.0f || entityDimensions.height > 4.0f) {
+            return vec32;
+        }
+        double d = (double)entityDimensions.height / 2.0;
+        Vec3 vec322 = vec32.add(0.0, d, 0.0);
+        VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec322, entityDimensions.width, 0.0, entityDimensions.width).expandTowards(0.0, 1.0, 0.0).inflate(1.0E-6));
+        Optional<Vec3> optional = serverLevel.findFreePosition(entity, voxelShape, vec322, entityDimensions.width, entityDimensions.height, entityDimensions.width);
+        Optional<Vec3> optional2 = optional.map(vec3 -> vec3.subtract(0.0, d, 0.0));
+        return optional2.orElse(vec32);
     }
 }
 

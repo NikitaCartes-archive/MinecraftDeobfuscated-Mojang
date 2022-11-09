@@ -5,8 +5,8 @@ package net.minecraft.server;
 
 import java.util.List;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public enum RegistryLayer {
     STATIC,
@@ -23,7 +23,7 @@ public enum RegistryLayer {
 
     static {
         VALUES = List.of(RegistryLayer.values());
-        STATIC_ACCESS = RegistryAccess.fromRegistryOfRegistries(Registry.REGISTRY);
+        STATIC_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     }
 }
 

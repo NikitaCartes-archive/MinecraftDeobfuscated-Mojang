@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.ScheduleBuilder;
 import net.minecraft.world.entity.schedule.Timeline;
@@ -23,7 +24,7 @@ public class Schedule {
     private final Map<Activity, Timeline> timelines = Maps.newHashMap();
 
     protected static ScheduleBuilder register(String string) {
-        Schedule schedule = Registry.register(Registry.SCHEDULE, string, new Schedule());
+        Schedule schedule = Registry.register(BuiltInRegistries.SCHEDULE, string, new Schedule());
         return new ScheduleBuilder(schedule);
     }
 

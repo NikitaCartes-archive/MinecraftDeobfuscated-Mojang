@@ -52,9 +52,9 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -167,11 +167,11 @@ implements ChunkHolder.PlayerProvider {
         long l = serverLevel.getSeed();
         if (chunkGenerator instanceof NoiseBasedChunkGenerator) {
             NoiseBasedChunkGenerator noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)chunkGenerator;
-            this.randomState = RandomState.create(noiseBasedChunkGenerator.generatorSettings().value(), registryAccess.lookupOrThrow(Registry.NOISE_REGISTRY), l);
+            this.randomState = RandomState.create(noiseBasedChunkGenerator.generatorSettings().value(), registryAccess.lookupOrThrow(Registries.NOISE), l);
         } else {
-            this.randomState = RandomState.create(NoiseGeneratorSettings.dummy(), registryAccess.lookupOrThrow(Registry.NOISE_REGISTRY), l);
+            this.randomState = RandomState.create(NoiseGeneratorSettings.dummy(), registryAccess.lookupOrThrow(Registries.NOISE), l);
         }
-        this.chunkGeneratorState = chunkGenerator.createState(registryAccess.lookupOrThrow(Registry.STRUCTURE_SET_REGISTRY), this.randomState, l);
+        this.chunkGeneratorState = chunkGenerator.createState(registryAccess.lookupOrThrow(Registries.STRUCTURE_SET), this.randomState, l);
         this.mainThreadExecutor = blockableEventLoop;
         ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(executor, "worldgen");
         ProcessorHandle<Runnable> processorHandle = ProcessorHandle.of("main", blockableEventLoop::tell);
@@ -563,7 +563,7 @@ implements ChunkHolder.PlayerProvider {
 
     private ChunkAccess createEmptyChunk(ChunkPos chunkPos) {
         this.markPositionReplaceable(chunkPos);
-        return new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
+        return new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registries.BIOME), null);
     }
 
     private void markPositionReplaceable(ChunkPos chunkPos) {

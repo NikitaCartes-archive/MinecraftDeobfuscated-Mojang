@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +24,6 @@ import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -106,13 +104,11 @@ public class BehaviorUtils {
     }
 
     public static boolean isWithinAttackRange(Mob mob, LivingEntity livingEntity, int i) {
+        ProjectileWeaponItem projectileWeaponItem;
         Item item = mob.getMainHandItem().getItem();
-        if (item instanceof ProjectileWeaponItem) {
-            ProjectileWeaponItem projectileWeaponItem = (ProjectileWeaponItem)item;
-            if (mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
-                int j = projectileWeaponItem.getDefaultProjectileRange() - i;
-                return mob.closerThan(livingEntity, j);
-            }
+        if (item instanceof ProjectileWeaponItem && mob.canFireProjectileWeapon(projectileWeaponItem = (ProjectileWeaponItem)item)) {
+            int j = projectileWeaponItem.getDefaultProjectileRange() - i;
+            return mob.closerThan(livingEntity, j);
         }
         return mob.isWithinMeleeAttackRange(livingEntity);
     }
@@ -154,10 +150,6 @@ public class BehaviorUtils {
             LivingEntity livingEntity;
             return entity instanceof LivingEntity ? (livingEntity = (LivingEntity)entity) : null;
         });
-    }
-
-    public static Stream<Villager> getNearbyVillagersWithCondition(Villager villager, Predicate<Villager> predicate) {
-        return villager.getBrain().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).map(list -> list.stream().filter(livingEntity -> livingEntity instanceof Villager && livingEntity != villager).map(livingEntity -> (Villager)livingEntity).filter(LivingEntity::isAlive).filter(predicate)).orElseGet(Stream::empty);
     }
 
     @Nullable

@@ -8,7 +8,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -41,10 +42,10 @@ public abstract class EntityTypePredicate {
         String string = GsonHelper.convertToString(jsonElement, "type");
         if (string.startsWith("#")) {
             ResourceLocation resourceLocation = new ResourceLocation(string.substring(1));
-            return new TagPredicate(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, resourceLocation));
+            return new TagPredicate(TagKey.create(Registries.ENTITY_TYPE, resourceLocation));
         }
         ResourceLocation resourceLocation = new ResourceLocation(string);
-        EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation + "', valid types are: " + COMMA_JOINER.join(Registry.ENTITY_TYPE.keySet())));
+        EntityType entityType = (EntityType)BuiltInRegistries.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation + "', valid types are: " + COMMA_JOINER.join(BuiltInRegistries.ENTITY_TYPE.keySet())));
         return new TypePredicate(entityType);
     }
 
@@ -90,7 +91,7 @@ public abstract class EntityTypePredicate {
 
         @Override
         public JsonElement serializeToJson() {
-            return new JsonPrimitive(Registry.ENTITY_TYPE.getKey(this.type).toString());
+            return new JsonPrimitive(BuiltInRegistries.ENTITY_TYPE.getKey(this.type).toString());
         }
     }
 }

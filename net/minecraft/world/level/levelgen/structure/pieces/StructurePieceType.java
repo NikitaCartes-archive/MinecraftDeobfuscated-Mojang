@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure.pieces;
 
 import java.util.Locale;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -87,7 +88,7 @@ public interface StructurePieceType {
     public StructurePiece load(StructurePieceSerializationContext var1, CompoundTag var2);
 
     private static StructurePieceType setFullContextPieceId(StructurePieceType structurePieceType, String string) {
-        return Registry.register(Registry.STRUCTURE_PIECE, string.toLowerCase(Locale.ROOT), structurePieceType);
+        return Registry.register(BuiltInRegistries.STRUCTURE_PIECE, string.toLowerCase(Locale.ROOT), structurePieceType);
     }
 
     private static StructurePieceType setPieceId(ContextlessType contextlessType, String string) {

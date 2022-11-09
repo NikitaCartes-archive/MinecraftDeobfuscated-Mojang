@@ -105,7 +105,7 @@ implements ContainerEventHandler {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
         GuiEventListener guiEventListener = this.getHovered();
         if (guiEventListener != null) {
             if (guiEventListener instanceof NarrationSupplier) {

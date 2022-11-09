@@ -3,47 +3,38 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 
-public class AssignProfessionFromJobSite
-extends Behavior<Villager> {
-    public AssignProfessionFromJobSite() {
-        super(ImmutableMap.of(MemoryModuleType.POTENTIAL_JOB_SITE, MemoryStatus.VALUE_PRESENT));
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-        BlockPos blockPos = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get().pos();
-        return blockPos.closerToCenterThan(villager.position(), 2.0) || villager.assignProfessionWhenSpawned();
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel2, Villager villager, long l) {
-        GlobalPos globalPos = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
-        villager.getBrain().eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
-        villager.getBrain().setMemory(MemoryModuleType.JOB_SITE, globalPos);
-        serverLevel2.broadcastEntityEvent(villager, (byte)14);
-        if (villager.getVillagerData().getProfession() != VillagerProfession.NONE) {
-            return;
-        }
-        MinecraftServer minecraftServer = serverLevel2.getServer();
-        Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension())).flatMap(serverLevel -> serverLevel.getPoiManager().getType(globalPos.pos())).flatMap(holder -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.heldJobSite().test((Holder<PoiType>)holder)).findFirst()).ifPresent(villagerProfession -> {
-            villager.setVillagerData(villager.getVillagerData().setProfession((VillagerProfession)villagerProfession));
-            villager.refreshBrain(serverLevel2);
-        });
+public class AssignProfessionFromJobSite {
+    public static BehaviorControl<Villager> create() {
+        return BehaviorBuilder.create(instance -> instance.group(instance.present(MemoryModuleType.POTENTIAL_JOB_SITE), instance.registered(MemoryModuleType.JOB_SITE)).apply(instance, (memoryAccessor, memoryAccessor2) -> (serverLevel2, villager, l) -> {
+            GlobalPos globalPos = (GlobalPos)instance.get(memoryAccessor);
+            if (!globalPos.pos().closerToCenterThan(villager.position(), 2.0) && !villager.assignProfessionWhenSpawned()) {
+                return false;
+            }
+            memoryAccessor.erase();
+            memoryAccessor2.set(globalPos);
+            serverLevel2.broadcastEntityEvent(villager, (byte)14);
+            if (villager.getVillagerData().getProfession() != VillagerProfession.NONE) {
+                return true;
+            }
+            MinecraftServer minecraftServer = serverLevel2.getServer();
+            Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension())).flatMap(serverLevel -> serverLevel.getPoiManager().getType(globalPos.pos())).flatMap(holder -> BuiltInRegistries.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.heldJobSite().test((Holder<PoiType>)holder)).findFirst()).ifPresent(villagerProfession -> {
+                villager.setVillagerData(villager.getVillagerData().setProfession((VillagerProfession)villagerProfession));
+                villager.refreshBrain(serverLevel2);
+            });
+            return true;
+        }));
     }
 }
 

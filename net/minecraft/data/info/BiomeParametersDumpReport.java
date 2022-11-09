@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -37,7 +37,7 @@ implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cachedOutput) {
         return this.registries.thenCompose(provider -> {
             RegistryOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, provider);
-            HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registry.BIOME_REGISTRY);
+            HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
             return CompletableFuture.allOf((CompletableFuture[])MultiNoiseBiomeSource.Preset.getPresets().map(pair -> {
                 MultiNoiseBiomeSource multiNoiseBiomeSource = ((MultiNoiseBiomeSource.Preset)pair.getSecond()).biomeSource(holderGetter, false);
                 return BiomeParametersDumpReport.dumpValue(this.createPath((ResourceLocation)pair.getFirst()), cachedOutput, dynamicOps, MultiNoiseBiomeSource.CODEC, multiNoiseBiomeSource);

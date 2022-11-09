@@ -36,7 +36,8 @@ import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -72,7 +73,7 @@ implements AdvancementSubProvider {
     public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
         Advancement advancement = Advancement.Builder.advancement().display(Items.MAP, (Component)Component.translatable("advancements.adventure.root.title"), (Component)Component.translatable("advancements.adventure.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/adventure.png"), FrameType.TASK, false, false, false).requirements(RequirementsStrategy.OR).addCriterion("killed_something", KilledTrigger.TriggerInstance.playerKilledEntity()).addCriterion("killed_by_something", KilledTrigger.TriggerInstance.entityKilledPlayer()).save(consumer, "adventure/root");
         Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Blocks.RED_BED, (Component)Component.translatable("advancements.adventure.sleep_in_bed.title"), (Component)Component.translatable("advancements.adventure.sleep_in_bed.description"), null, FrameType.TASK, true, true, false).addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed()).save(consumer, "adventure/sleep_in_bed");
-        HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registry.BIOME_REGISTRY);
+        HolderLookup.RegistryLookup<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
         VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes(holderGetter).toList()).parent(advancement2).display(Items.DIAMOND_BOOTS, (Component)Component.translatable("advancements.adventure.adventuring_time.title"), (Component)Component.translatable("advancements.adventure.adventuring_time.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
         Advancement advancement3 = Advancement.Builder.advancement().parent(advancement).display(Items.EMERALD, (Component)Component.translatable("advancements.adventure.trade.title"), (Component)Component.translatable("advancements.adventure.trade.description"), null, FrameType.TASK, true, true, false).addCriterion("traded", TradeTrigger.TriggerInstance.tradedWithVillager()).save(consumer, "adventure/trade");
         Advancement.Builder.advancement().parent(advancement3).display(Items.EMERALD, (Component)Component.translatable("advancements.adventure.trade_at_world_height.title"), (Component)Component.translatable("advancements.adventure.trade_at_world_height.description"), null, FrameType.TASK, true, true, false).addCriterion("trade_at_world_height", TradeTrigger.TriggerInstance.tradedWithVillager(EntityPredicate.Builder.entity().located(LocationPredicate.atYLocation(MinMaxBounds.Doubles.atLeast(319.0))))).save(consumer, "adventure/trade_at_world_height");
@@ -105,7 +106,7 @@ implements AdvancementSubProvider {
 
     private Advancement.Builder addMobsToKill(Advancement.Builder builder) {
         for (EntityType<?> entityType : MOBS_TO_KILL) {
-            builder.addCriterion(Registry.ENTITY_TYPE.getKey(entityType).toString(), KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(entityType)));
+            builder.addCriterion(BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString(), KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(entityType)));
         }
         return builder;
     }

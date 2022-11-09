@@ -3,31 +3,24 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerProfession;
 
-public class ResetProfession
-extends Behavior<Villager> {
-    public ResetProfession() {
-        super(ImmutableMap.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_ABSENT));
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-        VillagerData villagerData = villager.getVillagerData();
-        return villagerData.getProfession() != VillagerProfession.NONE && villagerData.getProfession() != VillagerProfession.NITWIT && villager.getVillagerXp() == 0 && villagerData.getLevel() <= 1;
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel, Villager villager, long l) {
-        villager.setVillagerData(villager.getVillagerData().setProfession(VillagerProfession.NONE));
-        villager.refreshBrain(serverLevel);
+public class ResetProfession {
+    public static BehaviorControl<Villager> create() {
+        return BehaviorBuilder.create(instance -> instance.group(instance.absent(MemoryModuleType.JOB_SITE)).apply(instance, memoryAccessor -> (serverLevel, villager, l) -> {
+            VillagerData villagerData = villager.getVillagerData();
+            if (villagerData.getProfession() != VillagerProfession.NONE && villagerData.getProfession() != VillagerProfession.NITWIT && villager.getVillagerXp() == 0 && villagerData.getLevel() <= 1) {
+                villager.setVillagerData(villager.getVillagerData().setProfession(VillagerProfession.NONE));
+                villager.refreshBrain(serverLevel);
+                return true;
+            }
+            return false;
+        }));
     }
 }
 

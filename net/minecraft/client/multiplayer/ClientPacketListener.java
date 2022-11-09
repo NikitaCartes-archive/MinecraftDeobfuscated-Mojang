@@ -97,6 +97,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -396,7 +398,7 @@ ClientGamePacketListener {
         Collections.shuffle(list);
         this.levels = Sets.newLinkedHashSet(list);
         ResourceKey<Level> resourceKey = clientboundLoginPacket.dimension();
-        Holder.Reference<DimensionType> holder = this.registryAccess.compositeAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getHolderOrThrow(clientboundLoginPacket.dimensionType());
+        Holder.Reference<DimensionType> holder = this.registryAccess.compositeAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(clientboundLoginPacket.dimensionType());
         this.serverChunkRadius = clientboundLoginPacket.chunkRadius();
         this.serverSimulationDistance = clientboundLoginPacket.simulationDistance();
         boolean bl = clientboundLoginPacket.isDebug();
@@ -429,7 +431,9 @@ ClientGamePacketListener {
         this.connection.send(new ServerboundCustomPayloadPacket(ServerboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(ClientBrandRetriever.getClientModName())));
         this.lastSeenMessages = new LastSeenMessagesTracker(20);
         this.messageSignatureCache = MessageSignatureCache.createDefault();
-        this.minecraft.getProfileKeyPairManager().prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> this.setChatSession(LocalChatSession.create(profileKeyPair))), (Executor)this.minecraft);
+        if (this.connection.isEncrypted()) {
+            this.minecraft.getProfileKeyPairManager().prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> this.setChatSession(LocalChatSession.create(profileKeyPair))), (Executor)this.minecraft);
+        }
         this.minecraft.getGame().onStartGameSession();
         this.telemetryManager.onPlayerInfoReceived(clientboundLoginPacket.gameType(), clientboundLoginPacket.hardcore());
     }
@@ -954,7 +958,7 @@ ClientGamePacketListener {
     public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
         ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
-        Holder.Reference<DimensionType> holder = this.registryAccess.compositeAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getHolderOrThrow(clientboundRespawnPacket.getDimensionType());
+        Holder.Reference<DimensionType> holder = this.registryAccess.compositeAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(clientboundRespawnPacket.getDimensionType());
         LocalPlayer localPlayer = this.minecraft.player;
         int i = localPlayer.getId();
         if (resourceKey != localPlayer.level.dimension()) {
@@ -1044,9 +1048,10 @@ ClientGamePacketListener {
             player.getInventory().setItem(i, itemStack);
         } else {
             boolean bl = false;
-            if (this.minecraft.screen instanceof CreativeModeInventoryScreen) {
-                CreativeModeInventoryScreen creativeModeInventoryScreen = (CreativeModeInventoryScreen)this.minecraft.screen;
-                boolean bl2 = bl = creativeModeInventoryScreen.getSelectedTab() != CreativeModeTabs.TAB_INVENTORY.getId();
+            Screen screen = this.minecraft.screen;
+            if (screen instanceof CreativeModeInventoryScreen) {
+                CreativeModeInventoryScreen creativeModeInventoryScreen = (CreativeModeInventoryScreen)screen;
+                boolean bl2 = bl = !creativeModeInventoryScreen.isInventoryOpen();
             }
             if (clientboundContainerSetSlotPacket.getContainerId() == 0 && InventoryMenu.isHotbarSlot(i)) {
                 ItemStack itemStack2;
@@ -1199,7 +1204,7 @@ ClientGamePacketListener {
         MapItemSavedData mapItemSavedData = this.minecraft.level.getMapData(string);
         if (mapItemSavedData == null) {
             mapItemSavedData = MapItemSavedData.createForClient(clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension());
-            this.minecraft.level.setMapData(string, mapItemSavedData);
+            this.minecraft.level.overrideMapData(string, mapItemSavedData);
         }
         clientboundMapItemDataPacket.applyToMap(mapItemSavedData);
         mapRenderer.update(i, mapItemSavedData);
@@ -1352,7 +1357,7 @@ ClientGamePacketListener {
         if (!this.connection.isMemoryConnection()) {
             Blocks.rebuildCache();
         }
-        CreativeModeTabs.TAB_SEARCH.invalidateSearchTree();
+        CreativeModeTabs.searchTab().rebuildSearchTree();
     }
 
     @Override
@@ -1785,7 +1790,7 @@ ClientGamePacketListener {
                 BlockPos blockPos = friendlyByteBuf.readBlockPos();
                 ((NeighborsUpdateRenderer)this.minecraft.debugRenderer.neighborsUpdateRenderer).addUpdate(l, blockPos);
             } else if (ClientboundCustomPayloadPacket.DEBUG_STRUCTURES_PACKET.equals(resourceLocation)) {
-                DimensionType dimensionType = this.registryAccess.compositeAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(friendlyByteBuf.readResourceLocation());
+                DimensionType dimensionType = this.registryAccess.compositeAccess().registryOrThrow(Registries.DIMENSION_TYPE).get(friendlyByteBuf.readResourceLocation());
                 BoundingBox boundingBox = new BoundingBox(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
                 int j = friendlyByteBuf.readInt();
                 ArrayList<BoundingBox> list = Lists.newArrayList();
@@ -1933,12 +1938,12 @@ ClientGamePacketListener {
                 int ac = friendlyByteBuf.readInt();
                 this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, m, string12, ac);
             } else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT.equals(resourceLocation)) {
-                GameEvent gameEvent = Registry.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
+                GameEvent gameEvent = BuiltInRegistries.GAME_EVENT.get(new ResourceLocation(friendlyByteBuf.readUtf()));
                 Vec3 vec3 = new Vec3(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble());
                 this.minecraft.debugRenderer.gameEventListenerRenderer.trackGameEvent(gameEvent, vec3);
             } else if (ClientboundCustomPayloadPacket.DEBUG_GAME_EVENT_LISTENER.equals(resourceLocation)) {
                 ResourceLocation resourceLocation2 = friendlyByteBuf.readResourceLocation();
-                Object positionSource = Registry.POSITION_SOURCE_TYPE.getOptional(resourceLocation2).orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation2)).read(friendlyByteBuf);
+                Object positionSource = BuiltInRegistries.POSITION_SOURCE_TYPE.getOptional(resourceLocation2).orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation2)).read(friendlyByteBuf);
                 int j = friendlyByteBuf.readVarInt();
                 this.minecraft.debugRenderer.gameEventListenerRenderer.trackListener((PositionSource)positionSource, j);
             } else {
@@ -2093,7 +2098,7 @@ ClientGamePacketListener {
         for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : clientboundUpdateAttributesPacket.getValues()) {
             AttributeInstance attributeInstance = attributeMap.getInstance(attributeSnapshot.getAttribute());
             if (attributeInstance == null) {
-                LOGGER.warn("Entity {} does not have attribute {}", (Object)entity, (Object)Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
+                LOGGER.warn("Entity {} does not have attribute {}", (Object)entity, (Object)BuiltInRegistries.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
                 continue;
             }
             attributeInstance.setBaseValue(attributeSnapshot.getBase());
@@ -2304,8 +2309,8 @@ ClientGamePacketListener {
 
     @Override
     public void tick() {
-        ProfileKeyPairManager profileKeyPairManager = this.minecraft.getProfileKeyPairManager();
-        if (profileKeyPairManager.shouldRefreshKeyPair()) {
+        ProfileKeyPairManager profileKeyPairManager;
+        if (this.connection.isEncrypted() && (profileKeyPairManager = this.minecraft.getProfileKeyPairManager()).shouldRefreshKeyPair()) {
             profileKeyPairManager.prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(this::refreshKeyPair), (Executor)this.minecraft);
         }
     }

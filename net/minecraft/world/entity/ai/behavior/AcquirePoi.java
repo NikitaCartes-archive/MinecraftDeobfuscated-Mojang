@@ -3,9 +3,7 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.HashSet;
 import java.util.Optional;
@@ -16,95 +14,78 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.DebugPackets;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.OneShot;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.pathfinder.Path;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.Nullable;
 
-public class AcquirePoi
-extends Behavior<PathfinderMob> {
-    private static final int BATCH_SIZE = 5;
-    private static final int RATE = 20;
+public class AcquirePoi {
     public static final int SCAN_RANGE = 48;
-    private final Predicate<Holder<PoiType>> poiType;
-    private final MemoryModuleType<GlobalPos> memoryToAcquire;
-    private final boolean onlyIfAdult;
-    private final Optional<Byte> onPoiAcquisitionEvent;
-    private long nextScheduledStart;
-    private final Long2ObjectMap<JitteredLinearRetry> batchCache = new Long2ObjectOpenHashMap<JitteredLinearRetry>();
 
-    public AcquirePoi(Predicate<Holder<PoiType>> predicate, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl, Optional<Byte> optional) {
-        super(AcquirePoi.constructEntryConditionMap(memoryModuleType, memoryModuleType2));
-        this.poiType = predicate;
-        this.memoryToAcquire = memoryModuleType2;
-        this.onlyIfAdult = bl;
-        this.onPoiAcquisitionEvent = optional;
+    public static BehaviorControl<PathfinderMob> create(Predicate<Holder<PoiType>> predicate, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl, Optional<Byte> optional) {
+        return AcquirePoi.create(predicate, memoryModuleType, memoryModuleType, bl, optional);
     }
 
-    public AcquirePoi(Predicate<Holder<PoiType>> predicate, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl, Optional<Byte> optional) {
-        this(predicate, memoryModuleType, memoryModuleType, bl, optional);
-    }
-
-    private static ImmutableMap<MemoryModuleType<?>, MemoryStatus> constructEntryConditionMap(MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2) {
-        ImmutableMap.Builder<MemoryModuleType<GlobalPos>, MemoryStatus> builder = ImmutableMap.builder();
-        builder.put(memoryModuleType, MemoryStatus.VALUE_ABSENT);
-        if (memoryModuleType2 != memoryModuleType) {
-            builder.put(memoryModuleType2, MemoryStatus.VALUE_ABSENT);
-        }
-        return builder.build();
-    }
-
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-        if (this.onlyIfAdult && pathfinderMob.isBaby()) {
-            return false;
-        }
-        if (this.nextScheduledStart == 0L) {
-            this.nextScheduledStart = pathfinderMob.level.getGameTime() + (long)serverLevel.random.nextInt(20);
-            return false;
-        }
-        return serverLevel.getGameTime() >= this.nextScheduledStart;
-    }
-
-    @Override
-    protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-        this.nextScheduledStart = l + 20L + (long)serverLevel.getRandom().nextInt(20);
-        PoiManager poiManager = serverLevel.getPoiManager();
-        this.batchCache.long2ObjectEntrySet().removeIf(entry -> !((JitteredLinearRetry)entry.getValue()).isStillValid(l));
-        Predicate<BlockPos> predicate = blockPos -> {
-            JitteredLinearRetry jitteredLinearRetry = (JitteredLinearRetry)this.batchCache.get(blockPos.asLong());
-            if (jitteredLinearRetry == null) {
-                return true;
-            }
-            if (!jitteredLinearRetry.shouldRetry(l)) {
+    public static BehaviorControl<PathfinderMob> create(Predicate<Holder<PoiType>> predicate, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl, Optional<Byte> optional) {
+        int i = 5;
+        int j = 20;
+        MutableLong mutableLong = new MutableLong(0L);
+        Long2ObjectOpenHashMap long2ObjectMap = new Long2ObjectOpenHashMap();
+        OneShot<PathfinderMob> oneShot = BehaviorBuilder.create(instance -> instance.group(instance.absent(memoryModuleType2)).apply(instance, memoryAccessor -> (serverLevel, pathfinderMob, l) -> {
+            if (bl && pathfinderMob.isBaby()) {
                 return false;
             }
-            jitteredLinearRetry.markAttempt(l);
-            return true;
-        };
-        Set<Pair<Holder<PoiType>, BlockPos>> set = poiManager.findAllClosestFirstWithType(this.poiType, predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE).limit(5L).collect(Collectors.toSet());
-        Path path = AcquirePoi.findPathToPois(pathfinderMob, set);
-        if (path != null && path.canReach()) {
-            BlockPos blockPos2 = path.getTarget();
-            poiManager.getType(blockPos2).ifPresent(holder2 -> {
-                poiManager.take(this.poiType, (holder, blockPos2) -> blockPos2.equals(blockPos2), blockPos2, 1);
-                pathfinderMob.getBrain().setMemory(this.memoryToAcquire, GlobalPos.of(serverLevel.dimension(), blockPos2));
-                this.onPoiAcquisitionEvent.ifPresent(byte_ -> serverLevel.broadcastEntityEvent(pathfinderMob, (byte)byte_));
-                this.batchCache.clear();
-                DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos2);
-            });
-        } else {
-            for (Pair<Holder<PoiType>, BlockPos> pair : set) {
-                this.batchCache.computeIfAbsent(pair.getSecond().asLong(), m -> new JitteredLinearRetry(pathfinderMob.level.random, l));
+            if (mutableLong.getValue() == 0L) {
+                mutableLong.setValue(serverLevel.getGameTime() + (long)serverLevel.random.nextInt(20));
+                return false;
             }
+            if (serverLevel.getGameTime() < mutableLong.getValue()) {
+                return false;
+            }
+            mutableLong.setValue(l + 20L + (long)serverLevel.getRandom().nextInt(20));
+            PoiManager poiManager = serverLevel.getPoiManager();
+            long2ObjectMap.long2ObjectEntrySet().removeIf(entry -> !((JitteredLinearRetry)entry.getValue()).isStillValid(l));
+            Predicate<BlockPos> predicate2 = blockPos -> {
+                JitteredLinearRetry jitteredLinearRetry = (JitteredLinearRetry)long2ObjectMap.get(blockPos.asLong());
+                if (jitteredLinearRetry == null) {
+                    return true;
+                }
+                if (!jitteredLinearRetry.shouldRetry(l)) {
+                    return false;
+                }
+                jitteredLinearRetry.markAttempt(l);
+                return true;
+            };
+            Set<Pair<Holder<PoiType>, BlockPos>> set = poiManager.findAllClosestFirstWithType(predicate, predicate2, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE).limit(5L).collect(Collectors.toSet());
+            Path path = AcquirePoi.findPathToPois(pathfinderMob, set);
+            if (path != null && path.canReach()) {
+                BlockPos blockPos2 = path.getTarget();
+                poiManager.getType(blockPos2).ifPresent(holder2 -> {
+                    poiManager.take(predicate, (holder, blockPos2) -> blockPos2.equals(blockPos2), blockPos2, 1);
+                    memoryAccessor.set(GlobalPos.of(serverLevel.dimension(), blockPos2));
+                    optional.ifPresent(byte_ -> serverLevel.broadcastEntityEvent(pathfinderMob, (byte)byte_));
+                    long2ObjectMap.clear();
+                    DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos2);
+                });
+            } else {
+                for (Pair<Holder<PoiType>, BlockPos> pair : set) {
+                    long2ObjectMap.computeIfAbsent(pair.getSecond().asLong(), m -> new JitteredLinearRetry(serverLevel.random, l));
+                }
+            }
+            return true;
+        }));
+        if (memoryModuleType2 == memoryModuleType) {
+            return oneShot;
         }
+        return BehaviorBuilder.create(instance -> instance.group(instance.absent(memoryModuleType)).apply(instance, memoryAccessor -> oneShot));
     }
 
     @Nullable

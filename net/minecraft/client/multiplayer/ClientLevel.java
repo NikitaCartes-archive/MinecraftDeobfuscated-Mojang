@@ -38,12 +38,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -252,7 +253,7 @@ extends Level {
     public void tickNonPassenger(Entity entity) {
         entity.setOldPosAndRot();
         ++entity.tickCount;
-        this.getProfiler().push(() -> Registry.ENTITY_TYPE.getKey(entity.getType()).toString());
+        this.getProfiler().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
         entity.tick();
         this.getProfiler().pop();
         for (Entity entity2 : entity.getPassengers()) {
@@ -495,9 +496,12 @@ extends Level {
         return this.mapData.get(string);
     }
 
+    public void overrideMapData(String string, MapItemSavedData mapItemSavedData) {
+        this.mapData.put(string, mapItemSavedData);
+    }
+
     @Override
     public void setMapData(String string, MapItemSavedData mapItemSavedData) {
-        this.mapData.put(string, mapItemSavedData);
     }
 
     @Override
@@ -587,7 +591,7 @@ extends Level {
 
     @Override
     public Holder<Biome> getUncachedNoiseBiome(int i, int j, int k) {
-        return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS);
+        return this.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS);
     }
 
     public float getSkyDarken(float f) {

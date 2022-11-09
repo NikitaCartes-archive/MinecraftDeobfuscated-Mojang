@@ -117,7 +117,7 @@ extends ContainerObjectSelectionList<Entry> {
             this.name = component;
             this.changeButton = Button.builder(component, button -> {
                 KeyBindsList.this.keyBindsScreen.selectedKey = keyMapping;
-            }).bounds(0, 0, 75, 20).tooltip(Button.NO_TOOLTIP).createNarration(supplier -> {
+            }).bounds(0, 0, 75, 20).createNarration(supplier -> {
                 if (keyMapping.isUnbound()) {
                     return Component.translatable("narrator.controls.unbound", component);
                 }
@@ -126,7 +126,7 @@ extends ContainerObjectSelectionList<Entry> {
             this.resetButton = Button.builder(Component.translatable("controls.reset"), button -> {
                 ((KeyBindsList)KeyBindsList.this).minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
                 KeyMapping.resetMapping();
-            }).bounds(0, 0, 50, 20).tooltip(Button.NO_TOOLTIP).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
+            }).bounds(0, 0, 50, 20).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
         }
 
         @Override

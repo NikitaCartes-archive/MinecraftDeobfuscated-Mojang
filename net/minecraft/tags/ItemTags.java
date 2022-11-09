@@ -3,7 +3,7 @@
  */
 package net.minecraft.tags;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -26,7 +26,6 @@ public final class ItemTags {
     public static final TagKey<Item> DOORS = ItemTags.bind("doors");
     public static final TagKey<Item> SAPLINGS = ItemTags.bind("saplings");
     public static final TagKey<Item> LOGS_THAT_BURN = ItemTags.bind("logs_that_burn");
-    public static final TagKey<Item> OVERWORLD_NATURAL_LOGS = ItemTags.bind("overworld_natural_logs");
     public static final TagKey<Item> LOGS = ItemTags.bind("logs");
     public static final TagKey<Item> DARK_OAK_LOGS = ItemTags.bind("dark_oak_logs");
     public static final TagKey<Item> OAK_LOGS = ItemTags.bind("oak_logs");
@@ -37,6 +36,7 @@ public final class ItemTags {
     public static final TagKey<Item> MANGROVE_LOGS = ItemTags.bind("mangrove_logs");
     public static final TagKey<Item> CRIMSON_STEMS = ItemTags.bind("crimson_stems");
     public static final TagKey<Item> WARPED_STEMS = ItemTags.bind("warped_stems");
+    public static final TagKey<Item> BAMBOO_BLOCKS = ItemTags.bind("bamboo_blocks");
     public static final TagKey<Item> WART_BLOCKS = ItemTags.bind("wart_blocks");
     public static final TagKey<Item> BANNERS = ItemTags.bind("banners");
     public static final TagKey<Item> SAND = ItemTags.bind("sand");
@@ -95,7 +95,7 @@ public final class ItemTags {
     }
 
     private static TagKey<Item> bind(String string) {
-        return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(string));
+        return TagKey.create(Registries.ITEM, new ResourceLocation(string));
     }
 }
 

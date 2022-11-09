@@ -6,7 +6,7 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -23,7 +23,7 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundAwardStatsPacket(FriendlyByteBuf friendlyByteBuf) {
         this.stats = friendlyByteBuf.readMap(Object2IntOpenHashMap::new, friendlyByteBuf2 -> {
-            StatType<?> statType = friendlyByteBuf2.readById(Registry.STAT_TYPE);
+            StatType<?> statType = friendlyByteBuf2.readById(BuiltInRegistries.STAT_TYPE);
             return ClientboundAwardStatsPacket.readStatCap(friendlyByteBuf, statType);
         }, FriendlyByteBuf::readVarInt);
     }
@@ -43,7 +43,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     private static <T> void writeStatCap(FriendlyByteBuf friendlyByteBuf, Stat<T> stat) {
-        friendlyByteBuf.writeId(Registry.STAT_TYPE, stat.getType());
+        friendlyByteBuf.writeId(BuiltInRegistries.STAT_TYPE, stat.getType());
         friendlyByteBuf.writeId(stat.getType().getRegistry(), stat.getValue());
     }
 

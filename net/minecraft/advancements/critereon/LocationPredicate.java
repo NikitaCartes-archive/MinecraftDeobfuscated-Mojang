@@ -13,7 +13,7 @@ import net.minecraft.advancements.critereon.FluidPredicate;
 import net.minecraft.advancements.critereon.LightPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -145,12 +145,12 @@ public class LocationPredicate {
         MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject2.get("x"));
         MinMaxBounds.Doubles doubles2 = MinMaxBounds.Doubles.fromJson(jsonObject2.get("y"));
         MinMaxBounds.Doubles doubles3 = MinMaxBounds.Doubles.fromJson(jsonObject2.get("z"));
-        ResourceKey resourceKey2 = jsonObject.has("dimension") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("dimension")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation)).orElse(null) : (resourceKey = null);
-        ResourceKey resourceKey22 = jsonObject.has("structure") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("structure")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.STRUCTURE_REGISTRY, resourceLocation)).orElse(null) : null;
+        ResourceKey resourceKey2 = jsonObject.has("dimension") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("dimension")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registries.DIMENSION, resourceLocation)).orElse(null) : (resourceKey = null);
+        ResourceKey resourceKey22 = jsonObject.has("structure") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("structure")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registries.STRUCTURE, resourceLocation)).orElse(null) : null;
         ResourceKey<Biome> resourceKey3 = null;
         if (jsonObject.has("biome")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "biome"));
-            resourceKey3 = ResourceKey.create(Registry.BIOME_REGISTRY, resourceLocation2);
+            resourceKey3 = ResourceKey.create(Registries.BIOME, resourceLocation2);
         }
         Boolean boolean_ = jsonObject.has("smokey") ? Boolean.valueOf(jsonObject.get("smokey").getAsBoolean()) : null;
         LightPredicate lightPredicate = LightPredicate.fromJson(jsonObject.get("light"));

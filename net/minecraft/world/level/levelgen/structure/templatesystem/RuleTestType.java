@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
@@ -24,7 +25,7 @@ public interface RuleTestType<P extends RuleTest> {
     public Codec<P> codec();
 
     public static <P extends RuleTest> RuleTestType<P> register(String string, Codec<P> codec) {
-        return Registry.register(Registry.RULE_TEST, string, () -> codec);
+        return Registry.register(BuiltInRegistries.RULE_TEST, string, () -> codec);
     }
 }
 

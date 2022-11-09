@@ -7,8 +7,8 @@ import com.mojang.logging.LogUtils;
 import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -50,7 +50,7 @@ public abstract class BaseSpawner {
     private int spawnRange = 4;
 
     public void setEntityId(EntityType<?> entityType, @Nullable Level level, RandomSource randomSource, BlockPos blockPos) {
-        this.getOrCreateNextSpawnData(level, randomSource, blockPos).getEntityToSpawn().putString("id", Registry.ENTITY_TYPE.getKey(entityType).toString());
+        this.getOrCreateNextSpawnData(level, randomSource, blockPos).getEntityToSpawn().putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString());
     }
 
     private boolean isNearPlayer(Level level, BlockPos blockPos) {

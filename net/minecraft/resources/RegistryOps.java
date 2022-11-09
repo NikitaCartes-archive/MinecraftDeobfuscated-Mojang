@@ -38,7 +38,7 @@ extends DelegatingOps<T> {
         return RegistryOps.create(dynamicOps, RegistryOps.memoizeLookup(new RegistryInfoLookup(){
 
             public <E> Optional<RegistryInfo<E>> lookup(ResourceKey<? extends Registry<? extends E>> resourceKey) {
-                return provider.lookup(resourceKey).map(registryLookup -> new RegistryInfo(registryLookup, registryLookup, registryLookup.elementsLifecycle()));
+                return provider.lookup(resourceKey).map(registryLookup -> new RegistryInfo(registryLookup, registryLookup, registryLookup.registryLifecycle()));
             }
         }));
     }

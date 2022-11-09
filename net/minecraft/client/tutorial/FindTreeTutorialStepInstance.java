@@ -12,7 +12,7 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.client.tutorial.TutorialStepInstance;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
@@ -83,7 +83,7 @@ implements TutorialStepInstance {
     }
 
     public static boolean hasPunchedTreesPreviously(LocalPlayer localPlayer) {
-        for (Holder<Block> holder : Registry.BLOCK.getTagOrEmpty(BlockTags.COMPLETES_FIND_TREE_TUTORIAL)) {
+        for (Holder<Block> holder : BuiltInRegistries.BLOCK.getTagOrEmpty(BlockTags.COMPLETES_FIND_TREE_TUTORIAL)) {
             Block block = holder.value();
             if (localPlayer.getStats().getValue(Stats.BLOCK_MINED.get(block)) <= 0) continue;
             return true;

@@ -99,5 +99,29 @@ public class HttpUtil {
         serverSocket.close();
         return n;
     }
+
+    public static boolean isPortAvailable(int i) {
+        boolean bl;
+        if (i < 0 || i > 65535) {
+            return false;
+        }
+        ServerSocket serverSocket = new ServerSocket(i);
+        try {
+            bl = serverSocket.getLocalPort() == i;
+        } catch (Throwable throwable) {
+            try {
+                try {
+                    serverSocket.close();
+                } catch (Throwable throwable2) {
+                    throwable.addSuppressed(throwable2);
+                }
+                throw throwable;
+            } catch (IOException iOException) {
+                return false;
+            }
+        }
+        serverSocket.close();
+        return bl;
+    }
 }
 

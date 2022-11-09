@@ -4,6 +4,7 @@
 package net.minecraft.world.item.enchantment;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.ArrowDamageEnchantment;
 import net.minecraft.world.item.enchantment.ArrowFireEnchantment;
@@ -82,7 +83,7 @@ public class Enchantments {
     public static final Enchantment VANISHING_CURSE = Enchantments.register("vanishing_curse", new VanishingCurseEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.values()));
 
     private static Enchantment register(String string, Enchantment enchantment) {
-        return Registry.register(Registry.ENCHANTMENT, string, enchantment);
+        return Registry.register(BuiltInRegistries.ENCHANTMENT, string, enchantment);
     }
 }
 

@@ -468,6 +468,9 @@ FlyingAnimal {
         if (!this.hasHive()) {
             return false;
         }
+        if (this.isTooFarAway(this.hivePos)) {
+            return false;
+        }
         BlockEntity blockEntity = this.level.getBlockEntity(this.hivePos);
         return blockEntity != null && blockEntity.getType() == BlockEntityType.BEEHIVE;
     }

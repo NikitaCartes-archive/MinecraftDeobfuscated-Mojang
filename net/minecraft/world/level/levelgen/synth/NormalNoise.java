@@ -14,7 +14,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
 import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
@@ -97,7 +97,7 @@ public class NormalNoise {
 
     public record NoiseParameters(int firstOctave, DoubleList amplitudes) {
         public static final Codec<NoiseParameters> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("firstOctave")).forGetter(NoiseParameters::firstOctave), ((MapCodec)Codec.DOUBLE.listOf().fieldOf("amplitudes")).forGetter(NoiseParameters::amplitudes)).apply((Applicative<NoiseParameters, ?>)instance, NoiseParameters::new));
-        public static final Codec<Holder<NoiseParameters>> CODEC = RegistryFileCodec.create(Registry.NOISE_REGISTRY, DIRECT_CODEC);
+        public static final Codec<Holder<NoiseParameters>> CODEC = RegistryFileCodec.create(Registries.NOISE, DIRECT_CODEC);
 
         public NoiseParameters(int i, List<Double> list) {
             this(i, new DoubleArrayList(list));

@@ -116,16 +116,6 @@ extends Behavior<Goat> {
     }
 
     @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Goat)livingEntity, l);
-    }
-
-    @Override
-    protected /* synthetic */ void tick(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.tick(serverLevel, (Goat)livingEntity, l);
-    }
-
-    @Override
     protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.start(serverLevel, (Goat)livingEntity, l);
     }

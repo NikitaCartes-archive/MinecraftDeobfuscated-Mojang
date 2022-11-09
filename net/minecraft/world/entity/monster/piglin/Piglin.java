@@ -223,7 +223,8 @@ InventoryCarrier {
 
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-        return this.isBaby() ? 0.93f : 1.74f;
+        float f = super.getStandingEyeHeight(pose, entityDimensions);
+        return this.isBaby() ? f - 0.81f : f;
     }
 
     @Override

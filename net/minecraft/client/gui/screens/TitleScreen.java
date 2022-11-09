@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.lang.invoke.LambdaMetafactory;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -28,6 +27,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.PlainTextButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
@@ -150,22 +150,11 @@ extends Screen {
 
     private void createNormalMenuOptions(int i, int j) {
         this.addRenderableWidget(Button.builder(Component.translatable("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))).bounds(this.width / 2 - 100, i, 200, 20).build());
-        final Component component = this.getMultiplayerDisabledReason();
+        Component component = this.getMultiplayerDisabledReason();
         boolean bl = component == null;
-        Button.OnTooltip onTooltip = component == null ? Button.NO_TOOLTIP : new Button.OnTooltip(){
-
-            @Override
-            public void onTooltip(Button button, PoseStack poseStack, int i, int j) {
-                TitleScreen.this.renderTooltip(poseStack, TitleScreen.this.minecraft.font.split(component, Math.max(TitleScreen.this.width / 2 - 43, 170)), i, j);
-            }
-
-            @Override
-            public void narrateTooltip(Consumer<Component> consumer) {
-                consumer.accept(component);
-            }
-        };
-        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)(i + j * 1), (int)200, (int)20).tooltip((Button.OnTooltip)onTooltip).build()).active = bl;
-        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)(i + j * 2), (int)200, (int)20).tooltip((Button.OnTooltip)onTooltip).build()).active = bl;
+        Tooltip tooltip = component != null ? Tooltip.create(component) : null;
+        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)(i + j * 1), (int)200, (int)20).tooltip((Tooltip)tooltip).build()).active = bl;
+        this.addRenderableWidget(Button.builder((Component)Component.translatable((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this)).bounds((int)(this.width / 2 - 100), (int)(i + j * 2), (int)200, (int)20).tooltip((Tooltip)tooltip).build()).active = bl;
     }
 
     @Nullable

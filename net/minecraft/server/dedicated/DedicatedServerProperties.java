@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -190,9 +191,9 @@ extends Settings<DedicatedServerProperties> {
         private static final Map<String, ResourceKey<WorldPreset>> LEGACY_PRESET_NAMES = Map.of("default", WorldPresets.NORMAL, "largebiomes", WorldPresets.LARGE_BIOMES);
 
         public WorldDimensions create(RegistryAccess registryAccess) {
-            Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registry.WORLD_PRESET_REGISTRY);
+            Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registries.WORLD_PRESET);
             Holder.Reference<WorldPreset> reference = registry.getHolder(WorldPresets.NORMAL).or(() -> registry.holders().findAny()).orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default preset"));
-            Holder holder = Optional.ofNullable(ResourceLocation.tryParse(this.levelType)).map(resourceLocation -> ResourceKey.create(Registry.WORLD_PRESET_REGISTRY, resourceLocation)).or(() -> Optional.ofNullable(LEGACY_PRESET_NAMES.get(this.levelType))).flatMap(registry::getHolder).orElseGet(() -> {
+            Holder holder = Optional.ofNullable(ResourceLocation.tryParse(this.levelType)).map(resourceLocation -> ResourceKey.create(Registries.WORLD_PRESET, resourceLocation)).or(() -> Optional.ofNullable(LEGACY_PRESET_NAMES.get(this.levelType))).flatMap(registry::getHolder).orElseGet(() -> {
                 LOGGER.warn("Failed to parse level-type {}, defaulting to {}", (Object)this.levelType, (Object)reference.key().location());
                 return reference;
             });

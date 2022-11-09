@@ -58,7 +58,7 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -137,11 +137,11 @@ public class ModelBakery {
         profilerFiller.popPush("static_definitions");
         STATIC_DEFINITIONS.forEach((resourceLocation, stateDefinition) -> stateDefinition.getPossibleStates().forEach(blockState -> this.loadTopLevel(BlockModelShaper.stateToModelLocation(resourceLocation, blockState))));
         profilerFiller.popPush("blocks");
-        for (Block block : Registry.BLOCK) {
+        for (Block block : BuiltInRegistries.BLOCK) {
             block.getStateDefinition().getPossibleStates().forEach(blockState -> this.loadTopLevel(BlockModelShaper.stateToModelLocation(blockState)));
         }
         profilerFiller.popPush("items");
-        for (ResourceLocation resourceLocation2 : Registry.ITEM.keySet()) {
+        for (ResourceLocation resourceLocation2 : BuiltInRegistries.ITEM.keySet()) {
             this.loadTopLevel(new ModelResourceLocation(resourceLocation2, "inventory"));
         }
         profilerFiller.popPush("special");
@@ -245,7 +245,7 @@ public class ModelBakery {
             this.unbakedCache.put(resourceLocation2, blockModel);
         } else {
             ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath());
-            StateDefinition stateDefinition = Optional.ofNullable(STATIC_DEFINITIONS.get(resourceLocation2)).orElseGet(() -> Registry.BLOCK.get(resourceLocation2).getStateDefinition());
+            StateDefinition stateDefinition = Optional.ofNullable(STATIC_DEFINITIONS.get(resourceLocation2)).orElseGet(() -> BuiltInRegistries.BLOCK.get(resourceLocation2).getStateDefinition());
             this.context.setDefinition(stateDefinition);
             ImmutableList<Property<?>> list = ImmutableList.copyOf(this.blockColors.getColoringProperties((Block)stateDefinition.getOwner()));
             ImmutableList immutableList = stateDefinition.getPossibleStates();
