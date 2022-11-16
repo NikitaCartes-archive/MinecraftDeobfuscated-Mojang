@@ -169,12 +169,11 @@ public class BoundingBox {
 	}
 
 	public boolean isInside(Vec3i vec3i) {
-		return vec3i.getX() >= this.minX
-			&& vec3i.getX() <= this.maxX
-			&& vec3i.getZ() >= this.minZ
-			&& vec3i.getZ() <= this.maxZ
-			&& vec3i.getY() >= this.minY
-			&& vec3i.getY() <= this.maxY;
+		return this.isInside(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+	}
+
+	public boolean isInside(int i, int j, int k) {
+		return i >= this.minX && i <= this.maxX && k >= this.minZ && k <= this.maxZ && j >= this.minY && j <= this.maxY;
 	}
 
 	public Vec3i getLength() {

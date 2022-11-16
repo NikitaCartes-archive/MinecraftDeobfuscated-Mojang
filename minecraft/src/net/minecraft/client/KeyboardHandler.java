@@ -44,7 +44,6 @@ import net.minecraft.world.phys.Vec3;
 public class KeyboardHandler {
 	public static final int DEBUG_CRASH_TIME = 10000;
 	private final Minecraft minecraft;
-	private boolean sendRepeatsToGui;
 	private final ClipboardManager clipboardManager = new ClipboardManager();
 	private long debugCrashKeyTime = -1L;
 	private long debugCrashKeyReportedTime = -1L;
@@ -355,13 +354,11 @@ public class KeyboardHandler {
 			if (screen != null) {
 				boolean[] bls = new boolean[]{false};
 				Screen.wrapScreenError(() -> {
-					if (k != 1 && (k != 2 || !this.sendRepeatsToGui)) {
-						if (k == 0) {
-							bls[0] = screen.keyReleased(i, j, m);
-						}
-					} else {
+					if (k == 1 || k == 2) {
 						screen.afterKeyboardAction();
 						bls[0] = screen.keyPressed(i, j, m);
+					} else if (k == 0) {
+						bls[0] = screen.keyReleased(i, j, m);
 					}
 				}, "keyPressed event handler", screen.getClass().getCanonicalName());
 				if (bls[0]) {
@@ -429,10 +426,6 @@ public class KeyboardHandler {
 				}
 			}
 		}
-	}
-
-	public void setSendRepeatsToGui(boolean bl) {
-		this.sendRepeatsToGui = bl;
 	}
 
 	public void setup(long l) {

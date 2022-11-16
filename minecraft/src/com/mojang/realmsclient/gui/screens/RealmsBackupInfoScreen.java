@@ -36,7 +36,6 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
 				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20)
@@ -45,11 +44,6 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList(this.minecraft);
 		this.addWidget(this.backupInfoList);
 		this.magicalSpecialHackyFocus(this.backupInfoList);
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override

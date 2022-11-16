@@ -77,15 +77,22 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 
 	private void dumpContents(int i, int j, int k) {
 		String string = this.location.toDebugFileName();
-		TextureUtil.writeAsPNG(string, this.getId(), i, j, k);
-		dumpSpriteNames(string, this.texturesByName);
-	}
-
-	private static void dumpSpriteNames(String string, Map<ResourceLocation, TextureAtlasSprite> map) {
-		Path path = Path.of(string + ".txt");
+		Path path = TextureUtil.getDebugTexturePath();
 
 		try {
-			Writer writer = Files.newBufferedWriter(path);
+			Files.createDirectories(path);
+			TextureUtil.writeAsPNG(path, string, this.getId(), i, j, k);
+			dumpSpriteNames(path, string, this.texturesByName);
+		} catch (IOException var7) {
+			LOGGER.warn("Failed to dump atlas contents to {}", path);
+		}
+	}
+
+	private static void dumpSpriteNames(Path path, String string, Map<ResourceLocation, TextureAtlasSprite> map) {
+		Path path2 = path.resolve(string + ".txt");
+
+		try {
+			Writer writer = Files.newBufferedWriter(path2);
 
 			try {
 				for (Entry<ResourceLocation, TextureAtlasSprite> entry : map.entrySet().stream().sorted(Entry.comparingByKey()).toList()) {
@@ -102,23 +109,23 @@ public class TextureAtlas extends AbstractTexture implements Tickable {
 						)
 					);
 				}
-			} catch (Throwable var8) {
+			} catch (Throwable var9) {
 				if (writer != null) {
 					try {
 						writer.close();
-					} catch (Throwable var7) {
-						var8.addSuppressed(var7);
+					} catch (Throwable var8) {
+						var9.addSuppressed(var8);
 					}
 				}
 
-				throw var8;
+				throw var9;
 			}
 
 			if (writer != null) {
 				writer.close();
 			}
-		} catch (IOException var9) {
-			LOGGER.warn("Failed to write file {}", path, var9);
+		} catch (IOException var10) {
+			LOGGER.warn("Failed to write file {}", path2, var10);
 		}
 	}
 

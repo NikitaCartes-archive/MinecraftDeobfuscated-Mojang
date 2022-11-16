@@ -10,12 +10,14 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.frog.Frog;
 
 @Environment(EnvType.CLIENT)
 public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
-	private static final float WALK_ANIMATION_SPEED_FACTOR = 9000.0F;
-	public static final float MAX_WALK_ANIMATION_SPEED = 8.0F;
+	private static final float WALK_ANIMATION_SPEED_FACTOR = 8000.0F;
+	public static final float MIN_WALK_ANIMATION_SPEED = 0.5F;
+	public static final float MAX_WALK_ANIMATION_SPEED = 1.5F;
 	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart head;
@@ -98,11 +100,12 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 
 	public void setupAnim(T frog, float f, float g, float h, float i, float j) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		float k = Math.min((float)frog.getDeltaMovement().horizontalDistanceSqr() * 9000.0F, 8.0F);
+		float k = (float)frog.getDeltaMovement().horizontalDistanceSqr();
+		float l = Mth.clamp(k * 8000.0F, 0.5F, 1.5F);
 		this.animate(frog.jumpAnimationState, FrogAnimation.FROG_JUMP, h);
 		this.animate(frog.croakAnimationState, FrogAnimation.FROG_CROAK, h);
 		this.animate(frog.tongueAnimationState, FrogAnimation.FROG_TONGUE, h);
-		this.animate(frog.walkAnimationState, FrogAnimation.FROG_WALK, h, k);
+		this.animate(frog.walkAnimationState, FrogAnimation.FROG_WALK, h, l);
 		this.animate(frog.swimAnimationState, FrogAnimation.FROG_SWIM, h);
 		this.animate(frog.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, h);
 		this.croakingBody.visible = frog.croakAnimationState.isStarted();

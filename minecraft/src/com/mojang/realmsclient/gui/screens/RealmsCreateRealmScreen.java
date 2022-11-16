@@ -41,7 +41,6 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.createButton = this.addRenderableWidget(
 			Button.builder(Component.translatable("mco.create.world"), button -> this.createWorld())
 				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20)
@@ -58,11 +57,6 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 		this.setInitialFocus(this.nameBox);
 		this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, Component.translatable("mco.configure.world.description"));
 		this.addWidget(this.descriptionBox);
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override

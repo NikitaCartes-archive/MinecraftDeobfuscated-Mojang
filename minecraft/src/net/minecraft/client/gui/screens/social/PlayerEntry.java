@@ -87,17 +87,28 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		boolean bl2 = minecraft.getChatStatus().isChatAllowed(minecraft.isLocalServer());
 		boolean bl3 = !minecraft.player.getUUID().equals(uUID);
 		if (bl3 && bl2 && !playerSocialManager.isBlocked(uUID)) {
-			this.reportButton = new ImageButton(0, 0, 20, 20, 0, 0, 20, REPORT_BUTTON_LOCATION, 64, 64, button -> {
-				if (reportingContext.draftReportHandled(minecraft, socialInteractionsScreen, false)) {
-					minecraft.setScreen(new ChatReportScreen(socialInteractionsScreen, reportingContext, uUID));
-				}
-			}, Component.translatable("gui.socialInteractions.report")) {
+			this.reportButton = new ImageButton(
+				0,
+				0,
+				20,
+				20,
+				0,
+				0,
+				20,
+				REPORT_BUTTON_LOCATION,
+				64,
+				64,
+				button -> reportingContext.draftReportHandled(
+						minecraft, socialInteractionsScreen, () -> minecraft.setScreen(new ChatReportScreen(socialInteractionsScreen, reportingContext, uUID)), false
+					),
+				Component.translatable("gui.socialInteractions.report")
+			) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
 					return PlayerEntry.this.getEntryNarationMessage(super.createNarrationMessage());
 				}
 			};
-			this.reportButton.setTooltip(Tooltip.create(this.getReportButtonText(false), this.getReportButtonText(true)));
+			this.reportButton.setTooltip(this.createReportButtonTooltip());
 			this.reportButton.setTooltipDelay(10);
 			this.hideButton = new ImageButton(0, 0, 20, 20, 0, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
 				playerSocialManager.hidePlayer(uUID);
@@ -130,15 +141,15 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		}
 	}
 
-	private Component getReportButtonText(boolean bl) {
+	private Tooltip createReportButtonTooltip() {
 		if (!this.playerReportable) {
-			return NOT_REPORTABLE_TOOLTIP;
+			return Tooltip.create(NOT_REPORTABLE_TOOLTIP);
 		} else if (!this.reportingEnabled) {
-			return REPORT_DISABLED_TOOLTIP;
-		} else if (!this.hasRecentMessages) {
-			return Component.translatable("gui.socialInteractions.tooltip.report.no_messages", this.playerName);
+			return Tooltip.create(REPORT_DISABLED_TOOLTIP);
 		} else {
-			return (Component)(bl ? Component.translatable("gui.socialInteractions.narration.report", this.playerName) : REPORT_PLAYER_TOOLTIP);
+			return !this.hasRecentMessages
+				? Tooltip.create(Component.translatable("gui.socialInteractions.tooltip.report.no_messages", this.playerName))
+				: Tooltip.create(REPORT_PLAYER_TOOLTIP, Component.translatable("gui.socialInteractions.narration.report", this.playerName));
 		}
 	}
 
@@ -218,6 +229,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		this.hasRecentMessages = bl;
 		if (this.reportButton != null) {
 			this.reportButton.active = this.reportingEnabled && this.playerReportable && bl;
+			this.reportButton.setTooltip(this.createReportButtonTooltip());
 		}
 	}
 

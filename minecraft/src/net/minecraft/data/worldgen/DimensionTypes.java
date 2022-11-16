@@ -46,7 +46,7 @@ public class DimensionTypes {
 				BlockTags.INFINIBURN_NETHER,
 				BuiltinDimensionTypes.NETHER_EFFECTS,
 				0.1F,
-				new DimensionType.MonsterSettings(true, false, ConstantInt.of(11), 15)
+				new DimensionType.MonsterSettings(true, false, ConstantInt.of(7), 15)
 			)
 		);
 		bootstapContext.register(

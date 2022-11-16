@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +44,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackLinkedSet;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 
@@ -92,25 +92,25 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private void tryRefreshInvalidatedTabs(FeatureFlagSet featureFlagSet, boolean bl) {
 		if (CreativeModeTabs.tryRebuildTabContents(featureFlagSet, bl)) {
 			for (CreativeModeTab creativeModeTab : CreativeModeTabs.allTabs()) {
-				ItemStackLinkedSet itemStackLinkedSet = creativeModeTab.getDisplayItems();
+				Collection<ItemStack> collection = creativeModeTab.getDisplayItems();
 				if (creativeModeTab == selectedTab) {
-					if (creativeModeTab.getType() == CreativeModeTab.Type.CATEGORY && itemStackLinkedSet.isEmpty()) {
+					if (creativeModeTab.getType() == CreativeModeTab.Type.CATEGORY && collection.isEmpty()) {
 						this.selectTab(CreativeModeTabs.getDefaultTab());
 					} else {
-						this.refreshCurrentTabContents(itemStackLinkedSet);
+						this.refreshCurrentTabContents(collection);
 					}
 				}
 			}
 		}
 	}
 
-	private void refreshCurrentTabContents(ItemStackLinkedSet itemStackLinkedSet) {
+	private void refreshCurrentTabContents(Collection<ItemStack> collection) {
 		int i = this.menu.getRowIndexForScroll(this.scrollOffs);
 		this.menu.items.clear();
 		if (selectedTab.getType() == CreativeModeTab.Type.SEARCH) {
 			this.refreshSearchResults();
 		} else {
-			this.menu.items.addAll(itemStackLinkedSet);
+			this.menu.items.addAll(collection);
 		}
 
 		this.scrollOffs = this.menu.getScrollForRowIndex(i);
@@ -697,7 +697,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		int j = 27;
 		int k = 27 * i;
 		if (creativeModeTab.isAlignedRight()) {
-			k = this.imageWidth - 27 * (7 - i);
+			k = this.imageWidth - 27 * (7 - i) + 1;
 		}
 
 		return k;

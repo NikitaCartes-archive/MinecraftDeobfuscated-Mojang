@@ -82,11 +82,6 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
-	}
-
-	@Override
 	public void tick() {
 		this.nameEdit.tick();
 	}

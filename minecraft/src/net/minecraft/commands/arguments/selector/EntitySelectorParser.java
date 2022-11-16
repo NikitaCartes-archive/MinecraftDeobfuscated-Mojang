@@ -58,8 +58,6 @@ public class EntitySelectorParser {
 	public static final DynamicCommandExceptionType ERROR_EXPECTED_OPTION_VALUE = new DynamicCommandExceptionType(
 		object -> Component.translatable("argument.entity.options.valueless", object)
 	);
-	public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_ARBITRARY = (vec3, list) -> {
-	};
 	public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_NEAREST = (vec3, list) -> list.sort(
 			(entity, entity2) -> Doubles.compare(entity.distanceToSqr(vec3), entity2.distanceToSqr(vec3))
 		);
@@ -90,7 +88,7 @@ public class EntitySelectorParser {
 	private WrappedMinMaxBounds rotX = WrappedMinMaxBounds.ANY;
 	private WrappedMinMaxBounds rotY = WrappedMinMaxBounds.ANY;
 	private Predicate<Entity> predicate = entity -> true;
-	private BiConsumer<Vec3, List<? extends Entity>> order = ORDER_ARBITRARY;
+	private BiConsumer<Vec3, List<? extends Entity>> order = EntitySelector.ORDER_ARBITRARY;
 	private boolean currentEntity;
 	@Nullable
 	private String playerName;
@@ -211,7 +209,7 @@ public class EntitySelectorParser {
 			} else if (c == 'a') {
 				this.maxResults = Integer.MAX_VALUE;
 				this.includesEntities = false;
-				this.order = ORDER_ARBITRARY;
+				this.order = EntitySelector.ORDER_ARBITRARY;
 				this.limitToType(EntityType.PLAYER);
 			} else if (c == 'r') {
 				this.maxResults = 1;
@@ -230,7 +228,7 @@ public class EntitySelectorParser {
 
 				this.maxResults = Integer.MAX_VALUE;
 				this.includesEntities = true;
-				this.order = ORDER_ARBITRARY;
+				this.order = EntitySelector.ORDER_ARBITRARY;
 				this.predicate = Entity::isAlive;
 			}
 

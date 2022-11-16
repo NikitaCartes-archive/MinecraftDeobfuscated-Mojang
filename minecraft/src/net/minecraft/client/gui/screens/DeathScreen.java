@@ -43,7 +43,7 @@ public class DeathScreen extends Screen {
 							Component.translatable("deathScreen.titleScreen"),
 							buttonx -> {
 								if (this.hardcore) {
-									this.exitToTitleScreen();
+									this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::exitToTitleScreen, true);
 								} else {
 									ConfirmScreen confirmScreen = new ConfirmScreen(
 										this::confirmResult,
@@ -78,7 +78,7 @@ public class DeathScreen extends Screen {
 
 	private void confirmResult(boolean bl) {
 		if (bl) {
-			this.exitToTitleScreen();
+			this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::exitToTitleScreen, true);
 		} else {
 			this.minecraft.player.respawn();
 			this.minecraft.setScreen(null);

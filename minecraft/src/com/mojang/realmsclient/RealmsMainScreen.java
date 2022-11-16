@@ -213,7 +213,6 @@ public class RealmsMainScreen extends RealmsScreen {
 				this.minecraft.setConnectedToRealms(false);
 			}
 
-			this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 			this.showingPopup = false;
 			this.addButtons();
 			this.realmSelectionList = new RealmsMainScreen.RealmSelectionList();
@@ -490,11 +489,6 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		return list;
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	public void setCreatedTrial(boolean bl) {

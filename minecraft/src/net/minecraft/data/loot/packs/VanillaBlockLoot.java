@@ -64,6 +64,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 			Blocks.ZOMBIE_HEAD,
 			Blocks.CREEPER_HEAD,
 			Blocks.DRAGON_HEAD,
+			Blocks.PIGLIN_HEAD,
 			Blocks.SHULKER_BOX,
 			Blocks.BLACK_SHULKER_BOX,
 			Blocks.BLUE_SHULKER_BOX,
@@ -303,6 +304,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.ZOMBIE_HEAD);
 		this.dropSelf(Blocks.CREEPER_HEAD);
 		this.dropSelf(Blocks.DRAGON_HEAD);
+		this.dropSelf(Blocks.PIGLIN_HEAD);
 		this.dropSelf(Blocks.ANVIL);
 		this.dropSelf(Blocks.CHIPPED_ANVIL);
 		this.dropSelf(Blocks.DAMAGED_ANVIL);

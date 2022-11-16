@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.state.properties;
 
+import java.util.Optional;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -24,14 +25,26 @@ public enum NoteBlockInstrument implements StringRepresentable {
 	DIDGERIDOO("didgeridoo", SoundEvents.NOTE_BLOCK_DIDGERIDOO),
 	BIT("bit", SoundEvents.NOTE_BLOCK_BIT),
 	BANJO("banjo", SoundEvents.NOTE_BLOCK_BANJO),
-	PLING("pling", SoundEvents.NOTE_BLOCK_PLING);
+	PLING("pling", SoundEvents.NOTE_BLOCK_PLING),
+	ZOMBIE("zombie", SoundEvents.ZOMBIE_AMBIENT, true),
+	SKELETON("skeleton", SoundEvents.SKELETON_AMBIENT, true),
+	CREEPER("creeper", SoundEvents.CREEPER_PRIMED, true),
+	DRAGON("dragon", SoundEvents.ENDER_DRAGON_AMBIENT, true),
+	WITHER_SKELETON("wither_skeleton", SoundEvents.WITHER_SKELETON_AMBIENT, true),
+	PIGLIN("piglin", SoundEvents.PIGLIN_ANGRY, true);
 
 	private final String name;
 	private final SoundEvent soundEvent;
+	private final boolean isMobHead;
 
-	private NoteBlockInstrument(String string2, SoundEvent soundEvent) {
+	private NoteBlockInstrument(String string2, SoundEvent soundEvent, boolean bl) {
 		this.name = string2;
 		this.soundEvent = soundEvent;
+		this.isMobHead = bl;
+	}
+
+	private NoteBlockInstrument(String string2, SoundEvent soundEvent) {
+		this(string2, soundEvent, false);
 	}
 
 	@Override
@@ -43,7 +56,27 @@ public enum NoteBlockInstrument implements StringRepresentable {
 		return this.soundEvent;
 	}
 
-	public static NoteBlockInstrument byState(BlockState blockState) {
+	public boolean isMobHeadInstrument() {
+		return this.isMobHead;
+	}
+
+	public static Optional<NoteBlockInstrument> byStateAbove(BlockState blockState) {
+		if (blockState.is(Blocks.ZOMBIE_HEAD)) {
+			return Optional.of(ZOMBIE);
+		} else if (blockState.is(Blocks.SKELETON_SKULL)) {
+			return Optional.of(SKELETON);
+		} else if (blockState.is(Blocks.CREEPER_HEAD)) {
+			return Optional.of(CREEPER);
+		} else if (blockState.is(Blocks.DRAGON_HEAD)) {
+			return Optional.of(DRAGON);
+		} else if (blockState.is(Blocks.WITHER_SKELETON_SKULL)) {
+			return Optional.of(WITHER_SKELETON);
+		} else {
+			return blockState.is(Blocks.PIGLIN_HEAD) ? Optional.of(PIGLIN) : Optional.empty();
+		}
+	}
+
+	public static NoteBlockInstrument byStateBelow(BlockState blockState) {
 		if (blockState.is(Blocks.CLAY)) {
 			return FLUTE;
 		} else if (blockState.is(Blocks.GOLD_BLOCK)) {

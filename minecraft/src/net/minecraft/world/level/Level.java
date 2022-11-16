@@ -27,6 +27,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -645,11 +646,23 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Override
 	public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate) {
-		this.getProfiler().incrementCounter("getEntities");
 		List<T> list = Lists.<T>newArrayList();
+		this.getEntities(entityTypeTest, aABB, predicate, list);
+		return list;
+	}
+
+	public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate, List<? super T> list) {
+		this.getEntities(entityTypeTest, aABB, predicate, list, Integer.MAX_VALUE);
+	}
+
+	public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate, List<? super T> list, int i) {
+		this.getProfiler().incrementCounter("getEntities");
 		this.getEntities().get(entityTypeTest, aABB, entity -> {
 			if (predicate.test(entity)) {
 				list.add(entity);
+				if (list.size() >= i) {
+					return AbortableIterationConsumer.Continuation.ABORT;
+				}
 			}
 
 			if (entity instanceof EnderDragon enderDragon) {
@@ -657,11 +670,15 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 					T entity2 = entityTypeTest.tryCast(enderDragonPart);
 					if (entity2 != null && predicate.test(entity2)) {
 						list.add(entity2);
+						if (list.size() >= i) {
+							return AbortableIterationConsumer.Continuation.ABORT;
+						}
 					}
 				}
 			}
+
+			return AbortableIterationConsumer.Continuation.CONTINUE;
 		});
-		return list;
 	}
 
 	@Nullable

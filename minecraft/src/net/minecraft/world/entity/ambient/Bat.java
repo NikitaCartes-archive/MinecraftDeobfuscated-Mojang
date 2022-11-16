@@ -38,7 +38,9 @@ public class Bat extends AmbientCreature {
 
 	public Bat(EntityType<? extends Bat> entityType, Level level) {
 		super(entityType, level);
-		this.setResting(true);
+		if (!level.isClientSide) {
+			this.setResting(true);
+		}
 	}
 
 	@Override

@@ -17,6 +17,13 @@ import net.minecraft.Util;
 public final class UUIDUtil {
 	public static final Codec<UUID> CODEC = Codec.INT_STREAM
 		.comapFlatMap(intStream -> Util.fixedSize(intStream, 4).map(UUIDUtil::uuidFromIntArray), uUID -> Arrays.stream(uuidToIntArray(uUID)));
+	public static final Codec<UUID> STRING_CODEC = Codec.STRING.comapFlatMap(string -> {
+		try {
+			return DataResult.success(UUID.fromString(string), Lifecycle.stable());
+		} catch (IllegalArgumentException var2) {
+			return DataResult.error("Invalid UUID " + string + ": " + var2.getMessage());
+		}
+	}, UUID::toString);
 	public static Codec<UUID> AUTHLIB_CODEC = Codec.either(CODEC, Codec.STRING.comapFlatMap(string -> {
 		try {
 			return DataResult.success(UUIDTypeAdapter.fromString(string), Lifecycle.stable());

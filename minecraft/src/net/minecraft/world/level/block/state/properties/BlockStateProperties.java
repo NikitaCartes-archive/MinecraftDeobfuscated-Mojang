@@ -133,6 +133,11 @@ public class BlockStateProperties {
 	public static final DirectionProperty VERTICAL_DIRECTION = DirectionProperty.create("vertical_direction", Direction.UP, Direction.DOWN);
 	public static final EnumProperty<DripstoneThickness> DRIPSTONE_THICKNESS = EnumProperty.create("thickness", DripstoneThickness.class);
 	public static final EnumProperty<SculkSensorPhase> SCULK_SENSOR_PHASE = EnumProperty.create("sculk_sensor_phase", SculkSensorPhase.class);
-	public static final IntegerProperty BOOKS_STORED = IntegerProperty.create("books_stored", 0, 6);
-	public static final IntegerProperty LAST_INTERACTION_BOOK_SLOT = IntegerProperty.create("last_interaction_book_slot", 0, 6);
+	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_0_OCCUPIED = BooleanProperty.create("slot_0_occupied");
+	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_1_OCCUPIED = BooleanProperty.create("slot_1_occupied");
+	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_2_OCCUPIED = BooleanProperty.create("slot_2_occupied");
+	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_3_OCCUPIED = BooleanProperty.create("slot_3_occupied");
+	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_4_OCCUPIED = BooleanProperty.create("slot_4_occupied");
+	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_5_OCCUPIED = BooleanProperty.create("slot_5_occupied");
+	public static final IntegerProperty CHISELED_BOOKSHELF_LAST_INTERACTION_BOOK_SLOT = IntegerProperty.create("last_interaction_book_slot", 0, 6);
 }

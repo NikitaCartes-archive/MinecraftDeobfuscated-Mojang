@@ -11,6 +11,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DataResult.PartialResult;
 import it.unimi.dsi.fastutil.Hash.Strategy;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -783,6 +784,15 @@ public class Util {
 		}
 
 		return object2IntMap;
+	}
+
+	public static <T, E extends Exception> T getOrThrow(DataResult<T> dataResult, Function<String, E> function) throws E {
+		Optional<PartialResult<T>> optional = dataResult.error();
+		if (optional.isPresent()) {
+			throw (Exception)function.apply(((PartialResult)optional.get()).message());
+		} else {
+			return (T)dataResult.result().orElseThrow();
+		}
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {

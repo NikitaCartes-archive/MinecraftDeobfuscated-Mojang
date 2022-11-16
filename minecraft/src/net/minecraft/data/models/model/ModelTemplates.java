@@ -97,7 +97,20 @@ public class ModelTemplates {
 	public static final ModelTemplate STAINED_GLASS_PANE_SIDE = create("template_glass_pane_side", "_side", TextureSlot.PANE, TextureSlot.EDGE);
 	public static final ModelTemplate STAINED_GLASS_PANE_SIDE_ALT = create("template_glass_pane_side_alt", "_side_alt", TextureSlot.PANE, TextureSlot.EDGE);
 	public static final ModelTemplate COMMAND_BLOCK = create("template_command_block", TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.SIDE);
-	public static final ModelTemplate CHISELED_BOOKSHELF_BLOCK = create("template_chiseled_bookshelf", TextureSlot.FRONT, TextureSlot.SIDE, TextureSlot.TOP);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_LEFT = create("template_chiseled_bookshelf_slot_top_left", "_slot_top_left", TextureSlot.TEXTURE);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_MID = create("template_chiseled_bookshelf_slot_top_mid", "_slot_top_mid", TextureSlot.TEXTURE);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_RIGHT = create(
+		"template_chiseled_bookshelf_slot_top_right", "_slot_top_right", TextureSlot.TEXTURE
+	);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_BOTTOM_LEFT = create(
+		"template_chiseled_bookshelf_slot_bottom_left", "_slot_bottom_left", TextureSlot.TEXTURE
+	);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_BOTTOM_MID = create(
+		"template_chiseled_bookshelf_slot_bottom_mid", "_slot_bottom_mid", TextureSlot.TEXTURE
+	);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_BOTTOM_RIGHT = create(
+		"template_chiseled_bookshelf_slot_bottom_right", "_slot_bottom_right", TextureSlot.TEXTURE
+	);
 	public static final ModelTemplate ANVIL = create("template_anvil", TextureSlot.TOP);
 	public static final ModelTemplate[] STEMS = (ModelTemplate[])IntStream.range(0, 8)
 		.mapToObj(i -> create("stem_growth" + i, "_stage" + i, TextureSlot.STEM))

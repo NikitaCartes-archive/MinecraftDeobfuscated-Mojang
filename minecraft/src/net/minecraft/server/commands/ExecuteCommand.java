@@ -34,6 +34,7 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceOrTagArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -41,6 +42,7 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.SwizzleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
@@ -410,6 +412,21 @@ public class ExecuteCommand {
 									bl,
 									commandContext -> BlockPredicateArgument.getBlockPredicate(commandContext, "block")
 											.test(new BlockInWorld(commandContext.getSource().getLevel(), BlockPosArgument.getLoadedBlockPos(commandContext, "pos"), true))
+								)
+							)
+					)
+			)
+			.then(
+				Commands.literal("biome")
+					.then(
+						Commands.argument("pos", BlockPosArgument.blockPos())
+							.then(
+								addConditional(
+									commandNode,
+									Commands.argument("biome", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registries.BIOME)),
+									bl,
+									commandContext -> ResourceOrTagArgument.getResourceOrTag(commandContext, "biome", Registries.BIOME)
+											.test(commandContext.getSource().getLevel().getBiome(BlockPosArgument.getLoadedBlockPos(commandContext, "pos")))
 								)
 							)
 					)

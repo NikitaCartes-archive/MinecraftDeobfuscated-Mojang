@@ -70,6 +70,7 @@ import org.slf4j.Logger;
 public class ParticleEngine implements PreparableReloadListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final FileToIdConverter PARTICLE_LISTER = FileToIdConverter.json("particles");
+	private static final ResourceLocation PARTICLES_ATLAS_INFO = new ResourceLocation("particles");
 	private static final int MAX_PARTICLES_PER_LAYER = 16384;
 	private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(
 		ParticleRenderType.TERRAIN_SHEET,
@@ -233,10 +234,8 @@ public class ParticleEngine implements PreparableReloadListener {
 					return Util.sequence(list);
 				}
 			);
-		CompletableFuture<SpriteLoader.Preparations> completableFuture2 = CompletableFuture.supplyAsync(
-				() -> SpriteLoader.listSprites(resourceManager, "particle"), executor
-			)
-			.thenCompose(map -> SpriteLoader.create(this.textureAtlas).stitch(map, 0, executor))
+		CompletableFuture<SpriteLoader.Preparations> completableFuture2 = SpriteLoader.create(this.textureAtlas)
+			.loadAndStitch(resourceManager, PARTICLES_ATLAS_INFO, 0, executor)
 			.thenCompose(SpriteLoader.Preparations::waitForUpload);
 		return CompletableFuture.allOf(completableFuture2, completableFuture).thenCompose(preparationBarrier::wait).thenAcceptAsync(void_ -> {
 			this.particles.clear();
@@ -305,7 +304,7 @@ public class ParticleEngine implements PreparableReloadListener {
 						throw new IllegalStateException("Redundant texture list for particle " + resourceLocation);
 					}
 
-					var11 = Optional.of((List)list.stream().map(resourceLocationx -> resourceLocationx.withPrefix("particle/")).collect(Collectors.toList()));
+					var11 = Optional.of(list);
 				} catch (Throwable var9) {
 					if (reader != null) {
 						try {

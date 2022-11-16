@@ -116,7 +116,9 @@ public class BlockEntityType<T extends BlockEntity> {
 			Blocks.WITHER_SKELETON_SKULL,
 			Blocks.WITHER_SKELETON_WALL_SKULL,
 			Blocks.PLAYER_HEAD,
-			Blocks.PLAYER_WALL_HEAD
+			Blocks.PLAYER_WALL_HEAD,
+			Blocks.PIGLIN_HEAD,
+			Blocks.PIGLIN_WALL_HEAD
 		)
 	);
 	public static final BlockEntityType<DaylightDetectorBlockEntity> DAYLIGHT_DETECTOR = register(

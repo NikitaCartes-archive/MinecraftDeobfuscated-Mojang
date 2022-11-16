@@ -67,6 +67,7 @@ import net.minecraft.server.players.SleepStatus;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
@@ -457,7 +458,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					if (blockState.is(Blocks.SNOW)) {
 						int m = (Integer)blockState.getValue(SnowLayerBlock.LAYERS);
 						if (m < Math.min(l, 8)) {
-							this.setBlockAndUpdate(blockPos, blockState.setValue(SnowLayerBlock.LAYERS, Integer.valueOf(m + 1)));
+							BlockState blockState2 = blockState.setValue(SnowLayerBlock.LAYERS, Integer.valueOf(m + 1));
+							Block.pushEntitiesUp(blockState, blockState2, this, blockPos);
+							this.setBlockAndUpdate(blockPos, blockState2);
 						}
 					} else {
 						this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
@@ -483,12 +486,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					for (int m = 0; m < i; m++) {
 						BlockPos blockPos3 = this.getBlockRandomPos(j, n, k, 15);
 						profilerFiller.push("randomTick");
-						BlockState blockState2 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
-						if (blockState2.isRandomlyTicking()) {
-							blockState2.randomTick(this, blockPos3, this.random);
+						BlockState blockState3 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
+						if (blockState3.isRandomlyTicking()) {
+							blockState3.randomTick(this, blockPos3, this.random);
 						}
 
-						FluidState fluidState = blockState2.getFluidState();
+						FluidState fluidState = blockState3.getFluidState();
 						if (fluidState.isRandomlyTicking()) {
 							fluidState.randomTick(this, blockPos3, this.random);
 						}
@@ -749,12 +752,25 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public <T extends Entity> List<? extends T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, Predicate<? super T> predicate) {
 		List<T> list = Lists.<T>newArrayList();
+		this.getEntities(entityTypeTest, predicate, list);
+		return list;
+	}
+
+	public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, Predicate<? super T> predicate, List<? super T> list) {
+		this.getEntities(entityTypeTest, predicate, list, Integer.MAX_VALUE);
+	}
+
+	public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, Predicate<? super T> predicate, List<? super T> list, int i) {
 		this.getEntities().get(entityTypeTest, entity -> {
 			if (predicate.test(entity)) {
 				list.add(entity);
+				if (list.size() >= i) {
+					return AbortableIterationConsumer.Continuation.ABORT;
+				}
 			}
+
+			return AbortableIterationConsumer.Continuation.CONTINUE;
 		});
-		return list;
 	}
 
 	public List<? extends EnderDragon> getDragons() {
@@ -762,11 +778,18 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public List<ServerPlayer> getPlayers(Predicate<? super ServerPlayer> predicate) {
+		return this.getPlayers(predicate, Integer.MAX_VALUE);
+	}
+
+	public List<ServerPlayer> getPlayers(Predicate<? super ServerPlayer> predicate, int i) {
 		List<ServerPlayer> list = Lists.<ServerPlayer>newArrayList();
 
 		for (ServerPlayer serverPlayer : this.players) {
 			if (predicate.test(serverPlayer)) {
 				list.add(serverPlayer);
+				if (list.size() >= i) {
+					return list;
+				}
 			}
 		}
 

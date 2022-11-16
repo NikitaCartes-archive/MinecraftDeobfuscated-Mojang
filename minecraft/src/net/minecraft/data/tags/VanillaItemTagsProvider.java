@@ -17,7 +17,6 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 	protected void addTags(HolderLookup.Provider provider) {
 		this.copy(BlockTags.WOOL, ItemTags.WOOL);
 		this.copy(BlockTags.PLANKS, ItemTags.PLANKS);
-		this.copy(BlockTags.STRIPPED_LOGS, ItemTags.STRIPPED_LOGS);
 		this.copy(BlockTags.STONE_BRICKS, ItemTags.STONE_BRICKS);
 		this.copy(BlockTags.WOODEN_BUTTONS, ItemTags.WOODEN_BUTTONS);
 		this.copy(BlockTags.BUTTONS, ItemTags.BUTTONS);

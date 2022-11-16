@@ -41,7 +41,6 @@ public class SelectWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.searchBox = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, this.searchBox, Component.translatable("selectWorld.search"));
 		this.searchBox.setResponder(string -> this.list.updateFilter(string));
 		this.list = new WorldSelectionList(this, this.minecraft, this.width, this.height, 48, this.height - 64, 36, this.searchBox.getValue(), this.list);

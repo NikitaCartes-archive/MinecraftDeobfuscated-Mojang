@@ -1746,6 +1746,14 @@ public class Blocks {
 	public static final Block DRAGON_WALL_HEAD = register(
 		"dragon_wall_head", new WallSkullBlock(SkullBlock.Types.DRAGON, BlockBehaviour.Properties.of(Material.DECORATION).strength(1.0F).dropsLike(DRAGON_HEAD))
 	);
+	public static final Block PIGLIN_HEAD = register(
+		"piglin_head",
+		new SkullBlock(SkullBlock.Types.PIGLIN, BlockBehaviour.Properties.of(Material.DECORATION).strength(1.0F).requiredFeatures(FeatureFlags.UPDATE_1_20))
+	);
+	public static final Block PIGLIN_WALL_HEAD = register(
+		"piglin_wall_head",
+		new PiglinWallSkullBlock(BlockBehaviour.Properties.of(Material.DECORATION).strength(1.0F).dropsLike(PIGLIN_HEAD).requiredFeatures(FeatureFlags.UPDATE_1_20))
+	);
 	public static final Block ANVIL = register(
 		"anvil",
 		new AnvilBlock(
@@ -3148,7 +3156,7 @@ public class Blocks {
 	);
 	public static final Block BAMBOO = register(
 		"bamboo",
-		new BambooBlock(
+		new BambooStalkBlock(
 			BlockBehaviour.Properties.of(Material.BAMBOO, MaterialColor.PLANT)
 				.randomTicks()
 				.instabreak()

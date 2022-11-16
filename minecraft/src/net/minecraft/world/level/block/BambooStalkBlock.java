@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class BambooBlock extends Block implements BonemealableBlock {
+public class BambooStalkBlock extends Block implements BonemealableBlock {
 	protected static final float SMALL_LEAVES_AABB_OFFSET = 3.0F;
 	protected static final float LARGE_LEAVES_AABB_OFFSET = 5.0F;
 	protected static final float COLLISION_AABB_OFFSET = 1.5F;
@@ -42,7 +42,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	public static final int AGE_THIN_BAMBOO = 0;
 	public static final int AGE_THICK_BAMBOO = 1;
 
-	public BambooBlock(BlockBehaviour.Properties properties) {
+	public BambooStalkBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)).setValue(LEAVES, BambooLeaves.NONE).setValue(STAGE, Integer.valueOf(0))

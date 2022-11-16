@@ -52,7 +52,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.pendingInvitationSelectionList = new RealmsPendingInvitesScreen.PendingInvitationSelectionList();
 		(new Thread("Realms-pending-invitations-fetcher") {
 				public void run() {

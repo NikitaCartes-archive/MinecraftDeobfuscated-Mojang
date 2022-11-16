@@ -66,7 +66,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		this.column1X = this.width / 2 - 160;
 		this.columnWidth = 150;
 		this.column2X = this.width / 2 + 12;
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.invitedObjectSelectionList = new RealmsPlayerScreen.InvitedObjectSelectionList();
 		this.invitedObjectSelectionList.setLeftPos(this.column1X);
 		this.addWidget(this.invitedObjectSelectionList);
@@ -110,11 +109,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	private boolean shouldRemoveAndOpdeopButtonBeVisible(int i) {
 		return i != -1;
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override

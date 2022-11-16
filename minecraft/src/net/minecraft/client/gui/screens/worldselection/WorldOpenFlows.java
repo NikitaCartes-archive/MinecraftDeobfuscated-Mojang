@@ -81,7 +81,7 @@ public class WorldOpenFlows {
 					},
 					WorldStem::new
 				);
-				this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
+				this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem, true);
 			} catch (Exception var10) {
 				LOGGER.warn("Failed to load datapacks, can't proceed with server load", (Throwable)var10);
 				safeCloseAccess(levelStorageAccess, string);
@@ -116,7 +116,8 @@ public class WorldOpenFlows {
 				levelStorageAccess.getLevelId(),
 				levelStorageAccess,
 				packRepository,
-				new WorldStem(closeableResourceManager, reloadableServerResources, layeredRegistryAccess, worldData)
+				new WorldStem(closeableResourceManager, reloadableServerResources, layeredRegistryAccess, worldData),
+				true
 			);
 	}
 
@@ -223,7 +224,7 @@ public class WorldOpenFlows {
 					return this.promptBundledPackLoadFailure();
 				}, this.minecraft).thenAcceptAsync(boolean_ -> {
 					if (boolean_) {
-						this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
+						this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem, false);
 					} else {
 						worldStem.close();
 						safeCloseAccess(levelStorageAccess, string);

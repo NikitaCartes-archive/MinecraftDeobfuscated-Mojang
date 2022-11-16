@@ -404,7 +404,7 @@ public class DataFixers {
 			)
 		);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema43, "RemoveNoteBlockFlowerPotFix", References.BLOCK_ENTITY));
-		dataFixerBuilder.addFixer(new ItemStackSpawnEggFix(schema43, false));
+		dataFixerBuilder.addFixer(new ItemStackSpawnEggFix(schema43, false, "minecraft:spawn_egg"));
 		dataFixerBuilder.addFixer(new EntityWolfColorFix(schema43, false));
 		dataFixerBuilder.addFixer(new BlockEntityBannerColorFix(schema43, false));
 		dataFixerBuilder.addFixer(new LevelFlatGeneratorInfoFix(schema43, false));
@@ -1031,6 +1031,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema173, "Added Camel", References.ENTITY));
 		Schema schema174 = dataFixerBuilder.addSchema(3204, V3204::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema174, "Added Chiseled Bookshelf", References.BLOCK_ENTITY));
+		Schema schema175 = dataFixerBuilder.addSchema(3209, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new ItemStackSpawnEggFix(schema175, false, "minecraft:pig_spawn_egg"));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

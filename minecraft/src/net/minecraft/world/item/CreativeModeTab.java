@@ -3,6 +3,7 @@ package net.minecraft.world.item;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -21,8 +22,8 @@ public class CreativeModeTab {
 	private final CreativeModeTab.Type type;
 	@Nullable
 	private ItemStack iconItemStack;
-	private ItemStackLinkedSet displayItems = new ItemStackLinkedSet();
-	private ItemStackLinkedSet displayItemsSearchTab = new ItemStackLinkedSet();
+	private Collection<ItemStack> displayItems = ItemStackLinkedSet.createTypeAndTagSet();
+	private Set<ItemStack> displayItemsSearchTab = ItemStackLinkedSet.createTypeAndTagSet();
 	@Nullable
 	private Consumer<List<ItemStack>> searchTreeBuilder;
 	private final Supplier<ItemStack> iconGenerator;
@@ -99,16 +100,16 @@ public class CreativeModeTab {
 	public void buildContents(FeatureFlagSet featureFlagSet, boolean bl) {
 		CreativeModeTab.ItemDisplayBuilder itemDisplayBuilder = new CreativeModeTab.ItemDisplayBuilder(this, featureFlagSet);
 		this.displayItemsGenerator.accept(featureFlagSet, itemDisplayBuilder, bl);
-		this.displayItems = itemDisplayBuilder.getTabContents();
-		this.displayItemsSearchTab = itemDisplayBuilder.getSearchTabContents();
+		this.displayItems = itemDisplayBuilder.tabContents;
+		this.displayItemsSearchTab = itemDisplayBuilder.searchTabContents;
 		this.rebuildSearchTree();
 	}
 
-	public ItemStackLinkedSet getDisplayItems() {
+	public Collection<ItemStack> getDisplayItems() {
 		return this.displayItems;
 	}
 
-	public ItemStackLinkedSet getSearchTabDisplayItems() {
+	public Collection<ItemStack> getSearchTabDisplayItems() {
 		return this.displayItemsSearchTab;
 	}
 
@@ -204,8 +205,8 @@ public class CreativeModeTab {
 	}
 
 	static class ItemDisplayBuilder implements CreativeModeTab.Output {
-		private final ItemStackLinkedSet tabContents = new ItemStackLinkedSet();
-		private final ItemStackLinkedSet searchTabContents = new ItemStackLinkedSet();
+		public final Collection<ItemStack> tabContents = ItemStackLinkedSet.createTypeAndTagSet();
+		public final Set<ItemStack> searchTabContents = ItemStackLinkedSet.createTypeAndTagSet();
 		private final CreativeModeTab tab;
 		private final FeatureFlagSet featureFlagSet;
 
@@ -216,37 +217,33 @@ public class CreativeModeTab {
 
 		@Override
 		public void accept(ItemStack itemStack, CreativeModeTab.TabVisibility tabVisibility) {
-			boolean bl = this.tabContents.contains(itemStack) && tabVisibility != CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY;
-			if (bl) {
-				throw new IllegalStateException(
-					"Accidentally adding the same item stack twice "
-						+ itemStack.getDisplayName().getString()
-						+ " to a Creative Mode Tab: "
-						+ this.tab.getDisplayName().getString()
-				);
+			if (itemStack.getCount() != 1) {
+				throw new IllegalArgumentException("Stack size must be exactly 1");
 			} else {
-				if (itemStack.getItem().isEnabled(this.featureFlagSet)) {
-					switch (tabVisibility) {
-						case PARENT_AND_SEARCH_TABS:
-							this.tabContents.add(itemStack);
-							this.searchTabContents.add(itemStack);
-							break;
-						case PARENT_TAB_ONLY:
-							this.tabContents.add(itemStack);
-							break;
-						case SEARCH_TAB_ONLY:
-							this.searchTabContents.add(itemStack);
+				boolean bl = this.tabContents.contains(itemStack) && tabVisibility != CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY;
+				if (bl) {
+					throw new IllegalStateException(
+						"Accidentally adding the same item stack twice "
+							+ itemStack.getDisplayName().getString()
+							+ " to a Creative Mode Tab: "
+							+ this.tab.getDisplayName().getString()
+					);
+				} else {
+					if (itemStack.getItem().isEnabled(this.featureFlagSet)) {
+						switch (tabVisibility) {
+							case PARENT_AND_SEARCH_TABS:
+								this.tabContents.add(itemStack);
+								this.searchTabContents.add(itemStack);
+								break;
+							case PARENT_TAB_ONLY:
+								this.tabContents.add(itemStack);
+								break;
+							case SEARCH_TAB_ONLY:
+								this.searchTabContents.add(itemStack);
+						}
 					}
 				}
 			}
-		}
-
-		public ItemStackLinkedSet getTabContents() {
-			return this.tabContents;
-		}
-
-		public ItemStackLinkedSet getSearchTabContents() {
-			return this.searchTabContents;
 		}
 	}
 

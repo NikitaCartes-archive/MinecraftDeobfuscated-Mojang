@@ -46,18 +46,6 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WARPED_PLANKS,
 				Blocks.MANGROVE_PLANKS
 			);
-		this.tag(BlockTags.STRIPPED_LOGS)
-			.add(
-				Blocks.STRIPPED_OAK_LOG,
-				Blocks.STRIPPED_SPRUCE_LOG,
-				Blocks.STRIPPED_BIRCH_LOG,
-				Blocks.STRIPPED_JUNGLE_LOG,
-				Blocks.STRIPPED_ACACIA_LOG,
-				Blocks.STRIPPED_DARK_OAK_LOG,
-				Blocks.STRIPPED_CRIMSON_STEM,
-				Blocks.STRIPPED_WARPED_STEM,
-				Blocks.STRIPPED_MANGROVE_LOG
-			);
 		this.tag(BlockTags.STONE_BRICKS).add(Blocks.STONE_BRICKS, Blocks.MOSSY_STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS, Blocks.CHISELED_STONE_BRICKS);
 		this.tag(BlockTags.WOODEN_BUTTONS)
 			.add(
@@ -521,6 +509,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.MANGROVE_WALL_SIGN
 			);
 		this.tag(BlockTags.SIGNS).addTag(BlockTags.STANDING_SIGNS).addTag(BlockTags.WALL_SIGNS);
+		this.tag(BlockTags.ALL_SIGNS).addTag(BlockTags.SIGNS);
 		this.tag(BlockTags.BEDS)
 			.add(
 				Blocks.RED_BED,

@@ -122,30 +122,32 @@ public class PauseScreen extends Screen {
 		k++;
 		Component component = this.minecraft.isLocalServer() ? Component.translatable("menu.returnToMenu") : Component.translatable("menu.disconnect");
 		this.disconnectButton = gridWidget.addChild(Button.builder(component, buttonx -> {
-			if (this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, true)) {
-				boolean bl = this.minecraft.isLocalServer();
-				boolean bl2 = this.minecraft.isConnectedToRealms();
-				buttonx.active = false;
-				this.minecraft.level.disconnect();
-				if (bl) {
-					this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
-				} else {
-					this.minecraft.clearLevel();
-				}
-
-				TitleScreen titleScreen = new TitleScreen();
-				if (bl) {
-					this.minecraft.setScreen(titleScreen);
-				} else if (bl2) {
-					this.minecraft.setScreen(new RealmsMainScreen(titleScreen));
-				} else {
-					this.minecraft.setScreen(new JoinMultiplayerScreen(titleScreen));
-				}
-			}
+			buttonx.active = false;
+			this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::onDisconnect, true);
 		}).width(204).build(), k, 0, 1, 2);
 		gridWidget.pack();
 		FrameWidget.centerInRectangle(gridWidget, 0, 0, this.width, this.height);
 		this.addRenderableWidget(gridWidget);
+	}
+
+	private void onDisconnect() {
+		boolean bl = this.minecraft.isLocalServer();
+		boolean bl2 = this.minecraft.isConnectedToRealms();
+		this.minecraft.level.disconnect();
+		if (bl) {
+			this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+		} else {
+			this.minecraft.clearLevel();
+		}
+
+		TitleScreen titleScreen = new TitleScreen();
+		if (bl) {
+			this.minecraft.setScreen(titleScreen);
+		} else if (bl2) {
+			this.minecraft.setScreen(new RealmsMainScreen(titleScreen));
+		} else {
+			this.minecraft.setScreen(new JoinMultiplayerScreen(titleScreen));
+		}
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package net.minecraft.world.level.entity;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.world.phys.AABB;
 
 public class LevelEntityGetterAdapter<T extends EntityAccess> implements LevelEntityGetter<T> {
@@ -32,17 +33,17 @@ public class LevelEntityGetterAdapter<T extends EntityAccess> implements LevelEn
 	}
 
 	@Override
-	public <U extends T> void get(EntityTypeTest<T, U> entityTypeTest, Consumer<U> consumer) {
-		this.visibleEntities.getEntities(entityTypeTest, consumer);
+	public <U extends T> void get(EntityTypeTest<T, U> entityTypeTest, AbortableIterationConsumer<U> abortableIterationConsumer) {
+		this.visibleEntities.getEntities(entityTypeTest, abortableIterationConsumer);
 	}
 
 	@Override
 	public void get(AABB aABB, Consumer<T> consumer) {
-		this.sectionStorage.getEntities(aABB, consumer);
+		this.sectionStorage.getEntities(aABB, AbortableIterationConsumer.forConsumer(consumer));
 	}
 
 	@Override
-	public <U extends T> void get(EntityTypeTest<T, U> entityTypeTest, AABB aABB, Consumer<U> consumer) {
-		this.sectionStorage.getEntities(entityTypeTest, aABB, consumer);
+	public <U extends T> void get(EntityTypeTest<T, U> entityTypeTest, AABB aABB, AbortableIterationConsumer<U> abortableIterationConsumer) {
+		this.sectionStorage.getEntities(entityTypeTest, aABB, abortableIterationConsumer);
 	}
 }

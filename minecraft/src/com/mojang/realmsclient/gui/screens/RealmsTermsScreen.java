@@ -41,7 +41,6 @@ public class RealmsTermsScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = this.width / 4 - 2;
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("mco.terms.buttons.agree"), button -> this.agreedToTos()).bounds(this.width / 4, row(12), i, 20).build()
@@ -51,11 +50,6 @@ public class RealmsTermsScreen extends RealmsScreen {
 				.bounds(this.width / 2 + 4, row(12), i, 20)
 				.build()
 		);
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override

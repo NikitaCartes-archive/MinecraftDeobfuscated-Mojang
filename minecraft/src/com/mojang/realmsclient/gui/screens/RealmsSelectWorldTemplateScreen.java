@@ -99,7 +99,6 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.worldTemplateObjectSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList(
 			this.worldTemplateObjectSelectionList.getTemplates()
 		);

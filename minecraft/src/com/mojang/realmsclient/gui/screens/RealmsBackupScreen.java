@@ -61,7 +61,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.backupObjectSelectionList = new RealmsBackupScreen.BackupObjectSelectionList();
 		if (lastScrollPosition != -1) {
 			this.backupObjectSelectionList.setScrollAmount((double)lastScrollPosition);

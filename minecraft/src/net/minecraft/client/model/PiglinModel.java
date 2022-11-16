@@ -34,6 +34,13 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 		partDefinition.addOrReplaceChild(
 			"body", CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, cubeDeformation), PartPose.ZERO
 		);
+		addHead(cubeDeformation, meshDefinition);
+		partDefinition.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+		return meshDefinition;
+	}
+
+	public static void addHead(CubeDeformation cubeDeformation, MeshDefinition meshDefinition) {
+		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
 			"head",
 			CubeListBuilder.create()
@@ -57,8 +64,6 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 			CubeListBuilder.create().texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, cubeDeformation),
 			PartPose.offsetAndRotation(-4.5F, -6.0F, 0.0F, 0.0F, 0.0F, (float) (Math.PI / 6))
 		);
-		partDefinition.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
-		return meshDefinition;
 	}
 
 	public void setupAnim(T mob, float f, float g, float h, float i, float j) {

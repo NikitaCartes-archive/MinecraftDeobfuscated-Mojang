@@ -36,6 +36,9 @@ import org.slf4j.Logger;
 public final class OptionInstance<T> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final OptionInstance.Enum<Boolean> BOOLEAN_VALUES = new OptionInstance.Enum<>(ImmutableList.of(Boolean.TRUE, Boolean.FALSE), Codec.BOOL);
+	public static final OptionInstance.CaptionBasedToString<Boolean> BOOLEAN_TO_STRING = (component, boolean_) -> boolean_
+			? CommonComponents.OPTION_ON
+			: CommonComponents.OPTION_OFF;
 	private final OptionInstance.TooltipSupplier<T> tooltip;
 	final Function<T, Component> toString;
 	private final OptionInstance.ValueSet<T> values;
@@ -62,9 +65,17 @@ public final class OptionInstance<T> {
 	public static OptionInstance<Boolean> createBoolean(
 		String string, OptionInstance.TooltipSupplier<Boolean> tooltipSupplier, boolean bl, Consumer<Boolean> consumer
 	) {
-		return new OptionInstance<>(
-			string, tooltipSupplier, (component, boolean_) -> boolean_ ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF, BOOLEAN_VALUES, bl, consumer
-		);
+		return createBoolean(string, tooltipSupplier, BOOLEAN_TO_STRING, bl, consumer);
+	}
+
+	public static OptionInstance<Boolean> createBoolean(
+		String string,
+		OptionInstance.TooltipSupplier<Boolean> tooltipSupplier,
+		OptionInstance.CaptionBasedToString<Boolean> captionBasedToString,
+		boolean bl,
+		Consumer<Boolean> consumer
+	) {
+		return new OptionInstance<>(string, tooltipSupplier, captionBasedToString, BOOLEAN_VALUES, bl, consumer);
 	}
 
 	public OptionInstance(
@@ -110,7 +121,12 @@ public final class OptionInstance<T> {
 	}
 
 	public AbstractWidget createButton(Options options, int i, int j, int k) {
-		return (AbstractWidget)this.values.createButton(this.tooltip, options, i, j, k).apply(this);
+		return this.createButton(options, i, j, k, object -> {
+		});
+	}
+
+	public AbstractWidget createButton(Options options, int i, int j, int k, Consumer<T> consumer) {
+		return (AbstractWidget)this.values.createButton(this.tooltip, options, i, j, k, consumer).apply(this);
 	}
 
 	public T get() {
@@ -208,7 +224,9 @@ public final class OptionInstance<T> {
 		}
 
 		@Override
-		default Function<OptionInstance<T>, AbstractWidget> createButton(OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+		default Function<OptionInstance<T>, AbstractWidget> createButton(
+			OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer
+		) {
 			return optionInstance -> CycleButton.<T>builder(optionInstance.toString)
 					.withValues(this.valueListSupplier())
 					.withTooltip(tooltipSupplier)
@@ -216,6 +234,7 @@ public final class OptionInstance<T> {
 					.create(i, j, k, 20, optionInstance.caption, (cycleButton, object) -> {
 						this.valueSetter().set(optionInstance, object);
 						options.save();
+						consumer.accept(object);
 					});
 		}
 
@@ -308,6 +327,7 @@ public final class OptionInstance<T> {
 		private final OptionInstance<N> instance;
 		private final OptionInstance.SliderableValueSet<N> values;
 		private final OptionInstance.TooltipSupplier<N> tooltipSupplier;
+		private final Consumer<N> onValueChanged;
 
 		OptionInstanceSliderButton(
 			Options options,
@@ -317,12 +337,14 @@ public final class OptionInstance<T> {
 			int l,
 			OptionInstance<N> optionInstance,
 			OptionInstance.SliderableValueSet<N> sliderableValueSet,
-			OptionInstance.TooltipSupplier<N> tooltipSupplier
+			OptionInstance.TooltipSupplier<N> tooltipSupplier,
+			Consumer<N> consumer
 		) {
 			super(options, i, j, k, l, sliderableValueSet.toSliderValue(optionInstance.get()));
 			this.instance = optionInstance;
 			this.values = sliderableValueSet;
 			this.tooltipSupplier = tooltipSupplier;
+			this.onValueChanged = consumer;
 			this.updateMessage();
 		}
 
@@ -336,6 +358,7 @@ public final class OptionInstance<T> {
 		protected void applyValue() {
 			this.instance.set(this.values.fromSliderValue(this.value));
 			this.options.save();
+			this.onValueChanged.accept(this.instance.get());
 		}
 	}
 
@@ -344,10 +367,12 @@ public final class OptionInstance<T> {
 		boolean createCycleButton();
 
 		@Override
-		default Function<OptionInstance<T>, AbstractWidget> createButton(OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+		default Function<OptionInstance<T>, AbstractWidget> createButton(
+			OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer
+		) {
 			return this.createCycleButton()
-				? OptionInstance.CycleableValueSet.super.createButton(tooltipSupplier, options, i, j, k)
-				: OptionInstance.SliderableValueSet.super.createButton(tooltipSupplier, options, i, j, k);
+				? OptionInstance.CycleableValueSet.super.createButton(tooltipSupplier, options, i, j, k, consumer)
+				: OptionInstance.SliderableValueSet.super.createButton(tooltipSupplier, options, i, j, k, consumer);
 		}
 	}
 
@@ -358,8 +383,10 @@ public final class OptionInstance<T> {
 		T fromSliderValue(double d);
 
 		@Override
-		default Function<OptionInstance<T>, AbstractWidget> createButton(OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
-			return optionInstance -> new OptionInstance.OptionInstanceSliderButton<>(options, i, j, k, 20, optionInstance, this, tooltipSupplier);
+		default Function<OptionInstance<T>, AbstractWidget> createButton(
+			OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer
+		) {
+			return optionInstance -> new OptionInstance.OptionInstanceSliderButton<>(options, i, j, k, 20, optionInstance, this, tooltipSupplier, consumer);
 		}
 	}
 
@@ -418,7 +445,9 @@ public final class OptionInstance<T> {
 
 	@Environment(EnvType.CLIENT)
 	interface ValueSet<T> {
-		Function<OptionInstance<T>, AbstractWidget> createButton(OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k);
+		Function<OptionInstance<T>, AbstractWidget> createButton(
+			OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer
+		);
 
 		Optional<T> validateValue(T object);
 

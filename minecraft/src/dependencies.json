@@ -3,9 +3,9 @@
 		"name": "Java 17"
 	},
 	{
-		"sha1sum": "88c5e6091e52fd76e2ee73420957a4cc74deab8d",
-		"name": "authlib-3.13.56.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.13.56/authlib-3.13.56.jar"
+		"sha1sum": "a562f3bbe97501089e3fbe3b43d95ff69c60c723",
+		"name": "authlib-3.15.28.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/3.15.28/authlib-3.15.28.jar"
 	},
 	{
 		"sha1sum": "5c685c5ffa94c4cd39496c7184c1d122e515ecef",
@@ -58,9 +58,9 @@
 		"url": "https://libraries.minecraft.net/it/unimi/dsi/fastutil/8.5.9/fastutil-8.5.9.jar"
 	},
 	{
-		"sha1sum": "02cc2131b98ebfb04e2b2c7dfb84431f4045096b",
-		"name": "gson-2.9.1.jar",
-		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar"
+		"sha1sum": "dd9b193aef96e973d5a11ab13cd17430c2e4306b",
+		"name": "gson-2.10.jar",
+		"url": "https://libraries.minecraft.net/com/google/code/gson/gson/2.10/gson-2.10.jar"
 	},
 	{
 		"sha1sum": "60458f877d055d0c9114d9e1a2efb737b4bc282c",

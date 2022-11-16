@@ -54,6 +54,7 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 				Blocks.BAMBOO_WALL_HANGING_SIGN
 			);
 		this.tag(BlockTags.ALL_HANGING_SIGNS).addTag(BlockTags.CEILING_HANGING_SIGNS).addTag(BlockTags.WALL_HANGING_SIGNS);
+		this.tag(BlockTags.ALL_SIGNS).addTag(BlockTags.ALL_HANGING_SIGNS);
 		this.tag(BlockTags.MINEABLE_WITH_AXE)
 			.addTag(BlockTags.ALL_HANGING_SIGNS)
 			.add(Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS)

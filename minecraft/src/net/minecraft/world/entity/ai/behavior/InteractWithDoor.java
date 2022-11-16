@@ -42,45 +42,38 @@ public class InteractWithDoor {
 							Path path = instance.get(memoryAccessor);
 							Optional<Set<GlobalPos>> optional = instance.tryGet(memoryAccessor2);
 							if (!path.notStarted() && !path.isDone()) {
-								if (!Objects.equals(mutableObject.getValue(), path.getNextNode())) {
+								if (Objects.equals(mutableObject.getValue(), path.getNextNode())) {
 									mutableInt.setValue(20);
-									return true;
-								} else {
-									if (mutableInt.getValue() > 0) {
-										mutableInt.decrement();
+								} else if (mutableInt.decrementAndGet() > 0) {
+									return false;
+								}
+
+								mutableObject.setValue(path.getNextNode());
+								Node node = path.getPreviousNode();
+								Node node2 = path.getNextNode();
+								BlockPos blockPos = node.asBlockPos();
+								BlockState blockState = serverLevel.getBlockState(blockPos);
+								if (blockState.is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock)) {
+									DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
+									if (!doorBlock.isOpen(blockState)) {
+										doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, true);
 									}
 
-									if (mutableInt.getValue() == 0) {
-										return true;
-									} else {
-										mutableObject.setValue(path.getNextNode());
-										Node node = path.getPreviousNode();
-										Node node2 = path.getNextNode();
-										BlockPos blockPos = node.asBlockPos();
-										BlockState blockState = serverLevel.getBlockState(blockPos);
-										if (blockState.is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock)) {
-											DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
-											if (!doorBlock.isOpen(blockState)) {
-												doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, true);
-											}
+									optional = rememberDoorToClose(memoryAccessor2, optional, serverLevel, blockPos);
+								}
 
-											rememberDoorToClose(memoryAccessor2, optional, serverLevel, livingEntity, blockPos);
-										}
-
-										BlockPos blockPos2 = node2.asBlockPos();
-										BlockState blockState2 = serverLevel.getBlockState(blockPos2);
-										if (blockState2.is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock)) {
-											DoorBlock doorBlock2 = (DoorBlock)blockState2.getBlock();
-											if (!doorBlock2.isOpen(blockState2)) {
-												doorBlock2.setOpen(livingEntity, serverLevel, blockState2, blockPos2, true);
-												rememberDoorToClose(memoryAccessor2, optional, serverLevel, livingEntity, blockPos2);
-											}
-										}
-
-										optional.ifPresent(set -> closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, node, node2, set, instance.tryGet(memoryAccessor3)));
-										return false;
+								BlockPos blockPos2 = node2.asBlockPos();
+								BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+								if (blockState2.is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock)) {
+									DoorBlock doorBlock2 = (DoorBlock)blockState2.getBlock();
+									if (!doorBlock2.isOpen(blockState2)) {
+										doorBlock2.setOpen(livingEntity, serverLevel, blockState2, blockPos2, true);
+										optional = rememberDoorToClose(memoryAccessor2, optional, serverLevel, blockPos2);
 									}
 								}
+
+								optional.ifPresent(set -> closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, node, node2, set, instance.tryGet(memoryAccessor3)));
+								return true;
 							} else {
 								return false;
 							}
@@ -152,10 +145,17 @@ public class InteractWithDoor {
 		return globalPos.dimension() != serverLevel.dimension() || !globalPos.pos().closerToCenterThan(livingEntity.position(), 2.0);
 	}
 
-	private static void rememberDoorToClose(
-		MemoryAccessor<Mu, Set<GlobalPos>> memoryAccessor, Optional<Set<GlobalPos>> optional, ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos
+	private static Optional<Set<GlobalPos>> rememberDoorToClose(
+		MemoryAccessor<Mu, Set<GlobalPos>> memoryAccessor, Optional<Set<GlobalPos>> optional, ServerLevel serverLevel, BlockPos blockPos
 	) {
 		GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), blockPos);
-		optional.ifPresentOrElse(set -> set.add(globalPos), () -> memoryAccessor.set(Sets.<GlobalPos>newHashSet(globalPos)));
+		return Optional.of((Set)optional.map(set -> {
+			set.add(globalPos);
+			return set;
+		}).orElseGet(() -> {
+			Set<GlobalPos> set = Sets.<GlobalPos>newHashSet(globalPos);
+			memoryAccessor.set(set);
+			return set;
+		}));
 	}
 }

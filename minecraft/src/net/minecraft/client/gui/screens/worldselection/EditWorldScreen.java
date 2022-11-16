@@ -64,7 +64,6 @@ public class EditWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		Button button = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.edit.resetIcon"), buttonx -> {
 			this.levelAccess.getIconFile().ifPresent(path -> FileUtils.deleteQuietly(path.toFile()));
 			buttonx.active = false;
@@ -185,11 +184,6 @@ public class EditWorldScreen extends Screen {
 	@Override
 	public void onClose() {
 		this.callback.accept(false);
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	private void onRename() {

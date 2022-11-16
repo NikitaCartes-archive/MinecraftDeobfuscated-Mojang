@@ -268,7 +268,7 @@ public abstract class RecipeProvider implements DataProvider {
 			.pattern("X X")
 			.pattern("###")
 			.pattern("###")
-			.unlockedBy("has_stripped_logs", has(ItemTags.STRIPPED_LOGS))
+			.unlockedBy("has_stripped_logs", has(itemLike2))
 			.save(consumer);
 	}
 

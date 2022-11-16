@@ -8,7 +8,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacketListener> {
-	private static final short LONG_DURATION_THRESHOLD = 32767;
 	private static final int FLAG_AMBIENT = 1;
 	private static final int FLAG_VISIBLE = 2;
 	private static final int FLAG_SHOW_ICON = 4;
@@ -61,10 +60,6 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		friendlyByteBuf.writeNullable(
 			this.factorData, (friendlyByteBufx, factorData) -> friendlyByteBufx.writeWithCodec(MobEffectInstance.FactorData.CODEC, factorData)
 		);
-	}
-
-	public boolean isSuperLongDuration() {
-		return this.effectDurationTicks >= 32767;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

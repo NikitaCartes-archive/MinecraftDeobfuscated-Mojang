@@ -34,7 +34,7 @@ public final class ReportingContext {
 		return new ReportingContext(abuseReportSender, reportEnvironment, chatLog);
 	}
 
-	public boolean draftReportHandled(Minecraft minecraft, @Nullable Screen screen, boolean bl) {
+	public void draftReportHandled(Minecraft minecraft, @Nullable Screen screen, Runnable runnable, boolean bl) {
 		if (this.chatReportDraft != null) {
 			ChatReportBuilder.ChatReport chatReport = this.chatReportDraft.copy();
 			minecraft.setScreen(
@@ -44,7 +44,7 @@ public final class ReportingContext {
 						if (blx) {
 							minecraft.setScreen(new ChatReportScreen(screen, this, chatReport));
 						} else {
-							minecraft.setScreen(screen);
+							runnable.run();
 						}
 					},
 					Component.translatable(bl ? "gui.chatReport.draft.quittotitle.title" : "gui.chatReport.draft.title"),
@@ -53,9 +53,8 @@ public final class ReportingContext {
 					Component.translatable("gui.chatReport.draft.discard")
 				)
 			);
-			return false;
 		} else {
-			return true;
+			runnable.run();
 		}
 	}
 

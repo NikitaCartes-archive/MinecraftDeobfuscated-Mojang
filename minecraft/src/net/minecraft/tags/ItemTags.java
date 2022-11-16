@@ -7,7 +7,6 @@ import net.minecraft.world.item.Item;
 public final class ItemTags {
 	public static final TagKey<Item> WOOL = bind("wool");
 	public static final TagKey<Item> PLANKS = bind("planks");
-	public static final TagKey<Item> STRIPPED_LOGS = bind("stripped_logs");
 	public static final TagKey<Item> STONE_BRICKS = bind("stone_bricks");
 	public static final TagKey<Item> WOODEN_BUTTONS = bind("wooden_buttons");
 	public static final TagKey<Item> BUTTONS = bind("buttons");

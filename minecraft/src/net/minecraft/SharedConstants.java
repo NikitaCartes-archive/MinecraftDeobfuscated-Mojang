@@ -13,15 +13,15 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3208;
+	public static final int WORLD_VERSION = 3210;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "22w45a";
+	public static final String VERSION_STRING = "22w46a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 761;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 107;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 108;
 	public static final int SNBT_NAG_VERSION = 3200;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
@@ -109,6 +109,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_STORE_CHUNK_STACKTRACES = false;
 	public static final boolean DEBUG_FEATURE_COUNT = false;
 	public static final boolean DEBUG_RESOURCE_GENERATION_OVERRIDE = false;
+	public static final boolean DEBUG_FORCE_TELEMETRY = false;
 	public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
 	public static boolean CHECK_DATA_FIXER_SCHEMA = true;
 	public static boolean IS_RUNNING_IN_IDE;
@@ -173,7 +174,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741931;
+		return 1073741932;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

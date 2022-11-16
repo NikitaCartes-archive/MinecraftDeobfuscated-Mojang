@@ -126,7 +126,6 @@ public class BookEditScreen extends Screen {
 	@Override
 	protected void init() {
 		this.clearDisplayCache();
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.signButton = this.addRenderableWidget(Button.builder(Component.translatable("book.signButton"), button -> {
 			this.isSigning = true;
 			this.updateButtonVisibility();
@@ -176,11 +175,6 @@ public class BookEditScreen extends Screen {
 
 		this.updateButtonVisibility();
 		this.clearDisplayCacheAfterPageChange();
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	private void updateButtonVisibility() {

@@ -6,6 +6,7 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class GridWidget extends AbstractContainerWidget {
@@ -123,6 +124,10 @@ public class GridWidget extends AbstractContainerWidget {
 		return this.defaultCellSettings;
 	}
 
+	public GridWidget.RowHelper createRowHelper(int i) {
+		return new GridWidget.RowHelper(i);
+	}
+
 	@Environment(EnvType.CLIENT)
 	static class CellInhabitant extends AbstractContainerWidget.AbstractChildWrapper {
 		final int row;
@@ -144,6 +149,49 @@ public class GridWidget extends AbstractContainerWidget {
 
 		public int getLastOccupiedColumn() {
 			return this.column + this.occupiedColumns - 1;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public final class RowHelper {
+		private final int columns;
+		private int index;
+
+		RowHelper(int i) {
+			this.columns = i;
+		}
+
+		public <T extends AbstractWidget> T addChild(T abstractWidget) {
+			return this.addChild(abstractWidget, 1);
+		}
+
+		public <T extends AbstractWidget> T addChild(T abstractWidget, int i) {
+			return this.addChild(abstractWidget, i, this.defaultCellSetting());
+		}
+
+		public <T extends AbstractWidget> T addChild(T abstractWidget, LayoutSettings layoutSettings) {
+			return this.addChild(abstractWidget, 1, layoutSettings);
+		}
+
+		public <T extends AbstractWidget> T addChild(T abstractWidget, int i, LayoutSettings layoutSettings) {
+			int j = this.index / this.columns;
+			int k = this.index % this.columns;
+			if (k + i > this.columns) {
+				j++;
+				k = 0;
+				this.index = Mth.roundToward(this.index, this.columns);
+			}
+
+			this.index += i;
+			return GridWidget.this.addChild(abstractWidget, j, k, 1, i, layoutSettings);
+		}
+
+		public LayoutSettings newCellSettings() {
+			return GridWidget.this.newCellSettings();
+		}
+
+		public LayoutSettings defaultCellSetting() {
+			return GridWidget.this.defaultCellSetting();
 		}
 	}
 }

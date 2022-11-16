@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -14,18 +13,17 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
 public class AtlasSet implements AutoCloseable {
 	private final Map<ResourceLocation, AtlasSet.AtlasEntry> atlases;
 
-	public AtlasSet(Map<ResourceLocation, AtlasSet.ResourceLister> map, TextureManager textureManager) {
+	public AtlasSet(Map<ResourceLocation, ResourceLocation> map, TextureManager textureManager) {
 		this.atlases = (Map<ResourceLocation, AtlasSet.AtlasEntry>)map.entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
 			TextureAtlas textureAtlas = new TextureAtlas((ResourceLocation)entry.getKey());
 			textureManager.register((ResourceLocation)entry.getKey(), textureAtlas);
-			return new AtlasSet.AtlasEntry(textureAtlas, (AtlasSet.ResourceLister)entry.getValue());
+			return new AtlasSet.AtlasEntry(textureAtlas, (ResourceLocation)entry.getValue());
 		}));
 	}
 
@@ -47,8 +45,8 @@ public class AtlasSet implements AutoCloseable {
 					Entry::getKey,
 					entry -> {
 						AtlasSet.AtlasEntry atlasEntry = (AtlasSet.AtlasEntry)entry.getValue();
-						return CompletableFuture.supplyAsync(() -> (Map)atlasEntry.resourceLister.apply(resourceManager), executor)
-							.thenCompose(map -> SpriteLoader.create(atlasEntry.atlas).stitch(map, i, executor))
+						return SpriteLoader.create(atlasEntry.atlas)
+							.loadAndStitch(resourceManager, atlasEntry.atlasInfoLocation, i, executor)
 							.thenApply(preparations -> new AtlasSet.StitchResult(atlasEntry.atlas, preparations));
 					}
 				)
@@ -56,16 +54,11 @@ public class AtlasSet implements AutoCloseable {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static record AtlasEntry(TextureAtlas atlas, AtlasSet.ResourceLister resourceLister) implements AutoCloseable {
+	static record AtlasEntry(TextureAtlas atlas, ResourceLocation atlasInfoLocation) implements AutoCloseable {
 
 		public void close() {
 			this.atlas.clearTextureData();
 		}
-	}
-
-	@FunctionalInterface
-	@Environment(EnvType.CLIENT)
-	public interface ResourceLister extends Function<ResourceManager, Map<ResourceLocation, Resource>> {
 	}
 
 	@Environment(EnvType.CLIENT)

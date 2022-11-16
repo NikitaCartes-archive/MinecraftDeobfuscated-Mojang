@@ -178,7 +178,6 @@ public class PresetFlatWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.shareText = Component.translatable("createWorld.customize.presets.share");
 		this.listText = Component.translatable("createWorld.customize.presets.list");
 		this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
@@ -230,11 +229,6 @@ public class PresetFlatWorldScreen extends Screen {
 	@Override
 	public void onClose() {
 		this.minecraft.setScreen(this.parent);
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override

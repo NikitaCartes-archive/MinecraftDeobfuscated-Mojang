@@ -96,6 +96,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation PIGLIN_BRUTE = register("piglin_brute");
 	public static final ModelLayerLocation PIGLIN_BRUTE_INNER_ARMOR = registerInnerArmor("piglin_brute");
 	public static final ModelLayerLocation PIGLIN_BRUTE_OUTER_ARMOR = registerOuterArmor("piglin_brute");
+	public static final ModelLayerLocation PIGLIN_HEAD = register("piglin_head");
 	public static final ModelLayerLocation PIGLIN_INNER_ARMOR = registerInnerArmor("piglin");
 	public static final ModelLayerLocation PIGLIN_OUTER_ARMOR = registerOuterArmor("piglin");
 	public static final ModelLayerLocation PIG_SADDLE = register("pig", "saddle");

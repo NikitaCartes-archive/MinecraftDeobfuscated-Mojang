@@ -1368,7 +1368,7 @@ public abstract class Player extends LivingEntity {
 
 			return optional;
 		} else if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel)) {
-			return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, f);
+			return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, blockState.getValue(BedBlock.FACING), f);
 		} else if (!bl) {
 			return Optional.empty();
 		} else {

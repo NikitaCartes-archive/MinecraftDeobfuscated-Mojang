@@ -24,6 +24,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class EntitySelector {
 	public static final int INFINITE = Integer.MAX_VALUE;
+	public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_ARBITRARY = (vec3, list) -> {
+	};
 	private static final EntityTypeTest<Entity, ?> ANY_TYPE = new EntityTypeTest<Entity, Entity>() {
 		public Entity tryCast(Entity entity) {
 			return entity;
@@ -162,11 +164,18 @@ public class EntitySelector {
 	}
 
 	private void addEntities(List<Entity> list, ServerLevel serverLevel, Vec3 vec3, Predicate<Entity> predicate) {
-		if (this.aabb != null) {
-			list.addAll(serverLevel.getEntities(this.type, this.aabb.move(vec3), predicate));
-		} else {
-			list.addAll(serverLevel.getEntities(this.type, predicate));
+		int i = this.getResultLimit();
+		if (list.size() < i) {
+			if (this.aabb != null) {
+				serverLevel.getEntities(this.type, this.aabb.move(vec3), predicate, list, i);
+			} else {
+				serverLevel.getEntities(this.type, predicate, list, i);
+			}
 		}
+	}
+
+	private int getResultLimit() {
+		return this.order == ORDER_ARBITRARY ? this.maxResults : Integer.MAX_VALUE;
 	}
 
 	public ServerPlayer findSinglePlayer(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
@@ -200,15 +209,19 @@ public class EntitySelector {
 
 				return Collections.emptyList();
 			} else {
+				int i = this.getResultLimit();
 				List<ServerPlayer> list;
 				if (this.isWorldLimited()) {
-					list = commandSourceStack.getLevel().getPlayers(predicate);
+					list = commandSourceStack.getLevel().getPlayers(predicate, i);
 				} else {
 					list = Lists.<ServerPlayer>newArrayList();
 
 					for (ServerPlayer serverPlayer3 : commandSourceStack.getServer().getPlayerList().getPlayers()) {
 						if (predicate.test(serverPlayer3)) {
 							list.add(serverPlayer3);
+							if (list.size() >= i) {
+								return list;
+							}
 						}
 					}
 				}

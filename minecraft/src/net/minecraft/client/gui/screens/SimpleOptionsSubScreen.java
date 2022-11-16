@@ -18,7 +18,7 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 	protected final OptionInstance<?>[] smallOptions;
 	@Nullable
 	private AbstractWidget narratorButton;
-	private OptionsList list;
+	protected OptionsList list;
 
 	public SimpleOptionsSubScreen(Screen screen, Options options, Component component, OptionInstance<?>[] optionInstances) {
 		super(screen, options, component);

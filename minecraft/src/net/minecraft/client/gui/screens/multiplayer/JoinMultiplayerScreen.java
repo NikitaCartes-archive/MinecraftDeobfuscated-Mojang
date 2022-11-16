@@ -48,8 +48,6 @@ public class JoinMultiplayerScreen extends Screen {
 
 	@Override
 	protected void init() {
-		super.init();
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		if (this.initedOnce) {
 			this.serverSelectionList.updateSize(this.width, this.height, 32, this.height - 64);
 		} else {
@@ -131,7 +129,6 @@ public class JoinMultiplayerScreen extends Screen {
 
 	@Override
 	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 		if (this.lanServerDetector != null) {
 			this.lanServerDetector.interrupt();
 			this.lanServerDetector = null;

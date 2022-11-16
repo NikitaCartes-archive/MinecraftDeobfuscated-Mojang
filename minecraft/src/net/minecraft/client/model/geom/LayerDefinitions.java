@@ -50,6 +50,7 @@ import net.minecraft.client.model.PandaModel;
 import net.minecraft.client.model.ParrotModel;
 import net.minecraft.client.model.PhantomModel;
 import net.minecraft.client.model.PigModel;
+import net.minecraft.client.model.PiglinHeadModel;
 import net.minecraft.client.model.PiglinModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.PolarBearModel;
@@ -121,13 +122,14 @@ public class LayerDefinitions {
 		LayerDefinition layerDefinition9 = CowModel.createBodyLayer();
 		LayerDefinition layerDefinition10 = LayerDefinition.create(OcelotModel.createBodyMesh(CubeDeformation.NONE), 64, 32);
 		LayerDefinition layerDefinition11 = LayerDefinition.create(PiglinModel.createMesh(CubeDeformation.NONE), 64, 64);
-		LayerDefinition layerDefinition12 = SkullModel.createHumanoidHeadLayer();
-		LayerDefinition layerDefinition13 = LlamaModel.createBodyLayer(CubeDeformation.NONE);
-		LayerDefinition layerDefinition14 = StriderModel.createBodyLayer();
-		LayerDefinition layerDefinition15 = HoglinModel.createBodyLayer();
-		LayerDefinition layerDefinition16 = SkeletonModel.createBodyLayer();
-		LayerDefinition layerDefinition17 = LayerDefinition.create(VillagerModel.createBodyModel(), 64, 64);
-		LayerDefinition layerDefinition18 = SpiderModel.createSpiderBodyLayer();
+		LayerDefinition layerDefinition12 = LayerDefinition.create(PiglinHeadModel.createHeadModel(), 64, 64);
+		LayerDefinition layerDefinition13 = SkullModel.createHumanoidHeadLayer();
+		LayerDefinition layerDefinition14 = LlamaModel.createBodyLayer(CubeDeformation.NONE);
+		LayerDefinition layerDefinition15 = StriderModel.createBodyLayer();
+		LayerDefinition layerDefinition16 = HoglinModel.createBodyLayer();
+		LayerDefinition layerDefinition17 = SkeletonModel.createBodyLayer();
+		LayerDefinition layerDefinition18 = LayerDefinition.create(VillagerModel.createBodyModel(), 64, 64);
+		LayerDefinition layerDefinition19 = SpiderModel.createSpiderBodyLayer();
 		builder.put(ModelLayers.ALLAY, AllayModel.createBodyLayer());
 		builder.put(ModelLayers.ARMOR_STAND, ArmorStandModel.createBodyLayer());
 		builder.put(ModelLayers.ARMOR_STAND_INNER_ARMOR, ArmorStandArmorModel.createBodyLayer(INNER_ARMOR_DEFORMATION));
@@ -144,7 +146,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.CAT, layerDefinition10);
 		builder.put(ModelLayers.CAT_COLLAR, LayerDefinition.create(OcelotModel.createBodyMesh(new CubeDeformation(0.01F)), 64, 32));
 		builder.put(ModelLayers.CAMEL, CamelModel.createBodyLayer());
-		builder.put(ModelLayers.CAVE_SPIDER, layerDefinition18);
+		builder.put(ModelLayers.CAVE_SPIDER, layerDefinition19);
 		builder.put(ModelLayers.CHEST, ChestRenderer.createSingleBodyLayer());
 		builder.put(ModelLayers.DOUBLE_CHEST_LEFT, ChestRenderer.createDoubleBodyLeftLayer());
 		builder.put(ModelLayers.DOUBLE_CHEST_RIGHT, ChestRenderer.createDoubleBodyRightLayer());
@@ -185,7 +187,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.GLOW_SQUID, SquidModel.createBodyLayer());
 		builder.put(ModelLayers.GOAT, GoatModel.createBodyLayer());
 		builder.put(ModelLayers.GUARDIAN, GuardianModel.createBodyLayer());
-		builder.put(ModelLayers.HOGLIN, layerDefinition15);
+		builder.put(ModelLayers.HOGLIN, layerDefinition16);
 		builder.put(ModelLayers.HOPPER_MINECART, layerDefinition5);
 		builder.put(ModelLayers.HORSE, layerDefinition7);
 		builder.put(ModelLayers.HORSE_ARMOR, LayerDefinition.create(HorseModel.createBodyMesh(new CubeDeformation(0.1F)), 64, 64));
@@ -195,7 +197,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.ILLUSIONER, layerDefinition8);
 		builder.put(ModelLayers.IRON_GOLEM, IronGolemModel.createBodyLayer());
 		builder.put(ModelLayers.LEASH_KNOT, LeashKnotModel.createBodyLayer());
-		builder.put(ModelLayers.LLAMA, layerDefinition13);
+		builder.put(ModelLayers.LLAMA, layerDefinition14);
 		builder.put(ModelLayers.LLAMA_DECOR, LlamaModel.createBodyLayer(new CubeDeformation(0.5F)));
 		builder.put(ModelLayers.LLAMA_SPIT, LlamaSpitModel.createBodyLayer());
 		builder.put(ModelLayers.MAGMA_CUBE, LavaSlimeModel.createBodyLayer());
@@ -214,9 +216,10 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.PIGLIN_BRUTE, layerDefinition11);
 		builder.put(ModelLayers.PIGLIN_BRUTE_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR, layerDefinition3);
+		builder.put(ModelLayers.PIGLIN_HEAD, layerDefinition12);
 		builder.put(ModelLayers.PILLAGER, layerDefinition8);
 		builder.put(ModelLayers.PLAYER, LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64));
-		builder.put(ModelLayers.PLAYER_HEAD, layerDefinition12);
+		builder.put(ModelLayers.PLAYER_HEAD, layerDefinition13);
 		builder.put(ModelLayers.PLAYER_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.PLAYER_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.PLAYER_SLIM, LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, true), 64, 64));
@@ -236,7 +239,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.SHULKER, ShulkerModel.createBodyLayer());
 		builder.put(ModelLayers.SHULKER_BULLET, ShulkerBulletModel.createBodyLayer());
 		builder.put(ModelLayers.SILVERFISH, SilverfishModel.createBodyLayer());
-		builder.put(ModelLayers.SKELETON, layerDefinition16);
+		builder.put(ModelLayers.SKELETON, layerDefinition17);
 		builder.put(ModelLayers.SKELETON_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.SKELETON_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.SKELETON_HORSE, layerDefinition7);
@@ -245,17 +248,17 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.SLIME_OUTER, SlimeModel.createOuterBodyLayer());
 		builder.put(ModelLayers.SNOW_GOLEM, SnowGolemModel.createBodyLayer());
 		builder.put(ModelLayers.SPAWNER_MINECART, layerDefinition5);
-		builder.put(ModelLayers.SPIDER, layerDefinition18);
+		builder.put(ModelLayers.SPIDER, layerDefinition19);
 		builder.put(ModelLayers.SQUID, SquidModel.createBodyLayer());
-		builder.put(ModelLayers.STRAY, layerDefinition16);
+		builder.put(ModelLayers.STRAY, layerDefinition17);
 		builder.put(ModelLayers.STRAY_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.STRAY_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.STRAY_OUTER_LAYER, LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(0.25F), 0.0F), 64, 32));
-		builder.put(ModelLayers.STRIDER, layerDefinition14);
-		builder.put(ModelLayers.STRIDER_SADDLE, layerDefinition14);
+		builder.put(ModelLayers.STRIDER, layerDefinition15);
+		builder.put(ModelLayers.STRIDER_SADDLE, layerDefinition15);
 		builder.put(ModelLayers.TADPOLE, TadpoleModel.createBodyLayer());
 		builder.put(ModelLayers.TNT_MINECART, layerDefinition5);
-		builder.put(ModelLayers.TRADER_LLAMA, layerDefinition13);
+		builder.put(ModelLayers.TRADER_LLAMA, layerDefinition14);
 		builder.put(ModelLayers.TRIDENT, TridentModel.createLayer());
 		builder.put(ModelLayers.TROPICAL_FISH_LARGE, TropicalFishModelB.createBodyLayer(CubeDeformation.NONE));
 		builder.put(ModelLayers.TROPICAL_FISH_LARGE_PATTERN, TropicalFishModelB.createBodyLayer(FISH_PATTERN_DEFORMATION));
@@ -263,24 +266,24 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.TROPICAL_FISH_SMALL_PATTERN, TropicalFishModelA.createBodyLayer(FISH_PATTERN_DEFORMATION));
 		builder.put(ModelLayers.TURTLE, TurtleModel.createBodyLayer());
 		builder.put(ModelLayers.VEX, VexModel.createBodyLayer());
-		builder.put(ModelLayers.VILLAGER, layerDefinition17);
+		builder.put(ModelLayers.VILLAGER, layerDefinition18);
 		builder.put(ModelLayers.VINDICATOR, layerDefinition8);
 		builder.put(ModelLayers.WARDEN, WardenModel.createBodyLayer());
-		builder.put(ModelLayers.WANDERING_TRADER, layerDefinition17);
+		builder.put(ModelLayers.WANDERING_TRADER, layerDefinition18);
 		builder.put(ModelLayers.WITCH, WitchModel.createBodyLayer());
 		builder.put(ModelLayers.WITHER, WitherBossModel.createBodyLayer(CubeDeformation.NONE));
 		builder.put(ModelLayers.WITHER_ARMOR, WitherBossModel.createBodyLayer(INNER_ARMOR_DEFORMATION));
 		builder.put(ModelLayers.WITHER_SKULL, WitherSkullRenderer.createSkullLayer());
-		builder.put(ModelLayers.WITHER_SKELETON, layerDefinition16);
+		builder.put(ModelLayers.WITHER_SKELETON, layerDefinition17);
 		builder.put(ModelLayers.WITHER_SKELETON_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.WITHER_SKELETON_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.WITHER_SKELETON_SKULL, layerDefinition6);
 		builder.put(ModelLayers.WOLF, WolfModel.createBodyLayer());
-		builder.put(ModelLayers.ZOGLIN, layerDefinition15);
+		builder.put(ModelLayers.ZOGLIN, layerDefinition16);
 		builder.put(ModelLayers.ZOMBIE, layerDefinition);
 		builder.put(ModelLayers.ZOMBIE_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.ZOMBIE_OUTER_ARMOR, layerDefinition2);
-		builder.put(ModelLayers.ZOMBIE_HEAD, layerDefinition12);
+		builder.put(ModelLayers.ZOMBIE_HEAD, layerDefinition13);
 		builder.put(ModelLayers.ZOMBIE_HORSE, layerDefinition7);
 		builder.put(ModelLayers.ZOMBIE_VILLAGER, ZombieVillagerModel.createBodyLayer());
 		builder.put(ModelLayers.ZOMBIE_VILLAGER_INNER_ARMOR, ZombieVillagerModel.createArmorLayer(INNER_ARMOR_DEFORMATION));
@@ -288,25 +291,25 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN, layerDefinition11);
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR, layerDefinition3);
-		LayerDefinition layerDefinition19 = BoatModel.createBodyModel();
-		LayerDefinition layerDefinition20 = ChestBoatModel.createBodyModel();
-		LayerDefinition layerDefinition21 = RaftModel.createBodyModel();
-		LayerDefinition layerDefinition22 = ChestRaftModel.createBodyModel();
+		LayerDefinition layerDefinition20 = BoatModel.createBodyModel();
+		LayerDefinition layerDefinition21 = ChestBoatModel.createBodyModel();
+		LayerDefinition layerDefinition22 = RaftModel.createBodyModel();
+		LayerDefinition layerDefinition23 = ChestRaftModel.createBodyModel();
 
 		for (Boat.Type type : Boat.Type.values()) {
 			if (type == Boat.Type.BAMBOO) {
-				builder.put(ModelLayers.createBoatModelName(type), layerDefinition21);
-				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition22);
+				builder.put(ModelLayers.createBoatModelName(type), layerDefinition22);
+				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition23);
 			} else {
-				builder.put(ModelLayers.createBoatModelName(type), layerDefinition19);
-				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition20);
+				builder.put(ModelLayers.createBoatModelName(type), layerDefinition20);
+				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition21);
 			}
 		}
 
-		LayerDefinition layerDefinition23 = SignRenderer.createSignLayer();
-		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition23));
-		LayerDefinition layerDefinition24 = HangingSignRenderer.createHangingSignLayer();
-		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createHangingSignModelName(woodType), layerDefinition24));
+		LayerDefinition layerDefinition24 = SignRenderer.createSignLayer();
+		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createSignModelName(woodType), layerDefinition24));
+		LayerDefinition layerDefinition25 = HangingSignRenderer.createHangingSignLayer();
+		WoodType.values().forEach(woodType -> builder.put(ModelLayers.createHangingSignModelName(woodType), layerDefinition25));
 		ImmutableMap<ModelLayerLocation, LayerDefinition> immutableMap = builder.build();
 		List<ModelLayerLocation> list = (List<ModelLayerLocation>)ModelLayers.getKnownLocations()
 			.filter(modelLayerLocation -> !immutableMap.containsKey(modelLayerLocation))

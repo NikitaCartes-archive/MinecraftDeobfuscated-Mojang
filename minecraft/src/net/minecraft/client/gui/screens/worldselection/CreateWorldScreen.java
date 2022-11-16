@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -133,7 +134,9 @@ public class CreateWorldScreen extends Screen {
 		minecraft.managedBlock(completableFuture::isDone);
 		minecraft.setScreen(
 			new CreateWorldScreen(
-				screen, WorldDataConfiguration.DEFAULT, new WorldGenSettingsComponent((WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL))
+				screen,
+				WorldDataConfiguration.DEFAULT,
+				new WorldGenSettingsComponent((WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty())
 			)
 		);
 	}
@@ -145,7 +148,9 @@ public class CreateWorldScreen extends Screen {
 			screen,
 			worldCreationContext.dataConfiguration(),
 			new WorldGenSettingsComponent(
-				worldCreationContext, WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()), worldCreationContext.options().seed()
+				worldCreationContext,
+				WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()),
+				OptionalLong.of(worldCreationContext.options().seed())
 			)
 		);
 		createWorldScreen.initName = levelSettings.levelName();
@@ -181,7 +186,6 @@ public class CreateWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, Component.translatable("selectWorld.enterName")) {
 			@Override
 			protected MutableComponent createNarrationMessage() {
@@ -282,11 +286,6 @@ public class CreateWorldScreen extends Screen {
 				throw new RuntimeException("Could not create save folder", var3);
 			}
 		}
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	private static void queueLoadScreen(Minecraft minecraft, Component component) {

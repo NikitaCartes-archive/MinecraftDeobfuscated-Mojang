@@ -31,14 +31,12 @@ public class Sheets {
 	public static final ResourceLocation BANNER_SHEET = new ResourceLocation("textures/atlas/banner_patterns.png");
 	public static final ResourceLocation SHIELD_SHEET = new ResourceLocation("textures/atlas/shield_patterns.png");
 	public static final ResourceLocation SIGN_SHEET = new ResourceLocation("textures/atlas/signs.png");
-	public static final ResourceLocation HANGING_SIGN_SHEET = new ResourceLocation("textures/atlas/hanging_signs.png");
 	public static final ResourceLocation CHEST_SHEET = new ResourceLocation("textures/atlas/chest.png");
 	private static final RenderType SHULKER_BOX_SHEET_TYPE = RenderType.entityCutoutNoCull(SHULKER_SHEET);
 	private static final RenderType BED_SHEET_TYPE = RenderType.entitySolid(BED_SHEET);
 	private static final RenderType BANNER_SHEET_TYPE = RenderType.entityNoOutline(BANNER_SHEET);
 	private static final RenderType SHIELD_SHEET_TYPE = RenderType.entityNoOutline(SHIELD_SHEET);
 	private static final RenderType SIGN_SHEET_TYPE = RenderType.entityCutoutNoCull(SIGN_SHEET);
-	private static final RenderType HANGING_SIGN_SHEET_TYPE = RenderType.entityCutoutNoCull(HANGING_SIGN_SHEET);
 	private static final RenderType CHEST_SHEET_TYPE = RenderType.entityCutout(CHEST_SHEET);
 	private static final RenderType SOLID_BLOCK_SHEET = RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS);
 	private static final RenderType CUTOUT_BLOCK_SHEET = RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
@@ -98,7 +96,7 @@ public class Sheets {
 	}
 
 	public static RenderType hangingSignSheet() {
-		return HANGING_SIGN_SHEET_TYPE;
+		return SIGN_SHEET_TYPE;
 	}
 
 	public static RenderType chestSheet() {
@@ -150,7 +148,7 @@ public class Sheets {
 	}
 
 	private static Material createHangingSignMaterial(WoodType woodType) {
-		return new Material(HANGING_SIGN_SHEET, new ResourceLocation("entity/signs/hanging/" + woodType.name()));
+		return new Material(SIGN_SHEET, new ResourceLocation("entity/signs/hanging/" + woodType.name()));
 	}
 
 	public static Material getSignMaterial(WoodType woodType) {

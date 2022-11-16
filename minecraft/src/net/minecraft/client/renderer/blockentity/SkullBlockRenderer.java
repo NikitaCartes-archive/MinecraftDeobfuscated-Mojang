@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.PiglinHeadModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.dragon.DragonHeadModel;
@@ -42,6 +43,7 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 		hashMap.put(SkullBlock.Types.ZOMBIE, new ResourceLocation("textures/entity/zombie/zombie.png"));
 		hashMap.put(SkullBlock.Types.CREEPER, new ResourceLocation("textures/entity/creeper/creeper.png"));
 		hashMap.put(SkullBlock.Types.DRAGON, new ResourceLocation("textures/entity/enderdragon/dragon.png"));
+		hashMap.put(SkullBlock.Types.PIGLIN, new ResourceLocation("textures/entity/piglin/piglin.png"));
 		hashMap.put(SkullBlock.Types.PLAYER, DefaultPlayerSkin.getDefaultSkin());
 	});
 
@@ -53,6 +55,7 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 		builder.put(SkullBlock.Types.ZOMBIE, new SkullModel(entityModelSet.bakeLayer(ModelLayers.ZOMBIE_HEAD)));
 		builder.put(SkullBlock.Types.CREEPER, new SkullModel(entityModelSet.bakeLayer(ModelLayers.CREEPER_HEAD)));
 		builder.put(SkullBlock.Types.DRAGON, new DragonHeadModel(entityModelSet.bakeLayer(ModelLayers.DRAGON_SKULL)));
+		builder.put(SkullBlock.Types.PIGLIN, new PiglinHeadModel(entityModelSet.bakeLayer(ModelLayers.PIGLIN_HEAD)));
 		return builder.build();
 	}
 
@@ -61,7 +64,7 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 	}
 
 	public void render(SkullBlockEntity skullBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-		float g = skullBlockEntity.getMouthAnimation(f);
+		float g = skullBlockEntity.getAnimation(f);
 		BlockState blockState = skullBlockEntity.getBlockState();
 		boolean bl = blockState.getBlock() instanceof WallSkullBlock;
 		Direction direction = bl ? blockState.getValue(WallSkullBlock.FACING) : null;

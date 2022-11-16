@@ -20,7 +20,6 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	int duration;
 	private int amplifier;
 	private boolean ambient;
-	private boolean noCounter;
 	private boolean visible;
 	private boolean showIcon;
 	@Nullable
@@ -298,14 +297,6 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		}
 
 		return new MobEffectInstance(mobEffect, j, Math.max(i, 0), bl, bl2, bl3, mobEffectInstance, optional);
-	}
-
-	public void setNoCounter(boolean bl) {
-		this.noCounter = bl;
-	}
-
-	public boolean isNoCounter() {
-		return this.noCounter;
 	}
 
 	public int compareTo(MobEffectInstance mobEffectInstance) {

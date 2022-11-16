@@ -845,6 +845,8 @@ public abstract class LivingEntity extends Entity {
 			EntityType<?> entityType = entity.getType();
 			if (entityType == EntityType.SKELETON && itemStack.is(Items.SKELETON_SKULL)
 				|| entityType == EntityType.ZOMBIE && itemStack.is(Items.ZOMBIE_HEAD)
+				|| entityType == EntityType.PIGLIN && itemStack.is(Items.PIGLIN_HEAD)
+				|| entityType == EntityType.PIGLIN_BRUTE && itemStack.is(Items.PIGLIN_HEAD)
 				|| entityType == EntityType.CREEPER && itemStack.is(Items.CREEPER_HEAD)) {
 				d *= 0.5;
 			}
@@ -1122,7 +1124,7 @@ public abstract class LivingEntity extends Entity {
 					this.markHurt();
 				}
 
-				if (entity2 != null) {
+				if (entity2 != null && !damageSource.isExplosion()) {
 					double d = entity2.getX() - this.getX();
 
 					double e;
@@ -3164,8 +3166,9 @@ public abstract class LivingEntity extends Entity {
 		this.getSleepingPos().filter(this.level::hasChunkAt).ifPresent(blockPos -> {
 			BlockState blockState = this.level.getBlockState(blockPos);
 			if (blockState.getBlock() instanceof BedBlock) {
+				Direction direction = blockState.getValue(BedBlock.FACING);
 				this.level.setBlock(blockPos, blockState.setValue(BedBlock.OCCUPIED, Boolean.valueOf(false)), 3);
-				Vec3 vec3x = (Vec3)BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, this.getYRot()).orElseGet(() -> {
+				Vec3 vec3x = (Vec3)BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, direction, this.getYRot()).orElseGet(() -> {
 					BlockPos blockPos2 = blockPos.above();
 					return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.1, (double)blockPos2.getZ() + 0.5);
 				});

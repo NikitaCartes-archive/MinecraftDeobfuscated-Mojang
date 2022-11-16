@@ -951,6 +951,7 @@ public class CreativeModeTabs {
 			output.accept(Items.PLAYER_HEAD);
 			output.accept(Items.ZOMBIE_HEAD);
 			output.accept(Items.CREEPER_HEAD);
+			output.accept(Items.PIGLIN_HEAD);
 			output.accept(Items.DRAGON_HEAD);
 			output.accept(Items.DRAGON_EGG);
 			output.accept(Items.END_PORTAL_FRAME);
@@ -970,63 +971,62 @@ public class CreativeModeTabs {
 		.displayItems((featureFlagSet, output, bl) -> {
 			output.accept(Items.REDSTONE);
 			output.accept(Items.REDSTONE_TORCH);
+			output.accept(Items.REDSTONE_BLOCK);
 			output.accept(Items.REPEATER);
 			output.accept(Items.COMPARATOR);
-			output.accept(Items.REDSTONE_BLOCK);
-			output.accept(Items.PISTON);
-			output.accept(Items.STICKY_PISTON);
-			output.accept(Items.SLIME_BLOCK);
-			output.accept(Items.HONEY_BLOCK);
-			output.accept(Items.OBSERVER);
-			output.accept(Items.HOPPER);
-			output.accept(Items.DISPENSER);
-			output.accept(Items.DROPPER);
-			output.accept(Items.CHEST);
-			output.accept(Items.BARREL);
-			output.accept(Items.CHISELED_BOOKSHELF);
-			output.accept(Items.ARMOR_STAND);
-			output.accept(Items.CAULDRON);
-			output.accept(Items.FURNACE);
-			output.accept(Items.RAIL);
-			output.accept(Items.POWERED_RAIL);
-			output.accept(Items.DETECTOR_RAIL);
-			output.accept(Items.ACTIVATOR_RAIL);
-			output.accept(Items.MINECART);
-			output.accept(Items.CHEST_MINECART);
-			output.accept(Items.FURNACE_MINECART);
-			output.accept(Items.TNT_MINECART);
-			output.accept(Items.HOPPER_MINECART);
-			output.accept(Items.OAK_CHEST_BOAT);
-			output.accept(Items.BAMBOO_CHEST_RAFT);
+			output.accept(Items.TARGET);
+			output.accept(Items.LEVER);
 			output.accept(Items.OAK_BUTTON);
 			output.accept(Items.STONE_BUTTON);
 			output.accept(Items.OAK_PRESSURE_PLATE);
 			output.accept(Items.STONE_PRESSURE_PLATE);
 			output.accept(Items.LIGHT_WEIGHTED_PRESSURE_PLATE);
 			output.accept(Items.HEAVY_WEIGHTED_PRESSURE_PLATE);
-			output.accept(Items.OAK_DOOR);
-			output.accept(Items.OAK_TRAPDOOR);
-			output.accept(Items.OAK_FENCE_GATE);
-			output.accept(Items.IRON_DOOR);
-			output.accept(Items.IRON_TRAPDOOR);
-			output.accept(Items.COMPOSTER);
-			output.accept(Items.LECTERN);
-			output.accept(Items.NOTE_BLOCK);
-			output.accept(Items.TARGET);
-			output.accept(Items.LEVER);
-			output.accept(Items.LIGHTNING_ROD);
-			output.accept(Items.DAYLIGHT_DETECTOR);
 			output.accept(Items.SCULK_SENSOR);
 			output.accept(Items.WHITE_WOOL);
 			output.accept(Items.TRIPWIRE_HOOK);
 			output.accept(Items.STRING);
+			output.accept(Items.LECTERN);
+			output.accept(Items.DAYLIGHT_DETECTOR);
+			output.accept(Items.LIGHTNING_ROD);
+			output.accept(Items.PISTON);
+			output.accept(Items.STICKY_PISTON);
+			output.accept(Items.SLIME_BLOCK);
+			output.accept(Items.HONEY_BLOCK);
+			output.accept(Items.DISPENSER);
+			output.accept(Items.DROPPER);
+			output.accept(Items.HOPPER);
+			output.accept(Items.CHEST);
+			output.accept(Items.BARREL);
+			output.accept(Items.CHISELED_BOOKSHELF);
+			output.accept(Items.FURNACE);
 			output.accept(Items.TRAPPED_CHEST);
+			output.accept(Items.OBSERVER);
+			output.accept(Items.NOTE_BLOCK);
+			output.accept(Items.COMPOSTER);
+			output.accept(Items.CAULDRON);
+			output.accept(Items.RAIL);
+			output.accept(Items.POWERED_RAIL);
+			output.accept(Items.DETECTOR_RAIL);
+			output.accept(Items.ACTIVATOR_RAIL);
+			output.accept(Items.MINECART);
+			output.accept(Items.HOPPER_MINECART);
+			output.accept(Items.CHEST_MINECART);
+			output.accept(Items.FURNACE_MINECART);
+			output.accept(Items.TNT_MINECART);
+			output.accept(Items.OAK_CHEST_BOAT);
+			output.accept(Items.BAMBOO_CHEST_RAFT);
+			output.accept(Items.OAK_DOOR);
+			output.accept(Items.IRON_DOOR);
+			output.accept(Items.OAK_FENCE_GATE);
+			output.accept(Items.OAK_TRAPDOOR);
+			output.accept(Items.IRON_TRAPDOOR);
 			output.accept(Items.TNT);
 			output.accept(Items.REDSTONE_LAMP);
-			output.accept(Items.BIG_DRIPLEAF);
 			output.accept(Items.BELL);
+			output.accept(Items.BIG_DRIPLEAF);
+			output.accept(Items.ARMOR_STAND);
 			output.accept(Items.REDSTONE_ORE);
-			output.accept(Items.DEEPSLATE_REDSTONE_ORE);
 		})
 		.build();
 	private static final CreativeModeTab HOTBAR = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 5)
@@ -1039,7 +1039,7 @@ public class CreativeModeTabs {
 		.title(Component.translatable("itemGroup.search"))
 		.icon(() -> new ItemStack(Items.COMPASS))
 		.displayItems((featureFlagSet, output, bl) -> {
-			Set<ItemStack> set = new ItemStackLinkedSet();
+			Set<ItemStack> set = ItemStackLinkedSet.createTypeAndTagSet();
 
 			for (CreativeModeTab creativeModeTab : CreativeModeTabs.TABS) {
 				if (creativeModeTab.getType() != CreativeModeTab.Type.SEARCH) {
@@ -1132,11 +1132,15 @@ public class CreativeModeTabs {
 			output.accept(Items.MANGROVE_CHEST_BOAT);
 			output.accept(Items.BAMBOO_RAFT);
 			output.accept(Items.BAMBOO_CHEST_RAFT);
+			output.accept(Items.RAIL);
+			output.accept(Items.POWERED_RAIL);
+			output.accept(Items.DETECTOR_RAIL);
+			output.accept(Items.ACTIVATOR_RAIL);
 			output.accept(Items.MINECART);
+			output.accept(Items.HOPPER_MINECART);
 			output.accept(Items.CHEST_MINECART);
 			output.accept(Items.FURNACE_MINECART);
 			output.accept(Items.TNT_MINECART);
-			output.accept(Items.HOPPER_MINECART);
 			generateInstrumentTypes(output, Items.GOAT_HORN, InstrumentTags.GOAT_HORNS, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 			output.accept(Items.MUSIC_DISC_13);
 			output.accept(Items.MUSIC_DISC_CAT);
@@ -1557,15 +1561,15 @@ public class CreativeModeTabs {
 
 	private static void generateSuspiciousStews(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
 		List<SuspiciousEffectHolder> list = SuspiciousEffectHolder.getAllEffectHolders();
-		ItemStackLinkedSet itemStackLinkedSet = new ItemStackLinkedSet();
+		Set<ItemStack> set = ItemStackLinkedSet.createTypeAndTagSet();
 
 		for (SuspiciousEffectHolder suspiciousEffectHolder : list) {
 			ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW);
 			SuspiciousStewItem.saveMobEffect(itemStack, suspiciousEffectHolder.getSuspiciousEffect(), suspiciousEffectHolder.getEffectDuration());
-			itemStackLinkedSet.add(itemStack);
+			set.add(itemStack);
 		}
 
-		output.acceptAll(itemStackLinkedSet, tabVisibility);
+		output.acceptAll(set, tabVisibility);
 	}
 
 	private static void generateFireworksAllDurations(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {

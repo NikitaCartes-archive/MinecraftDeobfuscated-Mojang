@@ -223,8 +223,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		return blockGetter.getBlockState(blockPos.below()).getBlock() instanceof BedBlock;
 	}
 
-	public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, float f) {
-		Direction direction = collisionGetter.getBlockState(blockPos).getValue(FACING);
+	public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, Direction direction, float f) {
 		Direction direction2 = direction.getClockWise();
 		Direction direction3 = direction2.isFacingAngle(f) ? direction2.getOpposite() : direction2;
 		if (isBunkBed(collisionGetter, blockPos)) {

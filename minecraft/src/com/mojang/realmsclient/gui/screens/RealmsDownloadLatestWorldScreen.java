@@ -74,7 +74,6 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.cancelButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			this.cancelled = true;
 			this.backButtonClicked();

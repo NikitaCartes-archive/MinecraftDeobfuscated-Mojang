@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.BambooBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
@@ -15,13 +15,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeat
 public class BambooFeature extends Feature<ProbabilityFeatureConfiguration> {
 	private static final BlockState BAMBOO_TRUNK = Blocks.BAMBOO
 		.defaultBlockState()
-		.setValue(BambooBlock.AGE, Integer.valueOf(1))
-		.setValue(BambooBlock.LEAVES, BambooLeaves.NONE)
-		.setValue(BambooBlock.STAGE, Integer.valueOf(0));
-	private static final BlockState BAMBOO_FINAL_LARGE = BAMBOO_TRUNK.setValue(BambooBlock.LEAVES, BambooLeaves.LARGE)
-		.setValue(BambooBlock.STAGE, Integer.valueOf(1));
-	private static final BlockState BAMBOO_TOP_LARGE = BAMBOO_TRUNK.setValue(BambooBlock.LEAVES, BambooLeaves.LARGE);
-	private static final BlockState BAMBOO_TOP_SMALL = BAMBOO_TRUNK.setValue(BambooBlock.LEAVES, BambooLeaves.SMALL);
+		.setValue(BambooStalkBlock.AGE, Integer.valueOf(1))
+		.setValue(BambooStalkBlock.LEAVES, BambooLeaves.NONE)
+		.setValue(BambooStalkBlock.STAGE, Integer.valueOf(0));
+	private static final BlockState BAMBOO_FINAL_LARGE = BAMBOO_TRUNK.setValue(BambooStalkBlock.LEAVES, BambooLeaves.LARGE)
+		.setValue(BambooStalkBlock.STAGE, Integer.valueOf(1));
+	private static final BlockState BAMBOO_TOP_LARGE = BAMBOO_TRUNK.setValue(BambooStalkBlock.LEAVES, BambooLeaves.LARGE);
+	private static final BlockState BAMBOO_TOP_SMALL = BAMBOO_TRUNK.setValue(BambooStalkBlock.LEAVES, BambooLeaves.SMALL);
 
 	public BambooFeature(Codec<ProbabilityFeatureConfiguration> codec) {
 		super(codec);

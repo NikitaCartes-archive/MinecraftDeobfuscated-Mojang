@@ -36,7 +36,6 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.checkIfMcoEnabled();
-		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		if (this.realmsDataSubscription != null) {
 			this.realmsDataSubscription.forceUpdate();
 		}

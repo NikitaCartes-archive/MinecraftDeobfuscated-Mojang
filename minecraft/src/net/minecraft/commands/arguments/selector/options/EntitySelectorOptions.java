@@ -18,6 +18,7 @@ import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -182,7 +183,7 @@ public class EntitySelectorOptions {
 						case "nearest" -> EntitySelectorParser.ORDER_NEAREST;
 						case "furthest" -> EntitySelectorParser.ORDER_FURTHEST;
 						case "random" -> EntitySelectorParser.ORDER_RANDOM;
-						case "arbitrary" -> EntitySelectorParser.ORDER_ARBITRARY;
+						case "arbitrary" -> EntitySelector.ORDER_ARBITRARY;
 						default -> {
 							entitySelectorParser.getReader().setCursor(i);
 							throw ERROR_SORT_UNKNOWN.createWithContext(entitySelectorParser.getReader(), string);

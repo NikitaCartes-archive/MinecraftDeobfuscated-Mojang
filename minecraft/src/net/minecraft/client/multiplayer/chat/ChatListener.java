@@ -150,7 +150,7 @@ public class ChatListener {
 
 	private void logPlayerMessage(PlayerChatMessage playerChatMessage, ChatType.Bound bound, GameProfile gameProfile, ChatTrustLevel chatTrustLevel) {
 		ChatLog chatLog = this.minecraft.getReportingContext().chatLog();
-		chatLog.push(LoggedChatMessage.player(gameProfile, bound.name(), playerChatMessage, chatTrustLevel));
+		chatLog.push(LoggedChatMessage.player(gameProfile, playerChatMessage, chatTrustLevel));
 	}
 
 	private void logSystemMessage(Component component, Instant instant) {

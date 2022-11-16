@@ -7,7 +7,6 @@ import net.minecraft.world.level.block.Block;
 public final class BlockTags {
 	public static final TagKey<Block> WOOL = create("wool");
 	public static final TagKey<Block> PLANKS = create("planks");
-	public static final TagKey<Block> STRIPPED_LOGS = create("stripped_logs");
 	public static final TagKey<Block> STONE_BRICKS = create("stone_bricks");
 	public static final TagKey<Block> WOODEN_BUTTONS = create("wooden_buttons");
 	public static final TagKey<Block> BUTTONS = create("buttons");
@@ -80,6 +79,7 @@ public final class BlockTags {
 	public static final TagKey<Block> CEILING_HANGING_SIGNS = create("ceiling_hanging_signs");
 	public static final TagKey<Block> WALL_HANGING_SIGNS = create("wall_hanging_signs");
 	public static final TagKey<Block> ALL_HANGING_SIGNS = create("all_hanging_signs");
+	public static final TagKey<Block> ALL_SIGNS = create("all_signs");
 	public static final TagKey<Block> DRAGON_IMMUNE = create("dragon_immune");
 	public static final TagKey<Block> DRAGON_TRANSPARENT = create("dragon_transparent");
 	public static final TagKey<Block> WITHER_IMMUNE = create("wither_immune");

@@ -2,8 +2,8 @@ package net.minecraft.world.level.entity;
 
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.phys.AABB;
@@ -27,23 +27,31 @@ public class EntitySection<T extends EntityAccess> {
 		return this.storage.remove(entityAccess);
 	}
 
-	public void getEntities(AABB aABB, Consumer<T> consumer) {
+	public AbortableIterationConsumer.Continuation getEntities(AABB aABB, AbortableIterationConsumer<T> abortableIterationConsumer) {
 		for (T entityAccess : this.storage) {
-			if (entityAccess.getBoundingBox().intersects(aABB)) {
-				consumer.accept(entityAccess);
+			if (entityAccess.getBoundingBox().intersects(aABB) && abortableIterationConsumer.accept(entityAccess).shouldAbort()) {
+				return AbortableIterationConsumer.Continuation.ABORT;
 			}
 		}
+
+		return AbortableIterationConsumer.Continuation.CONTINUE;
 	}
 
-	public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, AABB aABB, Consumer<? super U> consumer) {
+	public <U extends T> AbortableIterationConsumer.Continuation getEntities(
+		EntityTypeTest<T, U> entityTypeTest, AABB aABB, AbortableIterationConsumer<? super U> abortableIterationConsumer
+	) {
 		Collection<? extends T> collection = this.storage.find(entityTypeTest.getBaseClass());
-		if (!collection.isEmpty()) {
+		if (collection.isEmpty()) {
+			return AbortableIterationConsumer.Continuation.CONTINUE;
+		} else {
 			for (T entityAccess : collection) {
 				U entityAccess2 = (U)entityTypeTest.tryCast(entityAccess);
-				if (entityAccess2 != null && entityAccess.getBoundingBox().intersects(aABB)) {
-					consumer.accept(entityAccess2);
+				if (entityAccess2 != null && entityAccess.getBoundingBox().intersects(aABB) && abortableIterationConsumer.accept(entityAccess2).shouldAbort()) {
+					return AbortableIterationConsumer.Continuation.ABORT;
 				}
 			}
+
+			return AbortableIterationConsumer.Continuation.CONTINUE;
 		}
 	}
 
