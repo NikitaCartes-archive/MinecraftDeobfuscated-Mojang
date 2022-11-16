@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -39,15 +40,29 @@ extends Block {
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(INSTRUMENT, NoteBlockInstrument.HARP)).setValue(NOTE, 0)).setValue(POWERED, false));
     }
 
+    private static boolean isFeatureFlagEnabled(LevelAccessor levelAccessor) {
+        return levelAccessor.enabledFeatures().contains(FeatureFlags.UPDATE_1_20);
+    }
+
+    private BlockState setInstrument(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+        if (NoteBlock.isFeatureFlagEnabled(levelAccessor)) {
+            BlockState blockState2 = levelAccessor.getBlockState(blockPos.above());
+            return (BlockState)blockState.setValue(INSTRUMENT, NoteBlockInstrument.byStateAbove(blockState2).orElseGet(() -> NoteBlockInstrument.byStateBelow(levelAccessor.getBlockState(blockPos.below()))));
+        }
+        return (BlockState)blockState.setValue(INSTRUMENT, NoteBlockInstrument.byStateBelow(levelAccessor.getBlockState(blockPos.below())));
+    }
+
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(INSTRUMENT, NoteBlockInstrument.byState(blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().below())));
+        return this.setInstrument(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), this.defaultBlockState());
     }
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        if (direction == Direction.DOWN) {
-            return (BlockState)blockState.setValue(INSTRUMENT, NoteBlockInstrument.byState(blockState2));
+        boolean bl;
+        boolean bl2 = NoteBlock.isFeatureFlagEnabled(levelAccessor) ? direction.getAxis() == Direction.Axis.Y : (bl = direction == Direction.DOWN);
+        if (bl) {
+            return this.setInstrument(levelAccessor, blockPos, blockState);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
@@ -57,18 +72,17 @@ extends Block {
         boolean bl2 = level.hasNeighborSignal(blockPos);
         if (bl2 != blockState.getValue(POWERED)) {
             if (bl2) {
-                this.playNote(null, level, blockPos);
+                this.playNote(null, blockState, level, blockPos);
             }
             level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, bl2), 3);
         }
     }
 
-    private void playNote(@Nullable Entity entity, Level level, BlockPos blockPos) {
-        if (!level.getBlockState(blockPos.above()).isAir()) {
-            return;
+    private void playNote(@Nullable Entity entity, BlockState blockState, Level level, BlockPos blockPos) {
+        if (this.hasMobHead(blockState) || level.getBlockState(blockPos.above()).isAir()) {
+            level.blockEvent(blockPos, this, 0, 0);
+            level.gameEvent(entity, GameEvent.NOTE_BLOCK_PLAY, blockPos);
         }
-        level.blockEvent(blockPos, this, 0, 0);
-        level.gameEvent(entity, GameEvent.NOTE_BLOCK_PLAY, blockPos);
     }
 
     @Override
@@ -78,7 +92,7 @@ extends Block {
         }
         blockState = (BlockState)blockState.cycle(NOTE);
         level.setBlock(blockPos, blockState, 3);
-        this.playNote(player, level, blockPos);
+        this.playNote(player, blockState, level, blockPos);
         player.awardStat(Stats.TUNE_NOTEBLOCK);
         return InteractionResult.CONSUME;
     }
@@ -88,16 +102,25 @@ extends Block {
         if (level.isClientSide) {
             return;
         }
-        this.playNote(player, level, blockPos);
+        this.playNote(player, blockState, level, blockPos);
         player.awardStat(Stats.PLAY_NOTEBLOCK);
+    }
+
+    private boolean hasMobHead(BlockState blockState) {
+        return blockState.getValue(INSTRUMENT).isMobHeadInstrument();
     }
 
     @Override
     public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
-        int k = blockState.getValue(NOTE);
-        float f = (float)Math.pow(2.0, (double)(k - 12) / 12.0);
+        float f;
+        if (!this.hasMobHead(blockState)) {
+            int k = blockState.getValue(NOTE);
+            f = (float)Math.pow(2.0, (double)(k - 12) / 12.0);
+            level.addParticle(ParticleTypes.NOTE, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + 0.5, (double)k / 24.0, 0.0, 0.0);
+        } else {
+            f = 1.0f;
+        }
         level.playSound(null, blockPos, blockState.getValue(INSTRUMENT).getSoundEvent(), SoundSource.RECORDS, 3.0f, f);
-        level.addParticle(ParticleTypes.NOTE, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + 0.5, (double)k / 24.0, 0.0, 0.0);
         return true;
     }
 

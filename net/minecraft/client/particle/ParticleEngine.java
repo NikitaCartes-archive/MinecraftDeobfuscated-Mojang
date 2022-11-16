@@ -130,6 +130,7 @@ public class ParticleEngine
 implements PreparableReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final FileToIdConverter PARTICLE_LISTER = FileToIdConverter.json("particles");
+    private static final ResourceLocation PARTICLES_ATLAS_INFO = new ResourceLocation("particles");
     private static final int MAX_PARTICLES_PER_LAYER = 16384;
     private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(ParticleRenderType.TERRAIN_SHEET, ParticleRenderType.PARTICLE_SHEET_OPAQUE, ParticleRenderType.PARTICLE_SHEET_LIT, ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT, ParticleRenderType.CUSTOM);
     protected ClientLevel level;
@@ -272,7 +273,7 @@ implements PreparableReloadListener {
             });
             return Util.sequence(list);
         });
-        CompletionStage completableFuture2 = ((CompletableFuture)CompletableFuture.supplyAsync(() -> SpriteLoader.listSprites(resourceManager, "particle"), executor).thenCompose(map -> SpriteLoader.create(this.textureAtlas).stitch((Map<ResourceLocation, Resource>)map, 0, executor))).thenCompose(SpriteLoader.Preparations::waitForUpload);
+        CompletionStage completableFuture2 = SpriteLoader.create(this.textureAtlas).loadAndStitch(resourceManager, PARTICLES_ATLAS_INFO, 0, executor).thenCompose(SpriteLoader.Preparations::waitForUpload);
         return ((CompletableFuture)CompletableFuture.allOf(new CompletableFuture[]{completableFuture2, completableFuture}).thenCompose(preparationBarrier::wait)).thenAcceptAsync(arg_0 -> this.method_45766(profilerFiller2, (CompletableFuture)completableFuture2, (CompletableFuture)completableFuture, arg_0), executor2);
     }
 
@@ -285,25 +286,25 @@ implements PreparableReloadListener {
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
-    private Optional<List<ResourceLocation>> loadParticleDescription(ResourceLocation resourceLocation2, Resource resource) {
+    private Optional<List<ResourceLocation>> loadParticleDescription(ResourceLocation resourceLocation, Resource resource) {
         try (BufferedReader reader = resource.openAsReader();){
             ParticleDescription particleDescription = ParticleDescription.fromJson(GsonHelper.parse(reader));
             List<ResourceLocation> list = particleDescription.getTextures();
-            boolean bl = this.spriteSets.containsKey(resourceLocation2);
+            boolean bl = this.spriteSets.containsKey(resourceLocation);
             if (list == null) {
                 if (bl) {
-                    throw new IllegalStateException("Missing texture list for particle " + resourceLocation2);
+                    throw new IllegalStateException("Missing texture list for particle " + resourceLocation);
                 }
                 Optional<List<ResourceLocation>> optional2 = Optional.empty();
                 return optional2;
             }
             if (!bl) {
-                throw new IllegalStateException("Redundant texture list for particle " + resourceLocation2);
+                throw new IllegalStateException("Redundant texture list for particle " + resourceLocation);
             }
-            Optional<List<ResourceLocation>> optional = Optional.of(list.stream().map(resourceLocation -> resourceLocation.withPrefix("particle/")).collect(Collectors.toList()));
+            Optional<List<ResourceLocation>> optional = Optional.of(list);
             return optional;
         } catch (IOException iOException) {
-            throw new IllegalStateException("Failed to load description for particle " + resourceLocation2, iOException);
+            throw new IllegalStateException("Failed to load description for particle " + resourceLocation, iOException);
         }
     }
 

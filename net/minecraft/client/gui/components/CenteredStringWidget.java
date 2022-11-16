@@ -28,6 +28,7 @@ extends AbstractWidget {
     public CenteredStringWidget(int i, int j, int k, int l, Component component, Font font) {
         super(i, j, k, l, component);
         this.font = font;
+        this.active = false;
     }
 
     public CenteredStringWidget color(int i) {
@@ -37,11 +38,6 @@ extends AbstractWidget {
 
     @Override
     public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-    }
-
-    @Override
-    public boolean changeFocus(boolean bl) {
-        return false;
     }
 
     @Override

@@ -22,6 +22,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.advancements.packs.UpdateOneTwentyVanillaAdvancementProvider;
 import net.minecraft.data.advancements.packs.VanillaAdvancementProvider;
 import net.minecraft.data.info.BiomeParametersDumpReport;
 import net.minecraft.data.info.BlockListReport;
@@ -136,6 +137,7 @@ public class Main {
         tagsProvider = packGenerator2.addProvider(Main.bindRegistries(UpdateOneTwentyBlockTagsProvider::new, completableFuture));
         packGenerator2.addProvider(packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, completableFuture, tagsProvider));
         packGenerator2.addProvider(UpdateOneTwentyLootTableProvider::create);
+        packGenerator2.addProvider(Main.bindRegistries(UpdateOneTwentyVanillaAdvancementProvider::create, completableFuture));
         packGenerator2.addProvider(packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.update_1_20.description"), FeatureFlagSet.of(FeatureFlags.UPDATE_1_20)));
         return dataGenerator;
     }

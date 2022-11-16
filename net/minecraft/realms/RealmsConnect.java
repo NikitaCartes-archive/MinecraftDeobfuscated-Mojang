@@ -58,7 +58,7 @@ public class RealmsConnect {
                     if (RealmsConnect.this.aborted) {
                         return;
                     }
-                    RealmsConnect.this.connection.setListener(new ClientHandshakePacketListenerImpl(RealmsConnect.this.connection, minecraft, realmsServer.toServerData(string), RealmsConnect.this.onlineScreen, component -> {}));
+                    RealmsConnect.this.connection.setListener(new ClientHandshakePacketListenerImpl(RealmsConnect.this.connection, minecraft, realmsServer.toServerData(string), RealmsConnect.this.onlineScreen, false, null, component -> {}));
                     if (RealmsConnect.this.aborted) {
                         return;
                     }

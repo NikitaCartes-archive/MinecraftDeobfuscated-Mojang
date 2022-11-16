@@ -902,6 +902,7 @@ ServerGamePacketListener {
         this.player.absMoveTo(d, e, f, g, h);
         if (!this.player.noPhysics && !this.player.isSleeping() && (bl3 && serverLevel.noCollision(this.player, aABB) || this.isPlayerCollidingWithAnythingNew(serverLevel, aABB))) {
             this.teleport(i, j, k, g, h);
+            this.player.doCheckFallDamage(this.player.getY() - l, serverboundMovePlayerPacket.isOnGround());
             return;
         }
         this.clientIsFloating = t >= -0.03125 && !bl22 && this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR && !this.server.isFlightAllowed() && !this.player.getAbilities().mayfly && !this.player.hasEffect(MobEffects.LEVITATION) && !this.player.isFallFlying() && !this.player.isAutoSpinAttack() && this.noBlocksAround(this.player);

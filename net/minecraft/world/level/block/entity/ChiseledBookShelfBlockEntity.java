@@ -4,113 +4,79 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.logging.LogUtils;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.StackInventory;
+import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.slf4j.Logger;
 
 public class ChiseledBookShelfBlockEntity
 extends BlockEntity
 implements Container {
-    private static final Logger LOGGER = LogUtils.getLogger();
     public static final int MAX_BOOKS_IN_STORAGE = 6;
-    private final StackInventory books = new StackInventory(6);
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private final NonNullList<ItemStack> items = NonNullList.withSize(6, ItemStack.EMPTY);
 
     public ChiseledBookShelfBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(BlockEntityType.CHISELED_BOOKSHELF, blockPos, blockState);
     }
 
-    private void updateBlockState() {
-        int i = this.getBlockState().getValue(BlockStateProperties.BOOKS_STORED);
-        if (i == this.books.size()) {
+    private void updateState(int i) {
+        if (i < 0 || i >= 6) {
+            LOGGER.error("Expected slot 0-5, got {}", (Object)i);
             return;
         }
-        Objects.requireNonNull(this.level).setBlock(this.worldPosition, (BlockState)((BlockState)this.getBlockState().setValue(BlockStateProperties.BOOKS_STORED, this.books.size())).setValue(BlockStateProperties.LAST_INTERACTION_BOOK_SLOT, i > this.books.size() ? this.books.size() + 1 : this.books.size()), 3);
-    }
-
-    public ItemStack removeBook() {
-        ItemStack itemStack = this.books.pop();
-        if (!itemStack.isEmpty()) {
-            this.updateBlockState();
+        BlockState blockState = (BlockState)this.getBlockState().setValue(BlockStateProperties.CHISELED_BOOKSHELF_LAST_INTERACTION_BOOK_SLOT, i + 1);
+        for (int j = 0; j < ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.size(); ++j) {
+            boolean bl = !this.getItem(j).isEmpty();
+            BooleanProperty booleanProperty = ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(j);
+            blockState = (BlockState)blockState.setValue(booleanProperty, bl);
         }
-        return itemStack;
-    }
-
-    public List<ItemStack> removeAllBooksWithoutBlockStateUpdate() {
-        return this.books.clear();
-    }
-
-    public boolean addBook(ItemStack itemStack) {
-        if (this.isFull()) {
-            return false;
-        }
-        if (itemStack.getCount() > 1) {
-            LOGGER.warn("tried to add a stack with more than one items {} at {}", (Object)itemStack, (Object)this.worldPosition);
-            return false;
-        }
-        if (!itemStack.is(ItemTags.BOOKSHELF_BOOKS)) {
-            LOGGER.warn("tried to add a non book: {} at {}", (Object)itemStack, (Object)this.worldPosition);
-            return false;
-        }
-        if (!this.books.push(itemStack)) {
-            LOGGER.warn("failed to add {} at {}", (Object)itemStack, (Object)this.worldPosition);
-            return false;
-        }
-        this.updateBlockState();
-        return true;
+        Objects.requireNonNull(this.level).setBlock(this.worldPosition, blockState, 3);
     }
 
     @Override
     public void load(CompoundTag compoundTag) {
-        NonNullList<ItemStack> nonNullList = NonNullList.withSize(6, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(compoundTag, nonNullList);
-        this.books.clear();
-        for (int i = 0; i < nonNullList.size(); ++i) {
-            ItemStack itemStack = nonNullList.get(i);
-            if (itemStack.isEmpty()) continue;
-            this.books.pushWithSlot(itemStack, i);
-        }
+        ContainerHelper.loadAllItems(compoundTag, this.items);
     }
 
     @Override
     protected void saveAdditional(CompoundTag compoundTag) {
-        ContainerHelper.saveAllItems(compoundTag, ChiseledBookShelfBlockEntity.asNonNullList(this.books), true);
+        ContainerHelper.saveAllItems(compoundTag, this.items, true);
     }
 
-    private static NonNullList<ItemStack> asNonNullList(StackInventory stackInventory) {
-        NonNullList<ItemStack> nonNullList = NonNullList.withSize(6, ItemStack.EMPTY);
-        for (int i = 0; i < 6; ++i) {
-            nonNullList.set(i, stackInventory.get(i));
-        }
-        return nonNullList;
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag compoundTag = new CompoundTag();
+        ContainerHelper.saveAllItems(compoundTag, this.items, true);
+        return compoundTag;
+    }
+
+    public int count() {
+        return (int)this.items.stream().filter(Predicate.not(ItemStack::isEmpty)).count();
     }
 
     @Override
     public void clearContent() {
-        this.books.clear();
-    }
-
-    public int bookCount() {
-        return this.books.size();
-    }
-
-    public boolean isFull() {
-        return this.books.isFull();
+        this.items.clear();
     }
 
     @Override
@@ -119,37 +85,35 @@ implements Container {
     }
 
     @Override
-    public void setChanged() {
-        this.books.flatten();
-        this.updateBlockState();
-    }
-
-    @Override
     public boolean isEmpty() {
-        return this.books.isEmpty();
+        return this.items.stream().allMatch(ItemStack::isEmpty);
     }
 
     @Override
     public ItemStack getItem(int i) {
-        return this.books.get(i);
+        return this.items.get(i);
     }
 
     @Override
     public ItemStack removeItem(int i, int j) {
-        ItemStack itemStack = this.removeItemNoUpdate(i);
-        this.updateBlockState();
+        ItemStack itemStack = Objects.requireNonNullElse(this.items.get(i), ItemStack.EMPTY);
+        this.items.set(i, ItemStack.EMPTY);
+        if (!itemStack.isEmpty()) {
+            this.updateState(i);
+        }
         return itemStack;
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int i) {
-        return this.books.remove(i);
+        return this.removeItem(i, 1);
     }
 
     @Override
     public void setItem(int i, ItemStack itemStack) {
-        if (this.books.set(itemStack, i)) {
-            this.updateBlockState();
+        if (itemStack.is(ItemTags.BOOKSHELF_BOOKS)) {
+            this.items.set(i, itemStack);
+            this.updateState(i);
         }
     }
 
@@ -166,27 +130,16 @@ implements Container {
         if (this.level.getBlockEntity(this.worldPosition) != this) {
             return false;
         }
-        return player.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) <= 64.0;
+        return !(player.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) > 64.0);
     }
 
     @Override
     public boolean canPlaceItem(int i, ItemStack itemStack) {
-        return !this.isFull() && itemStack.is(ItemTags.BOOKSHELF_BOOKS) && this.books.canSet(i);
+        return itemStack.is(ItemTags.BOOKSHELF_BOOKS) && this.getItem(i).isEmpty();
     }
 
-    @Override
-    public int countItem(Item item) {
-        return (int)this.books.view().stream().filter(itemStack -> itemStack.is(item)).count();
-    }
-
-    @Override
-    public boolean hasAnyOf(Set<Item> set) {
-        return this.books.view().stream().anyMatch(itemStack -> set.contains(itemStack.getItem()));
-    }
-
-    @Override
-    public boolean hasAnyMatching(Predicate<ItemStack> predicate) {
-        return this.books.view().stream().anyMatch(predicate);
+    public /* synthetic */ Packet getUpdatePacket() {
+        return this.getUpdatePacket();
     }
 }
 

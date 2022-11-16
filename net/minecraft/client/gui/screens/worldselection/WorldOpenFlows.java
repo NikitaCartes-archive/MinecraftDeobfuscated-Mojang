@@ -82,7 +82,7 @@ public class WorldOpenFlows {
                 WorldDimensions.Complete complete = ((WorldDimensions)function.apply(dataLoadContext.datapackWorldgen())).bake(dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM));
                 return new WorldLoader.DataLoadOutput<PrimaryLevelData>(new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), complete.lifecycle()), complete.dimensionsRegistryAccess());
             }, WorldStem::new);
-            this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
+            this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem, true);
         } catch (Exception exception) {
             LOGGER.warn("Failed to load datapacks, can't proceed with server load", exception);
             WorldOpenFlows.safeCloseAccess(levelStorageAccess, string);
@@ -104,7 +104,7 @@ public class WorldOpenFlows {
     public void createLevelFromExistingSettings(LevelStorageSource.LevelStorageAccess levelStorageAccess, ReloadableServerResources reloadableServerResources, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, WorldData worldData) {
         PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
         CloseableResourceManager closeableResourceManager = new WorldLoader.PackConfig(packRepository, worldData.getDataConfiguration(), false, false).createResourceManager().getSecond();
-        this.minecraft.doWorldLoad(levelStorageAccess.getLevelId(), levelStorageAccess, packRepository, new WorldStem(closeableResourceManager, reloadableServerResources, layeredRegistryAccess, worldData));
+        this.minecraft.doWorldLoad(levelStorageAccess.getLevelId(), levelStorageAccess, packRepository, new WorldStem(closeableResourceManager, reloadableServerResources, layeredRegistryAccess, worldData), true);
     }
 
     private WorldStem loadWorldStem(LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl, PackRepository packRepository) throws Exception {
@@ -190,7 +190,7 @@ public class WorldOpenFlows {
             return this.promptBundledPackLoadFailure();
         }, (Executor)this.minecraft)).thenAcceptAsync(boolean_ -> {
             if (boolean_.booleanValue()) {
-                this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem);
+                this.minecraft.doWorldLoad(string, levelStorageAccess, packRepository, worldStem, false);
             } else {
                 worldStem.close();
                 WorldOpenFlows.safeCloseAccess(levelStorageAccess, string);

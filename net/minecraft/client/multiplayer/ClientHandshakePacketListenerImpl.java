@@ -13,6 +13,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
 import java.security.PublicKey;
+import java.time.Duration;
 import java.util.function.Consumer;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -55,13 +56,18 @@ implements ClientLoginPacketListener {
     private final Consumer<Component> updateStatus;
     private final Connection connection;
     private GameProfile localGameProfile;
+    private final boolean newWorld;
+    @Nullable
+    private final Duration worldLoadDuration;
 
-    public ClientHandshakePacketListenerImpl(Connection connection, Minecraft minecraft, @Nullable ServerData serverData, @Nullable Screen screen, Consumer<Component> consumer) {
+    public ClientHandshakePacketListenerImpl(Connection connection, Minecraft minecraft, @Nullable ServerData serverData, @Nullable Screen screen, boolean bl, @Nullable Duration duration, Consumer<Component> consumer) {
         this.connection = connection;
         this.minecraft = minecraft;
         this.serverData = serverData;
         this.parent = screen;
         this.updateStatus = consumer;
+        this.newWorld = bl;
+        this.worldLoadDuration = duration;
     }
 
     @Override
@@ -124,7 +130,7 @@ implements ClientLoginPacketListener {
         this.updateStatus.accept(Component.translatable("connect.joining"));
         this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
         this.connection.setProtocol(ConnectionProtocol.PLAY);
-        this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.serverData, this.localGameProfile, this.minecraft.createTelemetryManager()));
+        this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.serverData, this.localGameProfile, this.minecraft.getTelemetryManager().createWorldSessionManager(this.newWorld, this.worldLoadDuration)));
     }
 
     @Override

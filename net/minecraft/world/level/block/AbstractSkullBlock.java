@@ -37,8 +37,12 @@ implements Wearable {
     @Override
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        if (level.isClientSide && (blockState.is(Blocks.DRAGON_HEAD) || blockState.is(Blocks.DRAGON_WALL_HEAD))) {
-            return AbstractSkullBlock.createTickerHelper(blockEntityType, BlockEntityType.SKULL, SkullBlockEntity::dragonHeadAnimation);
+        if (level.isClientSide) {
+            boolean bl;
+            boolean bl2 = bl = blockState.is(Blocks.DRAGON_HEAD) || blockState.is(Blocks.DRAGON_WALL_HEAD) || blockState.is(Blocks.PIGLIN_HEAD) || blockState.is(Blocks.PIGLIN_WALL_HEAD);
+            if (bl) {
+                return AbstractSkullBlock.createTickerHelper(blockEntityType, BlockEntityType.SKULL, SkullBlockEntity::animation);
+            }
         }
         return null;
     }

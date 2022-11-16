@@ -81,7 +81,6 @@ extends Screen {
     @Override
     protected void init() {
         boolean bl;
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.poolEdit = new EditBox(this.font, this.width / 2 - 152, 20, 300, 20, Component.translatable("jigsaw_block.pool"));
         this.poolEdit.setMaxLength(128);
         this.poolEdit.setValue(this.jigsawEntity.getPool().location().toString());
@@ -158,11 +157,6 @@ extends Screen {
         this.levels = k;
         this.joint = jointType;
         this.jointButton.setValue(jointType);
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override

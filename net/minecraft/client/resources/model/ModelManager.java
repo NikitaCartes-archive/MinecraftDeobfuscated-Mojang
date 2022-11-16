@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +27,6 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.blockentity.BellRenderer;
-import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
-import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -56,26 +52,7 @@ public class ModelManager
 implements PreparableReloadListener,
 AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Map<ResourceLocation, AtlasSet.ResourceLister> VANILLA_ATLASES = Map.of(Sheets.BANNER_SHEET, resourceManager -> {
-        HashMap map = new HashMap();
-        SpriteLoader.addSprite(resourceManager, ModelBakery.BANNER_BASE.texture(), map::put);
-        SpriteLoader.listSprites(resourceManager, "entity/banner", map::put);
-        return map;
-    }, Sheets.BED_SHEET, resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/bed"), Sheets.CHEST_SHEET, resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/chest"), Sheets.SHIELD_SHEET, resourceManager -> {
-        HashMap map = new HashMap();
-        SpriteLoader.addSprite(resourceManager, ModelBakery.SHIELD_BASE.texture(), map::put);
-        SpriteLoader.addSprite(resourceManager, ModelBakery.NO_PATTERN_SHIELD.texture(), map::put);
-        SpriteLoader.listSprites(resourceManager, "entity/shield", map::put);
-        return map;
-    }, Sheets.SIGN_SHEET, resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/signs"), Sheets.SHULKER_SHEET, resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/shulker"), TextureAtlas.LOCATION_BLOCKS, resourceManager -> {
-        HashMap map = new HashMap();
-        SpriteLoader.listSprites(resourceManager, "block", map::put);
-        SpriteLoader.listSprites(resourceManager, "item", map::put);
-        SpriteLoader.listSprites(resourceManager, "entity/conduit", map::put);
-        SpriteLoader.addSprite(resourceManager, BellRenderer.BELL_RESOURCE_LOCATION.texture(), map::put);
-        SpriteLoader.addSprite(resourceManager, EnchantTableRenderer.BOOK_LOCATION.texture(), map::put);
-        return map;
-    }, Sheets.HANGING_SIGN_SHEET, resourceManager -> SpriteLoader.listSprites(resourceManager, "entity/signs/hanging"));
+    private static final Map<ResourceLocation, ResourceLocation> VANILLA_ATLASES = Map.of(Sheets.BANNER_SHEET, new ResourceLocation("banner_patterns"), Sheets.BED_SHEET, new ResourceLocation("beds"), Sheets.CHEST_SHEET, new ResourceLocation("chests"), Sheets.SHIELD_SHEET, new ResourceLocation("shield_patterns"), Sheets.SIGN_SHEET, new ResourceLocation("signs"), Sheets.SHULKER_SHEET, new ResourceLocation("shulker_boxes"), TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("blocks"));
     private Map<ResourceLocation, BakedModel> bakedRegistry;
     private final AtlasSet atlases;
     private final BlockModelShaper blockModelShaper;

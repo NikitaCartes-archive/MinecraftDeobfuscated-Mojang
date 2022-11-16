@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.kinds.OptionalBox;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -45,15 +46,10 @@ public class InteractWithDoor {
             if (path.notStarted() || path.isDone()) {
                 return false;
             }
-            if (!Objects.equals(mutableObject.getValue(), path.getNextNode())) {
+            if (Objects.equals(mutableObject.getValue(), path.getNextNode())) {
                 mutableInt.setValue(20);
-                return true;
-            }
-            if (mutableInt.getValue() > 0) {
-                mutableInt.decrement();
-            }
-            if (mutableInt.getValue() == 0) {
-                return true;
+            } else if (mutableInt.decrementAndGet() > 0) {
+                return false;
             }
             mutableObject.setValue(path.getNextNode());
             Node node = path.getPreviousNode();
@@ -65,14 +61,14 @@ public class InteractWithDoor {
                 if (!doorBlock.isOpen(blockState)) {
                     doorBlock.setOpen(livingEntity, serverLevel, blockState, blockPos, true);
                 }
-                InteractWithDoor.rememberDoorToClose(memoryAccessor2, optional, serverLevel, livingEntity, blockPos);
+                optional = InteractWithDoor.rememberDoorToClose(memoryAccessor2, optional, serverLevel, blockPos);
             }
             if ((blockState2 = serverLevel.getBlockState(blockPos2 = node2.asBlockPos())).is(BlockTags.WOODEN_DOORS, blockStateBase -> blockStateBase.getBlock() instanceof DoorBlock) && !(doorBlock2 = (DoorBlock)blockState2.getBlock()).isOpen(blockState2)) {
                 doorBlock2.setOpen(livingEntity, serverLevel, blockState2, blockPos2, true);
-                InteractWithDoor.rememberDoorToClose(memoryAccessor2, optional, serverLevel, livingEntity, blockPos2);
+                optional = InteractWithDoor.rememberDoorToClose(memoryAccessor2, optional, serverLevel, blockPos2);
             }
             optional.ifPresent(set -> InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, node, node2, set, instance.tryGet(memoryAccessor3)));
-            return false;
+            return true;
         }));
     }
 
@@ -132,9 +128,16 @@ public class InteractWithDoor {
         return globalPos.dimension() != serverLevel.dimension() || !globalPos.pos().closerToCenterThan(livingEntity.position(), 2.0);
     }
 
-    private static void rememberDoorToClose(MemoryAccessor<OptionalBox.Mu, Set<GlobalPos>> memoryAccessor, Optional<Set<GlobalPos>> optional, ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos) {
+    private static Optional<Set<GlobalPos>> rememberDoorToClose(MemoryAccessor<OptionalBox.Mu, Set<GlobalPos>> memoryAccessor, Optional<Set<GlobalPos>> optional, ServerLevel serverLevel, BlockPos blockPos) {
         GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), blockPos);
-        optional.ifPresentOrElse(set -> set.add(globalPos), () -> memoryAccessor.set(Sets.newHashSet(globalPos)));
+        return Optional.of(optional.map(set -> {
+            set.add(globalPos);
+            return set;
+        }).orElseGet(() -> {
+            HashSet<GlobalPos> set = Sets.newHashSet(globalPos);
+            memoryAccessor.set(set);
+            return set;
+        }));
     }
 }
 

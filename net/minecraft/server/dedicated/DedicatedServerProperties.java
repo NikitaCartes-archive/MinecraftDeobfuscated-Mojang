@@ -108,7 +108,7 @@ extends Settings<DedicatedServerProperties> {
         super(properties);
         String string2 = this.get("level-seed", "");
         boolean bl = this.get("generate-structures", true);
-        long l = WorldOptions.parseSeedOrElseRandom(string2);
+        long l = WorldOptions.parseSeed(string2).orElse(WorldOptions.randomSeed());
         this.worldOptions = new WorldOptions(l, bl, false);
         this.worldDimensionData = new WorldDimensionData(this.get("generator-settings", (String string) -> GsonHelper.parse(!string.isEmpty() ? string : "{}"), new JsonObject()), this.get("level-type", (String string) -> string.toLowerCase(Locale.ROOT), WorldPresets.NORMAL.location().toString()));
         this.serverResourcePackInfo = DedicatedServerProperties.getServerPackInfo(this.get("resource-pack", ""), this.get("resource-pack-sha1", ""), this.getLegacyString("resource-pack-hash"), this.get("require-resource-pack", false), this.get("resource-pack-prompt", ""));

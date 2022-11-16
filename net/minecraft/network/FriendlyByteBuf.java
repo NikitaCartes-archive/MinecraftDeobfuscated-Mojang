@@ -11,7 +11,6 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufInputStream;
@@ -46,6 +45,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -106,21 +106,16 @@ extends ByteBuf {
         return 10;
     }
 
+    @Deprecated
     public <T> T readWithCodec(Codec<T> codec) {
         CompoundTag compoundTag = this.readAnySizeNbt();
-        DataResult dataResult = codec.parse(NbtOps.INSTANCE, compoundTag);
-        dataResult.error().ifPresent(partialResult -> {
-            throw new EncoderException("Failed to decode: " + partialResult.message() + " " + compoundTag);
-        });
-        return (T)dataResult.result().get();
+        return (T)Util.getOrThrow(codec.parse(NbtOps.INSTANCE, compoundTag), string -> new DecoderException("Failed to decode: " + string + " " + compoundTag));
     }
 
+    @Deprecated
     public <T> void writeWithCodec(Codec<T> codec, T object) {
-        DataResult<Tag> dataResult = codec.encodeStart(NbtOps.INSTANCE, (Tag)object);
-        dataResult.error().ifPresent(partialResult -> {
-            throw new EncoderException("Failed to encode: " + partialResult.message() + " " + object);
-        });
-        this.writeNbt((CompoundTag)dataResult.result().get());
+        Tag tag = Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, (Tag)object), string -> new EncoderException("Failed to encode: " + string + " " + object));
+        this.writeNbt((CompoundTag)tag);
     }
 
     public <T> void writeId(IdMap<T> idMap, T object) {

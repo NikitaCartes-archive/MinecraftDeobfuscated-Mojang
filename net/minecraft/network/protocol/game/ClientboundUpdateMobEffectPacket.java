@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClientboundUpdateMobEffectPacket
 implements Packet<ClientGamePacketListener> {
-    private static final short LONG_DURATION_THRESHOLD = Short.MAX_VALUE;
     private static final int FLAG_AMBIENT = 1;
     private static final int FLAG_VISIBLE = 2;
     private static final int FLAG_SHOW_ICON = 4;
@@ -61,10 +60,6 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf2.writeVarInt(this.effectDurationTicks);
         friendlyByteBuf2.writeByte(this.flags);
         friendlyByteBuf2.writeNullable(this.factorData, (friendlyByteBuf, factorData) -> friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, factorData));
-    }
-
-    public boolean isSuperLongDuration() {
-        return this.effectDurationTicks >= Short.MAX_VALUE;
     }
 
     @Override

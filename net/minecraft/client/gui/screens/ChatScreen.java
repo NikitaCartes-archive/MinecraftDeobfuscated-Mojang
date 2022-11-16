@@ -41,7 +41,6 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.historyPos = this.minecraft.gui.getChat().getRecentChat().size();
         this.input = new EditBox(this.minecraft.fontFilterFishy, 4, this.height - 12, this.width - 4, 12, (Component)Component.translatable("chat.editBox")){
 
@@ -70,7 +69,6 @@ extends Screen {
 
     @Override
     public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
         this.minecraft.gui.getChat().resetChatScroll();
     }
 

@@ -331,6 +331,17 @@ public class Options {
         case 110 -> Options.genericValueLabel(component, Component.translatable("options.fov.max"));
         default -> Options.genericValueLabel(component, integer);
     }, new OptionInstance.IntRange(30, 110), Codec.DOUBLE.xmap(double_ -> (int)(double_ * 40.0 + 70.0), integer -> ((double)integer.intValue() - 70.0) / 40.0), 70, integer -> Minecraft.getInstance().levelRenderer.needsUpdate());
+    private static final MutableComponent TELEMETRY_TOOLTIP = Component.translatable("options.telemetry.button.tooltip", Component.translatable("options.telemetry.state.minimal"), Component.translatable("options.telemetry.state.all"));
+    private final OptionInstance<Boolean> telemetryOptInExtra = OptionInstance.createBoolean("options.telemetry.button", OptionInstance.cachedConstantTooltip(TELEMETRY_TOOLTIP), (component, boolean_) -> {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (!minecraft.allowsTelemetry()) {
+            return Component.translatable("options.telemetry.state.none");
+        }
+        if (boolean_.booleanValue() && minecraft.extraTelemetryAvailable()) {
+            return Component.translatable("options.telemetry.state.all");
+        }
+        return Component.translatable("options.telemetry.state.minimal");
+    }, false, boolean_ -> {});
     private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = Component.translatable("options.screenEffectScale.tooltip");
     private final OptionInstance<Double> screenEffectScale = new OptionInstance<Double>("options.screenEffectScale", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT), (component, double_) -> {
         if (double_ == 0.0) {
@@ -637,6 +648,10 @@ public class Options {
         return this.fov;
     }
 
+    public OptionInstance<Boolean> telemetryOptInExtra() {
+        return this.telemetryOptInExtra;
+    }
+
     public OptionInstance<Double> screenEffectScale() {
         return this.screenEffectScale;
     }
@@ -777,6 +792,7 @@ public class Options {
         fieldAccess.process("allowServerListing", this.allowServerListing);
         fieldAccess.process("onlyShowSecureChat", this.onlyShowSecureChat);
         fieldAccess.process("panoramaScrollSpeed", this.panoramaSpeed);
+        fieldAccess.process("telemetryOptInExtra", this.telemetryOptInExtra);
         for (KeyMapping keyMapping : this.keyMappings) {
             String string2;
             String string = keyMapping.saveString();

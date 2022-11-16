@@ -109,7 +109,6 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onCancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
         this.initialMirror = this.structure.getMirror();
@@ -239,11 +238,6 @@ extends Screen {
         this.integrityEdit.setValue(string8);
         this.seedEdit.setValue(string9);
         this.dataEdit.setValue(string10);
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     private void updateDirectionButtons() {

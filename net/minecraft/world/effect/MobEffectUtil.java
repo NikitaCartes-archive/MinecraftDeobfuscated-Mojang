@@ -18,9 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 public final class MobEffectUtil {
     public static String formatDuration(MobEffectInstance mobEffectInstance, float f) {
-        if (mobEffectInstance.isNoCounter()) {
-            return "**:**";
-        }
         int i = Mth.floor((float)mobEffectInstance.getDuration() * f);
         return StringUtil.formatTickDuration(i);
     }

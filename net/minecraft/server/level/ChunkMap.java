@@ -1063,6 +1063,19 @@ implements ChunkHolder.PlayerProvider {
         }
     }
 
+    public void resendChunk(ChunkAccess chunkAccess) {
+        LevelChunk levelChunk;
+        ChunkPos chunkPos = chunkAccess.getPos();
+        LevelChunk levelChunk2 = chunkAccess instanceof LevelChunk ? (levelChunk = (LevelChunk)chunkAccess) : this.level.getChunk(chunkPos.x, chunkPos.z);
+        MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject = new MutableObject<ClientboundLevelChunkWithLightPacket>();
+        for (ServerPlayer serverPlayer : this.getPlayers(chunkPos, false)) {
+            if (mutableObject.getValue() == null) {
+                mutableObject.setValue(new ClientboundLevelChunkWithLightPacket(levelChunk2, this.lightEngine, null, null, true));
+            }
+            serverPlayer.trackChunk(chunkPos, (Packet)mutableObject.getValue());
+        }
+    }
+
     private void playerLoadedChunk(ServerPlayer serverPlayer, MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject, LevelChunk levelChunk) {
         if (mutableObject.getValue() == null) {
             mutableObject.setValue(new ClientboundLevelChunkWithLightPacket(levelChunk, this.lightEngine, null, null, true));

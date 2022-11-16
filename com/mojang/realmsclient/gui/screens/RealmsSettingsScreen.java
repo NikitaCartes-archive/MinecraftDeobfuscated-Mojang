@@ -43,7 +43,6 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         int i = this.width / 2 - 106;
         this.doneButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.buttons.done"), button -> this.save()).bounds(i - 2, RealmsSettingsScreen.row(12), 106, 20).build());
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.configureWorldScreen)).bounds(this.width / 2 + 2, RealmsSettingsScreen.row(12), 106, 20).build());
@@ -73,11 +72,6 @@ extends RealmsScreen {
         this.descEdit.setMaxLength(32);
         this.descEdit.setValue(this.serverData.getDescription());
         this.addWidget(this.descEdit);
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override

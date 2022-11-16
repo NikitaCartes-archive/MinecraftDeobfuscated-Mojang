@@ -26,8 +26,8 @@ import net.minecraft.util.ExtraCodecs;
 @Environment(value=EnvType.CLIENT)
 public interface LoggedChatMessage
 extends LoggedChatEvent {
-    public static Player player(GameProfile gameProfile, Component component, PlayerChatMessage playerChatMessage, ChatTrustLevel chatTrustLevel) {
-        return new Player(gameProfile, component, playerChatMessage, chatTrustLevel);
+    public static Player player(GameProfile gameProfile, PlayerChatMessage playerChatMessage, ChatTrustLevel chatTrustLevel) {
+        return new Player(gameProfile, playerChatMessage, chatTrustLevel);
     }
 
     public static System system(Component component, Instant instant) {
@@ -43,9 +43,9 @@ extends LoggedChatEvent {
     public boolean canReport(UUID var1);
 
     @Environment(value=EnvType.CLIENT)
-    public record Player(GameProfile profile, Component displayName, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChatMessage
+    public record Player(GameProfile profile, PlayerChatMessage message, ChatTrustLevel trustLevel) implements LoggedChatMessage
     {
-        public static final Codec<Player> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.GAME_PROFILE.fieldOf("profile")).forGetter(Player::profile), ((MapCodec)ExtraCodecs.COMPONENT.fieldOf("display_name")).forGetter(Player::displayName), PlayerChatMessage.MAP_CODEC.forGetter(Player::message), ChatTrustLevel.CODEC.optionalFieldOf("trust_level", ChatTrustLevel.SECURE).forGetter(Player::trustLevel)).apply((Applicative<Player, ?>)instance, Player::new));
+        public static final Codec<Player> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ExtraCodecs.GAME_PROFILE.fieldOf("profile")).forGetter(Player::profile), PlayerChatMessage.MAP_CODEC.forGetter(Player::message), ChatTrustLevel.CODEC.optionalFieldOf("trust_level", ChatTrustLevel.SECURE).forGetter(Player::trustLevel)).apply((Applicative<Player, ?>)instance, Player::new));
         private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
         @Override
@@ -61,12 +61,12 @@ extends LoggedChatEvent {
         public Component toNarrationComponent() {
             Component component = this.toContentComponent();
             Component component2 = this.getTimeComponent();
-            return Component.translatable("gui.chatSelection.message.narrate", this.displayName, component, component2);
+            return Component.translatable("gui.chatSelection.message.narrate", this.profile.getName(), component, component2);
         }
 
         public Component toHeadingComponent() {
             Component component = this.getTimeComponent();
-            return Component.translatable("gui.chatSelection.heading", this.displayName, component);
+            return Component.translatable("gui.chatSelection.heading", this.profile.getName(), component);
         }
 
         private Component getTimeComponent() {

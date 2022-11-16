@@ -93,7 +93,6 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.backButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onBack()).bounds(this.width / 2 - 100, this.height - 42, 200, 20).build());
         this.backButton.visible = false;
         this.cancelButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onCancel()).bounds(this.width / 2 - 100, this.height - 42, 200, 20).build());
@@ -110,11 +109,6 @@ extends RealmsScreen {
                 });
             }
         }
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     private void onBack() {

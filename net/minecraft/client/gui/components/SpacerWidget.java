@@ -24,6 +24,11 @@ extends AbstractWidget {
     public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
     }
 
+    @Override
+    public boolean changeFocus(boolean bl) {
+        return false;
+    }
+
     public static AbstractWidget width(int i) {
         return new SpacerWidget(i, 0);
     }

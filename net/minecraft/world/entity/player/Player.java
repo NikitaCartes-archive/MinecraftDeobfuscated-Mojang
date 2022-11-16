@@ -1199,7 +1199,7 @@ extends LivingEntity {
             return optional;
         }
         if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel)) {
-            return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, f);
+            return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, blockState.getValue(BedBlock.FACING), f);
         }
         if (!bl) {
             return Optional.empty();

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class Screenshot {
     private static final Logger LOGGER = LogUtils.getLogger();
+    public static final String SCREENSHOT_DIR = "screenshots";
     private int rowHeight;
     private final DataOutputStream outputStream;
     private final byte[] bytes;
@@ -47,7 +48,7 @@ public class Screenshot {
 
     private static void _grab(File file, @Nullable String string, RenderTarget renderTarget, Consumer<Component> consumer) {
         NativeImage nativeImage = Screenshot.takeScreenshot(renderTarget);
-        File file2 = new File(file, "screenshots");
+        File file2 = new File(file, SCREENSHOT_DIR);
         file2.mkdir();
         File file3 = string == null ? Screenshot.getFile(file2) : new File(file2, string);
         Util.ioPool().execute(() -> {
@@ -88,7 +89,7 @@ public class Screenshot {
         this.width = i;
         this.height = j;
         this.rowHeight = k;
-        File file2 = new File(file, "screenshots");
+        File file2 = new File(file, SCREENSHOT_DIR);
         file2.mkdir();
         String string = "huge_" + Util.getFilenameFormattedDateTime();
         int l = 1;

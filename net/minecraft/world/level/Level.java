@@ -29,6 +29,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -583,22 +584,36 @@ AutoCloseable {
 
     @Override
     public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate) {
-        this.getProfiler().incrementCounter("getEntities");
         ArrayList list = Lists.newArrayList();
+        this.getEntities(entityTypeTest, aABB, predicate, list);
+        return list;
+    }
+
+    public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate, List<? super T> list) {
+        this.getEntities(entityTypeTest, aABB, predicate, list, Integer.MAX_VALUE);
+    }
+
+    public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate, List<? super T> list, int i) {
+        this.getProfiler().incrementCounter("getEntities");
         this.getEntities().get(entityTypeTest, aABB, entity -> {
             if (predicate.test(entity)) {
-                list.add(entity);
+                list.add((Object)entity);
+                if (list.size() >= i) {
+                    return AbortableIterationConsumer.Continuation.ABORT;
+                }
             }
             if (entity instanceof EnderDragon) {
                 EnderDragon enderDragon = (EnderDragon)entity;
                 for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
                     Entity entity2 = (Entity)entityTypeTest.tryCast(enderDragonPart);
                     if (entity2 == null || !predicate.test(entity2)) continue;
-                    list.add(entity2);
+                    list.add((Object)entity2);
+                    if (list.size() < i) continue;
+                    return AbortableIterationConsumer.Continuation.ABORT;
                 }
             }
+            return AbortableIterationConsumer.Continuation.CONTINUE;
         });
-        return list;
     }
 
     @Nullable

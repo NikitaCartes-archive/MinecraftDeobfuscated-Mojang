@@ -214,7 +214,6 @@ extends RealmsScreen {
         if (!this.dontSetConnectedToRealms) {
             this.minecraft.setConnectedToRealms(false);
         }
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.showingPopup = false;
         this.addButtons();
         this.realmSelectionList = new RealmSelectionList();
@@ -438,11 +437,6 @@ extends RealmsScreen {
             list.add(realmsServer.id);
         }
         return list;
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     public void setCreatedTrial(boolean bl) {

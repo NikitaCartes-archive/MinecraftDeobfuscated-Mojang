@@ -18,7 +18,6 @@ import java.nio.IntBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -389,10 +388,6 @@ implements AutoCloseable {
         GlStateManager._glDrawPixels(this.width, this.height, this.format.glFormat(), 5121, this.pixels);
     }
 
-    public void writeToFile(String string) throws IOException {
-        this.writeToFile(FileSystems.getDefault().getPath(string, new String[0]));
-    }
-
     public void writeToFile(File file) throws IOException {
         this.writeToFile(file.toPath());
     }
@@ -497,12 +492,16 @@ implements AutoCloseable {
     }
 
     public void copyRect(int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2) {
+        this.copyRect(this, i, j, i + k, j + l, m, n, bl, bl2);
+    }
+
+    public void copyRect(NativeImage nativeImage, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2) {
         for (int o = 0; o < n; ++o) {
             for (int p = 0; p < m; ++p) {
                 int q = bl ? m - 1 - p : p;
                 int r = bl2 ? n - 1 - o : o;
                 int s = this.getPixelRGBA(i + p, j + o);
-                this.setPixelRGBA(i + k + q, j + l + r, s);
+                nativeImage.setPixelRGBA(k + q, l + r, s);
             }
         }
     }

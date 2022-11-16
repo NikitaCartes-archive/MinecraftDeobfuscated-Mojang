@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
@@ -21,11 +21,11 @@ public class EntityLookup<T extends EntityAccess> {
     private final Int2ObjectMap<T> byId = new Int2ObjectLinkedOpenHashMap<T>();
     private final Map<UUID, T> byUuid = Maps.newHashMap();
 
-    public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, Consumer<U> consumer) {
+    public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, AbortableIterationConsumer<U> abortableIterationConsumer) {
         for (EntityAccess entityAccess : this.byId.values()) {
             EntityAccess entityAccess2 = (EntityAccess)entityTypeTest.tryCast(entityAccess);
-            if (entityAccess2 == null) continue;
-            consumer.accept(entityAccess2);
+            if (entityAccess2 == null || !abortableIterationConsumer.accept(entityAccess2).shouldAbort()) continue;
+            return;
         }
     }
 

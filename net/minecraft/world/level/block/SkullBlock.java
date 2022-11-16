@@ -26,6 +26,7 @@ extends AbstractSkullBlock {
     private static final int ROTATIONS = MAX + 1;
     public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0);
+    protected static final VoxelShape PIGLIN_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 8.0, 13.0);
 
     protected SkullBlock(Type type, BlockBehaviour.Properties properties) {
         super(type, properties);
@@ -34,6 +35,9 @@ extends AbstractSkullBlock {
 
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+        if (this.getType() == Types.PIGLIN) {
+            return PIGLIN_SHAPE;
+        }
         return SHAPE;
     }
 
@@ -44,7 +48,7 @@ extends AbstractSkullBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(ROTATION, RotationSegment.convertToSegment(blockPlaceContext.getRotation()));
+        return (BlockState)this.defaultBlockState().setValue(ROTATION, RotationSegment.convertToSegment(blockPlaceContext.getRotation() + 180.0f));
     }
 
     @Override
@@ -72,6 +76,7 @@ extends AbstractSkullBlock {
         PLAYER,
         ZOMBIE,
         CREEPER,
+        PIGLIN,
         DRAGON;
 
     }

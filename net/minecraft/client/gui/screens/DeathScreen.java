@@ -47,7 +47,7 @@ extends Screen {
         }).bounds(this.width / 2 - 100, this.height / 4 + 72, 200, 20).build()));
         this.exitButtons.add(this.addRenderableWidget(Button.builder(Component.translatable("deathScreen.titleScreen"), button -> {
             if (this.hardcore) {
-                this.exitToTitleScreen();
+                this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::exitToTitleScreen, true);
                 return;
             }
             ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, Component.translatable("deathScreen.quit.confirm"), CommonComponents.EMPTY, Component.translatable("deathScreen.titleScreen"), Component.translatable("deathScreen.respawn"));
@@ -67,7 +67,7 @@ extends Screen {
 
     private void confirmResult(boolean bl) {
         if (bl) {
-            this.exitToTitleScreen();
+            this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::exitToTitleScreen, true);
         } else {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);

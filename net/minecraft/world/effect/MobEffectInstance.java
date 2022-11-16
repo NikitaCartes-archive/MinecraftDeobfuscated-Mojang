@@ -28,7 +28,6 @@ implements Comparable<MobEffectInstance> {
     int duration;
     private int amplifier;
     private boolean ambient;
-    private boolean noCounter;
     private boolean visible;
     private boolean showIcon;
     @Nullable
@@ -263,14 +262,6 @@ implements Comparable<MobEffectInstance> {
         }
         Optional<FactorData> optional = compoundTag.contains("FactorCalculationData", 10) ? FactorData.CODEC.parse(new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag.getCompound("FactorCalculationData"))).resultOrPartial(LOGGER::error) : Optional.empty();
         return new MobEffectInstance(mobEffect, j, Math.max(i, 0), bl, bl2, bl3, mobEffectInstance, optional);
-    }
-
-    public void setNoCounter(boolean bl) {
-        this.noCounter = bl;
-    }
-
-    public boolean isNoCounter() {
-        return this.noCounter;
     }
 
     @Override

@@ -13,11 +13,11 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import java.util.Objects;
 import java.util.Spliterators;
-import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.entity.EntityAccess;
@@ -38,7 +38,7 @@ public class EntitySectionStorage<T extends EntityAccess> {
         this.intialSectionVisibility = long2ObjectFunction;
     }
 
-    public void forEachAccessibleNonEmptySection(AABB aABB, Consumer<EntitySection<T>> consumer) {
+    public void forEachAccessibleNonEmptySection(AABB aABB, AbortableIterationConsumer<EntitySection<T>> abortableIterationConsumer) {
         int i = 2;
         int j = SectionPos.posToSectionCoord(aABB.minX - 2.0);
         int k = SectionPos.posToSectionCoord(aABB.minY - 4.0);
@@ -55,8 +55,8 @@ public class EntitySectionStorage<T extends EntityAccess> {
                 long s = longIterator.nextLong();
                 int t = SectionPos.y(s);
                 int u = SectionPos.z(s);
-                if (t < k || t > n || u < l || u > o || (entitySection = (EntitySection)this.sections.get(s)) == null || entitySection.isEmpty() || !entitySection.getStatus().isAccessible()) continue;
-                consumer.accept(entitySection);
+                if (t < k || t > n || u < l || u > o || (entitySection = (EntitySection)this.sections.get(s)) == null || entitySection.isEmpty() || !entitySection.getStatus().isAccessible() || !abortableIterationConsumer.accept(entitySection).shouldAbort()) continue;
+                return;
             }
         }
     }
@@ -108,12 +108,12 @@ public class EntitySectionStorage<T extends EntityAccess> {
         return longSet;
     }
 
-    public void getEntities(AABB aABB, Consumer<T> consumer) {
-        this.forEachAccessibleNonEmptySection(aABB, entitySection -> entitySection.getEntities(aABB, consumer));
+    public void getEntities(AABB aABB, AbortableIterationConsumer<T> abortableIterationConsumer) {
+        this.forEachAccessibleNonEmptySection(aABB, entitySection -> entitySection.getEntities(aABB, abortableIterationConsumer));
     }
 
-    public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, AABB aABB, Consumer<U> consumer) {
-        this.forEachAccessibleNonEmptySection(aABB, entitySection -> entitySection.getEntities(entityTypeTest, aABB, consumer));
+    public <U extends T> void getEntities(EntityTypeTest<T, U> entityTypeTest, AABB aABB, AbortableIterationConsumer<U> abortableIterationConsumer) {
+        this.forEachAccessibleNonEmptySection(aABB, entitySection -> entitySection.getEntities(entityTypeTest, aABB, abortableIterationConsumer));
     }
 
     public void remove(long l) {

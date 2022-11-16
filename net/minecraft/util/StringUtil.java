@@ -3,6 +3,7 @@
  */
 package net.minecraft.util;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -16,10 +17,13 @@ public class StringUtil {
     public static String formatTickDuration(int i) {
         int j = i / 20;
         int k = j / 60;
-        if ((j %= 60) < 10) {
-            return k + ":0" + j;
+        j %= 60;
+        int l = k / 60;
+        k %= 60;
+        if (l > 0) {
+            return String.format(Locale.ROOT, "%02d:%02d:%02d", l, k, j);
         }
-        return k + ":" + j;
+        return String.format(Locale.ROOT, "%02d:%02d", k, j);
     }
 
     public static String stripColor(String string) {

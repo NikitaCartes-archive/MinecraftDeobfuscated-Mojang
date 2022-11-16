@@ -88,8 +88,6 @@ implements MenuAccess<T> {
 
     @Override
     protected void init() {
-        super.init();
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.leftPos = (this.width - this.imageWidth) / 2;
         this.topPos = (this.height - this.imageHeight) / 2;
     }
@@ -549,7 +547,6 @@ implements MenuAccess<T> {
         if (this.minecraft.player == null) {
             return;
         }
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
         ((AbstractContainerMenu)this.menu).removed(this.minecraft.player);
     }
 

@@ -61,7 +61,6 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.getSubscription(this.serverData.id);
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.subscription.extend"), button -> {
             String string = "https://aka.ms/ExtendJavaRealms?subscriptionId=" + this.serverData.remoteSubscriptionId + "&profileId=" + this.minecraft.getUser().getUuid();
             this.minecraft.keyboardHandler.setClipboard(string);
@@ -118,11 +117,6 @@ extends RealmsScreen {
         GregorianCalendar calendar = new GregorianCalendar(TimeZone.getDefault());
         calendar.setTimeInMillis(l);
         return Component.literal(DateFormat.getDateTimeInstance().format(calendar.getTime()));
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override

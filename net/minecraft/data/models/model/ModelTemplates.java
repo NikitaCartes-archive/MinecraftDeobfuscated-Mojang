@@ -94,7 +94,12 @@ public class ModelTemplates {
     public static final ModelTemplate STAINED_GLASS_PANE_SIDE = ModelTemplates.create("template_glass_pane_side", "_side", TextureSlot.PANE, TextureSlot.EDGE);
     public static final ModelTemplate STAINED_GLASS_PANE_SIDE_ALT = ModelTemplates.create("template_glass_pane_side_alt", "_side_alt", TextureSlot.PANE, TextureSlot.EDGE);
     public static final ModelTemplate COMMAND_BLOCK = ModelTemplates.create("template_command_block", TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.SIDE);
-    public static final ModelTemplate CHISELED_BOOKSHELF_BLOCK = ModelTemplates.create("template_chiseled_bookshelf", TextureSlot.FRONT, TextureSlot.SIDE, TextureSlot.TOP);
+    public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_LEFT = ModelTemplates.create("template_chiseled_bookshelf_slot_top_left", "_slot_top_left", TextureSlot.TEXTURE);
+    public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_MID = ModelTemplates.create("template_chiseled_bookshelf_slot_top_mid", "_slot_top_mid", TextureSlot.TEXTURE);
+    public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_RIGHT = ModelTemplates.create("template_chiseled_bookshelf_slot_top_right", "_slot_top_right", TextureSlot.TEXTURE);
+    public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_BOTTOM_LEFT = ModelTemplates.create("template_chiseled_bookshelf_slot_bottom_left", "_slot_bottom_left", TextureSlot.TEXTURE);
+    public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_BOTTOM_MID = ModelTemplates.create("template_chiseled_bookshelf_slot_bottom_mid", "_slot_bottom_mid", TextureSlot.TEXTURE);
+    public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_BOTTOM_RIGHT = ModelTemplates.create("template_chiseled_bookshelf_slot_bottom_right", "_slot_bottom_right", TextureSlot.TEXTURE);
     public static final ModelTemplate ANVIL = ModelTemplates.create("template_anvil", TextureSlot.TOP);
     public static final ModelTemplate[] STEMS = (ModelTemplate[])IntStream.range(0, 8).mapToObj(i -> ModelTemplates.create("stem_growth" + i, "_stage" + i, TextureSlot.STEM)).toArray(ModelTemplate[]::new);
     public static final ModelTemplate ATTACHED_STEM = ModelTemplates.create("stem_fruit", TextureSlot.STEM, TextureSlot.UPPER_STEM);

@@ -50,7 +50,6 @@ import org.jetbrains.annotations.Nullable;
 public class KeyboardHandler {
     public static final int DEBUG_CRASH_TIME = 10000;
     private final Minecraft minecraft;
-    private boolean sendRepeatsToGui;
     private final ClipboardManager clipboardManager = new ClipboardManager();
     private long debugCrashKeyTime = -1L;
     private long debugCrashKeyReportedTime = -1L;
@@ -346,7 +345,7 @@ public class KeyboardHandler {
         if (screen != null) {
             boolean[] bls = new boolean[]{false};
             Screen.wrapScreenError(() -> {
-                if (k == 1 || k == 2 && this.sendRepeatsToGui) {
+                if (k == 1 || k == 2) {
                     screen.afterKeyboardAction();
                     bls[0] = screen.keyPressed(i, j, m);
                 } else if (k == 0) {
@@ -414,10 +413,6 @@ public class KeyboardHandler {
                 Screen.wrapScreenError(() -> guiEventListener.charTyped(c, j), "charTyped event handler", guiEventListener.getClass().getCanonicalName());
             }
         }
-    }
-
-    public void setSendRepeatsToGui(boolean bl) {
-        this.sendRepeatsToGui = bl;
     }
 
     public void setup(long l2) {

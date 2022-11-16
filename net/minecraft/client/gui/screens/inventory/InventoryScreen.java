@@ -68,7 +68,7 @@ implements RecipeUpdateListener {
         this.addRenderableWidget(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
             this.recipeBookComponent.toggleVisibility();
             this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-            ((ImageButton)button).setPosition(this.leftPos + 104, this.height / 2 - 22);
+            button.setPosition(this.leftPos + 104, this.height / 2 - 22);
             this.buttonClicked = true;
         }));
         this.addWidget(this.recipeBookComponent);

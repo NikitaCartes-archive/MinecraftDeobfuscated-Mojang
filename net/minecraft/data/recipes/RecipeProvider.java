@@ -192,7 +192,7 @@ implements DataProvider {
     }
 
     protected static void hangingSign(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 6).group("hanging_sign").define(Character.valueOf('#'), itemLike2).define(Character.valueOf('X'), Items.CHAIN).pattern("X X").pattern("###").pattern("###").unlockedBy("has_stripped_logs", RecipeProvider.has(ItemTags.STRIPPED_LOGS)).save(consumer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 6).group("hanging_sign").define(Character.valueOf('#'), itemLike2).define(Character.valueOf('X'), Items.CHAIN).pattern("X X").pattern("###").pattern("###").unlockedBy("has_stripped_logs", RecipeProvider.has(itemLike2)).save(consumer);
     }
 
     protected static void coloredWoolFromWhiteWoolAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {

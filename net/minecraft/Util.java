@@ -789,6 +789,14 @@ public class Util {
         return object2IntMap;
     }
 
+    public static <T, E extends Exception> T getOrThrow(DataResult<T> dataResult, Function<String, E> function) throws E {
+        Optional<DataResult.PartialResult<T>> optional = dataResult.error();
+        if (optional.isPresent()) {
+            throw (Exception)function.apply(optional.get().message());
+        }
+        return dataResult.result().orElseThrow();
+    }
+
     /*
      * Uses 'sealed' constructs - enablewith --sealed true
      */

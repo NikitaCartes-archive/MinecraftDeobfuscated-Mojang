@@ -6,6 +6,7 @@ package net.minecraft.world.item;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.network.chat.Component;
@@ -26,8 +27,8 @@ public class CreativeModeTab {
     private final Type type;
     @Nullable
     private ItemStack iconItemStack;
-    private ItemStackLinkedSet displayItems = new ItemStackLinkedSet();
-    private ItemStackLinkedSet displayItemsSearchTab = new ItemStackLinkedSet();
+    private Collection<ItemStack> displayItems = ItemStackLinkedSet.createTypeAndTagSet();
+    private Set<ItemStack> displayItemsSearchTab = ItemStackLinkedSet.createTypeAndTagSet();
     @Nullable
     private Consumer<List<ItemStack>> searchTreeBuilder;
     private final Supplier<ItemStack> iconGenerator;
@@ -96,16 +97,16 @@ public class CreativeModeTab {
     public void buildContents(FeatureFlagSet featureFlagSet, boolean bl) {
         ItemDisplayBuilder itemDisplayBuilder = new ItemDisplayBuilder(this, featureFlagSet);
         this.displayItemsGenerator.accept(featureFlagSet, itemDisplayBuilder, bl);
-        this.displayItems = itemDisplayBuilder.getTabContents();
-        this.displayItemsSearchTab = itemDisplayBuilder.getSearchTabContents();
+        this.displayItems = itemDisplayBuilder.tabContents;
+        this.displayItemsSearchTab = itemDisplayBuilder.searchTabContents;
         this.rebuildSearchTree();
     }
 
-    public ItemStackLinkedSet getDisplayItems() {
+    public Collection<ItemStack> getDisplayItems() {
         return this.displayItems;
     }
 
-    public ItemStackLinkedSet getSearchTabDisplayItems() {
+    public Collection<ItemStack> getSearchTabDisplayItems() {
         return this.displayItemsSearchTab;
     }
 
@@ -214,8 +215,8 @@ public class CreativeModeTab {
 
     static class ItemDisplayBuilder
     implements Output {
-        private final ItemStackLinkedSet tabContents = new ItemStackLinkedSet();
-        private final ItemStackLinkedSet searchTabContents = new ItemStackLinkedSet();
+        public final Collection<ItemStack> tabContents = ItemStackLinkedSet.createTypeAndTagSet();
+        public final Set<ItemStack> searchTabContents = ItemStackLinkedSet.createTypeAndTagSet();
         private final CreativeModeTab tab;
         private final FeatureFlagSet featureFlagSet;
 
@@ -227,6 +228,9 @@ public class CreativeModeTab {
         @Override
         public void accept(ItemStack itemStack, TabVisibility tabVisibility) {
             boolean bl;
+            if (itemStack.getCount() != 1) {
+                throw new IllegalArgumentException("Stack size must be exactly 1");
+            }
             boolean bl2 = bl = this.tabContents.contains(itemStack) && tabVisibility != TabVisibility.SEARCH_TAB_ONLY;
             if (bl) {
                 throw new IllegalStateException("Accidentally adding the same item stack twice " + itemStack.getDisplayName().getString() + " to a Creative Mode Tab: " + this.tab.getDisplayName().getString());
@@ -247,14 +251,6 @@ public class CreativeModeTab {
                     }
                 }
             }
-        }
-
-        public ItemStackLinkedSet getTabContents() {
-            return this.tabContents;
-        }
-
-        public ItemStackLinkedSet getSearchTabContents() {
-            return this.searchTabContents;
         }
     }
 

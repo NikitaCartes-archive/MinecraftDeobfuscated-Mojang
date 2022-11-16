@@ -57,13 +57,13 @@ implements AdvancementSubProvider {
 
     @Override
     public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
-        Advancement advancement = Advancement.Builder.advancement().display(Blocks.HAY_BLOCK, (Component)Component.translatable("advancements.husbandry.root.title"), (Component)Component.translatable("advancements.husbandry.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/husbandry.png"), FrameType.TASK, false, false, false).addCriterion("consumed_item", ConsumeItemTrigger.TriggerInstance.usedItem()).save(consumer, "husbandry/root");
+        Advancement advancement = this.createRoot(consumer);
         Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Items.WHEAT, (Component)Component.translatable("advancements.husbandry.plant_seed.title"), (Component)Component.translatable("advancements.husbandry.plant_seed.description"), null, FrameType.TASK, true, true, false).requirements(RequirementsStrategy.OR).addCriterion("wheat", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.WHEAT)).addCriterion("pumpkin_stem", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.PUMPKIN_STEM)).addCriterion("melon_stem", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.MELON_STEM)).addCriterion("beetroots", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.BEETROOTS)).addCriterion("nether_wart", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.NETHER_WART)).save(consumer, "husbandry/plant_seed");
-        Advancement advancement3 = Advancement.Builder.advancement().parent(advancement).display(Items.WHEAT, (Component)Component.translatable("advancements.husbandry.breed_an_animal.title"), (Component)Component.translatable("advancements.husbandry.breed_an_animal.description"), null, FrameType.TASK, true, true, false).requirements(RequirementsStrategy.OR).addCriterion("bred", BredAnimalsTrigger.TriggerInstance.bredAnimals()).save(consumer, "husbandry/breed_an_animal");
+        Advancement advancement3 = this.createBreedAnAnimalAdvancement(advancement, consumer);
+        this.createBreedAllAnimalsAdvancement(advancement3, consumer);
         this.addFood(Advancement.Builder.advancement()).parent(advancement2).display(Items.APPLE, (Component)Component.translatable("advancements.husbandry.balanced_diet.title"), (Component)Component.translatable("advancements.husbandry.balanced_diet.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).save(consumer, "husbandry/balanced_diet");
         Advancement.Builder.advancement().parent(advancement2).display(Items.NETHERITE_HOE, (Component)Component.translatable("advancements.husbandry.netherite_hoe.title"), (Component)Component.translatable("advancements.husbandry.netherite_hoe.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).addCriterion("netherite_hoe", InventoryChangeTrigger.TriggerInstance.hasItems(Items.NETHERITE_HOE)).save(consumer, "husbandry/obtain_netherite_hoe");
         Advancement advancement4 = Advancement.Builder.advancement().parent(advancement).display(Items.LEAD, (Component)Component.translatable("advancements.husbandry.tame_an_animal.title"), (Component)Component.translatable("advancements.husbandry.tame_an_animal.description"), null, FrameType.TASK, true, true, false).addCriterion("tamed_animal", TameAnimalTrigger.TriggerInstance.tamedAnimal()).save(consumer, "husbandry/tame_an_animal");
-        this.addBreedable(Advancement.Builder.advancement()).parent(advancement3).display(Items.GOLDEN_CARROT, (Component)Component.translatable("advancements.husbandry.breed_all_animals.title"), (Component)Component.translatable("advancements.husbandry.breed_all_animals.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).save(consumer, "husbandry/bred_all_animals");
         Advancement advancement5 = this.addFish(Advancement.Builder.advancement()).parent(advancement).requirements(RequirementsStrategy.OR).display(Items.FISHING_ROD, (Component)Component.translatable("advancements.husbandry.fishy_business.title"), (Component)Component.translatable("advancements.husbandry.fishy_business.description"), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/fishy_business");
         Advancement advancement6 = this.addFishBuckets(Advancement.Builder.advancement()).parent(advancement5).requirements(RequirementsStrategy.OR).display(Items.PUFFERFISH_BUCKET, (Component)Component.translatable("advancements.husbandry.tactical_fishing.title"), (Component)Component.translatable("advancements.husbandry.tactical_fishing.description"), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/tactical_fishing");
         Advancement advancement7 = Advancement.Builder.advancement().parent(advancement6).requirements(RequirementsStrategy.OR).addCriterion(BuiltInRegistries.ITEM.getKey(Items.AXOLOTL_BUCKET).getPath(), FilledBucketTrigger.TriggerInstance.filledBucket(ItemPredicate.Builder.item().of(Items.AXOLOTL_BUCKET).build())).display(Items.AXOLOTL_BUCKET, (Component)Component.translatable("advancements.husbandry.axolotl_in_a_bucket.title"), (Component)Component.translatable("advancements.husbandry.axolotl_in_a_bucket.description"), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/axolotl_in_a_bucket");
@@ -77,9 +77,21 @@ implements AdvancementSubProvider {
         Advancement.Builder.advancement().parent(advancement11).display(Items.VERDANT_FROGLIGHT, (Component)Component.translatable("advancements.husbandry.froglights.title"), (Component)Component.translatable("advancements.husbandry.froglights.description"), null, FrameType.CHALLENGE, true, true, false).addCriterion("froglights", InventoryChangeTrigger.TriggerInstance.hasItems(Items.OCHRE_FROGLIGHT, Items.PEARLESCENT_FROGLIGHT, Items.VERDANT_FROGLIGHT)).save(consumer, "husbandry/froglights");
         Advancement.Builder.advancement().parent(advancement).addCriterion("silk_touch_nest", BeeNestDestroyedTrigger.TriggerInstance.destroyedBeeNest(Blocks.BEE_NEST, ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))), MinMaxBounds.Ints.exactly(3))).display(Blocks.BEE_NEST, (Component)Component.translatable("advancements.husbandry.silk_touch_nest.title"), (Component)Component.translatable("advancements.husbandry.silk_touch_nest.description"), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/silk_touch_nest");
         Advancement.Builder.advancement().parent(advancement).display(Items.OAK_BOAT, (Component)Component.translatable("advancements.husbandry.ride_a_boat_with_a_goat.title"), (Component)Component.translatable("advancements.husbandry.ride_a_boat_with_a_goat.description"), null, FrameType.TASK, true, true, false).addCriterion("ride_a_boat_with_a_goat", StartRidingTrigger.TriggerInstance.playerStartsRiding(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.BOAT).passenger(EntityPredicate.Builder.entity().of(EntityType.GOAT).build()).build()))).save(consumer, "husbandry/ride_a_boat_with_a_goat");
-        Advancement.Builder.advancement().parent(advancement).display(Items.GLOW_INK_SAC, (Component)Component.translatable("advancements.husbandry.make_a_sign_glow.title"), (Component)Component.translatable("advancements.husbandry.make_a_sign_glow.description"), null, FrameType.TASK, true, true, false).addCriterion("make_a_sign_glow", ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.SIGNS).build()), ItemPredicate.Builder.item().of(Items.GLOW_INK_SAC))).save(consumer, "husbandry/make_a_sign_glow");
+        Advancement.Builder.advancement().parent(advancement).display(Items.GLOW_INK_SAC, (Component)Component.translatable("advancements.husbandry.make_a_sign_glow.title"), (Component)Component.translatable("advancements.husbandry.make_a_sign_glow.description"), null, FrameType.TASK, true, true, false).addCriterion("make_a_sign_glow", ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.ALL_SIGNS).build()), ItemPredicate.Builder.item().of(Items.GLOW_INK_SAC))).save(consumer, "husbandry/make_a_sign_glow");
         Advancement advancement12 = Advancement.Builder.advancement().parent(advancement).display(Items.COOKIE, (Component)Component.translatable("advancements.husbandry.allay_deliver_item_to_player.title"), (Component)Component.translatable("advancements.husbandry.allay_deliver_item_to_player.description"), null, FrameType.TASK, true, true, true).addCriterion("allay_deliver_item_to_player", PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByPlayer(EntityPredicate.Composite.ANY, ItemPredicate.ANY, EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().of(EntityType.ALLAY).build()))).save(consumer, "husbandry/allay_deliver_item_to_player");
         Advancement.Builder.advancement().parent(advancement12).display(Items.NOTE_BLOCK, (Component)Component.translatable("advancements.husbandry.allay_deliver_cake_to_note_block.title"), (Component)Component.translatable("advancements.husbandry.allay_deliver_cake_to_note_block.description"), null, FrameType.TASK, true, true, true).addCriterion("allay_deliver_cake_to_note_block", ItemInteractWithBlockTrigger.TriggerInstance.allayDropItemOnBlock(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.NOTE_BLOCK).build()), ItemPredicate.Builder.item().of(Items.CAKE))).save(consumer, "husbandry/allay_deliver_cake_to_note_block");
+    }
+
+    Advancement createRoot(Consumer<Advancement> consumer) {
+        return Advancement.Builder.advancement().display(Blocks.HAY_BLOCK, (Component)Component.translatable("advancements.husbandry.root.title"), (Component)Component.translatable("advancements.husbandry.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/husbandry.png"), FrameType.TASK, false, false, false).addCriterion("consumed_item", ConsumeItemTrigger.TriggerInstance.usedItem()).save(consumer, "husbandry/root");
+    }
+
+    Advancement createBreedAnAnimalAdvancement(Advancement advancement, Consumer<Advancement> consumer) {
+        return Advancement.Builder.advancement().parent(advancement).display(Items.WHEAT, (Component)Component.translatable("advancements.husbandry.breed_an_animal.title"), (Component)Component.translatable("advancements.husbandry.breed_an_animal.description"), null, FrameType.TASK, true, true, false).requirements(RequirementsStrategy.OR).addCriterion("bred", BredAnimalsTrigger.TriggerInstance.bredAnimals()).save(consumer, "husbandry/breed_an_animal");
+    }
+
+    Advancement createBreedAllAnimalsAdvancement(Advancement advancement, Consumer<Advancement> consumer) {
+        return this.addBreedable(Advancement.Builder.advancement()).parent(advancement).display(Items.GOLDEN_CARROT, (Component)Component.translatable("advancements.husbandry.breed_all_animals.title"), (Component)Component.translatable("advancements.husbandry.breed_all_animals.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).save(consumer, "husbandry/bred_all_animals");
     }
 
     private Advancement.Builder addLeashedFrogVariants(Advancement.Builder builder) {
@@ -94,11 +106,11 @@ implements AdvancementSubProvider {
         return builder;
     }
 
-    private Advancement.Builder addBreedable(Advancement.Builder builder) {
-        for (EntityType<?> entityType : BREEDABLE_ANIMALS) {
+    Advancement.Builder addBreedable(Advancement.Builder builder) {
+        for (EntityType<?> entityType : this.getBreedableAnimals()) {
             builder.addCriterion(EntityType.getKey(entityType).toString(), BredAnimalsTrigger.TriggerInstance.bredAnimals(EntityPredicate.Builder.entity().of(entityType)));
         }
-        for (EntityType<?> entityType : INDIRECTLY_BREEDABLE_ANIMALS) {
+        for (EntityType<?> entityType : this.getIndirectlyBreedableAnimals()) {
             builder.addCriterion(EntityType.getKey(entityType).toString(), BredAnimalsTrigger.TriggerInstance.bredAnimals(EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.ANY));
         }
         return builder;
@@ -121,6 +133,14 @@ implements AdvancementSubProvider {
     private Advancement.Builder addCatVariants(Advancement.Builder builder) {
         BuiltInRegistries.CAT_VARIANT.entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceKey::location))).forEach(entry -> builder.addCriterion(((ResourceKey)entry.getKey()).location().toString(), TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicate.variant((CatVariant)entry.getValue())).build())));
         return builder;
+    }
+
+    public EntityType<?>[] getBreedableAnimals() {
+        return BREEDABLE_ANIMALS;
+    }
+
+    public EntityType<?>[] getIndirectlyBreedableAnimals() {
+        return INDIRECTLY_BREEDABLE_ANIMALS;
     }
 }
 

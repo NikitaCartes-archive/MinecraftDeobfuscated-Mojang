@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +51,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackLinkedSet;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
@@ -101,24 +101,24 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private void tryRefreshInvalidatedTabs(FeatureFlagSet featureFlagSet, boolean bl) {
         if (CreativeModeTabs.tryRebuildTabContents(featureFlagSet, bl)) {
             for (CreativeModeTab creativeModeTab : CreativeModeTabs.allTabs()) {
-                ItemStackLinkedSet itemStackLinkedSet = creativeModeTab.getDisplayItems();
+                Collection<ItemStack> collection = creativeModeTab.getDisplayItems();
                 if (creativeModeTab != selectedTab) continue;
-                if (creativeModeTab.getType() == CreativeModeTab.Type.CATEGORY && itemStackLinkedSet.isEmpty()) {
+                if (creativeModeTab.getType() == CreativeModeTab.Type.CATEGORY && collection.isEmpty()) {
                     this.selectTab(CreativeModeTabs.getDefaultTab());
                     continue;
                 }
-                this.refreshCurrentTabContents(itemStackLinkedSet);
+                this.refreshCurrentTabContents(collection);
             }
         }
     }
 
-    private void refreshCurrentTabContents(ItemStackLinkedSet itemStackLinkedSet) {
+    private void refreshCurrentTabContents(Collection<ItemStack> collection) {
         int i = ((ItemPickerMenu)this.menu).getRowIndexForScroll(this.scrollOffs);
         ((ItemPickerMenu)this.menu).items.clear();
         if (selectedTab.getType() == CreativeModeTab.Type.SEARCH) {
             this.refreshSearchResults();
         } else {
-            ((ItemPickerMenu)this.menu).items.addAll(itemStackLinkedSet);
+            ((ItemPickerMenu)this.menu).items.addAll(collection);
         }
         this.scrollOffs = ((ItemPickerMenu)this.menu).getScrollForRowIndex(i);
         ((ItemPickerMenu)this.menu).scrollTo(this.scrollOffs);
@@ -645,7 +645,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         int j = 27;
         int k = 27 * i;
         if (creativeModeTab.isAlignedRight()) {
-            k = this.imageWidth - 27 * (7 - i);
+            k = this.imageWidth - 27 * (7 - i) + 1;
         }
         return k;
     }

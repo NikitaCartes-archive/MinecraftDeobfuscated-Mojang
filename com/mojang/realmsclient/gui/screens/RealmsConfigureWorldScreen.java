@@ -93,7 +93,6 @@ extends RealmsScreen {
         }
         this.leftX = this.width / 2 - 187;
         this.rightX = this.width / 2 + 190;
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.playersButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.buttons.players"), button -> this.minecraft.setScreen(new RealmsPlayerScreen(this, this.serverData))).bounds(this.centerButton(0, 3), RealmsConfigureWorldScreen.row(0), 100, 20).build());
         this.settingsButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.buttons.settings"), button -> this.minecraft.setScreen(new RealmsSettingsScreen(this, this.serverData.clone()))).bounds(this.centerButton(1, 3), RealmsConfigureWorldScreen.row(0), 100, 20).build());
         this.subscriptionButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.buttons.subscription"), button -> this.minecraft.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone(), this.lastScreen))).bounds(this.centerButton(2, 3), RealmsConfigureWorldScreen.row(0), 100, 20).build());
@@ -207,11 +206,6 @@ extends RealmsScreen {
 
     private int frame(int i) {
         return this.leftX + (i - 1) * 98;
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override

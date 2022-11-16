@@ -779,7 +779,7 @@ extends Entity {
         if (entity != null) {
             ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
             EntityType<?> entityType = entity.getType();
-            if (entityType == EntityType.SKELETON && itemStack.is(Items.SKELETON_SKULL) || entityType == EntityType.ZOMBIE && itemStack.is(Items.ZOMBIE_HEAD) || entityType == EntityType.CREEPER && itemStack.is(Items.CREEPER_HEAD)) {
+            if (entityType == EntityType.SKELETON && itemStack.is(Items.SKELETON_SKULL) || entityType == EntityType.ZOMBIE && itemStack.is(Items.ZOMBIE_HEAD) || entityType == EntityType.PIGLIN && itemStack.is(Items.PIGLIN_HEAD) || entityType == EntityType.PIGLIN_BRUTE && itemStack.is(Items.PIGLIN_HEAD) || entityType == EntityType.CREEPER && itemStack.is(Items.CREEPER_HEAD)) {
                 d *= 0.5;
             }
         }
@@ -1027,7 +1027,7 @@ extends Entity {
             if (damageSource != DamageSource.DROWN && (!bl || f > 0.0f)) {
                 this.markHurt();
             }
-            if (entity2 != null) {
+            if (entity2 != null && !damageSource.isExplosion()) {
                 double d = entity2.getX() - this.getX();
                 double e = entity2.getZ() - this.getZ();
                 while (d * d + e * e < 1.0E-4) {
@@ -2856,8 +2856,9 @@ extends Entity {
         this.getSleepingPos().filter(this.level::hasChunkAt).ifPresent(blockPos -> {
             BlockState blockState = this.level.getBlockState((BlockPos)blockPos);
             if (blockState.getBlock() instanceof BedBlock) {
+                Direction direction = blockState.getValue(BedBlock.FACING);
                 this.level.setBlock((BlockPos)blockPos, (BlockState)blockState.setValue(BedBlock.OCCUPIED, false), 3);
-                Vec3 vec3 = BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, this.getYRot()).orElseGet(() -> {
+                Vec3 vec3 = BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, direction, this.getYRot()).orElseGet(() -> {
                     BlockPos blockPos2 = blockPos.above();
                     return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.1, (double)blockPos2.getZ() + 0.5);
                 });

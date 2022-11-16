@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 public final class OptionInstance<T> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Enum<Boolean> BOOLEAN_VALUES = new Enum<Boolean>(ImmutableList.of(Boolean.TRUE, Boolean.FALSE), Codec.BOOL);
+    public static final CaptionBasedToString<Boolean> BOOLEAN_TO_STRING = (component, boolean_) -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF;
     private final TooltipSupplier<T> tooltip;
     final Function<T, Component> toString;
     private final ValueSet<T> values;
@@ -63,7 +64,11 @@ public final class OptionInstance<T> {
     }
 
     public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplier<Boolean> tooltipSupplier, boolean bl, Consumer<Boolean> consumer) {
-        return new OptionInstance<Boolean>(string, tooltipSupplier, (component, boolean_) -> boolean_ != false ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF, BOOLEAN_VALUES, bl, consumer);
+        return OptionInstance.createBoolean(string, tooltipSupplier, BOOLEAN_TO_STRING, bl, consumer);
+    }
+
+    public static OptionInstance<Boolean> createBoolean(String string, TooltipSupplier<Boolean> tooltipSupplier, CaptionBasedToString<Boolean> captionBasedToString, boolean bl, Consumer<Boolean> consumer) {
+        return new OptionInstance<Boolean>(string, tooltipSupplier, captionBasedToString, BOOLEAN_VALUES, bl, consumer);
     }
 
     public OptionInstance(String string, TooltipSupplier<T> tooltipSupplier, CaptionBasedToString<T> captionBasedToString, ValueSet<T> valueSet, T object, Consumer<T> consumer) {
@@ -94,7 +99,11 @@ public final class OptionInstance<T> {
     }
 
     public AbstractWidget createButton(Options options, int i, int j, int k) {
-        return this.values.createButton(this.tooltip, options, i, j, k).apply(this);
+        return this.createButton(options, i, j, k, object -> {});
+    }
+
+    public AbstractWidget createButton(Options options, int i, int j, int k, Consumer<T> consumer) {
+        return this.values.createButton(this.tooltip, options, i, j, k, consumer).apply(this);
     }
 
     public T get() {
@@ -156,7 +165,7 @@ public final class OptionInstance<T> {
 
     @Environment(value=EnvType.CLIENT)
     static interface ValueSet<T> {
-        public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> var1, Options var2, int var3, int var4, int var5);
+        public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> var1, Options var2, int var3, int var4, int var5, Consumer<T> var6);
 
         public Optional<T> validateValue(T var1);
 
@@ -325,12 +334,14 @@ public final class OptionInstance<T> {
         private final OptionInstance<N> instance;
         private final SliderableValueSet<N> values;
         private final TooltipSupplier<N> tooltipSupplier;
+        private final Consumer<N> onValueChanged;
 
-        OptionInstanceSliderButton(Options options, int i, int j, int k, int l, OptionInstance<N> optionInstance, SliderableValueSet<N> sliderableValueSet, TooltipSupplier<N> tooltipSupplier) {
+        OptionInstanceSliderButton(Options options, int i, int j, int k, int l, OptionInstance<N> optionInstance, SliderableValueSet<N> sliderableValueSet, TooltipSupplier<N> tooltipSupplier, Consumer<N> consumer) {
             super(options, i, j, k, l, sliderableValueSet.toSliderValue(optionInstance.get()));
             this.instance = optionInstance;
             this.values = sliderableValueSet;
             this.tooltipSupplier = tooltipSupplier;
+            this.onValueChanged = consumer;
             this.updateMessage();
         }
 
@@ -344,6 +355,7 @@ public final class OptionInstance<T> {
         protected void applyValue() {
             this.instance.set(this.values.fromSliderValue(this.value));
             this.options.save();
+            this.onValueChanged.accept(this.instance.get());
         }
     }
 
@@ -382,11 +394,11 @@ public final class OptionInstance<T> {
         public boolean createCycleButton();
 
         @Override
-        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer) {
             if (this.createCycleButton()) {
-                return CycleableValueSet.super.createButton(tooltipSupplier, options, i, j, k);
+                return CycleableValueSet.super.createButton(tooltipSupplier, options, i, j, k, consumer);
             }
-            return SliderableValueSet.super.createButton(tooltipSupplier, options, i, j, k);
+            return SliderableValueSet.super.createButton(tooltipSupplier, options, i, j, k, consumer);
         }
     }
 
@@ -400,10 +412,11 @@ public final class OptionInstance<T> {
         }
 
         @Override
-        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
+        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer) {
             return optionInstance -> CycleButton.builder(optionInstance.toString).withValues(this.valueListSupplier()).withTooltip(tooltipSupplier).withInitialValue(optionInstance.value).create(i, j, k, 20, optionInstance.caption, (cycleButton, object) -> {
                 this.valueSetter().set((OptionInstance<Object>)optionInstance, object);
                 options.save();
+                consumer.accept(object);
             });
         }
 
@@ -421,8 +434,8 @@ public final class OptionInstance<T> {
         public T fromSliderValue(double var1);
 
         @Override
-        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k) {
-            return optionInstance -> new OptionInstanceSliderButton(options, i, j, k, 20, optionInstance, this, tooltipSupplier);
+        default public Function<OptionInstance<T>, AbstractWidget> createButton(TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer) {
+            return optionInstance -> new OptionInstanceSliderButton(options, i, j, k, 20, optionInstance, this, tooltipSupplier, consumer);
         }
     }
 }

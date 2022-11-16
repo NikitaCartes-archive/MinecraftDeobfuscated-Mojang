@@ -8,7 +8,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +16,7 @@ import java.nio.IntBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
 import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -99,17 +99,17 @@ public class TextureUtil {
         return byteBuffer;
     }
 
-    public static void writeAsPNG(String string, int i, int j, int k, int l) {
+    public static void writeAsPNG(Path path, String string, int i, int j, int k, int l) {
         RenderSystem.assertOnRenderThread();
         TextureUtil.bind(i);
         for (int m = 0; m <= j; ++m) {
-            String string2 = string + "_" + m + ".png";
             int n = k >> m;
             int o = l >> m;
             try (NativeImage nativeImage = new NativeImage(n, o, false);){
                 nativeImage.downloadTexture(m, false);
-                nativeImage.writeToFile(string2);
-                LOGGER.debug("Exported png to: {}", (Object)new File(string2).getAbsolutePath());
+                Path path2 = path.resolve(string + "_" + m + ".png");
+                nativeImage.writeToFile(path2);
+                LOGGER.debug("Exported png to: {}", (Object)path2.toAbsolutePath());
                 continue;
             } catch (IOException iOException) {
                 LOGGER.debug("Unable to write: ", iOException);
@@ -128,6 +128,14 @@ public class TextureUtil {
         GL11.glTexImage2D(3553, 0, 6408, i, j, 0, 32993, 33639, intBuffer);
         GL11.glTexParameteri(3553, 10240, 9728);
         GL11.glTexParameteri(3553, 10241, 9729);
+    }
+
+    public static Path getDebugTexturePath(Path path) {
+        return path.resolve("screenshots").resolve("debug");
+    }
+
+    public static Path getDebugTexturePath() {
+        return TextureUtil.getDebugTexturePath(Path.of(".", new String[0]));
     }
 }
 

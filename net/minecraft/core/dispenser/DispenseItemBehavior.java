@@ -483,6 +483,7 @@ public interface DispenseItemBehavior {
         DispenserBlock.registerBehavior(Items.ZOMBIE_HEAD, dispenseItemBehavior2);
         DispenserBlock.registerBehavior(Items.DRAGON_HEAD, dispenseItemBehavior2);
         DispenserBlock.registerBehavior(Items.SKELETON_SKULL, dispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.PIGLIN_HEAD, dispenseItemBehavior2);
         DispenserBlock.registerBehavior(Items.PLAYER_HEAD, dispenseItemBehavior2);
         DispenserBlock.registerBehavior(Items.WITHER_SKELETON_SKULL, new OptionalDispenseItemBehavior(){
 

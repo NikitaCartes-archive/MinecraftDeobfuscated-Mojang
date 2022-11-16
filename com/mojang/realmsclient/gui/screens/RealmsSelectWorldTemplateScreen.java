@@ -99,7 +99,6 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.worldTemplateObjectSelectionList = new WorldTemplateObjectSelectionList(this.worldTemplateObjectSelectionList.getTemplates());
         this.trailerButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.template.button.trailer"), button -> this.onTrailer()).bounds(this.width / 2 - 206, this.height - 32, 100, 20).build());
         this.selectButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.template.button.select"), button -> this.selectTemplate()).bounds(this.width / 2 - 100, this.height - 32, 100, 20).build());

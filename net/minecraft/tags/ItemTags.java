@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 public final class ItemTags {
     public static final TagKey<Item> WOOL = ItemTags.bind("wool");
     public static final TagKey<Item> PLANKS = ItemTags.bind("planks");
-    public static final TagKey<Item> STRIPPED_LOGS = ItemTags.bind("stripped_logs");
     public static final TagKey<Item> STONE_BRICKS = ItemTags.bind("stone_bricks");
     public static final TagKey<Item> WOODEN_BUTTONS = ItemTags.bind("wooden_buttons");
     public static final TagKey<Item> BUTTONS = ItemTags.bind("buttons");

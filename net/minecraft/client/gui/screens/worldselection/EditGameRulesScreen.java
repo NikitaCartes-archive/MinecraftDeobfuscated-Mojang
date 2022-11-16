@@ -57,17 +57,10 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        super.init();
         this.rules = new RuleList(this.gameRules);
         this.addWidget(this.rules);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty())).bounds(this.width / 2 - 155 + 160, this.height - 29, 150, 20).build());
         this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules))).bounds(this.width / 2 - 155, this.height - 29, 150, 20).build());
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override

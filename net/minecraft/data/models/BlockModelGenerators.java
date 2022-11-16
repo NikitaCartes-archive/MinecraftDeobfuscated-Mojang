@@ -10,7 +10,7 @@ import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -85,6 +85,7 @@ public class BlockModelGenerators {
     })).build();
     static final Map<BlockFamily.Variant, BiConsumer<BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.builder().put(BlockFamily.Variant.BUTTON, BlockFamilyProvider::button).put(BlockFamily.Variant.DOOR, BlockFamilyProvider::door).put(BlockFamily.Variant.CHISELED, BlockFamilyProvider::fullBlockVariant).put(BlockFamily.Variant.CRACKED, BlockFamilyProvider::fullBlockVariant).put(BlockFamily.Variant.CUSTOM_FENCE, BlockFamilyProvider::customFence).put(BlockFamily.Variant.FENCE, BlockFamilyProvider::fence).put(BlockFamily.Variant.CUSTOM_FENCE_GATE, BlockFamilyProvider::customFenceGate).put(BlockFamily.Variant.FENCE_GATE, BlockFamilyProvider::fenceGate).put(BlockFamily.Variant.SIGN, BlockFamilyProvider::sign).put(BlockFamily.Variant.SLAB, BlockFamilyProvider::slab).put(BlockFamily.Variant.STAIRS, BlockFamilyProvider::stairs).put(BlockFamily.Variant.PRESSURE_PLATE, BlockFamilyProvider::pressurePlate).put(BlockFamily.Variant.TRAPDOOR, BlockFamilyProvider::trapdoor).put(BlockFamily.Variant.WALL, BlockFamilyProvider::wall).build();
     public static final List<Pair<BooleanProperty, Function<ResourceLocation, Variant>>> MULTIFACE_GENERATOR = List.of(Pair.of(BlockStateProperties.NORTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation)), Pair.of(BlockStateProperties.EAST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.SOUTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.WEST, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.UP, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true)), Pair.of(BlockStateProperties.DOWN, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true)));
+    private static final Map<BookSlotModelCacheKey, ResourceLocation> CHISELED_BOOKSHELF_SLOT_MODEL_CACHE = new HashMap<BookSlotModelCacheKey, ResourceLocation>();
 
     private static BlockStateGenerator createMirroredCubeGenerator(Block block, ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer) {
         ResourceLocation resourceLocation2 = ModelTemplates.CUBE_MIRRORED_ALL.create(block, textureMapping, biConsumer);
@@ -1175,14 +1176,32 @@ public class BlockModelGenerators {
     }
 
     private void createChiseledBookshelf() {
-        String string = "_stage";
-        Collection<Integer> collection = BlockStateProperties.BOOKS_STORED.getPossibleValues();
-        List<ResourceLocation> list = collection.stream().map(integer -> {
-            TextureMapping textureMapping = new TextureMapping().put(TextureSlot.FRONT, TextureMapping.getBlockTexture(Blocks.CHISELED_BOOKSHELF, "_stage" + integer)).put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_BOOKSHELF, "_side")).put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.CHISELED_BOOKSHELF, "_top"));
-            return ModelTemplates.CHISELED_BOOKSHELF_BLOCK.createWithSuffix(Blocks.CHISELED_BOOKSHELF, "_stage" + integer, textureMapping, this.modelOutput);
-        }).toList();
-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.CHISELED_BOOKSHELF).with(BlockModelGenerators.createHorizontalFacingDispatch()).with(PropertyDispatch.property(BlockStateProperties.BOOKS_STORED).generate(integer -> Variant.variant().with(VariantProperties.MODEL, (ResourceLocation)list.get((int)integer)))));
-        this.delegateItemModel(Items.CHISELED_BOOKSHELF, list.get(0));
+        Block block = Blocks.CHISELED_BOOKSHELF;
+        ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
+        MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
+        Map.of(Direction.NORTH, VariantProperties.Rotation.R0, Direction.EAST, VariantProperties.Rotation.R90, Direction.SOUTH, VariantProperties.Rotation.R180, Direction.WEST, VariantProperties.Rotation.R270).forEach((direction, rotation) -> {
+            Condition.TerminalCondition terminalCondition = Condition.condition().term(BlockStateProperties.HORIZONTAL_FACING, direction);
+            multiPartGenerator.with((Condition)terminalCondition, Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, rotation));
+            this.addSlotStateAndRotationVariants(multiPartGenerator, terminalCondition, (VariantProperties.Rotation)((Object)rotation));
+        });
+        this.blockStateOutput.accept(multiPartGenerator);
+        this.delegateItemModel(block, ModelLocationUtils.getModelLocation(block, "_inventory"));
+        CHISELED_BOOKSHELF_SLOT_MODEL_CACHE.clear();
+    }
+
+    private void addSlotStateAndRotationVariants(MultiPartGenerator multiPartGenerator, Condition.TerminalCondition terminalCondition, VariantProperties.Rotation rotation) {
+        Map.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_0_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_LEFT, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_1_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_MID, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_2_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_RIGHT, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_3_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_LEFT, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_MID, BlockStateProperties.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_RIGHT).forEach((booleanProperty, modelTemplate) -> {
+            this.addBookSlotModel(multiPartGenerator, terminalCondition, rotation, (BooleanProperty)booleanProperty, (ModelTemplate)modelTemplate, true);
+            this.addBookSlotModel(multiPartGenerator, terminalCondition, rotation, (BooleanProperty)booleanProperty, (ModelTemplate)modelTemplate, false);
+        });
+    }
+
+    private void addBookSlotModel(MultiPartGenerator multiPartGenerator, Condition.TerminalCondition terminalCondition, VariantProperties.Rotation rotation, BooleanProperty booleanProperty, ModelTemplate modelTemplate, boolean bl) {
+        String string = bl ? "_occupied" : "_empty";
+        TextureMapping textureMapping = new TextureMapping().put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(Blocks.CHISELED_BOOKSHELF, string));
+        BookSlotModelCacheKey bookSlotModelCacheKey2 = new BookSlotModelCacheKey(modelTemplate, string);
+        ResourceLocation resourceLocation = CHISELED_BOOKSHELF_SLOT_MODEL_CACHE.computeIfAbsent(bookSlotModelCacheKey2, bookSlotModelCacheKey -> modelTemplate.createWithSuffix(Blocks.CHISELED_BOOKSHELF, string, textureMapping, this.modelOutput));
+        multiPartGenerator.with(Condition.and(terminalCondition, Condition.condition().term(booleanProperty, bl)), Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, rotation));
     }
 
     private void createMagmaBlock() {
@@ -1547,7 +1566,7 @@ public class BlockModelGenerators {
         this.createBedItem(Blocks.GREEN_BED, Blocks.GREEN_WOOL);
         this.createBedItem(Blocks.RED_BED, Blocks.RED_WOOL);
         this.createBedItem(Blocks.BLACK_BED, Blocks.BLACK_WOOL);
-        this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("skull"), Blocks.SOUL_SAND).createWithCustomBlockItemModel(ModelTemplates.SKULL_INVENTORY, Blocks.CREEPER_HEAD, Blocks.PLAYER_HEAD, Blocks.ZOMBIE_HEAD, Blocks.SKELETON_SKULL, Blocks.WITHER_SKELETON_SKULL).create(Blocks.DRAGON_HEAD).createWithoutBlockItem(Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL);
+        this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("skull"), Blocks.SOUL_SAND).createWithCustomBlockItemModel(ModelTemplates.SKULL_INVENTORY, Blocks.CREEPER_HEAD, Blocks.PLAYER_HEAD, Blocks.ZOMBIE_HEAD, Blocks.SKELETON_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.PIGLIN_HEAD).create(Blocks.DRAGON_HEAD).createWithoutBlockItem(Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL, Blocks.PIGLIN_WALL_HEAD);
         this.createShulkerBox(Blocks.SHULKER_BOX);
         this.createShulkerBox(Blocks.WHITE_SHULKER_BOX);
         this.createShulkerBox(Blocks.ORANGE_SHULKER_BOX);
@@ -2055,6 +2074,9 @@ public class BlockModelGenerators {
             }
             return this.create(blocks);
         }
+    }
+
+    record BookSlotModelCacheKey(ModelTemplate template, String modelSuffix) {
     }
 }
 

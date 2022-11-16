@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -83,19 +84,25 @@ implements Tickable {
 
     private void dumpContents(int i, int j, int k) {
         String string = this.location.toDebugFileName();
-        TextureUtil.writeAsPNG(string, this.getId(), i, j, k);
-        TextureAtlas.dumpSpriteNames(string, this.texturesByName);
+        Path path = TextureUtil.getDebugTexturePath();
+        try {
+            Files.createDirectories(path, new FileAttribute[0]);
+            TextureUtil.writeAsPNG(path, string, this.getId(), i, j, k);
+            TextureAtlas.dumpSpriteNames(path, string, this.texturesByName);
+        } catch (IOException iOException) {
+            LOGGER.warn("Failed to dump atlas contents to {}", (Object)path);
+        }
     }
 
-    private static void dumpSpriteNames(String string, Map<ResourceLocation, TextureAtlasSprite> map) {
-        Path path = Path.of(string + ".txt", new String[0]);
-        try (BufferedWriter writer = Files.newBufferedWriter(path, new OpenOption[0]);){
+    private static void dumpSpriteNames(Path path, String string, Map<ResourceLocation, TextureAtlasSprite> map) {
+        Path path2 = path.resolve(string + ".txt");
+        try (BufferedWriter writer = Files.newBufferedWriter(path2, new OpenOption[0]);){
             for (Map.Entry entry : map.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList()) {
                 TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)entry.getValue();
                 writer.write(String.format(Locale.ROOT, "%s\tx=%d\ty=%d\tw=%d\th=%d%n", entry.getKey(), textureAtlasSprite.getX(), textureAtlasSprite.getY(), textureAtlasSprite.contents().width(), textureAtlasSprite.contents().height()));
             }
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to write file {}", (Object)path, (Object)iOException);
+            LOGGER.warn("Failed to write file {}", (Object)path2, (Object)iOException);
         }
     }
 

@@ -222,9 +222,8 @@ implements EntityBlock {
         return blockGetter.getBlockState(blockPos.below()).getBlock() instanceof BedBlock;
     }
 
-    public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, float f) {
+    public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, Direction direction, float f) {
         Direction direction3;
-        Direction direction = collisionGetter.getBlockState(blockPos).getValue(FACING);
         Direction direction2 = direction.getClockWise();
         Direction direction4 = direction3 = direction2.isFacingAngle(f) ? direction2.getOpposite() : direction2;
         if (BedBlock.isBunkBed(collisionGetter, blockPos)) {

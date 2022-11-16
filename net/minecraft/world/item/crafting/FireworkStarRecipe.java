@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
 
 public class FireworkStarRecipe
 extends CustomRecipe {
-    private static final Ingredient SHAPE_INGREDIENT = Ingredient.of(Items.FIRE_CHARGE, Items.FEATHER, Items.GOLD_NUGGET, Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, Items.CREEPER_HEAD, Items.PLAYER_HEAD, Items.DRAGON_HEAD, Items.ZOMBIE_HEAD);
+    private static final Ingredient SHAPE_INGREDIENT = Ingredient.of(Items.FIRE_CHARGE, Items.FEATHER, Items.GOLD_NUGGET, Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, Items.CREEPER_HEAD, Items.PLAYER_HEAD, Items.DRAGON_HEAD, Items.ZOMBIE_HEAD, Items.PIGLIN_HEAD);
     private static final Ingredient TRAIL_INGREDIENT = Ingredient.of(Items.DIAMOND);
     private static final Ingredient FLICKER_INGREDIENT = Ingredient.of(Items.GLOWSTONE_DUST);
     private static final Map<Item, FireworkRocketItem.Shape> SHAPE_BY_ITEM = Util.make(Maps.newHashMap(), hashMap -> {
@@ -37,6 +37,7 @@ extends CustomRecipe {
         hashMap.put(Items.PLAYER_HEAD, FireworkRocketItem.Shape.CREEPER);
         hashMap.put(Items.DRAGON_HEAD, FireworkRocketItem.Shape.CREEPER);
         hashMap.put(Items.ZOMBIE_HEAD, FireworkRocketItem.Shape.CREEPER);
+        hashMap.put(Items.PIGLIN_HEAD, FireworkRocketItem.Shape.CREEPER);
     });
     private static final Ingredient GUNPOWDER_INGREDIENT = Ingredient.of(Items.GUNPOWDER);
 

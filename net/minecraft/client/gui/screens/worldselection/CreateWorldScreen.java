@@ -20,6 +20,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
@@ -127,11 +128,11 @@ extends Screen {
             return new WorldCreationContext(dataPackReloadCookie.worldGenSettings(), layeredRegistryAccess, reloadableServerResources, dataPackReloadCookie.dataConfiguration());
         }, Util.backgroundExecutor(), minecraft);
         minecraft.managedBlock(completableFuture::isDone);
-        minecraft.setScreen(new CreateWorldScreen(screen, WorldDataConfiguration.DEFAULT, new WorldGenSettingsComponent(completableFuture.join(), Optional.of(WorldPresets.NORMAL))));
+        minecraft.setScreen(new CreateWorldScreen(screen, WorldDataConfiguration.DEFAULT, new WorldGenSettingsComponent(completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty())));
     }
 
     public static CreateWorldScreen createFromExisting(@Nullable Screen screen, LevelSettings levelSettings, WorldCreationContext worldCreationContext, @Nullable Path path) {
-        CreateWorldScreen createWorldScreen = new CreateWorldScreen(screen, worldCreationContext.dataConfiguration(), new WorldGenSettingsComponent(worldCreationContext, WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()), worldCreationContext.options().seed()));
+        CreateWorldScreen createWorldScreen = new CreateWorldScreen(screen, worldCreationContext.dataConfiguration(), new WorldGenSettingsComponent(worldCreationContext, WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()), OptionalLong.of(worldCreationContext.options().seed())));
         createWorldScreen.initName = levelSettings.levelName();
         createWorldScreen.commands = levelSettings.allowCommands();
         createWorldScreen.commandsChanged = true;
@@ -164,7 +165,6 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, (Component)Component.translatable("selectWorld.enterName")){
 
             @Override
@@ -231,11 +231,6 @@ extends Screen {
                 throw new RuntimeException("Could not create save folder", exception2);
             }
         }
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     private static void queueLoadScreen(Minecraft minecraft, Component component) {

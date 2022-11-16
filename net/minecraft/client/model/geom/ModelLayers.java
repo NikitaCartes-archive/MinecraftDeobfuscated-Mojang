@@ -100,6 +100,7 @@ public class ModelLayers {
     public static final ModelLayerLocation PIGLIN_BRUTE = ModelLayers.register("piglin_brute");
     public static final ModelLayerLocation PIGLIN_BRUTE_INNER_ARMOR = ModelLayers.registerInnerArmor("piglin_brute");
     public static final ModelLayerLocation PIGLIN_BRUTE_OUTER_ARMOR = ModelLayers.registerOuterArmor("piglin_brute");
+    public static final ModelLayerLocation PIGLIN_HEAD = ModelLayers.register("piglin_head");
     public static final ModelLayerLocation PIGLIN_INNER_ARMOR = ModelLayers.registerInnerArmor("piglin");
     public static final ModelLayerLocation PIGLIN_OUTER_ARMOR = ModelLayers.registerOuterArmor("piglin");
     public static final ModelLayerLocation PIG_SADDLE = ModelLayers.register("pig", "saddle");

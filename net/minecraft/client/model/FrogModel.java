@@ -14,14 +14,16 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.frog.Frog;
 
 @Environment(value=EnvType.CLIENT)
 public class FrogModel<T extends Frog>
 extends HierarchicalModel<T> {
-    private static final float WALK_ANIMATION_SPEED_FACTOR = 9000.0f;
-    public static final float MAX_WALK_ANIMATION_SPEED = 8.0f;
+    private static final float WALK_ANIMATION_SPEED_FACTOR = 8000.0f;
+    public static final float MIN_WALK_ANIMATION_SPEED = 0.5f;
+    public static final float MAX_WALK_ANIMATION_SPEED = 1.5f;
     private final ModelPart root;
     private final ModelPart body;
     private final ModelPart head;
@@ -71,11 +73,12 @@ extends HierarchicalModel<T> {
     @Override
     public void setupAnim(T frog, float f, float g, float h, float i, float j) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
-        float k = Math.min((float)((Entity)frog).getDeltaMovement().horizontalDistanceSqr() * 9000.0f, 8.0f);
+        float k = (float)((Entity)frog).getDeltaMovement().horizontalDistanceSqr();
+        float l = Mth.clamp(k * 8000.0f, 0.5f, 1.5f);
         this.animate(((Frog)frog).jumpAnimationState, FrogAnimation.FROG_JUMP, h);
         this.animate(((Frog)frog).croakAnimationState, FrogAnimation.FROG_CROAK, h);
         this.animate(((Frog)frog).tongueAnimationState, FrogAnimation.FROG_TONGUE, h);
-        this.animate(((Frog)frog).walkAnimationState, FrogAnimation.FROG_WALK, h, k);
+        this.animate(((Frog)frog).walkAnimationState, FrogAnimation.FROG_WALK, h, l);
         this.animate(((Frog)frog).swimAnimationState, FrogAnimation.FROG_SWIM, h);
         this.animate(((Frog)frog).swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, h);
         this.croakingBody.visible = ((Frog)frog).croakAnimationState.isStarted();

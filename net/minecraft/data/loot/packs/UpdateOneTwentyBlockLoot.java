@@ -44,6 +44,7 @@ extends BlockLootSubProvider {
         this.add(Blocks.BAMBOO_MOSAIC_SLAB, (Block block) -> this.createSlabItemTable((Block)block));
         this.add(Blocks.BAMBOO_DOOR, (Block block) -> this.createDoorTable((Block)block));
         this.dropWhenSilkTouch(Blocks.CHISELED_BOOKSHELF);
+        this.dropSelf(Blocks.PIGLIN_HEAD);
     }
 }
 

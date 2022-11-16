@@ -46,7 +46,6 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 4 - 150, this.height / 4 + 120 + 12, 150, 20).build());
         this.cancelButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).bounds(this.width / 2 + 4, this.height / 4 + 120 + 12, 150, 20).build());
         boolean bl = this.getCommandBlock().isTrackOutput();
@@ -71,7 +70,6 @@ extends Screen {
         this.previousEdit.setValue("-");
         this.addWidget(this.previousEdit);
         this.setInitialFocus(this.commandEdit);
-        this.commandEdit.setFocus(true);
         this.commandSuggestions = new CommandSuggestions(this.minecraft, this, this.commandEdit, this.font, true, true, 0, 7, false, Integer.MIN_VALUE);
         this.commandSuggestions.setAllowSuggestions(true);
         this.commandSuggestions.updateCommandInfo();
@@ -97,11 +95,6 @@ extends Screen {
             baseCommandBlock.setLastOutput(null);
         }
         this.minecraft.setScreen(null);
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     protected abstract void populateAndSendPacket(BaseCommandBlock var1);
