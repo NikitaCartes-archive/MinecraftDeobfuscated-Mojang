@@ -9,11 +9,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -35,6 +34,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -51,6 +51,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
@@ -102,7 +103,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Fox
-extends Animal {
+extends Animal
+implements VariantHolder<Type> {
     private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.BYTE);
     private static final int FLAG_SITTING = 1;
@@ -262,7 +264,7 @@ extends Animal {
     public Fox getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         Fox fox = EntityType.FOX.create(serverLevel);
         if (fox != null) {
-            fox.setFoxType(this.random.nextBoolean() ? this.getFoxType() : ((Fox)ageableMob).getFoxType());
+            fox.setVariant(this.random.nextBoolean() ? this.getVariant() : ((Fox)ageableMob).getVariant());
         }
         return fox;
     }
@@ -286,7 +288,7 @@ extends Animal {
         } else {
             spawnGroupData = new FoxGroupData(type);
         }
-        this.setFoxType(type);
+        this.setVariant(type);
         if (bl) {
             this.setAge(-24000);
         }
@@ -298,7 +300,7 @@ extends Animal {
     }
 
     private void setTargetGoals() {
-        if (this.getFoxType() == Type.RED) {
+        if (this.getVariant() == Type.RED) {
             this.targetSelector.addGoal(4, this.landTargetGoal);
             this.targetSelector.addGoal(4, this.turtleEggTargetGoal);
             this.targetSelector.addGoal(6, this.fishTargetGoal);
@@ -325,11 +327,13 @@ extends Animal {
         return 0.4f;
     }
 
-    public Type getFoxType() {
+    @Override
+    public Type getVariant() {
         return Type.byId(this.entityData.get(DATA_TYPE_ID));
     }
 
-    private void setFoxType(Type type) {
+    @Override
+    public void setVariant(Type type) {
         this.entityData.set(DATA_TYPE_ID, type.getId());
     }
 
@@ -359,7 +363,7 @@ extends Animal {
         }
         compoundTag.put("Trusted", listTag);
         compoundTag.putBoolean("Sleeping", this.isSleeping());
-        compoundTag.putString("Type", this.getFoxType().getName());
+        compoundTag.putString("Type", this.getVariant().getSerializedName());
         compoundTag.putBoolean("Sitting", this.isSitting());
         compoundTag.putBoolean("Crouching", this.isCrouching());
     }
@@ -372,7 +376,7 @@ extends Animal {
             this.addTrustedUUID(NbtUtils.loadUUID(listTag.get(i)));
         }
         this.setSleeping(compoundTag.getBoolean("Sleeping"));
-        this.setFoxType(Type.byName(compoundTag.getString("Type")));
+        this.setVariant(Type.byName(compoundTag.getString("Type")));
         this.setSitting(compoundTag.getBoolean("Sitting"));
         this.setIsCrouching(compoundTag.getBoolean("Crouching"));
         if (this.level instanceof ServerLevel) {
@@ -660,6 +664,11 @@ extends Animal {
     @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
+    }
+
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
     }
 
     public class FoxLookControl
@@ -1348,12 +1357,13 @@ extends Animal {
         }
     }
 
-    public static enum Type {
+    public static enum Type implements StringRepresentable
+    {
         RED(0, "red"),
         SNOW(1, "snow");
 
+        public static final StringRepresentable.EnumCodec<Type> CODEC;
         private static final Type[] BY_ID;
-        private static final Map<String, Type> BY_NAME;
         private final int id;
         private final String name;
 
@@ -1362,7 +1372,8 @@ extends Animal {
             this.name = string2;
         }
 
-        public String getName() {
+        @Override
+        public String getSerializedName() {
             return this.name;
         }
 
@@ -1371,7 +1382,7 @@ extends Animal {
         }
 
         public static Type byName(String string) {
-            return BY_NAME.getOrDefault(string, RED);
+            return Objects.requireNonNullElse(CODEC.byName(string), RED);
         }
 
         public static Type byId(int i) {
@@ -1386,8 +1397,8 @@ extends Animal {
         }
 
         static {
+            CODEC = StringRepresentable.fromEnum(Type::values);
             BY_ID = (Type[])Arrays.stream(Type.values()).sorted(Comparator.comparingInt(Type::getId)).toArray(Type[]::new);
-            BY_NAME = Arrays.stream(Type.values()).collect(Collectors.toMap(Type::getName, type -> type));
         }
     }
 

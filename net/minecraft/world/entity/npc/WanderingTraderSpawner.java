@@ -103,7 +103,7 @@ implements CustomSpawner {
             if (serverLevel.getBiome(blockPos3).is(BiomeTags.WITHOUT_WANDERING_TRADER_SPAWNS)) {
                 return false;
             }
-            WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, null, null, null, blockPos3, MobSpawnType.EVENT, false, false);
+            WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, blockPos3, MobSpawnType.EVENT);
             if (wanderingTrader != null) {
                 for (int j = 0; j < 2; ++j) {
                     this.tryToSpawnLlamaFor(serverLevel, wanderingTrader, 4);
@@ -123,7 +123,7 @@ implements CustomSpawner {
         if (blockPos == null) {
             return;
         }
-        TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(serverLevel, null, null, null, blockPos, MobSpawnType.EVENT, false, false);
+        TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(serverLevel, blockPos, MobSpawnType.EVENT);
         if (traderLlama == null) {
             return;
         }

@@ -37,7 +37,7 @@ extends EntityRenderer<Painting> {
     public void render(Painting painting, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - f));
-        PaintingVariant paintingVariant = painting.getVariant().value();
+        PaintingVariant paintingVariant = (PaintingVariant)painting.getVariant().value();
         float h = 0.0625f;
         poseStack.scale(0.0625f, 0.0625f, 0.0625f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(this.getTextureLocation(painting)));

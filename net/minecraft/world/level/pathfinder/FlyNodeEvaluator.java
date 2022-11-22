@@ -41,7 +41,6 @@ extends WalkNodeEvaluator {
     @Nullable
     public Node getStart() {
         BlockPos blockPos;
-        BlockPathTypes blockPathTypes;
         int i;
         if (this.canFloat() && this.mob.isInWater()) {
             i = this.mob.getBlockY();
@@ -54,14 +53,19 @@ extends WalkNodeEvaluator {
         } else {
             i = Mth.floor(this.mob.getY() + 0.5);
         }
-        if (this.mob.getPathfindingMalus(blockPathTypes = this.getCachedBlockPathType((blockPos = this.mob.blockPosition()).getX(), i, blockPos.getZ())) < 0.0f) {
+        if (!this.canStartAt(blockPos = new BlockPos(this.mob.getX(), (double)i, this.mob.getZ()))) {
             for (BlockPos blockPos2 : this.mob.iteratePathfindingStartNodeCandidatePositions()) {
-                BlockPathTypes blockPathTypes2 = this.getCachedBlockPathType(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
-                if (!(this.mob.getPathfindingMalus(blockPathTypes2) >= 0.0f)) continue;
+                if (!this.canStartAt(blockPos2)) continue;
                 return super.getStartNode(blockPos2);
             }
         }
-        return super.getStartNode(new BlockPos(blockPos.getX(), i, blockPos.getZ()));
+        return super.getStartNode(blockPos);
+    }
+
+    @Override
+    protected boolean canStartAt(BlockPos blockPos) {
+        BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos);
+        return this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f;
     }
 
     @Override

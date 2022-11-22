@@ -106,7 +106,7 @@ ContainerEntity {
 
     @Override
     public Item getDropItem() {
-        return switch (this.getBoatType()) {
+        return switch (this.getVariant()) {
             case Boat.Type.SPRUCE -> Items.SPRUCE_CHEST_BOAT;
             case Boat.Type.BIRCH -> Items.BIRCH_CHEST_BOAT;
             case Boat.Type.JUNGLE -> Items.JUNGLE_CHEST_BOAT;

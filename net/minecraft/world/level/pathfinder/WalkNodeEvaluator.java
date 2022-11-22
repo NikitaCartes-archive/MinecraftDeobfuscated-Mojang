@@ -86,10 +86,9 @@ extends NodeEvaluator {
             i = blockPos.above().getY();
         }
         blockPos = this.mob.blockPosition();
-        BlockPathTypes blockPathTypes = this.getCachedBlockType(this.mob, blockPos.getX(), i, blockPos.getZ());
-        if (this.mob.getPathfindingMalus(blockPathTypes) < 0.0f) {
+        if (!this.canStartAt(mutableBlockPos.set(blockPos.getX(), i, blockPos.getZ()))) {
             AABB aABB = this.mob.getBoundingBox();
-            if (this.hasPositiveMalus(mutableBlockPos.set(aABB.minX, (double)i, aABB.minZ)) || this.hasPositiveMalus(mutableBlockPos.set(aABB.minX, (double)i, aABB.maxZ)) || this.hasPositiveMalus(mutableBlockPos.set(aABB.maxX, (double)i, aABB.minZ)) || this.hasPositiveMalus(mutableBlockPos.set(aABB.maxX, (double)i, aABB.maxZ))) {
+            if (this.canStartAt(mutableBlockPos.set(aABB.minX, (double)i, aABB.minZ)) || this.canStartAt(mutableBlockPos.set(aABB.minX, (double)i, aABB.maxZ)) || this.canStartAt(mutableBlockPos.set(aABB.maxX, (double)i, aABB.minZ)) || this.canStartAt(mutableBlockPos.set(aABB.maxX, (double)i, aABB.maxZ))) {
                 return this.getStartNode(mutableBlockPos);
             }
         }
@@ -106,9 +105,9 @@ extends NodeEvaluator {
         return node;
     }
 
-    private boolean hasPositiveMalus(BlockPos blockPos) {
+    protected boolean canStartAt(BlockPos blockPos) {
         BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos);
-        return this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f;
+        return blockPathTypes != BlockPathTypes.OPEN && this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f;
     }
 
     @Override
@@ -200,6 +199,9 @@ extends NodeEvaluator {
     }
 
     protected double getFloorLevel(BlockPos blockPos) {
+        if ((this.canFloat() || this.isAmphibious()) && this.level.getFluidState(blockPos).is(FluidTags.WATER)) {
+            return (double)blockPos.getY() + 0.5;
+        }
         return WalkNodeEvaluator.getFloorLevel(this.level, blockPos);
     }
 
@@ -236,7 +238,7 @@ extends NodeEvaluator {
         if (blockPathTypes2 == BlockPathTypes.WALKABLE || this.isAmphibious() && blockPathTypes2 == BlockPathTypes.WATER) {
             return node;
         }
-        if ((node == null || node.costMalus < 0.0f) && l > 0 && (blockPathTypes2 != BlockPathTypes.FENCE || this.canWalkOverFences()) && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.findAcceptedNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + WalkNodeEvaluator.getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
+        if ((node == null || node.costMalus < 0.0f) && l > 0 && (blockPathTypes2 != BlockPathTypes.FENCE || this.canWalkOverFences()) && blockPathTypes2 != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes2 != BlockPathTypes.TRAPDOOR && blockPathTypes2 != BlockPathTypes.POWDER_SNOW && (node = this.findAcceptedNode(i, j + 1, k, l - 1, d, direction, blockPathTypes)) != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && this.mob.getBbWidth() < 1.0f && this.hasCollisions(aABB = new AABB((h = (double)(i - direction.getStepX()) + 0.5) - g, this.getFloorLevel(mutableBlockPos.set(h, (double)(j + 1), m = (double)(k - direction.getStepZ()) + 0.5)) + 0.001, m - g, h + g, (double)this.mob.getBbHeight() + this.getFloorLevel(mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002, m + g))) {
             node = null;
         }
         if (!this.isAmphibious() && blockPathTypes2 == BlockPathTypes.WATER && !this.canFloat()) {
@@ -368,7 +370,7 @@ extends NodeEvaluator {
         return blockPathTypes;
     }
 
-    private BlockPathTypes getBlockPathType(Mob mob, BlockPos blockPos) {
+    protected BlockPathTypes getBlockPathType(Mob mob, BlockPos blockPos) {
         return this.getCachedBlockType(mob, blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 

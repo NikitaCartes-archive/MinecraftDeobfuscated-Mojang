@@ -42,7 +42,7 @@ extends PathNavigation {
     @Override
     protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32) {
         if (this.isInLiquid()) {
-            return AmphibiousPathNavigation.isClearForMovementBetween(this.mob, vec3, vec32);
+            return AmphibiousPathNavigation.isClearForMovementBetween(this.mob, vec3, vec32, false);
         }
         return false;
     }

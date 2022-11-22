@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
@@ -1345,8 +1346,12 @@ extends LivingEntity {
     }
 
     public void removeFreeWill() {
-        this.goalSelector.removeAllGoals();
+        this.removeAllGoals(goal -> true);
         this.getBrain().removeAllBehaviors();
+    }
+
+    public void removeAllGoals(Predicate<Goal> predicate) {
+        this.goalSelector.removeAllGoals(predicate);
     }
 
     @Override

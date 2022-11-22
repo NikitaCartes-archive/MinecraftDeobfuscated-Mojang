@@ -35,7 +35,6 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.GlowSquid;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -343,13 +342,30 @@ EntityTypeTest<Entity, T> {
     }
 
     @Nullable
-    public Entity spawn(ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
-        return this.spawn(serverLevel, itemStack == null ? null : itemStack.getTag(), itemStack != null && itemStack.hasCustomHoverName() ? itemStack.getHoverName() : null, player, blockPos, mobSpawnType, bl, bl2);
+    public T spawn(ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+        CompoundTag compoundTag;
+        Consumer<Entity> consumer = entity -> {};
+        if (itemStack != null) {
+            if (itemStack.hasCustomHoverName()) {
+                consumer = entity -> entity.setCustomName(itemStack.getHoverName());
+            }
+            if ((compoundTag = itemStack.getTag()) != null) {
+                consumer = consumer.andThen(entity -> EntityType.updateCustomEntityTag(serverLevel, player, entity, compoundTag));
+            }
+        } else {
+            compoundTag = null;
+        }
+        return (T)this.spawn(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
     }
 
     @Nullable
-    public T spawn(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
-        T entity = this.create(serverLevel, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
+    public T spawn(ServerLevel serverLevel, BlockPos blockPos, MobSpawnType mobSpawnType) {
+        return this.spawn(serverLevel, (CompoundTag)null, null, blockPos, mobSpawnType, false, false);
+    }
+
+    @Nullable
+    public T spawn(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Consumer<T> consumer, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+        T entity = this.create(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
         if (entity != null) {
             serverLevel.addFreshEntityWithPassengers((Entity)entity);
         }
@@ -357,7 +373,7 @@ EntityTypeTest<Entity, T> {
     }
 
     @Nullable
-    public T create(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+    public T create(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Consumer<T> consumer, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
         double d;
         T entity = this.create(serverLevel);
         if (entity == null) {
@@ -377,10 +393,9 @@ EntityTypeTest<Entity, T> {
             mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
             mob.playAmbientSound();
         }
-        if (component != null && entity instanceof LivingEntity) {
-            ((Entity)entity).setCustomName(component);
+        if (consumer != null) {
+            consumer.accept(entity);
         }
-        EntityType.updateCustomEntityTag(serverLevel, player, entity, compoundTag);
         return entity;
     }
 

@@ -53,9 +53,9 @@ extends BucketItem {
     }
 
     private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
-        Entity entity = this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
+        Object entity = this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
         if (entity instanceof Bucketable) {
-            Bucketable bucketable = (Bucketable)((Object)entity);
+            Bucketable bucketable = (Bucketable)entity;
             bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
             bucketable.setFromBucket(true);
         }
@@ -69,12 +69,12 @@ extends BucketItem {
             ChatFormatting[] chatFormattings = new ChatFormatting[]{ChatFormatting.ITALIC, ChatFormatting.GRAY};
             String string = "color.minecraft." + TropicalFish.getBaseColor(i);
             String string2 = "color.minecraft." + TropicalFish.getPatternColor(i);
-            for (int j = 0; j < TropicalFish.COMMON_VARIANTS.length; ++j) {
-                if (i != TropicalFish.COMMON_VARIANTS[j]) continue;
+            for (int j = 0; j < TropicalFish.COMMON_VARIANTS.size(); ++j) {
+                if (i != TropicalFish.COMMON_VARIANTS.get(j).getPackedId()) continue;
                 list.add(Component.translatable(TropicalFish.getPredefinedName(j)).withStyle(chatFormattings));
                 return;
             }
-            list.add(Component.translatable(TropicalFish.getFishTypeName(i)).withStyle(chatFormattings));
+            list.add(TropicalFish.getPattern(i).displayName().plainCopy().withStyle(chatFormattings));
             MutableComponent mutableComponent = Component.translatable(string);
             if (!string.equals(string2)) {
                 mutableComponent.append(", ").append(Component.translatable(string2));

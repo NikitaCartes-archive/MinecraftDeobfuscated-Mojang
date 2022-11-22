@@ -6,6 +6,7 @@ package net.minecraft.world.entity.animal.axolotl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,6 +26,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -43,6 +45,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -71,6 +74,7 @@ import org.slf4j.Logger;
 public class Axolotl
 extends Animal
 implements LerpingModel,
+VariantHolder<Variant>,
 Bucketable {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final int TOTAL_PLAYDEAD_TIME = 200;
@@ -188,11 +192,13 @@ Bucketable {
         return 6000;
     }
 
+    @Override
     public Variant getVariant() {
         return Variant.BY_ID[this.entityData.get(DATA_VARIANT)];
     }
 
-    private void setVariant(Variant variant) {
+    @Override
+    public void setVariant(Variant variant) {
         this.entityData.set(DATA_VARIANT, variant.getId());
     }
 
@@ -475,6 +481,11 @@ Bucketable {
         return serverLevelAccessor.getBlockState(blockPos.below()).is(BlockTags.AXOLOTLS_SPAWNABLE_ON);
     }
 
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
+    }
+
     static class AxolotlMoveControl
     extends SmoothSwimmingMoveControl {
         private final Axolotl axolotl;
@@ -506,7 +517,8 @@ Bucketable {
         }
     }
 
-    public static enum Variant {
+    public static enum Variant implements StringRepresentable
+    {
         LUCY(0, "lucy", true),
         WILD(1, "wild", true),
         GOLD(2, "gold", true),
@@ -514,6 +526,7 @@ Bucketable {
         BLUE(4, "blue", false);
 
         public static final Variant[] BY_ID;
+        public static final Codec<Variant> CODEC;
         private final int id;
         private final String name;
         private final boolean common;
@@ -532,6 +545,11 @@ Bucketable {
             return this.name;
         }
 
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
         public static Variant getCommonSpawnVariant(RandomSource randomSource) {
             return Variant.getSpawnVariant(randomSource, true);
         }
@@ -547,6 +565,7 @@ Bucketable {
 
         static {
             BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+            CODEC = StringRepresentable.fromEnum(Variant::values);
         }
     }
 

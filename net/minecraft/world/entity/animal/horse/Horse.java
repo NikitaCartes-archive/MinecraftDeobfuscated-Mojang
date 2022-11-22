@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
@@ -40,7 +41,8 @@ import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.Nullable;
 
 public class Horse
-extends AbstractHorse {
+extends AbstractHorse
+implements VariantHolder<Variant> {
     private static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
     private static final EntityDataAccessor<Integer> DATA_ID_TYPE_VARIANT = SynchedEntityData.defineId(Horse.class, EntityDataSerializers.INT);
 
@@ -102,8 +104,14 @@ extends AbstractHorse {
         this.setTypeVariant(variant.getId() & 0xFF | markings.getId() << 8 & 0xFF00);
     }
 
+    @Override
     public Variant getVariant() {
         return Variant.byId(this.getTypeVariant() & 0xFF);
+    }
+
+    @Override
+    public void setVariant(Variant variant) {
+        this.setTypeVariant(variant.getId() & 0xFF | this.getTypeVariant() & 0xFFFFFF00);
     }
 
     public Markings getMarkings() {
@@ -252,6 +260,11 @@ extends AbstractHorse {
         }
         this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), randomSource));
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
+
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
     }
 
     public static class HorseGroupData

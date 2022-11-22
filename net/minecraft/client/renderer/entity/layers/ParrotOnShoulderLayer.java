@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
 
 @Environment(value=EnvType.CLIENT)
@@ -41,7 +42,8 @@ extends RenderLayer<T, PlayerModel<T>> {
         EntityType.byString(compoundTag.getString("id")).filter(entityType -> entityType == EntityType.PARROT).ifPresent(entityType -> {
             poseStack.pushPose();
             poseStack.translate(bl ? 0.4f : -0.4f, player.isCrouching() ? -1.3f : -1.5f, 0.0f);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(ParrotRenderer.PARROT_LOCATIONS[compoundTag.getInt("Variant")]));
+            Parrot.Variant variant = Parrot.Variant.byId(compoundTag.getInt("Variant"));
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(ParrotRenderer.getVariantTexture(variant)));
             this.model.renderOnShoulder(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, j, player.tickCount);
             poseStack.popPose();
         });

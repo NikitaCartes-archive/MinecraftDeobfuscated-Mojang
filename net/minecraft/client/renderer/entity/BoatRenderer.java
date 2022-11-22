@@ -39,7 +39,7 @@ extends EntityRenderer<Boat> {
     public BoatRenderer(EntityRendererProvider.Context context, boolean bl) {
         super(context);
         this.shadowRadius = 0.8f;
-        this.boatResources = Stream.of(Boat.Type.values()).collect(ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(new ResourceLocation(BoatRenderer.getTextureLocation(type, bl)), this.createBoatModel(context, (Boat.Type)((Object)type), bl))));
+        this.boatResources = Stream.of(Boat.Type.values()).collect(ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(new ResourceLocation(BoatRenderer.getTextureLocation(type, bl)), this.createBoatModel(context, (Boat.Type)type, bl))));
     }
 
     private ListModel<Boat> createBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean bl) {
@@ -75,7 +75,7 @@ extends EntityRenderer<Boat> {
         if (!Mth.equal(k = boat.getBubbleAngle(g), 0.0f)) {
             poseStack.mulPose(new Quaternionf().setAngleAxis(boat.getBubbleAngle(g) * ((float)Math.PI / 180), 1.0f, 0.0f, 1.0f));
         }
-        Pair<ResourceLocation, ListModel<Boat>> pair = this.boatResources.get((Object)boat.getBoatType());
+        Pair<ResourceLocation, ListModel<Boat>> pair = this.boatResources.get(boat.getVariant());
         ResourceLocation resourceLocation = pair.getFirst();
         ListModel<Boat> listModel = pair.getSecond();
         poseStack.scale(-1.0f, -1.0f, 1.0f);
@@ -96,7 +96,7 @@ extends EntityRenderer<Boat> {
 
     @Override
     public ResourceLocation getTextureLocation(Boat boat) {
-        return this.boatResources.get((Object)boat.getBoatType()).getFirst();
+        return this.boatResources.get(boat.getVariant()).getFirst();
     }
 }
 

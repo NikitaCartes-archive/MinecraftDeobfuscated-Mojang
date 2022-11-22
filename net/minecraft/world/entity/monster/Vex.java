@@ -51,6 +51,7 @@ extends Monster {
     public static final int TICKS_PER_FLAP = Mth.ceil(3.9269907f);
     protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Vex.class, EntityDataSerializers.BYTE);
     private static final int FLAG_IS_CHARGING = 1;
+    private static final double RIDING_OFFSET = 0.4;
     @Nullable
     Mob owner;
     @Nullable
@@ -214,6 +215,11 @@ extends Monster {
     protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
         this.setDropChance(EquipmentSlot.MAINHAND, 0.0f);
+    }
+
+    @Override
+    public double getMyRidingOffset() {
+        return 0.4;
     }
 
     class VexMoveControl

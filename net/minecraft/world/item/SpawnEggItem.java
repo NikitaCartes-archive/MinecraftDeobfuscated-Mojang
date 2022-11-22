@@ -103,7 +103,7 @@ extends Item {
             return InteractionResultHolder.fail(itemStack);
         }
         EntityType<?> entityType = this.getType(itemStack.getTag());
-        Entity entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false);
+        Object entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false);
         if (entity == null) {
             return InteractionResultHolder.pass(itemStack);
         }
@@ -111,7 +111,7 @@ extends Item {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, entity.position());
+        level.gameEvent((Entity)player, GameEvent.ENTITY_PLACE, ((Entity)entity).position());
         return InteractionResultHolder.consume(itemStack);
     }
 

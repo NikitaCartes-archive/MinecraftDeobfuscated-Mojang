@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.animal;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -26,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Shearable;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -45,7 +48,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class MushroomCow
 extends Cow
-implements Shearable {
+implements Shearable,
+VariantHolder<MushroomType> {
     private static final EntityDataAccessor<String> DATA_TYPE = SynchedEntityData.defineId(MushroomCow.class, EntityDataSerializers.STRING);
     private static final int MUTATE_CHANCE = 1024;
     @Nullable
@@ -74,7 +78,7 @@ implements Shearable {
     public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
         UUID uUID = lightningBolt.getUUID();
         if (!uUID.equals(this.lastLightningBoltUUID)) {
-            this.setMushroomType(this.getMushroomType() == MushroomType.RED ? MushroomType.BROWN : MushroomType.RED);
+            this.setVariant(this.getVariant() == MushroomType.RED ? MushroomType.BROWN : MushroomType.RED);
             this.lastLightningBoltUUID = uUID;
             this.playSound(SoundEvents.MOOSHROOM_CONVERT, 2.0f, 1.0f);
         }
@@ -115,7 +119,7 @@ implements Shearable {
             }
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        if (this.getMushroomType() == MushroomType.BROWN && itemStack.is(ItemTags.SMALL_FLOWERS)) {
+        if (this.getVariant() == MushroomType.BROWN && itemStack.is(ItemTags.SMALL_FLOWERS)) {
             if (this.effect != null) {
                 for (int i = 0; i < 2; ++i) {
                     this.level.addParticle(ParticleTypes.SMOKE, this.getX() + this.random.nextDouble() / 2.0, this.getY(0.5), this.getZ() + this.random.nextDouble() / 2.0, 0.0, this.random.nextDouble() / 5.0, 0.0);
@@ -161,7 +165,7 @@ implements Shearable {
             cow.setInvulnerable(this.isInvulnerable());
             this.level.addFreshEntity(cow);
             for (int i = 0; i < 5; ++i) {
-                this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getMushroomType().blockState.getBlock())));
+                this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getVariant().blockState.getBlock())));
             }
         }
     }
@@ -174,7 +178,7 @@ implements Shearable {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putString("Type", this.getMushroomType().type);
+        compoundTag.putString("Type", this.getVariant().getSerializedName());
         if (this.effect != null) {
             compoundTag.putInt("EffectId", MobEffect.getId(this.effect));
             compoundTag.putInt("EffectDuration", this.effectDuration);
@@ -184,7 +188,7 @@ implements Shearable {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.setMushroomType(MushroomType.byType(compoundTag.getString("Type")));
+        this.setVariant(MushroomType.byType(compoundTag.getString("Type")));
         if (compoundTag.contains("EffectId", 1)) {
             this.effect = MobEffect.byId(compoundTag.getInt("EffectId"));
         }
@@ -201,11 +205,13 @@ implements Shearable {
         return Optional.empty();
     }
 
-    private void setMushroomType(MushroomType mushroomType) {
+    @Override
+    public void setVariant(MushroomType mushroomType) {
         this.entityData.set(DATA_TYPE, mushroomType.type);
     }
 
-    public MushroomType getMushroomType() {
+    @Override
+    public MushroomType getVariant() {
         return MushroomType.byType(this.entityData.get(DATA_TYPE));
     }
 
@@ -214,15 +220,15 @@ implements Shearable {
     public MushroomCow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel);
         if (mushroomCow != null) {
-            mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)ageableMob));
+            mushroomCow.setVariant(this.getOffspringType((MushroomCow)ageableMob));
         }
         return mushroomCow;
     }
 
     private MushroomType getOffspringType(MushroomCow mushroomCow) {
         MushroomType mushroomType2;
-        MushroomType mushroomType = this.getMushroomType();
-        MushroomType mushroomType3 = mushroomType == (mushroomType2 = mushroomCow.getMushroomType()) && this.random.nextInt(1024) == 0 ? (mushroomType == MushroomType.BROWN ? MushroomType.RED : MushroomType.BROWN) : (this.random.nextBoolean() ? mushroomType : mushroomType2);
+        MushroomType mushroomType = this.getVariant();
+        MushroomType mushroomType3 = mushroomType == (mushroomType2 = mushroomCow.getVariant()) && this.random.nextInt(1024) == 0 ? (mushroomType == MushroomType.BROWN ? MushroomType.RED : MushroomType.BROWN) : (this.random.nextBoolean() ? mushroomType : mushroomType2);
         return mushroomType3;
     }
 
@@ -238,10 +244,17 @@ implements Shearable {
         return this.getBreedOffspring(serverLevel, ageableMob);
     }
 
-    public static enum MushroomType {
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
+    }
+
+    public static enum MushroomType implements StringRepresentable
+    {
         RED("red", Blocks.RED_MUSHROOM.defaultBlockState()),
         BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState());
 
+        public static final StringRepresentable.EnumCodec<MushroomType> CODEC;
         final String type;
         final BlockState blockState;
 
@@ -254,12 +267,17 @@ implements Shearable {
             return this.blockState;
         }
 
+        @Override
+        public String getSerializedName() {
+            return this.type;
+        }
+
         static MushroomType byType(String string) {
-            for (MushroomType mushroomType : MushroomType.values()) {
-                if (!mushroomType.type.equals(string)) continue;
-                return mushroomType;
-            }
-            return RED;
+            return Objects.requireNonNullElse(CODEC.byName(string), RED);
+        }
+
+        static {
+            CODEC = StringRepresentable.fromEnum(MushroomType::values);
         }
     }
 }

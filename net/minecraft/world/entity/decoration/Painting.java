@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.decoration.PaintingVariants;
@@ -36,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Painting
-extends HangingEntity {
+extends HangingEntity
+implements VariantHolder<Holder<PaintingVariant>> {
     private static final EntityDataAccessor<Holder<PaintingVariant>> DATA_PAINTING_VARIANT_ID = SynchedEntityData.defineId(Painting.class, EntityDataSerializers.PAINTING_VARIANT);
     private static final ResourceKey<PaintingVariant> DEFAULT_VARIANT = PaintingVariants.KEBAB;
 
@@ -60,10 +62,12 @@ extends HangingEntity {
         }
     }
 
-    private void setVariant(Holder<PaintingVariant> holder) {
+    @Override
+    public void setVariant(Holder<PaintingVariant> holder) {
         this.entityData.set(DATA_PAINTING_VARIANT_ID, holder);
     }
 
+    @Override
     public Holder<PaintingVariant> getVariant() {
         return this.entityData.get(DATA_PAINTING_VARIANT_ID);
     }
@@ -126,12 +130,12 @@ extends HangingEntity {
 
     @Override
     public int getWidth() {
-        return this.getVariant().value().getWidth();
+        return ((PaintingVariant)this.getVariant().value()).getWidth();
     }
 
     @Override
     public int getHeight() {
-        return this.getVariant().value().getHeight();
+        return ((PaintingVariant)this.getVariant().value()).getHeight();
     }
 
     @Override
@@ -183,6 +187,11 @@ extends HangingEntity {
     @Override
     public ItemStack getPickResult() {
         return new ItemStack(Items.PAINTING);
+    }
+
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
     }
 }
 

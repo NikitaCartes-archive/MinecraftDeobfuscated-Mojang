@@ -82,12 +82,9 @@ implements ComponentContents {
                 if ("%".equals(string2) && "%%".equals(string3)) {
                     consumer.accept(TEXT_PERCENT);
                 } else if ("s".equals(string2)) {
-                    int m;
                     String string4 = matcher.group(1);
-                    int n = m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
-                    if (m < this.args.length) {
-                        consumer.accept(this.getArgument(m));
-                    }
+                    int m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
+                    consumer.accept(this.getArgument(m));
                 } else {
                     throw new TranslatableFormatException(this, "Unsupported format: '" + string3 + "'");
                 }
@@ -106,7 +103,7 @@ implements ComponentContents {
     }
 
     private FormattedText getArgument(int i) {
-        if (i >= this.args.length) {
+        if (i < 0 || i >= this.args.length) {
             throw new TranslatableFormatException(this, i);
         }
         Object object = this.args[i];

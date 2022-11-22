@@ -31,7 +31,7 @@ extends MobRenderer<MushroomCow, CowModel<MushroomCow>> {
 
     @Override
     public ResourceLocation getTextureLocation(MushroomCow mushroomCow) {
-        return TEXTURES.get((Object)mushroomCow.getMushroomType());
+        return TEXTURES.get(mushroomCow.getVariant());
     }
 }
 

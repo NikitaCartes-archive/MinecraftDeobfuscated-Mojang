@@ -3,6 +3,10 @@
  */
 package net.minecraft.world.entity.animal.horse;
 
+import com.mojang.serialization.Codec;
+import java.util.Arrays;
+import java.util.Comparator;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -24,6 +29,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -60,9 +66,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class Llama
 extends AbstractChestedHorse
-implements RangedAttackMob {
+implements VariantHolder<Variant>,
+RangedAttackMob {
     private static final int MAX_STRENGTH = 5;
-    private static final int VARIANTS = 4;
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
     private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SWAG_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
@@ -97,7 +103,7 @@ implements RangedAttackMob {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("Variant", this.getVariant());
+        compoundTag.putInt("Variant", this.getVariant().id);
         compoundTag.putInt("Strength", this.getStrength());
         if (!this.inventory.getItem(1).isEmpty()) {
             compoundTag.put("DecorItem", this.inventory.getItem(1).save(new CompoundTag()));
@@ -108,7 +114,7 @@ implements RangedAttackMob {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         this.setStrength(compoundTag.getInt("Strength"));
         super.readAdditionalSaveData(compoundTag);
-        this.setVariant(compoundTag.getInt("Variant"));
+        this.setVariant(Variant.byId(compoundTag.getInt("Variant")));
         if (compoundTag.contains("DecorItem", 10)) {
             this.inventory.setItem(1, ItemStack.of(compoundTag.getCompound("DecorItem")));
         }
@@ -144,12 +150,14 @@ implements RangedAttackMob {
         this.entityData.define(DATA_VARIANT_ID, 0);
     }
 
-    public int getVariant() {
-        return Mth.clamp(this.entityData.get(DATA_VARIANT_ID), 0, 3);
+    @Override
+    public Variant getVariant() {
+        return Variant.byId(this.entityData.get(DATA_VARIANT_ID));
     }
 
-    public void setVariant(int i) {
-        this.entityData.set(DATA_VARIANT_ID, i);
+    @Override
+    public void setVariant(Variant variant) {
+        this.entityData.set(DATA_VARIANT_ID, variant.id);
     }
 
     @Override
@@ -238,16 +246,16 @@ implements RangedAttackMob {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        int i;
+        Variant variant;
         RandomSource randomSource = serverLevelAccessor.getRandom();
         this.setRandomStrength(randomSource);
         if (spawnGroupData instanceof LlamaGroupData) {
-            i = ((LlamaGroupData)spawnGroupData).variant;
+            variant = ((LlamaGroupData)spawnGroupData).variant;
         } else {
-            i = randomSource.nextInt(4);
-            spawnGroupData = new LlamaGroupData(i);
+            variant = Util.getRandom(Variant.values(), randomSource);
+            spawnGroupData = new LlamaGroupData(variant);
         }
-        this.setVariant(i);
+        this.setVariant(variant);
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -487,6 +495,47 @@ implements RangedAttackMob {
         return this.getControllingPassenger();
     }
 
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
+    }
+
+    public static enum Variant implements StringRepresentable
+    {
+        CREAMY(0, "creamy"),
+        WHITE(1, "white"),
+        BROWN(2, "brown"),
+        GRAY(3, "gray");
+
+        public static final Codec<Variant> CODEC;
+        private static final Variant[] BY_ID;
+        final int id;
+        private final String name;
+
+        private Variant(int j, String string2) {
+            this.id = j;
+            this.name = string2;
+        }
+
+        public int getId() {
+            return this.id;
+        }
+
+        public static Variant byId(int i) {
+            return BY_ID[Mth.clamp(i, 0, BY_ID.length - 1)];
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
+        static {
+            CODEC = StringRepresentable.fromEnum(Variant::values);
+            BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+        }
+    }
+
     static class LlamaHurtByTargetGoal
     extends HurtByTargetGoal {
         public LlamaHurtByTargetGoal(Llama llama) {
@@ -520,11 +569,11 @@ implements RangedAttackMob {
 
     static class LlamaGroupData
     extends AgeableMob.AgeableMobGroupData {
-        public final int variant;
+        public final Variant variant;
 
-        LlamaGroupData(int i) {
+        LlamaGroupData(Variant variant) {
             super(true);
-            this.variant = i;
+            this.variant = variant;
         }
     }
 }

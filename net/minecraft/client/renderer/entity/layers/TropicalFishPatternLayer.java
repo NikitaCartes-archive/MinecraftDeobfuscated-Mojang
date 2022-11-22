@@ -14,11 +14,24 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.TropicalFish;
 
 @Environment(value=EnvType.CLIENT)
 public class TropicalFishPatternLayer
 extends RenderLayer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
+    private static final ResourceLocation KOB_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a_pattern_1.png");
+    private static final ResourceLocation SUNSTREAK_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a_pattern_2.png");
+    private static final ResourceLocation SNOOPER_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a_pattern_3.png");
+    private static final ResourceLocation DASHER_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a_pattern_4.png");
+    private static final ResourceLocation BRINELY_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a_pattern_5.png");
+    private static final ResourceLocation SPOTTY_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a_pattern_6.png");
+    private static final ResourceLocation FLOPPER_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b_pattern_1.png");
+    private static final ResourceLocation STRIPEY_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b_pattern_2.png");
+    private static final ResourceLocation GLITTER_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b_pattern_3.png");
+    private static final ResourceLocation BLOCKFISH_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b_pattern_4.png");
+    private static final ResourceLocation BETTY_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b_pattern_5.png");
+    private static final ResourceLocation CLAYFISH_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b_pattern_6.png");
     private final TropicalFishModelA<TropicalFish> modelA;
     private final TropicalFishModelB<TropicalFish> modelB;
 
@@ -30,9 +43,29 @@ extends RenderLayer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, TropicalFish tropicalFish, float f, float g, float h, float j, float k, float l) {
-        ColorableHierarchicalModel entityModel = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
-        float[] fs = tropicalFish.getPatternColor();
-        TropicalFishPatternLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), entityModel, tropicalFish.getPatternTextureLocation(), poseStack, multiBufferSource, i, tropicalFish, f, g, j, k, l, h, fs[0], fs[1], fs[2]);
+        TropicalFish.Pattern pattern = tropicalFish.getVariant();
+        ColorableHierarchicalModel entityModel = switch (pattern.base()) {
+            default -> throw new IncompatibleClassChangeError();
+            case TropicalFish.Base.SMALL -> this.modelA;
+            case TropicalFish.Base.LARGE -> this.modelB;
+        };
+        ResourceLocation resourceLocation = switch (pattern) {
+            default -> throw new IncompatibleClassChangeError();
+            case TropicalFish.Pattern.KOB -> KOB_TEXTURE;
+            case TropicalFish.Pattern.SUNSTREAK -> SUNSTREAK_TEXTURE;
+            case TropicalFish.Pattern.SNOOPER -> SNOOPER_TEXTURE;
+            case TropicalFish.Pattern.DASHER -> DASHER_TEXTURE;
+            case TropicalFish.Pattern.BRINELY -> BRINELY_TEXTURE;
+            case TropicalFish.Pattern.SPOTTY -> SPOTTY_TEXTURE;
+            case TropicalFish.Pattern.FLOPPER -> FLOPPER_TEXTURE;
+            case TropicalFish.Pattern.STRIPEY -> STRIPEY_TEXTURE;
+            case TropicalFish.Pattern.GLITTER -> GLITTER_TEXTURE;
+            case TropicalFish.Pattern.BLOCKFISH -> BLOCKFISH_TEXTURE;
+            case TropicalFish.Pattern.BETTY -> BETTY_TEXTURE;
+            case TropicalFish.Pattern.CLAYFISH -> CLAYFISH_TEXTURE;
+        };
+        float[] fs = tropicalFish.getPatternColor().getTextureDiffuseColors();
+        TropicalFishPatternLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), entityModel, resourceLocation, poseStack, multiBufferSource, i, tropicalFish, f, g, j, k, l, h, fs[0], fs[1], fs[2]);
     }
 }
 

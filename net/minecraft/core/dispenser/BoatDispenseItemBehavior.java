@@ -46,7 +46,7 @@ extends DefaultDispenseItemBehavior {
             return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
         }
         Boat boat = this.isChestBoat ? new ChestBoat(level, d, e + g, f) : new Boat(level, d, e + g, f);
-        boat.setType(this.type);
+        boat.setVariant(this.type);
         boat.setYRot(direction.toYRot());
         level.addFreshEntity(boat);
         itemStack.shrink(1);

@@ -11,6 +11,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -49,8 +50,8 @@ public class GoalSelector {
     }
 
     @VisibleForTesting
-    public void removeAllGoals() {
-        this.availableGoals.clear();
+    public void removeAllGoals(Predicate<Goal> predicate) {
+        this.availableGoals.removeIf(wrappedGoal -> predicate.test(wrappedGoal.getGoal()));
     }
 
     public void removeGoal(Goal goal) {

@@ -1181,7 +1181,7 @@ public class BlockModelGenerators {
         MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
         Map.of(Direction.NORTH, VariantProperties.Rotation.R0, Direction.EAST, VariantProperties.Rotation.R90, Direction.SOUTH, VariantProperties.Rotation.R180, Direction.WEST, VariantProperties.Rotation.R270).forEach((direction, rotation) -> {
             Condition.TerminalCondition terminalCondition = Condition.condition().term(BlockStateProperties.HORIZONTAL_FACING, direction);
-            multiPartGenerator.with((Condition)terminalCondition, Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, rotation));
+            multiPartGenerator.with((Condition)terminalCondition, Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, rotation).with(VariantProperties.UV_LOCK, true));
             this.addSlotStateAndRotationVariants(multiPartGenerator, terminalCondition, (VariantProperties.Rotation)((Object)rotation));
         });
         this.blockStateOutput.accept(multiPartGenerator);

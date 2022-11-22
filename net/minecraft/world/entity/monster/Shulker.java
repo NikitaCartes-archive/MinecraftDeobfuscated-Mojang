@@ -33,6 +33,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -62,7 +63,8 @@ import org.joml.Vector3f;
 
 public class Shulker
 extends AbstractGolem
-implements Enemy {
+implements VariantHolder<Optional<DyeColor>>,
+Enemy {
     private static final UUID COVERED_ARMOR_MODIFIER_UUID = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF27F");
     private static final AttributeModifier COVERED_ARMOR_MODIFIER = new AttributeModifier(COVERED_ARMOR_MODIFIER_UUID, "Covered armor bonus", 20.0, AttributeModifier.Operation.ADDITION);
     protected static final EntityDataAccessor<Direction> DATA_ATTACH_FACE_ID = SynchedEntityData.defineId(Shulker.class, EntityDataSerializers.DIRECTION);
@@ -421,10 +423,7 @@ implements Enemy {
         }
         Shulker shulker = EntityType.SHULKER.create(this.level);
         if (shulker != null) {
-            DyeColor dyeColor = this.getColor();
-            if (dyeColor != null) {
-                shulker.setColor(dyeColor);
-            }
+            shulker.setVariant((Optional<DyeColor>)this.getVariant());
             shulker.moveTo(vec3);
             this.level.addFreshEntity(shulker);
         }
@@ -518,8 +517,14 @@ implements Enemy {
         return Optional.of(new Vec3(-e, -g, -h));
     }
 
-    private void setColor(DyeColor dyeColor) {
-        this.entityData.set(DATA_COLOR_ID, (byte)dyeColor.getId());
+    @Override
+    public void setVariant(Optional<DyeColor> optional) {
+        this.entityData.set(DATA_COLOR_ID, optional.map(dyeColor -> (byte)dyeColor.getId()).orElse((byte)16));
+    }
+
+    @Override
+    public Optional<DyeColor> getVariant() {
+        return Optional.ofNullable(this.getColor());
     }
 
     @Nullable
@@ -529,6 +534,11 @@ implements Enemy {
             return null;
         }
         return DyeColor.byId(b);
+    }
+
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
     }
 
     class ShulkerLookControl

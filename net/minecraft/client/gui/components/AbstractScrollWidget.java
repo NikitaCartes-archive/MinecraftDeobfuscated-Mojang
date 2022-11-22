@@ -76,7 +76,7 @@ GuiEventListener {
 
     @Override
     public boolean mouseScrolled(double d, double e, double f) {
-        if (!this.visible || !this.isFocused()) {
+        if (!this.visible) {
             return false;
         }
         this.setScrollAmount(this.scrollAmount - f * this.scrollRate());

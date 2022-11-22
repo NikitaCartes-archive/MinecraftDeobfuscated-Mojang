@@ -31,7 +31,7 @@ extends MobRenderer<Axolotl, AxolotlModel<Axolotl>> {
 
     @Override
     public ResourceLocation getTextureLocation(Axolotl axolotl) {
-        return TEXTURE_BY_TYPE.get((Object)axolotl.getVariant());
+        return TEXTURE_BY_TYPE.get(axolotl.getVariant());
     }
 }
 

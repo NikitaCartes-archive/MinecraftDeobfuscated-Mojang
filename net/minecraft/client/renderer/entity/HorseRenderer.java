@@ -28,7 +28,7 @@ extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
         enumMap.put(Variant.BROWN, new ResourceLocation("textures/entity/horse/horse_brown.png"));
         enumMap.put(Variant.BLACK, new ResourceLocation("textures/entity/horse/horse_black.png"));
         enumMap.put(Variant.GRAY, new ResourceLocation("textures/entity/horse/horse_gray.png"));
-        enumMap.put(Variant.DARKBROWN, new ResourceLocation("textures/entity/horse/horse_darkbrown.png"));
+        enumMap.put(Variant.DARK_BROWN, new ResourceLocation("textures/entity/horse/horse_darkbrown.png"));
     });
 
     public HorseRenderer(EntityRendererProvider.Context context) {
@@ -39,7 +39,7 @@ extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
 
     @Override
     public ResourceLocation getTextureLocation(Horse horse) {
-        return LOCATION_BY_VARIANT.get((Object)horse.getVariant());
+        return LOCATION_BY_VARIANT.get(horse.getVariant());
     }
 }
 

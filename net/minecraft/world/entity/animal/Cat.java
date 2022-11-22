@@ -37,6 +37,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -78,7 +79,8 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 public class Cat
-extends TamableAnimal {
+extends TamableAnimal
+implements VariantHolder<CatVariant> {
     public static final double TEMPT_SPEED_MOD = 0.6;
     public static final double WALK_SPEED_MOD = 0.8;
     public static final double SPRINT_SPEED_MOD = 1.33;
@@ -102,7 +104,7 @@ extends TamableAnimal {
     }
 
     public ResourceLocation getResourceLocation() {
-        return this.getCatVariant().texture();
+        return this.getVariant().texture();
     }
 
     @Override
@@ -124,11 +126,13 @@ extends TamableAnimal {
         this.targetSelector.addGoal(1, new NonTameRandomTargetGoal<Turtle>(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
     }
 
-    public CatVariant getCatVariant() {
+    @Override
+    public CatVariant getVariant() {
         return this.entityData.get(DATA_VARIANT_ID);
     }
 
-    public void setCatVariant(CatVariant catVariant) {
+    @Override
+    public void setVariant(CatVariant catVariant) {
         this.entityData.set(DATA_VARIANT_ID, catVariant);
     }
 
@@ -168,7 +172,7 @@ extends TamableAnimal {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putString("variant", BuiltInRegistries.CAT_VARIANT.getKey(this.getCatVariant()).toString());
+        compoundTag.putString("variant", BuiltInRegistries.CAT_VARIANT.getKey(this.getVariant()).toString());
         compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
     }
 
@@ -177,7 +181,7 @@ extends TamableAnimal {
         super.readAdditionalSaveData(compoundTag);
         CatVariant catVariant = BuiltInRegistries.CAT_VARIANT.get(ResourceLocation.tryParse(compoundTag.getString("variant")));
         if (catVariant != null) {
-            this.setCatVariant(catVariant);
+            this.setVariant(catVariant);
         }
         if (compoundTag.contains("CollarColor", 99)) {
             this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
@@ -317,9 +321,9 @@ extends TamableAnimal {
         if (cat != null && ageableMob instanceof Cat) {
             Cat cat2 = (Cat)ageableMob;
             if (this.random.nextBoolean()) {
-                cat.setCatVariant(this.getCatVariant());
+                cat.setVariant(this.getVariant());
             } else {
-                cat.setCatVariant(cat2.getCatVariant());
+                cat.setVariant(cat2.getVariant());
             }
             if (this.isTame()) {
                 cat.setOwnerUUID(this.getOwnerUUID());
@@ -352,10 +356,10 @@ extends TamableAnimal {
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9f;
         TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
-        BuiltInRegistries.CAT_VARIANT.getTag(tagKey).flatMap(named -> named.getRandomElement(serverLevelAccessor.getRandom())).ifPresent(holder -> this.setCatVariant((CatVariant)holder.value()));
+        BuiltInRegistries.CAT_VARIANT.getTag(tagKey).flatMap(named -> named.getRandomElement(serverLevelAccessor.getRandom())).ifPresent(holder -> this.setVariant((CatVariant)holder.value()));
         ServerLevel serverLevel = serverLevelAccessor.getLevel();
         if (serverLevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
-            this.setCatVariant(BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.ALL_BLACK));
+            this.setVariant(BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.ALL_BLACK));
             this.setPersistenceRequired();
         }
         return spawnGroupData;
@@ -456,6 +460,11 @@ extends TamableAnimal {
     @Nullable
     public /* synthetic */ AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         return this.getBreedOffspring(serverLevel, ageableMob);
+    }
+
+    @Override
+    public /* synthetic */ Object getVariant() {
+        return this.getVariant();
     }
 
     static class CatTemptGoal

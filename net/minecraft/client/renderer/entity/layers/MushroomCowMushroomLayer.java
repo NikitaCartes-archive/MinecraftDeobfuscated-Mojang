@@ -43,7 +43,7 @@ extends RenderLayer<T, CowModel<T>> {
         if (((Entity)mushroomCow).isInvisible() && !bl) {
             return;
         }
-        BlockState blockState = ((MushroomCow)mushroomCow).getMushroomType().getBlockState();
+        BlockState blockState = ((MushroomCow)mushroomCow).getVariant().getBlockState();
         int m = LivingEntityRenderer.getOverlayCoords(mushroomCow, 0.0f);
         BakedModel bakedModel = this.blockRenderer.getBlockModel(blockState);
         poseStack.pushPose();

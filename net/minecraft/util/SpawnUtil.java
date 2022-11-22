@@ -23,7 +23,7 @@ public class SpawnUtil {
             int m = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
             int n = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
             mutableBlockPos.setWithOffset(blockPos, m, k, n);
-            if (!serverLevel.getWorldBorder().isWithinBounds(mutableBlockPos) || !SpawnUtil.moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos, strategy) || (mob = (Mob)entityType.create(serverLevel, null, null, null, mutableBlockPos, mobSpawnType, false, false)) == null) continue;
+            if (!serverLevel.getWorldBorder().isWithinBounds(mutableBlockPos) || !SpawnUtil.moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos, strategy) || (mob = (Mob)entityType.create(serverLevel, null, null, mutableBlockPos, mobSpawnType, false, false)) == null) continue;
             if (mob.checkSpawnRules(serverLevel, mobSpawnType) && mob.checkSpawnObstruction(serverLevel)) {
                 serverLevel.addFreshEntityWithPassengers(mob);
                 return Optional.of(mob);

@@ -47,7 +47,7 @@ extends Item {
         }
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
+            ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), null, blockPos, MobSpawnType.SPAWN_EGG, true, true);
             if (armorStand == null) {
                 return InteractionResult.FAIL;
             }

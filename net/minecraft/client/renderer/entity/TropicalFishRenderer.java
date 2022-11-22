@@ -24,6 +24,8 @@ public class TropicalFishRenderer
 extends MobRenderer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
     private final ColorableHierarchicalModel<TropicalFish> modelA = (ColorableHierarchicalModel)this.getModel();
     private final ColorableHierarchicalModel<TropicalFish> modelB;
+    private static final ResourceLocation MODEL_A_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a.png");
+    private static final ResourceLocation MODEL_B_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b.png");
 
     public TropicalFishRenderer(EntityRendererProvider.Context context) {
         super(context, new TropicalFishModelA(context.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL)), 0.15f);
@@ -33,14 +35,22 @@ extends MobRenderer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
 
     @Override
     public ResourceLocation getTextureLocation(TropicalFish tropicalFish) {
-        return tropicalFish.getBaseTextureLocation();
+        return switch (tropicalFish.getVariant().base()) {
+            default -> throw new IncompatibleClassChangeError();
+            case TropicalFish.Base.SMALL -> MODEL_A_TEXTURE;
+            case TropicalFish.Base.LARGE -> MODEL_B_TEXTURE;
+        };
     }
 
     @Override
     public void render(TropicalFish tropicalFish, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         ColorableHierarchicalModel<TropicalFish> colorableHierarchicalModel;
-        this.model = colorableHierarchicalModel = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
-        float[] fs = tropicalFish.getBaseColor();
+        this.model = colorableHierarchicalModel = (switch (tropicalFish.getVariant().base()) {
+            default -> throw new IncompatibleClassChangeError();
+            case TropicalFish.Base.SMALL -> this.modelA;
+            case TropicalFish.Base.LARGE -> this.modelB;
+        });
+        float[] fs = tropicalFish.getBaseColor().getTextureDiffuseColors();
         colorableHierarchicalModel.setColor(fs[0], fs[1], fs[2]);
         super.render(tropicalFish, f, g, poseStack, multiBufferSource, i);
         colorableHierarchicalModel.setColor(1.0f, 1.0f, 1.0f);

@@ -40,7 +40,7 @@ extends MobRenderer<Fox, FoxModel<Fox>> {
 
     @Override
     public ResourceLocation getTextureLocation(Fox fox) {
-        if (fox.getFoxType() == Fox.Type.RED) {
+        if (fox.getVariant() == Fox.Type.RED) {
             return fox.isSleeping() ? RED_FOX_SLEEP_TEXTURE : RED_FOX_TEXTURE;
         }
         return fox.isSleeping() ? SNOW_FOX_SLEEP_TEXTURE : SNOW_FOX_TEXTURE;

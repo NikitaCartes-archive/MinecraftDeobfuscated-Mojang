@@ -16,7 +16,11 @@ import net.minecraft.world.entity.animal.Parrot;
 @Environment(value=EnvType.CLIENT)
 public class ParrotRenderer
 extends MobRenderer<Parrot, ParrotModel> {
-    public static final ResourceLocation[] PARROT_LOCATIONS = new ResourceLocation[]{new ResourceLocation("textures/entity/parrot/parrot_red_blue.png"), new ResourceLocation("textures/entity/parrot/parrot_blue.png"), new ResourceLocation("textures/entity/parrot/parrot_green.png"), new ResourceLocation("textures/entity/parrot/parrot_yellow_blue.png"), new ResourceLocation("textures/entity/parrot/parrot_grey.png")};
+    private static final ResourceLocation RED_BLUE = new ResourceLocation("textures/entity/parrot/parrot_red_blue.png");
+    private static final ResourceLocation BLUE = new ResourceLocation("textures/entity/parrot/parrot_blue.png");
+    private static final ResourceLocation GREEN = new ResourceLocation("textures/entity/parrot/parrot_green.png");
+    private static final ResourceLocation YELLOW_BLUE = new ResourceLocation("textures/entity/parrot/parrot_yellow_blue.png");
+    private static final ResourceLocation GREY = new ResourceLocation("textures/entity/parrot/parrot_grey.png");
 
     public ParrotRenderer(EntityRendererProvider.Context context) {
         super(context, new ParrotModel(context.bakeLayer(ModelLayers.PARROT)), 0.3f);
@@ -24,7 +28,18 @@ extends MobRenderer<Parrot, ParrotModel> {
 
     @Override
     public ResourceLocation getTextureLocation(Parrot parrot) {
-        return PARROT_LOCATIONS[parrot.getVariant()];
+        return ParrotRenderer.getVariantTexture(parrot.getVariant());
+    }
+
+    public static ResourceLocation getVariantTexture(Parrot.Variant variant) {
+        return switch (variant) {
+            default -> throw new IncompatibleClassChangeError();
+            case Parrot.Variant.RED_BLUE -> RED_BLUE;
+            case Parrot.Variant.BLUE -> BLUE;
+            case Parrot.Variant.GREEN -> GREEN;
+            case Parrot.Variant.YELLOW_BLUE -> YELLOW_BLUE;
+            case Parrot.Variant.GRAY -> GREY;
+        };
     }
 
     @Override

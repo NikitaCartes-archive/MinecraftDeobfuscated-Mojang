@@ -24,13 +24,15 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ShareToLanScreen
 extends Screen {
+    private static final int PORT_LOWER_BOUND = 1024;
+    private static final int PORT_HIGHER_BOUND = 65535;
     private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands");
     private static final Component GAME_MODE_LABEL = Component.translatable("selectWorld.gameMode");
     private static final Component INFO_TEXT = Component.translatable("lanServer.otherPlayers");
     private static final Component PORT_INFO_TEXT = Component.translatable("lanServer.port");
-    private static final Component INVALID_PORT = Component.translatable("lanServer.port.invalid");
-    public static final Component PORT_UNAVAILABLE = Component.translatable("lanServer.port.unavailable");
-    public static final int INVALID_PORT_COLOR = 0xFF5555;
+    private static final Component PORT_UNAVAILABLE = Component.translatable("lanServer.port.unavailable.new", 1024, 65535);
+    private static final Component INVALID_PORT = Component.translatable("lanServer.port.invalid.new", 1024, 65535);
+    private static final int INVALID_PORT_COLOR = 0xFF5555;
     private final Screen lastScreen;
     private GameType gameMode = GameType.SURVIVAL;
     private boolean commands;
@@ -80,6 +82,14 @@ extends Screen {
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 5, this.height - 28, 150, 20).build());
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.portEdit != null) {
+            this.portEdit.tick();
+        }
+    }
+
     @Nullable
     private Component tryParsePort(String string) {
         if (string.isBlank()) {
@@ -88,7 +98,7 @@ extends Screen {
         }
         try {
             this.port = Integer.parseInt(string);
-            if (this.port < 1 || this.port > 65535) {
+            if (this.port < 1024 || this.port > 65535) {
                 return INVALID_PORT;
             }
             if (!HttpUtil.isPortAvailable(this.port)) {
@@ -96,7 +106,7 @@ extends Screen {
             }
             return null;
         } catch (NumberFormatException numberFormatException) {
-            this.port = -1;
+            this.port = HttpUtil.getAvailablePort();
             return INVALID_PORT;
         }
     }

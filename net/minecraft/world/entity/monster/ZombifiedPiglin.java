@@ -59,6 +59,7 @@ implements NeutralMob {
     private static final UniformInt ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
     private int ticksUntilNextAlert;
     private static final float ZOMBIFIED_PIGLIN_EYE_HEIGHT = 1.79f;
+    private static final float ZOMBIFIED_PIGLIN_BABY_EYE_HEIGHT_ADJUSTMENT = 0.82f;
 
     public ZombifiedPiglin(EntityType<? extends ZombifiedPiglin> entityType, Level level) {
         super((EntityType<? extends Zombie>)entityType, level);
@@ -90,7 +91,7 @@ implements NeutralMob {
 
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-        return this.isBaby() ? 0.97999996f : 1.79f;
+        return this.isBaby() ? 0.96999997f : 1.79f;
     }
 
     @Override
