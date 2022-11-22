@@ -32,6 +32,7 @@ public enum DyeColor implements StringRepresentable {
 	private static final Int2ObjectOpenHashMap<DyeColor> BY_FIREWORK_COLOR = new Int2ObjectOpenHashMap<>(
 		(Map<? extends Integer, ? extends DyeColor>)Arrays.stream(values()).collect(Collectors.toMap(dyeColor -> dyeColor.fireworkColor, dyeColor -> dyeColor))
 	);
+	public static final StringRepresentable.EnumCodec<DyeColor> CODEC = StringRepresentable.fromEnum(DyeColor::values);
 	private final int id;
 	private final String name;
 	private final MaterialColor color;
@@ -86,13 +87,8 @@ public enum DyeColor implements StringRepresentable {
 	@Nullable
 	@Contract("_,!null->!null;_,null->_")
 	public static DyeColor byName(String string, @Nullable DyeColor dyeColor) {
-		for (DyeColor dyeColor2 : values()) {
-			if (dyeColor2.name.equals(string)) {
-				return dyeColor2;
-			}
-		}
-
-		return dyeColor;
+		DyeColor dyeColor2 = (DyeColor)CODEC.byName(string);
+		return dyeColor2 != null ? dyeColor2 : dyeColor;
 	}
 
 	@Nullable

@@ -18,6 +18,8 @@ import net.minecraft.world.entity.animal.TropicalFish;
 public class TropicalFishRenderer extends MobRenderer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
 	private final ColorableHierarchicalModel<TropicalFish> modelA = this.getModel();
 	private final ColorableHierarchicalModel<TropicalFish> modelB;
+	private static final ResourceLocation MODEL_A_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a.png");
+	private static final ResourceLocation MODEL_B_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b.png");
 
 	public TropicalFishRenderer(EntityRendererProvider.Context context) {
 		super(context, new TropicalFishModelA<>(context.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL)), 0.15F);
@@ -26,13 +28,19 @@ public class TropicalFishRenderer extends MobRenderer<TropicalFish, ColorableHie
 	}
 
 	public ResourceLocation getTextureLocation(TropicalFish tropicalFish) {
-		return tropicalFish.getBaseTextureLocation();
+		return switch (tropicalFish.getVariant().base()) {
+			case SMALL -> MODEL_A_TEXTURE;
+			case LARGE -> MODEL_B_TEXTURE;
+		};
 	}
 
 	public void render(TropicalFish tropicalFish, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		ColorableHierarchicalModel<TropicalFish> colorableHierarchicalModel = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
+		ColorableHierarchicalModel<TropicalFish> colorableHierarchicalModel = switch (tropicalFish.getVariant().base()) {
+			case SMALL -> this.modelA;
+			case LARGE -> this.modelB;
+		};
 		this.model = colorableHierarchicalModel;
-		float[] fs = tropicalFish.getBaseColor();
+		float[] fs = tropicalFish.getBaseColor().getTextureDiffuseColors();
 		colorableHierarchicalModel.setColor(fs[0], fs[1], fs[2]);
 		super.render(tropicalFish, f, g, poseStack, multiBufferSource, i);
 		colorableHierarchicalModel.setColor(1.0F, 1.0F, 1.0F);

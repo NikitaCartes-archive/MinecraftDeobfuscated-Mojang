@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.social;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -132,10 +133,11 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			};
 			this.showButton.setTooltip(Tooltip.create(SHOW_TEXT_TOOLTIP, component2));
 			this.showButton.setTooltipDelay(10);
-			this.showButton.visible = playerSocialManager.isHidden(uUID);
-			this.hideButton.visible = !this.showButton.visible;
 			this.reportButton.active = false;
-			this.children = ImmutableList.of(this.hideButton, this.showButton, this.reportButton);
+			this.children = new ArrayList();
+			this.children.add(this.hideButton);
+			this.children.add(this.reportButton);
+			this.updateHideAndShowButton(playerSocialManager.isHidden(this.id));
 		} else {
 			this.children = ImmutableList.of();
 		}
@@ -238,10 +240,15 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	}
 
 	private void onHiddenOrShown(boolean bl, Component component) {
-		this.showButton.visible = bl;
-		this.hideButton.visible = !bl;
+		this.updateHideAndShowButton(bl);
 		this.minecraft.gui.getChat().addMessage(component);
 		this.minecraft.getNarrator().sayNow(component);
+	}
+
+	private void updateHideAndShowButton(boolean bl) {
+		this.showButton.visible = bl;
+		this.hideButton.visible = !bl;
+		this.children.set(0, bl ? this.showButton : this.hideButton);
 	}
 
 	MutableComponent getEntryNarationMessage(MutableComponent mutableComponent) {

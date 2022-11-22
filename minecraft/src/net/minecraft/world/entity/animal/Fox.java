@@ -5,11 +5,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -32,6 +31,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -48,6 +48,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
@@ -89,7 +90,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
-public class Fox extends Animal {
+public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_SITTING = 1;
@@ -293,7 +294,7 @@ public class Fox extends Animal {
 	public Fox getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Fox fox = EntityType.FOX.create(serverLevel);
 		if (fox != null) {
-			fox.setFoxType(this.random.nextBoolean() ? this.getFoxType() : ((Fox)ageableMob).getFoxType());
+			fox.setVariant(this.random.nextBoolean() ? this.getVariant() : ((Fox)ageableMob).getVariant());
 		}
 
 		return fox;
@@ -326,7 +327,7 @@ public class Fox extends Animal {
 			spawnGroupData = new Fox.FoxGroupData(type);
 		}
 
-		this.setFoxType(type);
+		this.setVariant(type);
 		if (bl) {
 			this.setAge(-24000);
 		}
@@ -340,7 +341,7 @@ public class Fox extends Animal {
 	}
 
 	private void setTargetGoals() {
-		if (this.getFoxType() == Fox.Type.RED) {
+		if (this.getVariant() == Fox.Type.RED) {
 			this.targetSelector.addGoal(4, this.landTargetGoal);
 			this.targetSelector.addGoal(4, this.turtleEggTargetGoal);
 			this.targetSelector.addGoal(6, this.fishTargetGoal);
@@ -365,11 +366,11 @@ public class Fox extends Animal {
 		return this.isBaby() ? entityDimensions.height * 0.85F : 0.4F;
 	}
 
-	public Fox.Type getFoxType() {
+	public Fox.Type getVariant() {
 		return Fox.Type.byId(this.entityData.get(DATA_TYPE_ID));
 	}
 
-	private void setFoxType(Fox.Type type) {
+	public void setVariant(Fox.Type type) {
 		this.entityData.set(DATA_TYPE_ID, type.getId());
 	}
 
@@ -402,7 +403,7 @@ public class Fox extends Animal {
 
 		compoundTag.put("Trusted", listTag);
 		compoundTag.putBoolean("Sleeping", this.isSleeping());
-		compoundTag.putString("Type", this.getFoxType().getName());
+		compoundTag.putString("Type", this.getVariant().getSerializedName());
 		compoundTag.putBoolean("Sitting", this.isSitting());
 		compoundTag.putBoolean("Crouching", this.isCrouching());
 	}
@@ -417,7 +418,7 @@ public class Fox extends Animal {
 		}
 
 		this.setSleeping(compoundTag.getBoolean("Sleeping"));
-		this.setFoxType(Fox.Type.byName(compoundTag.getString("Type")));
+		this.setVariant(Fox.Type.byName(compoundTag.getString("Type")));
 		this.setSitting(compoundTag.getBoolean("Sitting"));
 		this.setIsCrouching(compoundTag.getBoolean("Crouching"));
 		if (this.level instanceof ServerLevel) {
@@ -1455,13 +1456,12 @@ public class Fox extends Animal {
 		}
 	}
 
-	public static enum Type {
+	public static enum Type implements StringRepresentable {
 		RED(0, "red"),
 		SNOW(1, "snow");
 
+		public static final StringRepresentable.EnumCodec<Fox.Type> CODEC = StringRepresentable.fromEnum(Fox.Type::values);
 		private static final Fox.Type[] BY_ID = (Fox.Type[])Arrays.stream(values()).sorted(Comparator.comparingInt(Fox.Type::getId)).toArray(Fox.Type[]::new);
-		private static final Map<String, Fox.Type> BY_NAME = (Map<String, Fox.Type>)Arrays.stream(values())
-			.collect(Collectors.toMap(Fox.Type::getName, type -> type));
 		private final int id;
 		private final String name;
 
@@ -1470,7 +1470,8 @@ public class Fox extends Animal {
 			this.name = string2;
 		}
 
-		public String getName() {
+		@Override
+		public String getSerializedName() {
 			return this.name;
 		}
 
@@ -1479,7 +1480,7 @@ public class Fox extends Animal {
 		}
 
 		public static Fox.Type byName(String string) {
-			return (Fox.Type)BY_NAME.getOrDefault(string, RED);
+			return (Fox.Type)Objects.requireNonNullElse((Fox.Type)CODEC.byName(string), RED);
 		}
 
 		public static Fox.Type byId(int i) {

@@ -36,7 +36,7 @@ public class AmphibiousPathNavigation extends PathNavigation {
 
 	@Override
 	protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32) {
-		return this.isInLiquid() ? isClearForMovementBetween(this.mob, vec3, vec32) : false;
+		return this.isInLiquid() ? isClearForMovementBetween(this.mob, vec3, vec32, false) : false;
 	}
 
 	@Override

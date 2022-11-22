@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -1411,8 +1412,12 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	public void removeFreeWill() {
-		this.goalSelector.removeAllGoals();
+		this.removeAllGoals(goal -> true);
 		this.getBrain().removeAllBehaviors();
+	}
+
+	public void removeAllGoals(Predicate<Goal> predicate) {
+		this.goalSelector.removeAllGoals(predicate);
 	}
 
 	@Override

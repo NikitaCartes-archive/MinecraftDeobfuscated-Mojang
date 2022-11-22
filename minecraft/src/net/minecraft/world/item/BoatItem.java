@@ -51,7 +51,7 @@ public class BoatItem extends Item {
 
 			if (hitResult.getType() == HitResult.Type.BLOCK) {
 				Boat boat = this.getBoat(level, hitResult);
-				boat.setType(this.type);
+				boat.setVariant(this.type);
 				boat.setYRot(player.getYRot());
 				if (!level.noCollision(boat, boat.getBoundingBox())) {
 					return InteractionResultHolder.fail(itemStack);

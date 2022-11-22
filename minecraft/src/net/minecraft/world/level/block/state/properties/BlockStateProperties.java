@@ -139,5 +139,4 @@ public class BlockStateProperties {
 	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_3_OCCUPIED = BooleanProperty.create("slot_3_occupied");
 	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_4_OCCUPIED = BooleanProperty.create("slot_4_occupied");
 	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_5_OCCUPIED = BooleanProperty.create("slot_5_occupied");
-	public static final IntegerProperty CHISELED_BOOKSHELF_LAST_INTERACTION_BOOK_SLOT = IntegerProperty.create("last_interaction_book_slot", 0, 6);
 }

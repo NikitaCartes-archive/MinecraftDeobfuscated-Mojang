@@ -25,26 +25,18 @@ public class RabbitRenderer extends MobRenderer<Rabbit, RabbitModel<Rabbit>> {
 
 	public ResourceLocation getTextureLocation(Rabbit rabbit) {
 		String string = ChatFormatting.stripFormatting(rabbit.getName().getString());
-		if (string != null && "Toast".equals(string)) {
+		if ("Toast".equals(string)) {
 			return RABBIT_TOAST_LOCATION;
 		} else {
-			switch (rabbit.getRabbitType()) {
-				case 0:
-				default:
-					return RABBIT_BROWN_LOCATION;
-				case 1:
-					return RABBIT_WHITE_LOCATION;
-				case 2:
-					return RABBIT_BLACK_LOCATION;
-				case 3:
-					return RABBIT_WHITE_SPLOTCHED_LOCATION;
-				case 4:
-					return RABBIT_GOLD_LOCATION;
-				case 5:
-					return RABBIT_SALT_LOCATION;
-				case 99:
-					return RABBIT_EVIL_LOCATION;
-			}
+			return switch (rabbit.getVariant()) {
+				case BROWN -> RABBIT_BROWN_LOCATION;
+				case WHITE -> RABBIT_WHITE_LOCATION;
+				case BLACK -> RABBIT_BLACK_LOCATION;
+				case GOLD -> RABBIT_GOLD_LOCATION;
+				case SALT -> RABBIT_SALT_LOCATION;
+				case WHITE_SPLOTCHED -> RABBIT_WHITE_SPLOTCHED_LOCATION;
+				case EVIL -> RABBIT_EVIL_LOCATION;
+			};
 		}
 	}
 }

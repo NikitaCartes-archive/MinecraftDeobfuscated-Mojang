@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -14,6 +16,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -82,7 +85,7 @@ public class NoteBlock extends Block {
 	}
 
 	private void playNote(@Nullable Entity entity, BlockState blockState, Level level, BlockPos blockPos) {
-		if (this.hasMobHead(blockState) || level.getBlockState(blockPos.above()).isAir()) {
+		if (!((NoteBlockInstrument)blockState.getValue(INSTRUMENT)).requiresAirAbove() || level.getBlockState(blockPos.above()).isAir()) {
 			level.blockEvent(blockPos, this, 0, 0);
 			level.gameEvent(entity, GameEvent.NOTE_BLOCK_PLAY, blockPos);
 		}
@@ -111,14 +114,11 @@ public class NoteBlock extends Block {
 		}
 	}
 
-	private boolean hasMobHead(BlockState blockState) {
-		return ((NoteBlockInstrument)blockState.getValue(INSTRUMENT)).isMobHeadInstrument();
-	}
-
 	@Override
 	public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
+		NoteBlockInstrument noteBlockInstrument = blockState.getValue(INSTRUMENT);
 		float f;
-		if (!this.hasMobHead(blockState)) {
+		if (noteBlockInstrument.isTunable()) {
 			int k = (Integer)blockState.getValue(NOTE);
 			f = (float)Math.pow(2.0, (double)(k - 12) / 12.0);
 			level.addParticle(
@@ -128,8 +128,30 @@ public class NoteBlock extends Block {
 			f = 1.0F;
 		}
 
-		level.playSound(null, blockPos, ((NoteBlockInstrument)blockState.getValue(INSTRUMENT)).getSoundEvent(), SoundSource.RECORDS, 3.0F, f);
+		SoundEvent soundEvent;
+		if (noteBlockInstrument.hasCustomSound()) {
+			soundEvent = this.getCustomSoundEvent(noteBlockInstrument, level, blockPos);
+			if (soundEvent == null) {
+				return false;
+			}
+		} else {
+			soundEvent = noteBlockInstrument.getSoundEvent();
+		}
+
+		level.playSound(null, blockPos, soundEvent, SoundSource.RECORDS, 3.0F, f);
 		return true;
+	}
+
+	@Nullable
+	private SoundEvent getCustomSoundEvent(NoteBlockInstrument noteBlockInstrument, Level level, BlockPos blockPos) {
+		if (level.getBlockEntity(blockPos.above()) instanceof SkullBlockEntity skullBlockEntity) {
+			ResourceLocation resourceLocation = skullBlockEntity.getNoteBlockSound();
+			if (resourceLocation != null) {
+				return new SoundEvent(resourceLocation);
+			}
+		}
+
+		return null;
 	}
 
 	@Override

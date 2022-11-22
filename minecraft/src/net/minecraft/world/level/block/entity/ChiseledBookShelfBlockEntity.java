@@ -6,7 +6,6 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -15,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.slf4j.Logger;
 
@@ -23,6 +21,7 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 	public static final int MAX_BOOKS_IN_STORAGE = 6;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final NonNullList<ItemStack> items = NonNullList.withSize(6, ItemStack.EMPTY);
+	private int lastInteractedSlot = -1;
 
 	public ChiseledBookShelfBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.CHISELED_BOOKSHELF, blockPos, blockState);
@@ -30,7 +29,8 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 
 	private void updateState(int i) {
 		if (i >= 0 && i < 6) {
-			BlockState blockState = this.getBlockState().setValue(BlockStateProperties.CHISELED_BOOKSHELF_LAST_INTERACTION_BOOK_SLOT, Integer.valueOf(i + 1));
+			this.lastInteractedSlot = i;
+			BlockState blockState = this.getBlockState();
 
 			for (int j = 0; j < ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.size(); j++) {
 				boolean bl = !this.getItem(j).isEmpty();
@@ -46,23 +46,15 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 
 	@Override
 	public void load(CompoundTag compoundTag) {
+		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items);
+		this.lastInteractedSlot = compoundTag.getInt("last_interacted_slot");
 	}
 
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		ContainerHelper.saveAllItems(compoundTag, this.items, true);
-	}
-
-	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
-	}
-
-	@Override
-	public CompoundTag getUpdateTag() {
-		CompoundTag compoundTag = new CompoundTag();
-		ContainerHelper.saveAllItems(compoundTag, this.items, true);
-		return compoundTag;
+		compoundTag.putInt("last_interacted_slot", this.lastInteractedSlot);
 	}
 
 	public int count() {
@@ -132,5 +124,9 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 	@Override
 	public boolean canPlaceItem(int i, ItemStack itemStack) {
 		return itemStack.is(ItemTags.BOOKSHELF_BOOKS) && this.getItem(i).isEmpty();
+	}
+
+	public int getLastInteractedSlot() {
+		return this.lastInteractedSlot;
 	}
 }

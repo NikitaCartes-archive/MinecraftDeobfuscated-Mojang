@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,7 +31,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class Painting extends HangingEntity {
+public class Painting extends HangingEntity implements VariantHolder<Holder<PaintingVariant>> {
 	private static final EntityDataAccessor<Holder<PaintingVariant>> DATA_PAINTING_VARIANT_ID = SynchedEntityData.defineId(
 		Painting.class, EntityDataSerializers.PAINTING_VARIANT
 	);
@@ -56,7 +57,7 @@ public class Painting extends HangingEntity {
 		}
 	}
 
-	private void setVariant(Holder<PaintingVariant> holder) {
+	public void setVariant(Holder<PaintingVariant> holder) {
 		this.entityData.set(DATA_PAINTING_VARIANT_ID, holder);
 	}
 

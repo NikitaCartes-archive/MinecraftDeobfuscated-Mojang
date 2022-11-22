@@ -574,33 +574,44 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	@Nullable
-	public Entity spawn(
+	public T spawn(
 		ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2
 	) {
-		return this.spawn(
-			serverLevel,
-			itemStack == null ? null : itemStack.getTag(),
-			itemStack != null && itemStack.hasCustomHoverName() ? itemStack.getHoverName() : null,
-			player,
-			blockPos,
-			mobSpawnType,
-			bl,
-			bl2
-		);
+		Consumer<T> consumer = entity -> {
+		};
+		CompoundTag compoundTag;
+		if (itemStack != null) {
+			if (itemStack.hasCustomHoverName()) {
+				consumer = entity -> entity.setCustomName(itemStack.getHoverName());
+			}
+
+			compoundTag = itemStack.getTag();
+			if (compoundTag != null) {
+				consumer = consumer.andThen(entity -> updateCustomEntityTag(serverLevel, player, entity, compoundTag));
+			}
+		} else {
+			compoundTag = null;
+		}
+
+		return this.spawn(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
+	}
+
+	@Nullable
+	public T spawn(ServerLevel serverLevel, BlockPos blockPos, MobSpawnType mobSpawnType) {
+		return this.spawn(serverLevel, (CompoundTag)null, null, blockPos, mobSpawnType, false, false);
 	}
 
 	@Nullable
 	public T spawn(
 		ServerLevel serverLevel,
 		@Nullable CompoundTag compoundTag,
-		@Nullable Component component,
-		@Nullable Player player,
+		@Nullable Consumer<T> consumer,
 		BlockPos blockPos,
 		MobSpawnType mobSpawnType,
 		boolean bl,
 		boolean bl2
 	) {
-		T entity = this.create(serverLevel, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
+		T entity = this.create(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
 		if (entity != null) {
 			serverLevel.addFreshEntityWithPassengers(entity);
 		}
@@ -612,8 +623,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public T create(
 		ServerLevel serverLevel,
 		@Nullable CompoundTag compoundTag,
-		@Nullable Component component,
-		@Nullable Player player,
+		@Nullable Consumer<T> consumer,
 		BlockPos blockPos,
 		MobSpawnType mobSpawnType,
 		boolean bl,
@@ -641,11 +651,10 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 				mob.playAmbientSound();
 			}
 
-			if (component != null && entity instanceof LivingEntity) {
-				entity.setCustomName(component);
+			if (consumer != null) {
+				consumer.accept(entity);
 			}
 
-			updateCustomEntityTag(serverLevel, player, entity, compoundTag);
 			return entity;
 		}
 	}

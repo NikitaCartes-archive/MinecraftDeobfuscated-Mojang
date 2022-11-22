@@ -38,8 +38,7 @@ public class ArmorStandItem extends Item {
 			AABB aABB = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.x(), vec3.y(), vec3.z());
 			if (level.noCollision(null, aABB) && level.getEntities(null, aABB).isEmpty()) {
 				if (level instanceof ServerLevel serverLevel) {
-					ArmorStand armorStand = EntityType.ARMOR_STAND
-						.create(serverLevel, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
+					ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), null, blockPos, MobSpawnType.SPAWN_EGG, true, true);
 					if (armorStand == null) {
 						return InteractionResult.FAIL;
 					}

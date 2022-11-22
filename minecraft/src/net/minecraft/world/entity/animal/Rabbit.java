@@ -1,5 +1,9 @@
 package net.minecraft.world.entity.animal;
 
+import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.Objects;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -18,6 +22,7 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
@@ -27,6 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.JumpControl;
@@ -61,20 +67,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
-public class Rabbit extends Animal {
+public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	public static final double STROLL_SPEED_MOD = 0.6;
 	public static final double BREED_SPEED_MOD = 0.8;
 	public static final double FOLLOW_SPEED_MOD = 1.0;
 	public static final double FLEE_SPEED_MOD = 2.2;
 	public static final double ATTACK_SPEED_MOD = 1.4;
 	private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Rabbit.class, EntityDataSerializers.INT);
-	public static final int TYPE_BROWN = 0;
-	public static final int TYPE_WHITE = 1;
-	public static final int TYPE_BLACK = 2;
-	public static final int TYPE_WHITE_SPLOTCHED = 3;
-	public static final int TYPE_GOLD = 4;
-	public static final int TYPE_SALT = 5;
-	public static final int TYPE_EVIL = 99;
 	private static final ResourceLocation KILLER_BUNNY = new ResourceLocation("killer_bunny");
 	public static final int EVIL_ATTACK_POWER = 8;
 	public static final int EVIL_ARMOR_VALUE = 8;
@@ -166,7 +165,7 @@ public class Rabbit extends Animal {
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
-		this.entityData.define(DATA_TYPE_ID, 0);
+		this.entityData.define(DATA_TYPE_ID, Rabbit.Variant.BROWN.id);
 	}
 
 	@Override
@@ -188,7 +187,7 @@ public class Rabbit extends Animal {
 				this.checkLandingDelay();
 			}
 
-			if (this.getRabbitType() == 99 && this.jumpDelayTicks == 0) {
+			if (this.getVariant() == Rabbit.Variant.EVIL && this.jumpDelayTicks == 0) {
 				LivingEntity livingEntity = this.getTarget();
 				if (livingEntity != null && this.distanceToSqr(livingEntity) < 16.0) {
 					this.facePoint(livingEntity.getX(), livingEntity.getZ());
@@ -267,14 +266,14 @@ public class Rabbit extends Animal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putInt("RabbitType", this.getRabbitType());
+		compoundTag.putInt("RabbitType", this.getVariant().id);
 		compoundTag.putInt("MoreCarrotTicks", this.moreCarrotTicks);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setRabbitType(compoundTag.getInt("RabbitType"));
+		this.setVariant(Rabbit.Variant.byId(compoundTag.getInt("RabbitType")));
 		this.moreCarrotTicks = compoundTag.getInt("MoreCarrotTicks");
 	}
 
@@ -299,7 +298,7 @@ public class Rabbit extends Animal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		if (this.getRabbitType() == 99) {
+		if (this.getVariant() == Rabbit.Variant.EVIL) {
 			this.playSound(SoundEvents.RABBIT_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 			return entity.hurt(DamageSource.mobAttack(this), 8.0F);
 		} else {
@@ -309,7 +308,7 @@ public class Rabbit extends Animal {
 
 	@Override
 	public SoundSource getSoundSource() {
-		return this.getRabbitType() == 99 ? SoundSource.HOSTILE : SoundSource.NEUTRAL;
+		return this.getVariant() == Rabbit.Variant.EVIL ? SoundSource.HOSTILE : SoundSource.NEUTRAL;
 	}
 
 	private static boolean isTemptingItem(ItemStack itemStack) {
@@ -320,19 +319,19 @@ public class Rabbit extends Animal {
 	public Rabbit getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Rabbit rabbit = EntityType.RABBIT.create(serverLevel);
 		if (rabbit != null) {
-			int i;
-			i = this.getRandomRabbitType(serverLevel);
+			Rabbit.Variant variant;
+			variant = getRandomRabbitVariant(serverLevel, this.blockPosition());
 			label16:
 			if (this.random.nextInt(20) != 0) {
 				if (ageableMob instanceof Rabbit rabbit2 && this.random.nextBoolean()) {
-					i = rabbit2.getRabbitType();
+					variant = rabbit2.getVariant();
 					break label16;
 				}
 
-				i = this.getRabbitType();
+				variant = this.getVariant();
 			}
 
-			rabbit.setRabbitType(i);
+			rabbit.setVariant(variant);
 		}
 
 		return rabbit;
@@ -343,12 +342,12 @@ public class Rabbit extends Animal {
 		return isTemptingItem(itemStack);
 	}
 
-	public int getRabbitType() {
-		return this.entityData.get(DATA_TYPE_ID);
+	public Rabbit.Variant getVariant() {
+		return Rabbit.Variant.byId(this.entityData.get(DATA_TYPE_ID));
 	}
 
-	public void setRabbitType(int i) {
-		if (i == 99) {
+	public void setVariant(Rabbit.Variant variant) {
+		if (variant == Rabbit.Variant.EVIL) {
 			this.getAttribute(Attributes.ARMOR).setBaseValue(8.0);
 			this.goalSelector.addGoal(4, new Rabbit.EvilRabbitAttackGoal(this));
 			this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
@@ -359,7 +358,7 @@ public class Rabbit extends Animal {
 			}
 		}
 
-		this.entityData.set(DATA_TYPE_ID, i);
+		this.entityData.set(DATA_TYPE_ID, variant.id);
 	}
 
 	@Nullable
@@ -371,26 +370,26 @@ public class Rabbit extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		int i = this.getRandomRabbitType(serverLevelAccessor);
+		Rabbit.Variant variant = getRandomRabbitVariant(serverLevelAccessor, this.blockPosition());
 		if (spawnGroupData instanceof Rabbit.RabbitGroupData) {
-			i = ((Rabbit.RabbitGroupData)spawnGroupData).rabbitType;
+			variant = ((Rabbit.RabbitGroupData)spawnGroupData).variant;
 		} else {
-			spawnGroupData = new Rabbit.RabbitGroupData(i);
+			spawnGroupData = new Rabbit.RabbitGroupData(variant);
 		}
 
-		this.setRabbitType(i);
+		this.setVariant(variant);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	private int getRandomRabbitType(LevelAccessor levelAccessor) {
-		Holder<Biome> holder = levelAccessor.getBiome(this.blockPosition());
+	private static Rabbit.Variant getRandomRabbitVariant(LevelAccessor levelAccessor, BlockPos blockPos) {
+		Holder<Biome> holder = levelAccessor.getBiome(blockPos);
 		int i = levelAccessor.getRandom().nextInt(100);
 		if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
-			return i < 80 ? 1 : 3;
+			return i < 80 ? Rabbit.Variant.WHITE : Rabbit.Variant.WHITE_SPLOTCHED;
 		} else if (holder.is(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS)) {
-			return 4;
+			return Rabbit.Variant.GOLD;
 		} else {
-			return i < 50 ? 0 : (i < 90 ? 5 : 2);
+			return i < 50 ? Rabbit.Variant.BROWN : (i < 90 ? Rabbit.Variant.SALT : Rabbit.Variant.BLACK);
 		}
 	}
 
@@ -441,16 +440,16 @@ public class Rabbit extends Animal {
 
 		@Override
 		public boolean canUse() {
-			return this.rabbit.getRabbitType() != 99 && super.canUse();
+			return this.rabbit.getVariant() != Rabbit.Variant.EVIL && super.canUse();
 		}
 	}
 
 	public static class RabbitGroupData extends AgeableMob.AgeableMobGroupData {
-		public final int rabbitType;
+		public final Rabbit.Variant variant;
 
-		public RabbitGroupData(int i) {
+		public RabbitGroupData(Rabbit.Variant variant) {
 			super(1.0F);
-			this.rabbitType = i;
+			this.variant = variant;
 		}
 	}
 
@@ -604,6 +603,43 @@ public class Rabbit extends Animal {
 			}
 
 			return false;
+		}
+	}
+
+	public static enum Variant implements StringRepresentable {
+		BROWN(0, "brown"),
+		WHITE(1, "white"),
+		BLACK(2, "black"),
+		WHITE_SPLOTCHED(3, "white_splotched"),
+		GOLD(4, "gold"),
+		SALT(5, "salt"),
+		EVIL(99, "evil");
+
+		private static final IntFunction<Rabbit.Variant> BY_ID = Util.make(new Int2ObjectOpenHashMap<>(), int2ObjectOpenHashMap -> {
+			for (Rabbit.Variant variant : values()) {
+				int2ObjectOpenHashMap.put(variant.id, variant);
+			}
+		});
+		public static final Codec<Rabbit.Variant> CODEC = StringRepresentable.fromEnum(Rabbit.Variant::values);
+		final int id;
+		private final String name;
+
+		private Variant(int j, String string2) {
+			this.id = j;
+			this.name = string2;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
+		}
+
+		public int id() {
+			return this.id;
+		}
+
+		public static Rabbit.Variant byId(int i) {
+			return (Rabbit.Variant)Objects.requireNonNullElse((Rabbit.Variant)BY_ID.apply(i), BROWN);
 		}
 	}
 }

@@ -2,6 +2,7 @@ package net.minecraft.world.entity.vehicle;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -26,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
@@ -46,7 +49,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class Boat extends Entity {
+public class Boat extends Entity implements VariantHolder<Boat.Type> {
 	private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_ID_HURTDIR = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.FLOAT);
@@ -145,7 +148,7 @@ public class Boat extends Entity {
 
 	@Override
 	public double getPassengersRidingOffset() {
-		return this.getBoatType() == Boat.Type.BAMBOO ? 0.3 : -0.1;
+		return this.getVariant() == Boat.Type.BAMBOO ? 0.3 : -0.1;
 	}
 
 	@Override
@@ -210,7 +213,7 @@ public class Boat extends Entity {
 	}
 
 	public Item getDropItem() {
-		return switch (this.getBoatType()) {
+		return switch (this.getVariant()) {
 			case SPRUCE -> Items.SPRUCE_BOAT;
 			case BIRCH -> Items.BIRCH_BOAT;
 			case JUNGLE -> Items.JUNGLE_BOAT;
@@ -721,13 +724,13 @@ public class Boat extends Entity {
 
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
-		compoundTag.putString("Type", this.getBoatType().getName());
+		compoundTag.putString("Type", this.getVariant().getSerializedName());
 	}
 
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		if (compoundTag.contains("Type", 8)) {
-			this.setType(Boat.Type.byName(compoundTag.getString("Type")));
+			this.setVariant(Boat.Type.byName(compoundTag.getString("Type")));
 		}
 	}
 
@@ -762,7 +765,7 @@ public class Boat extends Entity {
 						this.kill();
 						if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 							for (int i = 0; i < 3; i++) {
-								this.spawnAtLocation(this.getBoatType().getPlanks());
+								this.spawnAtLocation(this.getVariant().getPlanks());
 							}
 
 							for (int i = 0; i < 2; i++) {
@@ -819,11 +822,11 @@ public class Boat extends Entity {
 		return this.entityData.get(DATA_ID_HURTDIR);
 	}
 
-	public void setType(Boat.Type type) {
+	public void setVariant(Boat.Type type) {
 		this.entityData.set(DATA_ID_TYPE, type.ordinal());
 	}
 
-	public Boat.Type getBoatType() {
+	public Boat.Type getVariant() {
 		return Boat.Type.byId(this.entityData.get(DATA_ID_TYPE));
 	}
 
@@ -867,7 +870,7 @@ public class Boat extends Entity {
 		IN_AIR;
 	}
 
-	public static enum Type {
+	public static enum Type implements StringRepresentable {
 		OAK(Blocks.OAK_PLANKS, "oak"),
 		SPRUCE(Blocks.SPRUCE_PLANKS, "spruce"),
 		BIRCH(Blocks.BIRCH_PLANKS, "birch"),
@@ -879,10 +882,16 @@ public class Boat extends Entity {
 
 		private final String name;
 		private final Block planks;
+		public static final StringRepresentable.EnumCodec<Boat.Type> CODEC = StringRepresentable.fromEnum(Boat.Type::values);
 
 		private Type(Block block, String string2) {
 			this.name = string2;
 			this.planks = block;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
 		}
 
 		public String getName() {
@@ -907,15 +916,7 @@ public class Boat extends Entity {
 		}
 
 		public static Boat.Type byName(String string) {
-			Boat.Type[] types = values();
-
-			for (int i = 0; i < types.length; i++) {
-				if (types[i].getName().equals(string)) {
-					return types[i];
-				}
-			}
-
-			return types[0];
+			return (Boat.Type)Objects.requireNonNullElse((Boat.Type)CODEC.byName(string), OAK);
 		}
 	}
 }

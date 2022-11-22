@@ -30,6 +30,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -55,7 +56,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-public class Shulker extends AbstractGolem implements Enemy {
+public class Shulker extends AbstractGolem implements VariantHolder<Optional<DyeColor>>, Enemy {
 	private static final UUID COVERED_ARMOR_MODIFIER_UUID = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF27F");
 	private static final AttributeModifier COVERED_ARMOR_MODIFIER = new AttributeModifier(
 		COVERED_ARMOR_MODIFIER_UUID, "Covered armor bonus", 20.0, AttributeModifier.Operation.ADDITION
@@ -457,11 +458,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 			if (!(this.level.random.nextFloat() < f)) {
 				Shulker shulker = EntityType.SHULKER.create(this.level);
 				if (shulker != null) {
-					DyeColor dyeColor = this.getColor();
-					if (dyeColor != null) {
-						shulker.setColor(dyeColor);
-					}
-
+					shulker.setVariant(this.getVariant());
 					shulker.moveTo(vec3);
 					this.level.addFreshEntity(shulker);
 				}
@@ -560,8 +557,12 @@ public class Shulker extends AbstractGolem implements Enemy {
 		}
 	}
 
-	private void setColor(DyeColor dyeColor) {
-		this.entityData.set(DATA_COLOR_ID, (byte)dyeColor.getId());
+	public void setVariant(Optional<DyeColor> optional) {
+		this.entityData.set(DATA_COLOR_ID, (Byte)optional.map(dyeColor -> (byte)dyeColor.getId()).orElse((byte)16));
+	}
+
+	public Optional<DyeColor> getVariant() {
+		return Optional.ofNullable(this.getColor());
 	}
 
 	@Nullable

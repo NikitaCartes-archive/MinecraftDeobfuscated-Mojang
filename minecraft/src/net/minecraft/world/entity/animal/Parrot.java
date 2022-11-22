@@ -3,6 +3,9 @@ package net.minecraft.world.entity.animal;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.serialization.Codec;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +25,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -38,6 +42,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -65,7 +70,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
-public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
+public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot.Variant>, FlyingAnimal {
 	private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Parrot.class, EntityDataSerializers.INT);
 	private static final Predicate<Mob> NOT_PARROT_PREDICATE = new Predicate<Mob>() {
 		public boolean test(@Nullable Mob mob) {
@@ -74,7 +79,6 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	};
 	private static final Item POISONOUS_FOOD = Items.COOKIE;
 	private static final Set<Item> TAME_FOOD = Sets.<Item>newHashSet(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS);
-	private static final int VARIANTS = 5;
 	static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.<EntityType<?>, SoundEvent>newHashMap(), hashMap -> {
 		hashMap.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
 		hashMap.put(EntityType.CAVE_SPIDER, SoundEvents.PARROT_IMITATE_SPIDER);
@@ -138,7 +142,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setVariant(serverLevelAccessor.getRandom().nextInt(5));
+		this.setVariant(Util.getRandom(Parrot.Variant.values(), serverLevelAccessor.getRandom()));
 		if (spawnGroupData == null) {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
 		}
@@ -416,12 +420,12 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		}
 	}
 
-	public int getVariant() {
-		return Mth.clamp(this.entityData.get(DATA_VARIANT_ID), 0, 4);
+	public Parrot.Variant getVariant() {
+		return Parrot.Variant.byId(this.entityData.get(DATA_VARIANT_ID));
 	}
 
-	public void setVariant(int i) {
-		this.entityData.set(DATA_VARIANT_ID, i);
+	public void setVariant(Parrot.Variant variant) {
+		this.entityData.set(DATA_VARIANT_ID, variant.id);
 	}
 
 	@Override
@@ -433,13 +437,13 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putInt("Variant", this.getVariant());
+		compoundTag.putInt("Variant", this.getVariant().id);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setVariant(compoundTag.getInt("Variant"));
+		this.setVariant(Parrot.Variant.byId(compoundTag.getInt("Variant")));
 	}
 
 	@Override
@@ -496,6 +500,39 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 			}
 
 			return null;
+		}
+	}
+
+	public static enum Variant implements StringRepresentable {
+		RED_BLUE(0, "red_blue"),
+		BLUE(1, "blue"),
+		GREEN(2, "green"),
+		YELLOW_BLUE(3, "yellow_blue"),
+		GRAY(4, "gray");
+
+		public static final Codec<Parrot.Variant> CODEC = StringRepresentable.fromEnum(Parrot.Variant::values);
+		private static final Parrot.Variant[] BY_ID = (Parrot.Variant[])Arrays.stream(values())
+			.sorted(Comparator.comparingInt(Parrot.Variant::getId))
+			.toArray(Parrot.Variant[]::new);
+		final int id;
+		private final String name;
+
+		private Variant(int j, String string2) {
+			this.id = j;
+			this.name = string2;
+		}
+
+		public int getId() {
+			return this.id;
+		}
+
+		public static Parrot.Variant byId(int i) {
+			return BY_ID[Mth.clamp(i, 0, BY_ID.length - 1)];
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
 		}
 	}
 }

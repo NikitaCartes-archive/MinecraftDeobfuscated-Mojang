@@ -27,6 +27,8 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class PathNavigation {
 	private static final int MAX_TIME_RECOMPUTE = 20;
+	private static final int STUCK_CHECK_INTERVAL = 100;
+	private static final float STUCK_THRESHOLD_DISTANCE_FACTOR = 0.25F;
 	protected final Mob mob;
 	protected final Level level;
 	@Nullable
@@ -266,7 +268,9 @@ public abstract class PathNavigation {
 
 	protected void doStuckDetection(Vec3 vec3) {
 		if (this.tick - this.lastStuckCheck > 100) {
-			if (vec3.distanceToSqr(this.lastStuckCheckPos) < 2.25) {
+			float f = this.mob.getSpeed() >= 1.0F ? this.mob.getSpeed() : this.mob.getSpeed() * this.mob.getSpeed();
+			float g = f * 100.0F * 0.25F;
+			if (vec3.distanceToSqr(this.lastStuckCheckPos) < (double)(g * g)) {
 				this.isStuck = true;
 				this.stop();
 			} else {
@@ -348,9 +352,10 @@ public abstract class PathNavigation {
 		return false;
 	}
 
-	protected static boolean isClearForMovementBetween(Mob mob, Vec3 vec3, Vec3 vec32) {
+	protected static boolean isClearForMovementBetween(Mob mob, Vec3 vec3, Vec3 vec32, boolean bl) {
 		Vec3 vec33 = new Vec3(vec32.x, vec32.y + (double)mob.getBbHeight() * 0.5, vec32.z);
-		return mob.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob)).getType() == HitResult.Type.MISS;
+		return mob.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, bl ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, mob)).getType()
+			== HitResult.Type.MISS;
 	}
 
 	public boolean isStableDestination(BlockPos blockPos) {

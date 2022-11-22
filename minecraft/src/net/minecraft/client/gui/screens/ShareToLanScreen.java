@@ -18,13 +18,15 @@ import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
 public class ShareToLanScreen extends Screen {
+	private static final int PORT_LOWER_BOUND = 1024;
+	private static final int PORT_HIGHER_BOUND = 65535;
 	private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands");
 	private static final Component GAME_MODE_LABEL = Component.translatable("selectWorld.gameMode");
 	private static final Component INFO_TEXT = Component.translatable("lanServer.otherPlayers");
 	private static final Component PORT_INFO_TEXT = Component.translatable("lanServer.port");
-	private static final Component INVALID_PORT = Component.translatable("lanServer.port.invalid");
-	public static final Component PORT_UNAVAILABLE = Component.translatable("lanServer.port.unavailable");
-	public static final int INVALID_PORT_COLOR = 16733525;
+	private static final Component PORT_UNAVAILABLE = Component.translatable("lanServer.port.unavailable.new", 1024, 65535);
+	private static final Component INVALID_PORT = Component.translatable("lanServer.port.invalid.new", 1024, 65535);
+	private static final int INVALID_PORT_COLOR = 16733525;
 	private final Screen lastScreen;
 	private GameType gameMode = GameType.SURVIVAL;
 	private boolean commands;
@@ -87,6 +89,14 @@ public class ShareToLanScreen extends Screen {
 		);
 	}
 
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.portEdit != null) {
+			this.portEdit.tick();
+		}
+	}
+
 	@Nullable
 	private Component tryParsePort(String string) {
 		if (string.isBlank()) {
@@ -95,13 +105,13 @@ public class ShareToLanScreen extends Screen {
 		} else {
 			try {
 				this.port = Integer.parseInt(string);
-				if (this.port < 1 || this.port > 65535) {
+				if (this.port < 1024 || this.port > 65535) {
 					return INVALID_PORT;
 				} else {
 					return !HttpUtil.isPortAvailable(this.port) ? PORT_UNAVAILABLE : null;
 				}
 			} catch (NumberFormatException var3) {
-				this.port = -1;
+				this.port = HttpUtil.getAvailablePort();
 				return INVALID_PORT;
 			}
 		}

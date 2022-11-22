@@ -6,10 +6,12 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.commands.arguments.ResourceOrTagArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -23,6 +25,7 @@ import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public class FillBiomeCommand {
 	private static final int MAX_FILL_AREA = 32768;
@@ -46,7 +49,23 @@ public class FillBiomeCommand {
 													commandContext.getSource(),
 													BlockPosArgument.getLoadedBlockPos(commandContext, "from"),
 													BlockPosArgument.getLoadedBlockPos(commandContext, "to"),
-													ResourceArgument.getResource(commandContext, "biome", Registries.BIOME)
+													ResourceArgument.getResource(commandContext, "biome", Registries.BIOME),
+													holder -> true
+												)
+										)
+										.then(
+											Commands.literal("replace")
+												.then(
+													Commands.argument("filter", ResourceOrTagArgument.resourceOrTag(commandBuildContext, Registries.BIOME))
+														.executes(
+															commandContext -> fill(
+																	commandContext.getSource(),
+																	BlockPosArgument.getLoadedBlockPos(commandContext, "from"),
+																	BlockPosArgument.getLoadedBlockPos(commandContext, "to"),
+																	ResourceArgument.getResource(commandContext, "biome", Registries.BIOME),
+																	ResourceOrTagArgument.getResourceOrTag(commandContext, "filter", Registries.BIOME)::test
+																)
+														)
 												)
 										)
 								)
@@ -63,16 +82,26 @@ public class FillBiomeCommand {
 		return new BlockPos(quantize(blockPos.getX()), quantize(blockPos.getY()), quantize(blockPos.getZ()));
 	}
 
-	private static BiomeResolver makeResolver(ChunkAccess chunkAccess, BoundingBox boundingBox, Holder<Biome> holder) {
+	private static BiomeResolver makeResolver(
+		MutableInt mutableInt, ChunkAccess chunkAccess, BoundingBox boundingBox, Holder<Biome> holder, Predicate<Holder<Biome>> predicate
+	) {
 		return (i, j, k, sampler) -> {
 			int l = QuartPos.toBlock(i);
 			int m = QuartPos.toBlock(j);
 			int n = QuartPos.toBlock(k);
-			return boundingBox.isInside(l, m, n) ? holder : chunkAccess.getNoiseBiome(i, j, k);
+			Holder<Biome> holder2 = chunkAccess.getNoiseBiome(i, j, k);
+			if (boundingBox.isInside(l, m, n) && predicate.test(holder2)) {
+				mutableInt.increment();
+				return holder;
+			} else {
+				return holder2;
+			}
 		};
 	}
 
-	private static int fill(CommandSourceStack commandSourceStack, BlockPos blockPos, BlockPos blockPos2, Holder.Reference<Biome> reference) throws CommandSyntaxException {
+	private static int fill(
+		CommandSourceStack commandSourceStack, BlockPos blockPos, BlockPos blockPos2, Holder.Reference<Biome> reference, Predicate<Holder<Biome>> predicate
+	) throws CommandSyntaxException {
 		BlockPos blockPos3 = quantize(blockPos);
 		BlockPos blockPos4 = quantize(blockPos2);
 		BoundingBox boundingBox = BoundingBox.fromCorners(blockPos3, blockPos4);
@@ -94,19 +123,30 @@ public class FillBiomeCommand {
 				}
 			}
 
-			for (ChunkAccess chunkAccess2 : list) {
-				chunkAccess2.fillBiomesFromNoise(makeResolver(chunkAccess2, boundingBox, reference), serverLevel.getChunkSource().randomState().sampler());
-				chunkAccess2.setUnsaved(true);
-				serverLevel.getChunkSource().chunkMap.resendChunk(chunkAccess2);
+			MutableInt mutableInt = new MutableInt(0);
+
+			for (ChunkAccess chunkAccess : list) {
+				chunkAccess.fillBiomesFromNoise(
+					makeResolver(mutableInt, chunkAccess, boundingBox, reference, predicate), serverLevel.getChunkSource().randomState().sampler()
+				);
+				chunkAccess.setUnsaved(true);
+				serverLevel.getChunkSource().chunkMap.resendChunk(chunkAccess);
 			}
 
 			commandSourceStack.sendSuccess(
 				Component.translatable(
-					"commands.fillbiome.success", boundingBox.minX(), boundingBox.minY(), boundingBox.minZ(), boundingBox.maxX(), boundingBox.maxY(), boundingBox.maxZ()
+					"commands.fillbiome.success.count",
+					mutableInt.getValue(),
+					boundingBox.minX(),
+					boundingBox.minY(),
+					boundingBox.minZ(),
+					boundingBox.maxX(),
+					boundingBox.maxY(),
+					boundingBox.maxZ()
 				),
 				true
 			);
-			return i;
+			return mutableInt.getValue();
 		}
 	}
 }

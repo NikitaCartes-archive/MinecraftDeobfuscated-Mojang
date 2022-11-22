@@ -21,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
@@ -31,7 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
 
-public class Horse extends AbstractHorse {
+public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 	private static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
 	private static final EntityDataAccessor<Integer> DATA_ID_TYPE_VARIANT = SynchedEntityData.defineId(Horse.class, EntityDataSerializers.INT);
 
@@ -98,6 +99,10 @@ public class Horse extends AbstractHorse {
 
 	public Variant getVariant() {
 		return Variant.byId(this.getTypeVariant() & 0xFF);
+	}
+
+	public void setVariant(Variant variant) {
+		this.setTypeVariant(variant.getId() & 0xFF | this.getTypeVariant() & -256);
 	}
 
 	public Markings getMarkings() {

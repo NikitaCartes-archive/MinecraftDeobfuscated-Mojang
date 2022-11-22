@@ -91,13 +91,12 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		}
 
 		BlockPos blockPos = this.mob.blockPosition();
-		BlockPathTypes blockPathTypes = this.getCachedBlockType(this.mob, blockPos.getX(), i, blockPos.getZ());
-		if (this.mob.getPathfindingMalus(blockPathTypes) < 0.0F) {
+		if (!this.canStartAt(mutableBlockPos.set(blockPos.getX(), i, blockPos.getZ()))) {
 			AABB aABB = this.mob.getBoundingBox();
-			if (this.hasPositiveMalus(mutableBlockPos.set(aABB.minX, (double)i, aABB.minZ))
-				|| this.hasPositiveMalus(mutableBlockPos.set(aABB.minX, (double)i, aABB.maxZ))
-				|| this.hasPositiveMalus(mutableBlockPos.set(aABB.maxX, (double)i, aABB.minZ))
-				|| this.hasPositiveMalus(mutableBlockPos.set(aABB.maxX, (double)i, aABB.maxZ))) {
+			if (this.canStartAt(mutableBlockPos.set(aABB.minX, (double)i, aABB.minZ))
+				|| this.canStartAt(mutableBlockPos.set(aABB.minX, (double)i, aABB.maxZ))
+				|| this.canStartAt(mutableBlockPos.set(aABB.maxX, (double)i, aABB.minZ))
+				|| this.canStartAt(mutableBlockPos.set(aABB.maxX, (double)i, aABB.maxZ))) {
 				return this.getStartNode(mutableBlockPos);
 			}
 		}
@@ -116,9 +115,9 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		return node;
 	}
 
-	private boolean hasPositiveMalus(BlockPos blockPos) {
+	protected boolean canStartAt(BlockPos blockPos) {
 		BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos);
-		return this.mob.getPathfindingMalus(blockPathTypes) >= 0.0F;
+		return blockPathTypes != BlockPathTypes.OPEN && this.mob.getPathfindingMalus(blockPathTypes) >= 0.0F;
 	}
 
 	@Nullable
@@ -225,7 +224,9 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	}
 
 	protected double getFloorLevel(BlockPos blockPos) {
-		return getFloorLevel(this.level, blockPos);
+		return (this.canFloat() || this.isAmphibious()) && this.level.getFluidState(blockPos).is(FluidTags.WATER)
+			? (double)blockPos.getY() + 0.5
+			: getFloorLevel(this.level, blockPos);
 	}
 
 	public static double getFloorLevel(BlockGetter blockGetter, BlockPos blockPos) {
@@ -270,10 +271,10 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 						double m = (double)(k - direction.getStepZ()) + 0.5;
 						AABB aABB = new AABB(
 							h - g,
-							getFloorLevel(this.level, mutableBlockPos.set(h, (double)(j + 1), m)) + 0.001,
+							this.getFloorLevel(mutableBlockPos.set(h, (double)(j + 1), m)) + 0.001,
 							m - g,
 							h + g,
-							(double)this.mob.getBbHeight() + getFloorLevel(this.level, mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002,
+							(double)this.mob.getBbHeight() + this.getFloorLevel(mutableBlockPos.set((double)node.x, (double)node.y, (double)node.z)) - 0.002,
 							m + g
 						);
 						if (this.hasCollisions(aABB)) {
@@ -452,7 +453,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		return blockPathTypes;
 	}
 
-	private BlockPathTypes getBlockPathType(Mob mob, BlockPos blockPos) {
+	protected BlockPathTypes getBlockPathType(Mob mob, BlockPos blockPos) {
 		return this.getCachedBlockType(mob, blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 

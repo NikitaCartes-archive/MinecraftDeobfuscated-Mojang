@@ -3,6 +3,7 @@ package net.minecraft.world.entity.animal.axolotl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -41,6 +43,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -64,7 +67,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 
-public class Axolotl extends Animal implements LerpingModel, Bucketable {
+public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolotl.Variant>, Bucketable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int TOTAL_PLAYDEAD_TIME = 200;
 	protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Axolotl>>> SENSOR_TYPES = ImmutableList.of(
@@ -216,7 +219,7 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		return Axolotl.Variant.BY_ID[this.entityData.get(DATA_VARIANT)];
 	}
 
-	private void setVariant(Axolotl.Variant variant) {
+	public void setVariant(Axolotl.Variant variant) {
 		this.entityData.set(DATA_VARIANT, variant.getId());
 	}
 
@@ -571,7 +574,7 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		}
 	}
 
-	public static enum Variant {
+	public static enum Variant implements StringRepresentable {
 		LUCY(0, "lucy", true),
 		WILD(1, "wild", true),
 		GOLD(2, "gold", true),
@@ -581,6 +584,7 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		public static final Axolotl.Variant[] BY_ID = (Axolotl.Variant[])Arrays.stream(values())
 			.sorted(Comparator.comparingInt(Axolotl.Variant::getId))
 			.toArray(Axolotl.Variant[]::new);
+		public static final Codec<Axolotl.Variant> CODEC = StringRepresentable.fromEnum(Axolotl.Variant::values);
 		private final int id;
 		private final String name;
 		private final boolean common;
@@ -596,6 +600,11 @@ public class Axolotl extends Animal implements LerpingModel, Bucketable {
 		}
 
 		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public String getSerializedName() {
 			return this.name;
 		}
 

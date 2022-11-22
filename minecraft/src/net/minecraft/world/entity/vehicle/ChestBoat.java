@@ -97,7 +97,7 @@ public class ChestBoat extends Boat implements HasCustomInventoryScreen, Contain
 
 	@Override
 	public Item getDropItem() {
-		return switch (this.getBoatType()) {
+		return switch (this.getVariant()) {
 			case SPRUCE -> Items.SPRUCE_CHEST_BOAT;
 			case BIRCH -> Items.BIRCH_CHEST_BOAT;
 			case JUNGLE -> Items.JUNGLE_CHEST_BOAT;

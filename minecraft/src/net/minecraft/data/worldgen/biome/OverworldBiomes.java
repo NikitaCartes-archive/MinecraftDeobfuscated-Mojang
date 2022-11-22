@@ -830,7 +830,7 @@ public class OverworldBiomes {
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);
 		BiomeDefaultFeatures.addSurfaceFreezing(builder2);
 		BiomeDefaultFeatures.addPlainGrass(builder2);
-		BiomeDefaultFeatures.addDefaultOres(builder2, true);
+		BiomeDefaultFeatures.addDefaultOres(builder2);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
 		BiomeDefaultFeatures.addPlainVegetation(builder2);
 		BiomeDefaultFeatures.addDefaultMushrooms(builder2);

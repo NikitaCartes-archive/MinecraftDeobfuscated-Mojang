@@ -22,7 +22,7 @@ public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseModel
 		enumMap.put(Variant.BROWN, new ResourceLocation("textures/entity/horse/horse_brown.png"));
 		enumMap.put(Variant.BLACK, new ResourceLocation("textures/entity/horse/horse_black.png"));
 		enumMap.put(Variant.GRAY, new ResourceLocation("textures/entity/horse/horse_gray.png"));
-		enumMap.put(Variant.DARKBROWN, new ResourceLocation("textures/entity/horse/horse_darkbrown.png"));
+		enumMap.put(Variant.DARK_BROWN, new ResourceLocation("textures/entity/horse/horse_darkbrown.png"));
 	});
 
 	public HorseRenderer(EntityRendererProvider.Context context) {
