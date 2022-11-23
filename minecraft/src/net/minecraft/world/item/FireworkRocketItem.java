@@ -1,9 +1,8 @@
 package net.minecraft.world.item;
 
 import com.google.common.collect.Lists;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
@@ -11,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -128,9 +128,9 @@ public class FireworkRocketItem extends Item {
 		CREEPER(3, "creeper"),
 		BURST(4, "burst");
 
-		private static final FireworkRocketItem.Shape[] BY_ID = (FireworkRocketItem.Shape[])Arrays.stream(values())
-			.sorted(Comparator.comparingInt(shape -> shape.id))
-			.toArray(FireworkRocketItem.Shape[]::new);
+		private static final IntFunction<FireworkRocketItem.Shape> BY_ID = ByIdMap.continuous(
+			FireworkRocketItem.Shape::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO
+		);
 		private final int id;
 		private final String name;
 
@@ -148,7 +148,7 @@ public class FireworkRocketItem extends Item {
 		}
 
 		public static FireworkRocketItem.Shape byId(int i) {
-			return i >= 0 && i < BY_ID.length ? BY_ID[i] : SMALL_BALL;
+			return (FireworkRocketItem.Shape)BY_ID.apply(i);
 		}
 	}
 }

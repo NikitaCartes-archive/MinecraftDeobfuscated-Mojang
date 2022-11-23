@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
@@ -44,6 +45,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -504,6 +506,19 @@ public class ClientLevel extends Level {
 			this.minecraft.getSoundManager().playDelayed(simpleSoundInstance, (int)(j * 20.0));
 		} else {
 			this.minecraft.getSoundManager().play(simpleSoundInstance);
+		}
+	}
+
+	@Override
+	public void playCustomSound(@Nullable Player player, Vec3 vec3, ResourceLocation resourceLocation, SoundSource soundSource, float f, float g, double d, long l) {
+		if (player == this.minecraft.player) {
+			this.minecraft
+				.getSoundManager()
+				.play(
+					new SimpleSoundInstance(
+						resourceLocation, soundSource, f, g, RandomSource.create(l), false, 0, SoundInstance.Attenuation.LINEAR, vec3.x(), vec3.y(), vec3.z(), false
+					)
+				);
 		}
 	}
 

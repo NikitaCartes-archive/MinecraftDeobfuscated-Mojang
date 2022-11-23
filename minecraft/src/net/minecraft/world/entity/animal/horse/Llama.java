@@ -1,8 +1,7 @@
 package net.minecraft.world.entity.animal.horse;
 
 import com.mojang.serialization.Codec;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -15,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -552,9 +552,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		GRAY(3, "gray");
 
 		public static final Codec<Llama.Variant> CODEC = StringRepresentable.fromEnum(Llama.Variant::values);
-		private static final Llama.Variant[] BY_ID = (Llama.Variant[])Arrays.stream(values())
-			.sorted(Comparator.comparingInt(Llama.Variant::getId))
-			.toArray(Llama.Variant[]::new);
+		private static final IntFunction<Llama.Variant> BY_ID = ByIdMap.continuous(Llama.Variant::getId, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
 		final int id;
 		private final String name;
 
@@ -568,7 +566,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		}
 
 		public static Llama.Variant byId(int i) {
-			return BY_ID[Mth.clamp(i, 0, BY_ID.length - 1)];
+			return (Llama.Variant)BY_ID.apply(i);
 		}
 
 		@Override

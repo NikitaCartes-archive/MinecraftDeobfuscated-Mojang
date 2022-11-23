@@ -1,7 +1,6 @@
 package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonObject;
-import java.util.Objects;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -14,9 +13,8 @@ public class SimpleCraftingRecipeSerializer<T extends CraftingRecipe> implements
 	}
 
 	public T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-		CraftingBookCategory craftingBookCategory = (CraftingBookCategory)Objects.requireNonNullElse(
-			(CraftingBookCategory)CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(jsonObject, "category", null)), CraftingBookCategory.MISC
-		);
+		CraftingBookCategory craftingBookCategory = (CraftingBookCategory)CraftingBookCategory.CODEC
+			.byName(GsonHelper.getAsString(jsonObject, "category", null), CraftingBookCategory.MISC);
 		return this.constructor.create(resourceLocation, craftingBookCategory);
 	}
 

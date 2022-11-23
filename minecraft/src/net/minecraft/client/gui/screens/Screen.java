@@ -34,6 +34,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.Tooltip;
@@ -44,6 +45,9 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.ScreenNarrationCollector;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -56,6 +60,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.joml.Matrix4f;
+import org.joml.Vector2ic;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -88,7 +93,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	@Nullable
 	private NarratableEntry lastNarratable;
 	@Nullable
-	private List<FormattedCharSequence> tooltip;
+	private Screen.DeferredTooltipRendering deferredTooltipRendering;
 
 	protected Screen(Component component) {
 		this.title = component;
@@ -104,9 +109,9 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	public final void renderWithTooltip(PoseStack poseStack, int i, int j, float f) {
 		this.render(poseStack, i, j, f);
-		if (this.tooltip != null) {
-			this.renderTooltip(poseStack, this.tooltip, i, j);
-			this.tooltip = null;
+		if (this.deferredTooltipRendering != null) {
+			this.renderTooltip(poseStack, this.deferredTooltipRendering, i, j);
+			this.deferredTooltipRendering = null;
 		}
 	}
 
@@ -186,7 +191,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			.map(ClientTooltipComponent::create)
 			.collect(Collectors.toList());
 		optional.ifPresent(tooltipComponent -> list2.add(1, ClientTooltipComponent.create(tooltipComponent)));
-		this.renderTooltipInternal(poseStack, list2, i, j);
+		this.renderTooltipInternal(poseStack, list2, i, j, DefaultTooltipPositioner.INSTANCE);
 	}
 
 	public List<Component> getTooltipFromItem(ItemStack itemStack) {
@@ -204,10 +209,26 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	public void renderTooltip(PoseStack poseStack, List<? extends FormattedCharSequence> list, int i, int j) {
-		this.renderTooltipInternal(poseStack, (List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()), i, j);
+		this.renderTooltipInternal(
+			poseStack,
+			(List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()),
+			i,
+			j,
+			DefaultTooltipPositioner.INSTANCE
+		);
 	}
 
-	private void renderTooltipInternal(PoseStack poseStack, List<ClientTooltipComponent> list, int i, int j) {
+	private void renderTooltip(PoseStack poseStack, Screen.DeferredTooltipRendering deferredTooltipRendering, int i, int j) {
+		this.renderTooltipInternal(
+			poseStack,
+			(List<ClientTooltipComponent>)deferredTooltipRendering.tooltip().stream().map(ClientTooltipComponent::create).collect(Collectors.toList()),
+			i,
+			j,
+			deferredTooltipRendering.positioner()
+		);
+	}
+
+	private void renderTooltipInternal(PoseStack poseStack, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner) {
 		if (!list.isEmpty()) {
 			int k = 0;
 			int l = list.size() == 1 ? -2 : 0;
@@ -223,19 +244,11 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 			int n = i + 12;
 			int o = j - 12;
-			if (n + k > this.width) {
-				n = Math.max(n - 24 - 4 - k, 4);
-			}
-
-			if (o + l + 6 > this.height) {
-				o = this.height - l - 6;
-			}
-
+			Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this, n, o, k, l);
+			n = vector2ic.x();
+			o = vector2ic.y();
 			poseStack.pushPose();
-			int q = -267386864;
-			int r = 1347420415;
-			int s = 1344798847;
-			int t = 400;
+			int q = 400;
 			float f = this.itemRenderer.blitOffset;
 			this.itemRenderer.blitOffset = 400.0F;
 			Tesselator tesselator = Tesselator.getInstance();
@@ -243,15 +256,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 			Matrix4f matrix4f = poseStack.last().pose();
-			fillGradient(matrix4f, bufferBuilder, n - 3, o - 4, n + k + 3, o - 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, n - 3, o + l + 3, n + k + 3, o + l + 4, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, n - 3, o - 3, n + k + 3, o + l + 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, n - 4, o - 3, n - 3, o + l + 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, n + k + 3, o - 3, n + k + 4, o + l + 3, 400, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, n - 3, o - 3 + 1, n - 3 + 1, o + l + 3 - 1, 400, 1347420415, 1344798847);
-			fillGradient(matrix4f, bufferBuilder, n + k + 2, o - 3 + 1, n + k + 3, o + l + 3 - 1, 400, 1347420415, 1344798847);
-			fillGradient(matrix4f, bufferBuilder, n - 3, o - 3, n + k + 3, o - 3 + 1, 400, 1347420415, 1347420415);
-			fillGradient(matrix4f, bufferBuilder, n - 3, o + l + 2, n + k + 3, o + l + 3, 400, 1344798847, 1344798847);
+			TooltipRenderUtil.renderTooltipBackground(
+				(matrix4fx, bufferBuilderx, ix, jx, kx, lx, mx, nx, ox) -> GuiComponent.fillGradient(matrix4fx, bufferBuilderx, ix, jx, kx, lx, mx, nx, ox),
+				matrix4f,
+				bufferBuilder,
+				n,
+				o,
+				k,
+				l,
+				400
+			);
 			RenderSystem.enableDepthTest();
 			RenderSystem.disableTexture();
 			RenderSystem.enableBlend();
@@ -261,22 +275,22 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			RenderSystem.enableTexture();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 			poseStack.translate(0.0F, 0.0F, 400.0F);
-			int u = o;
+			int r = o;
 
-			for (int v = 0; v < list.size(); v++) {
-				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(v);
-				clientTooltipComponent2.renderText(this.font, n, u, matrix4f, bufferSource);
-				u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
+			for (int s = 0; s < list.size(); s++) {
+				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(s);
+				clientTooltipComponent2.renderText(this.font, n, r, matrix4f, bufferSource);
+				r += clientTooltipComponent2.getHeight() + (s == 0 ? 2 : 0);
 			}
 
 			bufferSource.endBatch();
 			poseStack.popPose();
-			u = o;
+			r = o;
 
-			for (int v = 0; v < list.size(); v++) {
-				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(v);
-				clientTooltipComponent2.renderImage(this.font, n, u, poseStack, this.itemRenderer, 400);
-				u += clientTooltipComponent2.getHeight() + (v == 0 ? 2 : 0);
+			for (int s = 0; s < list.size(); s++) {
+				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(s);
+				clientTooltipComponent2.renderImage(this.font, n, r, poseStack, this.itemRenderer, 400);
+				r += clientTooltipComponent2.getHeight() + (s == 0 ? 2 : 0);
 			}
 
 			this.itemRenderer.blitOffset = f;
@@ -624,21 +638,31 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list) {
-		this.tooltip = list;
+		this.setTooltipForNextRenderPass(list, DefaultTooltipPositioner.INSTANCE, true);
+	}
+
+	public void setTooltipForNextRenderPass(List<FormattedCharSequence> list, ClientTooltipPositioner clientTooltipPositioner, boolean bl) {
+		if (this.deferredTooltipRendering == null || bl) {
+			this.deferredTooltipRendering = new Screen.DeferredTooltipRendering(list, clientTooltipPositioner);
+		}
 	}
 
 	protected void setTooltipForNextRenderPass(Component component) {
 		this.setTooltipForNextRenderPass(Tooltip.splitTooltip(this.minecraft, component));
 	}
 
-	public void setTooltipForNextRenderPass(Tooltip tooltip) {
-		this.setTooltipForNextRenderPass(tooltip.toCharSequence(this.minecraft));
+	public void setTooltipForNextRenderPass(Tooltip tooltip, ClientTooltipPositioner clientTooltipPositioner, boolean bl) {
+		this.setTooltipForNextRenderPass(tooltip.toCharSequence(this.minecraft), clientTooltipPositioner, bl);
 	}
 
 	protected static void hideWidgets(AbstractWidget... abstractWidgets) {
 		for (AbstractWidget abstractWidget : abstractWidgets) {
 			abstractWidget.visible = false;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record DeferredTooltipRendering(List<FormattedCharSequence> tooltip, ClientTooltipPositioner positioner) {
 	}
 
 	@Environment(EnvType.CLIENT)

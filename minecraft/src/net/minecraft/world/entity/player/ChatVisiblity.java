@@ -1,8 +1,7 @@
 package net.minecraft.world.entity.player;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import net.minecraft.util.Mth;
+import java.util.function.IntFunction;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.OptionEnum;
 
 public enum ChatVisiblity implements OptionEnum {
@@ -10,9 +9,7 @@ public enum ChatVisiblity implements OptionEnum {
 	SYSTEM(1, "options.chat.visibility.system"),
 	HIDDEN(2, "options.chat.visibility.hidden");
 
-	private static final ChatVisiblity[] BY_ID = (ChatVisiblity[])Arrays.stream(values())
-		.sorted(Comparator.comparingInt(ChatVisiblity::getId))
-		.toArray(ChatVisiblity[]::new);
+	private static final IntFunction<ChatVisiblity> BY_ID = ByIdMap.continuous(ChatVisiblity::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private final int id;
 	private final String key;
 
@@ -32,6 +29,6 @@ public enum ChatVisiblity implements OptionEnum {
 	}
 
 	public static ChatVisiblity byId(int i) {
-		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+		return (ChatVisiblity)BY_ID.apply(i);
 	}
 }

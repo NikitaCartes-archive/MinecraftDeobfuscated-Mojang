@@ -126,17 +126,21 @@ public class Node {
 		friendlyByteBuf.writeFloat(this.walkedDistance);
 		friendlyByteBuf.writeFloat(this.costMalus);
 		friendlyByteBuf.writeBoolean(this.closed);
-		friendlyByteBuf.writeInt(this.type.ordinal());
+		friendlyByteBuf.writeEnum(this.type);
 		friendlyByteBuf.writeFloat(this.f);
 	}
 
 	public static Node createFromStream(FriendlyByteBuf friendlyByteBuf) {
 		Node node = new Node(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
+		readContents(friendlyByteBuf, node);
+		return node;
+	}
+
+	protected static void readContents(FriendlyByteBuf friendlyByteBuf, Node node) {
 		node.walkedDistance = friendlyByteBuf.readFloat();
 		node.costMalus = friendlyByteBuf.readFloat();
 		node.closed = friendlyByteBuf.readBoolean();
-		node.type = BlockPathTypes.values()[friendlyByteBuf.readInt()];
+		node.type = friendlyByteBuf.readEnum(BlockPathTypes.class);
 		node.f = friendlyByteBuf.readFloat();
-		return node;
 	}
 }

@@ -2,14 +2,13 @@ package net.minecraft.world.entity.animal.axolotl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -23,6 +22,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
@@ -65,10 +65,8 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
-import org.slf4j.Logger;
 
 public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolotl.Variant>, Bucketable {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int TOTAL_PLAYDEAD_TIME = 200;
 	protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Axolotl>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.AXOLOTL_ATTACKABLES, SensorType.AXOLOTL_TEMPTATIONS
@@ -143,7 +141,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setVariant(Axolotl.Variant.BY_ID[compoundTag.getInt("Variant")]);
+		this.setVariant(Axolotl.Variant.byId(compoundTag.getInt("Variant")));
 		this.setFromBucket(compoundTag.getBoolean("FromBucket"));
 	}
 
@@ -216,7 +214,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	public Axolotl.Variant getVariant() {
-		return Axolotl.Variant.BY_ID[this.entityData.get(DATA_VARIANT)];
+		return Axolotl.Variant.byId(this.entityData.get(DATA_VARIANT));
 	}
 
 	public void setVariant(Axolotl.Variant variant) {
@@ -385,13 +383,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	@Override
 	public void loadFromBucketTag(CompoundTag compoundTag) {
 		Bucketable.loadDefaultDataFromBucketTag(this, compoundTag);
-		int i = compoundTag.getInt("Variant");
-		if (i >= 0 && i < Axolotl.Variant.BY_ID.length) {
-			this.setVariant(Axolotl.Variant.BY_ID[i]);
-		} else {
-			LOGGER.error("Invalid variant: {}", i);
-		}
-
+		this.setVariant(Axolotl.Variant.byId(compoundTag.getInt("Variant")));
 		if (compoundTag.contains("Age")) {
 			this.setAge(compoundTag.getInt("Age"));
 		}
@@ -581,9 +573,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		CYAN(3, "cyan", true),
 		BLUE(4, "blue", false);
 
-		public static final Axolotl.Variant[] BY_ID = (Axolotl.Variant[])Arrays.stream(values())
-			.sorted(Comparator.comparingInt(Axolotl.Variant::getId))
-			.toArray(Axolotl.Variant[]::new);
+		private static final IntFunction<Axolotl.Variant> BY_ID = ByIdMap.continuous(Axolotl.Variant::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 		public static final Codec<Axolotl.Variant> CODEC = StringRepresentable.fromEnum(Axolotl.Variant::values);
 		private final int id;
 		private final String name;
@@ -608,6 +598,10 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 			return this.name;
 		}
 
+		public static Axolotl.Variant byId(int i) {
+			return (Axolotl.Variant)BY_ID.apply(i);
+		}
+
 		public static Axolotl.Variant getCommonSpawnVariant(RandomSource randomSource) {
 			return getSpawnVariant(randomSource, true);
 		}
@@ -617,7 +611,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		}
 
 		private static Axolotl.Variant getSpawnVariant(RandomSource randomSource, boolean bl) {
-			Axolotl.Variant[] variants = (Axolotl.Variant[])Arrays.stream(BY_ID).filter(variant -> variant.common == bl).toArray(Axolotl.Variant[]::new);
+			Axolotl.Variant[] variants = (Axolotl.Variant[])Arrays.stream(values()).filter(variant -> variant.common == bl).toArray(Axolotl.Variant[]::new);
 			return Util.getRandom(variants, randomSource);
 		}
 	}

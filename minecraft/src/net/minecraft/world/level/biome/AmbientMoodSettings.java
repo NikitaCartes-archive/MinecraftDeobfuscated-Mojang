@@ -2,13 +2,14 @@ package net.minecraft.world.level.biome;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 
 public class AmbientMoodSettings {
 	public static final Codec<AmbientMoodSettings> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					SoundEvent.CODEC.fieldOf("sound").forGetter(ambientMoodSettings -> ambientMoodSettings.soundEvent),
+					BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("sound").forGetter(ambientMoodSettings -> ambientMoodSettings.soundEvent),
 					Codec.INT.fieldOf("tick_delay").forGetter(ambientMoodSettings -> ambientMoodSettings.tickDelay),
 					Codec.INT.fieldOf("block_search_extent").forGetter(ambientMoodSettings -> ambientMoodSettings.blockSearchExtent),
 					Codec.DOUBLE.fieldOf("offset").forGetter(ambientMoodSettings -> ambientMoodSettings.soundPositionOffset)

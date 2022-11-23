@@ -1,11 +1,12 @@
 package net.minecraft.world.entity.ai.gossip;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.serialization.DataResult;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.IntBinaryOperator;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -21,14 +22,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
+import org.slf4j.Logger;
 
 public class GossipContainer {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int DISCARD_THRESHOLD = 2;
 	private final Map<UUID, GossipContainer.EntityGossips> gossips = Maps.<UUID, GossipContainer.EntityGossips>newHashMap();
 
@@ -59,7 +61,7 @@ public class GossipContainer {
 	}
 
 	private Collection<GossipContainer.GossipEntry> selectGossipsForTransfer(RandomSource randomSource, int i) {
-		List<GossipContainer.GossipEntry> list = (List<GossipContainer.GossipEntry>)this.unpack().collect(Collectors.toList());
+		List<GossipContainer.GossipEntry> list = this.unpack().toList();
 		if (list.isEmpty()) {
 			return Collections.emptyList();
 		} else {
@@ -146,14 +148,19 @@ public class GossipContainer {
 		}
 	}
 
-	public <T> Dynamic<T> store(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(dynamicOps, dynamicOps.createList(this.unpack().map(gossipEntry -> gossipEntry.store(dynamicOps)).map(Dynamic::getValue)));
+	public <T> T store(DynamicOps<T> dynamicOps) {
+		return (T)GossipContainer.GossipEntry.LIST_CODEC
+			.encodeStart(dynamicOps, this.unpack().toList())
+			.resultOrPartial(string -> LOGGER.warn("Failed to serialize gossips: {}", string))
+			.orElseGet(dynamicOps::emptyList);
 	}
 
 	public void update(Dynamic<?> dynamic) {
-		dynamic.asStream()
-			.map(GossipContainer.GossipEntry::load)
-			.flatMap(dataResult -> dataResult.result().stream())
+		GossipContainer.GossipEntry.LIST_CODEC
+			.decode(dynamic)
+			.resultOrPartial(string -> LOGGER.warn("Failed to deserialize gossips: {}", string))
+			.stream()
+			.flatMap(pair -> ((List)pair.getFirst()).stream())
 			.forEach(gossipEntry -> this.getOrCreate(gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
 	}
 
@@ -216,52 +223,19 @@ public class GossipContainer {
 		}
 	}
 
-	static class GossipEntry {
-		public static final String TAG_TARGET = "Target";
-		public static final String TAG_TYPE = "Type";
-		public static final String TAG_VALUE = "Value";
-		public final UUID target;
-		public final GossipType type;
-		public final int value;
-
-		public GossipEntry(UUID uUID, GossipType gossipType, int i) {
-			this.target = uUID;
-			this.type = gossipType;
-			this.value = i;
-		}
+	static record GossipEntry(UUID target, GossipType type, int value) {
+		public static final Codec<GossipContainer.GossipEntry> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						UUIDUtil.CODEC.fieldOf("Target").forGetter(GossipContainer.GossipEntry::target),
+						GossipType.CODEC.fieldOf("Type").forGetter(GossipContainer.GossipEntry::type),
+						ExtraCodecs.POSITIVE_INT.fieldOf("Value").forGetter(GossipContainer.GossipEntry::value)
+					)
+					.apply(instance, GossipContainer.GossipEntry::new)
+		);
+		public static final Codec<List<GossipContainer.GossipEntry>> LIST_CODEC = CODEC.listOf();
 
 		public int weightedValue() {
 			return this.value * this.type.weight;
-		}
-
-		public String toString() {
-			return "GossipEntry{target=" + this.target + ", type=" + this.type + ", value=" + this.value + "}";
-		}
-
-		public <T> Dynamic<T> store(DynamicOps<T> dynamicOps) {
-			return new Dynamic<>(
-				dynamicOps,
-				dynamicOps.createMap(
-					ImmutableMap.of(
-						dynamicOps.createString("Target"),
-						(T)UUIDUtil.CODEC.encodeStart(dynamicOps, this.target).result().orElseThrow(RuntimeException::new),
-						dynamicOps.createString("Type"),
-						dynamicOps.createString(this.type.id),
-						dynamicOps.createString("Value"),
-						dynamicOps.createInt(this.value)
-					)
-				)
-			);
-		}
-
-		public static DataResult<GossipContainer.GossipEntry> load(Dynamic<?> dynamic) {
-			return DataResult.unbox(
-				DataResult.instance()
-					.group(
-						dynamic.get("Target").read(UUIDUtil.CODEC), dynamic.get("Type").asString().map(GossipType::byId), dynamic.get("Value").read(ExtraCodecs.POSITIVE_INT)
-					)
-					.apply(DataResult.instance(), GossipContainer.GossipEntry::new)
-			);
 		}
 	}
 }

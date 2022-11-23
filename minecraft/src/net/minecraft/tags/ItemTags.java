@@ -85,6 +85,7 @@ public final class ItemTags {
 	public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = bind("cluster_max_harvestables");
 	public static final TagKey<Item> COMPASSES = bind("compasses");
 	public static final TagKey<Item> HANGING_SIGNS = bind("hanging_signs");
+	public static final TagKey<Item> CREEPER_IGNITERS = bind("creeper_igniters");
 
 	private ItemTags() {
 	}

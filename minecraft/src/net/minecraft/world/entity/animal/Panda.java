@@ -1,9 +1,8 @@
 package net.minecraft.world.entity.animal;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -16,8 +15,10 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -224,8 +225,8 @@ public class Panda extends Animal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putString("MainGene", this.getMainGene().getName());
-		compoundTag.putString("HiddenGene", this.getHiddenGene().getName());
+		compoundTag.putString("MainGene", this.getMainGene().getSerializedName());
+		compoundTag.putString("HiddenGene", this.getHiddenGene().getSerializedName());
 	}
 
 	@Override
@@ -681,7 +682,7 @@ public class Panda extends Animal {
 		return !this.isOnBack() && !this.isScared() && !this.isEating() && !this.isRolling() && !this.isSitting();
 	}
 
-	public static enum Gene {
+	public static enum Gene implements StringRepresentable {
 		NORMAL(0, "normal", false),
 		LAZY(1, "lazy", false),
 		WORRIED(2, "worried", false),
@@ -690,7 +691,8 @@ public class Panda extends Animal {
 		WEAK(5, "weak", true),
 		AGGRESSIVE(6, "aggressive", false);
 
-		private static final Panda.Gene[] BY_ID = (Panda.Gene[])Arrays.stream(values()).sorted(Comparator.comparingInt(Panda.Gene::getId)).toArray(Panda.Gene[]::new);
+		public static final StringRepresentable.EnumCodec<Panda.Gene> CODEC = StringRepresentable.fromEnum(Panda.Gene::values);
+		private static final IntFunction<Panda.Gene> BY_ID = ByIdMap.continuous(Panda.Gene::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 		private static final int MAX_GENE = 6;
 		private final int id;
 		private final String name;
@@ -706,7 +708,8 @@ public class Panda extends Animal {
 			return this.id;
 		}
 
-		public String getName() {
+		@Override
+		public String getSerializedName() {
 			return this.name;
 		}
 
@@ -723,21 +726,11 @@ public class Panda extends Animal {
 		}
 
 		public static Panda.Gene byId(int i) {
-			if (i < 0 || i >= BY_ID.length) {
-				i = 0;
-			}
-
-			return BY_ID[i];
+			return (Panda.Gene)BY_ID.apply(i);
 		}
 
 		public static Panda.Gene byName(String string) {
-			for (Panda.Gene gene : values()) {
-				if (gene.name.equals(string)) {
-					return gene;
-				}
-			}
-
-			return NORMAL;
+			return (Panda.Gene)CODEC.byName(string, NORMAL);
 		}
 
 		public static Panda.Gene getRandom(RandomSource randomSource) {

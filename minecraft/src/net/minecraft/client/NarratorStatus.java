@@ -1,11 +1,10 @@
 package net.minecraft.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ByIdMap;
 
 @Environment(EnvType.CLIENT)
 public enum NarratorStatus {
@@ -14,9 +13,7 @@ public enum NarratorStatus {
 	CHAT(2, "options.narrator.chat"),
 	SYSTEM(3, "options.narrator.system");
 
-	private static final NarratorStatus[] BY_ID = (NarratorStatus[])Arrays.stream(values())
-		.sorted(Comparator.comparingInt(NarratorStatus::getId))
-		.toArray(NarratorStatus[]::new);
+	private static final IntFunction<NarratorStatus> BY_ID = ByIdMap.continuous(NarratorStatus::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private final int id;
 	private final Component name;
 
@@ -34,7 +31,7 @@ public enum NarratorStatus {
 	}
 
 	public static NarratorStatus byId(int i) {
-		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+		return (NarratorStatus)BY_ID.apply(i);
 	}
 
 	public boolean shouldNarrateChat() {

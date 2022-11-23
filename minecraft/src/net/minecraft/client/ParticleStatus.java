@@ -1,10 +1,9 @@
 package net.minecraft.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
@@ -13,9 +12,7 @@ public enum ParticleStatus implements OptionEnum {
 	DECREASED(1, "options.particles.decreased"),
 	MINIMAL(2, "options.particles.minimal");
 
-	private static final ParticleStatus[] BY_ID = (ParticleStatus[])Arrays.stream(values())
-		.sorted(Comparator.comparingInt(ParticleStatus::getId))
-		.toArray(ParticleStatus[]::new);
+	private static final IntFunction<ParticleStatus> BY_ID = ByIdMap.continuous(ParticleStatus::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private final int id;
 	private final String key;
 
@@ -35,6 +32,6 @@ public enum ParticleStatus implements OptionEnum {
 	}
 
 	public static ParticleStatus byId(int i) {
-		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+		return (ParticleStatus)BY_ID.apply(i);
 	}
 }

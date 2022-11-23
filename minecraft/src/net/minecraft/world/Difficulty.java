@@ -1,17 +1,19 @@
 package net.minecraft.world;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ByIdMap;
+import net.minecraft.util.StringRepresentable;
 
-public enum Difficulty {
+public enum Difficulty implements StringRepresentable {
 	PEACEFUL(0, "peaceful"),
 	EASY(1, "easy"),
 	NORMAL(2, "normal"),
 	HARD(3, "hard");
 
-	private static final Difficulty[] BY_ID = (Difficulty[])Arrays.stream(values()).sorted(Comparator.comparingInt(Difficulty::getId)).toArray(Difficulty[]::new);
+	public static final StringRepresentable.EnumCodec<Difficulty> CODEC = StringRepresentable.fromEnum(Difficulty::values);
+	private static final IntFunction<Difficulty> BY_ID = ByIdMap.continuous(Difficulty::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private final int id;
 	private final String key;
 
@@ -29,21 +31,20 @@ public enum Difficulty {
 	}
 
 	public static Difficulty byId(int i) {
-		return BY_ID[i % BY_ID.length];
+		return (Difficulty)BY_ID.apply(i);
 	}
 
 	@Nullable
 	public static Difficulty byName(String string) {
-		for (Difficulty difficulty : values()) {
-			if (difficulty.key.equals(string)) {
-				return difficulty;
-			}
-		}
-
-		return null;
+		return (Difficulty)CODEC.byName(string);
 	}
 
 	public String getKey() {
+		return this.key;
+	}
+
+	@Override
+	public String getSerializedName() {
 		return this.key;
 	}
 }

@@ -1,9 +1,7 @@
 package net.minecraft.world.scores.criteria;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.StatType;
+import net.minecraft.util.StringRepresentable;
 
 public class ObjectiveCriteria {
 	private static final Map<String, ObjectiveCriteria> CUSTOM_CRITERIA = Maps.<String, ObjectiveCriteria>newHashMap();
@@ -121,12 +120,12 @@ public class ObjectiveCriteria {
 		return this.renderType;
 	}
 
-	public static enum RenderType {
+	public static enum RenderType implements StringRepresentable {
 		INTEGER("integer"),
 		HEARTS("hearts");
 
 		private final String id;
-		private static final Map<String, ObjectiveCriteria.RenderType> BY_ID;
+		public static final StringRepresentable.EnumCodec<ObjectiveCriteria.RenderType> CODEC = StringRepresentable.fromEnum(ObjectiveCriteria.RenderType::values);
 
 		private RenderType(String string2) {
 			this.id = string2;
@@ -136,18 +135,13 @@ public class ObjectiveCriteria {
 			return this.id;
 		}
 
-		public static ObjectiveCriteria.RenderType byId(String string) {
-			return (ObjectiveCriteria.RenderType)BY_ID.getOrDefault(string, INTEGER);
+		@Override
+		public String getSerializedName() {
+			return this.id;
 		}
 
-		static {
-			Builder<String, ObjectiveCriteria.RenderType> builder = ImmutableMap.builder();
-
-			for (ObjectiveCriteria.RenderType renderType : values()) {
-				builder.put(renderType.id, renderType);
-			}
-
-			BY_ID = builder.build();
+		public static ObjectiveCriteria.RenderType byId(String string) {
+			return (ObjectiveCriteria.RenderType)CODEC.byName(string, INTEGER);
 		}
 	}
 }

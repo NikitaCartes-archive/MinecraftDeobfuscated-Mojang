@@ -196,5 +196,6 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.CLUSTER_MAX_HARVESTABLES)
 			.add(Items.DIAMOND_PICKAXE, Items.GOLDEN_PICKAXE, Items.IRON_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE, Items.WOODEN_PICKAXE);
 		this.tag(ItemTags.COMPASSES).add(Items.COMPASS).add(Items.RECOVERY_COMPASS);
+		this.tag(ItemTags.CREEPER_IGNITERS).add(Items.FLINT_AND_STEEL).add(Items.FIRE_CHARGE);
 	}
 }

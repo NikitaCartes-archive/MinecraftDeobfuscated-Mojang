@@ -1,10 +1,9 @@
 package net.minecraft.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
@@ -13,9 +12,7 @@ public enum AttackIndicatorStatus implements OptionEnum {
 	CROSSHAIR(1, "options.attack.crosshair"),
 	HOTBAR(2, "options.attack.hotbar");
 
-	private static final AttackIndicatorStatus[] BY_ID = (AttackIndicatorStatus[])Arrays.stream(values())
-		.sorted(Comparator.comparingInt(AttackIndicatorStatus::getId))
-		.toArray(AttackIndicatorStatus[]::new);
+	private static final IntFunction<AttackIndicatorStatus> BY_ID = ByIdMap.continuous(AttackIndicatorStatus::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private final int id;
 	private final String key;
 
@@ -35,6 +32,6 @@ public enum AttackIndicatorStatus implements OptionEnum {
 	}
 
 	public static AttackIndicatorStatus byId(int i) {
-		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+		return (AttackIndicatorStatus)BY_ID.apply(i);
 	}
 }

@@ -215,7 +215,7 @@ public class Climate {
 	}
 
 	protected static final class RTree<T> {
-		private static final int CHILDREN_PER_NODE = 10;
+		private static final int CHILDREN_PER_NODE = 6;
 		private final Climate.RTree.Node<T> root;
 		private final ThreadLocal<Climate.RTree.Leaf<T>> lastResult = new ThreadLocal();
 
@@ -244,7 +244,7 @@ public class Climate {
 				throw new IllegalStateException("Need at least one child to build a node");
 			} else if (list.size() == 1) {
 				return (Climate.RTree.Node<T>)list.get(0);
-			} else if (list.size() <= 10) {
+			} else if (list.size() <= 6) {
 				list.sort(Comparator.comparingLong(node -> {
 					long lx = 0L;
 
@@ -305,7 +305,7 @@ public class Climate {
 		private static <T> List<Climate.RTree.SubTree<T>> bucketize(List<? extends Climate.RTree.Node<T>> list) {
 			List<Climate.RTree.SubTree<T>> list2 = Lists.<Climate.RTree.SubTree<T>>newArrayList();
 			List<Climate.RTree.Node<T>> list3 = Lists.<Climate.RTree.Node<T>>newArrayList();
-			int i = (int)Math.pow(10.0, Math.floor(Math.log((double)list.size() - 0.01) / Math.log(10.0)));
+			int i = (int)Math.pow(6.0, Math.floor(Math.log((double)list.size() - 0.01) / Math.log(6.0)));
 
 			for (Climate.RTree.Node<T> node : list) {
 				list3.add(node);

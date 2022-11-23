@@ -98,7 +98,7 @@ public class StructureCheck {
 	}
 
 	private boolean canCreateStructure(ChunkPos chunkPos, Structure structure) {
-		return structure.findGenerationPoint(
+		return structure.findValidGenerationPoint(
 				new Structure.GenerationContext(
 					this.registryAccess,
 					this.chunkGenerator,

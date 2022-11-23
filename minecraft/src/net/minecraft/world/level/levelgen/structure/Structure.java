@@ -88,12 +88,11 @@ public abstract class Structure {
 		LevelHeightAccessor levelHeightAccessor,
 		Predicate<Holder<Biome>> predicate
 	) {
-		Optional<Structure.GenerationStub> optional = this.findGenerationPoint(
-			new Structure.GenerationContext(
-				registryAccess, chunkGenerator, biomeSource, randomState, structureTemplateManager, l, chunkPos, levelHeightAccessor, predicate
-			)
+		Structure.GenerationContext generationContext = new Structure.GenerationContext(
+			registryAccess, chunkGenerator, biomeSource, randomState, structureTemplateManager, l, chunkPos, levelHeightAccessor, predicate
 		);
-		if (optional.isPresent() && isValidBiome((Structure.GenerationStub)optional.get(), chunkGenerator, randomState, predicate)) {
+		Optional<Structure.GenerationStub> optional = this.findValidGenerationPoint(generationContext);
+		if (optional.isPresent()) {
 			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();
 			StructureStart structureStart = new StructureStart(this, chunkPos, i, structurePiecesBuilder.build());
 			if (structureStart.isValid()) {
@@ -114,14 +113,16 @@ public abstract class Structure {
 		return Optional.of(new Structure.GenerationStub(new BlockPos(i, k, j), consumer));
 	}
 
-	private static boolean isValidBiome(
-		Structure.GenerationStub generationStub, ChunkGenerator chunkGenerator, RandomState randomState, Predicate<Holder<Biome>> predicate
-	) {
+	private static boolean isValidBiome(Structure.GenerationStub generationStub, Structure.GenerationContext generationContext) {
 		BlockPos blockPos = generationStub.position();
-		return predicate.test(
-			chunkGenerator.getBiomeSource()
-				.getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ()), randomState.sampler())
-		);
+		return generationContext.validBiome
+			.test(
+				generationContext.chunkGenerator
+					.getBiomeSource()
+					.getNoiseBiome(
+						QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ()), generationContext.randomState.sampler()
+					)
+			);
 	}
 
 	public void afterPlace(
@@ -178,7 +179,11 @@ public abstract class Structure {
 		return new BlockPos(k, getLowestY(generationContext, k, l, i, j), l);
 	}
 
-	public abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext generationContext);
+	protected abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext generationContext);
+
+	public Optional<Structure.GenerationStub> findValidGenerationPoint(Structure.GenerationContext generationContext) {
+		return this.findGenerationPoint(generationContext).filter(generationStub -> isValidBiome(generationStub, generationContext));
+	}
 
 	public abstract StructureType<?> type();
 
@@ -194,6 +199,7 @@ public abstract class Structure {
 		LevelHeightAccessor heightAccessor,
 		Predicate<Holder<Biome>> validBiome
 	) {
+
 		public GenerationContext(
 			RegistryAccess registryAccess,
 			ChunkGenerator chunkGenerator,

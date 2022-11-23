@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -8,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -101,6 +103,9 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		DISAPPEAR(4, 0.3, 0.3, 0.8),
 		BLINDNESS(5, 0.1, 0.1, 0.2);
 
+		private static final IntFunction<SpellcasterIllager.IllagerSpell> BY_ID = ByIdMap.continuous(
+			illagerSpell -> illagerSpell.id, values(), ByIdMap.OutOfBoundsStrategy.ZERO
+		);
 		final int id;
 		final double[] spellColor;
 
@@ -110,13 +115,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		}
 
 		public static SpellcasterIllager.IllagerSpell byId(int i) {
-			for (SpellcasterIllager.IllagerSpell illagerSpell : values()) {
-				if (i == illagerSpell.id) {
-					return illagerSpell;
-				}
-			}
-
-			return NONE;
+			return (SpellcasterIllager.IllagerSpell)BY_ID.apply(i);
 		}
 	}
 

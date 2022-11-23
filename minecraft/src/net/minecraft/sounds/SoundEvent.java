@@ -1,20 +1,19 @@
 package net.minecraft.sounds;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 
 public class SoundEvent {
-	public static final Codec<SoundEvent> CODEC = ResourceLocation.CODEC.xmap(SoundEvent::new, soundEvent -> soundEvent.location);
+	private static final float DEFAULT_RANGE = 16.0F;
 	private final ResourceLocation location;
 	private final float range;
 	private final boolean newSystem;
 
-	public SoundEvent(ResourceLocation resourceLocation) {
-		this(resourceLocation, 16.0F, false);
+	static SoundEvent createVariableRangeEvent(ResourceLocation resourceLocation) {
+		return new SoundEvent(resourceLocation, 16.0F, false);
 	}
 
-	public SoundEvent(ResourceLocation resourceLocation, float f) {
-		this(resourceLocation, f, true);
+	static SoundEvent createFixedRangeEvent(ResourceLocation resourceLocation, float f) {
+		return new SoundEvent(resourceLocation, f, true);
 	}
 
 	private SoundEvent(ResourceLocation resourceLocation, float f, boolean bl) {
@@ -28,10 +27,10 @@ public class SoundEvent {
 	}
 
 	public float getRange(float f) {
-		if (this.newSystem) {
-			return this.range;
-		} else {
-			return f > 1.0F ? 16.0F * f : 16.0F;
-		}
+		return this.newSystem ? this.range : legacySoundRange(f);
+	}
+
+	public static float legacySoundRange(float f) {
+		return f > 1.0F ? 16.0F * f : 16.0F;
 	}
 }

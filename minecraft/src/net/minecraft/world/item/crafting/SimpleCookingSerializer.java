@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.Objects;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -21,9 +20,8 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 
 	public T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
 		String string = GsonHelper.getAsString(jsonObject, "group", "");
-		CookingBookCategory cookingBookCategory = (CookingBookCategory)Objects.requireNonNullElse(
-			(CookingBookCategory)CookingBookCategory.CODEC.byName(GsonHelper.getAsString(jsonObject, "category", null)), CookingBookCategory.MISC
-		);
+		CookingBookCategory cookingBookCategory = (CookingBookCategory)CookingBookCategory.CODEC
+			.byName(GsonHelper.getAsString(jsonObject, "category", null), CookingBookCategory.MISC);
 		JsonElement jsonElement = (JsonElement)(GsonHelper.isArrayNode(jsonObject, "ingredient")
 			? GsonHelper.getAsJsonArray(jsonObject, "ingredient")
 			: GsonHelper.getAsJsonObject(jsonObject, "ingredient"));

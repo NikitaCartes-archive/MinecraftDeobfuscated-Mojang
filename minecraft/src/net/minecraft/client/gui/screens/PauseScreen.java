@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.RealmsMainScreen;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -43,6 +44,7 @@ public class PauseScreen extends Screen {
 	private static final Component GAME = Component.translatable("menu.game");
 	private static final Component PAUSED = Component.translatable("menu.paused");
 	private final boolean showPauseMenu;
+	@Nullable
 	private Button disconnectButton;
 
 	public PauseScreen(boolean bl) {
@@ -126,7 +128,7 @@ public class PauseScreen extends Screen {
 		}
 
 		super.render(poseStack, i, j, f);
-		if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport()) {
+		if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
 			RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			this.blit(poseStack, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15);

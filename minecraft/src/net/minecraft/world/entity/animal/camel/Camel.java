@@ -28,6 +28,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.RiderShieldingMount;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
@@ -49,7 +50,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddleable {
+public class Camel extends AbstractHorse implements PlayerRideableJumping, RiderShieldingMount, Saddleable {
 	public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.CACTUS);
 	public static final int DASH_COOLDOWN_TICKS = 55;
 	private static final float RUNNING_SPEED_BONUS = 0.1F;
@@ -142,6 +143,11 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return entityDimensions.height - 0.1F;
+	}
+
+	@Override
+	public double getRiderShieldingHeight() {
+		return 0.5;
 	}
 
 	@Override

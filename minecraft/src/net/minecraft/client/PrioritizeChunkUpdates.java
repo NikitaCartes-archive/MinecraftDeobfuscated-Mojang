@@ -1,10 +1,9 @@
 package net.minecraft.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.OptionEnum;
 
 @Environment(EnvType.CLIENT)
@@ -13,9 +12,7 @@ public enum PrioritizeChunkUpdates implements OptionEnum {
 	PLAYER_AFFECTED(1, "options.prioritizeChunkUpdates.byPlayer"),
 	NEARBY(2, "options.prioritizeChunkUpdates.nearby");
 
-	private static final PrioritizeChunkUpdates[] BY_ID = (PrioritizeChunkUpdates[])Arrays.stream(values())
-		.sorted(Comparator.comparingInt(PrioritizeChunkUpdates::getId))
-		.toArray(PrioritizeChunkUpdates[]::new);
+	private static final IntFunction<PrioritizeChunkUpdates> BY_ID = ByIdMap.continuous(PrioritizeChunkUpdates::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private final int id;
 	private final String key;
 
@@ -35,6 +32,6 @@ public enum PrioritizeChunkUpdates implements OptionEnum {
 	}
 
 	public static PrioritizeChunkUpdates byId(int i) {
-		return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+		return (PrioritizeChunkUpdates)BY_ID.apply(i);
 	}
 }
