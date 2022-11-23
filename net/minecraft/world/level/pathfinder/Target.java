@@ -4,7 +4,6 @@
 package net.minecraft.world.level.pathfinder;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 
 public class Target
@@ -42,11 +41,7 @@ extends Node {
 
     public static Target createFromStream(FriendlyByteBuf friendlyByteBuf) {
         Target target = new Target(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
-        target.walkedDistance = friendlyByteBuf.readFloat();
-        target.costMalus = friendlyByteBuf.readFloat();
-        target.closed = friendlyByteBuf.readBoolean();
-        target.type = BlockPathTypes.values()[friendlyByteBuf.readInt()];
-        target.f = friendlyByteBuf.readFloat();
+        Target.readContents(friendlyByteBuf, target);
         return target;
     }
 }

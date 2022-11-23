@@ -3,10 +3,9 @@
  */
 package net.minecraft.world.entity.animal;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -18,8 +17,10 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -230,8 +231,8 @@ extends Animal {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putString("MainGene", this.getMainGene().getName());
-        compoundTag.putString("HiddenGene", this.getHiddenGene().getName());
+        compoundTag.putString("MainGene", this.getMainGene().getSerializedName());
+        compoundTag.putString("HiddenGene", this.getHiddenGene().getSerializedName());
     }
 
     @Override
@@ -654,7 +655,8 @@ extends Animal {
         }
     }
 
-    public static enum Gene {
+    public static enum Gene implements StringRepresentable
+    {
         NORMAL(0, "normal", false),
         LAZY(1, "lazy", false),
         WORRIED(2, "worried", false),
@@ -663,7 +665,8 @@ extends Animal {
         WEAK(5, "weak", true),
         AGGRESSIVE(6, "aggressive", false);
 
-        private static final Gene[] BY_ID;
+        public static final StringRepresentable.EnumCodec<Gene> CODEC;
+        private static final IntFunction<Gene> BY_ID;
         private static final int MAX_GENE = 6;
         private final int id;
         private final String name;
@@ -679,7 +682,8 @@ extends Animal {
             return this.id;
         }
 
-        public String getName() {
+        @Override
+        public String getSerializedName() {
             return this.name;
         }
 
@@ -698,18 +702,11 @@ extends Animal {
         }
 
         public static Gene byId(int i) {
-            if (i < 0 || i >= BY_ID.length) {
-                i = 0;
-            }
-            return BY_ID[i];
+            return BY_ID.apply(i);
         }
 
         public static Gene byName(String string) {
-            for (Gene gene : Gene.values()) {
-                if (!gene.name.equals(string)) continue;
-                return gene;
-            }
-            return NORMAL;
+            return CODEC.byName(string, NORMAL);
         }
 
         public static Gene getRandom(RandomSource randomSource) {
@@ -736,7 +733,8 @@ extends Animal {
         }
 
         static {
-            BY_ID = (Gene[])Arrays.stream(Gene.values()).sorted(Comparator.comparingInt(Gene::getId)).toArray(Gene[]::new);
+            CODEC = StringRepresentable.fromEnum(Gene::values);
+            BY_ID = ByIdMap.continuous(Gene::getId, Gene.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
         }
     }
 

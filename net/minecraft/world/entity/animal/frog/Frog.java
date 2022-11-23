@@ -411,7 +411,6 @@ implements VariantHolder<FrogVariant> {
         }
 
         @Override
-        @Nullable
         public Node getStart() {
             if (!this.mob.isInWater()) {
                 return super.getStart();

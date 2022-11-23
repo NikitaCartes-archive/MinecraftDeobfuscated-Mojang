@@ -18,6 +18,9 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -96,8 +99,15 @@ NarratableEntry {
             this.wasHoveredOrFocused = bl;
         }
         if (bl && Util.getMillis() - this.hoverOrFocusedStartTime > (long)this.tooltipMsDelay && (screen = Minecraft.getInstance().screen) != null) {
-            screen.setTooltipForNextRenderPass(this.tooltip);
+            screen.setTooltipForNextRenderPass(this.tooltip, this.createTooltipPositioner(), this.isFocused());
         }
+    }
+
+    protected ClientTooltipPositioner createTooltipPositioner() {
+        if (this.isFocused()) {
+            return new BelowOrAboveWidgetTooltipPositioner(this);
+        }
+        return DefaultTooltipPositioner.INSTANCE;
     }
 
     public void setTooltip(@Nullable Tooltip tooltip) {

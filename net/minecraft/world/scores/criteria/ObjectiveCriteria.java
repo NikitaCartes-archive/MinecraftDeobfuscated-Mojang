@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.scores.criteria;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.Map;
@@ -13,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.StatType;
+import net.minecraft.util.StringRepresentable;
 
 public class ObjectiveCriteria {
     private static final Map<String, ObjectiveCriteria> CUSTOM_CRITERIA = Maps.newHashMap();
@@ -87,12 +87,13 @@ public class ObjectiveCriteria {
         return this.renderType;
     }
 
-    public static enum RenderType {
+    public static enum RenderType implements StringRepresentable
+    {
         INTEGER("integer"),
         HEARTS("hearts");
 
         private final String id;
-        private static final Map<String, RenderType> BY_ID;
+        public static final StringRepresentable.EnumCodec<RenderType> CODEC;
 
         private RenderType(String string2) {
             this.id = string2;
@@ -102,16 +103,17 @@ public class ObjectiveCriteria {
             return this.id;
         }
 
+        @Override
+        public String getSerializedName() {
+            return this.id;
+        }
+
         public static RenderType byId(String string) {
-            return BY_ID.getOrDefault(string, INTEGER);
+            return CODEC.byName(string, INTEGER);
         }
 
         static {
-            ImmutableMap.Builder<String, RenderType> builder = ImmutableMap.builder();
-            for (RenderType renderType : RenderType.values()) {
-                builder.put(renderType.id, renderType);
-            }
-            BY_ID = builder.build();
+            CODEC = StringRepresentable.fromEnum(RenderType::values);
         }
     }
 }

@@ -8,11 +8,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -27,6 +26,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -456,7 +456,7 @@ FlyingAnimal {
         GRAY(4, "gray");
 
         public static final Codec<Variant> CODEC;
-        private static final Variant[] BY_ID;
+        private static final IntFunction<Variant> BY_ID;
         final int id;
         private final String name;
 
@@ -470,7 +470,7 @@ FlyingAnimal {
         }
 
         public static Variant byId(int i) {
-            return BY_ID[Mth.clamp(i, 0, BY_ID.length - 1)];
+            return BY_ID.apply(i);
         }
 
         @Override
@@ -480,7 +480,7 @@ FlyingAnimal {
 
         static {
             CODEC = StringRepresentable.fromEnum(Variant::values);
-            BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+            BY_ID = ByIdMap.continuous(Variant::getId, Variant.values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
         }
     }
 

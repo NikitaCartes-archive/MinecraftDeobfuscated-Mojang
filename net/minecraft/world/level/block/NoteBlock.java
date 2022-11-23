@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class NoteBlock
@@ -38,6 +39,7 @@ extends Block {
     public static final EnumProperty<NoteBlockInstrument> INSTRUMENT = BlockStateProperties.NOTEBLOCK_INSTRUMENT;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final IntegerProperty NOTE = BlockStateProperties.NOTE;
+    public static final int NOTE_VOLUME = 3;
 
     public NoteBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -112,7 +114,6 @@ extends Block {
 
     @Override
     public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
-        SoundEvent soundEvent;
         float f;
         NoteBlockInstrument noteBlockInstrument = blockState.getValue(INSTRUMENT);
         if (noteBlockInstrument.isTunable()) {
@@ -123,24 +124,24 @@ extends Block {
             f = 1.0f;
         }
         if (noteBlockInstrument.hasCustomSound()) {
-            soundEvent = this.getCustomSoundEvent(noteBlockInstrument, level, blockPos);
-            if (soundEvent == null) {
+            ResourceLocation resourceLocation = this.getCustomSoundId(level, blockPos);
+            if (resourceLocation == null) {
                 return false;
             }
+            level.playCustomSound(null, Vec3.atCenterOf(blockPos), resourceLocation, SoundSource.RECORDS, 3.0f, f, SoundEvent.legacySoundRange(3.0f));
         } else {
-            soundEvent = noteBlockInstrument.getSoundEvent();
+            SoundEvent soundEvent = noteBlockInstrument.getSoundEvent();
+            level.playSound(null, blockPos, soundEvent, SoundSource.RECORDS, 3.0f, f);
         }
-        level.playSound(null, blockPos, soundEvent, SoundSource.RECORDS, 3.0f, f);
         return true;
     }
 
     @Nullable
-    private SoundEvent getCustomSoundEvent(NoteBlockInstrument noteBlockInstrument, Level level, BlockPos blockPos) {
-        SkullBlockEntity skullBlockEntity;
-        ResourceLocation resourceLocation;
+    private ResourceLocation getCustomSoundId(Level level, BlockPos blockPos) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos.above());
-        if (blockEntity instanceof SkullBlockEntity && (resourceLocation = (skullBlockEntity = (SkullBlockEntity)blockEntity).getNoteBlockSound()) != null) {
-            return new SoundEvent(resourceLocation);
+        if (blockEntity instanceof SkullBlockEntity) {
+            SkullBlockEntity skullBlockEntity = (SkullBlockEntity)blockEntity;
+            return skullBlockEntity.getNoteBlockSound();
         }
         return null;
     }

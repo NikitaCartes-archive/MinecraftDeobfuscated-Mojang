@@ -4,8 +4,8 @@
 package net.minecraft.world.entity.animal.horse;
 
 import com.mojang.serialization.Codec;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 
 public enum Variant implements StringRepresentable
@@ -19,7 +19,7 @@ public enum Variant implements StringRepresentable
     DARK_BROWN(6, "dark_brown");
 
     public static final Codec<Variant> CODEC;
-    private static final Variant[] BY_ID;
+    private static final IntFunction<Variant> BY_ID;
     private final int id;
     private final String name;
 
@@ -33,7 +33,7 @@ public enum Variant implements StringRepresentable
     }
 
     public static Variant byId(int i) {
-        return BY_ID[i % BY_ID.length];
+        return BY_ID.apply(i);
     }
 
     @Override
@@ -43,7 +43,7 @@ public enum Variant implements StringRepresentable
 
     static {
         CODEC = StringRepresentable.fromEnum(Variant::values);
-        BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+        BY_ID = ByIdMap.continuous(Variant::getId, Variant.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     }
 }
 

@@ -89,6 +89,7 @@ public final class ItemTags {
     public static final TagKey<Item> CLUSTER_MAX_HARVESTABLES = ItemTags.bind("cluster_max_harvestables");
     public static final TagKey<Item> COMPASSES = ItemTags.bind("compasses");
     public static final TagKey<Item> HANGING_SIGNS = ItemTags.bind("hanging_signs");
+    public static final TagKey<Item> CREEPER_IGNITERS = ItemTags.bind("creeper_igniters");
 
     private ItemTags() {
     }

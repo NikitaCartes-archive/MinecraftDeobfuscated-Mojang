@@ -238,7 +238,7 @@ public class Climate {
     }
 
     protected static final class RTree<T> {
-        private static final int CHILDREN_PER_NODE = 10;
+        private static final int CHILDREN_PER_NODE = 6;
         private final Node<T> root;
         private final ThreadLocal<Leaf<T>> lastResult = new ThreadLocal();
 
@@ -265,7 +265,7 @@ public class Climate {
             if (list.size() == 1) {
                 return list.get(0);
             }
-            if (list.size() <= 10) {
+            if (list.size() <= 6) {
                 list.sort(Comparator.comparingLong(node -> {
                     long l = 0L;
                     for (int j = 0; j < i; ++j) {
@@ -314,7 +314,7 @@ public class Climate {
         private static <T> List<SubTree<T>> bucketize(List<? extends Node<T>> list) {
             ArrayList<SubTree<T>> list2 = Lists.newArrayList();
             ArrayList<Node<T>> list3 = Lists.newArrayList();
-            int i = (int)Math.pow(10.0, Math.floor(Math.log((double)list.size() - 0.01) / Math.log(10.0)));
+            int i = (int)Math.pow(6.0, Math.floor(Math.log((double)list.size() - 0.01) / Math.log(6.0)));
             for (Node<T> node : list) {
                 list3.add(node);
                 if (list3.size() < i) continue;

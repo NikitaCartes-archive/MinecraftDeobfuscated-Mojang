@@ -45,15 +45,13 @@ extends NodeEvaluator {
     }
 
     @Override
-    @Nullable
     public Node getStart() {
-        return super.getNode(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5), Mth.floor(this.mob.getBoundingBox().minZ));
+        return this.getNode(Mth.floor(this.mob.getBoundingBox().minX), Mth.floor(this.mob.getBoundingBox().minY + 0.5), Mth.floor(this.mob.getBoundingBox().minZ));
     }
 
     @Override
-    @Nullable
     public Target getGoal(double d, double e, double f) {
-        return this.getTargetFromNode(super.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
+        return this.getTargetFromNode(this.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
     }
 
     @Override
@@ -61,14 +59,14 @@ extends NodeEvaluator {
         int i = 0;
         EnumMap<Direction, Node> map = Maps.newEnumMap(Direction.class);
         for (Direction direction : Direction.values()) {
-            Node node2 = this.getNode(node.x + direction.getStepX(), node.y + direction.getStepY(), node.z + direction.getStepZ());
+            Node node2 = this.findAcceptedNode(node.x + direction.getStepX(), node.y + direction.getStepY(), node.z + direction.getStepZ());
             map.put(direction, node2);
             if (!this.isNodeValid(node2)) continue;
             nodes[i++] = node2;
         }
         for (Direction direction2 : Direction.Plane.HORIZONTAL) {
             Direction direction3 = direction2.getClockWise();
-            Node node3 = this.getNode(node.x + direction2.getStepX() + direction3.getStepX(), node.y, node.z + direction2.getStepZ() + direction3.getStepZ());
+            Node node3 = this.findAcceptedNode(node.x + direction2.getStepX() + direction3.getStepX(), node.y, node.z + direction2.getStepZ() + direction3.getStepZ());
             if (!this.isDiagonalNodeValid(node3, (Node)map.get(direction2), (Node)map.get(direction3))) continue;
             nodes[i++] = node3;
         }
@@ -83,13 +81,13 @@ extends NodeEvaluator {
         return this.isNodeValid(node) && node2 != null && node2.costMalus >= 0.0f && node3 != null && node3.costMalus >= 0.0f;
     }
 
-    @Override
     @Nullable
-    protected Node getNode(int i, int j, int k) {
+    protected Node findAcceptedNode(int i, int j, int k) {
         float f;
         Node node = null;
         BlockPathTypes blockPathTypes = this.getCachedBlockType(i, j, k);
-        if ((this.allowBreaching && blockPathTypes == BlockPathTypes.BREACH || blockPathTypes == BlockPathTypes.WATER) && (f = this.mob.getPathfindingMalus(blockPathTypes)) >= 0.0f && (node = super.getNode(i, j, k)) != null) {
+        if ((this.allowBreaching && blockPathTypes == BlockPathTypes.BREACH || blockPathTypes == BlockPathTypes.WATER) && (f = this.mob.getPathfindingMalus(blockPathTypes)) >= 0.0f) {
+            node = this.getNode(i, j, k);
             node.type = blockPathTypes;
             node.costMalus = Math.max(node.costMalus, f);
             if (this.level.getFluidState(new BlockPos(i, j, k)).isEmpty()) {

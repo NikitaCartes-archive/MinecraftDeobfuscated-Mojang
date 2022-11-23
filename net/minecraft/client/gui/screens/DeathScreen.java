@@ -4,11 +4,13 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
@@ -29,6 +31,8 @@ extends Screen {
     private final boolean hardcore;
     private Component deathScore;
     private final List<Button> exitButtons = Lists.newArrayList();
+    @Nullable
+    private Button exitToTitleButton;
 
     public DeathScreen(@Nullable Component component, boolean bl) {
         super(Component.translatable(bl ? "deathScreen.title.hardcore" : "deathScreen.title"));
@@ -45,15 +49,8 @@ extends Screen {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);
         }).bounds(this.width / 2 - 100, this.height / 4 + 72, 200, 20).build()));
-        this.exitButtons.add(this.addRenderableWidget(Button.builder(Component.translatable("deathScreen.titleScreen"), button -> {
-            if (this.hardcore) {
-                this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::exitToTitleScreen, true);
-                return;
-            }
-            ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, Component.translatable("deathScreen.quit.confirm"), CommonComponents.EMPTY, Component.translatable("deathScreen.titleScreen"), Component.translatable("deathScreen.respawn"));
-            this.minecraft.setScreen(confirmScreen);
-            confirmScreen.setDelay(20);
-        }).bounds(this.width / 2 - 100, this.height / 4 + 96, 200, 20).build()));
+        this.exitToTitleButton = this.addRenderableWidget(Button.builder(Component.translatable("deathScreen.titleScreen"), button -> this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::handleExitToTitleScreen, true)).bounds(this.width / 2 - 100, this.height / 4 + 96, 200, 20).build());
+        this.exitButtons.add(this.exitToTitleButton);
         for (Button button2 : this.exitButtons) {
             button2.active = false;
         }
@@ -65,13 +62,21 @@ extends Screen {
         return false;
     }
 
-    private void confirmResult(boolean bl) {
-        if (bl) {
-            this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::exitToTitleScreen, true);
-        } else {
-            this.minecraft.player.respawn();
-            this.minecraft.setScreen(null);
+    private void handleExitToTitleScreen() {
+        if (this.hardcore) {
+            this.exitToTitleScreen();
+            return;
         }
+        ConfirmScreen confirmScreen = new ConfirmScreen(bl -> {
+            if (bl) {
+                this.exitToTitleScreen();
+            } else {
+                this.minecraft.player.respawn();
+                this.minecraft.setScreen(null);
+            }
+        }, Component.translatable("deathScreen.quit.confirm"), CommonComponents.EMPTY, Component.translatable("deathScreen.titleScreen"), Component.translatable("deathScreen.respawn"));
+        this.minecraft.setScreen(confirmScreen);
+        confirmScreen.setDelay(20);
     }
 
     private void exitToTitleScreen() {
@@ -98,6 +103,11 @@ extends Screen {
             this.renderComponentHoverEffect(poseStack, style, i, j);
         }
         super.render(poseStack, i, j, f);
+        if (this.exitToTitleButton != null && this.minecraft.getReportingContext().hasDraftReport()) {
+            RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            this.blit(poseStack, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 182, 24, 15, 15);
+        }
     }
 
     @Nullable

@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.animal;
 
 import com.mojang.serialization.Codec;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.Objects;
 import java.util.function.IntFunction;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -22,6 +20,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -611,15 +610,11 @@ implements VariantHolder<Variant> {
         }
 
         public static Variant byId(int i) {
-            return Objects.requireNonNullElse(BY_ID.apply(i), BROWN);
+            return BY_ID.apply(i);
         }
 
         static {
-            BY_ID = Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
-                for (Variant variant : Variant.values()) {
-                    int2ObjectOpenHashMap.put(variant.id, variant);
-                }
-            });
+            BY_ID = ByIdMap.sparse(Variant::id, Variant.values(), BROWN);
             CODEC = StringRepresentable.fromEnum(Variant::values);
         }
     }

@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.entity.animal.horse;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
+import net.minecraft.util.ByIdMap;
 
 public enum Markings {
     NONE(0),
@@ -13,7 +13,7 @@ public enum Markings {
     WHITE_DOTS(3),
     BLACK_DOTS(4);
 
-    private static final Markings[] BY_ID;
+    private static final IntFunction<Markings> BY_ID;
     private final int id;
 
     private Markings(int j) {
@@ -25,11 +25,11 @@ public enum Markings {
     }
 
     public static Markings byId(int i) {
-        return BY_ID[i % BY_ID.length];
+        return BY_ID.apply(i);
     }
 
     static {
-        BY_ID = (Markings[])Arrays.stream(Markings.values()).sorted(Comparator.comparingInt(Markings::getId)).toArray(Markings[]::new);
+        BY_ID = ByIdMap.continuous(Markings::getId, Markings.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     }
 }
 

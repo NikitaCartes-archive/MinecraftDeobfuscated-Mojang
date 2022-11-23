@@ -5,14 +5,13 @@ package net.minecraft.world.entity.animal.axolotl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntFunction;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -25,6 +24,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
@@ -69,14 +69,12 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-import org.slf4j.Logger;
 
 public class Axolotl
 extends Animal
 implements LerpingModel,
 VariantHolder<Variant>,
 Bucketable {
-    private static final Logger LOGGER = LogUtils.getLogger();
     public static final int TOTAL_PLAYDEAD_TIME = 200;
     protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Axolotl>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.AXOLOTL_ATTACKABLES, SensorType.AXOLOTL_TEMPTATIONS);
     protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT, new MemoryModuleType[]{MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.PLAY_DEAD_TICKS, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.TEMPTING_PLAYER, MemoryModuleType.TEMPTATION_COOLDOWN_TICKS, MemoryModuleType.IS_TEMPTED, MemoryModuleType.HAS_HUNTING_COOLDOWN, MemoryModuleType.IS_PANICKING});
@@ -128,7 +126,7 @@ Bucketable {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.setVariant(Variant.BY_ID[compoundTag.getInt(VARIANT_TAG)]);
+        this.setVariant(Variant.byId(compoundTag.getInt(VARIANT_TAG)));
         this.setFromBucket(compoundTag.getBoolean("FromBucket"));
     }
 
@@ -194,7 +192,7 @@ Bucketable {
 
     @Override
     public Variant getVariant() {
-        return Variant.BY_ID[this.entityData.get(DATA_VARIANT)];
+        return Variant.byId(this.entityData.get(DATA_VARIANT));
     }
 
     @Override
@@ -348,12 +346,7 @@ Bucketable {
     @Override
     public void loadFromBucketTag(CompoundTag compoundTag) {
         Bucketable.loadDefaultDataFromBucketTag(this, compoundTag);
-        int i = compoundTag.getInt(VARIANT_TAG);
-        if (i >= 0 && i < Variant.BY_ID.length) {
-            this.setVariant(Variant.BY_ID[i]);
-        } else {
-            LOGGER.error("Invalid variant: {}", (Object)i);
-        }
+        this.setVariant(Variant.byId(compoundTag.getInt(VARIANT_TAG)));
         if (compoundTag.contains("Age")) {
             this.setAge(compoundTag.getInt("Age"));
         }
@@ -525,7 +518,7 @@ Bucketable {
         CYAN(3, "cyan", true),
         BLUE(4, "blue", false);
 
-        public static final Variant[] BY_ID;
+        private static final IntFunction<Variant> BY_ID;
         public static final Codec<Variant> CODEC;
         private final int id;
         private final String name;
@@ -550,6 +543,10 @@ Bucketable {
             return this.name;
         }
 
+        public static Variant byId(int i) {
+            return BY_ID.apply(i);
+        }
+
         public static Variant getCommonSpawnVariant(RandomSource randomSource) {
             return Variant.getSpawnVariant(randomSource, true);
         }
@@ -559,12 +556,12 @@ Bucketable {
         }
 
         private static Variant getSpawnVariant(RandomSource randomSource, boolean bl) {
-            Variant[] variants = (Variant[])Arrays.stream(BY_ID).filter(variant -> variant.common == bl).toArray(Variant[]::new);
+            Variant[] variants = (Variant[])Arrays.stream(Variant.values()).filter(variant -> variant.common == bl).toArray(Variant[]::new);
             return Util.getRandom(variants, randomSource);
         }
 
         static {
-            BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+            BY_ID = ByIdMap.continuous(Variant::getId, Variant.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
             CODEC = StringRepresentable.fromEnum(Variant::values);
         }
     }

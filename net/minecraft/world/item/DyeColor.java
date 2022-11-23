@@ -5,8 +5,9 @@ package net.minecraft.world.item;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MaterialColor;
 import org.jetbrains.annotations.Contract;
@@ -31,7 +32,7 @@ public enum DyeColor implements StringRepresentable
     RED(14, "red", 11546150, MaterialColor.COLOR_RED, 11743532, 0xFF0000),
     BLACK(15, "black", 0x1D1D21, MaterialColor.COLOR_BLACK, 0x1E1B1B, 0);
 
-    private static final DyeColor[] BY_ID;
+    private static final IntFunction<DyeColor> BY_ID;
     private static final Int2ObjectOpenHashMap<DyeColor> BY_FIREWORK_COLOR;
     public static final StringRepresentable.EnumCodec<DyeColor> CODEC;
     private final int id;
@@ -78,10 +79,7 @@ public enum DyeColor implements StringRepresentable
     }
 
     public static DyeColor byId(int i) {
-        if (i < 0 || i >= BY_ID.length) {
-            i = 0;
-        }
-        return BY_ID[i];
+        return BY_ID.apply(i);
     }
 
     @Nullable
@@ -106,7 +104,7 @@ public enum DyeColor implements StringRepresentable
     }
 
     static {
-        BY_ID = (DyeColor[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).toArray(DyeColor[]::new);
+        BY_ID = ByIdMap.continuous(DyeColor::getId, DyeColor.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
         BY_FIREWORK_COLOR = new Int2ObjectOpenHashMap<DyeColor>(Arrays.stream(DyeColor.values()).collect(Collectors.toMap(dyeColor -> dyeColor.fireworkColor, dyeColor -> dyeColor)));
         CODEC = StringRepresentable.fromEnum(DyeColor::values);
     }

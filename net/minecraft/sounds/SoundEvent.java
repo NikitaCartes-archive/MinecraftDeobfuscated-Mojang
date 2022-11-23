@@ -3,21 +3,20 @@
  */
 package net.minecraft.sounds;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 
 public class SoundEvent {
-    public static final Codec<SoundEvent> CODEC = ResourceLocation.CODEC.xmap(SoundEvent::new, soundEvent -> soundEvent.location);
+    private static final float DEFAULT_RANGE = 16.0f;
     private final ResourceLocation location;
     private final float range;
     private final boolean newSystem;
 
-    public SoundEvent(ResourceLocation resourceLocation) {
-        this(resourceLocation, 16.0f, false);
+    static SoundEvent createVariableRangeEvent(ResourceLocation resourceLocation) {
+        return new SoundEvent(resourceLocation, 16.0f, false);
     }
 
-    public SoundEvent(ResourceLocation resourceLocation, float f) {
-        this(resourceLocation, f, true);
+    static SoundEvent createFixedRangeEvent(ResourceLocation resourceLocation, float f) {
+        return new SoundEvent(resourceLocation, f, true);
     }
 
     private SoundEvent(ResourceLocation resourceLocation, float f, boolean bl) {
@@ -34,6 +33,10 @@ public class SoundEvent {
         if (this.newSystem) {
             return this.range;
         }
+        return SoundEvent.legacySoundRange(f);
+    }
+
+    public static float legacySoundRange(float f) {
         return f > 1.0f ? 16.0f * f : 16.0f;
     }
 }

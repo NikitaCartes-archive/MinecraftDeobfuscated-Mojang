@@ -6,7 +6,7 @@ package net.minecraft.world.entity.vehicle;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.IntFunction;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,6 +19,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
@@ -814,6 +815,7 @@ implements VariantHolder<Type> {
         private final String name;
         private final Block planks;
         public static final StringRepresentable.EnumCodec<Type> CODEC;
+        private static final IntFunction<Type> BY_ID;
 
         private Type(Block block, String string2) {
             this.name = string2;
@@ -838,19 +840,16 @@ implements VariantHolder<Type> {
         }
 
         public static Type byId(int i) {
-            Type[] types = Type.values();
-            if (i < 0 || i >= types.length) {
-                i = 0;
-            }
-            return types[i];
+            return BY_ID.apply(i);
         }
 
         public static Type byName(String string) {
-            return Objects.requireNonNullElse(CODEC.byName(string), OAK);
+            return CODEC.byName(string, OAK);
         }
 
         static {
             CODEC = StringRepresentable.fromEnum(Type::values);
+            BY_ID = ByIdMap.continuous(Enum::ordinal, Type.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
         }
     }
 

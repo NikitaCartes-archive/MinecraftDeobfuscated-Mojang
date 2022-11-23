@@ -81,6 +81,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.RiderShieldingMount;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -1270,6 +1271,15 @@ extends Entity {
 
     public boolean wasExperienceConsumed() {
         return this.skipDropExperience;
+    }
+
+    protected Vec3 getMeleeAttackReferencePosition() {
+        Entity entity = this.getVehicle();
+        if (entity instanceof RiderShieldingMount) {
+            RiderShieldingMount riderShieldingMount = (RiderShieldingMount)((Object)entity);
+            return this.position().add(0.0, riderShieldingMount.getRiderShieldingHeight(), 0.0);
+        }
+        return this.position();
     }
 
     public Fallsounds getFallSounds() {

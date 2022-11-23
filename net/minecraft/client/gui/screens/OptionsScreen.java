@@ -107,7 +107,7 @@ extends Screen {
     }
 
     public static CycleButton<Difficulty> createDifficultyButton(int i, int j, String string, Minecraft minecraft) {
-        return CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(minecraft.level.getDifficulty()).create(i, j, 150, 20, Component.translatable(string), (cycleButton, difficulty) -> minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)((Object)difficulty))));
+        return CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(minecraft.level.getDifficulty()).create(i, j, 150, 20, Component.translatable(string), (cycleButton, difficulty) -> minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)difficulty)));
     }
 
     private void updatePackList(PackRepository packRepository) {

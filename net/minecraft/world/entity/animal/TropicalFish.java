@@ -4,9 +4,7 @@
 package net.minecraft.world.entity.animal;
 
 import com.mojang.serialization.Codec;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.IntFunction;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -19,6 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
@@ -222,7 +221,7 @@ implements VariantHolder<Pattern> {
         }
 
         public static Pattern byId(int i) {
-            return Objects.requireNonNullElse(BY_ID.apply(i), KOB);
+            return BY_ID.apply(i);
         }
 
         public Base base() {
@@ -244,11 +243,7 @@ implements VariantHolder<Pattern> {
 
         static {
             CODEC = StringRepresentable.fromEnum(Pattern::values);
-            BY_ID = Util.make(new Int2ObjectOpenHashMap(), int2ObjectOpenHashMap -> {
-                for (Pattern pattern : Pattern.values()) {
-                    int2ObjectOpenHashMap.put(pattern.packedId, pattern);
-                }
-            });
+            BY_ID = ByIdMap.sparse(Pattern::getPackedId, Pattern.values(), KOB);
         }
     }
 

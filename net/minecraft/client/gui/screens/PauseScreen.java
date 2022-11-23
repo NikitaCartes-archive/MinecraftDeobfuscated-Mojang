@@ -27,6 +27,7 @@ import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class PauseScreen
@@ -53,6 +54,7 @@ extends Screen {
     private static final Component GAME = Component.translatable("menu.game");
     private static final Component PAUSED = Component.translatable("menu.paused");
     private final boolean showPauseMenu;
+    @Nullable
     private Button disconnectButton;
 
     public PauseScreen(boolean bl) {
@@ -126,7 +128,7 @@ extends Screen {
             this.renderBackground(poseStack);
         }
         super.render(poseStack, i, j, f);
-        if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport()) {
+        if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
             RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             this.blit(poseStack, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15);

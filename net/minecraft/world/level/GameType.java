@@ -3,18 +3,24 @@
  */
 package net.minecraft.world.level;
 
+import java.util.function.IntFunction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ByIdMap;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.player.Abilities;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-public enum GameType {
+public enum GameType implements StringRepresentable
+{
     SURVIVAL(0, "survival"),
     CREATIVE(1, "creative"),
     ADVENTURE(2, "adventure"),
     SPECTATOR(3, "spectator");
 
     public static final GameType DEFAULT_MODE;
+    public static final StringRepresentable.EnumCodec<GameType> CODEC;
+    private static final IntFunction<GameType> BY_ID;
     private static final int NOT_SET = -1;
     private final int id;
     private final String name;
@@ -33,6 +39,11 @@ public enum GameType {
     }
 
     public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getSerializedName() {
         return this.name;
     }
 
@@ -76,15 +87,7 @@ public enum GameType {
     }
 
     public static GameType byId(int i) {
-        return GameType.byId(i, DEFAULT_MODE);
-    }
-
-    public static GameType byId(int i, GameType gameType) {
-        for (GameType gameType2 : GameType.values()) {
-            if (gameType2.id != i) continue;
-            return gameType2;
-        }
-        return gameType;
+        return BY_ID.apply(i);
     }
 
     public static GameType byName(String string) {
@@ -94,11 +97,8 @@ public enum GameType {
     @Nullable
     @Contract(value="_,!null->!null;_,null->_")
     public static GameType byName(String string, @Nullable GameType gameType) {
-        for (GameType gameType2 : GameType.values()) {
-            if (!gameType2.name.equals(string)) continue;
-            return gameType2;
-        }
-        return gameType;
+        GameType gameType2 = CODEC.byName(string);
+        return gameType2 != null ? gameType2 : gameType;
     }
 
     public static int getNullableId(@Nullable GameType gameType) {
@@ -115,6 +115,8 @@ public enum GameType {
 
     static {
         DEFAULT_MODE = SURVIVAL;
+        CODEC = StringRepresentable.fromEnum(GameType::values);
+        BY_ID = ByIdMap.continuous(GameType::getId, GameType.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
     }
 }
 

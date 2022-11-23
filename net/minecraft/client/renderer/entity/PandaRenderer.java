@@ -39,7 +39,7 @@ extends MobRenderer<Panda, PandaModel<Panda>> {
 
     @Override
     public ResourceLocation getTextureLocation(Panda panda) {
-        return TEXTURES.getOrDefault((Object)panda.getVariant(), TEXTURES.get((Object)Panda.Gene.NORMAL));
+        return TEXTURES.getOrDefault(panda.getVariant(), TEXTURES.get(Panda.Gene.NORMAL));
     }
 
     @Override

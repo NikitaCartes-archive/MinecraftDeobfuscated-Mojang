@@ -43,7 +43,6 @@ extends WalkNodeEvaluator {
     }
 
     @Override
-    @Nullable
     public Node getStart() {
         if (!this.mob.isInWater()) {
             return super.getStart();
@@ -52,7 +51,6 @@ extends WalkNodeEvaluator {
     }
 
     @Override
-    @Nullable
     public Target getGoal(double d, double e, double f) {
         return this.getTargetFromNode(this.getNode(Mth.floor(d), Mth.floor(e + 0.5), Mth.floor(f)));
     }

@@ -4,8 +4,7 @@
 package net.minecraft.world.entity.animal.horse;
 
 import com.mojang.serialization.Codec;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -508,7 +508,7 @@ RangedAttackMob {
         GRAY(3, "gray");
 
         public static final Codec<Variant> CODEC;
-        private static final Variant[] BY_ID;
+        private static final IntFunction<Variant> BY_ID;
         final int id;
         private final String name;
 
@@ -522,7 +522,7 @@ RangedAttackMob {
         }
 
         public static Variant byId(int i) {
-            return BY_ID[Mth.clamp(i, 0, BY_ID.length - 1)];
+            return BY_ID.apply(i);
         }
 
         @Override
@@ -532,7 +532,7 @@ RangedAttackMob {
 
         static {
             CODEC = StringRepresentable.fromEnum(Variant::values);
-            BY_ID = (Variant[])Arrays.stream(Variant.values()).sorted(Comparator.comparingInt(Variant::getId)).toArray(Variant[]::new);
+            BY_ID = ByIdMap.continuous(Variant::getId, Variant.values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
         }
     }
 

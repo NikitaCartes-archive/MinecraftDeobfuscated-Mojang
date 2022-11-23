@@ -3,18 +3,21 @@
  */
 package net.minecraft.world;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ByIdMap;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
-public enum Difficulty {
+public enum Difficulty implements StringRepresentable
+{
     PEACEFUL(0, "peaceful"),
     EASY(1, "easy"),
     NORMAL(2, "normal"),
     HARD(3, "hard");
 
-    private static final Difficulty[] BY_ID;
+    public static final StringRepresentable.EnumCodec<Difficulty> CODEC;
+    private static final IntFunction<Difficulty> BY_ID;
     private final int id;
     private final String key;
 
@@ -32,24 +35,26 @@ public enum Difficulty {
     }
 
     public static Difficulty byId(int i) {
-        return BY_ID[i % BY_ID.length];
+        return BY_ID.apply(i);
     }
 
     @Nullable
     public static Difficulty byName(String string) {
-        for (Difficulty difficulty : Difficulty.values()) {
-            if (!difficulty.key.equals(string)) continue;
-            return difficulty;
-        }
-        return null;
+        return CODEC.byName(string);
     }
 
     public String getKey() {
         return this.key;
     }
 
+    @Override
+    public String getSerializedName() {
+        return this.key;
+    }
+
     static {
-        BY_ID = (Difficulty[])Arrays.stream(Difficulty.values()).sorted(Comparator.comparingInt(Difficulty::getId)).toArray(Difficulty[]::new);
+        CODEC = StringRepresentable.fromEnum(Difficulty::values);
+        BY_ID = ByIdMap.continuous(Difficulty::getId, Difficulty.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     }
 }
 

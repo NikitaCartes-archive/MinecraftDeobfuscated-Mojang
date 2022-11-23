@@ -395,7 +395,7 @@ extends Monster {
             if (zombieVillager != null) {
                 zombieVillager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false, true), null);
                 zombieVillager.setVillagerData(villager.getVillagerData());
-                zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
+                zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
                 zombieVillager.setTradeOffers(villager.getOffers().createTag());
                 zombieVillager.setVillagerXp(villager.getVillagerXp());
                 if (!this.isSilent()) {

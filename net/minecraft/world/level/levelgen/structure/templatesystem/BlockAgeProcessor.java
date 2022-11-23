@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -104,7 +105,7 @@ extends StructureProcessor {
     }
 
     private static BlockState getRandomFacingStairs(RandomSource randomSource, Block block) {
-        return (BlockState)((BlockState)block.defaultBlockState().setValue(StairBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(randomSource))).setValue(StairBlock.HALF, Half.values()[randomSource.nextInt(Half.values().length)]);
+        return (BlockState)((BlockState)block.defaultBlockState().setValue(StairBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(randomSource))).setValue(StairBlock.HALF, Util.getRandom(Half.values(), randomSource));
     }
 
     private BlockState getRandomBlock(RandomSource randomSource, BlockState[] blockStates, BlockState[] blockStates2) {

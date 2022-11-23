@@ -93,7 +93,7 @@ public class StructureCheck {
     }
 
     private boolean canCreateStructure(ChunkPos chunkPos, Structure structure) {
-        return structure.findGenerationPoint(new Structure.GenerationContext(this.registryAccess, this.chunkGenerator, this.biomeSource, this.randomState, this.structureTemplateManager, this.seed, chunkPos, this.heightAccessor, structure.biomes()::contains)).isPresent();
+        return structure.findValidGenerationPoint(new Structure.GenerationContext(this.registryAccess, this.chunkGenerator, this.biomeSource, this.randomState, this.structureTemplateManager, this.seed, chunkPos, this.heightAccessor, structure.biomes()::contains)).isPresent();
     }
 
     @Nullable

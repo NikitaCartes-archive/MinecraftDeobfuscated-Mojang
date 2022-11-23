@@ -5,13 +5,11 @@ package net.minecraft.world.entity.animal;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -32,6 +30,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -1363,7 +1362,7 @@ implements VariantHolder<Type> {
         SNOW(1, "snow");
 
         public static final StringRepresentable.EnumCodec<Type> CODEC;
-        private static final Type[] BY_ID;
+        private static final IntFunction<Type> BY_ID;
         private final int id;
         private final String name;
 
@@ -1382,14 +1381,11 @@ implements VariantHolder<Type> {
         }
 
         public static Type byName(String string) {
-            return Objects.requireNonNullElse(CODEC.byName(string), RED);
+            return CODEC.byName(string, RED);
         }
 
         public static Type byId(int i) {
-            if (i < 0 || i > BY_ID.length) {
-                i = 0;
-            }
-            return BY_ID[i];
+            return BY_ID.apply(i);
         }
 
         public static Type byBiome(Holder<Biome> holder) {
@@ -1398,7 +1394,7 @@ implements VariantHolder<Type> {
 
         static {
             CODEC = StringRepresentable.fromEnum(Type::values);
-            BY_ID = (Type[])Arrays.stream(Type.values()).sorted(Comparator.comparingInt(Type::getId)).toArray(Type[]::new);
+            BY_ID = ByIdMap.continuous(Type::getId, Type.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
         }
     }
 

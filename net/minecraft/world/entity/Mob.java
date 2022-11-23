@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.List;
@@ -1280,8 +1279,12 @@ extends LivingEntity {
         return this.getBbWidth() * 2.0f * (this.getBbWidth() * 2.0f) + livingEntity.getBbWidth();
     }
 
+    public double getPerceivedTargetDistanceSquareForMeleeAttack(LivingEntity livingEntity) {
+        return Math.max(this.distanceToSqr(livingEntity.getMeleeAttackReferencePosition()), this.distanceToSqr(livingEntity.position()));
+    }
+
     public boolean isWithinMeleeAttackRange(LivingEntity livingEntity) {
-        double d = this.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+        double d = this.getPerceivedTargetDistanceSquareForMeleeAttack(livingEntity);
         return d <= this.getMeleeAttackRangeSqr(livingEntity);
     }
 
@@ -1369,10 +1372,6 @@ extends LivingEntity {
             return null;
         }
         return new ItemStack(spawnEggItem);
-    }
-
-    public Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions() {
-        return ImmutableSet.of(new BlockPos(this.getBoundingBox().minX, (double)this.getBlockY(), this.getBoundingBox().minZ), new BlockPos(this.getBoundingBox().minX, (double)this.getBlockY(), this.getBoundingBox().maxZ), new BlockPos(this.getBoundingBox().maxX, (double)this.getBlockY(), this.getBoundingBox().minZ), new BlockPos(this.getBoundingBox().maxX, (double)this.getBlockY(), this.getBoundingBox().maxZ));
     }
 }
 

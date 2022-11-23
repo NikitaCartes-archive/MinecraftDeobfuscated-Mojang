@@ -5,15 +5,15 @@ package net.minecraft.world.item;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
+import java.util.function.IntFunction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -119,7 +119,7 @@ extends Item {
         CREEPER(3, "creeper"),
         BURST(4, "burst");
 
-        private static final Shape[] BY_ID;
+        private static final IntFunction<Shape> BY_ID;
         private final int id;
         private final String name;
 
@@ -137,14 +137,11 @@ extends Item {
         }
 
         public static Shape byId(int i) {
-            if (i < 0 || i >= BY_ID.length) {
-                return SMALL_BALL;
-            }
-            return BY_ID[i];
+            return BY_ID.apply(i);
         }
 
         static {
-            BY_ID = (Shape[])Arrays.stream(Shape.values()).sorted(Comparator.comparingInt(shape -> shape.id)).toArray(Shape[]::new);
+            BY_ID = ByIdMap.continuous(Shape::getId, Shape.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
         }
     }
 }

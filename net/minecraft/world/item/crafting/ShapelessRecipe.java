@@ -6,7 +6,6 @@ package net.minecraft.world.item.crafting;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import java.util.Objects;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -96,7 +95,7 @@ implements CraftingRecipe {
         @Override
         public ShapelessRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
             String string = GsonHelper.getAsString(jsonObject, "group", "");
-            CraftingBookCategory craftingBookCategory = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(jsonObject, "category", null)), CraftingBookCategory.MISC);
+            CraftingBookCategory craftingBookCategory = CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(jsonObject, "category", null), CraftingBookCategory.MISC);
             NonNullList<Ingredient> nonNullList = Serializer.itemsFromJson(GsonHelper.getAsJsonArray(jsonObject, "ingredients"));
             if (nonNullList.isEmpty()) {
                 throw new JsonParseException("No ingredients for shapeless recipe");

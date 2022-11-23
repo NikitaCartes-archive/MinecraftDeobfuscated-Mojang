@@ -9,7 +9,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
+import java.util.function.IntFunction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
@@ -74,6 +76,7 @@ extends Structure {
         MESA("mesa", Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE);
 
         public static final Codec<Type> CODEC;
+        private static final IntFunction<Type> BY_ID;
         private final String name;
         private final BlockState woodState;
         private final BlockState planksState;
@@ -91,10 +94,7 @@ extends Structure {
         }
 
         public static Type byId(int i) {
-            if (i < 0 || i >= Type.values().length) {
-                return NORMAL;
-            }
-            return Type.values()[i];
+            return BY_ID.apply(i);
         }
 
         public BlockState getWoodState() {
@@ -116,6 +116,7 @@ extends Structure {
 
         static {
             CODEC = StringRepresentable.fromEnum(Type::values);
+            BY_ID = ByIdMap.continuous(Enum::ordinal, Type.values(), ByIdMap.OutOfBoundsStrategy.ZERO);
         }
     }
 }

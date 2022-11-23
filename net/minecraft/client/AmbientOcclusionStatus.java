@@ -3,11 +3,10 @@
  */
 package net.minecraft.client;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.function.IntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.OptionEnum;
 
 @Environment(value=EnvType.CLIENT)
@@ -17,7 +16,7 @@ public enum AmbientOcclusionStatus implements OptionEnum
     MIN(1, "options.ao.min"),
     MAX(2, "options.ao.max");
 
-    private static final AmbientOcclusionStatus[] BY_ID;
+    private static final IntFunction<AmbientOcclusionStatus> BY_ID;
     private final int id;
     private final String key;
 
@@ -37,11 +36,11 @@ public enum AmbientOcclusionStatus implements OptionEnum
     }
 
     public static AmbientOcclusionStatus byId(int i) {
-        return BY_ID[Mth.positiveModulo(i, BY_ID.length)];
+        return BY_ID.apply(i);
     }
 
     static {
-        BY_ID = (AmbientOcclusionStatus[])Arrays.stream(AmbientOcclusionStatus.values()).sorted(Comparator.comparingInt(AmbientOcclusionStatus::getId)).toArray(AmbientOcclusionStatus[]::new);
+        BY_ID = ByIdMap.continuous(AmbientOcclusionStatus::getId, AmbientOcclusionStatus.values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     }
 }
 

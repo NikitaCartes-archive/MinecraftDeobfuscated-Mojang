@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.animal;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -273,7 +272,7 @@ VariantHolder<MushroomType> {
         }
 
         static MushroomType byType(String string) {
-            return Objects.requireNonNullElse(CODEC.byName(string), RED);
+            return CODEC.byName(string, RED);
         }
 
         static {
