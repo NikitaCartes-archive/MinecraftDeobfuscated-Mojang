@@ -67,7 +67,7 @@ extends Monster {
 
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-        return entityDimensions.height - 0.4375f;
+        return entityDimensions.height - 0.28125f;
     }
 
     @Override

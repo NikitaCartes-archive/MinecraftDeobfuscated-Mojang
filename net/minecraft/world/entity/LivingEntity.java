@@ -123,6 +123,7 @@ import net.minecraft.world.level.block.PowderSnowBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -343,13 +344,15 @@ extends Entity {
         }
         if (this.isAlive()) {
             BlockPos blockPos;
-            double e;
-            double d;
             boolean bl = this instanceof Player;
-            if (this.isInWall()) {
-                this.hurt(DamageSource.IN_WALL, 1.0f);
-            } else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox()) && (d = this.level.getWorldBorder().getDistanceToBorder(this) + this.level.getWorldBorder().getDamageSafeZone()) < 0.0 && (e = this.level.getWorldBorder().getDamagePerBlock()) > 0.0) {
-                this.hurt(DamageSource.IN_WALL, Math.max(1, Mth.floor(-d * e)));
+            if (!this.level.isClientSide) {
+                double e;
+                double d;
+                if (this.isInWall()) {
+                    this.hurt(DamageSource.IN_WALL, 1.0f);
+                } else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox()) && (d = this.level.getWorldBorder().getDistanceToBorder(this) + this.level.getWorldBorder().getDamageSafeZone()) < 0.0 && (e = this.level.getWorldBorder().getDamagePerBlock()) > 0.0) {
+                    this.hurt(DamageSource.IN_WALL, Math.max(1, Mth.floor(-d * e)));
+                }
             }
             if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
                 boolean bl2;
@@ -519,7 +522,7 @@ extends Entity {
 
     protected void tickDeath() {
         ++this.deathTime;
-        if (this.deathTime >= 20 && !this.level.isClientSide()) {
+        if (this.deathTime >= 20 && !this.level.isClientSide() && !this.isRemoved()) {
             this.level.broadcastEntityEvent(this, (byte)60);
             this.remove(Entity.RemovalReason.KILLED);
         }
@@ -2363,6 +2366,10 @@ extends Entity {
     }
 
     protected void pushEntities() {
+        if (this.level.isClientSide()) {
+            this.level.getEntities(EntityTypeTest.forClass(Player.class), this.getBoundingBox(), EntitySelector.pushableBy(this)).forEach(this::doPush);
+            return;
+        }
         List<Entity> list = this.level.getEntities(this, this.getBoundingBox(), EntitySelector.pushableBy(this));
         if (!list.isEmpty()) {
             int j;

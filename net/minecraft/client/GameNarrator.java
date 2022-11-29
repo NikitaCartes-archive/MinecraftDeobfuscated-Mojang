@@ -5,7 +5,6 @@ package net.minecraft.client;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.text2speech.Narrator;
-import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -28,11 +27,19 @@ public class GameNarrator {
         this.minecraft = minecraft;
     }
 
-    public void sayChatNow(Supplier<Component> supplier) {
+    public void sayChat(Component component) {
         if (this.getStatus().shouldNarrateChat()) {
-            String string = supplier.get().getString();
+            String string = component.getString();
             this.logNarratedMessage(string);
             this.narrator.say(string, false);
+        }
+    }
+
+    public void say(Component component) {
+        String string = component.getString();
+        if (this.getStatus().shouldNarrateSystem() && !string.isEmpty()) {
+            this.logNarratedMessage(string);
+            this.narrator.say(string, true);
         }
     }
 

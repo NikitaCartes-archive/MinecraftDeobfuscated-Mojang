@@ -113,6 +113,14 @@ IdMap<T> {
         return object;
     }
 
+    public static <T> Holder.Reference<T> registerForHolder(Registry<T> registry, ResourceKey<T> resourceKey, T object) {
+        return ((WritableRegistry)registry).register(resourceKey, object, Lifecycle.stable());
+    }
+
+    public static <T> Holder.Reference<T> registerForHolder(Registry<T> registry, ResourceLocation resourceLocation, T object) {
+        return Registry.registerForHolder(registry, ResourceKey.create(registry.key(), resourceLocation), object);
+    }
+
     public static <V, T extends V> T registerMapping(Registry<V> registry, int i, String string, T object) {
         ((WritableRegistry)registry).registerMapping(i, ResourceKey.create(registry.key(), new ResourceLocation(string)), object, Lifecycle.stable());
         return object;
@@ -125,6 +133,8 @@ IdMap<T> {
     public Optional<Holder.Reference<T>> getHolder(int var1);
 
     public Optional<Holder.Reference<T>> getHolder(ResourceKey<T> var1);
+
+    public Holder<T> wrapAsHolder(T var1);
 
     default public Holder.Reference<T> getHolderOrThrow(ResourceKey<T> resourceKey) {
         return this.getHolder(resourceKey).orElseThrow(() -> new IllegalStateException("Missing key in " + this.key() + ": " + resourceKey));

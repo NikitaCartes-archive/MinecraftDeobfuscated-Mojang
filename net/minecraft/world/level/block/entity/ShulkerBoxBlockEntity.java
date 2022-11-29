@@ -154,7 +154,7 @@ implements WorldlyContainer {
 
     @Override
     public void startOpen(Player player) {
-        if (!player.isSpectator()) {
+        if (!this.remove && !player.isSpectator()) {
             if (this.openCount < 0) {
                 this.openCount = 0;
             }
@@ -169,7 +169,7 @@ implements WorldlyContainer {
 
     @Override
     public void stopOpen(Player player) {
-        if (!player.isSpectator()) {
+        if (!this.remove && !player.isSpectator()) {
             --this.openCount;
             this.level.blockEvent(this.worldPosition, this.getBlockState().getBlock(), 1, this.openCount);
             if (this.openCount <= 0) {

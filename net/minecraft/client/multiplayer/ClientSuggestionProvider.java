@@ -86,8 +86,8 @@ implements SharedSuggestionProvider {
     }
 
     @Override
-    public Collection<ResourceLocation> getAvailableSoundEvents() {
-        return this.minecraft.getSoundManager().getAvailableSounds();
+    public Stream<ResourceLocation> getAvailableSounds() {
+        return this.minecraft.getSoundManager().getAvailableSounds().stream();
     }
 
     @Override

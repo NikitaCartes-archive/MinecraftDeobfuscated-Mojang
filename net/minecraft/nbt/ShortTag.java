@@ -73,6 +73,11 @@ extends NumericTag {
     }
 
     @Override
+    public int sizeInBits() {
+        return 80;
+    }
+
+    @Override
     public byte getId() {
         return 2;
     }

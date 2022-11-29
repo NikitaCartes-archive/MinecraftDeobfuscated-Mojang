@@ -66,6 +66,11 @@ implements Tag {
     }
 
     @Override
+    public int sizeInBits() {
+        return 64;
+    }
+
+    @Override
     public byte getId() {
         return 0;
     }

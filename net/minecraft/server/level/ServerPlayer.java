@@ -26,6 +26,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -980,6 +981,7 @@ extends Player {
         this.doCloseContainer();
     }
 
+    @Override
     public void doCloseContainer() {
         this.containerMenu.removed(this);
         this.inventoryMenu.transferState(this.containerMenu);
@@ -1439,7 +1441,7 @@ extends Player {
 
     @Override
     public void playNotifySound(SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-        this.connection.send(new ClientboundSoundPacket(soundEvent, soundSource, this.getX(), this.getY(), this.getZ(), f, g, this.random.nextLong()));
+        this.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), soundSource, this.getX(), this.getY(), this.getZ(), f, g, this.random.nextLong()));
     }
 
     @Override

@@ -163,7 +163,7 @@ public class ExecuteCommand {
             try {
                 CompoundTag compoundTag = dataAccessor.getData();
                 int j = bl ? i : (bl2 ? 1 : 0);
-                nbtPath.set((Tag)compoundTag, () -> (Tag)intFunction.apply(j));
+                nbtPath.set(compoundTag, (Tag)intFunction.apply(j));
                 dataAccessor.setData(compoundTag);
             } catch (CommandSyntaxException commandSyntaxException) {
                 // empty catch block

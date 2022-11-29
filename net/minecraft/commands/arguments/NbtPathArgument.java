@@ -35,7 +35,11 @@ public class NbtPathArgument
 implements ArgumentType<NbtPath> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
     public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.node.invalid"));
+    public static final SimpleCommandExceptionType ERROR_DATA_TOO_DEEP = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_deep"));
+    public static final SimpleCommandExceptionType ERROR_DATA_TOO_LARGE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_large"));
     public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(object -> Component.translatable("arguments.nbtpath.nothing_found", object));
+    static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.expected_list", object));
+    static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.invalid_index", object));
     private static final char INDEX_MATCH_START = '[';
     private static final char INDEX_MATCH_END = ']';
     private static final char KEY_MATCH_START = '{';
@@ -189,14 +193,100 @@ implements ArgumentType<NbtPath> {
             return list.stream().map(function).reduce(0, (integer, integer2) -> integer + integer2);
         }
 
-        public int set(Tag tag, Tag tag2) throws CommandSyntaxException {
-            return this.set(tag, tag2::copy);
+        public static boolean isTooDeep(Tag tag, int i) {
+            block4: {
+                block3: {
+                    if (i >= 512) {
+                        return true;
+                    }
+                    if (!(tag instanceof CompoundTag)) break block3;
+                    CompoundTag compoundTag = (CompoundTag)tag;
+                    for (String string : compoundTag.getAllKeys()) {
+                        Tag tag2 = compoundTag.get(string);
+                        if (tag2 == null || !NbtPath.isTooDeep(tag2, i + 1)) continue;
+                        return true;
+                    }
+                    break block4;
+                }
+                if (!(tag instanceof ListTag)) break block4;
+                ListTag listTag = (ListTag)tag;
+                for (Tag tag3 : listTag) {
+                    if (!NbtPath.isTooDeep(tag3, i + 1)) continue;
+                    return true;
+                }
+            }
+            return false;
         }
 
-        public int set(Tag tag2, Supplier<Tag> supplier) throws CommandSyntaxException {
-            List<Tag> list = this.getOrCreateParents(tag2);
+        public int set(Tag tag, Tag tag22) throws CommandSyntaxException {
+            if (NbtPath.isTooDeep(tag22, this.estimatePathDepth())) {
+                throw ERROR_DATA_TOO_DEEP.create();
+            }
+            Tag tag3 = tag22.copy();
+            List<Tag> list = this.getOrCreateParents(tag);
+            if (list.isEmpty()) {
+                return 0;
+            }
+            int i = list.size();
+            int j = tag.sizeInBits() + tag3.sizeInBits() * i;
+            if (j > 0x200000) {
+                throw ERROR_DATA_TOO_LARGE.create();
+            }
             Node node = this.nodes[this.nodes.length - 1];
-            return NbtPath.apply(list, tag -> node.setTag((Tag)tag, supplier));
+            MutableBoolean mutableBoolean = new MutableBoolean(false);
+            return NbtPath.apply(list, tag2 -> node.setTag((Tag)tag2, () -> {
+                if (mutableBoolean.isFalse()) {
+                    mutableBoolean.setTrue();
+                    return tag3;
+                }
+                return tag3.copy();
+            }));
+        }
+
+        private int estimatePathDepth() {
+            return this.nodes.length;
+        }
+
+        public int insert(int i, CompoundTag compoundTag, List<Tag> list) throws CommandSyntaxException {
+            int l;
+            ArrayList<Tag> list2 = new ArrayList<Tag>(list.size());
+            int j = 0;
+            for (Tag tag : list) {
+                Tag tag2 = tag.copy();
+                list2.add(tag2);
+                if (NbtPath.isTooDeep(tag2, this.estimatePathDepth())) {
+                    throw ERROR_DATA_TOO_DEEP.create();
+                }
+                j += tag2.sizeInBits();
+            }
+            List<Tag> collection = this.getOrCreate(compoundTag, ListTag::new);
+            int k = compoundTag.sizeInBits();
+            int m = k + (l = collection.size()) * j;
+            if (m > 0x200000) {
+                throw ERROR_DATA_TOO_LARGE.create();
+            }
+            int n = 0;
+            boolean bl = false;
+            for (Tag tag3 : collection) {
+                if (!(tag3 instanceof CollectionTag)) {
+                    throw ERROR_EXPECTED_LIST.create(tag3);
+                }
+                CollectionTag collectionTag = (CollectionTag)tag3;
+                boolean bl2 = false;
+                int o = i < 0 ? collectionTag.size() + i + 1 : i;
+                for (Tag tag4 : list2) {
+                    try {
+                        if (!collectionTag.addTag(o, bl ? tag4.copy() : tag4)) continue;
+                        ++o;
+                        bl2 = true;
+                    } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                        throw ERROR_INVALID_INDEX.create(o);
+                    }
+                }
+                bl = true;
+                n += bl2 ? 1 : 0;
+            }
+            return n;
         }
 
         public int remove(Tag tag) {

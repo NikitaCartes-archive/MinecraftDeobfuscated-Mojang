@@ -41,6 +41,12 @@ public interface Tag {
 
     public Tag copy();
 
+    public int sizeInBits();
+
+    default public int sizeInBytes() {
+        return this.sizeInBits() / 8;
+    }
+
     default public String getAsString() {
         return new StringTagVisitor().visit(this);
     }

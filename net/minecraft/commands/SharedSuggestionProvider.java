@@ -40,7 +40,7 @@ public interface SharedSuggestionProvider {
 
     public Collection<String> getAllTeams();
 
-    public Collection<ResourceLocation> getAvailableSoundEvents();
+    public Stream<ResourceLocation> getAvailableSounds();
 
     public Stream<ResourceLocation> getRecipeNames();
 

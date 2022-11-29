@@ -30,7 +30,7 @@ public class MusicManager {
     public void tick() {
         Music music = this.minecraft.getSituationalMusic();
         if (this.currentMusic != null) {
-            if (!music.getEvent().getLocation().equals(this.currentMusic.getLocation()) && music.replaceCurrentMusic()) {
+            if (!music.getEvent().value().getLocation().equals(this.currentMusic.getLocation()) && music.replaceCurrentMusic()) {
                 this.minecraft.getSoundManager().stop(this.currentMusic);
                 this.nextSongDelay = Mth.nextInt(this.random, 0, music.getMinDelay() / 2);
             }
@@ -46,7 +46,7 @@ public class MusicManager {
     }
 
     public void startPlaying(Music music) {
-        this.currentMusic = SimpleSoundInstance.forMusic(music.getEvent());
+        this.currentMusic = SimpleSoundInstance.forMusic(music.getEvent().value());
         if (this.currentMusic.getSound() != SoundManager.EMPTY_SOUND) {
             this.minecraft.getSoundManager().play(this.currentMusic);
         }
@@ -65,7 +65,7 @@ public class MusicManager {
         if (this.currentMusic == null) {
             return false;
         }
-        return music.getEvent().getLocation().equals(this.currentMusic.getLocation());
+        return music.getEvent().value().getLocation().equals(this.currentMusic.getLocation());
     }
 }
 

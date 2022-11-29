@@ -196,6 +196,8 @@ public class ChunkSerializer {
         }
         ListTag listTag5 = compoundTag.getList("Lights", 9);
         for (int q = 0; q < listTag5.size(); ++q) {
+            LevelChunkSection levelChunkSection2 = levelChunkSections[q];
+            if (levelChunkSection2 == null || levelChunkSection2.hasOnlyAir()) continue;
             ListTag listTag6 = listTag5.getList(q);
             for (int r = 0; r < listTag6.size(); ++r) {
                 protoChunk2.addLight(listTag6.getShort(r), q);

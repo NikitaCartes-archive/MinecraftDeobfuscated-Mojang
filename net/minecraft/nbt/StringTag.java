@@ -92,6 +92,11 @@ implements Tag {
     }
 
     @Override
+    public int sizeInBits() {
+        return 288 + 16 * this.data.length();
+    }
+
+    @Override
     public byte getId() {
         return 8;
     }

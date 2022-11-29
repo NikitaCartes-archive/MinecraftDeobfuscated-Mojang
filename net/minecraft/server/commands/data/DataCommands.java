@@ -27,7 +27,6 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
@@ -43,9 +42,7 @@ public class DataCommands {
     private static final DynamicCommandExceptionType ERROR_GET_NOT_NUMBER = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.get.invalid", object));
     private static final DynamicCommandExceptionType ERROR_GET_NON_EXISTENT = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.get.unknown", object));
     private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
-    private static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.expected_list", object));
     private static final DynamicCommandExceptionType ERROR_EXPECTED_OBJECT = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.expected_object", object));
-    private static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.invalid_index", object));
     public static final List<Function<String, DataProvider>> ALL_PROVIDERS = ImmutableList.of(EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER, StorageDataAccessor.PROVIDER);
     public static final List<DataProvider> TARGET_PROVIDERS = ALL_PROVIDERS.stream().map(function -> (DataProvider)function.apply("target")).collect(ImmutableList.toImmutableList());
     public static final List<DataProvider> SOURCE_PROVIDERS = ALL_PROVIDERS.stream().map(function -> (DataProvider)function.apply("source")).collect(ImmutableList.toImmutableList());
@@ -53,54 +50,37 @@ public class DataCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         LiteralArgumentBuilder literalArgumentBuilder = (LiteralArgumentBuilder)Commands.literal("data").requires(commandSourceStack -> commandSourceStack.hasPermission(2));
         for (DataProvider dataProvider : TARGET_PROVIDERS) {
-            ((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)literalArgumentBuilder.then(dataProvider.wrap(Commands.literal("merge"), argumentBuilder -> argumentBuilder.then(Commands.argument("nbt", CompoundTagArgument.compoundTag()).executes(commandContext -> DataCommands.mergeData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), CompoundTagArgument.getCompoundTag(commandContext, "nbt"))))))).then(dataProvider.wrap(Commands.literal("get"), argumentBuilder -> ((ArgumentBuilder)argumentBuilder.executes(commandContext -> DataCommands.getData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext)))).then(((RequiredArgumentBuilder)Commands.argument("path", NbtPathArgument.nbtPath()).executes(commandContext -> DataCommands.getData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path")))).then(Commands.argument("scale", DoubleArgumentType.doubleArg()).executes(commandContext -> DataCommands.getNumeric((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path"), DoubleArgumentType.getDouble(commandContext, "scale")))))))).then(dataProvider.wrap(Commands.literal("remove"), argumentBuilder -> argumentBuilder.then(Commands.argument("path", NbtPathArgument.nbtPath()).executes(commandContext -> DataCommands.removeData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path"))))))).then(DataCommands.decorateModification((argumentBuilder, dataManipulatorDecorator) -> ((ArgumentBuilder)((ArgumentBuilder)((ArgumentBuilder)((ArgumentBuilder)argumentBuilder.then(Commands.literal("insert").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("index", IntegerArgumentType.integer()).then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> {
-                int i = IntegerArgumentType.getInteger(commandContext, "index");
-                return DataCommands.insertAtIndex(i, compoundTag, nbtPath, list);
-            }))))).then(Commands.literal("prepend").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> DataCommands.insertAtIndex(0, compoundTag, nbtPath, list))))).then(Commands.literal("append").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> DataCommands.insertAtIndex(-1, compoundTag, nbtPath, list))))).then(Commands.literal("set").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.set((Tag)compoundTag, ((Tag)Iterables.getLast(list))::copy))))).then(Commands.literal("merge").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> {
+            ((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)literalArgumentBuilder.then(dataProvider.wrap(Commands.literal("merge"), argumentBuilder -> argumentBuilder.then(Commands.argument("nbt", CompoundTagArgument.compoundTag()).executes(commandContext -> DataCommands.mergeData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), CompoundTagArgument.getCompoundTag(commandContext, "nbt"))))))).then(dataProvider.wrap(Commands.literal("get"), argumentBuilder -> ((ArgumentBuilder)argumentBuilder.executes(commandContext -> DataCommands.getData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext)))).then(((RequiredArgumentBuilder)Commands.argument("path", NbtPathArgument.nbtPath()).executes(commandContext -> DataCommands.getData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path")))).then(Commands.argument("scale", DoubleArgumentType.doubleArg()).executes(commandContext -> DataCommands.getNumeric((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path"), DoubleArgumentType.getDouble(commandContext, "scale")))))))).then(dataProvider.wrap(Commands.literal("remove"), argumentBuilder -> argumentBuilder.then(Commands.argument("path", NbtPathArgument.nbtPath()).executes(commandContext -> DataCommands.removeData((CommandSourceStack)commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path"))))))).then(DataCommands.decorateModification((argumentBuilder, dataManipulatorDecorator) -> ((ArgumentBuilder)((ArgumentBuilder)((ArgumentBuilder)((ArgumentBuilder)argumentBuilder.then(Commands.literal("insert").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("index", IntegerArgumentType.integer()).then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.insert(IntegerArgumentType.getInteger(commandContext, "index"), compoundTag, list)))))).then(Commands.literal("prepend").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.insert(0, compoundTag, list))))).then(Commands.literal("append").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.insert(-1, compoundTag, list))))).then(Commands.literal("set").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.set(compoundTag, (Tag)Iterables.getLast(list)))))).then(Commands.literal("merge").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> {
+                CompoundTag compoundTag2 = new CompoundTag();
+                for (Tag tag : list) {
+                    if (NbtPathArgument.NbtPath.isTooDeep(tag, 0)) {
+                        throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+                    }
+                    if (tag instanceof CompoundTag) {
+                        CompoundTag compoundTag3 = (CompoundTag)tag;
+                        compoundTag2.merge(compoundTag3);
+                        continue;
+                    }
+                    throw ERROR_EXPECTED_OBJECT.create(tag);
+                }
                 List<Tag> collection = nbtPath.getOrCreate(compoundTag, CompoundTag::new);
+                if (compoundTag.sizeInBytes() + compoundTag2.sizeInBytes() * collection.size() > 0x200000) {
+                    throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
+                }
                 int i = 0;
-                for (Tag tag : collection) {
-                    if (!(tag instanceof CompoundTag)) {
-                        throw ERROR_EXPECTED_OBJECT.create(tag);
+                for (Tag tag2 : collection) {
+                    if (!(tag2 instanceof CompoundTag)) {
+                        throw ERROR_EXPECTED_OBJECT.create(tag2);
                     }
-                    CompoundTag compoundTag2 = (CompoundTag)tag;
-                    CompoundTag compoundTag3 = compoundTag2.copy();
-                    for (Tag tag2 : list) {
-                        if (!(tag2 instanceof CompoundTag)) {
-                            throw ERROR_EXPECTED_OBJECT.create(tag2);
-                        }
-                        compoundTag2.merge((CompoundTag)tag2);
-                    }
-                    i += compoundTag3.equals(compoundTag2) ? 0 : 1;
+                    CompoundTag compoundTag4 = (CompoundTag)tag2;
+                    CompoundTag compoundTag5 = compoundTag4.copy();
+                    compoundTag4.merge(compoundTag2);
+                    i += compoundTag5.equals(compoundTag4) ? 0 : 1;
                 }
                 return i;
             })))));
         }
         commandDispatcher.register(literalArgumentBuilder);
-    }
-
-    private static int insertAtIndex(int i, CompoundTag compoundTag, NbtPathArgument.NbtPath nbtPath, List<Tag> list) throws CommandSyntaxException {
-        List<Tag> collection = nbtPath.getOrCreate(compoundTag, ListTag::new);
-        int j = 0;
-        for (Tag tag : collection) {
-            if (!(tag instanceof CollectionTag)) {
-                throw ERROR_EXPECTED_LIST.create(tag);
-            }
-            boolean bl = false;
-            CollectionTag collectionTag = (CollectionTag)tag;
-            int k = i < 0 ? collectionTag.size() + i + 1 : i;
-            for (Tag tag2 : list) {
-                try {
-                    if (!collectionTag.addTag(k, tag2.copy())) continue;
-                    ++k;
-                    bl = true;
-                } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                    throw ERROR_INVALID_INDEX.create(k);
-                }
-            }
-            j += bl ? 1 : 0;
-        }
-        return j;
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> decorateModification(BiConsumer<ArgumentBuilder<CommandSourceStack, ?>, DataManipulatorDecorator> biConsumer) {
@@ -197,9 +177,15 @@ public class DataCommands {
     }
 
     private static int mergeData(CommandSourceStack commandSourceStack, DataAccessor dataAccessor, CompoundTag compoundTag) throws CommandSyntaxException {
-        CompoundTag compoundTag3;
         CompoundTag compoundTag2 = dataAccessor.getData();
-        if (compoundTag2.equals(compoundTag3 = compoundTag2.copy().merge(compoundTag))) {
+        if (NbtPathArgument.NbtPath.isTooDeep(compoundTag, 0)) {
+            throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+        }
+        if (compoundTag2.sizeInBytes() + compoundTag.sizeInBytes() > 0x200000) {
+            throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
+        }
+        CompoundTag compoundTag3 = compoundTag2.copy().merge(compoundTag);
+        if (compoundTag2.equals(compoundTag3)) {
             throw ERROR_MERGE_UNCHANGED.create();
         }
         dataAccessor.setData(compoundTag3);

@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.AbstractSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -23,6 +24,10 @@ extends AbstractSoundInstance {
 
     public static SimpleSoundInstance forUI(SoundEvent soundEvent, float f) {
         return SimpleSoundInstance.forUI(soundEvent, f, 0.25f);
+    }
+
+    public static SimpleSoundInstance forUI(Holder<SoundEvent> holder, float f) {
+        return SimpleSoundInstance.forUI(holder.value(), f);
     }
 
     public static SimpleSoundInstance forUI(SoundEvent soundEvent, float f, float g) {

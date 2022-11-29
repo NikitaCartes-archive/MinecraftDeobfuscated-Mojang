@@ -20,13 +20,10 @@ import org.jetbrains.annotations.Nullable;
 public class WeighedSoundEvents
 implements Weighted<Sound> {
     private final List<Weighted<Sound>> list = Lists.newArrayList();
-    private final RandomSource random = RandomSource.create();
-    private final ResourceLocation location;
     @Nullable
     private final Component subtitle;
 
     public WeighedSoundEvents(ResourceLocation resourceLocation, @Nullable String string) {
-        this.location = resourceLocation;
         this.subtitle = string == null ? null : Component.translatable(string);
     }
 
@@ -55,10 +52,6 @@ implements Weighted<Sound> {
 
     public void addSound(Weighted<Sound> weighted) {
         this.list.add(weighted);
-    }
-
-    public ResourceLocation getResourceLocation() {
-        return this.location;
     }
 
     @Nullable

@@ -20,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -345,7 +346,11 @@ AutoCloseable {
         this.playSound(player, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, soundEvent, soundSource, f, g);
     }
 
-    public abstract void playSeededSound(@Nullable Player var1, double var2, double var4, double var6, SoundEvent var8, SoundSource var9, float var10, float var11, long var12);
+    public abstract void playSeededSound(@Nullable Player var1, double var2, double var4, double var6, Holder<SoundEvent> var8, SoundSource var9, float var10, float var11, long var12);
+
+    public void playSeededSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, long l) {
+        this.playSeededSound(player, d, e, f, BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), soundSource, g, h, l);
+    }
 
     public abstract void playSeededSound(@Nullable Player var1, Entity var2, SoundEvent var3, SoundSource var4, float var5, float var6, long var7);
 
@@ -355,12 +360,6 @@ AutoCloseable {
 
     public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
         this.playSeededSound(player, entity, soundEvent, soundSource, f, g, this.threadSafeRandom.nextLong());
-    }
-
-    public abstract void playCustomSound(@Nullable Player var1, Vec3 var2, ResourceLocation var3, SoundSource var4, float var5, float var6, double var7, long var9);
-
-    public void playCustomSound(@Nullable Player player, Vec3 vec3, ResourceLocation resourceLocation, SoundSource soundSource, float f, float g, double d) {
-        this.playCustomSound(player, vec3, resourceLocation, soundSource, f, g, d, this.threadSafeRandom.nextLong());
     }
 
     public void playLocalSound(BlockPos blockPos, SoundEvent soundEvent, SoundSource soundSource, float f, float g, boolean bl) {

@@ -7,12 +7,11 @@ import java.time.Duration;
 import java.time.Instant;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.telemetry.events.TelemetryEventProducer;
+import net.minecraft.client.telemetry.TelemetryEventSender;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public abstract class AggregatedTelemetryEvent
-implements TelemetryEventProducer {
+public abstract class AggregatedTelemetryEvent {
     private static final int SAMPLE_INTERVAL_MS = 60000;
     private static final int SAMPLES_PER_EVENT = 10;
     private int sampleCount;
@@ -26,14 +25,14 @@ implements TelemetryEventProducer {
         this.sampleCount = 0;
     }
 
-    public void tick() {
+    public void tick(TelemetryEventSender telemetryEventSender) {
         if (this.shouldTakeSample()) {
             this.takeSample();
             ++this.sampleCount;
             this.lastSampleTime = Instant.now();
         }
         if (this.shouldSentEvent()) {
-            this.sendEvent();
+            this.sendEvent(telemetryEventSender);
             this.sampleCount = 0;
         }
     }
@@ -56,6 +55,6 @@ implements TelemetryEventProducer {
 
     public abstract void takeSample();
 
-    public abstract void sendEvent();
+    public abstract void sendEvent(TelemetryEventSender var1);
 }
 

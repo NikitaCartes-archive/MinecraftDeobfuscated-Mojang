@@ -415,6 +415,9 @@ extends LivingEntity {
         this.containerMenu = this.inventoryMenu;
     }
 
+    protected void doCloseContainer() {
+    }
+
     @Override
     public void rideTick() {
         if (!this.level.isClientSide && this.wantsToStopRiding() && this.isPassenger()) {
@@ -1141,8 +1144,8 @@ extends LivingEntity {
     public void remove(Entity.RemovalReason removalReason) {
         super.remove(removalReason);
         this.inventoryMenu.removed(this);
-        if (this.containerMenu != null) {
-            this.containerMenu.removed(this);
+        if (this.containerMenu != null && this.hasContainerOpen()) {
+            this.doCloseContainer();
         }
     }
 

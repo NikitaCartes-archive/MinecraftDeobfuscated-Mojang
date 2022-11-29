@@ -26,7 +26,6 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
@@ -230,8 +229,6 @@ extends PacketListener {
     public void handleSoundEvent(ClientboundSoundPacket var1);
 
     public void handleSoundEntityEvent(ClientboundSoundEntityPacket var1);
-
-    public void handleCustomSoundEvent(ClientboundCustomSoundPacket var1);
 
     public void handleTakeItemEntity(ClientboundTakeItemEntityPacket var1);
 

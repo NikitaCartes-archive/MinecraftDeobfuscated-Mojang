@@ -140,7 +140,7 @@ extends Screen {
         public void render(PoseStack poseStack, int i, int j, float f) {
             super.render(poseStack, i, j, f);
             RuleEntry ruleEntry = (RuleEntry)this.getHovered();
-            if (ruleEntry != null) {
+            if (ruleEntry != null && ruleEntry.tooltip != null) {
                 EditGameRulesScreen.this.setTooltipForNextRenderPass(ruleEntry.tooltip);
             }
         }

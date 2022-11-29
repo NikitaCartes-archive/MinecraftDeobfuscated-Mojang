@@ -20,16 +20,11 @@ extends AggregatedTelemetryEvent {
     private final LongList fpsSamples = new LongArrayList();
     private final LongList frameTimeSamples = new LongArrayList();
     private final LongList usedMemorySamples = new LongArrayList();
-    private final TelemetryEventSender eventSender;
-
-    public PerformanceMetricsEvent(TelemetryEventSender telemetryEventSender) {
-        this.eventSender = telemetryEventSender;
-    }
 
     @Override
-    public void tick() {
+    public void tick(TelemetryEventSender telemetryEventSender) {
         if (Minecraft.getInstance().telemetryOptInExtra()) {
-            super.tick();
+            super.tick(telemetryEventSender);
         }
     }
 
@@ -54,12 +49,7 @@ extends AggregatedTelemetryEvent {
     }
 
     @Override
-    public void sendEvent() {
-        this.send(this.eventSender);
-    }
-
-    @Override
-    public void send(TelemetryEventSender telemetryEventSender) {
+    public void sendEvent(TelemetryEventSender telemetryEventSender) {
         telemetryEventSender.send(TelemetryEventType.PERFORMANCE_METRICS, builder -> {
             builder.put(TelemetryProperty.FRAME_RATE_SAMPLES, new LongArrayList(this.fpsSamples));
             builder.put(TelemetryProperty.RENDER_TIME_SAMPLES, new LongArrayList(this.frameTimeSamples));

@@ -3,6 +3,7 @@
  */
 package net.minecraft.sounds;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -21,8 +22,8 @@ public class Musics {
     public static final Music UNDER_WATER = Musics.createGameMusic(SoundEvents.MUSIC_UNDER_WATER);
     public static final Music GAME = Musics.createGameMusic(SoundEvents.MUSIC_GAME);
 
-    public static Music createGameMusic(SoundEvent soundEvent) {
-        return new Music(soundEvent, 12000, 24000, false);
+    public static Music createGameMusic(Holder<SoundEvent> holder) {
+        return new Music(holder, 12000, 24000, false);
     }
 }
 

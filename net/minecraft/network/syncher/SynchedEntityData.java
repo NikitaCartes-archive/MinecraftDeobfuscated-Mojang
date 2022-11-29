@@ -176,7 +176,6 @@ public class SynchedEntityData {
         } finally {
             this.lock.writeLock().unlock();
         }
-        this.isDirty = true;
     }
 
     private <T> void assignValue(DataItem<T> dataItem, DataValue<?> dataValue) {
@@ -190,15 +189,6 @@ public class SynchedEntityData {
         return this.itemsById.isEmpty();
     }
 
-    public void clearDirty() {
-        this.isDirty = false;
-        this.lock.readLock().lock();
-        for (DataItem dataItem : this.itemsById.values()) {
-            dataItem.setDirty(false);
-        }
-        this.lock.readLock().unlock();
-    }
-
     public static class DataItem<T> {
         final EntityDataAccessor<T> accessor;
         T value;
@@ -209,7 +199,6 @@ public class SynchedEntityData {
             this.accessor = entityDataAccessor;
             this.initialValue = object;
             this.value = object;
-            this.dirty = true;
         }
 
         public EntityDataAccessor<T> getAccessor() {

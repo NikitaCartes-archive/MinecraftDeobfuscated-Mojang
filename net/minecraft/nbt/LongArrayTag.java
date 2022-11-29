@@ -98,6 +98,11 @@ extends CollectionTag<LongTag> {
     }
 
     @Override
+    public int sizeInBits() {
+        return 192 + 64 * this.data.length;
+    }
+
+    @Override
     public byte getId() {
         return 12;
     }

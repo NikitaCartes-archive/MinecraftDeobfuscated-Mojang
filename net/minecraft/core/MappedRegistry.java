@@ -220,6 +220,12 @@ implements WritableRegistry<T> {
         return Optional.ofNullable(this.byKey.get(resourceKey));
     }
 
+    @Override
+    public Holder<T> wrapAsHolder(T object) {
+        Holder.Reference<T> reference = this.byValue.get(object);
+        return reference != null ? reference : Holder.direct(object);
+    }
+
     Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> resourceKey2) {
         return this.byKey.computeIfAbsent(resourceKey2, resourceKey -> {
             if (this.unregisteredIntrusiveHolders != null) {

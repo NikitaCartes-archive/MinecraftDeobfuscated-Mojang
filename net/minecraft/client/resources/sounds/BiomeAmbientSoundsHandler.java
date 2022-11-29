@@ -62,9 +62,9 @@ implements AmbientSoundHandler {
             this.moodSettings = biome.getAmbientMood();
             this.additionsSettings = biome.getAmbientAdditions();
             this.loopSounds.values().forEach(LoopSoundInstance::fadeOut);
-            biome.getAmbientLoop().ifPresent(soundEvent -> this.loopSounds.compute(biome, (biome, loopSoundInstance) -> {
+            biome.getAmbientLoop().ifPresent(holder -> this.loopSounds.compute(biome, (biome, loopSoundInstance) -> {
                 if (loopSoundInstance == null) {
-                    loopSoundInstance = new LoopSoundInstance((SoundEvent)soundEvent);
+                    loopSoundInstance = new LoopSoundInstance((SoundEvent)holder.value());
                     this.soundManager.play((SoundInstance)loopSoundInstance);
                 }
                 loopSoundInstance.fadeIn();
@@ -73,7 +73,7 @@ implements AmbientSoundHandler {
         }
         this.additionsSettings.ifPresent(ambientAdditionsSettings -> {
             if (this.random.nextDouble() < ambientAdditionsSettings.getTickChance()) {
-                this.soundManager.play(SimpleSoundInstance.forAmbientAddition(ambientAdditionsSettings.getSoundEvent()));
+                this.soundManager.play(SimpleSoundInstance.forAmbientAddition(ambientAdditionsSettings.getSoundEvent().value()));
             }
         });
         this.moodSettings.ifPresent(ambientMoodSettings -> {
@@ -91,7 +91,7 @@ implements AmbientSoundHandler {
                 double k = f - this.player.getZ();
                 double l = Math.sqrt(g * g + h * h + k * k);
                 double m = l + ambientMoodSettings.getSoundPositionOffset();
-                SimpleSoundInstance simpleSoundInstance = SimpleSoundInstance.forAmbientMood(ambientMoodSettings.getSoundEvent(), this.random, this.player.getX() + g / l * m, this.player.getEyeY() + h / l * m, this.player.getZ() + k / l * m);
+                SimpleSoundInstance simpleSoundInstance = SimpleSoundInstance.forAmbientMood(ambientMoodSettings.getSoundEvent().value(), this.random, this.player.getX() + g / l * m, this.player.getEyeY() + h / l * m, this.player.getZ() + k / l * m);
                 this.soundManager.play(simpleSoundInstance);
                 this.moodiness = 0.0f;
             } else {

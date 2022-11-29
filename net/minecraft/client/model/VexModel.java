@@ -4,7 +4,6 @@
 package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmedModel;
@@ -31,6 +30,7 @@ implements ArmedModel {
     private final ModelPart leftArm;
     private final ModelPart rightWing;
     private final ModelPart leftWing;
+    private final ModelPart head;
 
     public VexModel(ModelPart modelPart) {
         super(RenderType::entityTranslucent);
@@ -40,12 +40,13 @@ implements ArmedModel {
         this.leftArm = this.body.getChild("left_arm");
         this.rightWing = this.body.getChild("right_wing");
         this.leftWing = this.body.getChild("left_wing");
+        this.head = this.root.getChild("head");
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0f, 0.0f, 0.0f));
+        PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0f, -2.5f, 0.0f));
         partDefinition2.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5f, -5.0f, -2.5f, 5.0f, 5.0f, 5.0f, new CubeDeformation(0.0f)), PartPose.offset(0.0f, 20.0f, 0.0f));
         PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 10).addBox(-1.5f, 0.0f, -1.0f, 3.0f, 4.0f, 2.0f, new CubeDeformation(0.0f)).texOffs(0, 16).addBox(-1.5f, 1.0f, -1.0f, 3.0f, 5.0f, 2.0f, new CubeDeformation(-0.2f)), PartPose.offset(0.0f, 20.0f, 0.0f));
         partDefinition3.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(23, 0).addBox(-1.25f, -0.5f, -1.0f, 2.0f, 4.0f, 2.0f, new CubeDeformation(-0.1f)), PartPose.offset(-1.75f, 0.25f, 0.0f));
@@ -59,6 +60,8 @@ implements ArmedModel {
     public void setupAnim(Vex vex, float f, float g, float h, float i, float j) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
         this.body.xRot = 6.440265f;
+        this.head.yRot = i * ((float)Math.PI / 180);
+        this.head.xRot = j * ((float)Math.PI / 180);
         float k = 0.62831855f + Mth.cos(h * 5.5f * ((float)Math.PI / 180)) * 0.1f;
         if (vex.isCharging()) {
             this.body.xRot = 0.0f;
@@ -89,24 +92,21 @@ implements ArmedModel {
 
     @Override
     public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
-        this.offsetSwordPivot(poseStack);
-        this.rotateSwordWithArm(poseStack);
+        boolean bl = humanoidArm == HumanoidArm.RIGHT;
+        ModelPart modelPart = bl ? this.rightArm : this.leftArm;
+        this.root.translateAndRotate(poseStack);
+        this.body.translateAndRotate(poseStack);
+        modelPart.translateAndRotate(poseStack);
         poseStack.scale(0.55f, 0.55f, 0.55f);
-        this.offsetSwordPosition(poseStack);
+        this.offsetStackPosition(poseStack, bl);
     }
 
-    private void offsetSwordPivot(PoseStack poseStack) {
-        poseStack.translate((this.body.x + this.rightArm.x) / 16.0f, (this.body.y + this.rightArm.y) / 16.0f, (this.body.z + this.rightArm.z) / 16.0f);
-    }
-
-    private void rotateSwordWithArm(PoseStack poseStack) {
-        poseStack.mulPose(Axis.ZP.rotation(this.rightArm.zRot));
-        poseStack.mulPose(Axis.YP.rotation(this.rightArm.yRot));
-        poseStack.mulPose(Axis.XP.rotation(this.rightArm.xRot));
-    }
-
-    private void offsetSwordPosition(PoseStack poseStack) {
-        poseStack.translate(0.046875, -0.15625, 0.078125);
+    private void offsetStackPosition(PoseStack poseStack, boolean bl) {
+        if (bl) {
+            poseStack.translate(0.046875, -0.15625, 0.078125);
+        } else {
+            poseStack.translate(-0.046875, -0.15625, 0.078125);
+        }
     }
 }
 

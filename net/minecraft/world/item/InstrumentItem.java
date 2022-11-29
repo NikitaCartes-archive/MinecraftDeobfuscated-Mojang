@@ -109,7 +109,7 @@ extends Item {
     }
 
     private static void play(Level level, Player player, Instrument instrument) {
-        SoundEvent soundEvent = instrument.soundEvent();
+        SoundEvent soundEvent = instrument.soundEvent().value();
         float f = instrument.range() / 16.0f;
         level.playSound(player, player, soundEvent, SoundSource.RECORDS, f, 1.0f);
         level.gameEvent(GameEvent.INSTRUMENT_PLAY, player.position(), GameEvent.Context.of(player));

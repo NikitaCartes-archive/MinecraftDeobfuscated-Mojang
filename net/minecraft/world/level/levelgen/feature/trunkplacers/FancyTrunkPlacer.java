@@ -94,7 +94,7 @@ extends TrunkPlacer {
         for (int j = 0; j <= i; ++j) {
             BlockPos blockPos4 = blockPos.offset(0.5f + (float)j * f, 0.5f + (float)j * g, 0.5f + (float)j * h);
             if (bl) {
-                this.placeLog(levelSimulatedReader, biConsumer, randomSource, blockPos4, treeConfiguration, blockState -> (BlockState)blockState.setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)));
+                this.placeLog(levelSimulatedReader, biConsumer, randomSource, blockPos4, treeConfiguration, blockState -> (BlockState)blockState.trySetValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)));
                 continue;
             }
             if (this.isFree(levelSimulatedReader, blockPos4)) continue;

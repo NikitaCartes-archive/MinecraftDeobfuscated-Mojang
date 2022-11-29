@@ -17,11 +17,14 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class PlaySoundCommand {
@@ -40,7 +43,8 @@ public class PlaySoundCommand {
     }
 
     private static int playSound(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, ResourceLocation resourceLocation, SoundSource soundSource, Vec3 vec3, float f, float g, float h) throws CommandSyntaxException {
-        double d = Math.pow(f > 1.0f ? (double)(f * 16.0f) : 16.0, 2.0);
+        Holder<SoundEvent> holder = Holder.direct(SoundEvent.createVariableRangeEvent(resourceLocation));
+        double d = Mth.square(holder.value().getRange(f));
         int i = 0;
         long l = commandSourceStack.getLevel().getRandom().nextLong();
         for (ServerPlayer serverPlayer : collection) {
@@ -56,7 +60,7 @@ public class PlaySoundCommand {
                 vec32 = new Vec3(serverPlayer.getX() + e / o * 2.0, serverPlayer.getY() + j / o * 2.0, serverPlayer.getZ() + k / o * 2.0);
                 n = h;
             }
-            serverPlayer.connection.send(new ClientboundCustomSoundPacket(resourceLocation, soundSource, vec32, n, g, l));
+            serverPlayer.connection.send(new ClientboundSoundPacket(holder, soundSource, vec32.x(), vec32.y(), vec32.z(), n, g, l));
             ++i;
         }
         if (i == 0) {

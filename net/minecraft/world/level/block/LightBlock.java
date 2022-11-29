@@ -51,7 +51,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide && player.canUseGameMasterBlocks()) {
             level.setBlock(blockPos, (BlockState)blockState.cycle(LEVEL), 2);
             return InteractionResult.SUCCESS;
         }

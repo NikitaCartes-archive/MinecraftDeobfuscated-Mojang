@@ -10,23 +10,16 @@ import net.minecraft.client.telemetry.TelemetryEventSender;
 import net.minecraft.client.telemetry.TelemetryEventType;
 import net.minecraft.client.telemetry.TelemetryProperty;
 import net.minecraft.client.telemetry.TelemetryPropertyMap;
-import net.minecraft.client.telemetry.events.TelemetryEventProducer;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class WorldLoadEvent
-implements TelemetryEventProducer {
-    private final WorldLoadEventCallbacks callbacks;
+public class WorldLoadEvent {
     private boolean eventSent;
     @Nullable
     private TelemetryProperty.GameMode gameMode = null;
     @Nullable
     private String serverBrand;
-
-    public WorldLoadEvent(WorldLoadEventCallbacks worldLoadEventCallbacks) {
-        this.callbacks = worldLoadEventCallbacks;
-    }
 
     public void addProperties(TelemetryPropertyMap.Builder builder) {
         if (this.serverBrand != null) {
@@ -45,14 +38,13 @@ implements TelemetryEventProducer {
         return TelemetryProperty.ServerType.OTHER;
     }
 
-    @Override
-    public void send(TelemetryEventSender telemetryEventSender) {
-        if (this.eventSent || this.gameMode == null) {
-            return;
+    public boolean send(TelemetryEventSender telemetryEventSender) {
+        if (this.eventSent || this.gameMode == null || this.serverBrand == null) {
+            return false;
         }
         this.eventSent = true;
-        this.callbacks.onWorldLoadSent();
         telemetryEventSender.send(TelemetryEventType.WORLD_LOADED, builder -> builder.put(TelemetryProperty.GAME_MODE, this.gameMode));
+        return true;
     }
 
     public void setGameMode(GameType gameType, boolean bl) {
@@ -72,16 +64,6 @@ implements TelemetryEventProducer {
 
     public void setServerBrand(String string) {
         this.serverBrand = string;
-    }
-
-    @Nullable
-    public String getServerBrand() {
-        return this.serverBrand;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static interface WorldLoadEventCallbacks {
-        public void onWorldLoadSent();
     }
 }
 
