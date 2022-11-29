@@ -11,17 +11,12 @@ import net.minecraft.client.telemetry.TelemetryPropertyMap;
 import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
-public class WorldLoadEvent implements TelemetryEventProducer {
-	private final WorldLoadEvent.WorldLoadEventCallbacks callbacks;
+public class WorldLoadEvent {
 	private boolean eventSent;
 	@Nullable
 	private TelemetryProperty.GameMode gameMode = null;
 	@Nullable
 	private String serverBrand;
-
-	public WorldLoadEvent(WorldLoadEvent.WorldLoadEventCallbacks worldLoadEventCallbacks) {
-		this.callbacks = worldLoadEventCallbacks;
-	}
 
 	public void addProperties(TelemetryPropertyMap.Builder builder) {
 		if (this.serverBrand != null) {
@@ -39,12 +34,13 @@ public class WorldLoadEvent implements TelemetryEventProducer {
 		}
 	}
 
-	@Override
-	public void send(TelemetryEventSender telemetryEventSender) {
-		if (!this.eventSent && this.gameMode != null) {
+	public boolean send(TelemetryEventSender telemetryEventSender) {
+		if (!this.eventSent && this.gameMode != null && this.serverBrand != null) {
 			this.eventSent = true;
-			this.callbacks.onWorldLoadSent();
 			telemetryEventSender.send(TelemetryEventType.WORLD_LOADED, builder -> builder.put(TelemetryProperty.GAME_MODE, this.gameMode));
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -59,15 +55,5 @@ public class WorldLoadEvent implements TelemetryEventProducer {
 
 	public void setServerBrand(String string) {
 		this.serverBrand = string;
-	}
-
-	@Nullable
-	public String getServerBrand() {
-		return this.serverBrand;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public interface WorldLoadEventCallbacks {
-		void onWorldLoadSent();
 	}
 }

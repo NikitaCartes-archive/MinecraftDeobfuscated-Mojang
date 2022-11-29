@@ -105,6 +105,7 @@ import net.minecraft.world.level.block.PowderSnowBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -339,14 +340,16 @@ public abstract class LivingEntity extends Entity {
 
 		if (this.isAlive()) {
 			boolean bl = this instanceof Player;
-			if (this.isInWall()) {
-				this.hurt(DamageSource.IN_WALL, 1.0F);
-			} else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox())) {
-				double d = this.level.getWorldBorder().getDistanceToBorder(this) + this.level.getWorldBorder().getDamageSafeZone();
-				if (d < 0.0) {
-					double e = this.level.getWorldBorder().getDamagePerBlock();
-					if (e > 0.0) {
-						this.hurt(DamageSource.IN_WALL, (float)Math.max(1, Mth.floor(-d * e)));
+			if (!this.level.isClientSide) {
+				if (this.isInWall()) {
+					this.hurt(DamageSource.IN_WALL, 1.0F);
+				} else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox())) {
+					double d = this.level.getWorldBorder().getDistanceToBorder(this) + this.level.getWorldBorder().getDamageSafeZone();
+					if (d < 0.0) {
+						double e = this.level.getWorldBorder().getDamagePerBlock();
+						if (e > 0.0) {
+							this.hurt(DamageSource.IN_WALL, (float)Math.max(1, Mth.floor(-d * e)));
+						}
 					}
 				}
 			}
@@ -556,7 +559,7 @@ public abstract class LivingEntity extends Entity {
 
 	protected void tickDeath() {
 		this.deathTime++;
-		if (this.deathTime >= 20 && !this.level.isClientSide()) {
+		if (this.deathTime >= 20 && !this.level.isClientSide() && !this.isRemoved()) {
 			this.level.broadcastEntityEvent(this, (byte)60);
 			this.remove(Entity.RemovalReason.KILLED);
 		}
@@ -2641,26 +2644,30 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected void pushEntities() {
-		List<Entity> list = this.level.getEntities(this, this.getBoundingBox(), EntitySelector.pushableBy(this));
-		if (!list.isEmpty()) {
-			int i = this.level.getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
-			if (i > 0 && list.size() > i - 1 && this.random.nextInt(4) == 0) {
-				int j = 0;
+		if (this.level.isClientSide()) {
+			this.level.getEntities(EntityTypeTest.forClass(Player.class), this.getBoundingBox(), EntitySelector.pushableBy(this)).forEach(this::doPush);
+		} else {
+			List<Entity> list = this.level.getEntities(this, this.getBoundingBox(), EntitySelector.pushableBy(this));
+			if (!list.isEmpty()) {
+				int i = this.level.getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
+				if (i > 0 && list.size() > i - 1 && this.random.nextInt(4) == 0) {
+					int j = 0;
 
-				for (int k = 0; k < list.size(); k++) {
-					if (!((Entity)list.get(k)).isPassenger()) {
-						j++;
+					for (int k = 0; k < list.size(); k++) {
+						if (!((Entity)list.get(k)).isPassenger()) {
+							j++;
+						}
+					}
+
+					if (j > i - 1) {
+						this.hurt(DamageSource.CRAMMING, 6.0F);
 					}
 				}
 
-				if (j > i - 1) {
-					this.hurt(DamageSource.CRAMMING, 6.0F);
+				for (int j = 0; j < list.size(); j++) {
+					Entity entity = (Entity)list.get(j);
+					this.doPush(entity);
 				}
-			}
-
-			for (int j = 0; j < list.size(); j++) {
-				Entity entity = (Entity)list.get(j);
-				this.doPush(entity);
 			}
 		}
 	}

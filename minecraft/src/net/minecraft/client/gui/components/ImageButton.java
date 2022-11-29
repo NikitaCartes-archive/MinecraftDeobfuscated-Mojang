@@ -43,12 +43,6 @@ public class ImageButton extends Button {
 	}
 
 	@Override
-	public void setPosition(int i, int j) {
-		this.setX(i);
-		this.setY(j);
-	}
-
-	@Override
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.resourceLocation);

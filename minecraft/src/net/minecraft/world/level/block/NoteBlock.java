@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -27,7 +28,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 public class NoteBlock extends Block {
 	public static final EnumProperty<NoteBlockInstrument> INSTRUMENT = BlockStateProperties.NOTEBLOCK_INSTRUMENT;
@@ -130,18 +130,29 @@ public class NoteBlock extends Block {
 			f = 1.0F;
 		}
 
+		Holder<SoundEvent> holder;
 		if (noteBlockInstrument.hasCustomSound()) {
 			ResourceLocation resourceLocation = this.getCustomSoundId(level, blockPos);
 			if (resourceLocation == null) {
 				return false;
 			}
 
-			level.playCustomSound(null, Vec3.atCenterOf(blockPos), resourceLocation, SoundSource.RECORDS, 3.0F, f, (double)SoundEvent.legacySoundRange(3.0F));
+			holder = Holder.direct(SoundEvent.createVariableRangeEvent(resourceLocation));
 		} else {
-			SoundEvent soundEvent = noteBlockInstrument.getSoundEvent();
-			level.playSound(null, blockPos, soundEvent, SoundSource.RECORDS, 3.0F, f);
+			holder = noteBlockInstrument.getSoundEvent();
 		}
 
+		level.playSeededSound(
+			null,
+			(double)blockPos.getX() + 0.5,
+			(double)blockPos.getY() + 0.5,
+			(double)blockPos.getZ() + 0.5,
+			holder,
+			SoundSource.RECORDS,
+			3.0F,
+			f,
+			level.random.nextLong()
+		);
 		return true;
 	}
 

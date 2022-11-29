@@ -37,7 +37,7 @@ public interface SharedSuggestionProvider {
 
 	Collection<String> getAllTeams();
 
-	Collection<ResourceLocation> getAvailableSoundEvents();
+	Stream<ResourceLocation> getAvailableSounds();
 
 	Stream<ResourceLocation> getRecipeNames();
 

@@ -24,7 +24,6 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
@@ -40,14 +39,8 @@ public class DataCommands {
 		object -> Component.translatable("commands.data.get.unknown", object)
 	);
 	private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
-	private static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.data.modify.expected_list", object)
-	);
 	private static final DynamicCommandExceptionType ERROR_EXPECTED_OBJECT = new DynamicCommandExceptionType(
 		object -> Component.translatable("commands.data.modify.expected_object", object)
-	);
-	private static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.data.modify.invalid_index", object)
 	);
 	public static final List<Function<String, DataCommands.DataProvider>> ALL_PROVIDERS = ImmutableList.of(
 		EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER, StorageDataAccessor.PROVIDER
@@ -116,83 +109,65 @@ public class DataCommands {
 						(argumentBuilder, dataManipulatorDecorator) -> argumentBuilder.then(
 									Commands.literal("insert")
 										.then(
-											Commands.argument("index", IntegerArgumentType.integer()).then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> {
-												int i = IntegerArgumentType.getInteger(commandContext, "index");
-												return insertAtIndex(i, compoundTag, nbtPath, list);
-											}))
+											Commands.argument("index", IntegerArgumentType.integer())
+												.then(
+													dataManipulatorDecorator.create(
+														(commandContext, compoundTag, nbtPath, list) -> nbtPath.insert(IntegerArgumentType.getInteger(commandContext, "index"), compoundTag, list)
+													)
+												)
 										)
 								)
 								.then(
 									Commands.literal("prepend")
-										.then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> insertAtIndex(0, compoundTag, nbtPath, list)))
+										.then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.insert(0, compoundTag, list)))
 								)
 								.then(
 									Commands.literal("append")
-										.then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> insertAtIndex(-1, compoundTag, nbtPath, list)))
+										.then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.insert(-1, compoundTag, list)))
 								)
 								.then(
 									Commands.literal("set")
-										.then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.set(compoundTag, Iterables.getLast(list)::copy)))
+										.then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> nbtPath.set(compoundTag, Iterables.getLast(list))))
 								)
 								.then(Commands.literal("merge").then(dataManipulatorDecorator.create((commandContext, compoundTag, nbtPath, list) -> {
-									Collection<Tag> collection = nbtPath.getOrCreate(compoundTag, CompoundTag::new);
-									int i = 0;
+									CompoundTag compoundTag2 = new CompoundTag();
 
-									for (Tag tag : collection) {
-										if (!(tag instanceof CompoundTag compoundTag2)) {
+									for (Tag tag : list) {
+										if (NbtPathArgument.NbtPath.isTooDeep(tag, 0)) {
+											throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+										}
+
+										if (!(tag instanceof CompoundTag compoundTag3)) {
 											throw ERROR_EXPECTED_OBJECT.create(tag);
 										}
 
-										CompoundTag compoundTag3 = compoundTag2.copy();
+										compoundTag2.merge(compoundTag3);
+									}
 
-										for (Tag tag2 : list) {
-											if (!(tag2 instanceof CompoundTag)) {
+									Collection<Tag> collection = nbtPath.getOrCreate(compoundTag, CompoundTag::new);
+									if (compoundTag.sizeInBytes() + compoundTag2.sizeInBytes() * collection.size() > 2097152) {
+										throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
+									} else {
+										int i = 0;
+
+										for (Tag tag2 : collection) {
+											if (!(tag2 instanceof CompoundTag compoundTag4)) {
 												throw ERROR_EXPECTED_OBJECT.create(tag2);
 											}
 
-											compoundTag2.merge((CompoundTag)tag2);
+											CompoundTag compoundTag5 = compoundTag4.copy();
+											compoundTag4.merge(compoundTag2);
+											i += compoundTag5.equals(compoundTag4) ? 0 : 1;
 										}
 
-										i += compoundTag3.equals(compoundTag2) ? 0 : 1;
+										return i;
 									}
-
-									return i;
 								})))
 					)
 				);
 		}
 
 		commandDispatcher.register(literalArgumentBuilder);
-	}
-
-	private static int insertAtIndex(int i, CompoundTag compoundTag, NbtPathArgument.NbtPath nbtPath, List<Tag> list) throws CommandSyntaxException {
-		Collection<Tag> collection = nbtPath.getOrCreate(compoundTag, ListTag::new);
-		int j = 0;
-
-		for (Tag tag : collection) {
-			if (!(tag instanceof CollectionTag)) {
-				throw ERROR_EXPECTED_LIST.create(tag);
-			}
-
-			boolean bl = false;
-			CollectionTag<?> collectionTag = (CollectionTag<?>)tag;
-			int k = i < 0 ? collectionTag.size() + i + 1 : i;
-
-			for (Tag tag2 : list) {
-				try {
-					if (collectionTag.addTag(k, tag2.copy())) {
-						k++;
-						bl = true;
-					}
-				} catch (IndexOutOfBoundsException var14) {
-					throw ERROR_INVALID_INDEX.create(k);
-				}
-			}
-
-			j += bl ? 1 : 0;
-		}
-
-		return j;
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> decorateModification(
@@ -317,13 +292,19 @@ public class DataCommands {
 
 	private static int mergeData(CommandSourceStack commandSourceStack, DataAccessor dataAccessor, CompoundTag compoundTag) throws CommandSyntaxException {
 		CompoundTag compoundTag2 = dataAccessor.getData();
-		CompoundTag compoundTag3 = compoundTag2.copy().merge(compoundTag);
-		if (compoundTag2.equals(compoundTag3)) {
-			throw ERROR_MERGE_UNCHANGED.create();
+		if (NbtPathArgument.NbtPath.isTooDeep(compoundTag, 0)) {
+			throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+		} else if (compoundTag2.sizeInBytes() + compoundTag.sizeInBytes() > 2097152) {
+			throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
 		} else {
-			dataAccessor.setData(compoundTag3);
-			commandSourceStack.sendSuccess(dataAccessor.getModifiedSuccess(), true);
-			return 1;
+			CompoundTag compoundTag3 = compoundTag2.copy().merge(compoundTag);
+			if (compoundTag2.equals(compoundTag3)) {
+				throw ERROR_MERGE_UNCHANGED.create();
+			} else {
+				dataAccessor.setData(compoundTag3);
+				commandSourceStack.sendSuccess(dataAccessor.getModifiedSuccess(), true);
+				return 1;
+			}
 		}
 	}
 

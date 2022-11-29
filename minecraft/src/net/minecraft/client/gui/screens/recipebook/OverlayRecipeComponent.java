@@ -244,7 +244,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 			this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
 			PoseStack poseStack2 = RenderSystem.getModelViewStack();
 			poseStack2.pushPose();
-			poseStack2.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 125.0);
+			poseStack2.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
 				poseStack2.pushPose();

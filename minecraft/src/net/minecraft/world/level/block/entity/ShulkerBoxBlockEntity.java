@@ -154,7 +154,7 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 
 	@Override
 	public void startOpen(Player player) {
-		if (!player.isSpectator()) {
+		if (!this.remove && !player.isSpectator()) {
 			if (this.openCount < 0) {
 				this.openCount = 0;
 			}
@@ -170,7 +170,7 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 
 	@Override
 	public void stopOpen(Player player) {
-		if (!player.isSpectator()) {
+		if (!this.remove && !player.isSpectator()) {
 			this.openCount--;
 			this.level.blockEvent(this.worldPosition, this.getBlockState().getBlock(), 1, this.openCount);
 			if (this.openCount <= 0) {

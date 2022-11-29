@@ -62,7 +62,7 @@ public class Vex extends Monster {
 
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height - 0.4375F;
+		return entityDimensions.height - 0.28125F;
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -380,8 +381,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public abstract void playSeededSound(
-		@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, long l
+		@Nullable Player player, double d, double e, double f, Holder<SoundEvent> holder, SoundSource soundSource, float g, float h, long l
 	);
+
+	public void playSeededSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, long l) {
+		this.playSeededSound(player, d, e, f, BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), soundSource, g, h, l);
+	}
 
 	public abstract void playSeededSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g, long l);
 
@@ -391,14 +396,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
 		this.playSeededSound(player, entity, soundEvent, soundSource, f, g, this.threadSafeRandom.nextLong());
-	}
-
-	public abstract void playCustomSound(
-		@Nullable Player player, Vec3 vec3, ResourceLocation resourceLocation, SoundSource soundSource, float f, float g, double d, long l
-	);
-
-	public void playCustomSound(@Nullable Player player, Vec3 vec3, ResourceLocation resourceLocation, SoundSource soundSource, float f, float g, double d) {
-		this.playCustomSound(player, vec3, resourceLocation, soundSource, f, g, d, this.threadSafeRandom.nextLong());
 	}
 
 	public void playLocalSound(BlockPos blockPos, SoundEvent soundEvent, SoundSource soundSource, float f, float g, boolean bl) {

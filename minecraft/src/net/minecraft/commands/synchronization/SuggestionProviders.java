@@ -28,7 +28,7 @@ public class SuggestionProviders {
 	);
 	public static final SuggestionProvider<CommandSourceStack> AVAILABLE_SOUNDS = register(
 		new ResourceLocation("available_sounds"),
-		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getAvailableSoundEvents(), suggestionsBuilder)
+		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getAvailableSounds(), suggestionsBuilder)
 	);
 	public static final SuggestionProvider<CommandSourceStack> SUMMONABLE_ENTITIES = register(
 		new ResourceLocation("summonable_entities"),

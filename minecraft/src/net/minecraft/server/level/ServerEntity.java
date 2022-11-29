@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
@@ -56,6 +57,8 @@ public class ServerEntity {
 	private List<Entity> lastPassengers = Collections.emptyList();
 	private boolean wasRiding;
 	private boolean wasOnGround;
+	@Nullable
+	private List<SynchedEntityData.DataValue<?>> trackedDataValues;
 
 	public ServerEntity(ServerLevel serverLevel, Entity entity, int i, boolean bl, Consumer<Packet<?>> consumer) {
 		this.level = serverLevel;
@@ -68,6 +71,7 @@ public class ServerEntity {
 		this.xRotp = Mth.floor(entity.getXRot() * 256.0F / 360.0F);
 		this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0F / 360.0F);
 		this.wasOnGround = entity.isOnGround();
+		this.trackedDataValues = entity.getEntityData().getNonDefaultValues();
 	}
 
 	public void sendChanges() {
@@ -201,13 +205,8 @@ public class ServerEntity {
 		Packet<ClientGamePacketListener> packet = this.entity.getAddEntityPacket();
 		this.yHeadRotp = Mth.floor(this.entity.getYHeadRot() * 256.0F / 360.0F);
 		consumer.accept(packet);
-		SynchedEntityData synchedEntityData = this.entity.getEntityData();
-		if (!synchedEntityData.isEmpty()) {
-			List<SynchedEntityData.DataValue<?>> list = synchedEntityData.getNonDefaultValues();
-			synchedEntityData.clearDirty();
-			if (list != null) {
-				consumer.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
-			}
+		if (this.trackedDataValues != null) {
+			consumer.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), this.trackedDataValues));
 		}
 
 		boolean bl = this.trackDelta;
@@ -228,17 +227,17 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
-			List<Pair<EquipmentSlot, ItemStack>> list2 = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
+			List<Pair<EquipmentSlot, ItemStack>> list = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
 
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 				ItemStack itemStack = ((LivingEntity)this.entity).getItemBySlot(equipmentSlot);
 				if (!itemStack.isEmpty()) {
-					list2.add(Pair.of(equipmentSlot, itemStack.copy()));
+					list.add(Pair.of(equipmentSlot, itemStack.copy()));
 				}
 			}
 
-			if (!list2.isEmpty()) {
-				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list2));
+			if (!list.isEmpty()) {
+				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list));
 			}
 		}
 
@@ -265,6 +264,7 @@ public class ServerEntity {
 		SynchedEntityData synchedEntityData = this.entity.getEntityData();
 		List<SynchedEntityData.DataValue<?>> list = synchedEntityData.packDirty();
 		if (list != null) {
+			this.trackedDataValues = synchedEntityData.getNonDefaultValues();
 			this.broadcastAndSend(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
 		}
 

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.state.properties;
 
 import java.util.Optional;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -26,21 +27,21 @@ public enum NoteBlockInstrument implements StringRepresentable {
 	BIT("bit", SoundEvents.NOTE_BLOCK_BIT, NoteBlockInstrument.Type.BASE_BLOCK),
 	BANJO("banjo", SoundEvents.NOTE_BLOCK_BANJO, NoteBlockInstrument.Type.BASE_BLOCK),
 	PLING("pling", SoundEvents.NOTE_BLOCK_PLING, NoteBlockInstrument.Type.BASE_BLOCK),
-	ZOMBIE("zombie", SoundEvents.ZOMBIE_AMBIENT, NoteBlockInstrument.Type.MOB_HEAD),
-	SKELETON("skeleton", SoundEvents.SKELETON_AMBIENT, NoteBlockInstrument.Type.MOB_HEAD),
-	CREEPER("creeper", SoundEvents.CREEPER_PRIMED, NoteBlockInstrument.Type.MOB_HEAD),
-	DRAGON("dragon", SoundEvents.ENDER_DRAGON_AMBIENT, NoteBlockInstrument.Type.MOB_HEAD),
-	WITHER_SKELETON("wither_skeleton", SoundEvents.WITHER_SKELETON_AMBIENT, NoteBlockInstrument.Type.MOB_HEAD),
-	PIGLIN("piglin", SoundEvents.PIGLIN_AMBIENT, NoteBlockInstrument.Type.MOB_HEAD),
+	ZOMBIE("zombie", SoundEvents.NOTE_BLOCK_IMITATE_ZOMBIE, NoteBlockInstrument.Type.MOB_HEAD),
+	SKELETON("skeleton", SoundEvents.NOTE_BLOCK_IMITATE_SKELETON, NoteBlockInstrument.Type.MOB_HEAD),
+	CREEPER("creeper", SoundEvents.NOTE_BLOCK_IMITATE_CREEPER, NoteBlockInstrument.Type.MOB_HEAD),
+	DRAGON("dragon", SoundEvents.NOTE_BLOCK_IMITATE_ENDER_DRAGON, NoteBlockInstrument.Type.MOB_HEAD),
+	WITHER_SKELETON("wither_skeleton", SoundEvents.NOTE_BLOCK_IMITATE_WITHER_SKELETON, NoteBlockInstrument.Type.MOB_HEAD),
+	PIGLIN("piglin", SoundEvents.NOTE_BLOCK_IMITATE_PIGLIN, NoteBlockInstrument.Type.MOB_HEAD),
 	CUSTOM_HEAD("custom_head", SoundEvents.UI_BUTTON_CLICK, NoteBlockInstrument.Type.CUSTOM);
 
 	private final String name;
-	private final SoundEvent soundEvent;
+	private final Holder<SoundEvent> soundEvent;
 	private final NoteBlockInstrument.Type type;
 
-	private NoteBlockInstrument(String string2, SoundEvent soundEvent, NoteBlockInstrument.Type type) {
+	private NoteBlockInstrument(String string2, Holder<SoundEvent> holder, NoteBlockInstrument.Type type) {
 		this.name = string2;
-		this.soundEvent = soundEvent;
+		this.soundEvent = holder;
 		this.type = type;
 	}
 
@@ -49,7 +50,7 @@ public enum NoteBlockInstrument implements StringRepresentable {
 		return this.name;
 	}
 
-	public SoundEvent getSoundEvent() {
+	public Holder<SoundEvent> getSoundEvent() {
 		return this.soundEvent;
 	}
 

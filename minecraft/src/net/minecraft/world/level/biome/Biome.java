@@ -249,7 +249,7 @@ public final class Biome {
 		return this.specialEffects.getAmbientParticleSettings();
 	}
 
-	public Optional<SoundEvent> getAmbientLoop() {
+	public Optional<Holder<SoundEvent>> getAmbientLoop() {
 		return this.specialEffects.getAmbientLoopSoundEvent();
 	}
 

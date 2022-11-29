@@ -141,7 +141,7 @@ public class ChatListener {
 	}
 
 	private void narrateChatMessage(ChatType.Bound bound, Component component) {
-		this.minecraft.getNarrator().sayChatNow(() -> bound.decorateNarration(component));
+		this.minecraft.getNarrator().sayChat(bound.decorateNarration(component));
 	}
 
 	private ChatTrustLevel evaluateTrustLevel(PlayerChatMessage playerChatMessage, Component component, Instant instant) {
@@ -167,7 +167,7 @@ public class ChatListener {
 				this.logSystemMessage(component, Instant.now());
 			}
 
-			this.minecraft.getNarrator().sayNow(component);
+			this.minecraft.getNarrator().say(component);
 		}
 	}
 

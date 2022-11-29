@@ -81,6 +81,11 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 	}
 
 	@Override
+	public int sizeInBits() {
+		return 192 + 32 * this.data.length;
+	}
+
+	@Override
 	public byte getId() {
 		return 11;
 	}

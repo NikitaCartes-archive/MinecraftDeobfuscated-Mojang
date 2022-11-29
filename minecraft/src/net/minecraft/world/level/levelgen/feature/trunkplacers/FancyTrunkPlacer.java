@@ -117,7 +117,7 @@ public class FancyTrunkPlacer extends TrunkPlacer {
 						randomSource,
 						blockPos4,
 						treeConfiguration,
-						blockState -> blockState.setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4))
+						blockState -> blockState.trySetValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4))
 					);
 				} else if (!this.isFree(levelSimulatedReader, blockPos4)) {
 					return false;

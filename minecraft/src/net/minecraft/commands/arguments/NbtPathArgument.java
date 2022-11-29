@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,8 +31,16 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
 	public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.node.invalid"));
+	public static final SimpleCommandExceptionType ERROR_DATA_TOO_DEEP = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_deep"));
+	public static final SimpleCommandExceptionType ERROR_DATA_TOO_LARGE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_large"));
 	public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(
 		object -> Component.translatable("arguments.nbtpath.nothing_found", object)
+	);
+	static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(
+		object -> Component.translatable("commands.data.modify.expected_list", object)
+	);
+	static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(
+		object -> Component.translatable("commands.data.modify.invalid_index", object)
 	);
 	private static final char INDEX_MATCH_START = '[';
 	private static final char INDEX_MATCH_END = ']';
@@ -585,14 +594,111 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 			return (Integer)list.stream().map(function).reduce(0, (integer, integer2) -> integer + integer2);
 		}
 
-		public int set(Tag tag, Tag tag2) throws CommandSyntaxException {
-			return this.set(tag, tag2::copy);
+		public static boolean isTooDeep(Tag tag, int i) {
+			if (i >= 512) {
+				return true;
+			} else {
+				if (tag instanceof CompoundTag compoundTag) {
+					for (String string : compoundTag.getAllKeys()) {
+						Tag tag2 = compoundTag.get(string);
+						if (tag2 != null && isTooDeep(tag2, i + 1)) {
+							return true;
+						}
+					}
+				} else if (tag instanceof ListTag) {
+					for (Tag tag3 : (ListTag)tag) {
+						if (isTooDeep(tag3, i + 1)) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
 		}
 
-		public int set(Tag tag, Supplier<Tag> supplier) throws CommandSyntaxException {
-			List<Tag> list = this.getOrCreateParents(tag);
-			NbtPathArgument.Node node = this.nodes[this.nodes.length - 1];
-			return apply(list, tagx -> node.setTag(tagx, supplier));
+		public int set(Tag tag, Tag tag2) throws CommandSyntaxException {
+			if (isTooDeep(tag2, this.estimatePathDepth())) {
+				throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+			} else {
+				Tag tag3 = tag2.copy();
+				List<Tag> list = this.getOrCreateParents(tag);
+				if (list.isEmpty()) {
+					return 0;
+				} else {
+					int i = list.size();
+					int j = tag.sizeInBits() + tag3.sizeInBits() * i;
+					if (j > 2097152) {
+						throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
+					} else {
+						NbtPathArgument.Node node = this.nodes[this.nodes.length - 1];
+						MutableBoolean mutableBoolean = new MutableBoolean(false);
+						return apply(list, tag2x -> node.setTag(tag2x, () -> {
+								if (mutableBoolean.isFalse()) {
+									mutableBoolean.setTrue();
+									return tag3;
+								} else {
+									return tag3.copy();
+								}
+							}));
+					}
+				}
+			}
+		}
+
+		private int estimatePathDepth() {
+			return this.nodes.length;
+		}
+
+		public int insert(int i, CompoundTag compoundTag, List<Tag> list) throws CommandSyntaxException {
+			List<Tag> list2 = new ArrayList(list.size());
+			int j = 0;
+
+			for (Tag tag : list) {
+				Tag tag2 = tag.copy();
+				list2.add(tag2);
+				if (isTooDeep(tag2, this.estimatePathDepth())) {
+					throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
+				}
+
+				j += tag2.sizeInBits();
+			}
+
+			Collection<Tag> collection = this.getOrCreate(compoundTag, ListTag::new);
+			int k = compoundTag.sizeInBits();
+			int l = collection.size();
+			int m = k + l * j;
+			if (m > 2097152) {
+				throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
+			} else {
+				int n = 0;
+				boolean bl = false;
+
+				for (Tag tag3 : collection) {
+					if (!(tag3 instanceof CollectionTag<?> collectionTag)) {
+						throw NbtPathArgument.ERROR_EXPECTED_LIST.create(tag3);
+					}
+
+					boolean bl2 = false;
+					int o = i < 0 ? collectionTag.size() + i + 1 : i;
+
+					for (Tag tag4 : list2) {
+						try {
+							if (collectionTag.addTag(o, bl ? tag4.copy() : tag4)) {
+								o++;
+								bl2 = true;
+							}
+						} catch (IndexOutOfBoundsException var20) {
+							throw NbtPathArgument.ERROR_INVALID_INDEX.create(o);
+						}
+					}
+
+					bl = true;
+					n += bl2 ? 1 : 0;
+				}
+
+				return n;
+			}
 		}
 
 		public int remove(Tag tag) {

@@ -2,6 +2,7 @@ package net.minecraft.sounds;
 
 import com.google.common.collect.ImmutableList;
 import java.util.stream.IntStream;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -14,22 +15,22 @@ public class SoundEvents {
 	public static final SoundEvent ALLAY_ITEM_GIVEN = register("entity.allay.item_given");
 	public static final SoundEvent ALLAY_ITEM_TAKEN = register("entity.allay.item_taken");
 	public static final SoundEvent ALLAY_THROW = register("entity.allay.item_thrown");
-	public static final SoundEvent AMBIENT_CAVE = register("ambient.cave");
-	public static final SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = register("ambient.basalt_deltas.additions");
-	public static final SoundEvent AMBIENT_BASALT_DELTAS_LOOP = register("ambient.basalt_deltas.loop");
-	public static final SoundEvent AMBIENT_BASALT_DELTAS_MOOD = register("ambient.basalt_deltas.mood");
-	public static final SoundEvent AMBIENT_CRIMSON_FOREST_ADDITIONS = register("ambient.crimson_forest.additions");
-	public static final SoundEvent AMBIENT_CRIMSON_FOREST_LOOP = register("ambient.crimson_forest.loop");
-	public static final SoundEvent AMBIENT_CRIMSON_FOREST_MOOD = register("ambient.crimson_forest.mood");
-	public static final SoundEvent AMBIENT_NETHER_WASTES_ADDITIONS = register("ambient.nether_wastes.additions");
-	public static final SoundEvent AMBIENT_NETHER_WASTES_LOOP = register("ambient.nether_wastes.loop");
-	public static final SoundEvent AMBIENT_NETHER_WASTES_MOOD = register("ambient.nether_wastes.mood");
-	public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_ADDITIONS = register("ambient.soul_sand_valley.additions");
-	public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_LOOP = register("ambient.soul_sand_valley.loop");
-	public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_MOOD = register("ambient.soul_sand_valley.mood");
-	public static final SoundEvent AMBIENT_WARPED_FOREST_ADDITIONS = register("ambient.warped_forest.additions");
-	public static final SoundEvent AMBIENT_WARPED_FOREST_LOOP = register("ambient.warped_forest.loop");
-	public static final SoundEvent AMBIENT_WARPED_FOREST_MOOD = register("ambient.warped_forest.mood");
+	public static final Holder.Reference<SoundEvent> AMBIENT_CAVE = registerForHolder("ambient.cave");
+	public static final Holder.Reference<SoundEvent> AMBIENT_BASALT_DELTAS_ADDITIONS = registerForHolder("ambient.basalt_deltas.additions");
+	public static final Holder.Reference<SoundEvent> AMBIENT_BASALT_DELTAS_LOOP = registerForHolder("ambient.basalt_deltas.loop");
+	public static final Holder.Reference<SoundEvent> AMBIENT_BASALT_DELTAS_MOOD = registerForHolder("ambient.basalt_deltas.mood");
+	public static final Holder.Reference<SoundEvent> AMBIENT_CRIMSON_FOREST_ADDITIONS = registerForHolder("ambient.crimson_forest.additions");
+	public static final Holder.Reference<SoundEvent> AMBIENT_CRIMSON_FOREST_LOOP = registerForHolder("ambient.crimson_forest.loop");
+	public static final Holder.Reference<SoundEvent> AMBIENT_CRIMSON_FOREST_MOOD = registerForHolder("ambient.crimson_forest.mood");
+	public static final Holder.Reference<SoundEvent> AMBIENT_NETHER_WASTES_ADDITIONS = registerForHolder("ambient.nether_wastes.additions");
+	public static final Holder.Reference<SoundEvent> AMBIENT_NETHER_WASTES_LOOP = registerForHolder("ambient.nether_wastes.loop");
+	public static final Holder.Reference<SoundEvent> AMBIENT_NETHER_WASTES_MOOD = registerForHolder("ambient.nether_wastes.mood");
+	public static final Holder.Reference<SoundEvent> AMBIENT_SOUL_SAND_VALLEY_ADDITIONS = registerForHolder("ambient.soul_sand_valley.additions");
+	public static final Holder.Reference<SoundEvent> AMBIENT_SOUL_SAND_VALLEY_LOOP = registerForHolder("ambient.soul_sand_valley.loop");
+	public static final Holder.Reference<SoundEvent> AMBIENT_SOUL_SAND_VALLEY_MOOD = registerForHolder("ambient.soul_sand_valley.mood");
+	public static final Holder.Reference<SoundEvent> AMBIENT_WARPED_FOREST_ADDITIONS = registerForHolder("ambient.warped_forest.additions");
+	public static final Holder.Reference<SoundEvent> AMBIENT_WARPED_FOREST_LOOP = registerForHolder("ambient.warped_forest.loop");
+	public static final Holder.Reference<SoundEvent> AMBIENT_WARPED_FOREST_MOOD = registerForHolder("ambient.warped_forest.mood");
 	public static final SoundEvent AMBIENT_UNDERWATER_ENTER = register("ambient.underwater.enter");
 	public static final SoundEvent AMBIENT_UNDERWATER_EXIT = register("ambient.underwater.exit");
 	public static final SoundEvent AMBIENT_UNDERWATER_LOOP = register("ambient.underwater.loop");
@@ -582,7 +583,7 @@ public class SoundEvents {
 	public static final SoundEvent HONEYCOMB_WAX_ON = register("item.honeycomb.wax_on");
 	public static final SoundEvent HONEY_DRINK = register("item.honey_bottle.drink");
 	public static final int GOAT_HORN_VARIANT_COUNT = 8;
-	public static final ImmutableList<SoundEvent> GOAT_HORN_SOUND_VARIANTS = registerGoatHornSoundVariants();
+	public static final ImmutableList<Holder.Reference<SoundEvent>> GOAT_HORN_SOUND_VARIANTS = registerGoatHornSoundVariants();
 	public static final SoundEvent HORSE_AMBIENT = register("entity.horse.ambient");
 	public static final SoundEvent HORSE_ANGRY = register("entity.horse.angry");
 	public static final SoundEvent HORSE_ARMOR = register("entity.horse.armor");
@@ -728,8 +729,8 @@ public class SoundEvents {
 	public static final SoundEvent MULE_DEATH = register("entity.mule.death");
 	public static final SoundEvent MULE_EAT = register("entity.mule.eat");
 	public static final SoundEvent MULE_HURT = register("entity.mule.hurt");
-	public static final SoundEvent MUSIC_CREATIVE = register("music.creative");
-	public static final SoundEvent MUSIC_CREDITS = register("music.credits");
+	public static final Holder.Reference<SoundEvent> MUSIC_CREATIVE = registerForHolder("music.creative");
+	public static final Holder.Reference<SoundEvent> MUSIC_CREDITS = registerForHolder("music.credits");
 	public static final SoundEvent MUSIC_DISC_5 = register("music_disc.5");
 	public static final SoundEvent MUSIC_DISC_11 = register("music_disc.11");
 	public static final SoundEvent MUSIC_DISC_13 = register("music_disc.13");
@@ -745,28 +746,28 @@ public class SoundEvents {
 	public static final SoundEvent MUSIC_DISC_WAIT = register("music_disc.wait");
 	public static final SoundEvent MUSIC_DISC_WARD = register("music_disc.ward");
 	public static final SoundEvent MUSIC_DISC_OTHERSIDE = register("music_disc.otherside");
-	public static final SoundEvent MUSIC_DRAGON = register("music.dragon");
-	public static final SoundEvent MUSIC_END = register("music.end");
-	public static final SoundEvent MUSIC_GAME = register("music.game");
-	public static final SoundEvent MUSIC_MENU = register("music.menu");
-	public static final SoundEvent MUSIC_BIOME_BASALT_DELTAS = register("music.nether.basalt_deltas");
-	public static final SoundEvent MUSIC_BIOME_CRIMSON_FOREST = register("music.nether.crimson_forest");
-	public static final SoundEvent MUSIC_BIOME_DEEP_DARK = register("music.overworld.deep_dark");
-	public static final SoundEvent MUSIC_BIOME_DRIPSTONE_CAVES = register("music.overworld.dripstone_caves");
-	public static final SoundEvent MUSIC_BIOME_GROVE = register("music.overworld.grove");
-	public static final SoundEvent MUSIC_BIOME_JAGGED_PEAKS = register("music.overworld.jagged_peaks");
-	public static final SoundEvent MUSIC_BIOME_LUSH_CAVES = register("music.overworld.lush_caves");
-	public static final SoundEvent MUSIC_BIOME_SWAMP = register("music.overworld.swamp");
-	public static final SoundEvent MUSIC_BIOME_JUNGLE_AND_FOREST = register("music.overworld.jungle_and_forest");
-	public static final SoundEvent MUSIC_BIOME_OLD_GROWTH_TAIGA = register("music.overworld.old_growth_taiga");
-	public static final SoundEvent MUSIC_BIOME_MEADOW = register("music.overworld.meadow");
-	public static final SoundEvent MUSIC_BIOME_NETHER_WASTES = register("music.nether.nether_wastes");
-	public static final SoundEvent MUSIC_BIOME_FROZEN_PEAKS = register("music.overworld.frozen_peaks");
-	public static final SoundEvent MUSIC_BIOME_SNOWY_SLOPES = register("music.overworld.snowy_slopes");
-	public static final SoundEvent MUSIC_BIOME_SOUL_SAND_VALLEY = register("music.nether.soul_sand_valley");
-	public static final SoundEvent MUSIC_BIOME_STONY_PEAKS = register("music.overworld.stony_peaks");
-	public static final SoundEvent MUSIC_BIOME_WARPED_FOREST = register("music.nether.warped_forest");
-	public static final SoundEvent MUSIC_UNDER_WATER = register("music.under_water");
+	public static final Holder.Reference<SoundEvent> MUSIC_DRAGON = registerForHolder("music.dragon");
+	public static final Holder.Reference<SoundEvent> MUSIC_END = registerForHolder("music.end");
+	public static final Holder.Reference<SoundEvent> MUSIC_GAME = registerForHolder("music.game");
+	public static final Holder.Reference<SoundEvent> MUSIC_MENU = registerForHolder("music.menu");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_BASALT_DELTAS = registerForHolder("music.nether.basalt_deltas");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_CRIMSON_FOREST = registerForHolder("music.nether.crimson_forest");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_DEEP_DARK = registerForHolder("music.overworld.deep_dark");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_DRIPSTONE_CAVES = registerForHolder("music.overworld.dripstone_caves");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_GROVE = registerForHolder("music.overworld.grove");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_JAGGED_PEAKS = registerForHolder("music.overworld.jagged_peaks");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_LUSH_CAVES = registerForHolder("music.overworld.lush_caves");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_SWAMP = registerForHolder("music.overworld.swamp");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_JUNGLE_AND_FOREST = registerForHolder("music.overworld.jungle_and_forest");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_OLD_GROWTH_TAIGA = registerForHolder("music.overworld.old_growth_taiga");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_MEADOW = registerForHolder("music.overworld.meadow");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_NETHER_WASTES = registerForHolder("music.nether.nether_wastes");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_FROZEN_PEAKS = registerForHolder("music.overworld.frozen_peaks");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_SNOWY_SLOPES = registerForHolder("music.overworld.snowy_slopes");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_SOUL_SAND_VALLEY = registerForHolder("music.nether.soul_sand_valley");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_STONY_PEAKS = registerForHolder("music.overworld.stony_peaks");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_WARPED_FOREST = registerForHolder("music.nether.warped_forest");
+	public static final Holder.Reference<SoundEvent> MUSIC_UNDER_WATER = registerForHolder("music.under_water");
 	public static final SoundEvent NETHER_BRICKS_BREAK = register("block.nether_bricks.break");
 	public static final SoundEvent NETHER_BRICKS_STEP = register("block.nether_bricks.step");
 	public static final SoundEvent NETHER_BRICKS_PLACE = register("block.nether_bricks.place");
@@ -834,22 +835,28 @@ public class SoundEvents {
 	public static final SoundEvent NETHERRACK_PLACE = register("block.netherrack.place");
 	public static final SoundEvent NETHERRACK_HIT = register("block.netherrack.hit");
 	public static final SoundEvent NETHERRACK_FALL = register("block.netherrack.fall");
-	public static final SoundEvent NOTE_BLOCK_BASEDRUM = register("block.note_block.basedrum");
-	public static final SoundEvent NOTE_BLOCK_BASS = register("block.note_block.bass");
-	public static final SoundEvent NOTE_BLOCK_BELL = register("block.note_block.bell");
-	public static final SoundEvent NOTE_BLOCK_CHIME = register("block.note_block.chime");
-	public static final SoundEvent NOTE_BLOCK_FLUTE = register("block.note_block.flute");
-	public static final SoundEvent NOTE_BLOCK_GUITAR = register("block.note_block.guitar");
-	public static final SoundEvent NOTE_BLOCK_HARP = register("block.note_block.harp");
-	public static final SoundEvent NOTE_BLOCK_HAT = register("block.note_block.hat");
-	public static final SoundEvent NOTE_BLOCK_PLING = register("block.note_block.pling");
-	public static final SoundEvent NOTE_BLOCK_SNARE = register("block.note_block.snare");
-	public static final SoundEvent NOTE_BLOCK_XYLOPHONE = register("block.note_block.xylophone");
-	public static final SoundEvent NOTE_BLOCK_IRON_XYLOPHONE = register("block.note_block.iron_xylophone");
-	public static final SoundEvent NOTE_BLOCK_COW_BELL = register("block.note_block.cow_bell");
-	public static final SoundEvent NOTE_BLOCK_DIDGERIDOO = register("block.note_block.didgeridoo");
-	public static final SoundEvent NOTE_BLOCK_BIT = register("block.note_block.bit");
-	public static final SoundEvent NOTE_BLOCK_BANJO = register("block.note_block.banjo");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_BASEDRUM = registerForHolder("block.note_block.basedrum");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_BASS = registerForHolder("block.note_block.bass");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_BELL = registerForHolder("block.note_block.bell");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_CHIME = registerForHolder("block.note_block.chime");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_FLUTE = registerForHolder("block.note_block.flute");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_GUITAR = registerForHolder("block.note_block.guitar");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_HARP = registerForHolder("block.note_block.harp");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_HAT = registerForHolder("block.note_block.hat");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_PLING = registerForHolder("block.note_block.pling");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_SNARE = registerForHolder("block.note_block.snare");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_XYLOPHONE = registerForHolder("block.note_block.xylophone");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IRON_XYLOPHONE = registerForHolder("block.note_block.iron_xylophone");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_COW_BELL = registerForHolder("block.note_block.cow_bell");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_DIDGERIDOO = registerForHolder("block.note_block.didgeridoo");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_BIT = registerForHolder("block.note_block.bit");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_BANJO = registerForHolder("block.note_block.banjo");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IMITATE_ZOMBIE = registerForHolder("block.note_block.imitate.zombie");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IMITATE_SKELETON = registerForHolder("block.note_block.imitate.skeleton");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IMITATE_CREEPER = registerForHolder("block.note_block.imitate.creeper");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IMITATE_ENDER_DRAGON = registerForHolder("block.note_block.imitate.ender_dragon");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IMITATE_WITHER_SKELETON = registerForHolder("block.note_block.imitate.wither_skeleton");
+	public static final Holder.Reference<SoundEvent> NOTE_BLOCK_IMITATE_PIGLIN = registerForHolder("block.note_block.imitate.piglin");
 	public static final SoundEvent OCELOT_HURT = register("entity.ocelot.hurt");
 	public static final SoundEvent OCELOT_AMBIENT = register("entity.ocelot.ambient");
 	public static final SoundEvent OCELOT_DEATH = register("entity.ocelot.death");
@@ -990,7 +997,7 @@ public class SoundEvents {
 	public static final SoundEvent RABBIT_DEATH = register("entity.rabbit.death");
 	public static final SoundEvent RABBIT_HURT = register("entity.rabbit.hurt");
 	public static final SoundEvent RABBIT_JUMP = register("entity.rabbit.jump");
-	public static final SoundEvent RAID_HORN = register("event.raid.horn");
+	public static final Holder.Reference<SoundEvent> RAID_HORN = registerForHolder("event.raid.horn");
 	public static final SoundEvent RAVAGER_AMBIENT = register("entity.ravager.ambient");
 	public static final SoundEvent RAVAGER_ATTACK = register("entity.ravager.attack");
 	public static final SoundEvent RAVAGER_CELEBRATE = register("entity.ravager.celebrate");
@@ -1012,7 +1019,7 @@ public class SoundEvents {
 	public static final SoundEvent REDSTONE_TORCH_BURNOUT = register("block.redstone_torch.burnout");
 	public static final SoundEvent RESPAWN_ANCHOR_AMBIENT = register("block.respawn_anchor.ambient");
 	public static final SoundEvent RESPAWN_ANCHOR_CHARGE = register("block.respawn_anchor.charge");
-	public static final SoundEvent RESPAWN_ANCHOR_DEPLETE = register("block.respawn_anchor.deplete");
+	public static final Holder.Reference<SoundEvent> RESPAWN_ANCHOR_DEPLETE = registerForHolder("block.respawn_anchor.deplete");
 	public static final SoundEvent RESPAWN_ANCHOR_SET_SPAWN = register("block.respawn_anchor.set_spawn");
 	public static final SoundEvent ROOTED_DIRT_BREAK = register("block.rooted_dirt.break");
 	public static final SoundEvent ROOTED_DIRT_FALL = register("block.rooted_dirt.fall");
@@ -1234,7 +1241,7 @@ public class SoundEvents {
 	public static final SoundEvent TURTLE_SHAMBLE = register("entity.turtle.shamble");
 	public static final SoundEvent TURTLE_SHAMBLE_BABY = register("entity.turtle.shamble_baby");
 	public static final SoundEvent TURTLE_SWIM = register("entity.turtle.swim");
-	public static final SoundEvent UI_BUTTON_CLICK = register("ui.button.click");
+	public static final Holder.Reference<SoundEvent> UI_BUTTON_CLICK = registerForHolder("ui.button.click");
 	public static final SoundEvent UI_LOOM_SELECT_PATTERN = register("ui.loom.select_pattern");
 	public static final SoundEvent UI_LOOM_TAKE_RESULT = register("ui.loom.take_result");
 	public static final SoundEvent UI_CARTOGRAPHY_TABLE_TAKE_RESULT = register("ui.cartography_table.take_result");
@@ -1388,15 +1395,37 @@ public class SoundEvents {
 	public static final SoundEvent ZOMBIE_VILLAGER_HURT = register("entity.zombie_villager.hurt");
 	public static final SoundEvent ZOMBIE_VILLAGER_STEP = register("entity.zombie_villager.step");
 
-	private static SoundEvent register(String string, float f) {
-		return Registry.register(BuiltInRegistries.SOUND_EVENT, string, SoundEvent.createFixedRangeEvent(new ResourceLocation(string), f));
+	private static Holder<SoundEvent> register(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f) {
+		return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createFixedRangeEvent(resourceLocation2, f));
 	}
 
 	private static SoundEvent register(String string) {
-		return Registry.register(BuiltInRegistries.SOUND_EVENT, string, SoundEvent.createVariableRangeEvent(new ResourceLocation(string)));
+		return register(new ResourceLocation(string));
 	}
 
-	private static ImmutableList<SoundEvent> registerGoatHornSoundVariants() {
-		return (ImmutableList<SoundEvent>)IntStream.range(0, 8).mapToObj(i -> register("item.goat_horn.sound." + i)).collect(ImmutableList.toImmutableList());
+	private static SoundEvent register(ResourceLocation resourceLocation) {
+		return register(resourceLocation, resourceLocation);
+	}
+
+	private static Holder.Reference<SoundEvent> registerForHolder(String string) {
+		return registerForHolder(new ResourceLocation(string));
+	}
+
+	private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation resourceLocation) {
+		return registerForHolder(resourceLocation, resourceLocation);
+	}
+
+	private static SoundEvent register(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
+		return Registry.register(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createVariableRangeEvent(resourceLocation2));
+	}
+
+	private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
+		return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createVariableRangeEvent(resourceLocation2));
+	}
+
+	private static ImmutableList<Holder.Reference<SoundEvent>> registerGoatHornSoundVariants() {
+		return (ImmutableList<Holder.Reference<SoundEvent>>)IntStream.range(0, 8)
+			.mapToObj(i -> registerForHolder("item.goat_horn.sound." + i))
+			.collect(ImmutableList.toImmutableList());
 	}
 }

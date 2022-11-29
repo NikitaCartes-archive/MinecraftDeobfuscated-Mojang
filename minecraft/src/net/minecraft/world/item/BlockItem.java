@@ -31,7 +31,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class BlockItem extends Item {
-	private static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+	public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
 	public static final String BLOCK_STATE_TAG = "BlockStateTag";
 	@Deprecated
 	private final Block block;

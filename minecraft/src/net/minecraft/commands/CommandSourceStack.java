@@ -27,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
@@ -527,8 +528,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getAvailableSoundEvents() {
-		return BuiltInRegistries.SOUND_EVENT.keySet();
+	public Stream<ResourceLocation> getAvailableSounds() {
+		return BuiltInRegistries.SOUND_EVENT.stream().map(SoundEvent::getLocation);
 	}
 
 	@Override

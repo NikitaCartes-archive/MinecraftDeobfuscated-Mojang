@@ -55,6 +55,11 @@ public class FloatTag extends NumericTag {
 	}
 
 	@Override
+	public int sizeInBits() {
+		return 96;
+	}
+
+	@Override
 	public byte getId() {
 		return 5;
 	}

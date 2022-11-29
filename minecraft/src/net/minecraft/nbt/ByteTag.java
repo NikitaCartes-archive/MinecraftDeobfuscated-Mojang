@@ -59,6 +59,11 @@ public class ByteTag extends NumericTag {
 	}
 
 	@Override
+	public int sizeInBits() {
+		return 72;
+	}
+
+	@Override
 	public byte getId() {
 		return 1;
 	}

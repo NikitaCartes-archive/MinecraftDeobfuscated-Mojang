@@ -45,7 +45,7 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (!level.isClientSide) {
+		if (!level.isClientSide && player.canUseGameMasterBlocks()) {
 			level.setBlock(blockPos, blockState.cycle(LEVEL), 2);
 			return InteractionResult.SUCCESS;
 		} else {

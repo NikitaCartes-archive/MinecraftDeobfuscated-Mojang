@@ -47,6 +47,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
@@ -73,7 +74,7 @@ import net.minecraft.world.phys.Vec3;
 public class FriendlyByteBuf extends ByteBuf {
 	private static final int MAX_VARINT_SIZE = 5;
 	private static final int MAX_VARLONG_SIZE = 10;
-	private static final int DEFAULT_NBT_QUOTA = 2097152;
+	public static final int DEFAULT_NBT_QUOTA = 2097152;
 	private final ByteBuf source;
 	public static final short MAX_STRING_LENGTH = 32767;
 	public static final int MAX_COMPONENT_STRING_LENGTH = 262144;
@@ -126,10 +127,40 @@ public class FriendlyByteBuf extends ByteBuf {
 		}
 	}
 
+	public <T> void writeId(IdMap<Holder<T>> idMap, Holder<T> holder, FriendlyByteBuf.Writer<T> writer) {
+		switch (holder.kind()) {
+			case REFERENCE:
+				int i = idMap.getId(holder);
+				if (i == -1) {
+					throw new IllegalArgumentException("Can't find id for '" + holder.value() + "' in map " + idMap);
+				}
+
+				this.writeVarInt(i + 1);
+				break;
+			case DIRECT:
+				this.writeVarInt(0);
+				writer.accept(this, holder.value());
+		}
+	}
+
 	@Nullable
 	public <T> T readById(IdMap<T> idMap) {
 		int i = this.readVarInt();
 		return idMap.byId(i);
+	}
+
+	public <T> Holder<T> readById(IdMap<Holder<T>> idMap, FriendlyByteBuf.Reader<T> reader) {
+		int i = this.readVarInt();
+		if (i == 0) {
+			return Holder.direct((T)reader.apply(this));
+		} else {
+			Holder<T> holder = idMap.byId(i - 1);
+			if (holder == null) {
+				throw new IllegalArgumentException("Can't find element with id " + i);
+			} else {
+				return holder;
+			}
+		}
 	}
 
 	public static <T> IntFunction<T> limitValue(IntFunction<T> intFunction, int i) {

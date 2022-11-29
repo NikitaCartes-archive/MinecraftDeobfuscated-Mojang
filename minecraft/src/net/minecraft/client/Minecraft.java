@@ -2220,20 +2220,24 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	private ItemStack addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity) {
+	private void addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity) {
 		CompoundTag compoundTag = blockEntity.saveWithFullMetadata();
+		BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
 		if (itemStack.getItem() instanceof PlayerHeadItem && compoundTag.contains("SkullOwner")) {
 			CompoundTag compoundTag2 = compoundTag.getCompound("SkullOwner");
-			itemStack.getOrCreateTag().put("SkullOwner", compoundTag2);
-			return itemStack;
+			CompoundTag compoundTag3 = itemStack.getOrCreateTag();
+			compoundTag3.put("SkullOwner", compoundTag2);
+			CompoundTag compoundTag4 = compoundTag3.getCompound("BlockEntityTag");
+			compoundTag4.remove("SkullOwner");
+			compoundTag4.remove("x");
+			compoundTag4.remove("y");
+			compoundTag4.remove("z");
 		} else {
-			BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
 			CompoundTag compoundTag2 = new CompoundTag();
 			ListTag listTag = new ListTag();
 			listTag.add(StringTag.valueOf("\"(+NBT)\""));
 			compoundTag2.put("Lore", listTag);
 			itemStack.addTagElement("display", compoundTag2);
-			return itemStack;
 		}
 	}
 

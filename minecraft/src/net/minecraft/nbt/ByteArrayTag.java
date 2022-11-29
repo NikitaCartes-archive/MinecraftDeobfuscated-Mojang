@@ -70,6 +70,11 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 	}
 
 	@Override
+	public int sizeInBits() {
+		return 192 + 8 * this.data.length;
+	}
+
+	@Override
 	public byte getId() {
 		return 7;
 	}

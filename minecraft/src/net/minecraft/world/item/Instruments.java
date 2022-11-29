@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -24,13 +25,13 @@ public interface Instruments {
 	}
 
 	static Instrument bootstrap(Registry<Instrument> registry) {
-		Registry.register(registry, PONDER_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(0), 140, 256.0F));
-		Registry.register(registry, SING_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(1), 140, 256.0F));
-		Registry.register(registry, SEEK_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(2), 140, 256.0F));
-		Registry.register(registry, FEEL_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(3), 140, 256.0F));
-		Registry.register(registry, ADMIRE_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(4), 140, 256.0F));
-		Registry.register(registry, CALL_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(5), 140, 256.0F));
-		Registry.register(registry, YEARN_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(6), 140, 256.0F));
-		return Registry.register(registry, DREAM_GOAT_HORN, new Instrument((SoundEvent)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(7), 140, 256.0F));
+		Registry.register(registry, PONDER_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(0), 140, 256.0F));
+		Registry.register(registry, SING_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(1), 140, 256.0F));
+		Registry.register(registry, SEEK_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(2), 140, 256.0F));
+		Registry.register(registry, FEEL_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(3), 140, 256.0F));
+		Registry.register(registry, ADMIRE_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(4), 140, 256.0F));
+		Registry.register(registry, CALL_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(5), 140, 256.0F));
+		Registry.register(registry, YEARN_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(6), 140, 256.0F));
+		return Registry.register(registry, DREAM_GOAT_HORN, new Instrument((Holder<SoundEvent>)SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(7), 140, 256.0F));
 	}
 }

@@ -211,6 +211,12 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 		return Optional.ofNullable((Holder.Reference)this.byKey.get(resourceKey));
 	}
 
+	@Override
+	public Holder<T> wrapAsHolder(T object) {
+		Holder.Reference<T> reference = (Holder.Reference<T>)this.byValue.get(object);
+		return (Holder<T>)(reference != null ? reference : Holder.direct(object));
+	}
+
 	Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> resourceKey) {
 		return (Holder.Reference<T>)this.byKey.computeIfAbsent(resourceKey, resourceKeyx -> {
 			if (this.unregisteredIntrusiveHolders != null) {

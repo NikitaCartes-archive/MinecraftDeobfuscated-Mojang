@@ -40,7 +40,7 @@ public class CompoundTag implements Tag {
 					String string = CompoundTag.readNamedTagName(dataInput, nbtAccounter);
 					nbtAccounter.accountBits((long)(224 + 16 * string.length()));
 					Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b), string, dataInput, i + 1, nbtAccounter);
-					if (map.put(string, tag) != null) {
+					if (map.put(string, tag) == null) {
 						nbtAccounter.accountBits(288L);
 					}
 				}
@@ -134,6 +134,19 @@ public class CompoundTag implements Tag {
 		}
 
 		dataOutput.writeByte(0);
+	}
+
+	@Override
+	public int sizeInBits() {
+		int i = 384;
+
+		for (Entry<String, Tag> entry : this.tags.entrySet()) {
+			i += 224 + 16 * ((String)entry.getKey()).length();
+			i += 288;
+			i += ((Tag)entry.getValue()).sizeInBits();
+		}
+
+		return i;
 	}
 
 	public Set<String> getAllKeys() {

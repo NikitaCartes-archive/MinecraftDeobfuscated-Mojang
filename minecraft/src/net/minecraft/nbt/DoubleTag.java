@@ -55,6 +55,11 @@ public class DoubleTag extends NumericTag {
 	}
 
 	@Override
+	public int sizeInBits() {
+		return 128;
+	}
+
+	@Override
 	public byte getId() {
 		return 6;
 	}

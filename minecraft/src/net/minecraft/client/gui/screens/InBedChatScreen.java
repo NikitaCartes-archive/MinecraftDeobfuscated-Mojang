@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -9,6 +10,8 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 @Environment(EnvType.CLIENT)
 public class InBedChatScreen extends ChatScreen {
+	private Button leaveBedButton;
+
 	public InBedChatScreen() {
 		super("");
 	}
@@ -16,11 +19,19 @@ public class InBedChatScreen extends ChatScreen {
 	@Override
 	protected void init() {
 		super.init();
-		this.addRenderableWidget(
-			Button.builder(Component.translatable("multiplayer.stopSleeping"), button -> this.sendWakeUp())
-				.bounds(this.width / 2 - 100, this.height - 40, 200, 20)
-				.build()
-		);
+		this.leaveBedButton = Button.builder(Component.translatable("multiplayer.stopSleeping"), button -> this.sendWakeUp())
+			.bounds(this.width / 2 - 100, this.height - 40, 200, 20)
+			.build();
+		this.addRenderableWidget(this.leaveBedButton);
+	}
+
+	@Override
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		if (!this.minecraft.getChatStatus().isChatAllowed(this.minecraft.isLocalServer())) {
+			this.leaveBedButton.render(poseStack, i, j, f);
+		} else {
+			super.render(poseStack, i, j, f);
+		}
 	}
 
 	@Override
@@ -29,10 +40,21 @@ public class InBedChatScreen extends ChatScreen {
 	}
 
 	@Override
+	public boolean charTyped(char c, int i) {
+		return !this.minecraft.getChatStatus().isChatAllowed(this.minecraft.isLocalServer()) ? true : super.charTyped(c, i);
+	}
+
+	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		if (i == 256) {
 			this.sendWakeUp();
-		} else if (i == 257 || i == 335) {
+		}
+
+		if (!this.minecraft.getChatStatus().isChatAllowed(this.minecraft.isLocalServer())) {
+			return true;
+		} else if (i != 257 && i != 335) {
+			return super.keyPressed(i, j, k);
+		} else {
 			if (this.handleChatInput(this.input.getValue(), true)) {
 				this.minecraft.setScreen(null);
 				this.input.setValue("");
@@ -41,8 +63,6 @@ public class InBedChatScreen extends ChatScreen {
 
 			return true;
 		}
-
-		return super.keyPressed(i, j, k);
 	}
 
 	private void sendWakeUp() {

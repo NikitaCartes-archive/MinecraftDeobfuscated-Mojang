@@ -69,8 +69,6 @@ import net.minecraft.client.resources.sounds.BeeFlyingSoundInstance;
 import net.minecraft.client.resources.sounds.BeeSoundInstance;
 import net.minecraft.client.resources.sounds.GuardianAttackSoundInstance;
 import net.minecraft.client.resources.sounds.MinecartSoundInstance;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.commands.CommandBuildContext;
@@ -129,7 +127,6 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
@@ -1830,7 +1827,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				clientboundSoundPacket.getX(),
 				clientboundSoundPacket.getY(),
 				clientboundSoundPacket.getZ(),
-				clientboundSoundPacket.getSound(),
+				clientboundSoundPacket.getSound().value(),
 				clientboundSoundPacket.getSource(),
 				clientboundSoundPacket.getVolume(),
 				clientboundSoundPacket.getPitch(),
@@ -1855,29 +1852,6 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 					clientboundSoundEntityPacket.getSeed()
 				);
 		}
-	}
-
-	@Override
-	public void handleCustomSoundEvent(ClientboundCustomSoundPacket clientboundCustomSoundPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundCustomSoundPacket, this, this.minecraft);
-		this.minecraft
-			.getSoundManager()
-			.play(
-				new SimpleSoundInstance(
-					clientboundCustomSoundPacket.getName(),
-					clientboundCustomSoundPacket.getSource(),
-					clientboundCustomSoundPacket.getVolume(),
-					clientboundCustomSoundPacket.getPitch(),
-					RandomSource.create(clientboundCustomSoundPacket.getSeed()),
-					false,
-					0,
-					SoundInstance.Attenuation.LINEAR,
-					clientboundCustomSoundPacket.getX(),
-					clientboundCustomSoundPacket.getY(),
-					clientboundCustomSoundPacket.getZ(),
-					false
-				)
-			);
 	}
 
 	@Override
