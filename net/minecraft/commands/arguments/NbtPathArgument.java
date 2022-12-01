@@ -36,7 +36,6 @@ implements ArgumentType<NbtPath> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
     public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.node.invalid"));
     public static final SimpleCommandExceptionType ERROR_DATA_TOO_DEEP = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_deep"));
-    public static final SimpleCommandExceptionType ERROR_DATA_TOO_LARGE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_large"));
     public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(object -> Component.translatable("arguments.nbtpath.nothing_found", object));
     static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.expected_list", object));
     static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.invalid_index", object));
@@ -227,11 +226,6 @@ implements ArgumentType<NbtPath> {
             if (list.isEmpty()) {
                 return 0;
             }
-            int i = list.size();
-            int j = tag.sizeInBits() + tag3.sizeInBits() * i;
-            if (j > 0x200000) {
-                throw ERROR_DATA_TOO_LARGE.create();
-            }
             Node node = this.nodes[this.nodes.length - 1];
             MutableBoolean mutableBoolean = new MutableBoolean(false);
             return NbtPath.apply(list, tag2 -> node.setTag((Tag)tag2, () -> {
@@ -248,24 +242,15 @@ implements ArgumentType<NbtPath> {
         }
 
         public int insert(int i, CompoundTag compoundTag, List<Tag> list) throws CommandSyntaxException {
-            int l;
             ArrayList<Tag> list2 = new ArrayList<Tag>(list.size());
-            int j = 0;
             for (Tag tag : list) {
                 Tag tag2 = tag.copy();
                 list2.add(tag2);
-                if (NbtPath.isTooDeep(tag2, this.estimatePathDepth())) {
-                    throw ERROR_DATA_TOO_DEEP.create();
-                }
-                j += tag2.sizeInBits();
+                if (!NbtPath.isTooDeep(tag2, this.estimatePathDepth())) continue;
+                throw ERROR_DATA_TOO_DEEP.create();
             }
             List<Tag> collection = this.getOrCreate(compoundTag, ListTag::new);
-            int k = compoundTag.sizeInBits();
-            int m = k + (l = collection.size()) * j;
-            if (m > 0x200000) {
-                throw ERROR_DATA_TOO_LARGE.create();
-            }
-            int n = 0;
+            int j = 0;
             boolean bl = false;
             for (Tag tag3 : collection) {
                 if (!(tag3 instanceof CollectionTag)) {
@@ -273,20 +258,20 @@ implements ArgumentType<NbtPath> {
                 }
                 CollectionTag collectionTag = (CollectionTag)tag3;
                 boolean bl2 = false;
-                int o = i < 0 ? collectionTag.size() + i + 1 : i;
+                int k = i < 0 ? collectionTag.size() + i + 1 : i;
                 for (Tag tag4 : list2) {
                     try {
-                        if (!collectionTag.addTag(o, bl ? tag4.copy() : tag4)) continue;
-                        ++o;
+                        if (!collectionTag.addTag(k, bl ? tag4.copy() : tag4)) continue;
+                        ++k;
                         bl2 = true;
                     } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                        throw ERROR_INVALID_INDEX.create(o);
+                        throw ERROR_INVALID_INDEX.create(k);
                     }
                 }
                 bl = true;
-                n += bl2 ? 1 : 0;
+                j += bl2 ? 1 : 0;
             }
-            return n;
+            return j;
         }
 
         public int remove(Tag tag) {

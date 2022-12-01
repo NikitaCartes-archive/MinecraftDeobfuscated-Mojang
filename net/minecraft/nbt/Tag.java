@@ -11,10 +11,10 @@ import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagVisitor;
 
 public interface Tag {
-    public static final int OBJECT_HEADER = 64;
-    public static final int ARRAY_HEADER = 96;
-    public static final int OBJECT_REFERENCE = 32;
-    public static final int STRING_SIZE = 224;
+    public static final int OBJECT_HEADER = 8;
+    public static final int ARRAY_HEADER = 12;
+    public static final int OBJECT_REFERENCE = 4;
+    public static final int STRING_SIZE = 28;
     public static final byte TAG_END = 0;
     public static final byte TAG_BYTE = 1;
     public static final byte TAG_SHORT = 2;
@@ -41,11 +41,7 @@ public interface Tag {
 
     public Tag copy();
 
-    public int sizeInBits();
-
-    default public int sizeInBytes() {
-        return this.sizeInBits() / 8;
-    }
+    public int sizeInBytes();
 
     default public String getAsString() {
         return new StringTagVisitor().visit(this);

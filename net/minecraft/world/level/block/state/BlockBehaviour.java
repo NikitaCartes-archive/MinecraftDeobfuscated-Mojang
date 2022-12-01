@@ -649,11 +649,11 @@ implements FeatureElement {
         }
 
         public void initCache() {
+            this.fluidState = ((Block)this.owner).getFluidState(this.asState());
+            this.isRandomlyTicking = ((Block)this.owner).isRandomlyTicking(this.asState());
             if (!this.getBlock().hasDynamicShape()) {
                 this.cache = new Cache(this.asState());
             }
-            this.fluidState = ((Block)this.owner).getFluidState(this.asState());
-            this.isRandomlyTicking = ((Block)this.owner).isRandomlyTicking(this.asState());
         }
 
         public Block getBlock() {

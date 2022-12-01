@@ -11,6 +11,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class EnderDragonPart
 extends Entity {
@@ -41,6 +43,12 @@ extends Entity {
     @Override
     public boolean isPickable() {
         return true;
+    }
+
+    @Override
+    @Nullable
+    public ItemStack getPickResult() {
+        return this.parentMob.getPickResult();
     }
 
     @Override

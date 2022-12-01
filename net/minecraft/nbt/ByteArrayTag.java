@@ -20,14 +20,14 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class ByteArrayTag
 extends CollectionTag<ByteTag> {
-    private static final int SELF_SIZE_IN_BITS = 192;
+    private static final int SELF_SIZE_IN_BYTES = 24;
     public static final TagType<ByteArrayTag> TYPE = new TagType.VariableSize<ByteArrayTag>(){
 
         @Override
         public ByteArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-            nbtAccounter.accountBits(192L);
+            nbtAccounter.accountBytes(24L);
             int j = dataInput.readInt();
-            nbtAccounter.accountBits(8L * (long)j);
+            nbtAccounter.accountBytes(1L * (long)j);
             byte[] bs = new byte[j];
             dataInput.readFully(bs);
             return new ByteArrayTag(bs);
@@ -87,8 +87,8 @@ extends CollectionTag<ByteTag> {
     }
 
     @Override
-    public int sizeInBits() {
-        return 192 + 8 * this.data.length;
+    public int sizeInBytes() {
+        return 24 + 1 * this.data.length;
     }
 
     @Override

@@ -50,7 +50,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
@@ -166,7 +165,7 @@ public class Options {
         optionInstance.set(graphicsStatus);
         minecraft.levelRenderer.allChanged();
     }, Codec.INT.xmap(GraphicsStatus::byId, GraphicsStatus::getId)), GraphicsStatus.FANCY, graphicsStatus -> {});
-    private final OptionInstance<AmbientOcclusionStatus> ambientOcclusion = new OptionInstance<AmbientOcclusionStatus>("options.ao", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<AmbientOcclusionStatus>(Arrays.asList(AmbientOcclusionStatus.values()), Codec.either(Codec.BOOL.xmap(boolean_ -> boolean_ != false ? AmbientOcclusionStatus.MAX.getId() : AmbientOcclusionStatus.OFF.getId(), integer -> integer.intValue() == AmbientOcclusionStatus.MAX.getId()), Codec.INT).xmap(either -> either.map(integer -> integer, integer -> integer), Either::right).xmap(AmbientOcclusionStatus::byId, AmbientOcclusionStatus::getId)), AmbientOcclusionStatus.MAX, ambientOcclusionStatus -> Minecraft.getInstance().levelRenderer.allChanged());
+    private final OptionInstance<Boolean> ambientOcclusion = OptionInstance.createBoolean("options.ao", true, boolean_ -> Minecraft.getInstance().levelRenderer.allChanged());
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_NONE = Component.translatable("options.prioritizeChunkUpdates.none.tooltip");
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED = Component.translatable("options.prioritizeChunkUpdates.byPlayer.tooltip");
     private static final Component PRIORITIZE_CHUNK_TOOLTIP_NEARBY = Component.translatable("options.prioritizeChunkUpdates.nearby.tooltip");
@@ -447,7 +446,7 @@ public class Options {
         return this.graphicsMode;
     }
 
-    public OptionInstance<AmbientOcclusionStatus> ambientOcclusion() {
+    public OptionInstance<Boolean> ambientOcclusion() {
         return this.ambientOcclusion;
     }
 
@@ -1072,7 +1071,7 @@ public class Options {
     }
 
     private static List<String> readPackList(String string) {
-        List<String> list = GsonHelper.fromJson(GSON, string, RESOURCE_PACK_TYPE);
+        List<String> list = GsonHelper.fromNullableJson(GSON, string, RESOURCE_PACK_TYPE);
         return list != null ? list : Lists.newArrayList();
     }
 

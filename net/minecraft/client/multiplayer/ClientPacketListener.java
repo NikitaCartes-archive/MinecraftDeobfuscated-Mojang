@@ -1637,7 +1637,7 @@ ClientGamePacketListener {
     @Override
     public void handleSoundEvent(ClientboundSoundPacket clientboundSoundPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundSoundPacket, this, this.minecraft);
-        this.minecraft.level.playSeededSound((Player)this.minecraft.player, clientboundSoundPacket.getX(), clientboundSoundPacket.getY(), clientboundSoundPacket.getZ(), clientboundSoundPacket.getSound().value(), clientboundSoundPacket.getSource(), clientboundSoundPacket.getVolume(), clientboundSoundPacket.getPitch(), clientboundSoundPacket.getSeed());
+        this.minecraft.level.playSeededSound((Player)this.minecraft.player, clientboundSoundPacket.getX(), clientboundSoundPacket.getY(), clientboundSoundPacket.getZ(), clientboundSoundPacket.getSound(), clientboundSoundPacket.getSource(), clientboundSoundPacket.getVolume(), clientboundSoundPacket.getPitch(), clientboundSoundPacket.getSeed());
     }
 
     @Override

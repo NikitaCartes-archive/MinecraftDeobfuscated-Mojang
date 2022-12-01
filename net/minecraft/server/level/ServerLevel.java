@@ -794,8 +794,8 @@ implements WorldGenLevel {
     }
 
     @Override
-    public void playSeededSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g, long l) {
-        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), soundEvent.getRange(f), this.dimension(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g, l));
+    public void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l) {
+        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), holder.value().getRange(f), this.dimension(), new ClientboundSoundEntityPacket(holder, soundSource, entity, f, g, l));
     }
 
     @Override

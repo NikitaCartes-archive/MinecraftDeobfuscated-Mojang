@@ -72,7 +72,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.Util;
-import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.CloudStatus;
@@ -1937,7 +1936,7 @@ implements WindowEventHandler {
     }
 
     public static boolean useAmbientOcclusion() {
-        return Minecraft.instance.options.ambientOcclusion().get() != AmbientOcclusionStatus.OFF;
+        return Minecraft.instance.options.ambientOcclusion().get();
     }
 
     private void pickBlock() {

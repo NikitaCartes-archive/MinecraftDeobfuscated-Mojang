@@ -1955,66 +1955,67 @@ AutoCloseable {
         RenderSystem.enablePolygonOffset();
         RenderSystem.disableCull();
         float m = (float)(Util.getMillis() % 3000L) / 3000.0f;
-        float n = 0.0f;
-        float o = 0.0f;
-        float p = (float)(h - Mth.frac(camera.getPosition().y));
+        float n = (float)(-Mth.frac(camera.getPosition().y * 0.5));
+        float o = n + (float)h;
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        double q = Math.max((double)Mth.floor(g - d), worldBorder.getMinZ());
-        double r = Math.min((double)Mth.ceil(g + d), worldBorder.getMaxZ());
+        double p = Math.max((double)Mth.floor(g - d), worldBorder.getMinZ());
+        double q = Math.min((double)Mth.ceil(g + d), worldBorder.getMaxZ());
+        float r = (float)(Mth.floor(p) & 1) * 0.5f;
         if (f > worldBorder.getMaxX() - d) {
-            s = 0.0f;
-            t = q;
-            while (t < r) {
-                u = Math.min(1.0, r - t);
+            s = r;
+            t = p;
+            while (t < q) {
+                u = Math.min(1.0, q - t);
                 v = (float)u * 0.5f;
-                bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m - s, m + p).endVertex();
-                bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m - (v + s), m + p).endVertex();
-                bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m - (v + s), m + 0.0f).endVertex();
-                bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m - s, m + 0.0f).endVertex();
+                bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m - s, m + o).endVertex();
+                bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m - (v + s), m + o).endVertex();
+                bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m - (v + s), m + n).endVertex();
+                bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m - s, m + n).endVertex();
                 t += 1.0;
                 s += 0.5f;
             }
         }
         if (f < worldBorder.getMinX() + d) {
-            s = 0.0f;
-            t = q;
-            while (t < r) {
-                u = Math.min(1.0, r - t);
+            s = r;
+            t = p;
+            while (t < q) {
+                u = Math.min(1.0, q - t);
                 v = (float)u * 0.5f;
-                bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t - g).uv(m + s, m + p).endVertex();
-                bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t + u - g).uv(m + v + s, m + p).endVertex();
-                bufferBuilder.vertex(worldBorder.getMinX() - f, h, t + u - g).uv(m + v + s, m + 0.0f).endVertex();
-                bufferBuilder.vertex(worldBorder.getMinX() - f, h, t - g).uv(m + s, m + 0.0f).endVertex();
+                bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t - g).uv(m + s, m + o).endVertex();
+                bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t + u - g).uv(m + v + s, m + o).endVertex();
+                bufferBuilder.vertex(worldBorder.getMinX() - f, h, t + u - g).uv(m + v + s, m + n).endVertex();
+                bufferBuilder.vertex(worldBorder.getMinX() - f, h, t - g).uv(m + s, m + n).endVertex();
                 t += 1.0;
                 s += 0.5f;
             }
         }
-        q = Math.max((double)Mth.floor(f - d), worldBorder.getMinX());
-        r = Math.min((double)Mth.ceil(f + d), worldBorder.getMaxX());
+        p = Math.max((double)Mth.floor(f - d), worldBorder.getMinX());
+        q = Math.min((double)Mth.ceil(f + d), worldBorder.getMaxX());
+        r = (float)(Mth.floor(p) & 1) * 0.5f;
         if (g > worldBorder.getMaxZ() - d) {
-            s = 0.0f;
-            t = q;
-            while (t < r) {
-                u = Math.min(1.0, r - t);
+            s = r;
+            t = p;
+            while (t < q) {
+                u = Math.min(1.0, q - t);
                 v = (float)u * 0.5f;
-                bufferBuilder.vertex(t - f, -h, worldBorder.getMaxZ() - g).uv(m + s, m + p).endVertex();
-                bufferBuilder.vertex(t + u - f, -h, worldBorder.getMaxZ() - g).uv(m + v + s, m + p).endVertex();
-                bufferBuilder.vertex(t + u - f, h, worldBorder.getMaxZ() - g).uv(m + v + s, m + 0.0f).endVertex();
-                bufferBuilder.vertex(t - f, h, worldBorder.getMaxZ() - g).uv(m + s, m + 0.0f).endVertex();
+                bufferBuilder.vertex(t - f, -h, worldBorder.getMaxZ() - g).uv(m + s, m + o).endVertex();
+                bufferBuilder.vertex(t + u - f, -h, worldBorder.getMaxZ() - g).uv(m + v + s, m + o).endVertex();
+                bufferBuilder.vertex(t + u - f, h, worldBorder.getMaxZ() - g).uv(m + v + s, m + n).endVertex();
+                bufferBuilder.vertex(t - f, h, worldBorder.getMaxZ() - g).uv(m + s, m + n).endVertex();
                 t += 1.0;
                 s += 0.5f;
             }
         }
         if (g < worldBorder.getMinZ() + d) {
-            s = 0.0f;
-            t = q;
-            while (t < r) {
-                u = Math.min(1.0, r - t);
+            s = r;
+            t = p;
+            while (t < q) {
+                u = Math.min(1.0, q - t);
                 v = (float)u * 0.5f;
-                bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m - s, m + p).endVertex();
-                bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m - (v + s), m + p).endVertex();
-                bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m - (v + s), m + 0.0f).endVertex();
-                bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m - s, m + 0.0f).endVertex();
+                bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m - s, m + o).endVertex();
+                bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m - (v + s), m + o).endVertex();
+                bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m - (v + s), m + n).endVertex();
+                bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m - s, m + n).endVertex();
                 t += 1.0;
                 s += 0.5f;
             }

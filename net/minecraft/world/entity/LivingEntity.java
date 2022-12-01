@@ -616,7 +616,7 @@ extends Entity {
     public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack, ItemStack itemStack2) {
         boolean bl;
         boolean bl2 = bl = itemStack2.isEmpty() && itemStack.isEmpty();
-        if (bl || ItemStack.isSameIgnoreDurability(itemStack, itemStack2) || this.firstTick) {
+        if (bl || ItemStack.isSame(itemStack, itemStack2) || this.firstTick) {
             return;
         }
         if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
@@ -2572,7 +2572,7 @@ extends Entity {
 
     private void updatingUsingItem() {
         if (this.isUsingItem()) {
-            if (ItemStack.isSameIgnoreDurability(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
+            if (ItemStack.isSame(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
                 this.useItem = this.getItemInHand(this.getUsedItemHand());
                 this.updateUsingItem(this.useItem);
             } else {

@@ -346,7 +346,7 @@ implements InventoryCarrier {
     }
 
     private boolean allayConsidersItemEqual(ItemStack itemStack, ItemStack itemStack2) {
-        return itemStack.sameItemStackIgnoreDurability(itemStack2) && !this.hasNonMatchingPotion(itemStack, itemStack2);
+        return itemStack.sameItem(itemStack2) && !this.hasNonMatchingPotion(itemStack, itemStack2);
     }
 
     private boolean hasNonMatchingPotion(ItemStack itemStack, ItemStack itemStack2) {

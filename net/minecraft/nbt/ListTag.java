@@ -29,12 +29,12 @@ import net.minecraft.nbt.TagVisitor;
 
 public class ListTag
 extends CollectionTag<Tag> {
-    private static final int SELF_SIZE_IN_BITS = 296;
+    private static final int SELF_SIZE_IN_BYTES = 37;
     public static final TagType<ListTag> TYPE = new TagType.VariableSize<ListTag>(){
 
         @Override
         public ListTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-            nbtAccounter.accountBits(296L);
+            nbtAccounter.accountBytes(37L);
             if (i > 512) {
                 throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
             }
@@ -43,7 +43,7 @@ extends CollectionTag<Tag> {
             if (b == 0 && j > 0) {
                 throw new RuntimeException("Missing type on ListTag");
             }
-            nbtAccounter.accountBits(32L * (long)j);
+            nbtAccounter.accountBytes(4L * (long)j);
             TagType<?> tagType = TagTypes.getType(b);
             ArrayList<Tag> list = Lists.newArrayListWithCapacity(j);
             for (int k = 0; k < j; ++k) {
@@ -153,11 +153,11 @@ extends CollectionTag<Tag> {
     }
 
     @Override
-    public int sizeInBits() {
-        int i = 296;
-        i += 32 * this.list.size();
+    public int sizeInBytes() {
+        int i = 37;
+        i += 4 * this.list.size();
         for (Tag tag : this.list) {
-            i += tag.sizeInBits();
+            i += tag.sizeInBytes();
         }
         return i;
     }

@@ -489,7 +489,7 @@ Nameable {
     public boolean contains(ItemStack itemStack) {
         for (List list : this.compartments) {
             for (ItemStack itemStack2 : list) {
-                if (itemStack2.isEmpty() || !itemStack2.sameItem(itemStack)) continue;
+                if (itemStack2.isEmpty() || !ItemStack.isSameItemSameTags(itemStack2, itemStack)) continue;
                 return true;
             }
         }

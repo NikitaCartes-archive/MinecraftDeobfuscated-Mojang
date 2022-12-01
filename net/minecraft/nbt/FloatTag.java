@@ -16,13 +16,13 @@ import net.minecraft.util.Mth;
 
 public class FloatTag
 extends NumericTag {
-    private static final int SELF_SIZE_IN_BITS = 96;
+    private static final int SELF_SIZE_IN_BYTES = 12;
     public static final FloatTag ZERO = new FloatTag(0.0f);
     public static final TagType<FloatTag> TYPE = new TagType.StaticSize<FloatTag>(){
 
         @Override
         public FloatTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-            nbtAccounter.accountBits(96L);
+            nbtAccounter.accountBytes(12L);
             return FloatTag.valueOf(dataInput.readFloat());
         }
 
@@ -75,8 +75,8 @@ extends NumericTag {
     }
 
     @Override
-    public int sizeInBits() {
-        return 96;
+    public int sizeInBytes() {
+        return 12;
     }
 
     @Override

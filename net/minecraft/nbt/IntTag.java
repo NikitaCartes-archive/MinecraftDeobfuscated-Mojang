@@ -15,12 +15,12 @@ import net.minecraft.nbt.TagVisitor;
 
 public class IntTag
 extends NumericTag {
-    private static final int SELF_SIZE_IN_BITS = 96;
+    private static final int SELF_SIZE_IN_BYTES = 12;
     public static final TagType<IntTag> TYPE = new TagType.StaticSize<IntTag>(){
 
         @Override
         public IntTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-            nbtAccounter.accountBits(96L);
+            nbtAccounter.accountBytes(12L);
             return IntTag.valueOf(dataInput.readInt());
         }
 
@@ -73,8 +73,8 @@ extends NumericTag {
     }
 
     @Override
-    public int sizeInBits() {
-        return 96;
+    public int sizeInBytes() {
+        return 12;
     }
 
     @Override

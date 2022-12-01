@@ -65,7 +65,7 @@ extends NamedEntityFix {
             component = CommonComponents.EMPTY;
         } else if (string2.charAt(0) == '\"' && string2.charAt(string2.length() - 1) == '\"' || string2.charAt(0) == '{' && string2.charAt(string2.length() - 1) == '}') {
             try {
-                component = GsonHelper.fromJson(GSON, string2, Component.class, true);
+                component = GsonHelper.fromNullableJson(GSON, string2, Component.class, true);
                 if (component == null) {
                     component = CommonComponents.EMPTY;
                 }

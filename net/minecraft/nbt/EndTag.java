@@ -14,12 +14,12 @@ import net.minecraft.nbt.TagVisitor;
 
 public class EndTag
 implements Tag {
-    private static final int SELF_SIZE_IN_BITS = 64;
+    private static final int SELF_SIZE_IN_BYTES = 8;
     public static final TagType<EndTag> TYPE = new TagType<EndTag>(){
 
         @Override
         public EndTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) {
-            nbtAccounter.accountBits(64L);
+            nbtAccounter.accountBytes(8L);
             return INSTANCE;
         }
 
@@ -66,8 +66,8 @@ implements Tag {
     }
 
     @Override
-    public int sizeInBits() {
-        return 64;
+    public int sizeInBytes() {
+        return 8;
     }
 
     @Override

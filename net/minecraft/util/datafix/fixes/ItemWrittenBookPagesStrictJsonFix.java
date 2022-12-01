@@ -35,7 +35,7 @@ extends DataFix {
                 component = CommonComponents.EMPTY;
             } else if (string.charAt(0) == '\"' && string.charAt(string.length() - 1) == '\"' || string.charAt(0) == '{' && string.charAt(string.length() - 1) == '}') {
                 try {
-                    component = GsonHelper.fromJson(BlockEntitySignTextStrictJsonFix.GSON, string, Component.class, true);
+                    component = GsonHelper.fromNullableJson(BlockEntitySignTextStrictJsonFix.GSON, string, Component.class, true);
                     if (component == null) {
                         component = CommonComponents.EMPTY;
                     }

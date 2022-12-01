@@ -44,12 +44,9 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
                 BufferedReader reader = entry.getValue().openAsReader();
                 try {
                     JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
-                    if (jsonElement != null) {
-                        JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
-                        if (jsonElement2 == null) continue;
-                        throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
-                    }
-                    LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation2, (Object)resourceLocation);
+                    JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
+                    if (jsonElement2 == null) continue;
+                    throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
                 } finally {
                     if (reader == null) continue;
                     ((Reader)reader).close();
