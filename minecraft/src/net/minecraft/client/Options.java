@@ -197,24 +197,8 @@ public class Options {
 		graphicsStatus -> {
 		}
 	);
-	private final OptionInstance<AmbientOcclusionStatus> ambientOcclusion = new OptionInstance<>(
-		"options.ao",
-		OptionInstance.noTooltip(),
-		OptionInstance.forOptionEnum(),
-		new OptionInstance.Enum<>(
-			Arrays.asList(AmbientOcclusionStatus.values()),
-			Codec.either(
-					Codec.BOOL
-						.xmap(
-							boolean_ -> boolean_ ? AmbientOcclusionStatus.MAX.getId() : AmbientOcclusionStatus.OFF.getId(), integer -> integer == AmbientOcclusionStatus.MAX.getId()
-						),
-					Codec.INT
-				)
-				.xmap(either -> either.map(integer -> integer, integer -> integer), Either::right)
-				.xmap(AmbientOcclusionStatus::byId, AmbientOcclusionStatus::getId)
-		),
-		AmbientOcclusionStatus.MAX,
-		ambientOcclusionStatus -> Minecraft.getInstance().levelRenderer.allChanged()
+	private final OptionInstance<Boolean> ambientOcclusion = OptionInstance.createBoolean(
+		"options.ao", true, boolean_ -> Minecraft.getInstance().levelRenderer.allChanged()
 	);
 	private static final Component PRIORITIZE_CHUNK_TOOLTIP_NONE = Component.translatable("options.prioritizeChunkUpdates.none.tooltip");
 	private static final Component PRIORITIZE_CHUNK_TOOLTIP_PLAYER_AFFECTED = Component.translatable("options.prioritizeChunkUpdates.byPlayer.tooltip");
@@ -719,7 +703,7 @@ public class Options {
 		return this.graphicsMode;
 	}
 
-	public OptionInstance<AmbientOcclusionStatus> ambientOcclusion() {
+	public OptionInstance<Boolean> ambientOcclusion() {
 		return this.ambientOcclusion;
 	}
 
@@ -1419,7 +1403,7 @@ public class Options {
 	}
 
 	private static List<String> readPackList(String string) {
-		List<String> list = GsonHelper.fromJson(GSON, string, RESOURCE_PACK_TYPE);
+		List<String> list = GsonHelper.fromNullableJson(GSON, string, RESOURCE_PACK_TYPE);
 		return (List<String>)(list != null ? list : Lists.<String>newArrayList());
 	}
 

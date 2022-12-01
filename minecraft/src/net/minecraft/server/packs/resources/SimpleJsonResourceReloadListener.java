@@ -38,13 +38,9 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 
 				try {
 					JsonElement jsonElement = GsonHelper.fromJson(this.gson, reader, JsonElement.class);
-					if (jsonElement != null) {
-						JsonElement jsonElement2 = (JsonElement)map.put(resourceLocation2, jsonElement);
-						if (jsonElement2 != null) {
-							throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
-						}
-					} else {
-						LOGGER.error("Couldn't load data file {} from {} as it's null or empty", resourceLocation2, resourceLocation);
+					JsonElement jsonElement2 = (JsonElement)map.put(resourceLocation2, jsonElement);
+					if (jsonElement2 != null) {
+						throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
 					}
 				} catch (Throwable var13) {
 					if (reader != null) {

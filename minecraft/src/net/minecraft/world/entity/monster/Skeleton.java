@@ -12,6 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class Skeleton extends AbstractSkeleton {
+	private static final int TOTAL_CONVERSION_TIME = 300;
 	private static final EntityDataAccessor<Boolean> DATA_STRAY_CONVERSION_ID = SynchedEntityData.defineId(Skeleton.class, EntityDataSerializers.BOOLEAN);
 	public static final String CONVERSION_TAG = "StrayConversionTime";
 	private int inPowderSnowTime;
@@ -43,18 +44,21 @@ public class Skeleton extends AbstractSkeleton {
 	@Override
 	public void tick() {
 		if (!this.level.isClientSide && this.isAlive() && !this.isNoAi()) {
-			if (this.isFreezeConverting()) {
-				this.conversionTime--;
-				if (this.conversionTime < 0) {
-					this.doFreezeConversion();
-				}
-			} else if (this.isInPowderSnow) {
-				this.inPowderSnowTime++;
-				if (this.inPowderSnowTime >= 140) {
-					this.startFreezeConversion(300);
+			if (this.isInPowderSnow) {
+				if (this.isFreezeConverting()) {
+					this.conversionTime--;
+					if (this.conversionTime < 0) {
+						this.doFreezeConversion();
+					}
+				} else {
+					this.inPowderSnowTime++;
+					if (this.inPowderSnowTime >= 140) {
+						this.startFreezeConversion(300);
+					}
 				}
 			} else {
 				this.inPowderSnowTime = -1;
+				this.setFreezeConverting(false);
 			}
 		}
 
@@ -77,7 +81,7 @@ public class Skeleton extends AbstractSkeleton {
 
 	private void startFreezeConversion(int i) {
 		this.conversionTime = i;
-		this.entityData.set(DATA_STRAY_CONVERSION_ID, true);
+		this.setFreezeConverting(true);
 	}
 
 	protected void doFreezeConversion() {

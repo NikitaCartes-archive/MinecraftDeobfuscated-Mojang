@@ -89,21 +89,21 @@ public class PackSelectionScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.doneButton = this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 + 4, this.height - 48, 150, 20).build()
-		);
+		this.availablePackList = new TransferableSelectionList(this.minecraft, this, 200, this.height, Component.translatable("pack.available.title"));
+		this.availablePackList.setLeftPos(this.width / 2 - 4 - 200);
+		this.addWidget(this.availablePackList);
+		this.selectedPackList = new TransferableSelectionList(this.minecraft, this, 200, this.height, Component.translatable("pack.selected.title"));
+		this.selectedPackList.setLeftPos(this.width / 2 + 4);
+		this.addWidget(this.selectedPackList);
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("pack.openFolder"), button -> Util.getPlatform().openUri(this.packDir.toUri()))
 				.bounds(this.width / 2 - 154, this.height - 48, 150, 20)
 				.tooltip(Tooltip.create(DIRECTORY_BUTTON_TOOLTIP))
 				.build()
 		);
-		this.availablePackList = new TransferableSelectionList(this.minecraft, 200, this.height, Component.translatable("pack.available.title"));
-		this.availablePackList.setLeftPos(this.width / 2 - 4 - 200);
-		this.addWidget(this.availablePackList);
-		this.selectedPackList = new TransferableSelectionList(this.minecraft, 200, this.height, Component.translatable("pack.selected.title"));
-		this.selectedPackList.setLeftPos(this.width / 2 + 4);
-		this.addWidget(this.selectedPackList);
+		this.doneButton = this.addRenderableWidget(
+			Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 + 4, this.height - 48, 150, 20).build()
+		);
 		this.reload();
 	}
 
@@ -133,6 +133,7 @@ public class PackSelectionScreen extends Screen {
 
 	private void updateList(TransferableSelectionList transferableSelectionList, Stream<PackSelectionModel.Entry> stream) {
 		transferableSelectionList.children().clear();
+		transferableSelectionList.setSelected(null);
 		stream.forEach(
 			entry -> transferableSelectionList.children().add(new TransferableSelectionList.PackEntry(this.minecraft, transferableSelectionList, this, entry))
 		);

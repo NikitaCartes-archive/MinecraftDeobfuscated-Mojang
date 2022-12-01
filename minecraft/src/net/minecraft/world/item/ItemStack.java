@@ -443,20 +443,8 @@ public final class ItemStack {
 		}
 	}
 
-	public static boolean isSameIgnoreDurability(ItemStack itemStack, ItemStack itemStack2) {
-		if (itemStack == itemStack2) {
-			return true;
-		} else {
-			return !itemStack.isEmpty() && !itemStack2.isEmpty() ? itemStack.sameItemStackIgnoreDurability(itemStack2) : false;
-		}
-	}
-
 	public boolean sameItem(ItemStack itemStack) {
 		return !itemStack.isEmpty() && this.is(itemStack.getItem());
-	}
-
-	public boolean sameItemStackIgnoreDurability(ItemStack itemStack) {
-		return !this.isDamageableItem() ? this.sameItem(itemStack) : !itemStack.isEmpty() && this.is(itemStack.getItem());
 	}
 
 	public static boolean isSameItemSameTags(ItemStack itemStack, ItemStack itemStack2) {

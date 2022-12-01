@@ -893,7 +893,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public void playSeededSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g, long l) {
+	public void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l) {
 		this.server
 			.getPlayerList()
 			.broadcast(
@@ -901,9 +901,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				entity.getX(),
 				entity.getY(),
 				entity.getZ(),
-				(double)soundEvent.getRange(f),
+				(double)holder.value().getRange(f),
 				this.dimension(),
-				new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g, l)
+				new ClientboundSoundEntityPacket(holder, soundSource, entity, f, g, l)
 			);
 	}
 

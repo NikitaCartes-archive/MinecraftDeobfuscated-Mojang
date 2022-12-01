@@ -5,10 +5,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class ByteTag extends NumericTag {
-	private static final int SELF_SIZE_IN_BITS = 72;
+	private static final int SELF_SIZE_IN_BYTES = 9;
 	public static final TagType<ByteTag> TYPE = new TagType.StaticSize<ByteTag>() {
 		public ByteTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBits(72L);
+			nbtAccounter.accountBytes(9L);
 			return ByteTag.valueOf(dataInput.readByte());
 		}
 
@@ -59,8 +59,8 @@ public class ByteTag extends NumericTag {
 	}
 
 	@Override
-	public int sizeInBits() {
-		return 72;
+	public int sizeInBytes() {
+		return 9;
 	}
 
 	@Override

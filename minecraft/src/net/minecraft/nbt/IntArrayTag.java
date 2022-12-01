@@ -8,12 +8,12 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class IntArrayTag extends CollectionTag<IntTag> {
-	private static final int SELF_SIZE_IN_BITS = 192;
+	private static final int SELF_SIZE_IN_BYTES = 24;
 	public static final TagType<IntArrayTag> TYPE = new TagType.VariableSize<IntArrayTag>() {
 		public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBits(192L);
+			nbtAccounter.accountBytes(24L);
 			int j = dataInput.readInt();
-			nbtAccounter.accountBits(32L * (long)j);
+			nbtAccounter.accountBytes(4L * (long)j);
 			int[] is = new int[j];
 
 			for (int k = 0; k < j; k++) {
@@ -81,8 +81,8 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 	}
 
 	@Override
-	public int sizeInBits() {
-		return 192 + 32 * this.data.length;
+	public int sizeInBytes() {
+		return 24 + 4 * this.data.length;
 	}
 
 	@Override

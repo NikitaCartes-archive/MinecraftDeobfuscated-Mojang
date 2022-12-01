@@ -2322,66 +2322,67 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderSystem.enablePolygonOffset();
 			RenderSystem.disableCull();
 			float m = (float)(Util.getMillis() % 3000L) / 3000.0F;
-			float n = 0.0F;
-			float o = 0.0F;
-			float p = (float)(h - Mth.frac(camera.getPosition().y));
+			float n = (float)(-Mth.frac(camera.getPosition().y * 0.5));
+			float o = n + (float)h;
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-			double q = Math.max((double)Mth.floor(g - d), worldBorder.getMinZ());
-			double r = Math.min((double)Mth.ceil(g + d), worldBorder.getMaxZ());
+			double p = Math.max((double)Mth.floor(g - d), worldBorder.getMinZ());
+			double q = Math.min((double)Mth.ceil(g + d), worldBorder.getMaxZ());
+			float r = (float)(Mth.floor(p) & 1) * 0.5F;
 			if (f > worldBorder.getMaxX() - d) {
-				float s = 0.0F;
+				float s = r;
 
-				for (double t = q; t < r; s += 0.5F) {
-					double u = Math.min(1.0, r - t);
+				for (double t = p; t < q; s += 0.5F) {
+					double u = Math.min(1.0, q - t);
 					float v = (float)u * 0.5F;
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m - s, m + p).endVertex();
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m - (v + s), m + p).endVertex();
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m - (v + s), m + 0.0F).endVertex();
-					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m - s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t - g).uv(m - s, m + o).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, -h, t + u - g).uv(m - (v + s), m + o).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t + u - g).uv(m - (v + s), m + n).endVertex();
+					bufferBuilder.vertex(worldBorder.getMaxX() - f, h, t - g).uv(m - s, m + n).endVertex();
 					t++;
 				}
 			}
 
 			if (f < worldBorder.getMinX() + d) {
-				float s = 0.0F;
+				float s = r;
 
-				for (double t = q; t < r; s += 0.5F) {
-					double u = Math.min(1.0, r - t);
+				for (double t = p; t < q; s += 0.5F) {
+					double u = Math.min(1.0, q - t);
 					float v = (float)u * 0.5F;
-					bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t - g).uv(m + s, m + p).endVertex();
-					bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t + u - g).uv(m + v + s, m + p).endVertex();
-					bufferBuilder.vertex(worldBorder.getMinX() - f, h, t + u - g).uv(m + v + s, m + 0.0F).endVertex();
-					bufferBuilder.vertex(worldBorder.getMinX() - f, h, t - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t - g).uv(m + s, m + o).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, -h, t + u - g).uv(m + v + s, m + o).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, h, t + u - g).uv(m + v + s, m + n).endVertex();
+					bufferBuilder.vertex(worldBorder.getMinX() - f, h, t - g).uv(m + s, m + n).endVertex();
 					t++;
 				}
 			}
 
-			q = Math.max((double)Mth.floor(f - d), worldBorder.getMinX());
-			r = Math.min((double)Mth.ceil(f + d), worldBorder.getMaxX());
+			p = Math.max((double)Mth.floor(f - d), worldBorder.getMinX());
+			q = Math.min((double)Mth.ceil(f + d), worldBorder.getMaxX());
+			r = (float)(Mth.floor(p) & 1) * 0.5F;
 			if (g > worldBorder.getMaxZ() - d) {
-				float s = 0.0F;
+				float s = r;
 
-				for (double t = q; t < r; s += 0.5F) {
-					double u = Math.min(1.0, r - t);
+				for (double t = p; t < q; s += 0.5F) {
+					double u = Math.min(1.0, q - t);
 					float v = (float)u * 0.5F;
-					bufferBuilder.vertex(t - f, -h, worldBorder.getMaxZ() - g).uv(m + s, m + p).endVertex();
-					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMaxZ() - g).uv(m + v + s, m + p).endVertex();
-					bufferBuilder.vertex(t + u - f, h, worldBorder.getMaxZ() - g).uv(m + v + s, m + 0.0F).endVertex();
-					bufferBuilder.vertex(t - f, h, worldBorder.getMaxZ() - g).uv(m + s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t - f, -h, worldBorder.getMaxZ() - g).uv(m + s, m + o).endVertex();
+					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMaxZ() - g).uv(m + v + s, m + o).endVertex();
+					bufferBuilder.vertex(t + u - f, h, worldBorder.getMaxZ() - g).uv(m + v + s, m + n).endVertex();
+					bufferBuilder.vertex(t - f, h, worldBorder.getMaxZ() - g).uv(m + s, m + n).endVertex();
 					t++;
 				}
 			}
 
 			if (g < worldBorder.getMinZ() + d) {
-				float s = 0.0F;
+				float s = r;
 
-				for (double t = q; t < r; s += 0.5F) {
-					double u = Math.min(1.0, r - t);
+				for (double t = p; t < q; s += 0.5F) {
+					double u = Math.min(1.0, q - t);
 					float v = (float)u * 0.5F;
-					bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m - s, m + p).endVertex();
-					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m - (v + s), m + p).endVertex();
-					bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m - (v + s), m + 0.0F).endVertex();
-					bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m - s, m + 0.0F).endVertex();
+					bufferBuilder.vertex(t - f, -h, worldBorder.getMinZ() - g).uv(m - s, m + o).endVertex();
+					bufferBuilder.vertex(t + u - f, -h, worldBorder.getMinZ() - g).uv(m - (v + s), m + o).endVertex();
+					bufferBuilder.vertex(t + u - f, h, worldBorder.getMinZ() - g).uv(m - (v + s), m + n).endVertex();
+					bufferBuilder.vertex(t - f, h, worldBorder.getMinZ() - g).uv(m - s, m + n).endVertex();
 					t++;
 				}
 			}

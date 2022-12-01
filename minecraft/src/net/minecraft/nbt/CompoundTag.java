@@ -25,11 +25,11 @@ public class CompoundTag implements Tag {
 		Tag tag = dynamic.convert(NbtOps.INSTANCE).getValue();
 		return tag instanceof CompoundTag ? DataResult.success((CompoundTag)tag) : DataResult.error("Not a compound tag: " + tag);
 	}, compoundTag -> new Dynamic<>(NbtOps.INSTANCE, compoundTag));
-	private static final int SELF_SIZE_IN_BITS = 384;
-	private static final int MAP_ENTRY_SIZE_IN_BITS = 256;
+	private static final int SELF_SIZE_IN_BYTES = 48;
+	private static final int MAP_ENTRY_SIZE_IN_BYTES = 32;
 	public static final TagType<CompoundTag> TYPE = new TagType.VariableSize<CompoundTag>() {
 		public CompoundTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBits(384L);
+			nbtAccounter.accountBytes(48L);
 			if (i > 512) {
 				throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
 			} else {
@@ -38,10 +38,10 @@ public class CompoundTag implements Tag {
 				byte b;
 				while ((b = CompoundTag.readNamedTagType(dataInput, nbtAccounter)) != 0) {
 					String string = CompoundTag.readNamedTagName(dataInput, nbtAccounter);
-					nbtAccounter.accountBits((long)(224 + 16 * string.length()));
+					nbtAccounter.accountBytes((long)(28 + 2 * string.length()));
 					Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b), string, dataInput, i + 1, nbtAccounter);
 					if (map.put(string, tag) == null) {
-						nbtAccounter.accountBits(288L);
+						nbtAccounter.accountBytes(36L);
 					}
 				}
 
@@ -137,13 +137,13 @@ public class CompoundTag implements Tag {
 	}
 
 	@Override
-	public int sizeInBits() {
-		int i = 384;
+	public int sizeInBytes() {
+		int i = 48;
 
 		for (Entry<String, Tag> entry : this.tags.entrySet()) {
-			i += 224 + 16 * ((String)entry.getKey()).length();
-			i += 288;
-			i += ((Tag)entry.getValue()).sizeInBits();
+			i += 28 + 2 * ((String)entry.getKey()).length();
+			i += 36;
+			i += ((Tag)entry.getValue()).sizeInBytes();
 		}
 
 		return i;

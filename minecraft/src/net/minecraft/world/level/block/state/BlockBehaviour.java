@@ -423,12 +423,11 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public void initCache() {
+			this.fluidState = this.owner.getFluidState(this.asState());
+			this.isRandomlyTicking = this.owner.isRandomlyTicking(this.asState());
 			if (!this.getBlock().hasDynamicShape()) {
 				this.cache = new BlockBehaviour.BlockStateBase.Cache(this.asState());
 			}
-
-			this.fluidState = this.owner.getFluidState(this.asState());
-			this.isRandomlyTicking = this.owner.isRandomlyTicking(this.asState());
 		}
 
 		public Block getBlock() {

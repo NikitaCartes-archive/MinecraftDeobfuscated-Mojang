@@ -1,24 +1,23 @@
 package net.minecraft.network.protocol.game;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import org.apache.commons.lang3.Validate;
 
 public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketListener> {
-	private final SoundEvent sound;
+	private final Holder<SoundEvent> sound;
 	private final SoundSource source;
 	private final int id;
 	private final float volume;
 	private final float pitch;
 	private final long seed;
 
-	public ClientboundSoundEntityPacket(SoundEvent soundEvent, SoundSource soundSource, Entity entity, float f, float g, long l) {
-		Validate.notNull(soundEvent, "sound");
-		this.sound = soundEvent;
+	public ClientboundSoundEntityPacket(Holder<SoundEvent> holder, SoundSource soundSource, Entity entity, float f, float g, long l) {
+		this.sound = holder;
 		this.source = soundSource;
 		this.id = entity.getId();
 		this.volume = f;
@@ -27,7 +26,7 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 	}
 
 	public ClientboundSoundEntityPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.sound = friendlyByteBuf.readById(BuiltInRegistries.SOUND_EVENT);
+		this.sound = friendlyByteBuf.readById(BuiltInRegistries.SOUND_EVENT.asHolderIdMap(), SoundEvent::readFromNetwork);
 		this.source = friendlyByteBuf.readEnum(SoundSource.class);
 		this.id = friendlyByteBuf.readVarInt();
 		this.volume = friendlyByteBuf.readFloat();
@@ -37,7 +36,9 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeId(BuiltInRegistries.SOUND_EVENT, this.sound);
+		friendlyByteBuf.writeId(
+			BuiltInRegistries.SOUND_EVENT.asHolderIdMap(), this.sound, (friendlyByteBufx, soundEvent) -> soundEvent.writeToNetwork(friendlyByteBufx)
+		);
 		friendlyByteBuf.writeEnum(this.source);
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeFloat(this.volume);
@@ -45,7 +46,7 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 		friendlyByteBuf.writeLong(this.seed);
 	}
 
-	public SoundEvent getSound() {
+	public Holder<SoundEvent> getSound() {
 		return this.sound;
 	}
 

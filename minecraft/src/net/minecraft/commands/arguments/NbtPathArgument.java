@@ -32,7 +32,6 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
 	public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.node.invalid"));
 	public static final SimpleCommandExceptionType ERROR_DATA_TOO_DEEP = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_deep"));
-	public static final SimpleCommandExceptionType ERROR_DATA_TOO_LARGE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_large"));
 	public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(
 		object -> Component.translatable("arguments.nbtpath.nothing_found", object)
 	);
@@ -626,22 +625,16 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 				if (list.isEmpty()) {
 					return 0;
 				} else {
-					int i = list.size();
-					int j = tag.sizeInBits() + tag3.sizeInBits() * i;
-					if (j > 2097152) {
-						throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
-					} else {
-						NbtPathArgument.Node node = this.nodes[this.nodes.length - 1];
-						MutableBoolean mutableBoolean = new MutableBoolean(false);
-						return apply(list, tag2x -> node.setTag(tag2x, () -> {
-								if (mutableBoolean.isFalse()) {
-									mutableBoolean.setTrue();
-									return tag3;
-								} else {
-									return tag3.copy();
-								}
-							}));
-					}
+					NbtPathArgument.Node node = this.nodes[this.nodes.length - 1];
+					MutableBoolean mutableBoolean = new MutableBoolean(false);
+					return apply(list, tag2x -> node.setTag(tag2x, () -> {
+							if (mutableBoolean.isFalse()) {
+								mutableBoolean.setTrue();
+								return tag3;
+							} else {
+								return tag3.copy();
+							}
+						}));
 				}
 			}
 		}
@@ -652,7 +645,6 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 
 		public int insert(int i, CompoundTag compoundTag, List<Tag> list) throws CommandSyntaxException {
 			List<Tag> list2 = new ArrayList(list.size());
-			int j = 0;
 
 			for (Tag tag : list) {
 				Tag tag2 = tag.copy();
@@ -660,45 +652,36 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 				if (isTooDeep(tag2, this.estimatePathDepth())) {
 					throw NbtPathArgument.ERROR_DATA_TOO_DEEP.create();
 				}
-
-				j += tag2.sizeInBits();
 			}
 
 			Collection<Tag> collection = this.getOrCreate(compoundTag, ListTag::new);
-			int k = compoundTag.sizeInBits();
-			int l = collection.size();
-			int m = k + l * j;
-			if (m > 2097152) {
-				throw NbtPathArgument.ERROR_DATA_TOO_LARGE.create();
-			} else {
-				int n = 0;
-				boolean bl = false;
+			int j = 0;
+			boolean bl = false;
 
-				for (Tag tag3 : collection) {
-					if (!(tag3 instanceof CollectionTag<?> collectionTag)) {
-						throw NbtPathArgument.ERROR_EXPECTED_LIST.create(tag3);
-					}
-
-					boolean bl2 = false;
-					int o = i < 0 ? collectionTag.size() + i + 1 : i;
-
-					for (Tag tag4 : list2) {
-						try {
-							if (collectionTag.addTag(o, bl ? tag4.copy() : tag4)) {
-								o++;
-								bl2 = true;
-							}
-						} catch (IndexOutOfBoundsException var20) {
-							throw NbtPathArgument.ERROR_INVALID_INDEX.create(o);
-						}
-					}
-
-					bl = true;
-					n += bl2 ? 1 : 0;
+			for (Tag tag3 : collection) {
+				if (!(tag3 instanceof CollectionTag<?> collectionTag)) {
+					throw NbtPathArgument.ERROR_EXPECTED_LIST.create(tag3);
 				}
 
-				return n;
+				boolean bl2 = false;
+				int k = i < 0 ? collectionTag.size() + i + 1 : i;
+
+				for (Tag tag4 : list2) {
+					try {
+						if (collectionTag.addTag(k, bl ? tag4.copy() : tag4)) {
+							k++;
+							bl2 = true;
+						}
+					} catch (IndexOutOfBoundsException var16) {
+						throw NbtPathArgument.ERROR_INVALID_INDEX.create(k);
+					}
+				}
+
+				bl = true;
+				j += bl2 ? 1 : 0;
 			}
+
+			return j;
 		}
 
 		public int remove(Tag tag) {

@@ -1827,7 +1827,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				clientboundSoundPacket.getX(),
 				clientboundSoundPacket.getY(),
 				clientboundSoundPacket.getZ(),
-				clientboundSoundPacket.getSound().value(),
+				clientboundSoundPacket.getSound(),
 				clientboundSoundPacket.getSource(),
 				clientboundSoundPacket.getVolume(),
 				clientboundSoundPacket.getPitch(),

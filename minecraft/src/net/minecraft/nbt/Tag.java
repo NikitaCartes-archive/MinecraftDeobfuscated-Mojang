@@ -4,10 +4,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public interface Tag {
-	int OBJECT_HEADER = 64;
-	int ARRAY_HEADER = 96;
-	int OBJECT_REFERENCE = 32;
-	int STRING_SIZE = 224;
+	int OBJECT_HEADER = 8;
+	int ARRAY_HEADER = 12;
+	int OBJECT_REFERENCE = 4;
+	int STRING_SIZE = 28;
 	byte TAG_END = 0;
 	byte TAG_BYTE = 1;
 	byte TAG_SHORT = 2;
@@ -34,11 +34,7 @@ public interface Tag {
 
 	Tag copy();
 
-	int sizeInBits();
-
-	default int sizeInBytes() {
-		return this.sizeInBits() / 8;
-	}
+	int sizeInBytes();
 
 	default String getAsString() {
 		return new StringTagVisitor().visit(this);

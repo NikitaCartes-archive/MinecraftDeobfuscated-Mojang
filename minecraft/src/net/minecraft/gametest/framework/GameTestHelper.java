@@ -21,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -469,6 +470,38 @@ public class GameTestHelper {
 					throw new GameTestAssertException("Expected entity data to be: " + object + ", but was: " + object2);
 				}
 			}
+		}
+	}
+
+	public <E extends LivingEntity> void assertEntityIsHolding(BlockPos blockPos, EntityType<E> entityType, Item item) {
+		BlockPos blockPos2 = this.absolutePos(blockPos);
+		List<E> list = this.getLevel().getEntities(entityType, new AABB(blockPos2), Entity::isAlive);
+		if (list.isEmpty()) {
+			throw new GameTestAssertPosException("Expected entity of type: " + entityType, blockPos2, blockPos, this.getTick());
+		} else {
+			for (E livingEntity : list) {
+				if (livingEntity.isHolding(item)) {
+					return;
+				}
+			}
+
+			throw new GameTestAssertPosException("Entity should be holding: " + item, blockPos2, blockPos, this.getTick());
+		}
+	}
+
+	public <E extends Entity & InventoryCarrier> void assertEntityInventoryContains(BlockPos blockPos, EntityType<E> entityType, Item item) {
+		BlockPos blockPos2 = this.absolutePos(blockPos);
+		List<E> list = this.getLevel().getEntities(entityType, new AABB(blockPos2), object -> ((Entity)object).isAlive());
+		if (list.isEmpty()) {
+			throw new GameTestAssertPosException("Expected " + entityType.toShortString() + " to exist", blockPos2, blockPos, this.getTick());
+		} else {
+			for (E entity : list) {
+				if (entity.getInventory().hasAnyMatching(itemStack -> itemStack.is(item))) {
+					return;
+				}
+			}
+
+			throw new GameTestAssertPosException("Entity inventory should contain: " + item, blockPos2, blockPos, this.getTick());
 		}
 	}
 

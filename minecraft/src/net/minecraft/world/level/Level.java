@@ -388,14 +388,14 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.playSeededSound(player, d, e, f, BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), soundSource, g, h, l);
 	}
 
-	public abstract void playSeededSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g, long l);
+	public abstract void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l);
 
 	public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
 		this.playSeededSound(player, d, e, f, soundEvent, soundSource, g, h, this.threadSafeRandom.nextLong());
 	}
 
 	public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-		this.playSeededSound(player, entity, soundEvent, soundSource, f, g, this.threadSafeRandom.nextLong());
+		this.playSeededSound(player, entity, BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), soundSource, f, g, this.threadSafeRandom.nextLong());
 	}
 
 	public void playLocalSound(BlockPos blockPos, SoundEvent soundEvent, SoundSource soundSource, float f, float g, boolean bl) {

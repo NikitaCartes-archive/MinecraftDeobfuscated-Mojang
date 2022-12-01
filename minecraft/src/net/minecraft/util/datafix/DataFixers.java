@@ -132,6 +132,7 @@ import net.minecraft.util.datafix.fixes.ObjectiveRenderTypeFix;
 import net.minecraft.util.datafix.fixes.OminousBannerBlockEntityRenameFix;
 import net.minecraft.util.datafix.fixes.OminousBannerRenameFix;
 import net.minecraft.util.datafix.fixes.OptionsAddTextBackgroundFix;
+import net.minecraft.util.datafix.fixes.OptionsAmbientOcclusionFix;
 import net.minecraft.util.datafix.fixes.OptionsForceVBOFix;
 import net.minecraft.util.datafix.fixes.OptionsKeyLwjgl3Fix;
 import net.minecraft.util.datafix.fixes.OptionsKeyTranslationFix;
@@ -1033,6 +1034,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema174, "Added Chiseled Bookshelf", References.BLOCK_ENTITY));
 		Schema schema175 = dataFixerBuilder.addSchema(3209, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ItemStackSpawnEggFix(schema175, false, "minecraft:pig_spawn_egg"));
+		Schema schema176 = dataFixerBuilder.addSchema(3214, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new OptionsAmbientOcclusionFix(schema176));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

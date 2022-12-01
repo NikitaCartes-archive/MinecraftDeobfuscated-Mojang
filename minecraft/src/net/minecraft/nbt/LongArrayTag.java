@@ -9,12 +9,12 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class LongArrayTag extends CollectionTag<LongTag> {
-	private static final int SELF_SIZE_IN_BITS = 192;
+	private static final int SELF_SIZE_IN_BYTES = 24;
 	public static final TagType<LongArrayTag> TYPE = new TagType.VariableSize<LongArrayTag>() {
 		public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBits(192L);
+			nbtAccounter.accountBytes(24L);
 			int j = dataInput.readInt();
-			nbtAccounter.accountBits(64L * (long)j);
+			nbtAccounter.accountBytes(8L * (long)j);
 			long[] ls = new long[j];
 
 			for (int k = 0; k < j; k++) {
@@ -86,8 +86,8 @@ public class LongArrayTag extends CollectionTag<LongTag> {
 	}
 
 	@Override
-	public int sizeInBits() {
-		return 192 + 64 * this.data.length;
+	public int sizeInBytes() {
+		return 24 + 8 * this.data.length;
 	}
 
 	@Override

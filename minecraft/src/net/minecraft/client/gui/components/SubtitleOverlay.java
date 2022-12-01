@@ -86,15 +86,16 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				fill(poseStack, -l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
 				RenderSystem.enableBlend();
+				int r = q + -16777216;
 				if (!bl) {
 					if (d > 0.0) {
-						this.minecraft.font.draw(poseStack, ">", (float)(l - this.minecraft.font.width(">")), (float)(-n), q + -16777216);
+						drawString(poseStack, this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, r);
 					} else if (d < 0.0) {
-						this.minecraft.font.draw(poseStack, "<", (float)(-l), (float)(-n), q + -16777216);
+						drawString(poseStack, this.minecraft.font, "<", -l, -n, r);
 					}
 				}
 
-				this.minecraft.font.draw(poseStack, component, (float)(-o / 2), (float)(-n), q + -16777216);
+				drawString(poseStack, this.minecraft.font, component, -o / 2, -n, r);
 				poseStack.popPose();
 				i++;
 			}

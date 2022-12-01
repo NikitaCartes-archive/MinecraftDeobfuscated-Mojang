@@ -411,7 +411,7 @@ public interface Component extends Message, FormattedText {
 
 		@Nullable
 		public static MutableComponent fromJson(String string) {
-			return GsonHelper.fromJson(GSON, string, MutableComponent.class, false);
+			return GsonHelper.fromNullableJson(GSON, string, MutableComponent.class, false);
 		}
 
 		@Nullable
@@ -421,7 +421,7 @@ public interface Component extends Message, FormattedText {
 
 		@Nullable
 		public static MutableComponent fromJsonLenient(String string) {
-			return GsonHelper.fromJson(GSON, string, MutableComponent.class, true);
+			return GsonHelper.fromNullableJson(GSON, string, MutableComponent.class, true);
 		}
 
 		public static MutableComponent fromJson(com.mojang.brigadier.StringReader stringReader) {

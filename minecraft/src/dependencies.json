@@ -158,11 +158,6 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1-natives-windows.jar"
 	},
 	{
-		"sha1sum": "0f46cadcf95675908fd3a550d63d9d709cb68998",
-		"name": "lwjgl-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1-natives-windows-arm64.jar"
-	},
-	{
 		"sha1sum": "3b14f4beae9dd39791ec9e12190a9380cd8a3ce6",
 		"name": "lwjgl-3.3.1-natives-windows-x86.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1-natives-windows-x86.jar"
@@ -191,11 +186,6 @@
 		"sha1sum": "ed892f945cf7e79c8756796f32d00fa4ceaf573b",
 		"name": "lwjgl-glfw-3.3.1-natives-windows.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1-natives-windows.jar"
-	},
-	{
-		"sha1sum": "beda65ee503443e60aa196d58ed31f8d001dc22a",
-		"name": "lwjgl-glfw-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1-natives-windows-arm64.jar"
 	},
 	{
 		"sha1sum": "b997e3391d6ce8f05487e7335d95c606043884a1",
@@ -228,11 +218,6 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-jemalloc/3.3.1/lwjgl-jemalloc-3.3.1-natives-windows.jar"
 	},
 	{
-		"sha1sum": "cae85c4edb219c88b6a0c26a87955ad98dc9519d",
-		"name": "lwjgl-jemalloc-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-jemalloc/3.3.1/lwjgl-jemalloc-3.3.1-natives-windows-arm64.jar"
-	},
-	{
 		"sha1sum": "fb476c8ec110e1c137ad3ce8a7f7bfe6b11c6324",
 		"name": "lwjgl-jemalloc-3.3.1-natives-windows-x86.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-jemalloc/3.3.1/lwjgl-jemalloc-3.3.1-natives-windows-x86.jar"
@@ -261,11 +246,6 @@
 		"sha1sum": "30a474d0e57193d7bc128849a3ab66bc9316fdb1",
 		"name": "lwjgl-openal-3.3.1-natives-windows.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-openal/3.3.1/lwjgl-openal-3.3.1-natives-windows.jar"
-	},
-	{
-		"sha1sum": "40d65f1a7368a2aa47336f9cb69f5a190cf9975a",
-		"name": "lwjgl-openal-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-openal/3.3.1/lwjgl-openal-3.3.1-natives-windows-arm64.jar"
 	},
 	{
 		"sha1sum": "888349f7b1be6fbae58bf8edfb9ef12def04c4e3",
@@ -298,11 +278,6 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-opengl/3.3.1/lwjgl-opengl-3.3.1-natives-windows.jar"
 	},
 	{
-		"sha1sum": "527d78f1e9056aff3ed02ce93019c73c5e8f1721",
-		"name": "lwjgl-opengl-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-opengl/3.3.1/lwjgl-opengl-3.3.1-natives-windows-arm64.jar"
-	},
-	{
 		"sha1sum": "deef3eb9b178ff2ff3ce893cc72ae741c3a17974",
 		"name": "lwjgl-opengl-3.3.1-natives-windows-x86.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-opengl/3.3.1/lwjgl-opengl-3.3.1-natives-windows-x86.jar"
@@ -333,11 +308,6 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-stb/3.3.1/lwjgl-stb-3.3.1-natives-windows.jar"
 	},
 	{
-		"sha1sum": "fde63cdd2605c00636721a6c8b961e41d1f6b247",
-		"name": "lwjgl-stb-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-stb/3.3.1/lwjgl-stb-3.3.1-natives-windows-arm64.jar"
-	},
-	{
 		"sha1sum": "a8d41f419eecb430b7c91ea2ce2c5c451cae2091",
 		"name": "lwjgl-stb-3.3.1-natives-windows-x86.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-stb/3.3.1/lwjgl-stb-3.3.1-natives-windows-x86.jar"
@@ -366,11 +336,6 @@
 		"sha1sum": "a5d830475ec0958d9fdba1559efa99aef211e6ff",
 		"name": "lwjgl-tinyfd-3.3.1-natives-windows.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.3.1/lwjgl-tinyfd-3.3.1-natives-windows.jar"
-	},
-	{
-		"sha1sum": "83a5e780df610829ff3a737822b4f931cffecd91",
-		"name": "lwjgl-tinyfd-3.3.1-natives-windows-arm64.jar",
-		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.3.1/lwjgl-tinyfd-3.3.1-natives-windows-arm64.jar"
 	},
 	{
 		"sha1sum": "842eedd876fae354abc308c98a263f6bbc9e8a4d",
@@ -443,8 +408,18 @@
 		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/2.0.1/slf4j-api-2.0.1.jar"
 	},
 	{
-		"sha1sum": "ee4095669061d1fe4bce5fea23d69d1520bc2d58",
-		"name": "text2speech-1.16.7.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.16.7/text2speech-1.16.7.jar"
+		"sha1sum": "5f4e3a6ef86cb021f7ca87ca192cddb50c26eb59",
+		"name": "text2speech-1.13.9.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.13.9/text2speech-1.13.9.jar"
+	},
+	{
+		"sha1sum": "6c63ecb3b6408dcfdde6440c9ee62c060542af33",
+		"name": "text2speech-1.13.9-natives-linux.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.13.9/text2speech-1.13.9-natives-linux.jar"
+	},
+	{
+		"sha1sum": "7a90898b29e5c72f90ba6ebe86fa78a6afd7d3eb",
+		"name": "text2speech-1.13.9-natives-windows.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.13.9/text2speech-1.13.9-natives-windows.jar"
 	}
 ]

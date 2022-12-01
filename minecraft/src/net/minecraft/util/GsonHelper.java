@@ -417,7 +417,7 @@ public class GsonHelper {
 	}
 
 	@Nullable
-	public static <T> T fromJson(Gson gson, Reader reader, Class<T> class_, boolean bl) {
+	public static <T> T fromNullableJson(Gson gson, Reader reader, Class<T> class_, boolean bl) {
 		try {
 			JsonReader jsonReader = new JsonReader(reader);
 			jsonReader.setLenient(bl);
@@ -427,8 +427,17 @@ public class GsonHelper {
 		}
 	}
 
+	public static <T> T fromJson(Gson gson, Reader reader, Class<T> class_, boolean bl) {
+		T object = fromNullableJson(gson, reader, class_, bl);
+		if (object == null) {
+			throw new JsonParseException("JSON data was null or empty");
+		} else {
+			return object;
+		}
+	}
+
 	@Nullable
-	public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken, boolean bl) {
+	public static <T> T fromNullableJson(Gson gson, Reader reader, TypeToken<T> typeToken, boolean bl) {
 		try {
 			JsonReader jsonReader = new JsonReader(reader);
 			jsonReader.setLenient(bl);
@@ -438,32 +447,42 @@ public class GsonHelper {
 		}
 	}
 
-	@Nullable
-	public static <T> T fromJson(Gson gson, String string, TypeToken<T> typeToken, boolean bl) {
-		return fromJson(gson, new StringReader(string), typeToken, bl);
+	public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken, boolean bl) {
+		T object = fromNullableJson(gson, reader, typeToken, bl);
+		if (object == null) {
+			throw new JsonParseException("JSON data was null or empty");
+		} else {
+			return object;
+		}
 	}
 
 	@Nullable
+	public static <T> T fromNullableJson(Gson gson, String string, TypeToken<T> typeToken, boolean bl) {
+		return fromNullableJson(gson, new StringReader(string), typeToken, bl);
+	}
+
 	public static <T> T fromJson(Gson gson, String string, Class<T> class_, boolean bl) {
 		return fromJson(gson, new StringReader(string), class_, bl);
 	}
 
 	@Nullable
+	public static <T> T fromNullableJson(Gson gson, String string, Class<T> class_, boolean bl) {
+		return fromNullableJson(gson, new StringReader(string), class_, bl);
+	}
+
 	public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken) {
 		return fromJson(gson, reader, typeToken, false);
 	}
 
 	@Nullable
-	public static <T> T fromJson(Gson gson, String string, TypeToken<T> typeToken) {
-		return fromJson(gson, string, typeToken, false);
+	public static <T> T fromNullableJson(Gson gson, String string, TypeToken<T> typeToken) {
+		return fromNullableJson(gson, string, typeToken, false);
 	}
 
-	@Nullable
 	public static <T> T fromJson(Gson gson, Reader reader, Class<T> class_) {
 		return fromJson(gson, reader, class_, false);
 	}
 
-	@Nullable
 	public static <T> T fromJson(Gson gson, String string, Class<T> class_) {
 		return fromJson(gson, string, class_, false);
 	}

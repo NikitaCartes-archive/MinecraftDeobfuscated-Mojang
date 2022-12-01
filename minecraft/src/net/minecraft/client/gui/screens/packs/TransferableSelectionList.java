@@ -26,9 +26,11 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	static final Component INCOMPATIBLE_TITLE = Component.translatable("pack.incompatible");
 	static final Component INCOMPATIBLE_CONFIRM_TITLE = Component.translatable("pack.incompatible.confirm.title");
 	private final Component title;
+	private final Screen screen;
 
-	public TransferableSelectionList(Minecraft minecraft, int i, int j, Component component) {
+	public TransferableSelectionList(Minecraft minecraft, Screen screen, int i, int j, Component component) {
 		super(minecraft, i, j, 32, j - 55 + 4, 36);
+		this.screen = screen;
 		this.title = component;
 		this.centerListVertically = false;
 		this.setRenderHeader(true, (int)(9.0F * 1.5F));
@@ -50,6 +52,11 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	@Override
 	protected int getScrollbarPosition() {
 		return this.x1 - 6;
+	}
+
+	@Override
+	protected boolean isFocused() {
+		return this.screen.getFocused() == this;
 	}
 
 	@Environment(EnvType.CLIENT)
