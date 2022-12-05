@@ -2614,10 +2614,12 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	}
 
 	public void setKeyPair(ProfileKeyPair profileKeyPair) {
-		if (this.chatSession == null || !this.chatSession.keyPair().equals(profileKeyPair)) {
-			this.chatSession = LocalChatSession.create(profileKeyPair);
-			this.signedMessageEncoder = this.chatSession.createMessageEncoder(this.localGameProfile.getId());
-			this.send(new ServerboundChatSessionUpdatePacket(this.chatSession.asRemote().asData()));
+		if (this.localGameProfile.getId().equals(this.minecraft.getUser().getProfileId())) {
+			if (this.chatSession == null || !this.chatSession.keyPair().equals(profileKeyPair)) {
+				this.chatSession = LocalChatSession.create(profileKeyPair);
+				this.signedMessageEncoder = this.chatSession.createMessageEncoder(this.localGameProfile.getId());
+				this.send(new ServerboundChatSessionUpdatePacket(this.chatSession.asRemote().asData()));
+			}
 		}
 	}
 

@@ -16,6 +16,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
@@ -164,6 +165,12 @@ public class IntegratedServer extends MinecraftServer {
 	public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
 		try {
 			this.minecraft.prepareForMultiplayer();
+			this.minecraft.getProfileKeyPairManager().prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> {
+					ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+					if (clientPacketListener != null) {
+						clientPacketListener.setKeyPair(profileKeyPair);
+					}
+				}), this.minecraft);
 			this.getConnection().startTcpServerListener(null, i);
 			LOGGER.info("Started serving on {}", i);
 			this.publishedPort = i;

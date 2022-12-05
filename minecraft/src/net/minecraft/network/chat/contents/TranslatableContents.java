@@ -107,15 +107,17 @@ public class TranslatableContents implements ComponentContents {
 	}
 
 	private FormattedText getArgument(int i) {
-		if (i >= 0 && i < this.args.length) {
+		if (i < 0) {
+			throw new TranslatableFormatException(this, i);
+		} else if (i >= this.args.length) {
+			return Component.EMPTY;
+		} else {
 			Object object = this.args[i];
 			if (object instanceof Component) {
 				return (Component)object;
 			} else {
 				return object == null ? TEXT_NULL : FormattedText.of(object.toString());
 			}
-		} else {
-			throw new TranslatableFormatException(this, i);
 		}
 	}
 

@@ -2737,12 +2737,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void prepareForMultiplayer() {
 		this.playerSocialManager.startOnlineMode();
-		this.getProfileKeyPairManager().prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> {
-				ClientPacketListener clientPacketListener = this.getConnection();
-				if (clientPacketListener != null) {
-					clientPacketListener.setKeyPair(profileKeyPair);
-				}
-			}), this);
+		this.getProfileKeyPairManager().prepareKeyPair();
 	}
 
 	public Realms32BitWarningStatus getRealms32BitWarningStatus() {
