@@ -2309,6 +2309,9 @@ ClientGamePacketListener {
     }
 
     public void setKeyPair(ProfileKeyPair profileKeyPair) {
+        if (!this.localGameProfile.getId().equals(this.minecraft.getUser().getProfileId())) {
+            return;
+        }
         if (this.chatSession != null && this.chatSession.keyPair().equals(profileKeyPair)) {
             return;
         }

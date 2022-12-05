@@ -56,7 +56,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -240,7 +239,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -2487,12 +2485,7 @@ implements WindowEventHandler {
 
     public void prepareForMultiplayer() {
         this.playerSocialManager.startOnlineMode();
-        this.getProfileKeyPairManager().prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> {
-            ClientPacketListener clientPacketListener = this.getConnection();
-            if (clientPacketListener != null) {
-                clientPacketListener.setKeyPair((ProfileKeyPair)profileKeyPair);
-            }
-        }), (Executor)this);
+        this.getProfileKeyPairManager().prepareKeyPair();
     }
 
     public Realms32BitWarningStatus getRealms32BitWarningStatus() {

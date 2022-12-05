@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,6 +19,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.client.server.LanServerPinger;
 import net.minecraft.server.MinecraftServer;
@@ -29,6 +31,7 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ModCheck;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.Nullable;
@@ -161,6 +164,12 @@ extends MinecraftServer {
     public boolean publishServer(@Nullable GameType gameType, boolean bl, int i) {
         try {
             this.minecraft.prepareForMultiplayer();
+            this.minecraft.getProfileKeyPairManager().prepareKeyPair().thenAcceptAsync(optional -> optional.ifPresent(profileKeyPair -> {
+                ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+                if (clientPacketListener != null) {
+                    clientPacketListener.setKeyPair((ProfileKeyPair)profileKeyPair);
+                }
+            }), (Executor)this.minecraft);
             this.getConnection().startTcpServerListener(null, i);
             LOGGER.info("Started serving on {}", (Object)i);
             this.publishedPort = i;

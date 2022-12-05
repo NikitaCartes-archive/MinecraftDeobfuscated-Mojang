@@ -103,8 +103,11 @@ implements ComponentContents {
     }
 
     private FormattedText getArgument(int i) {
-        if (i < 0 || i >= this.args.length) {
+        if (i < 0) {
             throw new TranslatableFormatException(this, i);
+        }
+        if (i >= this.args.length) {
+            return Component.EMPTY;
         }
         Object object = this.args[i];
         if (object instanceof Component) {
