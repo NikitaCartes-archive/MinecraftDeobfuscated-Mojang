@@ -498,6 +498,7 @@ public abstract class PlayerList {
 			serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
 		}
 
+		byte b = (byte)(bl ? 1 : 0);
 		LevelData levelData = serverPlayer2.level.getLevelData();
 		serverPlayer2.connection
 			.send(
@@ -509,7 +510,7 @@ public abstract class PlayerList {
 					serverPlayer2.gameMode.getPreviousGameModeForPlayer(),
 					serverPlayer2.getLevel().isDebug(),
 					serverPlayer2.getLevel().isFlat(),
-					bl,
+					b,
 					serverPlayer2.getLastDeathLocation()
 				)
 			);

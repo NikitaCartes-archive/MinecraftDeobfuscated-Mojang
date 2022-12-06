@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Rotations;
@@ -38,7 +39,9 @@ public class ArmorStandItem extends Item {
 			AABB aABB = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.x(), vec3.y(), vec3.z());
 			if (level.noCollision(null, aABB) && level.getEntities(null, aABB).isEmpty()) {
 				if (level instanceof ServerLevel serverLevel) {
-					ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), null, blockPos, MobSpawnType.SPAWN_EGG, true, true);
+					Consumer<ArmorStand> consumer = EntityType.appendCustomEntityStackConfig(armorStandx -> {
+					}, serverLevel, itemStack, useOnContext.getPlayer());
+					ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), consumer, blockPos, MobSpawnType.SPAWN_EGG, true, true);
 					if (armorStand == null) {
 						return InteractionResult.FAIL;
 					}

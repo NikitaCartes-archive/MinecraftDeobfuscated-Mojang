@@ -756,7 +756,7 @@ public class ServerPlayer extends Player {
 						this.gameMode.getPreviousGameModeForPlayer(),
 						serverLevel.isDebug(),
 						serverLevel.isFlat(),
-						true,
+						(byte)3,
 						this.getLastDeathLocation()
 					)
 				);
@@ -1469,7 +1469,7 @@ public class ServerPlayer extends Player {
 						this.gameMode.getPreviousGameModeForPlayer(),
 						serverLevel.isDebug(),
 						serverLevel.isFlat(),
-						true,
+						(byte)3,
 						this.getLastDeathLocation()
 					)
 				);

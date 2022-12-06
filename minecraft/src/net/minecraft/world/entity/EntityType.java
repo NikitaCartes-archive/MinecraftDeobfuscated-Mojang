@@ -577,23 +577,36 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public T spawn(
 		ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2
 	) {
-		Consumer<T> consumer = entity -> {
-		};
+		Consumer<T> consumer;
 		CompoundTag compoundTag;
 		if (itemStack != null) {
-			if (itemStack.hasCustomHoverName()) {
-				consumer = entity -> entity.setCustomName(itemStack.getHoverName());
-			}
-
 			compoundTag = itemStack.getTag();
-			if (compoundTag != null) {
-				consumer = consumer.andThen(entity -> updateCustomEntityTag(serverLevel, player, entity, compoundTag));
-			}
+			consumer = createDefaultStackConfig(serverLevel, itemStack, player);
 		} else {
+			consumer = entity -> {
+			};
 			compoundTag = null;
 		}
 
 		return this.spawn(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
+	}
+
+	public static <T extends Entity> Consumer<T> createDefaultStackConfig(ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
+		Consumer<T> consumer = entity -> {
+		};
+		consumer = appendCustomNameConfig(consumer, itemStack);
+		return appendCustomEntityStackConfig(consumer, serverLevel, itemStack, player);
+	}
+
+	public static <T extends Entity> Consumer<T> appendCustomNameConfig(Consumer<T> consumer, ItemStack itemStack) {
+		return itemStack.hasCustomHoverName() ? consumer.andThen(entity -> entity.setCustomName(itemStack.getHoverName())) : consumer;
+	}
+
+	public static <T extends Entity> Consumer<T> appendCustomEntityStackConfig(
+		Consumer<T> consumer, ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player
+	) {
+		CompoundTag compoundTag = itemStack.getTag();
+		return compoundTag != null ? consumer.andThen(entity -> updateCustomEntityTag(serverLevel, player, entity, compoundTag)) : consumer;
 	}
 
 	@Nullable
