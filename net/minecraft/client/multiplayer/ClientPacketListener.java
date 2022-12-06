@@ -238,6 +238,7 @@ import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceKey;
@@ -955,6 +956,7 @@ ClientGamePacketListener {
 
     @Override
     public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
+        List<SynchedEntityData.DataValue<?>> list;
         PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
         ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
         Holder.Reference<DimensionType> holder = this.registryAccess.compositeAccess().registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(clientboundRespawnPacket.getDimensionType());
@@ -985,8 +987,10 @@ ClientGamePacketListener {
             this.minecraft.getMusicManager().stopPlaying();
         }
         this.minecraft.cameraEntity = localPlayer2;
-        localPlayer2.getEntityData().assignValues(localPlayer.getEntityData().getNonDefaultValues());
-        if (clientboundRespawnPacket.shouldKeepAllPlayerData()) {
+        if (clientboundRespawnPacket.shouldKeep((byte)2) && (list = localPlayer.getEntityData().getNonDefaultValues()) != null) {
+            localPlayer2.getEntityData().assignValues(list);
+        }
+        if (clientboundRespawnPacket.shouldKeep((byte)1)) {
             localPlayer2.getAttributes().assignValues(localPlayer.getAttributes());
         }
         localPlayer2.resetPos();

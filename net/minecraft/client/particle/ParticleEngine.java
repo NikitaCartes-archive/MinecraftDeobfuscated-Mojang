@@ -436,9 +436,8 @@ implements PreparableReloadListener {
 
     public void setLevel(@Nullable ClientLevel clientLevel) {
         this.level = clientLevel;
-        this.particles.clear();
+        this.clearParticles();
         this.trackingEmitters.clear();
-        this.trackedParticleCounts.clear();
     }
 
     public void destroy(BlockPos blockPos, BlockState blockState) {
@@ -512,8 +511,13 @@ implements PreparableReloadListener {
         return this.trackedParticleCounts.getInt(particleGroup) < particleGroup.getLimit();
     }
 
-    private /* synthetic */ void method_45766(ProfilerFiller profilerFiller, CompletableFuture completableFuture, CompletableFuture completableFuture2, Void void_) {
+    private void clearParticles() {
         this.particles.clear();
+        this.trackedParticleCounts.clear();
+    }
+
+    private /* synthetic */ void method_45766(ProfilerFiller profilerFiller, CompletableFuture completableFuture, CompletableFuture completableFuture2, Void void_) {
+        this.clearParticles();
         profilerFiller.startTick();
         profilerFiller.push("upload");
         SpriteLoader.Preparations preparations = (SpriteLoader.Preparations)completableFuture.join();

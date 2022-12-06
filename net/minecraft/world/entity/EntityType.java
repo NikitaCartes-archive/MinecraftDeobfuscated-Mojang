@@ -343,19 +343,37 @@ EntityTypeTest<Entity, T> {
 
     @Nullable
     public T spawn(ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+        Consumer<Entity> consumer;
         CompoundTag compoundTag;
-        Consumer<Entity> consumer = entity -> {};
         if (itemStack != null) {
-            if (itemStack.hasCustomHoverName()) {
-                consumer = entity -> entity.setCustomName(itemStack.getHoverName());
-            }
-            if ((compoundTag = itemStack.getTag()) != null) {
-                consumer = consumer.andThen(entity -> EntityType.updateCustomEntityTag(serverLevel, player, entity, compoundTag));
-            }
+            compoundTag = itemStack.getTag();
+            consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, player);
         } else {
+            consumer = entity -> {};
             compoundTag = null;
         }
         return (T)this.spawn(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
+    }
+
+    public static <T extends Entity> Consumer<T> createDefaultStackConfig(ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
+        Consumer<Entity> consumer = entity -> {};
+        consumer = EntityType.appendCustomNameConfig(consumer, itemStack);
+        return EntityType.appendCustomEntityStackConfig(consumer, serverLevel, itemStack, player);
+    }
+
+    public static <T extends Entity> Consumer<T> appendCustomNameConfig(Consumer<T> consumer, ItemStack itemStack) {
+        if (itemStack.hasCustomHoverName()) {
+            return consumer.andThen(entity -> entity.setCustomName(itemStack.getHoverName()));
+        }
+        return consumer;
+    }
+
+    public static <T extends Entity> Consumer<T> appendCustomEntityStackConfig(Consumer<T> consumer, ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
+        CompoundTag compoundTag = itemStack.getTag();
+        if (compoundTag != null) {
+            return consumer.andThen(entity -> EntityType.updateCustomEntityTag(serverLevel, player, entity, compoundTag));
+        }
+        return consumer;
     }
 
     @Nullable
